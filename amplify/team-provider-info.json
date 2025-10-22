@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-kingsroom-dev-338eb-authRole",
+      "UnauthRoleArn": "arn:aws:iam::495599763953:role/amplify-kingsroom-dev-338eb-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::495599763953:role/amplify-kingsroom-dev-338eb-authRole",
+      "Region": "ap-southeast-2",
+      "DeploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+      "UnauthRoleName": "amplify-kingsroom-dev-338eb-unauthRole",
+      "StackName": "amplify-kingsroom-dev-338eb",
+      "StackId": "arn:aws:cloudformation:ap-southeast-2:495599763953:stack/amplify-kingsroom-dev-338eb/a7e74cb0-aee6-11f0-a5bd-06650124ec87",
+      "AmplifyAppId": "d3ldctb2oc2vur"
+    },
+    "categories": {
+      "auth": {
+        "kingsroomc05d6627": {}
+      }
+    }
+  }
+}
