@@ -1,0 +1,11 @@
+{
+  "AppSyncApiName": "kingsroom",
+  "DynamoDBBillingMode": "PAY_PER_REQUEST",
+  "DynamoDBEnableServerSideEncryption": false,
+  "AuthCognitoUserPoolId": {
+    "Fn::GetAtt": [
+      "authkingsroomc05d6627",
+      "Outputs.UserPoolId"
+    ]
+  }
+}

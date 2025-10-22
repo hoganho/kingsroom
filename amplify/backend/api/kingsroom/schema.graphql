@@ -1,0 +1,433 @@
+# =======================================
+# CORE ENUMS
+# =======================================
+enum SyncMethod { SCRAPE, API, MANUAL }
+enum AssetCondition { NEW, GOOD, FAIR, POOR, RETIRED }
+enum VenueStatus { ACTIVE, INACTIVE, PENDING }
+enum GameType { TOURNAMENT, CASH_GAME }
+enum GameStatus { SCHEDULED, LIVE, COMPLETED, CANCELLED, FINISHED }
+enum TournamentType { FREEZEOUT, REBUY, SATELLITE, DEEPSTACK }
+enum PaymentSourceType { CASH, SQUARE, CREDIT, UNKNOWN }
+enum PlayerAccountStatus { ACTIVE, SUSPENDED, PENDING_VERIFICATION }
+enum PlayerAccountCategory { NEW, RECREATIONAL, REGULAR, VIP, LAPSED }
+
+# UPDATED: Populated the enum with targeting values
+enum PlayerTargetingClassification {
+  NotPlayer
+  Active_EL
+  Active
+  Retain_Inactive31_60d
+  Retain_Inactive61_90d
+  Churned_91_120d
+  Churned_121_180d
+  Churned_181_360d
+  Churned_361d
+}
+
+# NEW: Added a new enum for venue-specific targeting
+enum PlayerVenueTargetingClassification {
+  Active_EL
+  Active
+  Retain_Inactive31_60d
+  Retain_Inactive61_90d
+  Churned_91_120d
+  Churned_121_180d
+  Churned_181_360d
+  Churned_361d
+}
+
+enum TransactionType { BUY_IN, DEPOSIT, TICKET_AWARD, TICKET_REDEMPTION, CASH_AWARD, QUALIFICATION, WITHDRAWAL }
+enum MessageStatus { SENT, DELIVERED, FAILED, READ }
+enum UserRole { SUPER_ADMIN, ADMIN, VENUE_MANAGER, TOURNAMENT_DIRECTOR, MARKETING }
+enum StaffRole { DEALER, FLOOR_MANAGER, SERVICE, TOURNAMENT_DIRECTOR }
+enum TicketStatus { ACTIVE, EXPIRED, USED }
+
+# =======================================
+# SCRAPE/DATA SYNC MANAGEMENT
+# =======================================
+type DataSync @model @auth(rules: [{ allow: private }]) {
+id: ID!
+syncedAt: AWSDateTime!
+method: SyncMethod!
+sourceUrl: AWSURL
+title: String
+content: String
+}
+
+# =======================================
+# INVENTORY MANAGEMENT
+# =======================================
+type Asset @model @auth(rules: [{ allow: private }]) {
+id: ID!
+name: String!
+type: String! # e.g., "Playing Cards", "Poker Table", "Chip Set"
+condition: AssetCondition!
+acquiredDate: AWSDate!
+lastCheckedDate: AWSDate!
+venueId: ID! @index(name: "byVenue")
+venue: Venue @belongsTo(fields: ["venueId"])
+}
+
+# =======================================
+# VENUE MANAGEMENT
+# =======================================
+type Venue @model @auth(rules: [{ allow: private }]) {
+id: ID!
+name: String!
+address: String
+city: String
+country: String
+details: VenueDetails @hasOne
+assets: [Asset] @hasMany(indexName: "byVenue", fields: ["id"])
+games: [Game] @hasMany(indexName: "byVenue", fields: ["id"])
+playerMemberships: [PlayerVenue] @hasMany(indexName: "byVenue", fields: ["id"])
+}
+
+type VenueDetails @model @auth(rules: [{ allow: private }]) {
+id: ID!
+venueId: ID! @index(name: "byVenue")
+startDate: AWSDate!
+status: VenueStatus!
+lastCustomerSuccessVisit: AWSDate
+totalGamesHeld: Int
+averagePlayersPerGame: Float
+gameNights: [String] # e.g., ["Monday", "Friday"]
+venue: Venue @belongsTo(fields: ["venueId"])
+}
+
+# =======================================
+# CUSTOM TYPES FOR OUR NEW OPERATIONS
+# =======================================
+
+# This type defines the shape of the data our scraper will return.
+# It is NOT a database model.
+type ScrapedGameData {
+    name: String!
+    gameDateTime: String
+    status: String
+    registrationStatus: String
+    gameVariant: String
+    prizepool: Float
+    totalEntries: Int
+    totalRebuys: Int
+    totalAddons: Int
+    totalDuration: String
+    gameTags: [String]
+    buyIn: Float
+    startingStack: Int
+    hasGuarantee: Boolean
+    guaranteeAmount: Float
+    levels: [ScrapedTournamentLevel!]
+    results: [ScrapedPlayerResult!]
+    rawHtml: String
+}
+
+type ScrapedTournamentLevel {
+    levelNumber: Int!
+    durationMinutes: Int
+    smallBlind: Int
+    bigBlind: Int
+    ante: Int
+}
+
+type ScrapedPlayerResult {
+    rank: Int!
+    name: String!
+    winnings: Float
+}
+
+# This is the input type for our save operation.
+input SaveTournamentInput {
+    id: ID # Provide an ID if you are updating an existing game
+    sourceUrl: AWSURL!
+    venueId: ID!
+    data: ScrapedGameDataInput!
+}
+
+input ScrapedGameDataInput {
+    name: String!
+    gameDateTime: String
+    status: GameStatus
+    registrationStatus: String
+    gameVariant: String
+    prizepool: Float
+    totalEntries: Int
+    totalRebuys: Int
+    totalAddons: Int
+    totalDuration: String
+    gameTags: [String]
+    buyIn: Float
+    startingStack: Int
+    hasGuarantee: Boolean
+    guaranteeAmount: Float
+    levels: [ScrapedTournamentLevelInput!]
+}
+
+input ScrapedTournamentLevelInput {
+    levelNumber: Int!
+    durationMinutes: Int
+    smallBlind: Int
+    bigBlind: Int
+    ante: Int
+}
+
+# =======================================
+# GAME MANAGEMENT
+# =======================================
+type Game @model @auth(rules: [{ allow: private }]) {
+    id: ID!
+    name: String!
+    type: GameType!
+    variant: String
+    status: GameStatus!
+    gameDateTime: AWSDateTime!
+    venueId: ID! @index(name: "byVenue", sortKeyFields: ["gameDateTime"])
+    sourceUrl: AWSURL @index(name: "bySourceUrl", queryField: "gameBySourceUrl")
+    seriesName: String
+    isAdHoc: Boolean
+    tournamentStructureId: ID @index(name: "byTournamentStructure")
+    cashStructureId: ID @index(name: "byCashStructure")
+    registrationStatus: String
+    gameVariant: String
+    prizepool: Float
+    totalEntries: Int
+    totalRebuys: Int
+    totalAddons: Int
+    totalDuration: String
+    gameTags: [String]
+    venue: Venue @belongsTo(fields: ["venueId"])
+    tournamentStructure: TournamentStructure @belongsTo(fields: ["tournamentStructureId"])
+    cashStructure: CashStructure @belongsTo(fields: ["cashStructureId"])
+    playerResults: [PlayerResult] @hasMany(indexName: "byGame", fields: ["id"])
+}
+
+type TournamentStructure @model @auth(rules: [{ allow: private }]) {
+id: ID!
+name: String!
+type: TournamentType!
+buyIn: Float!
+rake: Float!
+startingStack: Int!
+hasGuarantee: Boolean
+guaranteeAmount: Float
+levels: [TournamentLevel] @hasMany(indexName: "byStructure", fields: ["id"])
+games: [Game] @hasMany(indexName: "byTournamentStructure", fields: ["id"])
+}
+
+type TournamentLevel @model @auth(rules: [{ allow: private }]) {
+id: ID!
+structureId: ID! @index(name: "byStructure")
+levelNumber: Int!
+durationMinutes: Int!
+smallBlind: Int!
+bigBlind: Int!
+ante: Int
+breakMinutes: Int
+}
+
+type RakeStructure @model @auth(rules: [{ allow: private }]) {
+id: ID!
+name: String!
+rakePercentage: Float!
+maxRake: Float!
+cashStructures: [CashStructure] @hasMany(indexName: "byRakeStructure", fields: ["id"])
+}
+
+type CashStructure @model @auth(rules: [{ allow: private }]) {
+id: ID!
+name: String! # e.g., "$1/$2 NLHE"
+smallBlind: Float!
+bigBlind: Float!
+minBuyIn: Float!
+maxBuyIn: Float!
+rakeStructureId: ID! @index(name: "byRakeStructure")
+rakeStructure: RakeStructure @belongsTo(fields: ["rakeStructureId"])
+games: [Game] @hasMany(indexName: "byCashStructure", fields: ["id"])
+}
+
+# =======================================
+# PLAYER MANAGEMENT (Updated)
+# =======================================
+
+type Player @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  firstName: String!
+  givenName: String
+  lastName: String
+  email: String @index(name: "byEmail", queryField: "playerByEmail")
+  phone: String
+  registrationVenueId: ID! @index(name: "byVenue")
+  creationDate: AWSDateTime!
+  lastPlayedDate: AWSDate
+  status: PlayerAccountStatus!
+  category: PlayerAccountCategory!
+  targetingClassification: PlayerTargetingClassification!
+  tier: String # e.g., "Bronze", "Silver", "Gold"
+  transactions: [PlayerTransaction] @hasMany(indexName: "byPlayer", fields: ["id"])
+  results: [PlayerResult] @hasMany(indexName: "byPlayer", fields: ["id"])
+  tickets: [PlayerTicket] @hasMany(indexName: "byPlayer", fields: ["id"])
+  marketingPreferences: PlayerMarketingPreferences @hasOne
+  venueMemberships: [PlayerVenue] @hasMany(indexName: "byPlayer", fields: ["id"])
+  # NEW: one-to-one relationship with PlayerSummary
+  summary: PlayerSummary @hasOne
+}
+
+# NEW: Model to store derived player statistics for fast querying.
+type PlayerSummary @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  playerId: ID! @index(name: "byPlayer")
+  venuesVisited: [ID]
+  sessionsPlayed: Int
+  tournamentsPlayed: Int
+  cashGamesPlayed: Int
+  tournamentWinnings: Float
+  tournamentBuyIns: Float
+  cashGameWinnings: Float
+  cashGameBuyIns: Float
+  totalWinnings: Float
+  totalBuyIns: Float
+  netBalance: Float
+  tournamentITM: Int
+  tournamentsCashed: Int
+  lastUpdated: AWSDateTime!
+  player: Player @belongsTo(fields: ["playerId"])
+}
+
+type PlayerVenue @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["venueId"])
+  venueId: ID! @index(name: "byVenue", sortKeyFields: ["playerId"])
+  totalGamesPlayed: Int
+  averageBuyIn: Float
+  firstPlayedDate: AWSDate
+  lastPlayedDate: AWSDate
+  targetingClassification: PlayerVenueTargetingClassification!
+  player: Player @belongsTo(fields: ["playerId"])
+  venue: Venue @belongsTo(fields: ["venueId"])
+}
+
+type PlayerTransaction @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["transactionDate"])
+  type: TransactionType!
+  amount: Float!
+  paymentSource: PaymentSourceType!
+  transactionDate: AWSDateTime!
+  rake: Float
+  notes: String
+  gameId: ID @index(name: "byGame") # Link to game for buy-ins
+  player: Player @belongsTo(fields: ["playerId"])
+}
+
+type PlayerResult @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  playerId: ID! @index(name: "byPlayer")
+  gameId: ID! @index(name: "byGame")
+  finishingPlace: Int
+  isMultiDayQualification: Boolean
+  prizeWon: Boolean
+  amountWon: Float
+  totalRunners: Int
+  game: Game @belongsTo(fields: ["gameId"])
+  player: Player @belongsTo(fields: ["playerId"])
+}
+
+type PlayerMarketingMessage @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["sentAt"])
+  marketingMessageId: ID! @index(name: "byMarketingMessage")
+  status: MessageStatus!
+  sentAt: AWSDateTime!
+}
+
+type PlayerMarketingPreferences @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  playerId: ID! @index(name: "byPlayer")
+  optOutSms: Boolean
+  optOutEmail: Boolean
+  player: Player @belongsTo(fields: ["playerId"])
+}
+
+type TicketTemplate @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  name: String!
+  description: String
+  value: Float!
+  validityDays: Int! # How many days the ticket is valid for after being won
+  originGameId: ID # The game where this ticket can be won
+  targetGameId: ID # The game this ticket grants entry to
+  playerTickets: [PlayerTicket] @hasMany(indexName: "byTicketTemplate", fields: ["id"])
+}
+
+type PlayerTicket @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  playerId: ID! @index(name: "byPlayer")
+  ticketTemplateId: ID! @index(name: "byTicketTemplate")
+  assignedAt: AWSDateTime!
+  expiryDate: AWSDateTime!
+  status: TicketStatus!
+  usedInGameId: ID
+  ticketTemplate: TicketTemplate @belongsTo(fields: ["ticketTemplateId"])
+  player: Player @belongsTo(fields: ["playerId"])
+}
+
+type User @model @auth(rules: [
+  { allow: owner, ownerField: "id", operations: [read, update] },
+  { allow: private, operations: [read] },
+  { allow: groups, groups: ["SUPER_ADMIN"], operations: [create, read, update, delete] }
+]) {
+  id: ID! # Uses Cognito username (sub)
+  username: String!
+  email: String!
+  role: UserRole!
+  preferences: [UserPreference] @hasMany(indexName: "byUser", fields: ["id"])
+}
+
+type Staff @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  firstName: String!
+  lastName: String
+  role: StaffRole!
+  assignedVenueId: ID @index(name: "byVenue")
+}
+
+type UserPreference @model @auth(rules: [{ allow: owner, ownerField: "userId" }]) {
+  id: ID!
+  userId: ID! @index(name: "byUser")
+  page: String! # e.g., "Dashboard"
+  widget: String! # e.g., "Widget1"
+  preference: AWSJSON # e.g., { "type": "TopVenues", "limit": 5 }
+}
+
+type SocialPost @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  socialAccountId: ID! @index(name: "bySocialAccount", sortKeyFields: ["postedAt"])
+  content: String!
+  imageUrl: AWSURL
+  postedAt: AWSDateTime!
+}
+
+type SocialAccount @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  platform: String! # e.g., "Facebook", "Instagram"
+  accountName: String!
+  apiKey: String # Store securely
+  apiSecret: String # Store securely
+}
+
+type MarketingMessage @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  name: String! # Internal name for the campaign
+  subject: String
+  emailBody: String
+  smsBody: String
+  sentMessages: [PlayerMarketingMessage] @hasMany(indexName: "byMarketingMessage", fields: ["id"])
+}
+
+# =======================================
+# CUSTOM MUTATIONS
+# =======================================
+type Mutation {
+    fetchTournamentData(url: AWSURL!): ScrapedGameData @function(name: "webScraperFunction-${env}")
+    saveTournamentData(input: SaveTournamentInput!): Game @function(name: "webScraperFunction-${env}")
+}

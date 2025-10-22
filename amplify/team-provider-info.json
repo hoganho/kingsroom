@@ -9,11 +9,28 @@
       "UnauthRoleName": "amplify-kingsroom-dev-338eb-unauthRole",
       "StackName": "amplify-kingsroom-dev-338eb",
       "StackId": "arn:aws:cloudformation:ap-southeast-2:495599763953:stack/amplify-kingsroom-dev-338eb/a7e74cb0-aee6-11f0-a5bd-06650124ec87",
-      "AmplifyAppId": "d3ldctb2oc2vur"
+      "AmplifyAppId": "d3ldctb2oc2vur",
+      "AuthTriggerTemplateURL": "https://s3.amazonaws.com/amplify-kingsroom-dev-338eb-deployment/amplify-cfn-templates/auth/auth-trigger-cloudformation-template.json"
     },
     "categories": {
       "auth": {
         "kingsroomc05d6627": {}
+      },
+      "api": {
+        "kingsroom": {}
+      },
+      "function": {
+        "webScraperFunction": {
+          "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+          "s3Key": "amplify-builds/webScraperFunction-744854426b51694d4632-build.zip"
+        },
+        "kingsroomc05d6627CustomMessage": {
+          "REDIRECTURL": "http://localhost:5173/",
+          "EMAILSUBJECT": "Your Kings Room Poker Verification Code",
+          "EMAILMESSAGE": "Welcome to Kings Room Poker! Please use the following code to verify your email address:",
+          "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+          "s3Key": "amplify-builds/kingsroomc05d6627CustomMessage-424d4c496846614f3754-build.zip"
+        }
       }
     }
   }

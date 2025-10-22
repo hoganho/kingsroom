@@ -1,12 +1,49 @@
 {
+  "api": {
+    "kingsroom": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "kingsroomc05d6627"
+        }
+      ],
+      "output": {
+        "authConfig": {
+          "additionalAuthenticationProviders": [],
+          "defaultAuthentication": {
+            "authenticationType": "AMAZON_COGNITO_USER_POOLS",
+            "userPoolConfig": {
+              "userPoolId": "authkingsroomc05d6627"
+            }
+          }
+        }
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "AppSync"
+    }
+  },
   "auth": {
     "kingsroomc05d6627": {
       "customAuth": false,
-      "dependsOn": [],
+      "dependsOn": [
+        {
+          "attributes": [
+            "Arn",
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "kingsroomc05d6627CustomMessage",
+          "triggerProvider": "Cognito"
+        }
+      ],
       "frontendAuthConfig": {
-        "mfaConfiguration": "OFF",
+        "mfaConfiguration": "OPTIONAL",
         "mfaTypes": [
-          "SMS"
+          "SMS",
+          "TOTP"
         ],
         "passwordProtectionSettings": {
           "passwordPolicyCharacters": [],
@@ -25,6 +62,86 @@
       },
       "providerPlugin": "awscloudformation",
       "service": "Cognito"
+    }
+  },
+  "function": {
+    "kingsroomc05d6627CustomMessage": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "webScraperFunction": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_function_kingsroomc05d6627CustomMessage_EMAILMESSAGE": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "kingsroomc05d6627CustomMessage"
+        }
+      ]
+    },
+    "AMPLIFY_function_kingsroomc05d6627CustomMessage_EMAILSUBJECT": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "kingsroomc05d6627CustomMessage"
+        }
+      ]
+    },
+    "AMPLIFY_function_kingsroomc05d6627CustomMessage_REDIRECTURL": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "kingsroomc05d6627CustomMessage"
+        }
+      ]
+    },
+    "AMPLIFY_function_kingsroomc05d6627CustomMessage_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "kingsroomc05d6627CustomMessage"
+        }
+      ]
+    },
+    "AMPLIFY_function_kingsroomc05d6627CustomMessage_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "kingsroomc05d6627CustomMessage"
+        }
+      ]
+    },
+    "AMPLIFY_function_webScraperFunction_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "webScraperFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_webScraperFunction_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "webScraperFunction"
+        }
+      ]
     }
   }
 }

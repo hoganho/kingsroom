@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "serviceConfiguration": {
+    "apiName": "kingsroom",
+    "serviceName": "AppSync",
+    "defaultAuthType": {
+      "mode": "AMAZON_COGNITO_USER_POOLS",
+      "cognitoUserPoolId": "authkingsroomc05d6627"
+    },
+    "conflictResolution": {
+      "defaultResolutionStrategy": {
+        "type": "OPTIMISTIC_CONCURRENCY"
+      }
+    }
+  }
+}
