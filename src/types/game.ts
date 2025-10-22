@@ -10,33 +10,35 @@ export type GameData = {
     name: string;
     gameDateTime: string;
     status: string;
-    // ✅ FIX: Add all the new fields as optional properties
-    registrationStatus?: string;
-    gameVariant?: string;
-    prizepool?: number;
-    totalEntries?: number;
-    totalRebuys?: number;
-    totalAddons?: number;
-    totalDuration?: string;
-    gameTags?: string[];
-    seriesName?: string;
-    tournamentType?: string;
-    buyIn?: number;
-    rake?: number;
-    startingStack?: number;
+    registrationStatus?: string | null;
+    gameVariant?: string | null;
+    prizepool?: number | null;
+    totalEntries?: number | null;
+    totalRebuys?: number | null;
+    totalAddons?: number | null;
+    totalDuration?: string | null;
+    gameTags?: (string | null)[] | null;
+    seriesName?: string | null;
+    tournamentType?: string | null;
+    buyIn?: number | null;
+    rake?: number | null;
+    startingStack?: number | null;
     hasGuarantee: boolean;
-    guaranteeAmount?: number;
+    guaranteeAmount?: number | null;
     levels: {
-        // ✅ FIX: Make properties optional to match backend response
         levelNumber: number;
-        durationMinutes?: number;
-        smallBlind?: number;
-        bigBlind?: number;
-        ante?: number;
+        durationMinutes?: number | null;
+        smallBlind?: number | null;
+        bigBlind?: number | null;
+        ante?: number | null;
     }[];
-    results?: PlayerResultData[];
+    results?: {
+        rank: number;
+        name: string;
+        winnings: number;
+    }[] | null;
     otherDetails: Record<string, string>;
-    rawHtml?: string;
+    rawHtml?: string | null;
 };
 
 export type MissingField = {

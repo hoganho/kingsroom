@@ -14,8 +14,7 @@ function App() {
                   <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
                       <h1 className="text-xl font-bold text-gray-900">Scraper App</h1>
                       <div className="flex items-center space-x-4">
-                          <span className="text-sm text-gray-600">Logged in as: {user?.attributes?.email}</span>
-                          <button
+                        <span className="text-sm text-gray-600">Logged in as: {user?.signInDetails?.loginId}</span>                          <button
                               onClick={signOut}
                               className="py-1 px-3 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700"
                           >
