@@ -126,7 +126,8 @@ export enum TicketStatus {
 
 type EagerScrapedGameData = {
   readonly name: string;
-  readonly gameDateTime?: string | null;
+  readonly gameStartDateTime?: string | null;
+  readonly gameEndDateTime?: string | null;
   readonly status?: string | null;
   readonly registrationStatus?: string | null;
   readonly gameVariant?: string | null;
@@ -148,7 +149,8 @@ type EagerScrapedGameData = {
 
 type LazyScrapedGameData = {
   readonly name: string;
-  readonly gameDateTime?: string | null;
+  readonly gameStartDateTime?: string | null;
+  readonly gameEndDateTime?: string | null;
   readonly status?: string | null;
   readonly registrationStatus?: string | null;
   readonly gameVariant?: string | null;
@@ -273,6 +275,7 @@ type EagerScrapeStructure = {
   };
   readonly id: string;
   readonly fields: (string | null)[];
+  readonly structureLabel?: string | null;
   readonly occurrenceCount: number;
   readonly firstSeenAt: string;
   readonly lastSeenAt: string;
@@ -288,6 +291,7 @@ type LazyScrapeStructure = {
   };
   readonly id: string;
   readonly fields: (string | null)[];
+  readonly structureLabel?: string | null;
   readonly occurrenceCount: number;
   readonly firstSeenAt: string;
   readonly lastSeenAt: string;
@@ -438,7 +442,8 @@ type EagerGame = {
   readonly type: GameType | keyof typeof GameType;
   readonly variant?: string | null;
   readonly status: GameStatus | keyof typeof GameStatus;
-  readonly gameDateTime: string;
+  readonly gameStartDateTime: string;
+  readonly gameEndDateTime?: string | null;
   readonly venueId: string;
   readonly sourceUrl?: string | null;
   readonly seriesName?: string | null;
@@ -478,7 +483,8 @@ type LazyGame = {
   readonly type: GameType | keyof typeof GameType;
   readonly variant?: string | null;
   readonly status: GameStatus | keyof typeof GameStatus;
-  readonly gameDateTime: string;
+  readonly gameStartDateTime: string;
+  readonly gameEndDateTime?: string | null;
   readonly venueId: string;
   readonly sourceUrl?: string | null;
   readonly seriesName?: string | null;

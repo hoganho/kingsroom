@@ -24,6 +24,7 @@ export const fetchGameDataFromBackend = async (url: string): Promise<APITypes.Sc
         }
         
         console.log('[GameService] Successfully fetched data:', response.data.fetchTournamentData);
+        // Cast to ScrapedGameData, which now includes the new fields from the schema
         return response.data.fetchTournamentData as APITypes.ScrapedGameData;
     } catch (error) {
         console.error('[GameService] Error fetching data from backend:', error);
@@ -53,7 +54,8 @@ export const saveGameDataToBackend = async (
             venueId,
             data: {
                 name: data.name,
-                gameDateTime: data.gameDateTime,
+                gameStartDateTime: data.gameStartDateTime, // ✅ RENAMED
+                gameEndDateTime: data.gameEndDateTime ?? undefined, // ✅ NEW
                 // ✅ FIX: Cast the status string to the GameStatus enum type
                 status: data.status as APITypes.GameStatus, 
                 // ✅ FIX: Use nullish coalescing (??) to convert null to undefined

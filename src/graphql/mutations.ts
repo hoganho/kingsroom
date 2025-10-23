@@ -11,7 +11,8 @@ type GeneratedMutation<InputType, OutputType> = string & {
 export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData($url: AWSURL!) {
   fetchTournamentData(url: $url) {
     name
-    gameDateTime
+    gameStartDateTime
+    gameEndDateTime
     status
     registrationStatus
     gameVariant
@@ -55,7 +56,8 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
     type
     variant
     status
-    gameDateTime
+    gameStartDateTime
+    gameEndDateTime
     venueId
     sourceUrl
     seriesName
@@ -210,6 +212,7 @@ export const createScrapeStructure = /* GraphQL */ `mutation CreateScrapeStructu
   createScrapeStructure(input: $input, condition: $condition) {
     id
     fields
+    structureLabel
     occurrenceCount
     firstSeenAt
     lastSeenAt
@@ -233,6 +236,7 @@ export const updateScrapeStructure = /* GraphQL */ `mutation UpdateScrapeStructu
   updateScrapeStructure(input: $input, condition: $condition) {
     id
     fields
+    structureLabel
     occurrenceCount
     firstSeenAt
     lastSeenAt
@@ -256,6 +260,7 @@ export const deleteScrapeStructure = /* GraphQL */ `mutation DeleteScrapeStructu
   deleteScrapeStructure(input: $input, condition: $condition) {
     id
     fields
+    structureLabel
     occurrenceCount
     firstSeenAt
     lastSeenAt
@@ -675,7 +680,8 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
     type
     variant
     status
-    gameDateTime
+    gameStartDateTime
+    gameEndDateTime
     venueId
     sourceUrl
     seriesName
@@ -764,7 +770,8 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
     type
     variant
     status
-    gameDateTime
+    gameStartDateTime
+    gameEndDateTime
     venueId
     sourceUrl
     seriesName
@@ -853,7 +860,8 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
     type
     variant
     status
-    gameDateTime
+    gameStartDateTime
+    gameEndDateTime
     venueId
     sourceUrl
     seriesName
@@ -2019,7 +2027,8 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
       type
       variant
       status
-      gameDateTime
+      gameStartDateTime
+      gameEndDateTime
       venueId
       sourceUrl
       seriesName
@@ -2102,7 +2111,8 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
       type
       variant
       status
-      gameDateTime
+      gameStartDateTime
+      gameEndDateTime
       venueId
       sourceUrl
       seriesName
@@ -2185,7 +2195,8 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
       type
       variant
       status
-      gameDateTime
+      gameStartDateTime
+      gameEndDateTime
       venueId
       sourceUrl
       seriesName

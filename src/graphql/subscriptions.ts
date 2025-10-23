@@ -74,6 +74,7 @@ export const onCreateScrapeStructure = /* GraphQL */ `subscription OnCreateScrap
   onCreateScrapeStructure(filter: $filter) {
     id
     fields
+    structureLabel
     occurrenceCount
     firstSeenAt
     lastSeenAt
@@ -96,6 +97,7 @@ export const onUpdateScrapeStructure = /* GraphQL */ `subscription OnUpdateScrap
   onUpdateScrapeStructure(filter: $filter) {
     id
     fields
+    structureLabel
     occurrenceCount
     firstSeenAt
     lastSeenAt
@@ -118,6 +120,7 @@ export const onDeleteScrapeStructure = /* GraphQL */ `subscription OnDeleteScrap
   onDeleteScrapeStructure(filter: $filter) {
     id
     fields
+    structureLabel
     occurrenceCount
     firstSeenAt
     lastSeenAt
@@ -513,7 +516,8 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
     type
     variant
     status
-    gameDateTime
+    gameStartDateTime
+    gameEndDateTime
     venueId
     sourceUrl
     seriesName
@@ -599,7 +603,8 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
     type
     variant
     status
-    gameDateTime
+    gameStartDateTime
+    gameEndDateTime
     venueId
     sourceUrl
     seriesName
@@ -685,7 +690,8 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
     type
     variant
     status
-    gameDateTime
+    gameStartDateTime
+    gameEndDateTime
     venueId
     sourceUrl
     seriesName
@@ -1823,7 +1829,8 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
       type
       variant
       status
-      gameDateTime
+      gameStartDateTime
+      gameEndDateTime
       venueId
       sourceUrl
       seriesName
@@ -1905,7 +1912,8 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
       type
       variant
       status
-      gameDateTime
+      gameStartDateTime
+      gameEndDateTime
       venueId
       sourceUrl
       seriesName
@@ -1987,7 +1995,8 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
       type
       variant
       status
-      gameDateTime
+      gameStartDateTime
+      gameEndDateTime
       venueId
       sourceUrl
       seriesName

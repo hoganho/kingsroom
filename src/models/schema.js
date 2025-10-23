@@ -107,6 +107,13 @@ export const schema = {
                     "attributes": [],
                     "isArrayNullable": false
                 },
+                "structureLabel": {
+                    "name": "structureLabel",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "occurrenceCount": {
                     "name": "occurrenceCount",
                     "isArray": false,
@@ -620,11 +627,18 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "gameDateTime": {
-                    "name": "gameDateTime",
+                "gameStartDateTime": {
+                    "name": "gameStartDateTime",
                     "isArray": false,
                     "type": "AWSDateTime",
                     "isRequired": true,
+                    "attributes": []
+                },
+                "gameEndDateTime": {
+                    "name": "gameEndDateTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
                     "attributes": []
                 },
                 "venueId": {
@@ -868,7 +882,7 @@ export const schema = {
                         "name": "byVenue",
                         "fields": [
                             "venueId",
-                            "gameDateTime"
+                            "gameStartDateTime"
                         ]
                     }
                 },
@@ -3319,8 +3333,15 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "gameDateTime": {
-                    "name": "gameDateTime",
+                "gameStartDateTime": {
+                    "name": "gameStartDateTime",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameEndDateTime": {
+                    "name": "gameEndDateTime",
                     "isArray": false,
                     "type": "String",
                     "isRequired": false,
@@ -3569,5 +3590,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "c1bc9a1f6f34410f17988480367b004e"
+    "version": "e57798b16f38ecabd19f0346ff4e62ec"
 };

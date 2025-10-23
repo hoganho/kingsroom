@@ -71,13 +71,13 @@ const HtmlModal: React.FC<{
 const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] }> = ({ data, missingFields }) => {
     if (!data) return null;
 
-    // ✅ UPDATED: reportConfig now reflects the flattened Game schema.
-    // Fields are grouped logically for better readability in the report.
+    // ✅ UPDATED: reportConfig now reflects the flattened Game schema
+    // and includes the new/renamed date fields.
     const reportConfig = [
         {
             title: 'Game Details',
             model: 'Game', // Used for finding missing fields
-            fields: ['name', 'gameDateTime', 'status', 'registrationStatus', 'gameVariant', 'prizepool', 'totalEntries', 'totalRebuys', 'totalAddons', 'totalDuration', 'gameTags']
+            fields: ['name', 'gameStartDateTime', 'gameEndDateTime', 'status', 'registrationStatus', 'gameVariant', 'prizepool', 'totalEntries', 'totalRebuys', 'totalAddons', 'totalDuration', 'gameTags']
         },
         {
             title: 'Tournament Details',
@@ -174,6 +174,15 @@ const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] 
                                     </li>
                                 );
                             }
+                            // Only render 'null' for fields that were explicitly scraped as null (like gameEndDateTime)
+                            else if (value === null) {
+                                return (
+                                     <li key={field} className="flex items-start">
+                                        <span className="mr-2">ℹ️</span>
+                                        <div><span className="font-semibold">{field}:</span> <span className="text-gray-500 italic">Not found/calculated</span></div>
+                                    </li>
+                                );
+                            }
                             return null;
                         })}
                     </ul>
@@ -231,7 +240,7 @@ const PlayerResults: React.FC<{ results?: PlayerResultData[] }> = ({ results }) 
 };
 
 /**
- * ✅ UPDATED: Save Confirmation Modal with all schema fields.
+ * ✅ UPDATED: Save Confirmation Modal with new/renamed date fields.
  */
 const SaveConfirmationModal: React.FC<{
     isOpen: boolean;
@@ -264,7 +273,8 @@ const SaveConfirmationModal: React.FC<{
             name: gameData.name,
             type: 'TOURNAMENT',
             status: gameData.status,
-            gameDateTime: gameData.gameDateTime,
+            gameStartDateTime: gameData.gameStartDateTime, // ✅ RENAMED
+            gameEndDateTime: gameData.gameEndDateTime || null, // ✅ NEW
             venueId: venueId,
             sourceUrl: sourceUrl,
             seriesName: gameData.seriesName || null,
@@ -410,7 +420,7 @@ const GameCard: React.FC<{
                                     New Page Structure Discovered!
                                 </p>
                                 <p className="text-xs text-amber-700 mt-1">
-                                    This page has a data layout we haven't seen before. The new structure has been saved for review.
+                                    This page has a data layout we haven't seen before. The new structure (Label: {game.data?.status} / {game.data?.registrationStatus}) has been saved for review.
                                 </p>
                             </div>
                         </div>
@@ -420,7 +430,8 @@ const GameCard: React.FC<{
                 {game.data?.name && (
                     <div className="bg-gray-50 p-2 rounded border">
                         <h4 className="font-bold text-lg">{game.data.name}</h4>
-                        <p className="text-xs text-gray-600">{game.data.gameDateTime}</p>
+                        {/* ✅ UPDATED: Use gameStartDateTime */}
+                        <p className="text-xs text-gray-600">{game.data.gameStartDateTime}</p>
                         <p className="text-xs text-gray-500">Last Fetched: {lastFetchedDate} at {lastFetchedTime}</p>
                     </div>
                 )}

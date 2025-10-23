@@ -96,6 +96,7 @@ export const getScrapeStructure = /* GraphQL */ `query GetScrapeStructure($id: I
   getScrapeStructure(id: $id) {
     id
     fields
+    structureLabel
     occurrenceCount
     firstSeenAt
     lastSeenAt
@@ -121,6 +122,7 @@ export const listScrapeStructures = /* GraphQL */ `query ListScrapeStructures(
     items {
       id
       fields
+      structureLabel
       occurrenceCount
       firstSeenAt
       lastSeenAt
@@ -156,6 +158,7 @@ export const syncScrapeStructures = /* GraphQL */ `query SyncScrapeStructures(
     items {
       id
       fields
+      structureLabel
       occurrenceCount
       firstSeenAt
       lastSeenAt
@@ -497,7 +500,8 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
     type
     variant
     status
-    gameDateTime
+    gameStartDateTime
+    gameEndDateTime
     venueId
     sourceUrl
     seriesName
@@ -585,7 +589,8 @@ export const listGames = /* GraphQL */ `query ListGames(
       type
       variant
       status
-      gameDateTime
+      gameStartDateTime
+      gameEndDateTime
       venueId
       sourceUrl
       seriesName
@@ -638,7 +643,8 @@ export const syncGames = /* GraphQL */ `query SyncGames(
       type
       variant
       status
-      gameDateTime
+      gameStartDateTime
+      gameEndDateTime
       venueId
       sourceUrl
       seriesName
@@ -1517,7 +1523,8 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
       type
       variant
       status
-      gameDateTime
+      gameStartDateTime
+      gameEndDateTime
       venueId
       sourceUrl
       seriesName
@@ -2608,17 +2615,17 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
   APITypes.VenueDetailsByVenueIdQueryVariables,
   APITypes.VenueDetailsByVenueIdQuery
 >;
-export const gamesByVenueIdAndGameDateTime = /* GraphQL */ `query GamesByVenueIdAndGameDateTime(
+export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVenueIdAndGameStartDateTime(
   $venueId: ID!
-  $gameDateTime: ModelStringKeyConditionInput
+  $gameStartDateTime: ModelStringKeyConditionInput
   $sortDirection: ModelSortDirection
   $filter: ModelGameFilterInput
   $limit: Int
   $nextToken: String
 ) {
-  gamesByVenueIdAndGameDateTime(
+  gamesByVenueIdAndGameStartDateTime(
     venueId: $venueId
-    gameDateTime: $gameDateTime
+    gameStartDateTime: $gameStartDateTime
     sortDirection: $sortDirection
     filter: $filter
     limit: $limit
@@ -2630,7 +2637,8 @@ export const gamesByVenueIdAndGameDateTime = /* GraphQL */ `query GamesByVenueId
       type
       variant
       status
-      gameDateTime
+      gameStartDateTime
+      gameEndDateTime
       venueId
       sourceUrl
       seriesName
@@ -2665,8 +2673,8 @@ export const gamesByVenueIdAndGameDateTime = /* GraphQL */ `query GamesByVenueId
   }
 }
 ` as GeneratedQuery<
-  APITypes.GamesByVenueIdAndGameDateTimeQueryVariables,
-  APITypes.GamesByVenueIdAndGameDateTimeQuery
+  APITypes.GamesByVenueIdAndGameStartDateTimeQueryVariables,
+  APITypes.GamesByVenueIdAndGameStartDateTimeQuery
 >;
 export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
   $sourceUrl: AWSURL!
@@ -2688,7 +2696,8 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
       type
       variant
       status
-      gameDateTime
+      gameStartDateTime
+      gameEndDateTime
       venueId
       sourceUrl
       seriesName
@@ -2746,7 +2755,8 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
       type
       variant
       status
-      gameDateTime
+      gameStartDateTime
+      gameEndDateTime
       venueId
       sourceUrl
       seriesName
@@ -2804,7 +2814,8 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
       type
       variant
       status
-      gameDateTime
+      gameStartDateTime
+      gameEndDateTime
       venueId
       sourceUrl
       seriesName

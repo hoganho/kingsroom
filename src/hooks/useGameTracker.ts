@@ -47,7 +47,8 @@ export const useGameTracker = () => {
 
             const data: GameData = {
                 name: dataFromBackend.name,
-                gameDateTime: dataFromBackend.gameDateTime || new Date().toISOString(),
+                gameStartDateTime: dataFromBackend.gameStartDateTime || new Date().toISOString(), // ✅ RENAMED
+                gameEndDateTime: dataFromBackend.gameEndDateTime || undefined, // ✅ NEW
                 status: dataFromBackend.status || 'SCHEDULED',
                 type: 'TOURNAMENT', // Default to tournament for scraped games
                 registrationStatus: dataFromBackend.registrationStatus || undefined,

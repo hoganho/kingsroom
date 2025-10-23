@@ -18,7 +18,8 @@ export type PlayerResultData = {
 export type GameData = {
     // Basic game information
     name: string;
-    gameDateTime: string;
+    gameStartDateTime: string; // ✅ RENAMED
+    gameEndDateTime?: string | null; // ✅ NEW
     status: string;
     type?: 'TOURNAMENT' | 'CASH_GAME';
     variant?: string | null;
@@ -86,7 +87,8 @@ export interface SaveTournamentInput {
 
 export interface GameDataInput {
     name: string;
-    gameDateTime?: string;
+    gameStartDateTime?: string; // ✅ RENAMED
+    gameEndDateTime?: string; // ✅ NEW
     status?: string;
     registrationStatus?: string;
     gameVariant?: string;

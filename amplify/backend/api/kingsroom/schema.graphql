@@ -61,6 +61,7 @@ content: String
 type ScrapeStructure @model @auth(rules: [{ allow: private }]) {
   id: ID! # This will be the SHA-256 hash of the fields
   fields: [String]! # The sorted list of data keys found on the page
+  structureLabel: String # ✅ NEW: Combo of status and registrationStatus
   occurrenceCount: Int! # How many times we've seen this structure
   firstSeenAt: AWSDateTime!
   lastSeenAt: AWSDateTime!
@@ -116,7 +117,8 @@ venue: Venue @belongsTo(fields: ["venueId"])
 # It is NOT a database model.
 type ScrapedGameData {
     name: String!
-    gameDateTime: String
+    gameStartDateTime: String # ✅ RENAMED
+    gameEndDateTime: String # ✅ NEW
     status: String
     registrationStatus: String
     gameVariant: String
@@ -160,7 +162,8 @@ input SaveTournamentInput {
 
 input ScrapedGameDataInput {
     name: String!
-    gameDateTime: String
+    gameStartDateTime: String # ✅ RENAMED
+    gameEndDateTime: String # ✅ NEW
     status: GameStatus
     registrationStatus: String
     gameVariant: String
@@ -196,8 +199,9 @@ type Game @model @auth(rules: [{ allow: private }]) {
     type: GameType!
     variant: String
     status: GameStatus!
-    gameDateTime: AWSDateTime!
-    venueId: ID! @index(name: "byVenue", sortKeyFields: ["gameDateTime"])
+    gameStartDateTime: AWSDateTime! # ✅ RENAMED
+    gameEndDateTime: AWSDateTime # ✅ NEW
+    venueId: ID! @index(name: "byVenue", sortKeyFields: ["gameStartDateTime"]) # ✅ UPDATED sortKeyField
     sourceUrl: AWSURL @index(name: "bySourceUrl", queryField: "gameBySourceUrl")
     
     # Basic game info
