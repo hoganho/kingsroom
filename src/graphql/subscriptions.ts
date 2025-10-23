@@ -68,6 +68,72 @@ export const onDeleteDataSync = /* GraphQL */ `subscription OnDeleteDataSync($fi
   APITypes.OnDeleteDataSyncSubscriptionVariables,
   APITypes.OnDeleteDataSyncSubscription
 >;
+export const onCreateScrapeStructure = /* GraphQL */ `subscription OnCreateScrapeStructure(
+  $filter: ModelSubscriptionScrapeStructureFilterInput
+) {
+  onCreateScrapeStructure(filter: $filter) {
+    id
+    fields
+    occurrenceCount
+    firstSeenAt
+    lastSeenAt
+    exampleUrl
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateScrapeStructureSubscriptionVariables,
+  APITypes.OnCreateScrapeStructureSubscription
+>;
+export const onUpdateScrapeStructure = /* GraphQL */ `subscription OnUpdateScrapeStructure(
+  $filter: ModelSubscriptionScrapeStructureFilterInput
+) {
+  onUpdateScrapeStructure(filter: $filter) {
+    id
+    fields
+    occurrenceCount
+    firstSeenAt
+    lastSeenAt
+    exampleUrl
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateScrapeStructureSubscriptionVariables,
+  APITypes.OnUpdateScrapeStructureSubscription
+>;
+export const onDeleteScrapeStructure = /* GraphQL */ `subscription OnDeleteScrapeStructure(
+  $filter: ModelSubscriptionScrapeStructureFilterInput
+) {
+  onDeleteScrapeStructure(filter: $filter) {
+    id
+    fields
+    occurrenceCount
+    firstSeenAt
+    lastSeenAt
+    exampleUrl
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteScrapeStructureSubscriptionVariables,
+  APITypes.OnDeleteScrapeStructureSubscription
+>;
 export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: ModelSubscriptionAssetFilterInput) {
   onCreateAsset(filter: $filter) {
     id

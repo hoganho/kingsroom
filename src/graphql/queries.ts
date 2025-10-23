@@ -92,6 +92,90 @@ export const syncDataSyncs = /* GraphQL */ `query SyncDataSyncs(
   APITypes.SyncDataSyncsQueryVariables,
   APITypes.SyncDataSyncsQuery
 >;
+export const getScrapeStructure = /* GraphQL */ `query GetScrapeStructure($id: ID!) {
+  getScrapeStructure(id: $id) {
+    id
+    fields
+    occurrenceCount
+    firstSeenAt
+    lastSeenAt
+    exampleUrl
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetScrapeStructureQueryVariables,
+  APITypes.GetScrapeStructureQuery
+>;
+export const listScrapeStructures = /* GraphQL */ `query ListScrapeStructures(
+  $filter: ModelScrapeStructureFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listScrapeStructures(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      fields
+      occurrenceCount
+      firstSeenAt
+      lastSeenAt
+      exampleUrl
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListScrapeStructuresQueryVariables,
+  APITypes.ListScrapeStructuresQuery
+>;
+export const syncScrapeStructures = /* GraphQL */ `query SyncScrapeStructures(
+  $filter: ModelScrapeStructureFilterInput
+  $limit: Int
+  $nextToken: String
+  $lastSync: AWSTimestamp
+) {
+  syncScrapeStructures(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+    lastSync: $lastSync
+  ) {
+    items {
+      id
+      fields
+      occurrenceCount
+      firstSeenAt
+      lastSeenAt
+      exampleUrl
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.SyncScrapeStructuresQueryVariables,
+  APITypes.SyncScrapeStructuresQuery
+>;
 export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
   getAsset(id: $id) {
     id

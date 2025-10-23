@@ -654,6 +654,72 @@ export type DeleteDataSyncInput = {
   _version?: number | null,
 };
 
+export type CreateScrapeStructureInput = {
+  id?: string | null,
+  fields: Array< string | null >,
+  occurrenceCount: number,
+  firstSeenAt: string,
+  lastSeenAt: string,
+  exampleUrl?: string | null,
+  _version?: number | null,
+};
+
+export type ModelScrapeStructureConditionInput = {
+  fields?: ModelStringInput | null,
+  occurrenceCount?: ModelIntInput | null,
+  firstSeenAt?: ModelStringInput | null,
+  lastSeenAt?: ModelStringInput | null,
+  exampleUrl?: ModelStringInput | null,
+  and?: Array< ModelScrapeStructureConditionInput | null > | null,
+  or?: Array< ModelScrapeStructureConditionInput | null > | null,
+  not?: ModelScrapeStructureConditionInput | null,
+  _deleted?: ModelBooleanInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type ModelIntInput = {
+  ne?: number | null,
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+};
+
+export type ScrapeStructure = {
+  __typename: "ScrapeStructure",
+  id: string,
+  fields: Array< string | null >,
+  occurrenceCount: number,
+  firstSeenAt: string,
+  lastSeenAt: string,
+  exampleUrl?: string | null,
+  createdAt: string,
+  updatedAt: string,
+  _version: number,
+  _deleted?: boolean | null,
+  _lastChangedAt: number,
+};
+
+export type UpdateScrapeStructureInput = {
+  id: string,
+  fields?: Array< string | null > | null,
+  occurrenceCount?: number | null,
+  firstSeenAt?: string | null,
+  lastSeenAt?: string | null,
+  exampleUrl?: string | null,
+  _version?: number | null,
+};
+
+export type DeleteScrapeStructureInput = {
+  id: string,
+  _version?: number | null,
+};
+
 export type CreateAssetInput = {
   id?: string | null,
   name: string,
@@ -772,18 +838,6 @@ export type ModelVenueDetailsConditionInput = {
 export type ModelVenueStatusInput = {
   eq?: VenueStatus | null,
   ne?: VenueStatus | null,
-};
-
-export type ModelIntInput = {
-  ne?: number | null,
-  eq?: number | null,
-  le?: number | null,
-  lt?: number | null,
-  ge?: number | null,
-  gt?: number | null,
-  between?: Array< number | null > | null,
-  attributeExists?: boolean | null,
-  attributeType?: ModelAttributeTypes | null,
 };
 
 export type ModelFloatInput = {
@@ -1898,6 +1952,28 @@ export type ModelDataSyncConnection = {
   startedAt?: number | null,
 };
 
+export type ModelScrapeStructureFilterInput = {
+  id?: ModelIDInput | null,
+  fields?: ModelStringInput | null,
+  occurrenceCount?: ModelIntInput | null,
+  firstSeenAt?: ModelStringInput | null,
+  lastSeenAt?: ModelStringInput | null,
+  exampleUrl?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelScrapeStructureFilterInput | null > | null,
+  or?: Array< ModelScrapeStructureFilterInput | null > | null,
+  not?: ModelScrapeStructureFilterInput | null,
+  _deleted?: ModelBooleanInput | null,
+};
+
+export type ModelScrapeStructureConnection = {
+  __typename: "ModelScrapeStructureConnection",
+  items:  Array<ScrapeStructure | null >,
+  nextToken?: string | null,
+  startedAt?: number | null,
+};
+
 export type ModelAssetFilterInput = {
   id?: ModelIDInput | null,
   name?: ModelStringInput | null,
@@ -2427,6 +2503,32 @@ export type ModelSubscriptionStringInput = {
   notIn?: Array< string | null > | null,
 };
 
+export type ModelSubscriptionScrapeStructureFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  fields?: ModelSubscriptionStringInput | null,
+  occurrenceCount?: ModelSubscriptionIntInput | null,
+  firstSeenAt?: ModelSubscriptionStringInput | null,
+  lastSeenAt?: ModelSubscriptionStringInput | null,
+  exampleUrl?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionScrapeStructureFilterInput | null > | null,
+  or?: Array< ModelSubscriptionScrapeStructureFilterInput | null > | null,
+  _deleted?: ModelBooleanInput | null,
+};
+
+export type ModelSubscriptionIntInput = {
+  ne?: number | null,
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+  in?: Array< number | null > | null,
+  notIn?: Array< number | null > | null,
+};
+
 export type ModelSubscriptionAssetFilterInput = {
   id?: ModelSubscriptionIDInput | null,
   name?: ModelSubscriptionStringInput | null,
@@ -2470,18 +2572,6 @@ export type ModelSubscriptionVenueDetailsFilterInput = {
   and?: Array< ModelSubscriptionVenueDetailsFilterInput | null > | null,
   or?: Array< ModelSubscriptionVenueDetailsFilterInput | null > | null,
   _deleted?: ModelBooleanInput | null,
-};
-
-export type ModelSubscriptionIntInput = {
-  ne?: number | null,
-  eq?: number | null,
-  le?: number | null,
-  lt?: number | null,
-  ge?: number | null,
-  gt?: number | null,
-  between?: Array< number | null > | null,
-  in?: Array< number | null > | null,
-  notIn?: Array< number | null > | null,
 };
 
 export type ModelSubscriptionFloatInput = {
@@ -2987,6 +3077,72 @@ export type DeleteDataSyncMutation = {
     sourceUrl?: string | null,
     title?: string | null,
     content?: string | null,
+    createdAt: string,
+    updatedAt: string,
+    _version: number,
+    _deleted?: boolean | null,
+    _lastChangedAt: number,
+  } | null,
+};
+
+export type CreateScrapeStructureMutationVariables = {
+  input: CreateScrapeStructureInput,
+  condition?: ModelScrapeStructureConditionInput | null,
+};
+
+export type CreateScrapeStructureMutation = {
+  createScrapeStructure?:  {
+    __typename: "ScrapeStructure",
+    id: string,
+    fields: Array< string | null >,
+    occurrenceCount: number,
+    firstSeenAt: string,
+    lastSeenAt: string,
+    exampleUrl?: string | null,
+    createdAt: string,
+    updatedAt: string,
+    _version: number,
+    _deleted?: boolean | null,
+    _lastChangedAt: number,
+  } | null,
+};
+
+export type UpdateScrapeStructureMutationVariables = {
+  input: UpdateScrapeStructureInput,
+  condition?: ModelScrapeStructureConditionInput | null,
+};
+
+export type UpdateScrapeStructureMutation = {
+  updateScrapeStructure?:  {
+    __typename: "ScrapeStructure",
+    id: string,
+    fields: Array< string | null >,
+    occurrenceCount: number,
+    firstSeenAt: string,
+    lastSeenAt: string,
+    exampleUrl?: string | null,
+    createdAt: string,
+    updatedAt: string,
+    _version: number,
+    _deleted?: boolean | null,
+    _lastChangedAt: number,
+  } | null,
+};
+
+export type DeleteScrapeStructureMutationVariables = {
+  input: DeleteScrapeStructureInput,
+  condition?: ModelScrapeStructureConditionInput | null,
+};
+
+export type DeleteScrapeStructureMutation = {
+  deleteScrapeStructure?:  {
+    __typename: "ScrapeStructure",
+    id: string,
+    fields: Array< string | null >,
+    occurrenceCount: number,
+    firstSeenAt: string,
+    lastSeenAt: string,
+    exampleUrl?: string | null,
     createdAt: string,
     updatedAt: string,
     _version: number,
@@ -5867,6 +6023,84 @@ export type SyncDataSyncsQuery = {
       sourceUrl?: string | null,
       title?: string | null,
       content?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      _version: number,
+      _deleted?: boolean | null,
+      _lastChangedAt: number,
+    } | null >,
+    nextToken?: string | null,
+    startedAt?: number | null,
+  } | null,
+};
+
+export type GetScrapeStructureQueryVariables = {
+  id: string,
+};
+
+export type GetScrapeStructureQuery = {
+  getScrapeStructure?:  {
+    __typename: "ScrapeStructure",
+    id: string,
+    fields: Array< string | null >,
+    occurrenceCount: number,
+    firstSeenAt: string,
+    lastSeenAt: string,
+    exampleUrl?: string | null,
+    createdAt: string,
+    updatedAt: string,
+    _version: number,
+    _deleted?: boolean | null,
+    _lastChangedAt: number,
+  } | null,
+};
+
+export type ListScrapeStructuresQueryVariables = {
+  filter?: ModelScrapeStructureFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListScrapeStructuresQuery = {
+  listScrapeStructures?:  {
+    __typename: "ModelScrapeStructureConnection",
+    items:  Array< {
+      __typename: "ScrapeStructure",
+      id: string,
+      fields: Array< string | null >,
+      occurrenceCount: number,
+      firstSeenAt: string,
+      lastSeenAt: string,
+      exampleUrl?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      _version: number,
+      _deleted?: boolean | null,
+      _lastChangedAt: number,
+    } | null >,
+    nextToken?: string | null,
+    startedAt?: number | null,
+  } | null,
+};
+
+export type SyncScrapeStructuresQueryVariables = {
+  filter?: ModelScrapeStructureFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+  lastSync?: number | null,
+};
+
+export type SyncScrapeStructuresQuery = {
+  syncScrapeStructures?:  {
+    __typename: "ModelScrapeStructureConnection",
+    items:  Array< {
+      __typename: "ScrapeStructure",
+      id: string,
+      fields: Array< string | null >,
+      occurrenceCount: number,
+      firstSeenAt: string,
+      lastSeenAt: string,
+      exampleUrl?: string | null,
       createdAt: string,
       updatedAt: string,
       _version: number,
@@ -9027,6 +9261,69 @@ export type OnDeleteDataSyncSubscription = {
     sourceUrl?: string | null,
     title?: string | null,
     content?: string | null,
+    createdAt: string,
+    updatedAt: string,
+    _version: number,
+    _deleted?: boolean | null,
+    _lastChangedAt: number,
+  } | null,
+};
+
+export type OnCreateScrapeStructureSubscriptionVariables = {
+  filter?: ModelSubscriptionScrapeStructureFilterInput | null,
+};
+
+export type OnCreateScrapeStructureSubscription = {
+  onCreateScrapeStructure?:  {
+    __typename: "ScrapeStructure",
+    id: string,
+    fields: Array< string | null >,
+    occurrenceCount: number,
+    firstSeenAt: string,
+    lastSeenAt: string,
+    exampleUrl?: string | null,
+    createdAt: string,
+    updatedAt: string,
+    _version: number,
+    _deleted?: boolean | null,
+    _lastChangedAt: number,
+  } | null,
+};
+
+export type OnUpdateScrapeStructureSubscriptionVariables = {
+  filter?: ModelSubscriptionScrapeStructureFilterInput | null,
+};
+
+export type OnUpdateScrapeStructureSubscription = {
+  onUpdateScrapeStructure?:  {
+    __typename: "ScrapeStructure",
+    id: string,
+    fields: Array< string | null >,
+    occurrenceCount: number,
+    firstSeenAt: string,
+    lastSeenAt: string,
+    exampleUrl?: string | null,
+    createdAt: string,
+    updatedAt: string,
+    _version: number,
+    _deleted?: boolean | null,
+    _lastChangedAt: number,
+  } | null,
+};
+
+export type OnDeleteScrapeStructureSubscriptionVariables = {
+  filter?: ModelSubscriptionScrapeStructureFilterInput | null,
+};
+
+export type OnDeleteScrapeStructureSubscription = {
+  onDeleteScrapeStructure?:  {
+    __typename: "ScrapeStructure",
+    id: string,
+    fields: Array< string | null >,
+    occurrenceCount: number,
+    firstSeenAt: string,
+    lastSeenAt: string,
+    exampleUrl?: string | null,
     createdAt: string,
     updatedAt: string,
     _version: number,

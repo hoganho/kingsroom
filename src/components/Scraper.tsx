@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useGameTracker } from '../hooks/useGameTracker';
-import type { GameState, MissingField, PlayerResultData, GameData, JobStatus } from '../types/game';
+import type { GameState, MissingField, PlayerResultData, GameData, JobStatus, TournamentLevelData } from '../types/game';
 
 // This modal is for viewing the raw HTML source
 const HtmlModal: React.FC<{ 
@@ -67,15 +67,24 @@ const HtmlModal: React.FC<{
     );
 };
 
-// This component provides a detailed report of what was and wasn't found
+// ✅ UPDATED: The ScraperReport component has been fully updated.
 const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] }> = ({ data, missingFields }) => {
     if (!data) return null;
 
-    const reportConfig: Record<string, string[]> = {
-        'Game': ['name', 'gameDateTime', 'status', 'registrationStatus', 'gameVariant', 'prizepool', 'totalEntries', 'totalRebuys', 'totalAddons', 'totalDuration', 'gameTags'],
-        'TournamentStructure': ['buyIn', 'startingStack', 'hasGuarantee', 'guaranteeAmount', 'tournamentType', 'rake'],
-        'TournamentLevel': ['levels'],
-    };
+    // ✅ UPDATED: reportConfig now reflects the flattened Game schema.
+    // Fields are grouped logically for better readability in the report.
+    const reportConfig = [
+        {
+            title: 'Game Details',
+            model: 'Game', // Used for finding missing fields
+            fields: ['name', 'gameDateTime', 'status', 'registrationStatus', 'gameVariant', 'prizepool', 'totalEntries', 'totalRebuys', 'totalAddons', 'totalDuration', 'gameTags']
+        },
+        {
+            title: 'Tournament Details',
+            model: 'Game', // These fields are now on the Game model
+            fields: ['tournamentType', 'buyIn', 'rake', 'startingStack', 'hasGuarantee', 'guaranteeAmount']
+        }
+    ];
 
     const getMissingField = (model: string, field: string) => {
         return missingFields?.find(mf => mf.model === model && mf.field === field);
@@ -89,21 +98,65 @@ const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] 
             return acc;
         }, {} as Record<string, string[]>) || {};
 
+    // ✅ NEW: Component to render the expanded blind levels table.
+    const BlindLevelsTable: React.FC<{ levels: TournamentLevelData[] }> = ({ levels }) => {
+        if (!levels || levels.length === 0) {
+            const missingInfo = missingFields?.find(mf => mf.model === 'TournamentStructure' && mf.field === 'levels');
+            return (
+                <div>
+                    <h6 className="text-xs font-bold text-gray-600">Blind Structure</h6>
+                    <ul className="pl-2 mt-1 space-y-1 text-xs">
+                         <li className="flex items-start">
+                            <span className="mr-2">❌</span>
+                            <div><span className="font-semibold">levels:</span> <span className="text-red-700">{missingInfo?.reason || 'No blind levels found.'}</span></div>
+                        </li>
+                    </ul>
+                </div>
+            );
+        }
+
+        return (
+             <div>
+                <h6 className="text-xs font-bold text-gray-600">Blind Structure ({levels.length} Levels Found) ✅</h6>
+                <div className="mt-1 max-h-48 overflow-y-auto border rounded-md text-xs">
+                    <table className="w-full">
+                        <thead className="bg-gray-100 sticky top-0">
+                            <tr>
+                                <th className="p-1 text-center font-medium">Lvl</th>
+                                <th className="p-1 text-left font-medium">Blinds</th>
+                                <th className="p-1 text-left font-medium">Ante</th>
+                                <th className="p-1 text-left font-medium">Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white">
+                            {levels.map(l => (
+                                <tr key={l.levelNumber} className="border-t">
+                                    <td className="p-1 text-center font-mono">{l.levelNumber}</td>
+                                    <td className="p-1 font-mono">{l.smallBlind}/{l.bigBlind}</td>
+                                    <td className="p-1 font-mono">{l.ante || '-'}</td>
+                                    <td className="p-1">{l.durationMinutes} min</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    };
 
     return (
-        <div className="mt-2 bg-gray-50 p-3 rounded-md border border-gray-200 space-y-3">
+        <div className="mt-2 bg-gray-50 p-3 rounded-md border border-gray-200 space-y-4">
             <h5 className="text-sm font-semibold text-gray-800">📋 Scraper Report</h5>
-            {Object.entries(reportConfig).map(([model, fields]) => (
-                <div key={model}>
-                    <h6 className="text-xs font-bold text-gray-600">{model}</h6>
+            {reportConfig.map(({ title, model, fields }) => (
+                <div key={title}>
+                    <h6 className="text-xs font-bold text-gray-600">{title}</h6>
                     <ul className="pl-2 mt-1 space-y-1 text-xs">
                         {fields.map(field => {
                             const value = (data as any)[field];
                             const missingInfo = getMissingField(model, field);
                             if (value !== undefined && value !== null && !(Array.isArray(value) && value.length === 0)) {
                                 let displayValue: string;
-                                if (field === 'levels') displayValue = `${(value as any[]).length} levels found`;
-                                else if (Array.isArray(value)) displayValue = `[${value.join(', ')}]`;
+                                if (Array.isArray(value)) displayValue = `[${value.join(', ')}]`;
                                 else if (typeof value === 'number') displayValue = value.toLocaleString();
                                 else if (typeof value === 'boolean') displayValue = value ? 'Yes' : 'No';
                                 else displayValue = `"${value}"`;
@@ -126,6 +179,9 @@ const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] 
                     </ul>
                 </div>
             ))}
+
+            <BlindLevelsTable levels={data.levels} />
+
             {Object.keys(unscrapableModels).length > 0 && (
                 <div>
                      <h6 className="text-xs font-bold text-gray-600">Manual Entry Required</h6>
@@ -142,6 +198,7 @@ const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] 
         </div>
     );
 };
+
 
 // This component shows the player results found on the page
 const PlayerResults: React.FC<{ results?: PlayerResultData[] }> = ({ results }) => {
@@ -325,7 +382,6 @@ const GameCard: React.FC<{
                         <p className="text-sm font-mono truncate" title={game.id}>{getDisplayId(game.id)}</p>
                     </div>
                     <div className="flex items-center space-x-2 flex-shrink-0">
-                        {/* ✅ NEW: Launch URL button */}
                         <a 
                             href={game.id} 
                             target="_blank" 
@@ -339,6 +395,27 @@ const GameCard: React.FC<{
                         <button onClick={() => onRemove(game.id)} className="text-gray-400 hover:text-red-600 font-bold text-xl">×</button>
                     </div>
                 </div>
+
+                {/* ✅ NEW: Announcement for new structures */}
+                {game.isNewStructure && (
+                    <div className="p-3 my-2 bg-gradient-to-r from-yellow-100 to-amber-200 border-l-4 border-amber-500 rounded-md shadow">
+                        <div className="flex items-center">
+                            <div className="flex-shrink-0">
+                                <svg className="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <div className="ml-3">
+                                <p className="text-sm font-bold text-amber-800">
+                                    New Page Structure Discovered!
+                                </p>
+                                <p className="text-xs text-amber-700 mt-1">
+                                    This page has a data layout we haven't seen before. The new structure has been saved for review.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {game.data?.name && (
                     <div className="bg-gray-50 p-2 rounded border">

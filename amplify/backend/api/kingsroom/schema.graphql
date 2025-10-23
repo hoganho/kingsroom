@@ -55,6 +55,19 @@ content: String
 }
 
 # =======================================
+# SCRAPER STRUCTURE MANAGEMENT
+# =======================================
+
+type ScrapeStructure @model @auth(rules: [{ allow: private }]) {
+  id: ID! # This will be the SHA-256 hash of the fields
+  fields: [String]! # The sorted list of data keys found on the page
+  occurrenceCount: Int! # How many times we've seen this structure
+  firstSeenAt: AWSDateTime!
+  lastSeenAt: AWSDateTime!
+  exampleUrl: AWSURL # A sample URL where this structure was found
+}
+
+# =======================================
 # INVENTORY MANAGEMENT
 # =======================================
 type Asset @model @auth(rules: [{ allow: private }]) {
@@ -120,6 +133,7 @@ type ScrapedGameData {
     levels: [ScrapedTournamentLevel!]
     results: [ScrapedPlayerResult!]
     rawHtml: String
+    isNewStructure: Boolean
 }
 
 type ScrapedTournamentLevel {

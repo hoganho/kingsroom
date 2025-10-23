@@ -143,6 +143,7 @@ type EagerScrapedGameData = {
   readonly levels?: ScrapedTournamentLevel[] | null;
   readonly results?: ScrapedPlayerResult[] | null;
   readonly rawHtml?: string | null;
+  readonly isNewStructure?: boolean | null;
 }
 
 type LazyScrapedGameData = {
@@ -164,6 +165,7 @@ type LazyScrapedGameData = {
   readonly levels?: ScrapedTournamentLevel[] | null;
   readonly results?: ScrapedPlayerResult[] | null;
   readonly rawHtml?: string | null;
+  readonly isNewStructure?: boolean | null;
 }
 
 export declare type ScrapedGameData = LazyLoading extends LazyLoadingDisabled ? EagerScrapedGameData : LazyScrapedGameData
@@ -262,6 +264,42 @@ export declare type DataSync = LazyLoading extends LazyLoadingDisabled ? EagerDa
 
 export declare const DataSync: (new (init: ModelInit<DataSync>) => DataSync) & {
   copyOf(source: DataSync, mutator: (draft: MutableModel<DataSync>) => MutableModel<DataSync> | void): DataSync;
+}
+
+type EagerScrapeStructure = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<ScrapeStructure, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly fields: (string | null)[];
+  readonly occurrenceCount: number;
+  readonly firstSeenAt: string;
+  readonly lastSeenAt: string;
+  readonly exampleUrl?: string | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyScrapeStructure = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<ScrapeStructure, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly fields: (string | null)[];
+  readonly occurrenceCount: number;
+  readonly firstSeenAt: string;
+  readonly lastSeenAt: string;
+  readonly exampleUrl?: string | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type ScrapeStructure = LazyLoading extends LazyLoadingDisabled ? EagerScrapeStructure : LazyScrapeStructure
+
+export declare const ScrapeStructure: (new (init: ModelInit<ScrapeStructure>) => ScrapeStructure) & {
+  copyOf(source: ScrapeStructure, mutator: (draft: MutableModel<ScrapeStructure>) => MutableModel<ScrapeStructure> | void): ScrapeStructure;
 }
 
 type EagerAsset = {

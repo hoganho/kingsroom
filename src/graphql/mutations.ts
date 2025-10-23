@@ -202,6 +202,75 @@ export const deleteDataSync = /* GraphQL */ `mutation DeleteDataSync(
   APITypes.DeleteDataSyncMutationVariables,
   APITypes.DeleteDataSyncMutation
 >;
+export const createScrapeStructure = /* GraphQL */ `mutation CreateScrapeStructure(
+  $input: CreateScrapeStructureInput!
+  $condition: ModelScrapeStructureConditionInput
+) {
+  createScrapeStructure(input: $input, condition: $condition) {
+    id
+    fields
+    occurrenceCount
+    firstSeenAt
+    lastSeenAt
+    exampleUrl
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateScrapeStructureMutationVariables,
+  APITypes.CreateScrapeStructureMutation
+>;
+export const updateScrapeStructure = /* GraphQL */ `mutation UpdateScrapeStructure(
+  $input: UpdateScrapeStructureInput!
+  $condition: ModelScrapeStructureConditionInput
+) {
+  updateScrapeStructure(input: $input, condition: $condition) {
+    id
+    fields
+    occurrenceCount
+    firstSeenAt
+    lastSeenAt
+    exampleUrl
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateScrapeStructureMutationVariables,
+  APITypes.UpdateScrapeStructureMutation
+>;
+export const deleteScrapeStructure = /* GraphQL */ `mutation DeleteScrapeStructure(
+  $input: DeleteScrapeStructureInput!
+  $condition: ModelScrapeStructureConditionInput
+) {
+  deleteScrapeStructure(input: $input, condition: $condition) {
+    id
+    fields
+    occurrenceCount
+    firstSeenAt
+    lastSeenAt
+    exampleUrl
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteScrapeStructureMutationVariables,
+  APITypes.DeleteScrapeStructureMutation
+>;
 export const createAsset = /* GraphQL */ `mutation CreateAsset(
   $input: CreateAssetInput!
   $condition: ModelAssetConditionInput

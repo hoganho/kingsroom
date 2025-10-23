@@ -41,7 +41,8 @@ export const useGameTracker = () => {
         
         try {
             const dataFromBackend = await fetchGameDataFromBackend(id);
-            
+            const isNewStructure = dataFromBackend.isNewStructure;
+
             const data: GameData = {
                 name: dataFromBackend.name,
                 gameDateTime: dataFromBackend.gameDateTime || new Date().toISOString(),
@@ -132,6 +133,7 @@ export const useGameTracker = () => {
                 status: isLive ? 'LIVE' : 'READY_TO_SAVE', 
                 lastFetched: new Date().toISOString(),
                 missingFields,
+                isNewStructure,
             });
 
         } catch (error: any) {

@@ -73,6 +73,7 @@ export interface GameState {
     lastFetched?: string;
     errorMessage?: string;
     saveResult?: any;
+    isNewStructure?: boolean;
 }
 
 // Updated input types to match new schema
