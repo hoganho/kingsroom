@@ -170,6 +170,7 @@ input ScrapedGameDataInput {
     totalAddons: Int
     totalDuration: String
     gameTags: [String]
+    tournamentType: TournamentType
     buyIn: Float
     startingStack: Int
     hasGuarantee: Boolean

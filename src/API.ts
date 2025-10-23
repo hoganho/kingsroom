@@ -60,6 +60,7 @@ export type ScrapedGameDataInput = {
   totalAddons?: number | null,
   totalDuration?: string | null,
   gameTags?: Array< string | null > | null,
+  tournamentType?: TournamentType | null,
   buyIn?: number | null,
   startingStack?: number | null,
   hasGuarantee?: boolean | null,
@@ -73,6 +74,14 @@ export enum GameStatus {
   COMPLETED = "COMPLETED",
   CANCELLED = "CANCELLED",
   FINISHED = "FINISHED",
+}
+
+
+export enum TournamentType {
+  FREEZEOUT = "FREEZEOUT",
+  REBUY = "REBUY",
+  SATELLITE = "SATELLITE",
+  DEEPSTACK = "DEEPSTACK",
 }
 
 
@@ -127,14 +136,6 @@ export type Game = {
 export enum GameType {
   TOURNAMENT = "TOURNAMENT",
   CASH_GAME = "CASH_GAME",
-}
-
-
-export enum TournamentType {
-  FREEZEOUT = "FREEZEOUT",
-  REBUY = "REBUY",
-  SATELLITE = "SATELLITE",
-  DEEPSTACK = "DEEPSTACK",
 }
 
 

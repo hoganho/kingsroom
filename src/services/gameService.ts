@@ -3,7 +3,7 @@
 import { generateClient } from 'aws-amplify/api';
 import { fetchTournamentData, saveTournamentData } from '../graphql/mutations';
 import * as APITypes from '../API';
-import type { GameData, SaveTournamentInput } from '../types/game';
+import type { GameData } from '../types/game';
 
 /**
  * Calls the backend Lambda to fetch and parse tournament data without saving.
