@@ -1,15 +1,29 @@
-// This file defines the shared data structures for our game data feature.
+// Updated type definitions to match the refactored schema
+
+export type TournamentLevelData = {
+    levelNumber: number;
+    durationMinutes: number;
+    smallBlind: number;
+    bigBlind: number;
+    ante?: number | null;
+    breakMinutes?: number | null;
+};
 
 export type PlayerResultData = {
     rank: number;
     name: string;
-    winnings: number; // The hook will handle potential null/undefined values
+    winnings: number;
 };
 
 export type GameData = {
+    // Basic game information
     name: string;
     gameDateTime: string;
     status: string;
+    type?: 'TOURNAMENT' | 'CASH_GAME';
+    variant?: string | null;
+    
+    // Game state and metadata
     registrationStatus?: string | null;
     gameVariant?: string | null;
     prizepool?: number | null;
@@ -19,24 +33,22 @@ export type GameData = {
     totalDuration?: string | null;
     gameTags?: (string | null)[] | null;
     seriesName?: string | null;
-    tournamentType?: string | null;
+    
+    // Tournament-specific fields (now on Game model)
+    tournamentType?: 'FREEZEOUT' | 'REBUY' | 'SATELLITE' | 'DEEPSTACK' | null;
     buyIn?: number | null;
     rake?: number | null;
     startingStack?: number | null;
     hasGuarantee: boolean;
     guaranteeAmount?: number | null;
-    levels: {
-        levelNumber: number;
-        durationMinutes?: number | null;
-        smallBlind?: number | null;
-        bigBlind?: number | null;
-        ante?: number | null;
-    }[];
-    results?: {
-        rank: number;
-        name: string;
-        winnings: number;
-    }[] | null;
+    
+    // Blind structure (embedded)
+    levels: TournamentLevelData[];
+    
+    // Player results
+    results?: PlayerResultData[] | null;
+    
+    // Additional data
     otherDetails: Record<string, string>;
     rawHtml?: string | null;
 };
@@ -59,4 +71,46 @@ export interface GameState {
     lastFetched?: string;
     errorMessage?: string;
     saveResult?: any;
+}
+
+// Updated input types to match new schema
+export interface SaveTournamentInput {
+    id?: string;
+    sourceUrl: string;
+    venueId: string;
+    data: GameDataInput;
+}
+
+export interface GameDataInput {
+    name: string;
+    gameDateTime?: string;
+    status?: string;
+    registrationStatus?: string;
+    gameVariant?: string;
+    prizepool?: number;
+    totalEntries?: number;
+    totalRebuys?: number;
+    totalAddons?: number;
+    totalDuration?: string;
+    gameTags?: string[];
+    
+    // Tournament-specific fields (now directly in game input)
+    tournamentType?: 'FREEZEOUT' | 'REBUY' | 'SATELLITE' | 'DEEPSTACK';
+    buyIn?: number;
+    rake?: number;
+    startingStack?: number;
+    hasGuarantee?: boolean;
+    guaranteeAmount?: number;
+    
+    // Blind levels
+    levels?: TournamentLevelInput[];
+}
+
+export interface TournamentLevelInput {
+    levelNumber: number;
+    durationMinutes?: number;
+    smallBlind?: number;
+    bigBlind?: number;
+    ante?: number;
+    breakMinutes?: number;
 }

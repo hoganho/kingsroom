@@ -452,8 +452,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
     sourceUrl
     seriesName
     isAdHoc
-    tournamentStructureId
-    cashStructureId
     registrationStatus
     gameVariant
     prizepool
@@ -462,6 +460,14 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
     totalAddons
     totalDuration
     gameTags
+    tournamentType
+    buyIn
+    rake
+    startingStack
+    hasGuarantee
+    guaranteeAmount
+    tournamentStructureId
+    cashStructureId
     venue {
       id
       name
@@ -479,12 +485,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
     tournamentStructure {
       id
       name
-      type
-      buyIn
-      rake
-      startingStack
-      hasGuarantee
-      guaranteeAmount
+      description
       createdAt
       updatedAt
       _version
@@ -536,8 +537,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
     sourceUrl
     seriesName
     isAdHoc
-    tournamentStructureId
-    cashStructureId
     registrationStatus
     gameVariant
     prizepool
@@ -546,6 +545,14 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
     totalAddons
     totalDuration
     gameTags
+    tournamentType
+    buyIn
+    rake
+    startingStack
+    hasGuarantee
+    guaranteeAmount
+    tournamentStructureId
+    cashStructureId
     venue {
       id
       name
@@ -563,12 +570,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
     tournamentStructure {
       id
       name
-      type
-      buyIn
-      rake
-      startingStack
-      hasGuarantee
-      guaranteeAmount
+      description
       createdAt
       updatedAt
       _version
@@ -620,8 +622,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
     sourceUrl
     seriesName
     isAdHoc
-    tournamentStructureId
-    cashStructureId
     registrationStatus
     gameVariant
     prizepool
@@ -630,6 +630,14 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
     totalAddons
     totalDuration
     gameTags
+    tournamentType
+    buyIn
+    rake
+    startingStack
+    hasGuarantee
+    guaranteeAmount
+    tournamentStructureId
+    cashStructureId
     venue {
       id
       name
@@ -647,12 +655,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
     tournamentStructure {
       id
       name
-      type
-      buyIn
-      rake
-      startingStack
-      hasGuarantee
-      guaranteeAmount
+      description
       createdAt
       updatedAt
       _version
@@ -698,15 +701,14 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
   onCreateTournamentStructure(filter: $filter) {
     id
     name
-    type
-    buyIn
-    rake
-    startingStack
-    hasGuarantee
-    guaranteeAmount
+    description
     levels {
-      nextToken
-      startedAt
+      levelNumber
+      durationMinutes
+      smallBlind
+      bigBlind
+      ante
+      breakMinutes
       __typename
     }
     games {
@@ -732,15 +734,14 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
   onUpdateTournamentStructure(filter: $filter) {
     id
     name
-    type
-    buyIn
-    rake
-    startingStack
-    hasGuarantee
-    guaranteeAmount
+    description
     levels {
-      nextToken
-      startedAt
+      levelNumber
+      durationMinutes
+      smallBlind
+      bigBlind
+      ante
+      breakMinutes
       __typename
     }
     games {
@@ -766,15 +767,14 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
   onDeleteTournamentStructure(filter: $filter) {
     id
     name
-    type
-    buyIn
-    rake
-    startingStack
-    hasGuarantee
-    guaranteeAmount
+    description
     levels {
-      nextToken
-      startedAt
+      levelNumber
+      durationMinutes
+      smallBlind
+      bigBlind
+      ante
+      breakMinutes
       __typename
     }
     games {
@@ -793,78 +793,6 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
 ` as GeneratedSubscription<
   APITypes.OnDeleteTournamentStructureSubscriptionVariables,
   APITypes.OnDeleteTournamentStructureSubscription
->;
-export const onCreateTournamentLevel = /* GraphQL */ `subscription OnCreateTournamentLevel(
-  $filter: ModelSubscriptionTournamentLevelFilterInput
-) {
-  onCreateTournamentLevel(filter: $filter) {
-    id
-    structureId
-    levelNumber
-    durationMinutes
-    smallBlind
-    bigBlind
-    ante
-    breakMinutes
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnCreateTournamentLevelSubscriptionVariables,
-  APITypes.OnCreateTournamentLevelSubscription
->;
-export const onUpdateTournamentLevel = /* GraphQL */ `subscription OnUpdateTournamentLevel(
-  $filter: ModelSubscriptionTournamentLevelFilterInput
-) {
-  onUpdateTournamentLevel(filter: $filter) {
-    id
-    structureId
-    levelNumber
-    durationMinutes
-    smallBlind
-    bigBlind
-    ante
-    breakMinutes
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnUpdateTournamentLevelSubscriptionVariables,
-  APITypes.OnUpdateTournamentLevelSubscription
->;
-export const onDeleteTournamentLevel = /* GraphQL */ `subscription OnDeleteTournamentLevel(
-  $filter: ModelSubscriptionTournamentLevelFilterInput
-) {
-  onDeleteTournamentLevel(filter: $filter) {
-    id
-    structureId
-    levelNumber
-    durationMinutes
-    smallBlind
-    bigBlind
-    ante
-    breakMinutes
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnDeleteTournamentLevelSubscriptionVariables,
-  APITypes.OnDeleteTournamentLevelSubscription
 >;
 export const onCreateRakeStructure = /* GraphQL */ `subscription OnCreateRakeStructure(
   $filter: ModelSubscriptionRakeStructureFilterInput
@@ -1831,8 +1759,6 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
       sourceUrl
       seriesName
       isAdHoc
-      tournamentStructureId
-      cashStructureId
       registrationStatus
       gameVariant
       prizepool
@@ -1841,6 +1767,14 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
       totalAddons
       totalDuration
       gameTags
+      tournamentType
+      buyIn
+      rake
+      startingStack
+      hasGuarantee
+      guaranteeAmount
+      tournamentStructureId
+      cashStructureId
       createdAt
       updatedAt
       _version
@@ -1906,8 +1840,6 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
       sourceUrl
       seriesName
       isAdHoc
-      tournamentStructureId
-      cashStructureId
       registrationStatus
       gameVariant
       prizepool
@@ -1916,6 +1848,14 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
       totalAddons
       totalDuration
       gameTags
+      tournamentType
+      buyIn
+      rake
+      startingStack
+      hasGuarantee
+      guaranteeAmount
+      tournamentStructureId
+      cashStructureId
       createdAt
       updatedAt
       _version
@@ -1981,8 +1921,6 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
       sourceUrl
       seriesName
       isAdHoc
-      tournamentStructureId
-      cashStructureId
       registrationStatus
       gameVariant
       prizepool
@@ -1991,6 +1929,14 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
       totalAddons
       totalDuration
       gameTags
+      tournamentType
+      buyIn
+      rake
+      startingStack
+      hasGuarantee
+      guaranteeAmount
+      tournamentStructureId
+      cashStructureId
       createdAt
       updatedAt
       _version

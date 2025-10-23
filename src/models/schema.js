@@ -567,20 +567,6 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "tournamentStructureId": {
-                    "name": "tournamentStructureId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "cashStructureId": {
-                    "name": "cashStructureId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
                 "registrationStatus": {
                     "name": "registrationStatus",
                     "isArray": false,
@@ -637,6 +623,64 @@ export const schema = {
                     "isRequired": false,
                     "attributes": [],
                     "isArrayNullable": true
+                },
+                "tournamentType": {
+                    "name": "tournamentType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "TournamentType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "buyIn": {
+                    "name": "buyIn",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rake": {
+                    "name": "rake",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "startingStack": {
+                    "name": "startingStack",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasGuarantee": {
+                    "name": "hasGuarantee",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeAmount": {
+                    "name": "guaranteeAmount",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tournamentStructureId": {
+                    "name": "tournamentStructureId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "cashStructureId": {
+                    "name": "cashStructureId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
                 },
                 "venue": {
                     "name": "venue",
@@ -796,47 +840,10 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "type": {
-                    "name": "type",
+                "description": {
+                    "name": "description",
                     "isArray": false,
-                    "type": {
-                        "enum": "TournamentType"
-                    },
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "buyIn": {
-                    "name": "buyIn",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "rake": {
-                    "name": "rake",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "startingStack": {
-                    "name": "startingStack",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "hasGuarantee": {
-                    "name": "hasGuarantee",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "guaranteeAmount": {
-                    "name": "guaranteeAmount",
-                    "isArray": false,
-                    "type": "Float",
+                    "type": "String",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -844,17 +851,11 @@ export const schema = {
                     "name": "levels",
                     "isArray": true,
                     "type": {
-                        "model": "TournamentLevel"
+                        "nonModel": "TournamentLevelData"
                     },
                     "isRequired": false,
                     "attributes": [],
-                    "isArrayNullable": true,
-                    "association": {
-                        "connectionType": "HAS_MANY",
-                        "associatedWith": [
-                            "structureId"
-                        ]
-                    }
+                    "isArrayNullable": true
                 },
                 "games": {
                     "name": "games",
@@ -895,116 +896,6 @@ export const schema = {
                 {
                     "type": "model",
                     "properties": {}
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        "TournamentLevel": {
-            "name": "TournamentLevel",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "structureId": {
-                    "name": "structureId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "levelNumber": {
-                    "name": "levelNumber",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "durationMinutes": {
-                    "name": "durationMinutes",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "smallBlind": {
-                    "name": "smallBlind",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "bigBlind": {
-                    "name": "bigBlind",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "ante": {
-                    "name": "ante",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "breakMinutes": {
-                    "name": "breakMinutes",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "TournamentLevels",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byStructure",
-                        "fields": [
-                            "structureId"
-                        ]
-                    }
                 },
                 {
                     "type": "auth",
@@ -3526,8 +3417,55 @@ export const schema = {
                     "attributes": []
                 }
             }
+        },
+        "TournamentLevelData": {
+            "name": "TournamentLevelData",
+            "fields": {
+                "levelNumber": {
+                    "name": "levelNumber",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "durationMinutes": {
+                    "name": "durationMinutes",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "smallBlind": {
+                    "name": "smallBlind",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "bigBlind": {
+                    "name": "bigBlind",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "ante": {
+                    "name": "ante",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "breakMinutes": {
+                    "name": "breakMinutes",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "bb2096171bc493cbbd0ac1771359c21f"
+    "version": "03b1b3b3fe0316b6a26627e90950773d"
 };

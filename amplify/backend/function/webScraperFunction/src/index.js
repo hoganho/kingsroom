@@ -1,43 +1,9 @@
 /* Amplify Params - DO NOT EDIT
-	API_KINGSROOM_CASHSTRUCTURETABLE_ARN
-	API_KINGSROOM_CASHSTRUCTURETABLE_NAME
-	API_KINGSROOM_DATASYNCTABLE_ARN
-	API_KINGSROOM_DATASYNCTABLE_NAME
-	API_KINGSROOM_GAMETABLE_ARN
-	API_KINGSROOM_GAMETABLE_NAME
 	API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
 	API_KINGSROOM_GRAPHQLAPIIDOUTPUT
-	API_KINGSROOM_PLAYERRESULTTABLE_ARN
-	API_KINGSROOM_PLAYERRESULTTABLE_NAME
-	API_KINGSROOM_PLAYERSUMMARYTABLE_ARN
-	API_KINGSROOM_PLAYERSUMMARYTABLE_NAME
-	API_KINGSROOM_PLAYERTABLE_ARN
-	API_KINGSROOM_PLAYERTABLE_NAME
-	API_KINGSROOM_PLAYERTICKETTABLE_ARN
-	API_KINGSROOM_PLAYERTICKETTABLE_NAME
-	API_KINGSROOM_PLAYERTRANSACTIONTABLE_ARN
-	API_KINGSROOM_PLAYERTRANSACTIONTABLE_NAME
-	API_KINGSROOM_PLAYERVENUETABLE_ARN
-	API_KINGSROOM_PLAYERVENUETABLE_NAME
-	API_KINGSROOM_RAKESTRUCTURETABLE_ARN
-	API_KINGSROOM_RAKESTRUCTURETABLE_NAME
-	API_KINGSROOM_TICKETTEMPLATETABLE_ARN
-	API_KINGSROOM_TICKETTEMPLATETABLE_NAME
-	API_KINGSROOM_TOURNAMENTLEVELTABLE_ARN
-	API_KINGSROOM_TOURNAMENTLEVELTABLE_NAME
-	API_KINGSROOM_TOURNAMENTSTRUCTURETABLE_ARN
-	API_KINGSROOM_TOURNAMENTSTRUCTURETABLE_NAME
-	API_KINGSROOM_USERTABLE_ARN
-	API_KINGSROOM_USERTABLE_NAME
-	API_KINGSROOM_VENUEDETAILSTABLE_ARN
-	API_KINGSROOM_VENUEDETAILSTABLE_NAME
-	API_KINGSROOM_VENUETABLE_ARN
-	API_KINGSROOM_VENUETABLE_NAME
 	ENV
 	REGION
 Amplify Params - DO NOT EDIT */
-
-// Triggering a redeploy
 
 const axios = require('axios');
 const cheerio = require('cheerio');
@@ -50,13 +16,13 @@ const ddbDocClient = DynamoDBDocumentClient.from(client);
 
 // Helper to get table names from environment variables
 const getTableName = (modelName) => {
-    const envVarName = `API_KINGSROOMDASHBOARD_${modelName.toUpperCase()}TABLE_NAME`;
+    const envVarName = `API_KINGSROOM_${modelName.toUpperCase()}TABLE_NAME`;
     const tableName = process.env[envVarName];
     if (!tableName) throw new Error(`Table name for model ${modelName} not found in environment variables.`);
     return tableName;
 };
 
-// --- SCRAPING LOGIC (now in its own function) ---
+// --- SCRAPING LOGIC ---
 const scrapeDataFromHtml = (html) => {
     const $ = cheerio.load(html);
 
@@ -140,6 +106,9 @@ const handleSave = async (input) => {
     const now = new Date().toISOString();
     
     const gameTable = getTableName('Game');
+    const structureTable = getTableName('TournamentStructure');
+    
+    // Check if game already exists
     const queryCommand = new QueryCommand({
         TableName: gameTable,
         IndexName: 'bySourceUrl',
@@ -152,87 +121,167 @@ const handleSave = async (input) => {
 
     if (existingGame) {
         console.log(`Found existing game with ID: ${existingGame.id}. Updating...`);
-        const structureId = existingGame.tournamentStructureId;
-
+        
+        // Update existing game with new data
         const updatedGameItem = {
             ...existingGame,
-            ...data,
-            venueId,
-            gameDateTime: data.gameDateTime ? new Date(data.gameDateTime).toISOString() : existingGame.gameDateTime,
-            updatedAt: now,
-        };
-
-        await ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem }));
-        return updatedGameItem;
-
-    } else {
-        console.log('No existing game found. Creating new records...');
-        const structureId = crypto.randomUUID();
-        const gameId = crypto.randomUUID();
-        
-        const structureItem = {
-            id: structureId,
-            name: `${data.name} Structure`,
-            type: data.tournamentType || 'FREEZEOUT',
+            // Update with new scraped data
+            name: data.name,
+            status: data.status || 'SCHEDULED',
+            registrationStatus: data.registrationStatus,
+            gameVariant: data.gameVariant,
+            prizepool: data.prizepool,
+            totalEntries: data.totalEntries,
+            totalRebuys: data.totalRebuys,
+            totalAddons: data.totalAddons,
+            totalDuration: data.totalDuration,
+            gameTags: data.gameTags,
+            // Tournament-specific fields now on Game
             buyIn: data.buyIn,
             rake: data.rake || 0,
             startingStack: data.startingStack,
             hasGuarantee: data.hasGuarantee,
             guaranteeAmount: data.guaranteeAmount,
-            createdAt: now, updatedAt: now, _lastChangedAt: Date.now(), _version: 1, __typename: "TournamentStructure",
+            tournamentType: data.tournamentType || 'FREEZEOUT',
+            // Keep existing fields
+            venueId,
+            gameDateTime: data.gameDateTime ? new Date(data.gameDateTime).toISOString() : existingGame.gameDateTime,
+            updatedAt: now,
         };
 
+        // If there's a tournament structure, update its levels
+        if (existingGame.tournamentStructureId && data.levels && data.levels.length > 0) {
+            const structureUpdate = {
+                TableName: structureTable,
+                Key: { id: existingGame.tournamentStructureId },
+                UpdateExpression: 'SET #levels = :levels, #updatedAt = :updatedAt',
+                ExpressionAttributeNames: {
+                    '#levels': 'levels',
+                    '#updatedAt': 'updatedAt'
+                },
+                ExpressionAttributeValues: {
+                    ':levels': data.levels.map(level => ({
+                        levelNumber: level.levelNumber,
+                        durationMinutes: level.durationMinutes,
+                        smallBlind: level.smallBlind,
+                        bigBlind: level.bigBlind,
+                        ante: level.ante,
+                        breakMinutes: level.breakMinutes || 0
+                    })),
+                    ':updatedAt': now
+                }
+            };
+            
+            // Update both game and structure
+            await Promise.all([
+                ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem })),
+                ddbDocClient.send(new PutCommand(structureUpdate))
+            ]);
+        } else {
+            // Just update the game
+            await ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem }));
+        }
+
+        return updatedGameItem;
+
+    } else {
+        console.log('No existing game found. Creating new records...');
+        
+        const gameId = crypto.randomUUID();
+        let structureId = null;
+        
+        // Only create a tournament structure if we have levels
+        if (data.levels && data.levels.length > 0) {
+            structureId = crypto.randomUUID();
+            
+            const structureItem = {
+                id: structureId,
+                name: `${data.name} - Blind Structure`,
+                description: `Blind structure for ${data.name}`,
+                // Embed levels directly in the structure
+                levels: data.levels.map(level => ({
+                    levelNumber: level.levelNumber,
+                    durationMinutes: level.durationMinutes || 20,
+                    smallBlind: level.smallBlind || 0,
+                    bigBlind: level.bigBlind || 0,
+                    ante: level.ante || 0,
+                    breakMinutes: level.breakMinutes || 0
+                })),
+                createdAt: now,
+                updatedAt: now,
+                _lastChangedAt: Date.now(),
+                _version: 1,
+                __typename: "TournamentStructure",
+            };
+            
+            // Save the tournament structure
+            await ddbDocClient.send(new PutCommand({ 
+                TableName: structureTable, 
+                Item: structureItem 
+            }));
+        }
+        
+        // Create the game with all tournament fields
         const gameItem = {
             id: gameId,
-            ...data,
+            name: data.name,
+            type: 'TOURNAMENT',
+            status: data.status || 'SCHEDULED',
+            gameDateTime: data.gameDateTime ? new Date(data.gameDateTime).toISOString() : now,
             sourceUrl,
             venueId,
+            // Tournament-specific fields (moved from TournamentStructure)
+            tournamentType: data.tournamentType || 'FREEZEOUT',
+            buyIn: data.buyIn,
+            rake: data.rake || 0,
+            startingStack: data.startingStack,
+            hasGuarantee: data.hasGuarantee,
+            guaranteeAmount: data.guaranteeAmount,
+            // Other game data
+            registrationStatus: data.registrationStatus,
+            gameVariant: data.gameVariant,
+            prizepool: data.prizepool,
+            totalEntries: data.totalEntries,
+            totalRebuys: data.totalRebuys,
+            totalAddons: data.totalAddons,
+            totalDuration: data.totalDuration,
+            gameTags: data.gameTags,
+            // Reference to tournament structure (if levels exist)
             tournamentStructureId: structureId,
-            gameDateTime: data.gameDateTime ? new Date(data.gameDateTime).toISOString() : now,
-            createdAt: now, updatedAt: now, _lastChangedAt: Date.now(), _version: 1, __typename: "Game",
+            // Metadata
+            createdAt: now,
+            updatedAt: now,
+            _lastChangedAt: Date.now(),
+            _version: 1,
+            __typename: "Game",
         };
-        delete gameItem.levels;
-        delete gameItem.results;
         
-        const levelItems = data.levels.map(level => ({
-            Put: {
-                TableName: getTableName('TournamentLevel'),
-                Item: { id: crypto.randomUUID(), structureId, ...level, createdAt: now, updatedAt: now, _lastChangedAt: Date.now(), _version: 1, __typename: "TournamentLevel" },
-            },
+        await ddbDocClient.send(new PutCommand({ 
+            TableName: gameTable, 
+            Item: gameItem 
         }));
-
-        const transactItems = [
-            { Put: { TableName: getTableName('TournamentStructure'), Item: structureItem } },
-            ...levelItems,
-            { Put: { TableName: gameTable, Item: gameItem } },
-        ];
-
-        await ddbDocClient.send(new TransactWriteCommand({ TransactItems: transactItems }));
+        
         return gameItem;
     }
 };
 
-
-// --- MAIN LAMBDA HANDLER (ROUTER) ---
+// --- MAIN LAMBDA HANDLER ---
 exports.handler = async (event) => {
     console.log('Event received:', JSON.stringify(event, null, 2));
-    // ✅ NEW, MORE ROBUST ROUTING LOGIC
-    // Instead of relying on event.info, we check for the presence of specific arguments.
     const { arguments } = event;
 
     try {
         if (arguments.input) {
-            // If 'input' exists, it's the saveTournamentData mutation
+            // saveTournamentData mutation
             return await handleSave(arguments.input);
         } else if (arguments.url) {
-            // If 'url' exists, it's the fetchTournamentData mutation
+            // fetchTournamentData mutation
             return await handleFetch(arguments.url);
         } else {
             throw new Error(`Could not determine operation. No 'input' or 'url' argument found.`);
         }
     } catch (error) {
         console.error('Error during handler execution:', error);
-        // The fieldName is useful for debugging in CloudWatch if we can get it
         const fieldName = event.info?.fieldName || 'unknown'; 
         throw new Error(`Operation failed for field ${fieldName}. Reason: ${error.message}`);
     }

@@ -183,10 +183,10 @@ type Game @model @auth(rules: [{ allow: private }]) {
     gameDateTime: AWSDateTime!
     venueId: ID! @index(name: "byVenue", sortKeyFields: ["gameDateTime"])
     sourceUrl: AWSURL @index(name: "bySourceUrl", queryField: "gameBySourceUrl")
+    
+    # Basic game info
     seriesName: String
     isAdHoc: Boolean
-    tournamentStructureId: ID @index(name: "byTournamentStructure")
-    cashStructureId: ID @index(name: "byCashStructure")
     registrationStatus: String
     gameVariant: String
     prizepool: Float
@@ -195,34 +195,47 @@ type Game @model @auth(rules: [{ allow: private }]) {
     totalAddons: Int
     totalDuration: String
     gameTags: [String]
+    
+    # Tournament-specific fields (moved from TournamentStructure)
+    tournamentType: TournamentType # FREEZEOUT, REBUY, etc.
+    buyIn: Float
+    rake: Float
+    startingStack: Int
+    hasGuarantee: Boolean
+    guaranteeAmount: Float
+    
+    # Blind structure reference (optional - for reusable structures)
+    tournamentStructureId: ID @index(name: "byTournamentStructure")
+    
+    # Cash game structure (unchanged)
+    cashStructureId: ID @index(name: "byCashStructure")
+    
+    # Relationships
     venue: Venue @belongsTo(fields: ["venueId"])
     tournamentStructure: TournamentStructure @belongsTo(fields: ["tournamentStructureId"])
     cashStructure: CashStructure @belongsTo(fields: ["cashStructureId"])
     playerResults: [PlayerResult] @hasMany(indexName: "byGame", fields: ["id"])
 }
 
+# Simplified TournamentStructure - now just for blind levels
 type TournamentStructure @model @auth(rules: [{ allow: private }]) {
-id: ID!
-name: String!
-type: TournamentType!
-buyIn: Float!
-rake: Float!
-startingStack: Int!
-hasGuarantee: Boolean
-guaranteeAmount: Float
-levels: [TournamentLevel] @hasMany(indexName: "byStructure", fields: ["id"])
-games: [Game] @hasMany(indexName: "byTournamentStructure", fields: ["id"])
+    id: ID!
+    name: String! # e.g., "Standard Daily Structure", "Turbo Structure"
+    description: String
+    # Embedded levels array instead of separate model
+    levels: [TournamentLevelData]
+    # Track which games use this structure
+    games: [Game] @hasMany(indexName: "byTournamentStructure", fields: ["id"])
 }
 
-type TournamentLevel @model @auth(rules: [{ allow: private }]) {
-id: ID!
-structureId: ID! @index(name: "byStructure")
-levelNumber: Int!
-durationMinutes: Int!
-smallBlind: Int!
-bigBlind: Int!
-ante: Int
-breakMinutes: Int
+# Not a @model - just a type for embedding
+type TournamentLevelData {
+    levelNumber: Int!
+    durationMinutes: Int!
+    smallBlind: Int!
+    bigBlind: Int!
+    ante: Int
+    breakMinutes: Int
 }
 
 type RakeStructure @model @auth(rules: [{ allow: private }]) {

@@ -46,6 +46,7 @@ export const useGameTracker = () => {
                 name: dataFromBackend.name,
                 gameDateTime: dataFromBackend.gameDateTime || new Date().toISOString(),
                 status: dataFromBackend.status || 'SCHEDULED',
+                type: 'TOURNAMENT', // Default to tournament for scraped games
                 registrationStatus: dataFromBackend.registrationStatus || undefined,
                 gameVariant: dataFromBackend.gameVariant || undefined,
                 prizepool: dataFromBackend.prizepool || undefined,
@@ -54,42 +55,74 @@ export const useGameTracker = () => {
                 totalAddons: dataFromBackend.totalAddons || undefined,
                 totalDuration: dataFromBackend.totalDuration || undefined,
                 gameTags: dataFromBackend.gameTags || [],
+                
+                // Tournament-specific fields (now directly on Game)
+                tournamentType: 'FREEZEOUT', // Default, could be determined from tags
                 buyIn: dataFromBackend.buyIn || undefined,
+                rake: undefined, // Rake typically not scraped, needs manual input
                 startingStack: dataFromBackend.startingStack || undefined,
                 hasGuarantee: dataFromBackend.hasGuarantee ?? false,
                 guaranteeAmount: dataFromBackend.guaranteeAmount || undefined,
-                levels: dataFromBackend.levels?.map(l => ({...l})) ?? [],
-                results: dataFromBackend.results?.map(r => ({ ...r, name: r.name, rank: r.rank, winnings: r.winnings ?? 0 })) ?? [],                otherDetails: {},
+                
+                // Blind levels
+                levels: dataFromBackend.levels?.map(l => ({
+                    levelNumber: l.levelNumber,
+                    durationMinutes: l.durationMinutes || 20,
+                    smallBlind: l.smallBlind || 0,
+                    bigBlind: l.bigBlind || 0,
+                    ante: l.ante,
+                    breakMinutes: undefined
+                })) ?? [],
+                
+                // Player results
+                results: dataFromBackend.results?.map(r => ({ 
+                    name: r.name, 
+                    rank: r.rank, 
+                    winnings: r.winnings ?? 0 
+                })) ?? [],
+                
+                otherDetails: {},
                 rawHtml: dataFromBackend.rawHtml || undefined
             };
 
-            // ✅ REGENERATE MISSING FIELDS on the frontend for the report
+            // Updated missing fields check for refactored schema
             const missingFields: MissingField[] = [];
-            const fieldsToCheck: Record<string, string[]> = {
-                'Game': ['prizepool', 'totalEntries', 'totalRebuys', 'totalAddons'],
-                'TournamentStructure': ['tournamentType', 'rake'],
+            
+            // Game model fields (including tournament-specific ones)
+            const gameFields: Record<string, string> = {
+                'prizepool': 'Prize pool not found on page',
+                'totalEntries': 'Total entries not found on page',
+                'totalRebuys': 'Total rebuys not found on page',
+                'totalAddons': 'Total addons not found on page',
+                'tournamentType': 'Tournament type needs manual specification',
+                'rake': 'Rake amount not available on page',
             };
 
-            Object.entries(fieldsToCheck).forEach(([model, fields]) => {
-                fields.forEach(field => {
-                    if ((data as any)[field] === undefined || (data as any)[field] === null) {
-                        missingFields.push({ model, field, reason: 'Not found on page.' });
-                    }
-                });
+            Object.entries(gameFields).forEach(([field, reason]) => {
+                if ((data as any)[field] === undefined || (data as any)[field] === null) {
+                    missingFields.push({ model: 'Game', field, reason });
+                }
             });
 
-            // Add fields that are always manual
-            missingFields.push(
-                { model: 'Venue', field: 'all fields', reason: 'Venue must be provided manually.' },
-                { model: 'Player', field: 'all fields', reason: 'Player data cannot be scraped from this page.' },
-                { model: 'PlayerAccount', field: 'all fields', reason: 'Player account data cannot be scraped.' },
-                { model: 'PlayerResult', field: 'all fields', reason: 'Results cannot be linked to accounts automatically.' },
-                { model: 'PlayerTransaction', field: 'all fields', reason: 'Transaction data cannot be scraped.' },
-                { model: 'PlayerTicket', field: 'all fields', reason: 'Ticket data cannot be scraped.' },
-                { model: 'CashStructure', field: 'all fields', reason: 'This is a tournament, not a cash game.' },
-                { model: 'RakeStructure', field: 'all fields', reason: 'This is a tournament, not a cash game.' },
-            );
+            // TournamentStructure is now simplified - just check if we have levels
+            if (!data.levels || data.levels.length === 0) {
+                missingFields.push({ 
+                    model: 'TournamentStructure', 
+                    field: 'levels', 
+                    reason: 'Blind structure not found on page' 
+                });
+            }
 
+            // Add fields that always require manual input
+            missingFields.push(
+                { model: 'Venue', field: 'all fields', reason: 'Venue must be selected manually' },
+                { model: 'Player', field: 'all fields', reason: 'Player data cannot be scraped from this page' },
+                { model: 'PlayerResult', field: 'player linking', reason: 'Results cannot be automatically linked to player accounts' },
+                { model: 'PlayerTransaction', field: 'all fields', reason: 'Transaction data not available on page' },
+                { model: 'PlayerTicket', field: 'all fields', reason: 'Ticket data not available on page' },
+                { model: 'CashStructure', field: 'all fields', reason: 'Not applicable for tournaments' },
+                { model: 'RakeStructure', field: 'all fields', reason: 'Not applicable for tournaments' },
+            );
 
             const isLive = data.status.toUpperCase() === 'LIVE';
 
@@ -98,7 +131,7 @@ export const useGameTracker = () => {
                 data,
                 status: isLive ? 'LIVE' : 'READY_TO_SAVE', 
                 lastFetched: new Date().toISOString(),
-                missingFields, // Pass the regenerated array to the state
+                missingFields,
             });
 
         } catch (error: any) {

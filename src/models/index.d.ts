@@ -206,6 +206,28 @@ export declare type ScrapedPlayerResult = LazyLoading extends LazyLoadingDisable
 
 export declare const ScrapedPlayerResult: (new (init: ModelInit<ScrapedPlayerResult>) => ScrapedPlayerResult)
 
+type EagerTournamentLevelData = {
+  readonly levelNumber: number;
+  readonly durationMinutes: number;
+  readonly smallBlind: number;
+  readonly bigBlind: number;
+  readonly ante?: number | null;
+  readonly breakMinutes?: number | null;
+}
+
+type LazyTournamentLevelData = {
+  readonly levelNumber: number;
+  readonly durationMinutes: number;
+  readonly smallBlind: number;
+  readonly bigBlind: number;
+  readonly ante?: number | null;
+  readonly breakMinutes?: number | null;
+}
+
+export declare type TournamentLevelData = LazyLoading extends LazyLoadingDisabled ? EagerTournamentLevelData : LazyTournamentLevelData
+
+export declare const TournamentLevelData: (new (init: ModelInit<TournamentLevelData>) => TournamentLevelData)
+
 type EagerDataSync = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<DataSync, 'id'>;
@@ -383,8 +405,6 @@ type EagerGame = {
   readonly sourceUrl?: string | null;
   readonly seriesName?: string | null;
   readonly isAdHoc?: boolean | null;
-  readonly tournamentStructureId?: string | null;
-  readonly cashStructureId?: string | null;
   readonly registrationStatus?: string | null;
   readonly gameVariant?: string | null;
   readonly prizepool?: number | null;
@@ -393,6 +413,14 @@ type EagerGame = {
   readonly totalAddons?: number | null;
   readonly totalDuration?: string | null;
   readonly gameTags?: (string | null)[] | null;
+  readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
+  readonly buyIn?: number | null;
+  readonly rake?: number | null;
+  readonly startingStack?: number | null;
+  readonly hasGuarantee?: boolean | null;
+  readonly guaranteeAmount?: number | null;
+  readonly tournamentStructureId?: string | null;
+  readonly cashStructureId?: string | null;
   readonly venue?: Venue | null;
   readonly tournamentStructure?: TournamentStructure | null;
   readonly cashStructure?: CashStructure | null;
@@ -416,8 +444,6 @@ type LazyGame = {
   readonly sourceUrl?: string | null;
   readonly seriesName?: string | null;
   readonly isAdHoc?: boolean | null;
-  readonly tournamentStructureId?: string | null;
-  readonly cashStructureId?: string | null;
   readonly registrationStatus?: string | null;
   readonly gameVariant?: string | null;
   readonly prizepool?: number | null;
@@ -426,6 +452,14 @@ type LazyGame = {
   readonly totalAddons?: number | null;
   readonly totalDuration?: string | null;
   readonly gameTags?: (string | null)[] | null;
+  readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
+  readonly buyIn?: number | null;
+  readonly rake?: number | null;
+  readonly startingStack?: number | null;
+  readonly hasGuarantee?: boolean | null;
+  readonly guaranteeAmount?: number | null;
+  readonly tournamentStructureId?: string | null;
+  readonly cashStructureId?: string | null;
   readonly venue: AsyncItem<Venue | undefined>;
   readonly tournamentStructure: AsyncItem<TournamentStructure | undefined>;
   readonly cashStructure: AsyncItem<CashStructure | undefined>;
@@ -447,13 +481,8 @@ type EagerTournamentStructure = {
   };
   readonly id: string;
   readonly name: string;
-  readonly type: TournamentType | keyof typeof TournamentType;
-  readonly buyIn: number;
-  readonly rake: number;
-  readonly startingStack: number;
-  readonly hasGuarantee?: boolean | null;
-  readonly guaranteeAmount?: number | null;
-  readonly levels?: (TournamentLevel | null)[] | null;
+  readonly description?: string | null;
+  readonly levels?: (TournamentLevelData | null)[] | null;
   readonly games?: (Game | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
@@ -466,13 +495,8 @@ type LazyTournamentStructure = {
   };
   readonly id: string;
   readonly name: string;
-  readonly type: TournamentType | keyof typeof TournamentType;
-  readonly buyIn: number;
-  readonly rake: number;
-  readonly startingStack: number;
-  readonly hasGuarantee?: boolean | null;
-  readonly guaranteeAmount?: number | null;
-  readonly levels: AsyncCollection<TournamentLevel>;
+  readonly description?: string | null;
+  readonly levels?: (TournamentLevelData | null)[] | null;
   readonly games: AsyncCollection<Game>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
@@ -482,46 +506,6 @@ export declare type TournamentStructure = LazyLoading extends LazyLoadingDisable
 
 export declare const TournamentStructure: (new (init: ModelInit<TournamentStructure>) => TournamentStructure) & {
   copyOf(source: TournamentStructure, mutator: (draft: MutableModel<TournamentStructure>) => MutableModel<TournamentStructure> | void): TournamentStructure;
-}
-
-type EagerTournamentLevel = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<TournamentLevel, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly structureId: string;
-  readonly levelNumber: number;
-  readonly durationMinutes: number;
-  readonly smallBlind: number;
-  readonly bigBlind: number;
-  readonly ante?: number | null;
-  readonly breakMinutes?: number | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-type LazyTournamentLevel = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<TournamentLevel, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly structureId: string;
-  readonly levelNumber: number;
-  readonly durationMinutes: number;
-  readonly smallBlind: number;
-  readonly bigBlind: number;
-  readonly ante?: number | null;
-  readonly breakMinutes?: number | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-export declare type TournamentLevel = LazyLoading extends LazyLoadingDisabled ? EagerTournamentLevel : LazyTournamentLevel
-
-export declare const TournamentLevel: (new (init: ModelInit<TournamentLevel>) => TournamentLevel) & {
-  copyOf(source: TournamentLevel, mutator: (draft: MutableModel<TournamentLevel>) => MutableModel<TournamentLevel> | void): TournamentLevel;
 }
 
 type EagerRakeStructure = {

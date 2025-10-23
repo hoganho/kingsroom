@@ -20,16 +20,16 @@
         "kingsroom": {}
       },
       "function": {
-        "webScraperFunction": {
-          "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/webScraperFunction-744854426b51694d4632-build.zip"
-        },
         "kingsroomc05d6627CustomMessage": {
           "REDIRECTURL": "http://localhost:5173/",
           "EMAILSUBJECT": "Your Kings Room Poker Verification Code",
           "EMAILMESSAGE": "Welcome to Kings Room Poker! Please use the following code to verify your email address:",
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
           "s3Key": "amplify-builds/kingsroomc05d6627CustomMessage-424d4c496846614f3754-build.zip"
+        },
+        "webScraperFunction": {
+          "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+          "s3Key": "amplify-builds/webScraperFunction-63474d4f33626d6c3233-build.zip"
         }
       }
     }
