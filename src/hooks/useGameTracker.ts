@@ -41,7 +41,9 @@ export const useGameTracker = () => {
         
         try {
             const dataFromBackend = await fetchGameDataFromBackend(id);
-            const isNewStructure = dataFromBackend.isNewStructure;
+            
+            // ✅ FIX: Use nullish coalescing to convert a potential null to undefined
+            const isNewStructure = dataFromBackend.isNewStructure ?? undefined;
 
             const data: GameData = {
                 name: dataFromBackend.name,

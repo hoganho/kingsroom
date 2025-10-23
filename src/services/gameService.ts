@@ -48,29 +48,31 @@ export const saveGameDataToBackend = async (
     
     try {
         // Prepare the input matching the refactored schema
-        const input: SaveTournamentInput = {
+        const input: APITypes.SaveTournamentInput = { // ✅ Use the generated type for safety
             sourceUrl,
             venueId,
             data: {
                 name: data.name,
                 gameDateTime: data.gameDateTime,
-                status: data.status as APITypes.GameStatus,
-                registrationStatus: data.registrationStatus,
-                gameVariant: data.gameVariant,
-                prizepool: data.prizepool,
-                totalEntries: data.totalEntries,
-                totalRebuys: data.totalRebuys,
-                totalAddons: data.totalAddons,
-                totalDuration: data.totalDuration,
-                gameTags: data.gameTags,
+                // ✅ FIX: Cast the status string to the GameStatus enum type
+                status: data.status as APITypes.GameStatus, 
+                // ✅ FIX: Use nullish coalescing (??) to convert null to undefined
+                registrationStatus: data.registrationStatus ?? undefined,
+                gameVariant: data.gameVariant ?? undefined,
+                prizepool: data.prizepool ?? undefined,
+                totalEntries: data.totalEntries ?? undefined,
+                totalRebuys: data.totalRebuys ?? undefined,
+                totalAddons: data.totalAddons ?? undefined,
+                totalDuration: data.totalDuration ?? undefined,
+                gameTags: data.gameTags?.filter((tag): tag is string => tag !== null) ?? [], // Remove nulls from the array
                 
                 // Tournament-specific fields (now part of Game)
-                tournamentType: data.tournamentType || 'FREEZEOUT',
-                buyIn: data.buyIn,
-                rake: data.rake,
-                startingStack: data.startingStack,
+                tournamentType: (data.tournamentType ?? 'FREEZEOUT') as APITypes.TournamentType,
+                buyIn: data.buyIn ?? undefined,
+                rake: data.rake ?? undefined,
+                startingStack: data.startingStack ?? undefined,
                 hasGuarantee: data.hasGuarantee,
-                guaranteeAmount: data.guaranteeAmount,
+                guaranteeAmount: data.guaranteeAmount ?? undefined,
                 
                 // Blind levels (will be embedded in TournamentStructure)
                 levels: data.levels?.map(l => ({
@@ -78,8 +80,8 @@ export const saveGameDataToBackend = async (
                     durationMinutes: l.durationMinutes,
                     smallBlind: l.smallBlind,
                     bigBlind: l.bigBlind,
-                    ante: l.ante,
-                    breakMinutes: l.breakMinutes,
+                    ante: l.ante ?? undefined, // ✅ FIX: Convert null to undefined
+                    breakMinutes: l.breakMinutes ?? undefined,
                 })) || [],
             },
         };
