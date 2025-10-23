@@ -62,6 +62,7 @@ export type ScrapedGameDataInput = {
   gameTags?: Array< string | null > | null,
   tournamentType?: TournamentType | null,
   buyIn?: number | null,
+  rake?: number | null,
   startingStack?: number | null,
   hasGuarantee?: boolean | null,
   guaranteeAmount?: number | null,

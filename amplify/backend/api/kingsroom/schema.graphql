@@ -172,6 +172,7 @@ input ScrapedGameDataInput {
     gameTags: [String]
     tournamentType: TournamentType
     buyIn: Float
+    rake: Float
     startingStack: Int
     hasGuarantee: Boolean
     guaranteeAmount: Float
