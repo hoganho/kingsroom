@@ -40,6 +40,7 @@ export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData($
       __typename
     }
     rawHtml
+    isNewStructure
     __typename
   }
 }
