@@ -62,6 +62,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
     registrationStatus
     gameVariant
     prizepool
+    revenueByEntries
     totalEntries
     totalRebuys
     totalAddons
@@ -612,6 +613,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
     registrationStatus
     gameVariant
     prizepool
+    revenueByEntries
     totalEntries
     totalRebuys
     totalAddons
@@ -700,6 +702,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
     registrationStatus
     gameVariant
     prizepool
+    revenueByEntries
     totalEntries
     totalRebuys
     totalAddons
@@ -788,6 +791,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
     registrationStatus
     gameVariant
     prizepool
+    revenueByEntries
     totalEntries
     totalRebuys
     totalAddons
@@ -1953,6 +1957,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
       registrationStatus
       gameVariant
       prizepool
+      revenueByEntries
       totalEntries
       totalRebuys
       totalAddons
@@ -2035,6 +2040,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
       registrationStatus
       gameVariant
       prizepool
+      revenueByEntries
       totalEntries
       totalRebuys
       totalAddons
@@ -2117,6 +2123,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
       registrationStatus
       gameVariant
       prizepool
+      revenueByEntries
       totalEntries
       totalRebuys
       totalAddons

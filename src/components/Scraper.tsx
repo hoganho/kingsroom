@@ -325,6 +325,16 @@ const GameCard: React.FC<{
                         <p className="text-sm font-mono truncate" title={game.id}>{getDisplayId(game.id)}</p>
                     </div>
                     <div className="flex items-center space-x-2 flex-shrink-0">
+                        {/* ✅ NEW: Launch URL button */}
+                        <a 
+                            href={game.id} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200"
+                            title="Open tournament page in new tab"
+                        >
+                            Launch URL 🚀
+                        </a>
                         <span className={`px-2 py-1 text-xs font-bold text-white rounded-full ${getStatusColor(game.status)}`}>{game.status}</span>
                         <button onClick={() => onRemove(game.id)} className="text-gray-400 hover:text-red-600 font-bold text-xl">×</button>
                     </div>

@@ -51,6 +51,8 @@ export type GameData = {
     // Additional data
     otherDetails: Record<string, string>;
     rawHtml?: string | null;
+    revenueByEntries?: number | null;
+
 };
 
 export type MissingField = {

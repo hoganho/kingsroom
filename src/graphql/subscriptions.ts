@@ -455,6 +455,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
     registrationStatus
     gameVariant
     prizepool
+    revenueByEntries
     totalEntries
     totalRebuys
     totalAddons
@@ -540,6 +541,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
     registrationStatus
     gameVariant
     prizepool
+    revenueByEntries
     totalEntries
     totalRebuys
     totalAddons
@@ -625,6 +627,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
     registrationStatus
     gameVariant
     prizepool
+    revenueByEntries
     totalEntries
     totalRebuys
     totalAddons
@@ -1762,6 +1765,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
       registrationStatus
       gameVariant
       prizepool
+      revenueByEntries
       totalEntries
       totalRebuys
       totalAddons
@@ -1843,6 +1847,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
       registrationStatus
       gameVariant
       prizepool
+      revenueByEntries
       totalEntries
       totalRebuys
       totalAddons
@@ -1924,6 +1929,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
       registrationStatus
       gameVariant
       prizepool
+      revenueByEntries
       totalEntries
       totalRebuys
       totalAddons

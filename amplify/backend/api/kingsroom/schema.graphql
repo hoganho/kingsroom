@@ -190,6 +190,7 @@ type Game @model @auth(rules: [{ allow: private }]) {
     registrationStatus: String
     gameVariant: String
     prizepool: Float
+    revenueByEntries: Float
     totalEntries: Int
     totalRebuys: Int
     totalAddons: Int

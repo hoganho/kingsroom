@@ -108,6 +108,14 @@ const handleSave = async (input) => {
     const gameTable = getTableName('Game');
     const structureTable = getTableName('TournamentStructure');
     
+    // ✅ NEW: Helper function to calculate revenue from entries
+    const calculateRevenueByEntries = (buyIn, totalEntries) => {
+        if (buyIn && totalEntries) {
+            return buyIn * totalEntries;
+        }
+        return null;
+    };
+    
     // Check if game already exists
     const queryCommand = new QueryCommand({
         TableName: gameTable,
@@ -143,6 +151,8 @@ const handleSave = async (input) => {
             hasGuarantee: data.hasGuarantee,
             guaranteeAmount: data.guaranteeAmount,
             tournamentType: data.tournamentType || 'FREEZEOUT',
+            // ✅ UPDATED: Calculate and add revenueByEntries
+            revenueByEntries: calculateRevenueByEntries(data.buyIn, data.totalEntries),
             // Keep existing fields
             venueId,
             gameDateTime: data.gameDateTime ? new Date(data.gameDateTime).toISOString() : existingGame.gameDateTime,
@@ -237,6 +247,8 @@ const handleSave = async (input) => {
             startingStack: data.startingStack,
             hasGuarantee: data.hasGuarantee,
             guaranteeAmount: data.guaranteeAmount,
+            // ✅ UPDATED: Calculate and add revenueByEntries
+            revenueByEntries: calculateRevenueByEntries(data.buyIn, data.totalEntries),
             // Other game data
             registrationStatus: data.registrationStatus,
             gameVariant: data.gameVariant,

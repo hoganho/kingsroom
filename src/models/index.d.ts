@@ -408,6 +408,7 @@ type EagerGame = {
   readonly registrationStatus?: string | null;
   readonly gameVariant?: string | null;
   readonly prizepool?: number | null;
+  readonly revenueByEntries?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
@@ -447,6 +448,7 @@ type LazyGame = {
   readonly registrationStatus?: string | null;
   readonly gameVariant?: string | null;
   readonly prizepool?: number | null;
+  readonly revenueByEntries?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
