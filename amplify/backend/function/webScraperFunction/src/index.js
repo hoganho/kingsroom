@@ -1,6 +1,38 @@
 /* Amplify Params - DO NOT EDIT
+	API_KINGSROOM_ASSETTABLE_ARN
+	API_KINGSROOM_ASSETTABLE_NAME
+	API_KINGSROOM_CASHSTRUCTURETABLE_ARN
+	API_KINGSROOM_CASHSTRUCTURETABLE_NAME
+	API_KINGSROOM_DATASYNCTABLE_ARN
+	API_KINGSROOM_DATASYNCTABLE_NAME
+	API_KINGSROOM_GAMETABLE_ARN
+	API_KINGSROOM_GAMETABLE_NAME
 	API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
 	API_KINGSROOM_GRAPHQLAPIIDOUTPUT
+	API_KINGSROOM_PLAYERRESULTTABLE_ARN
+	API_KINGSROOM_PLAYERRESULTTABLE_NAME
+	API_KINGSROOM_PLAYERSUMMARYTABLE_ARN
+	API_KINGSROOM_PLAYERSUMMARYTABLE_NAME
+	API_KINGSROOM_PLAYERTABLE_ARN
+	API_KINGSROOM_PLAYERTABLE_NAME
+	API_KINGSROOM_PLAYERTICKETTABLE_ARN
+	API_KINGSROOM_PLAYERTICKETTABLE_NAME
+	API_KINGSROOM_PLAYERTRANSACTIONTABLE_ARN
+	API_KINGSROOM_PLAYERTRANSACTIONTABLE_NAME
+	API_KINGSROOM_PLAYERVENUETABLE_ARN
+	API_KINGSROOM_PLAYERVENUETABLE_NAME
+	API_KINGSROOM_RAKESTRUCTURETABLE_ARN
+	API_KINGSROOM_RAKESTRUCTURETABLE_NAME
+	API_KINGSROOM_SCRAPESTRUCTURETABLE_ARN
+	API_KINGSROOM_SCRAPESTRUCTURETABLE_NAME
+	API_KINGSROOM_TICKETTEMPLATETABLE_ARN
+	API_KINGSROOM_TICKETTEMPLATETABLE_NAME
+	API_KINGSROOM_TOURNAMENTSTRUCTURETABLE_ARN
+	API_KINGSROOM_TOURNAMENTSTRUCTURETABLE_NAME
+	API_KINGSROOM_VENUEDETAILSTABLE_ARN
+	API_KINGSROOM_VENUEDETAILSTABLE_NAME
+	API_KINGSROOM_VENUETABLE_ARN
+	API_KINGSROOM_VENUETABLE_NAME
 	ENV
 	REGION
 Amplify Params - DO NOT EDIT */
@@ -26,27 +58,36 @@ const getTableName = (modelName) => {
 // ✅ UPDATED: The function now also returns a list of keys for the data it found.
 const scrapeDataFromHtml = (html) => {
     const $ = cheerio.load(html);
-    const foundKeys = new Set(); // Using a Set to avoid duplicate keys
+    const foundKeys = new Set();
 
-    // Helper to parse numeric and track if the key was found
     const parseNumeric = (str, key) => {
         if (!str) return undefined;
         const num = parseInt(str.replace(/[^0-9.-]+/g, ''), 10);
         if (!isNaN(num)) {
-            foundKeys.add(key);
+            if (key) foundKeys.add(key);
             return num;
         }
         return undefined;
     };
 
-    // Helper to get text and track if the key was found
     const getText = (selector, key) => {
-        const text = $(selector).text().trim();
+        const text = $(selector).first().text().trim();
         if (text) {
-            foundKeys.add(key);
+            if (key) foundKeys.add(key);
             return text;
         }
         return undefined;
+    };
+
+    // ✅ FIX: Re-added the missing parseGuarantee helper function
+    const parseGuarantee = (text) => {
+        if (!text) return { hasGuarantee: false, guaranteeAmount: undefined };
+        const guaranteeRegex = /(gtd|guaranteed|g'teed)/i;
+        if (guaranteeRegex.test(text)) {
+            foundKeys.add('hasGuarantee');
+            return { hasGuarantee: true, guaranteeAmount: parseNumeric(text, 'guaranteeAmount') };
+        }
+        return { hasGuarantee: false, guaranteeAmount: undefined };
     };
 
     const registrationDiv = $('label:contains("Registration")').parent();
@@ -54,13 +95,7 @@ const scrapeDataFromHtml = (html) => {
     if (registrationStatus) foundKeys.add('registrationStatus');
 
     const guaranteeText = $('.cw-game-shortdesc').text().trim();
-    if (guaranteeText) {
-        const guaranteeRegex = /(gtd|guaranteed|g'teed)/i;
-        if (guaranteeRegex.test(guaranteeText)) {
-            foundKeys.add('hasGuarantee');
-            parseNumeric(guaranteeText, 'guaranteeAmount');
-        }
-    }
+    const { hasGuarantee, guaranteeAmount } = parseGuarantee(guaranteeText);
 
     const levelsScriptRegex = /const cw_tt_levels = (\[.*?\]);/s;
     const match = html.match(levelsScriptRegex);
@@ -81,12 +116,11 @@ const scrapeDataFromHtml = (html) => {
         results.push({
             rank: parseInt($(el).find('td').eq(0).text().trim(), 10),
             name: $(el).find('td').eq(2).text().trim(),
-            winnings: parseNumeric($(el).find('td').eq(3).text().trim(), null) || 0, // Winnings is part of results, not a separate key
+            winnings: parseNumeric($(el).find('td').eq(3).text().trim(), null) || 0,
         });
     });
     if (results.length > 0) foundKeys.add('results');
-    
-    // Scrape all fields
+
     const data = {
         name: getText('.cw-game-title', 'name'),
         gameDateTime: getText('#cw_clock_start_date_time_local', 'gameDateTime'),
@@ -100,18 +134,15 @@ const scrapeDataFromHtml = (html) => {
         totalDuration: getText('div.cw-clock-label:contains("Total Time")', 'totalDuration'),
         buyIn: parseNumeric($('#cw_clock_buyin').text().trim(), 'buyIn'),
         startingStack: parseNumeric($('#cw_clock_startchips').text().trim(), 'startingStack'),
+        hasGuarantee,
+        guaranteeAmount,
         levels,
         results,
         rawHtml: html,
     };
     
-    // Add keys that are derived or always present
     if (data.status) foundKeys.add('status');
     if (data.rawHtml) foundKeys.add('rawHtml');
-    
-    const { hasGuarantee, guaranteeAmount } = parseGuarantee(guaranteeText);
-    data.hasGuarantee = hasGuarantee;
-    data.guaranteeAmount = guaranteeAmount;
 
     return { data, foundKeys: Array.from(foundKeys) };
 };

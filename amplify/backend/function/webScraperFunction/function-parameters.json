@@ -5,6 +5,89 @@
         "Query",
         "Mutation"
       ]
+    },
+    "storage": {
+      "DataSync:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "ScrapeStructure:@model(appsync)": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "Asset:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "Venue:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "VenueDetails:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "Game:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "TournamentStructure:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "RakeStructure:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "CashStructure:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "Player:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "PlayerSummary:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "PlayerVenue:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "PlayerTransaction:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "PlayerResult:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "TicketTemplate:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "PlayerTicket:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ]
     }
   },
   "lambdaLayers": []
