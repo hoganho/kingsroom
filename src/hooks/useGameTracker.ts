@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useGameContext } from '../contexts/GameContext';
 import { fetchGameDataFromBackend, saveGameDataToBackend } from '../services/gameService';
-import type { GameState, DataSource, GameData, JobStatus, MissingField } from '../types/game';
+import type { GameState, DataSource, GameData, MissingField } from '../types/game';
 
 const POLLING_INTERVAL = 5 * 60 * 1000;
 
@@ -59,8 +59,7 @@ export const useGameTracker = () => {
                 hasGuarantee: dataFromBackend.hasGuarantee ?? false,
                 guaranteeAmount: dataFromBackend.guaranteeAmount || undefined,
                 levels: dataFromBackend.levels?.map(l => ({...l})) ?? [],
-                results: dataFromBackend.results?.map(r => ({...r})) ?? [],
-                otherDetails: {},
+                results: dataFromBackend.results?.map(r => ({ ...r, name: r.name, rank: r.rank, winnings: r.winnings ?? 0 })) ?? [],                otherDetails: {},
                 rawHtml: dataFromBackend.rawHtml || undefined
             };
 

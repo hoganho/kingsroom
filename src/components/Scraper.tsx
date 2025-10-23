@@ -342,7 +342,7 @@ const GameCard: React.FC<{
                 
                 {(game.status === 'READY_TO_SAVE' || game.status === 'DONE' || game.status === 'SAVING' || game.status === 'LIVE') && (
                     <>
-                        <PlayerResults results={game.data?.results} />
+                        <PlayerResults results={game.data?.results ?? undefined} />
                         <ScraperReport data={game.data} missingFields={game.missingFields} />
                     </>
                 )}
