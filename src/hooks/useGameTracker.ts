@@ -129,6 +129,7 @@ export const useGameTracker = () => {
                 structureLabel: structureLabel,
                 foundKeys: foundKeys,
             };
+            const currentFetchCount = game?.fetchCount || 0;
 
             // Check for missing fields (same logic as before)
             const missingFields: MissingField[] = [];
@@ -201,6 +202,7 @@ export const useGameTracker = () => {
                 missingFields,
                 isNewStructure,
                 autoRefresh: shouldAutoRefresh,
+                fetchCount: currentFetchCount + 1,
             });
 
             // Log if auto-refresh is enabled

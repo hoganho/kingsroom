@@ -91,8 +91,8 @@ export interface GameState {
     errorMessage?: string;
     saveResult?: any;
     isNewStructure?: boolean;
-    // Track if we should auto-refresh (for RUNNING tournaments)
     autoRefresh?: boolean;
+    fetchCount?: number;
 }
 
 // Updated input types to match new schema

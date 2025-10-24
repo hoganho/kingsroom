@@ -21,7 +21,8 @@ const gameReducer = (state: GlobalState, action: GameAction): GlobalState => {
                 id: action.payload.id,
                 source: action.payload.source,
                 status: 'IDLE',
-                autoRefresh: false, // Default to false
+                autoRefresh: false,
+                fetchCount: 0,
             };
             return {
                 ...state,

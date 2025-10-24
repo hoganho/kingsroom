@@ -1,11 +1,14 @@
-import { useState } from 'react';
-import type { GameState } from '../../types/game.ts';
-import { getStatusColor } from './helpers.ts';
-import { HtmlModal } from './HtmlModal.tsx';
-import { SaveConfirmationModal } from './SaveConfirmationModal.tsx';
-import { PlayerResults } from './PlayerResults.tsx';
-import { ScraperReport } from './ScraperReport.tsx';
-import { StructureInfo } from './StructureInfo.tsx';
+import { useState, useEffect } from 'react';
+import type { GameState } from '../../types/game';
+import { getStatusColor } from './helpers';
+import { HtmlModal } from './HtmlModal';
+import { SaveConfirmationModal } from './SaveConfirmationModal';
+import { PlayerResults } from './PlayerResults';
+import { ScraperReport } from './ScraperReport';
+import { StructureInfo } from './StructureInfo';
+
+// ✅ NEW: Define the polling interval (5 minutes) to calculate next fetch
+const POLLING_INTERVAL = 5 * 60 * 1000;
 
 /**
  * GameCard component (UPDATED for RUNNING status and new job statuses)
@@ -19,10 +22,53 @@ export const GameCard: React.FC<{
     const [showHtmlModal, setShowHtmlModal] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     
+    // ✅ NEW: Add local state for the countdown timer
+    const [countdown, setCountdown] = useState<string | null>(null);
+
     const rawHtml = game.data?.rawHtml || '';
     const lastFetched = game.lastFetched ? new Date(game.lastFetched) : null;
     const lastFetchedDate = lastFetched?.toLocaleDateString() || 'Never';
     const lastFetchedTime = lastFetched?.toLocaleTimeString() || '';
+
+    // ✅ NEW: Add a useEffect to manage the countdown timer
+    useEffect(() => {
+        // Ensure we should be counting down
+        if (!game.autoRefresh || !game.lastFetched) {
+            setCountdown(null);
+            return;
+        }
+
+        const lastFetchedTime = new Date(game.lastFetched).getTime();
+        const nextFetchTime = lastFetchedTime + POLLING_INTERVAL;
+
+        // Set up an interval to update the countdown every second
+        const intervalId = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = nextFetchTime - now;
+
+            if (distance < 0) {
+                // Time's up. The poller in useGameTracker will take over.
+                setCountdown("00:00");
+                clearInterval(intervalId); // Stop this timer
+            } else {
+                // Format the time remaining
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                // Format to "MM:SS"
+                const formattedCountdown = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                setCountdown(formattedCountdown);
+            }
+        }, 1000); // Update every second
+
+        // Cleanup function to clear the interval
+        return () => {
+            clearInterval(intervalId);
+        };
+
+    }, [game.lastFetched, game.autoRefresh]); // Dependencies
 
     // Save button is now enabled for all statuses except ERROR
     const isSaveDisabled = !venueId || game.status === 'DONE' || game.status === 'SAVING' || game.status === 'ERROR';
@@ -102,7 +148,28 @@ export const GameCard: React.FC<{
                                 </span>
                             )}
                         </div>
-                        <p className="text-xs text-gray-500">Last Fetched: {lastFetchedDate} at {lastFetchedTime}</p>
+                        {/* ✅ UPDATED: Expanded fetch time details */}
+                        <div className="text-xs text-gray-500 mt-1">
+                            <p>
+                                Last Fetched: {lastFetchedDate} at {lastFetchedTime}
+                                {/* Show re-fetch count after the first re-fetch */}
+                                {game.fetchCount && game.fetchCount > 1 && (
+                                    <span className="ml-2 font-medium text-gray-600">
+                                        (Re-fetched {game.fetchCount - 1} time{game.fetchCount - 1 > 1 ? 's' : ''})
+                                    </span>
+                                )}
+                            </p>
+                            {/* ✅ UPDATED: Show the live countdown */}
+                            {game.autoRefresh && lastFetched && (
+                                <p className="text-green-700 font-medium">
+                                    {countdown ? (
+                                        <span>Next fetch in: {countdown}</span>
+                                    ) : (
+                                        <span>Calculating next fetch...</span>
+                                    )}
+                                </p>
+                            )}
+                        </div>
                     </div>
                 )}
                 
@@ -154,4 +221,3 @@ export const GameCard: React.FC<{
         </>
     );
 };
-
