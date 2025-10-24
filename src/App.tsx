@@ -1,7 +1,7 @@
 import { Authenticator } from '@aws-amplify/ui-react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ScraperDashboard } from './components/Scraper';
-import { GameProvider } from './contexts/GameContext';
+import { ScraperDashboard } from './pages/ScraperPage.tsx';
+import { GameProvider } from './contexts/GameContext.tsx';
 
 function App() {
   return (
@@ -25,8 +25,12 @@ function App() {
                 </header>
                 <main>
                   <Routes>
-                    <Route path="/dashboard" element={<ScraperDashboard />} />
-                    <Route path="/" element={<Navigate to="/dashboard" />} /> 
+                    {/* ✅ UPDATED: Route path is now /scraper */}
+                    <Route path="/scraper" element={<ScraperDashboard />} />
+                    {/* ✅ UPDATED: Redirects to /scraper */}
+                    <Route path="/" element={<Navigate to="/scraper" />} /> 
+                    {/* You can now add a new component for /dashboard */}
+                    {/* <Route path="/dashboard" element={<YourNewDashboardComponent />} /> */}
                   </Routes>
                 </main>
             </div>
@@ -38,3 +42,4 @@ function App() {
 }
 
 export default App;
+

@@ -15,12 +15,15 @@ export type PlayerResultData = {
     winnings: number;
 };
 
+// Tournament/Game status - what's happening with the actual game
+export type GameStatus = 'SCHEDULED' | 'RUNNING' | 'COMPLETED' | 'CANCELLED';
+
 export type GameData = {
     // Basic game information
     name: string;
     gameStartDateTime: string; // ✅ RENAMED
     gameEndDateTime?: string; // ✅ NEW
-    status: string;
+    status: GameStatus; // Changed to use specific type
     type?: 'TOURNAMENT' | 'CASH_GAME';
     variant?: string | null;
     
@@ -66,7 +69,17 @@ export type MissingField = {
 };
 
 export type DataSource = 'SCRAPE' | 'API';
-export type JobStatus = 'IDLE' | 'FETCHING' | 'READY_TO_SAVE' | 'LIVE' | 'DONE' | 'ERROR' | 'SAVING';
+
+// Job/Scraping status - what's happening with our data fetching process
+export type JobStatus = 
+    | 'IDLE'           // Not doing anything
+    | 'FETCHING'       // Initial request to backend
+    | 'SCRAPING'       // Axios is fetching the HTML
+    | 'PARSING'        // Cheerio is parsing the HTML
+    | 'READY_TO_SAVE'  // Data is ready, user can save
+    | 'SAVING'         // Currently saving to database
+    | 'DONE'           // Successfully saved
+    | 'ERROR';         // Something went wrong
 
 export interface GameState {
     id: string;
@@ -78,6 +91,8 @@ export interface GameState {
     errorMessage?: string;
     saveResult?: any;
     isNewStructure?: boolean;
+    // Track if we should auto-refresh (for RUNNING tournaments)
+    autoRefresh?: boolean;
 }
 
 // Updated input types to match new schema
@@ -92,7 +107,7 @@ export interface GameDataInput {
     name: string;
     gameStartDateTime?: string; // ✅ RENAMED
     gameEndDateTime?: string; // ✅ NEW
-    status?: string;
+    status?: GameStatus;
     registrationStatus?: string;
     gameVariant?: string;
     prizepool?: number;

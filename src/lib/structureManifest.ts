@@ -5,7 +5,7 @@ export interface StructureExpectations {
 }
 
 export const structureManifest: Record<string, StructureExpectations> = {
-  
+
   "STATUS: COMPLETED | REG: CLOSED": {
     description: "A standard completed tournament with results.",
     expectedFields: [
@@ -28,7 +28,7 @@ export const structureManifest: Record<string, StructureExpectations> = {
     ]
   },
   
-  "STATUS: LIVE | REG: CLOSED": {
+  "STATUS: RUNNING | REG: CLOSED": {
     description: "A game currently in progress.",
     expectedFields: [
       "name",
@@ -66,4 +66,5 @@ export const structureManifest: Record<string, StructureExpectations> = {
       "totalEntries"
     ]
   }
+
 };

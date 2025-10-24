@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { useGameContext } from '../contexts/GameContext';
 import { fetchGameDataFromBackend, saveGameDataToBackend } from '../services/gameService';
-import type { GameState, DataSource, GameData, MissingField } from '../types/game';
+import type { GameState, DataSource, GameData, MissingField, GameStatus } from '../types/game';
 
-const POLLING_INTERVAL = 5 * 60 * 1000;
+const POLLING_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 export const useGameTracker = () => {
     const { state, dispatch } = useGameContext();
@@ -13,8 +13,9 @@ export const useGameTracker = () => {
         const intervalId = setInterval(() => {
             console.log(`[useGameTracker] Polling check initiated at ${new Date().toLocaleTimeString()}`);
             Object.values(games).forEach(game => {
-                if (game.status === 'LIVE') {
-                    console.log(`[useGameTracker] Re-fetching updates for LIVE game: ${game.id}`);
+                // Auto-refresh RUNNING tournaments
+                if (game.autoRefresh && game.data?.status === 'RUNNING') {
+                    console.log(`[useGameTracker] Re-fetching updates for RUNNING tournament: ${game.id}`);
                     fetchAndLoadData(game.id, game.source);
                 }
             });
@@ -35,31 +36,56 @@ export const useGameTracker = () => {
         }
 
         const game = state.games[id];
-        if (game?.status !== 'LIVE') {
+        
+        // Set initial fetching status only if not auto-refreshing
+        if (!game?.autoRefresh) {
             updateGameState({ id, status: 'FETCHING', errorMessage: undefined, missingFields: [] });
         }
         
         try {
+            // Note: The backend will handle SCRAPING and PARSING status internally
+            // We just get the final result here
             const dataFromBackend = await fetchGameDataFromBackend(id);
             
             // Console log for debugging
             console.log('[useGameTracker] Raw data from backend:', dataFromBackend);
 
-            // ✅ UPDATED: Get all new fields
+            // Extract all fields including new structure metadata
             const isNewStructure = dataFromBackend.isNewStructure ?? undefined;
-            // Use 'as any' as a safeguard in case the type file is stale
-            // This is the correct way to access fields that *might* be missing
             const structureLabel = (dataFromBackend as any).structureLabel || undefined;
-            const foundKeys = (dataFromBackend as any).foundKeys || []; // ✅✅✅ GET foundKeys
+            const foundKeys = (dataFromBackend as any).foundKeys || [];
 
+            console.log('[useGameTracker] Extracted isNewStructure:', isNewStructure);
             console.log('[useGameTracker] Extracted structureLabel:', structureLabel); 
-            console.log('[useGameTracker] Extracted foundKeys:', foundKeys); // ✅ Debug log
+            console.log('[useGameTracker] Extracted foundKeys:', foundKeys);
+
+            // Map backend status values - convert LIVE to RUNNING
+            let mappedStatus: GameStatus = 'SCHEDULED';
+            const backendStatus = (dataFromBackend.status || 'SCHEDULED').toUpperCase();
+            
+            switch (backendStatus) {
+                case 'LIVE':
+                case 'RUNNING':
+                    mappedStatus = 'RUNNING';
+                    break;
+                case 'COMPLETED':
+                    mappedStatus = 'COMPLETED';
+                    break;
+                case 'CANCELLED':
+                    mappedStatus = 'CANCELLED';
+                    break;
+                default:
+                    mappedStatus = 'SCHEDULED';
+            }
 
             const data: GameData = {
+                // ✅ FIX: Removed default fallback value. Will be undefined if not found.
+                gameStartDateTime: dataFromBackend.gameStartDateTime || undefined,
+                gameEndDateTime: dataFromBackend.gameEndDateTime || undefined,
+                
+                // Other fields
                 name: dataFromBackend.name,
-                gameStartDateTime: dataFromBackend.gameStartDateTime || new Date().toISOString(), // ✅ RENAMED
-                gameEndDateTime: dataFromBackend.gameEndDateTime || undefined, // ✅ NEW
-                status: dataFromBackend.status || 'SCHEDULED',
+                status: mappedStatus, // Use mapped status
                 type: 'TOURNAMENT', // Default to tournament for scraped games
                 registrationStatus: dataFromBackend.registrationStatus || undefined,
                 gameVariant: dataFromBackend.gameVariant || undefined,
@@ -99,17 +125,19 @@ export const useGameTracker = () => {
                 otherDetails: {},
                 rawHtml: dataFromBackend.rawHtml || undefined,
 
-                // ✅ UPDATED: Add scraper metadata
+                // Scraper metadata
                 structureLabel: structureLabel,
-                foundKeys: foundKeys, // ✅✅✅ ADD foundKeys to the data object
+                foundKeys: foundKeys,
             };
 
-            // Updated missing fields check for refactored schema
+            // Check for missing fields (same logic as before)
             const missingFields: MissingField[] = [];
             
-            // ✅ UPDATED: List of ALL Game model fields to check
+            // ✅ NEW: Add gameStartDateTime to the check
             const gameFields: Record<string, string> = {
                 // Core Game Fields
+                'name': 'Game name not found on page',
+                'gameStartDateTime': 'Start date/time not found on page',
                 'variant': 'Game variant (e.g., NLHE) not found', 
                 'seriesName': 'Series name not found on page',
                 'prizepool': 'Prize pool not found on page',
@@ -140,7 +168,7 @@ export const useGameTracker = () => {
                 }
             });
 
-            // TournamentStructure is now simplified - just check if we have levels
+            // TournamentStructure check
             if (!data.levels || data.levels.length === 0) {
                 missingFields.push({ 
                     model: 'TournamentStructure', 
@@ -160,16 +188,25 @@ export const useGameTracker = () => {
                 { model: 'RakeStructure', field: 'all fields', reason: 'Not applicable for tournaments' },
             );
 
-            const isLive = data.status.toUpperCase() === 'LIVE';
+            // Determine if we should enable auto-refresh for RUNNING tournaments
+            const shouldAutoRefresh = data.status === 'RUNNING';
 
+            // Always set status to READY_TO_SAVE regardless of tournament status
+            // This allows users to save any tournament at any time
             updateGameState({
                 id,
                 data,
-                status: isLive ? 'LIVE' : 'READY_TO_SAVE', 
+                status: 'READY_TO_SAVE', // Always ready to save
                 lastFetched: new Date().toISOString(),
                 missingFields,
                 isNewStructure,
+                autoRefresh: shouldAutoRefresh,
             });
+
+            // Log if auto-refresh is enabled
+            if (shouldAutoRefresh) {
+                console.log(`[useGameTracker] Auto-refresh enabled for RUNNING tournament: ${id}`);
+            }
 
         } catch (error: any) {
             console.error('[useGameTracker] Error fetching data:', error);
@@ -198,10 +235,15 @@ export const useGameTracker = () => {
             return;
         }
         
+        // No restrictions on saving based on tournament status
+        // All tournaments can be saved regardless of their status
+        console.log(`[useGameTracker] Saving ${game.data.status} tournament: ${id}`);
+        
         updateGameState({ id, status: 'SAVING' });
         try {
             const result = await saveGameDataToBackend(id, venueId, game.data);
             updateGameState({ id, status: 'DONE', saveResult: result });
+            console.log(`[useGameTracker] Successfully saved ${game.data.status} tournament: ${id}`);
         } catch (error: any) {
             updateGameState({ id, status: 'ERROR', errorMessage: `Failed to save: ${error.message}` });
         }
@@ -211,5 +253,14 @@ export const useGameTracker = () => {
         dispatch({ type: 'REMOVE_GAME', payload: { id } });
     };
 
-    return { games, trackGame, saveGame, removeGame };
+    // New function to manually refresh a specific game
+    const refreshGame = (id: string) => {
+        const game = games[id];
+        if (game) {
+            console.log(`[useGameTracker] Manual refresh requested for: ${id}`);
+            fetchAndLoadData(id, game.source);
+        }
+    };
+
+    return { games, trackGame, saveGame, removeGame, refreshGame };
 };

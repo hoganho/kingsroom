@@ -38,10 +38,10 @@
 Amplify Params - DO NOT EDIT */
 
 const axios = require('axios');
-const cheerio = require('cheerio');
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const crypto = require('crypto');
+const { runScraper, getStatusAndReg } = require('./scraperStrategies'); // ✅ NEW: Import strategy runner
 
 const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
@@ -57,164 +57,20 @@ const getTableName = (modelName) => {
 // --- SCRAPING LOGIC ---
 
 /**
- * ✅ NEW: Helper to parse duration strings (e.g., "1h 30m") into milliseconds.
+ * 🛑 DEPRECATED: All scraping logic is now in scraperStrategies.js
+ * This function is kept for structural reference but is no longer used directly.
  */
-const parseDurationToMilliseconds = (durationStr) => {
-    if (!durationStr) return 0;
-    
-    let totalMilliseconds = 0;
-    const hourMatch = durationStr.match(/(\d+)\s*h/);
-    const minMatch = durationStr.match(/(\d+)\s*m/);
-    
-    if (hourMatch && hourMatch[1]) {
-        totalMilliseconds += parseInt(hourMatch[1], 10) * 60 * 60 * 1000;
-    }
-    if (minMatch && minMatch[1]) {
-        totalMilliseconds += parseInt(minMatch[1], 10) * 60 * 1000;
-    }
-    
-    return totalMilliseconds;
-};
-
-// ✅ UPDATED: The function now also returns a list of keys for the data it found.
-const scrapeDataFromHtml = (html) => {
-    const $ = cheerio.load(html);
-    const foundKeys = new Set();
-
-    const parseNumeric = (str, key) => {
-        if (!str) return undefined;
-        const num = parseInt(str.replace(/[^0-9.-]+/g, ''), 10);
-        if (!isNaN(num)) {
-            if (key) foundKeys.add(key);
-            return num;
-        }
-        return undefined;
-    };
-
-    const getText = (selector, key) => {
-        const text = $(selector).first().text().trim();
-        if (text) {
-            if (key) foundKeys.add(key);
-            return text;
-        }
-        return undefined;
-    };
-
-    // ✅ FIX: Re-added the missing parseGuarantee helper function
-    const parseGuarantee = (text) => {
-        if (!text) return { hasGuarantee: false, guaranteeAmount: undefined };
-        const guaranteeRegex = /(gtd|guaranteed|g'teed)/i;
-        if (guaranteeRegex.test(text)) {
-            foundKeys.add('hasGuarantee');
-            return { hasGuarantee: true, guaranteeAmount: parseNumeric(text, 'guaranteeAmount') };
-        }
-        // ✅ FIX: Moved the misplaced logic from here
-        return { hasGuarantee: false, guaranteeAmount: undefined };
-    };
-    
-    // ✅ FIX: Moved status and regStatus logic to the correct scope
-    const registrationDiv = $('label:contains("Registration")').parent();
-    const registrationStatus = registrationDiv.text().replace(/Registration/gi, '').trim() || undefined;
-    if (registrationStatus) foundKeys.add('registrationStatus');
-
-    const status = ($('label:contains("Status")').first().next('strong').text().trim().toUpperCase() || 'UNKNOWN_STATUS');
-    if (status !== 'UNKNOWN_STATUS') foundKeys.add('status');
-
-    const guaranteeText = $('.cw-game-shortdesc').text().trim();
-    const { hasGuarantee, guaranteeAmount } = parseGuarantee(guaranteeText);
-
-    const levelsScriptRegex = /const cw_tt_levels = (\[.*?\]);/s;
-    const match = html.match(levelsScriptRegex);
-    let levels = [];
-    if (match && match[1]) {
-        try {
-            levels = JSON.parse(match[1]).map(level => ({
-                levelNumber: level.ID || 0,
-                durationMinutes: level.duration || 0,
-                smallBlind: level.smallblind || 0,
-                bigBlind: level.bigblind || 0,
-                ante: level.ante || 0,
-            }));
-            if (levels.length > 0) foundKeys.add('levels');
-        } catch (e) {
-            console.warn('Could not parse blind levels JSON:', e.message);
-        }
-    }
-
-    const results = [];
-    $('h4.cw-text-center:contains("Result")').next('table').find('tbody tr').each((i, el) => {
-        results.push({
-            rank: parseInt($(el).find('td').eq(0).text().trim(), 10),
-            name: $(el).find('td').eq(2).text().trim(),
-            winnings: parseNumeric($(el).find('td').eq(3).text().trim(), null) || 0,
-        });
-    });
-    if (results.length > 0) foundKeys.add('results');
-
-    // ✅ UPDATED: Corrected totalDuration selector
-    const totalDurationText = $('div.cw-clock-label:contains("Total Time")').next().text().trim() || undefined;
-    if(totalDurationText) foundKeys.add('totalDuration');
-    
-    // Scrape seriesName (example selector, adjust if needed)
-    // This is a guess, you may need to find the correct selector
-    const seriesNameText = $('.cw-game-series-name-selector').text().trim() || undefined; // ADJUST THIS SELECTOR
-    if(seriesNameText) foundKeys.add('seriesName');
-
-    const data = {
-        name: getText('.cw-game-title', 'name'),
-        gameStartDateTime: getText('#cw_clock_start_date_time_local', 'gameStartDateTime'), // ✅ RENAMED
-        status: status, // ✅ FIX: Use the calculated status
-        registrationStatus,
-        gameVariant: getText('#cw_clock_shortlimitgame', 'gameVariant'),
-        prizepool: parseNumeric($('#cw_clock_prizepool').text().trim(), 'prizepool'),
-        totalEntries: parseNumeric($('#cw_clock_playersentries').text().trim(), 'totalEntries'),
-        totalRebuys: parseNumeric($('#cw_clock_rebuys').text().trim(), 'totalRebuys'),
-        totalAddons: parseNumeric($('div.cw-clock-label:contains("Add-Ons")').next().text().trim(), 'totalAddons'),
-        totalDuration: totalDurationText, // ✅ UPDATED
-        seriesName: seriesNameText, // ✅ NEW
-        buyIn: parseNumeric($('#cw_clock_buyin').text().trim(), 'buyIn'),
-        startingStack: parseNumeric($('#cw_clock_startchips').text().trim(), 'startingStack'),
-        hasGuarantee,
-        guaranteeAmount,
-        levels,
-        results,
-        // 🛑 REMOVED: structureLabel is no longer calculated here
-        rawHtml: html,
-    };
-    
-    // ✅ NEW: Calculate gameEndDateTime
-    let gameEndDateTime;
-    if (data.gameStartDateTime && data.totalDuration) {
-        try {
-            const startDate = new Date(data.gameStartDateTime);
-            const durationMs = parseDurationToMilliseconds(data.totalDuration);
-            // Check for valid start date and positive duration
-            if (!isNaN(startDate.getTime()) && durationMs > 0) {
-                const endDate = new Date(startDate.getTime() + durationMs);
-                gameEndDateTime = endDate.toISOString();
-                foundKeys.add('gameEndDateTime');
-            }
-        } catch (e) {
-            console.warn('Could not parse gameStartDateTime or totalDuration:', e.message);
-        }
-    }
-    
-    if (data.status) foundKeys.add('status');
-    if (data.rawHtml) foundKeys.add('rawHtml');
-
-    // Return data with gameEndDateTime included
-    return { data: { ...data, gameEndDateTime }, foundKeys: Array.from(foundKeys) };
-};
+// const scrapeDataFromHtml = (html) => { ... }
 
 
-// ✅ UPDATED: Logic to create a fingerprint and save/update the structure in DynamoDB
 /**
- * Now returns both isNew and the structureLabel.
+ * ✅ UPDATED: Logic to create a fingerprint and save/update the structure in DynamoDB
+ * Now takes status/regStatus as arguments.
  */
 const processStructureFingerprint = async (foundKeys, sourceUrl, status, registrationStatus) => {
     if (!foundKeys || foundKeys.length === 0) {
         console.log('No keys found, skipping fingerprint generation.');
-        return { isNew: false, structureLabel: null };
+        return { isNewStructure: false, structureLabel: null };
     }
 
     foundKeys.sort();
@@ -224,9 +80,7 @@ const processStructureFingerprint = async (foundKeys, sourceUrl, status, registr
     const now = new Date().toISOString();
 
     // ✅ NEW: Create the structureLabel
-    const statusLabel = status || 'UNKNOWN_STATUS';
-    const regLabel = registrationStatus || 'UNKNOWN_REG_STATUS';
-    const structureLabel = `STATUS: ${statusLabel} | REG: ${regLabel}`;
+    const structureLabel = `STATUS: ${status || 'UNKNOWN_STATUS'} | REG: ${registrationStatus || 'UNKNOWN_REG_STATUS'}`;
 
     try {
         const getResponse = await ddbDocClient.send(new QueryCommand({
@@ -254,11 +108,9 @@ const processStructureFingerprint = async (foundKeys, sourceUrl, status, registr
                     _version: 1,
                 }
             }));
-            // ✅ FIX: Return 'isNewStructure' to match the schema
             return { isNewStructure: true, structureLabel };
         } else {
             console.log(`Updated existing structure fingerprint with ID: ${structureId}`);
-            // ✅ UPDATED: Per request, no longer updating structureLabel for existing items
             await ddbDocClient.send(new UpdateCommand({
                 TableName: structureTable,
                 Key: { id: structureId },
@@ -273,34 +125,46 @@ const processStructureFingerprint = async (foundKeys, sourceUrl, status, registr
                 }
             }));
             
-            // ✅ FIX: Return 'isNewStructure' to match the schema
-            return { isNewStructure: false, structureLabel }; 
+            // Return the existing label from the database
+            const existingLabel = getResponse.Items[0].structureLabel || structureLabel;
+            return { isNewStructure: false, structureLabel: existingLabel }; 
         }
     } catch (error) {
         console.error('Error processing structure fingerprint:', error);
-        // ✅ FIX: Return 'isNewStructure' to match the schema
         return { isNewStructure: false, structureLabel: null };
     }
 };
 
 /**
- * ✅ UPDATED: The handler now passes status flags to the fingerprint processor
- * and adds all new fields to the response.
+ * ✅ UPDATED: The handler now runs the scraper twice:
+ * 1. A quick pass to get status and determine the structureLabel.
+ * 2. A full pass using the strategy for that specific structureLabel.
  */
 const handleFetch = async (url) => {
     console.log(`Fetching data from: ${url}`);
     const response = await axios.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-    // ✅ UPDATED: Pass structureLabel to the fingerprint processor
-    const { data, foundKeys } = scrapeDataFromHtml(response.data);
+    const html = response.data;
     
-    // ✅ FIX: This result will now be { isNewStructure: boolean, structureLabel: string }
+    // 1. Quick pass just to get status and regStatus
+    const { status, registrationStatus } = getStatusAndReg(html);
+    
+    // 2. Determine structure label (provisional)
+    const provisionalLabel = `STATUS: ${status || 'UNKNOWN_STATUS'} | REG: ${registrationStatus || 'UNKNOWN_REG_STATUS'}`;
+    console.log(`[Scraper] Provisional Label: ${provisionalLabel}`);
+    
+    // 3. Run the FULL scraper using the determined strategy
+    const { data, foundKeys } = runScraper(html, provisionalLabel);
+    
+    // 4. Process the fingerprint with the keys *actually found*
+    // This will return the *final* structureLabel (either new or existing)
     const fingerprintResult = await processStructureFingerprint(foundKeys, url, data.status, data.registrationStatus);
     
-    // This will correctly merge all fields, including 'isNewStructure'
-    return { ...data, ...fingerprintResult };
+    // 5. Return all data, including the final keys and fingerprint result
+    return { ...data, ...fingerprintResult, foundKeys };
 };
 
 // --- HANDLER FOR SAVING/UPDATING DATA ---
+// (No changes to handleSave function... it remains the same)
 const handleSave = async (input) => {
     const { sourceUrl, venueId, data } = input;
     const now = new Date().toISOString();
@@ -308,9 +172,7 @@ const handleSave = async (input) => {
     const gameTable = getTableName('Game');
     const structureTable = getTableName('TournamentStructure');
     
-    // ✅ NEW: Helper function to calculate revenue from entries
     const calculateRevenueByEntries = (buyIn, totalEntries) => {
-        // Ensure buyIn and totalEntries are valid numbers
         const numBuyIn = parseFloat(buyIn);
         const numTotalEntries = parseInt(totalEntries, 10);
         
@@ -331,46 +193,38 @@ const handleSave = async (input) => {
     const queryResult = await ddbDocClient.send(queryCommand);
     const existingGame = queryResult.Items?.[0];
 
-    // ✅ NEW: Prepare revenueByEntries
     const revenueByEntries = calculateRevenueByEntries(data.buyIn, data.totalEntries);
 
     if (existingGame) {
         console.log(`Found existing game with ID: ${existingGame.id}. Updating...`);
         
-        // Update existing game with new data
         const updatedGameItem = {
             ...existingGame,
-            // Update with new scraped data
             name: data.name,
             status: data.status || 'SCHEDULED',
             registrationStatus: data.registrationStatus,
-            gameVariant: data.gameVariant, // This maps to 'gameVariant'
-            variant: data.gameVariant, // ✅ NEW: Also map to 'variant'
-            seriesName: data.seriesName, // ✅ NEW
+            gameVariant: data.gameVariant,
+            variant: data.gameVariant,
+            seriesName: data.seriesName,
             prizepool: data.prizepool,
             totalEntries: data.totalEntries,
             totalRebuys: data.totalRebuys,
             totalAddons: data.totalAddons,
             totalDuration: data.totalDuration,
             gameTags: data.gameTags,
-            // Tournament-specific fields now on Game
             buyIn: data.buyIn,
             rake: data.rake || 0,
             startingStack: data.startingStack,
             hasGuarantee: data.hasGuarantee,
             guaranteeAmount: data.guaranteeAmount,
             tournamentType: data.tournamentType || 'FREEZEOUT',
-            // ✅ UPDATED: Calculate and add revenueByEntries
             revenueByEntries: revenueByEntries,
-            // Keep existing fields
             venueId,
-            // ✅ UPDATED: Use new field names
             gameStartDateTime: data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : existingGame.gameStartDateTime,
             gameEndDateTime: data.gameEndDateTime ? new Date(data.gameEndDateTime).toISOString() : existingGame.gameEndDateTime || null,
             updatedAt: now,
         };
 
-        // If there's a tournament structure, update its levels
         if (existingGame.tournamentStructureId && data.levels && data.levels.length > 0) {
             const structureUpdate = {
                 TableName: structureTable,
@@ -393,14 +247,11 @@ const handleSave = async (input) => {
                 }
             };
             
-            // Update both game and structure
-            // ✅ UPDATED: Use PutCommand for game update as it's a full replace
             await Promise.all([
                 ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem })),
-                ddbDocClient.send(new UpdateCommand(structureUpdate)) // Use UpdateCommand for structure
+                ddbDocClient.send(new UpdateCommand(structureUpdate))
             ]);
         } else {
-            // Just update the game
             await ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem }));
         }
 
@@ -412,7 +263,6 @@ const handleSave = async (input) => {
         const gameId = crypto.randomUUID();
         let structureId = null;
         
-        // Only create a tournament structure if we have levels
         if (data.levels && data.levels.length > 0) {
             structureId = crypto.randomUUID();
             
@@ -420,7 +270,6 @@ const handleSave = async (input) => {
                 id: structureId,
                 name: `${data.name} - Blind Structure`,
                 description: `Blind structure for ${data.name}`,
-                // Embed levels directly in the structure
                 levels: data.levels.map(level => ({
                     levelNumber: level.levelNumber,
                     durationMinutes: level.durationMinutes || 20,
@@ -436,47 +285,39 @@ const handleSave = async (input) => {
                 __typename: "TournamentStructure",
             };
             
-            // Save the tournament structure
             await ddbDocClient.send(new PutCommand({ 
                 TableName: structureTable, 
                 Item: structureItem 
             }));
         }
         
-        // Create the game with all tournament fields
         const gameItem = {
             id: gameId,
             name: data.name,
             type: 'TOURNAMENT',
             status: data.status || 'SCHEDULED',
-            // ✅ UPDATED: Use new field names
             gameStartDateTime: data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : now,
             gameEndDateTime: data.gameEndDateTime ? new Date(data.gameEndDateTime).toISOString() : null,
             sourceUrl,
             venueId,
-            // Tournament-specific fields (moved from TournamentStructure)
             tournamentType: data.tournamentType || 'FREEZEOUT',
             buyIn: data.buyIn,
             rake: data.rake || 0,
             startingStack: data.startingStack,
             hasGuarantee: data.hasGuarantee,
             guaranteeAmount: data.guaranteeAmount,
-            // ✅ UPDATED: Calculate and add revenueByEntries
             revenueByEntries: revenueByEntries,
-            // Other game data
-            seriesName: data.seriesName, // ✅ NEW
+            seriesName: data.seriesName,
             registrationStatus: data.registrationStatus,
-            gameVariant: data.gameVariant, // This maps to 'gameVariant'
-            variant: data.gameVariant, // ✅ NEW: Also map to 'variant'
+            gameVariant: data.gameVariant,
+            variant: data.gameVariant,
             prizepool: data.prizepool,
             totalEntries: data.totalEntries,
             totalRebuys: data.totalRebuys,
             totalAddons: data.totalAddons,
             totalDuration: data.totalDuration,
             gameTags: data.gameTags,
-            // Reference to tournament structure (if levels exist)
             tournamentStructureId: structureId,
-            // Metadata
             createdAt: now,
             updatedAt: now,
             _lastChangedAt: Date.now(),

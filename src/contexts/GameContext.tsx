@@ -10,7 +10,8 @@ type GlobalState = {
 type GameAction =
     | { type: 'ADD_GAME'; payload: { id: string; source: DataSource } }
     | { type: 'UPDATE_GAME_STATE'; payload: Partial<GameState> & { id: string } }
-    | { type: 'REMOVE_GAME'; payload: { id: string } };
+    | { type: 'REMOVE_GAME'; payload: { id: string } }
+    | { type: 'TOGGLE_AUTO_REFRESH'; payload: { id: string; enabled: boolean } };
 
 // The reducer function handles state transitions based on dispatched actions
 const gameReducer = (state: GlobalState, action: GameAction): GlobalState => {
@@ -20,6 +21,7 @@ const gameReducer = (state: GlobalState, action: GameAction): GlobalState => {
                 id: action.payload.id,
                 source: action.payload.source,
                 status: 'IDLE',
+                autoRefresh: false, // Default to false
             };
             return {
                 ...state,
@@ -28,6 +30,7 @@ const gameReducer = (state: GlobalState, action: GameAction): GlobalState => {
                     [newGame.id]: newGame,
                 },
             };
+            
         case 'UPDATE_GAME_STATE':
             const { id, ...updates } = action.payload;
             if (!state.games[id]) return state;
@@ -41,12 +44,27 @@ const gameReducer = (state: GlobalState, action: GameAction): GlobalState => {
                     },
                 },
             };
+            
         case 'REMOVE_GAME':
             const { [action.payload.id]: _, ...remainingGames } = state.games;
             return {
                 ...state,
                 games: remainingGames,
             };
+            
+        case 'TOGGLE_AUTO_REFRESH':
+            if (!state.games[action.payload.id]) return state;
+            return {
+                ...state,
+                games: {
+                    ...state.games,
+                    [action.payload.id]: {
+                        ...state.games[action.payload.id],
+                        autoRefresh: action.payload.enabled,
+                    },
+                },
+            };
+            
         default:
             return state;
     }
