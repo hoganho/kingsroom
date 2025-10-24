@@ -79,6 +79,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
     startingStack
     hasGuarantee
     guaranteeAmount
+    playersRemaining
     tournamentStructureId
     cashStructureId
     venue {
@@ -703,6 +704,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
     startingStack
     hasGuarantee
     guaranteeAmount
+    playersRemaining
     tournamentStructureId
     cashStructureId
     venue {
@@ -793,6 +795,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
     startingStack
     hasGuarantee
     guaranteeAmount
+    playersRemaining
     tournamentStructureId
     cashStructureId
     venue {
@@ -883,6 +886,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
     startingStack
     hasGuarantee
     guaranteeAmount
+    playersRemaining
     tournamentStructureId
     cashStructureId
     venue {
@@ -2050,6 +2054,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
       startingStack
       hasGuarantee
       guaranteeAmount
+      playersRemaining
       tournamentStructureId
       cashStructureId
       createdAt
@@ -2134,6 +2139,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
       startingStack
       hasGuarantee
       guaranteeAmount
+      playersRemaining
       tournamentStructureId
       cashStructureId
       createdAt
@@ -2218,6 +2224,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
       startingStack
       hasGuarantee
       guaranteeAmount
+      playersRemaining
       tournamentStructureId
       cashStructureId
       createdAt

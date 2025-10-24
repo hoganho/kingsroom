@@ -156,7 +156,8 @@ type ScrapedPlayerResult {
 
 # This is the input type for our save operation.
 input SaveTournamentInput {
-    id: ID # Provide an ID if you are updating an existing game
+    existingGameId: ID # ✅ RENAMED from 'id' to match frontend and backend logic
+    doNotScrape: Boolean # ✅ ADDED this missing field
     sourceUrl: AWSURL!
     venueId: ID!
     data: ScrapedGameDataInput!
@@ -226,7 +227,10 @@ type Game @model @auth(rules: [{ allow: private }]) {
     startingStack: Int
     hasGuarantee: Boolean
     guaranteeAmount: Float
-    
+
+    # Running game info
+    playersRemaining: Int
+
     # Blind structure reference (optional - for reusable structures)
     tournamentStructureId: ID @index(name: "byTournamentStructure")
     

@@ -82,7 +82,6 @@ export const saveGameDataToBackend = async (
         const input: APITypes.SaveTournamentInput = {
             sourceUrl,
             venueId,
-            // ✅ NEW: Pass existingGameId and doNotScrape flag
             existingGameId: existingGameId,
             doNotScrape: data.doNotScrape ?? false,
             data: {

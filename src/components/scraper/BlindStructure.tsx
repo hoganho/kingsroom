@@ -1,4 +1,4 @@
-import type { TournamentLevelData } from '../../../types/game';
+import type { TournamentLevelData } from '../../types/game';
 
 /**
  * BlindStructure component

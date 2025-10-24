@@ -32,7 +32,7 @@ export const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingF
         return missingFields?.find(mf => mf.model === model && mf.field === field);
     };
 
-    const renderFieldValue = (field: string, value: any) => {
+    const renderFieldValue = (value: any) => {
         if (value === null || value === undefined) return null;
         if (Array.isArray(value)) {
             if (value.length === 0) return null;
@@ -63,7 +63,7 @@ export const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingF
                                 <div key={field} className="flex items-center text-xs">
                                     <span className="font-medium text-gray-600 w-32">{field}:</span>
                                     {hasValue ? (
-                                        <span className="text-gray-800">{renderFieldValue(field, value)}</span>
+                                        <span className="text-gray-800">{renderFieldValue(value)}</span>
                                     ) : (
                                         <span className="text-red-500 italic">
                                             Missing {missingField ? `(${missingField.reason})` : ''}

@@ -1,4 +1,4 @@
-import type { GameData } from '../../../types/game';
+import type { GameData } from '../../types/game';
 
 /**
  * SaveConfirmationModal component

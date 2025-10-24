@@ -467,6 +467,7 @@ type EagerGame = {
   readonly startingStack?: number | null;
   readonly hasGuarantee?: boolean | null;
   readonly guaranteeAmount?: number | null;
+  readonly playersRemaining?: number | null;
   readonly tournamentStructureId?: string | null;
   readonly cashStructureId?: string | null;
   readonly venue?: Venue | null;
@@ -508,6 +509,7 @@ type LazyGame = {
   readonly startingStack?: number | null;
   readonly hasGuarantee?: boolean | null;
   readonly guaranteeAmount?: number | null;
+  readonly playersRemaining?: number | null;
   readonly tournamentStructureId?: string | null;
   readonly cashStructureId?: string | null;
   readonly venue: AsyncItem<Venue | undefined>;

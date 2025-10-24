@@ -1,4 +1,4 @@
-import type { PlayerResultData } from '../../../types/game';
+import type { PlayerResultData } from '../../types/game';
 
 /**
  * PlayerResults component

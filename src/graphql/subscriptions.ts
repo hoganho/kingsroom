@@ -537,6 +537,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
     startingStack
     hasGuarantee
     guaranteeAmount
+    playersRemaining
     tournamentStructureId
     cashStructureId
     venue {
@@ -624,6 +625,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
     startingStack
     hasGuarantee
     guaranteeAmount
+    playersRemaining
     tournamentStructureId
     cashStructureId
     venue {
@@ -711,6 +713,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
     startingStack
     hasGuarantee
     guaranteeAmount
+    playersRemaining
     tournamentStructureId
     cashStructureId
     venue {
@@ -1850,6 +1853,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
       startingStack
       hasGuarantee
       guaranteeAmount
+      playersRemaining
       tournamentStructureId
       cashStructureId
       createdAt
@@ -1933,6 +1937,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
       startingStack
       hasGuarantee
       guaranteeAmount
+      playersRemaining
       tournamentStructureId
       cashStructureId
       createdAt
@@ -2016,6 +2021,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
       startingStack
       hasGuarantee
       guaranteeAmount
+      playersRemaining
       tournamentStructureId
       cashStructureId
       createdAt

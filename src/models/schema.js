@@ -777,6 +777,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "playersRemaining": {
+                    "name": "playersRemaining",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "tournamentStructureId": {
                     "name": "tournamentStructureId",
                     "isArray": false,
@@ -3605,5 +3612,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "abb995265f1133f7aaf5b1d424d62ffe"
+    "version": "16cb25f19152805fc5da59ff5de38921"
 };

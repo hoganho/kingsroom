@@ -299,6 +299,7 @@ const handleSave = async (input) => {
             seriesName: data.seriesName,
             prizepool: data.prizepool,
             totalEntries: data.totalEntries,
+            playersRemaining: data.playersRemaining,
             totalRebuys: data.totalRebuys,
             totalAddons: data.totalAddons,
             totalDuration: data.totalDuration,
@@ -448,6 +449,7 @@ const handleSave = async (input) => {
             variant: data.gameVariant, // Ensure variant is also set
             prizepool: data.prizepool,
             totalEntries: data.totalEntries,
+            playersRemaining: data.playersRemaining,
             totalRebuys: data.totalRebuys,
             totalAddons: data.totalAddons,
             totalDuration: data.totalDuration,

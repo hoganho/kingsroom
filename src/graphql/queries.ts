@@ -521,6 +521,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
     startingStack
     hasGuarantee
     guaranteeAmount
+    playersRemaining
     tournamentStructureId
     cashStructureId
     venue {
@@ -610,6 +611,7 @@ export const listGames = /* GraphQL */ `query ListGames(
       startingStack
       hasGuarantee
       guaranteeAmount
+      playersRemaining
       tournamentStructureId
       cashStructureId
       createdAt
@@ -664,6 +666,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
       startingStack
       hasGuarantee
       guaranteeAmount
+      playersRemaining
       tournamentStructureId
       cashStructureId
       createdAt
@@ -1544,6 +1547,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
       startingStack
       hasGuarantee
       guaranteeAmount
+      playersRemaining
       tournamentStructureId
       cashStructureId
       createdAt
@@ -2658,6 +2662,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
       startingStack
       hasGuarantee
       guaranteeAmount
+      playersRemaining
       tournamentStructureId
       cashStructureId
       createdAt
@@ -2717,6 +2722,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
       startingStack
       hasGuarantee
       guaranteeAmount
+      playersRemaining
       tournamentStructureId
       cashStructureId
       createdAt
@@ -2776,6 +2782,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
       startingStack
       hasGuarantee
       guaranteeAmount
+      playersRemaining
       tournamentStructureId
       cashStructureId
       createdAt
@@ -2835,6 +2842,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
       startingStack
       hasGuarantee
       guaranteeAmount
+      playersRemaining
       tournamentStructureId
       cashStructureId
       createdAt

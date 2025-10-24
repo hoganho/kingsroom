@@ -1,4 +1,4 @@
-import type { JobStatus } from '../../../types/game';
+import type { JobStatus } from '../../types/game';
 
 /**
  * Helper to get status color

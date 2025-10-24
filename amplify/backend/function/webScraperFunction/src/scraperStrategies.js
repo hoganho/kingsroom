@@ -115,7 +115,50 @@ const defaultStrategy = {
     },
     
     getTotalEntries(ctx) {
-        ctx.parseNumeric('totalEntries', '#cw_clock_playersentries');
+        const selector = '#cw_clock_playersentries';
+        const text = ctx.$(selector).first().text().trim();
+        const currentStatus = ctx.data.status; // Get status from the context
+
+        // ✅ DEBUG LOG 1: See initial values
+        console.log(`[DEBUG-getTotalEntries] Raw text found: "${text}" | Status at runtime: "${currentStatus}"`);
+
+        if (!text) {
+            console.log('[DEBUG-getTotalEntries] No text found for selector. Exiting function.');
+            return;
+        }
+
+        // Check for "RUNNING" game logic
+        if (currentStatus === 'RUNNING' && text.includes('/')) {
+            // ✅ DEBUG LOG 2: Confirming which logic path is taken
+            console.log('[DEBUG-getTotalEntries] Condition MET. Entering RUNNING game parsing logic.');
+
+            const parts = text.split('/').map(part => parseInt(part.trim(), 10));
+            
+            if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+                const playersRemaining = parts[0];
+                const totalEntries = parts[1];
+                
+                // ✅ DEBUG LOG 3: Show the final parsed values
+                console.log(`[DEBUG-getTotalEntries] Successfully parsed -> playersRemaining: ${playersRemaining}, totalEntries: ${totalEntries}`);
+                
+                ctx.add('playersRemaining', playersRemaining);
+                ctx.add('totalEntries', totalEntries);
+            } else {
+                 console.error('[DEBUG-getTotalEntries] ERROR: Failed to parse parts into numbers.', parts);
+            }
+
+        } else {
+            // ✅ DEBUG LOG 4: Confirming the fallback path is taken
+            console.log('[DEBUG-getTotalEntries] Condition NOT MET. Using fallback parsing logic.');
+            const num = parseInt(text.replace(/[^0-9.-]+/g, ''), 10);
+
+            if (!isNaN(num)) {
+                ctx.add('totalEntries', num);
+                console.log(`[DEBUG-getTotalEntries] Fallback parsed -> totalEntries: ${num}`);
+            } else {
+                console.error(`[DEBUG-getTotalEntries] ERROR: Fallback failed to parse "${text}" into a number.`);
+            }
+        }
     },
 
     getTotalRebuys(ctx) {
