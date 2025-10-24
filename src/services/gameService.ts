@@ -21,6 +21,10 @@ export const fetchGameDataFromBackend = async (url: string): Promise<APITypes.Sc
         });
 
         if (response.errors) {
+            // Handle the custom error from the backend for "Do Not Scrape"
+            if (response.errors[0].message.includes('Scraping is disabled')) {
+                 console.warn(`[GameService] Scraping disabled for ${url}`);
+            }
             throw new Error(response.errors[0].message);
         }
         
@@ -61,12 +65,14 @@ const mapToAPIGameStatus = (status: GameStatus): APITypes.GameStatus => {
  * @param sourceUrl The original URL of the tournament.
  * @param venueId The ID of the venue to associate with this game.
  * @param data The structured GameData to save.
+ * @param existingGameId The ID of the game if it already exists in the DB (for updates).
  * @returns The saved or updated Game object from the database.
  */
 export const saveGameDataToBackend = async (
     sourceUrl: string, 
     venueId: string, 
-    data: GameData
+    data: GameData,
+    existingGameId: string | null | undefined
 ): Promise<APITypes.Game> => {
     const client = generateClient();
     console.log(`[GameService] Saving ${data.status} tournament data for ${sourceUrl} to database...`);
@@ -76,9 +82,12 @@ export const saveGameDataToBackend = async (
         const input: APITypes.SaveTournamentInput = {
             sourceUrl,
             venueId,
+            // ✅ NEW: Pass existingGameId and doNotScrape flag
+            existingGameId: existingGameId,
+            doNotScrape: data.doNotScrape ?? false,
             data: {
                 name: data.name,
-                gameStartDateTime: data.gameStartDateTime,
+                gameStartDateTime: data.gameStartDateTime ?? undefined, // Now optional
                 gameEndDateTime: data.gameEndDateTime ?? undefined,
                 // Map the status properly
                 status: mapToAPIGameStatus(data.status),
@@ -137,5 +146,9 @@ export const saveGameDataToBackend = async (
  * based on its status and other criteria
  */
 export const shouldAutoRefreshTournament = (data: GameData): boolean => {
+    // ✅ UPDATED: Do not refresh if doNotScrape is true
+    if (data.doNotScrape) {
+        return false;
+    }
     return data.status === 'RUNNING';
 };

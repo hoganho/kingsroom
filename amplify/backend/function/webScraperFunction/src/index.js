@@ -39,9 +39,14 @@ Amplify Params - DO NOT EDIT */
 
 const axios = require('axios');
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
 const crypto = require('crypto');
-const { runScraper, getStatusAndReg } = require('./scraperStrategies'); // ✅ NEW: Import strategy runner
+
+// ✅ NEW: Import the runScraper and getStatusAndReg functions
+const {
+    runScraper,
+    getStatusAndReg
+} = require('./scraperStrategies.js');
 
 const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
@@ -57,20 +62,44 @@ const getTableName = (modelName) => {
 // --- SCRAPING LOGIC ---
 
 /**
- * 🛑 DEPRECATED: All scraping logic is now in scraperStrategies.js
- * This function is kept for structural reference but is no longer used directly.
+ * ✅ REFACTORED: This function is now lightweight.
+ * It determines the structure, selects the correct strategy, and executes it.
  */
-// const scrapeDataFromHtml = (html) => { ... }
+const scrapeDataFromHtml = (html) => {
+    // 1. Get Status and Reg to determine structure
+    // NOTE: This is a quick pass just to get the label.
+    // The main runScraper will re-run these functions as part of the full scrape.
+    const { status, registrationStatus } = getStatusAndReg(html);
+    
+    // ✅ NEW: Create the structureLabel
+    const structureLabel = `STATUS: ${status || 'UNKNOWN'} | REG: ${registrationStatus || 'UNKNOWN'}`;
+    console.log(`[DEBUG-SCRAPER] Identified Structure: ${structureLabel}`);
+    
+    // 2. Run the full scraper strategy
+    // The runScraper function will handle strategy selection based on the label
+    // and execute all scraping functions.
+    const { data, foundKeys } = runScraper(html, structureLabel);
+    
+    // 3. Manually add the structureLabel to the final data object
+    // (runScraper doesn't add this itself, as it's metadata)
+    data.structureLabel = structureLabel;
+    
+    // Add to foundKeys for validation, ensuring no duplicates
+    if (!foundKeys.includes('structureLabel')) {
+        foundKeys.push('structureLabel');
+    }
+
+    return { data, foundKeys };
+};
 
 
 /**
- * ✅ UPDATED: Logic to create a fingerprint and save/update the structure in DynamoDB
- * Now takes status/regStatus as arguments.
+ * Processes the structure fingerprint
  */
-const processStructureFingerprint = async (foundKeys, sourceUrl, status, registrationStatus) => {
+const processStructureFingerprint = async (foundKeys, structureLabel, sourceUrl) => {
     if (!foundKeys || foundKeys.length === 0) {
         console.log('No keys found, skipping fingerprint generation.');
-        return { isNewStructure: false, structureLabel: null };
+        return { isNewStructure: false, structureLabel: structureLabel }; // Return the label even if no keys
     }
 
     foundKeys.sort();
@@ -79,12 +108,11 @@ const processStructureFingerprint = async (foundKeys, sourceUrl, status, registr
     const structureTable = getTableName('ScrapeStructure');
     const now = new Date().toISOString();
 
-    // ✅ NEW: Create the structureLabel
-    const structureLabel = `STATUS: ${status || 'UNKNOWN_STATUS'} | REG: ${registrationStatus || 'UNKNOWN_REG_STATUS'}`;
-
     try {
         const getResponse = await ddbDocClient.send(new QueryCommand({
             TableName: structureTable,
+            // Use the GSI 'byStructureLabel' if 'id' is not the primary key you want to query
+            // Assuming 'id' (the hash) is the primary key
             KeyConditionExpression: 'id = :id',
             ExpressionAttributeValues: { ':id': structureId }
         }));
@@ -98,12 +126,14 @@ const processStructureFingerprint = async (foundKeys, sourceUrl, status, registr
                 Item: {
                     id: structureId,
                     fields: foundKeys,
-                    structureLabel: structureLabel, // ✅ Save the label
+                    structureLabel: structureLabel, // Save the label
                     occurrenceCount: 1,
                     firstSeenAt: now,
                     lastSeenAt: now,
                     exampleUrl: sourceUrl,
                     __typename: "ScrapeStructure",
+                    createdAt: now, // Added createdAt
+                    updatedAt: now, // Added updatedAt
                     _lastChangedAt: Date.now(),
                     _version: 1,
                 }
@@ -111,13 +141,15 @@ const processStructureFingerprint = async (foundKeys, sourceUrl, status, registr
             return { isNewStructure: true, structureLabel };
         } else {
             console.log(`Updated existing structure fingerprint with ID: ${structureId}`);
+            // Use UpdateCommand on the primary key 'id'
             await ddbDocClient.send(new UpdateCommand({
                 TableName: structureTable,
-                Key: { id: structureId },
-                UpdateExpression: 'SET #lastSeen = :now, #occ = #occ + :inc',
+                Key: { id: structureId }, // Correctly target the item by its primary key
+                UpdateExpression: 'SET #lastSeenAt = :now, #occurrenceCount = #occurrenceCount + :inc, #updatedAt = :now',
                 ExpressionAttributeNames: {
-                    '#lastSeen': 'lastSeenAt',
-                    '#occ': 'occurrenceCount'
+                    '#lastSeenAt': 'lastSeenAt',
+                    '#occurrenceCount': 'occurrenceCount',
+                    '#updatedAt': 'updatedAt'
                 },
                 ExpressionAttributeValues: {
                     ':now': now,
@@ -125,53 +157,108 @@ const processStructureFingerprint = async (foundKeys, sourceUrl, status, registr
                 }
             }));
             
-            // Return the existing label from the database
-            const existingLabel = getResponse.Items[0].structureLabel || structureLabel;
-            return { isNewStructure: false, structureLabel: existingLabel }; 
+            return { isNewStructure: false, structureLabel }; 
         }
     } catch (error) {
         console.error('Error processing structure fingerprint:', error);
-        return { isNewStructure: false, structureLabel: null };
+        // Return the best-effort info we have
+        return { isNewStructure: false, structureLabel: structureLabel };
     }
 };
 
 /**
- * ✅ UPDATED: The handler now runs the scraper twice:
- * 1. A quick pass to get status and determine the structureLabel.
- * 2. A full pass using the strategy for that specific structureLabel.
+ * ✅ UPDATED: The handler now queries DynamoDB *first* to check for an existing game
+ * and the `doNotScrape` flag before attempting to fetch the URL.
  */
 const handleFetch = async (url) => {
-    console.log(`Fetching data from: ${url}`);
+    console.log(`[handleFetch] Processing URL: ${url}`);
+    
+    const gameTable = getTableName('Game');
+    let existingGameId = null;
+    let doNotScrape = false;
+    
+    // --- 1. Check for existing game and `doNotScrape` flag ---
+    try {
+        const queryCommand = new QueryCommand({
+            TableName: gameTable,
+            IndexName: 'bySourceUrl', // Assumes a GSI named 'bySourceUrl' on the 'sourceUrl' field
+            KeyConditionExpression: 'sourceUrl = :sourceUrl',
+            ExpressionAttributeValues: { ':sourceUrl': url },
+            // Request only the fields we need for this check
+            ProjectionExpression: 'id, doNotScrape' 
+        });
+
+        const queryResult = await ddbDocClient.send(queryCommand);
+        
+        if (queryResult.Items && queryResult.Items.length > 0) {
+            const game = queryResult.Items[0];
+            existingGameId = game.id;
+            doNotScrape = game.doNotScrape || false;
+            console.log(`[handleFetch] Found existing game (ID: ${existingGameId}). doNotScrape = ${doNotScrape}`);
+        } else {
+            console.log(`[handleFetch] No existing game found for this URL.`);
+        }
+
+    } catch (error) {
+        console.warn(`[handleFetch] Error querying for existing game: ${error.message}. Proceeding with scrape.`);
+        // Don't block scraping if the query fails, just log it.
+    }
+
+    // --- 2. Honor the `doNotScrape` flag ---
+    if (doNotScrape) {
+        console.error(`[handleFetch] Scraping is disabled for this URL (doNotScrape=true). Aborting.`);
+        // Throw an error to notify the frontend
+        // Also return the existingGameId so the frontend can manage state
+        return {
+            existingGameId,
+            doNotScrape,
+            // Send minimal data to prevent frontend errors
+            name: "Scraping Disabled",
+            status: "UNKNOWN",
+            gameStartDateTime: new Date().toISOString(),
+            foundKeys: [],
+            isNewStructure: false,
+            structureLabel: "UNKNOWN",
+            // Throwing an error is better
+            errorMessage: "Scraping is disabled for this URL. To re-enable, uncheck \"Do Not Scrape\" and save."
+        };
+        // throw new Error('Scraping is disabled for this URL. To re-enable, uncheck "Do Not Scrape" and save.');
+    }
+
+    // --- 3. Proceed with scraping ---
+    console.log(`[handleFetch] Fetching data from: ${url}`);
     const response = await axios.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-    const html = response.data;
     
-    // 1. Quick pass just to get status and regStatus
-    const { status, registrationStatus } = getStatusAndReg(html);
+    const { data, foundKeys } = scrapeDataFromHtml(response.data);
     
-    // 2. Determine structure label (provisional)
-    const provisionalLabel = `STATUS: ${status || 'UNKNOWN_STATUS'} | REG: ${registrationStatus || 'UNKNOWN_REG_STATUS'}`;
-    console.log(`[Scraper] Provisional Label: ${provisionalLabel}`);
+    // --- 4. Process fingerprint ---
+    const fingerprintResult = await processStructureFingerprint(foundKeys, data.structureLabel, url);
     
-    // 3. Run the FULL scraper using the determined strategy
-    const { data, foundKeys } = runScraper(html, provisionalLabel);
-    
-    // 4. Process the fingerprint with the keys *actually found*
-    // This will return the *final* structureLabel (either new or existing)
-    const fingerprintResult = await processStructureFingerprint(foundKeys, url, data.status, data.registrationStatus);
-    
-    // 5. Return all data, including the final keys and fingerprint result
-    return { ...data, ...fingerprintResult, foundKeys };
+    // --- 5. Return all data to frontend ---
+    // Includes scraped data, fingerprint results, foundKeys, and existingGameId
+    return { 
+        ...data, 
+        ...fingerprintResult, 
+        foundKeys,
+        existingGameId, // ✅ NEW: Send existingGameId to frontend
+        doNotScrape,    // ✅ NEW: Send current doNotScrape status to frontend
+    };
 };
 
-// --- HANDLER FOR SAVING/UPDATING DATA ---
-// (No changes to handleSave function... it remains the same)
+/**
+ * ✅ UPDATED: The handler for saving data.
+ * It now correctly handles updates vs. creations based on `existingGameId`.
+ * It also saves the `doNotScrape` flag.
+ */
 const handleSave = async (input) => {
-    const { sourceUrl, venueId, data } = input;
+    // Note: We need GetCommand for the update logic, it's imported in the handler
+    const { sourceUrl, venueId, data, existingGameId, doNotScrape } = input;
     const now = new Date().toISOString();
     
     const gameTable = getTableName('Game');
     const structureTable = getTableName('TournamentStructure');
     
+    // Helper function to calculate revenue from entries
     const calculateRevenueByEntries = (buyIn, totalEntries) => {
         const numBuyIn = parseFloat(buyIn);
         const numTotalEntries = parseInt(totalEntries, 10);
@@ -182,29 +269,33 @@ const handleSave = async (input) => {
         return null;
     };
     
-    // Check if game already exists
-    const queryCommand = new QueryCommand({
-        TableName: gameTable,
-        IndexName: 'bySourceUrl',
-        KeyConditionExpression: 'sourceUrl = :sourceUrl',
-        ExpressionAttributeValues: { ':sourceUrl': sourceUrl },
-    });
-
-    const queryResult = await ddbDocClient.send(queryCommand);
-    const existingGame = queryResult.Items?.[0];
-
+    // Prepare revenueByEntries
     const revenueByEntries = calculateRevenueByEntries(data.buyIn, data.totalEntries);
 
-    if (existingGame) {
-        console.log(`Found existing game with ID: ${existingGame.id}. Updating...`);
+    // --- 1. Check if this is an UPDATE or a NEW game ---
+    if (existingGameId) {
+        console.log(`[handleSave] Updating existing game with ID: ${existingGameId}.`);
         
+        // Fetch the full existing game item to merge
+        const getResult = await ddbDocClient.send(new GetCommand({
+            TableName: gameTable,
+            Key: { id: existingGameId }
+        }));
+
+        if (!getResult.Item) {
+            throw new Error(`Failed to update. Game with ID ${existingGameId} not found.`);
+        }
+        const existingGame = getResult.Item;
+        
+        // Update existing game with new data
         const updatedGameItem = {
             ...existingGame,
+            // Update with new scraped data
             name: data.name,
             status: data.status || 'SCHEDULED',
             registrationStatus: data.registrationStatus,
-            gameVariant: data.gameVariant,
-            variant: data.gameVariant,
+            gameVariant: data.gameVariant, 
+            variant: data.gameVariant, // Ensure variant is also updated
             seriesName: data.seriesName,
             prizepool: data.prizepool,
             totalEntries: data.totalEntries,
@@ -213,26 +304,34 @@ const handleSave = async (input) => {
             totalDuration: data.totalDuration,
             gameTags: data.gameTags,
             buyIn: data.buyIn,
-            rake: data.rake || 0,
+            rake: data.rake || existingGame.rake || 0, // Keep existing rake if new one isn't provided
             startingStack: data.startingStack,
             hasGuarantee: data.hasGuarantee,
             guaranteeAmount: data.guaranteeAmount,
             tournamentType: data.tournamentType || 'FREEZEOUT',
             revenueByEntries: revenueByEntries,
-            venueId,
+            // Keep existing fields
+            venueId, // Update venueId in case it was changed
             gameStartDateTime: data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : existingGame.gameStartDateTime,
-            gameEndDateTime: data.gameEndDateTime ? new Date(data.gameEndDateTime).toISOString() : existingGame.gameEndDateTime || null,
+            gameEndDateTime: data.gameEndDateTime ? new Date(data.gameEndDateTime).toISOString() : (existingGame.gameEndDateTime || null),
+            // ✅ NEW: Update the doNotScrape flag
+            doNotScrape: doNotScrape,
             updatedAt: now,
+            _lastChangedAt: Date.now(), // Update DynamoDB metadata
+            _version: (existingGame._version || 1) + 1, // Increment version
         };
 
+        // If there's a tournament structure, update its levels
         if (existingGame.tournamentStructureId && data.levels && data.levels.length > 0) {
             const structureUpdate = {
                 TableName: structureTable,
                 Key: { id: existingGame.tournamentStructureId },
-                UpdateExpression: 'SET #levels = :levels, #updatedAt = :updatedAt',
+                UpdateExpression: 'SET #levels = :levels, #updatedAt = :updatedAt, #_lastChangedAt = :_lastChangedAt, #_version = #_version + :inc',
                 ExpressionAttributeNames: {
                     '#levels': 'levels',
-                    '#updatedAt': 'updatedAt'
+                    '#updatedAt': 'updatedAt',
+                    '#_lastChangedAt': '_lastChangedAt',
+                    '#_version': '_version'
                 },
                 ExpressionAttributeValues: {
                     ':levels': data.levels.map(level => ({
@@ -243,7 +342,9 @@ const handleSave = async (input) => {
                         ante: level.ante,
                         breakMinutes: level.breakMinutes || 0
                     })),
-                    ':updatedAt': now
+                    ':updatedAt': now,
+                    ':_lastChangedAt': Date.now(),
+                    ':inc': 1
                 }
             };
             
@@ -251,18 +352,51 @@ const handleSave = async (input) => {
                 ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem })),
                 ddbDocClient.send(new UpdateCommand(structureUpdate))
             ]);
+        } else if (!existingGame.tournamentStructureId && data.levels && data.levels.length > 0) {
+            // Case: Game exists but structure was missing, now we have levels
+            console.log(`[handleSave] Adding new tournament structure to existing game: ${existingGameId}`);
+            const structureId = crypto.randomUUID();
+            updatedGameItem.tournamentStructureId = structureId; // Link new structure to game
+            
+            const structureItem = {
+                id: structureId,
+                name: `${data.name} - Blind Structure`,
+                description: `Blind structure for ${data.name}`,
+                levels: data.levels.map(level => ({
+                    levelNumber: level.levelNumber,
+                    durationMinutes: level.durationMinutes || 20,
+                    smallBlind: level.smallBlind || 0,
+                    bigBlind: level.bigBlind || 0,
+                    ante: level.ante || 0,
+                    breakMinutes: level.breakMinutes || 0
+                })),
+                createdAt: now,
+                updatedAt: now,
+                _lastChangedAt: Date.now(),
+                _version: 1,
+                __typename: "TournamentStructure",
+            };
+
+            await Promise.all([
+                ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem })),
+                ddbDocClient.send(new PutCommand({ TableName: structureTable, Item: structureItem }))
+            ]);
+
         } else {
+            // Just update the game
             await ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem }));
         }
 
         return updatedGameItem;
 
     } else {
-        console.log('No existing game found. Creating new records...');
+        // --- 2. This is a NEW game ---
+        console.log('[handleSave] No existing game found. Creating new records...');
         
         const gameId = crypto.randomUUID();
         let structureId = null;
         
+        // Only create a tournament structure if we have levels
         if (data.levels && data.levels.length > 0) {
             structureId = crypto.randomUUID();
             
@@ -291,6 +425,7 @@ const handleSave = async (input) => {
             }));
         }
         
+        // Create the game with all tournament fields
         const gameItem = {
             id: gameId,
             name: data.name,
@@ -310,7 +445,7 @@ const handleSave = async (input) => {
             seriesName: data.seriesName,
             registrationStatus: data.registrationStatus,
             gameVariant: data.gameVariant,
-            variant: data.gameVariant,
+            variant: data.gameVariant, // Ensure variant is also set
             prizepool: data.prizepool,
             totalEntries: data.totalEntries,
             totalRebuys: data.totalRebuys,
@@ -318,6 +453,9 @@ const handleSave = async (input) => {
             totalDuration: data.totalDuration,
             gameTags: data.gameTags,
             tournamentStructureId: structureId,
+            // ✅ NEW: Save the doNotScrape flag
+            doNotScrape: doNotScrape,
+            // Metadata
             createdAt: now,
             updatedAt: now,
             _lastChangedAt: Date.now(),
@@ -345,13 +483,18 @@ exports.handler = async (event) => {
             return await handleSave(arguments.input);
         } else if (arguments.url) {
             // fetchTournamentData mutation
-            return await handleFetch(arguments.url);
+            const result = await handleFetch(arguments.url);
+            // If handleFetch returned an error message (e.g., for doNotScrape), throw it
+            if (result.errorMessage) {
+                throw new Error(result.errorMessage);
+            }
+            return result;
         } else {
             throw new Error(`Could not determine operation. No 'input' or 'url' argument found.`);
         }
     } catch (error) {
         console.error('Error during handler execution:', error);
-        const fieldName = event.info?.fieldName || 'unknown'; 
-        throw new Error(`Operation failed for field ${fieldName}. Reason: ${error.message}`);
+        // Forward the specific error message
+        throw new Error(error.message);
     }
 };

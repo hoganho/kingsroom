@@ -1,19 +1,25 @@
+import React, { useMemo } from 'react'; // Import useMemo
 import type { GameData } from '../../types/game';
-import { validateStructure } from '../../lib/validation';
+// ✅ FIX: Added .ts extension to the import path
+import { validateStructure } from '../../lib/validation.ts';
 
-/**
- * ValidationSummary Component
- * This new component houses the validation logic, providing a clear
- * summary at the top of the main report without replacing existing details.
- */
 export const ValidationSummary: React.FC<{ data: GameData }> = ({ data }) => {
-    // Cannot generate a summary without the necessary info
-    if (!data.structureLabel || !data.foundKeys) return null;
+    
+    // ✅ FIX: Use useMemo to prevent re-calculating and re-logging on every render.
+    // This logic will now ONLY run if data.structureLabel or data.foundKeys changes.
+    const validationResult = useMemo(() => {
+        // Cannot generate a summary without the necessary info
+        if (!data.structureLabel || !data.foundKeys) return null;
 
-    // ✅ ADD THIS LOG for easier debugging
-    console.log(`[ValidationSummary] Validating structure "${data.structureLabel}" with keys:`, data.foundKeys);
+        // Your log is now inside useMemo, so it will only fire when data changes.
+        console.log(`[ValidationSummary] Validating structure "${data.structureLabel}" with keys:`, data.foundKeys);
+        
+        return validateStructure(data.structureLabel, data.foundKeys);
 
-    const validationResult = validateStructure(data.structureLabel, data.foundKeys);
+    }, [data.structureLabel, data.foundKeys]); // Dependencies
+
+    // If validation didn't run, render nothing.
+    if (!validationResult) return null;
 
     const renderMissingOptional = () => {
         if (validationResult.missingOptionalFields.length === 0) return null;
@@ -61,4 +67,3 @@ export const ValidationSummary: React.FC<{ data: GameData }> = ({ data }) => {
             return null;
     }
 };
-

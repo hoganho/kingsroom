@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import { useGameContext } from '../contexts/GameContext';
-import { fetchGameDataFromBackend, saveGameDataToBackend } from '../services/gameService';
+import { fetchGameDataFromBackend, saveGameDataToBackend, shouldAutoRefreshTournament } from '../services/gameService';
 import type { GameState, DataSource, GameData, MissingField, GameStatus } from '../types/game';
 
-const POLLING_INTERVAL = 5 * 60 * 1000; // 5 minutes
+// 5 minute polling interval
+export const POLLING_INTERVAL = 5 * 60 * 1000; 
 
 export const useGameTracker = () => {
     const { state, dispatch } = useGameContext();
@@ -13,16 +14,18 @@ export const useGameTracker = () => {
         const intervalId = setInterval(() => {
             console.log(`[useGameTracker] Polling check initiated at ${new Date().toLocaleTimeString()}`);
             Object.values(games).forEach(game => {
-                // Auto-refresh RUNNING tournaments
-                if (game.autoRefresh && game.data?.status === 'RUNNING') {
+                // Auto-refresh RUNNING tournaments that are not flagged as "doNotScrape"
+                if (game.autoRefresh && game.data?.status === 'RUNNING' && !game.data.doNotScrape) {
                     console.log(`[useGameTracker] Re-fetching updates for RUNNING tournament: ${game.id}`);
                     fetchAndLoadData(game.id, game.source);
+                } else if (game.autoRefresh && game.data?.doNotScrape) {
+                    console.log(`[useGameTracker] Auto-refresh skipped for ${game.id} (Do Not Scrape)`);
                 }
             });
         }, POLLING_INTERVAL);
 
         return () => clearInterval(intervalId);
-    }, [games]);
+    }, [games]); // Dependency on games ensures the loop always has the latest state
 
     const updateGameState = (payload: Partial<GameState> & { id: string }) => {
         dispatch({ type: 'UPDATE_GAME_STATE', payload });
@@ -54,10 +57,16 @@ export const useGameTracker = () => {
             const isNewStructure = dataFromBackend.isNewStructure ?? undefined;
             const structureLabel = (dataFromBackend as any).structureLabel || undefined;
             const foundKeys = (dataFromBackend as any).foundKeys || [];
+            
+            // ✅ NEW: Extract existingGameId and doNotScrape flag
+            const existingGameId = (dataFromBackend as any).existingGameId || null;
+            const doNotScrape = (dataFromBackend as any).doNotScrape || false;
 
             console.log('[useGameTracker] Extracted isNewStructure:', isNewStructure);
             console.log('[useGameTracker] Extracted structureLabel:', structureLabel); 
             console.log('[useGameTracker] Extracted foundKeys:', foundKeys);
+            console.log('[useGameTracker] Extracted existingGameId:', existingGameId);
+            console.log('[useGameTracker] Extracted doNotScrape:', doNotScrape);
 
             // Map backend status values - convert LIVE to RUNNING
             let mappedStatus: GameStatus = 'SCHEDULED';
@@ -79,12 +88,9 @@ export const useGameTracker = () => {
             }
 
             const data: GameData = {
-                // ✅ FIX: Removed default fallback value. Will be undefined if not found.
-                gameStartDateTime: dataFromBackend.gameStartDateTime || undefined,
-                gameEndDateTime: dataFromBackend.gameEndDateTime || undefined,
-                
-                // Other fields
                 name: dataFromBackend.name,
+                gameStartDateTime: dataFromBackend.gameStartDateTime || undefined, // ✅ REMOVED default value
+                gameEndDateTime: dataFromBackend.gameEndDateTime || undefined,
                 status: mappedStatus, // Use mapped status
                 type: 'TOURNAMENT', // Default to tournament for scraped games
                 registrationStatus: dataFromBackend.registrationStatus || undefined,
@@ -128,17 +134,18 @@ export const useGameTracker = () => {
                 // Scraper metadata
                 structureLabel: structureLabel,
                 foundKeys: foundKeys,
+                
+                // ✅ NEW: Set the doNotScrape flag in the data
+                doNotScrape: doNotScrape,
             };
-            const currentFetchCount = game?.fetchCount || 0;
 
             // Check for missing fields (same logic as before)
             const missingFields: MissingField[] = [];
             
-            // ✅ NEW: Add gameStartDateTime to the check
             const gameFields: Record<string, string> = {
                 // Core Game Fields
-                'name': 'Game name not found on page',
-                'gameStartDateTime': 'Start date/time not found on page',
+                // ✅ NEW: Add gameStartDateTime as a potential missing field
+                'gameStartDateTime': 'Game start date/time not found',
                 'variant': 'Game variant (e.g., NLHE) not found', 
                 'seriesName': 'Series name not found on page',
                 'prizepool': 'Prize pool not found on page',
@@ -189,8 +196,11 @@ export const useGameTracker = () => {
                 { model: 'RakeStructure', field: 'all fields', reason: 'Not applicable for tournaments' },
             );
 
-            // Determine if we should enable auto-refresh for RUNNING tournaments
-            const shouldAutoRefresh = data.status === 'RUNNING';
+            // Determine if we should enable auto-refresh
+            const shouldAutoRefresh = shouldAutoRefreshTournament(data);
+            
+            // ✅ NEW: Increment fetch count
+            const newFetchCount = (game?.fetchCount || 0) + 1;
 
             // Always set status to READY_TO_SAVE regardless of tournament status
             // This allows users to save any tournament at any time
@@ -202,7 +212,8 @@ export const useGameTracker = () => {
                 missingFields,
                 isNewStructure,
                 autoRefresh: shouldAutoRefresh,
-                fetchCount: currentFetchCount + 1,
+                fetchCount: newFetchCount, // ✅ Set new fetch count
+                existingGameId: existingGameId, // ✅ Set existing game ID
             });
 
             // Log if auto-refresh is enabled
@@ -212,21 +223,42 @@ export const useGameTracker = () => {
 
         } catch (error: any) {
             console.error('[useGameTracker] Error fetching data:', error);
+            
+            // ✅ NEW: Handle the "Do Not Scrape" error specifically
+            const isDoNotScrapeError = error.message.includes('Scraping is disabled');
+            
             updateGameState({
                 id,
                 status: 'ERROR',
                 errorMessage: error.message || 'Failed to fetch data from backend.',
+                // If this error was thrown, update the game state to reflect it
+                ...(isDoNotScrapeError && {
+                    data: {
+                        ...(game?.data as GameData),
+                        doNotScrape: true,
+                    },
+                    autoRefresh: false, // Turn off auto-refresh
+                })
             });
         }
     };
     
     const trackGame = (id: string, source: DataSource) => {
         if (games[id] && games[id].status !== 'ERROR') {
-            console.log(`[useGameTracker] Game ${id} is already being tracked.`);
-            return; 
+            // If it's an error, allow re-tracking.
+            // But if it's an error *because* of doNotScrape, fetchAndLoadData will handle it.
+            if (games[id].errorMessage?.includes('Scraping is disabled')) {
+                 // Allow re-fetch, it will just fail again and show the message
+                 console.log(`[useGameTracker] Re-tracking ${id}, which is flagged as 'Do Not Scrape'.`);
+            } else {
+                console.log(`[useGameTracker] Game ${id} is already being tracked.`);
+                return; 
+            }
         }
         
         dispatch({ type: 'ADD_GAME', payload: { id, source } });
+        // Use setTimeout to allow the ADD_GAME dispatch to update state
+        // before fetchAndLoadData is called
         setTimeout(() => fetchAndLoadData(id, source), 0);
     };
 
@@ -237,14 +269,21 @@ export const useGameTracker = () => {
             return;
         }
         
-        // No restrictions on saving based on tournament status
         // All tournaments can be saved regardless of their status
         console.log(`[useGameTracker] Saving ${game.data.status} tournament: ${id}`);
         
         updateGameState({ id, status: 'SAVING' });
         try {
-            const result = await saveGameDataToBackend(id, venueId, game.data);
-            updateGameState({ id, status: 'DONE', saveResult: result });
+            // ✅ NEW: Pass the existingGameId to the save function
+            const result = await saveGameDataToBackend(id, venueId, game.data, game.existingGameId);
+            
+            updateGameState({ 
+                id, 
+                status: 'DONE', 
+                saveResult: result,
+                // ✅ NEW: After a successful save, update the existingGameId
+                existingGameId: result.id,
+            });
             console.log(`[useGameTracker] Successfully saved ${game.data.status} tournament: ${id}`);
         } catch (error: any) {
             updateGameState({ id, status: 'ERROR', errorMessage: `Failed to save: ${error.message}` });

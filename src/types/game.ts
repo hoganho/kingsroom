@@ -21,7 +21,7 @@ export type GameStatus = 'SCHEDULED' | 'RUNNING' | 'COMPLETED' | 'CANCELLED';
 export type GameData = {
     // Basic game information
     name: string;
-    gameStartDateTime: string; // ✅ RENAMED
+    gameStartDateTime?: string; // ✅ UPDATED: Now optional
     gameEndDateTime?: string; // ✅ NEW
     status: GameStatus; // Changed to use specific type
     type?: 'TOURNAMENT' | 'CASH_GAME';
@@ -57,9 +57,12 @@ export type GameData = {
     otherDetails: Record<string, string>;
     rawHtml?: string | null;
 
-    // ✅ NEW: Scraper metadata
+    // Scraper metadata
     structureLabel?: string;
     foundKeys?: string[];
+    
+    // ✅ NEW: Flag to control scraping
+    doNotScrape?: boolean;
 };
 
 export type MissingField = {
@@ -91,8 +94,12 @@ export interface GameState {
     errorMessage?: string;
     saveResult?: any;
     isNewStructure?: boolean;
+    // Track if we should auto-refresh (for RUNNING tournaments)
     autoRefresh?: boolean;
-    fetchCount?: number;
+    // ✅ NEW: Track number of fetches
+    fetchCount: number;
+    // ✅ NEW: Track if game exists in DB
+    existingGameId?: string | null;
 }
 
 // Updated input types to match new schema
@@ -101,12 +108,16 @@ export interface SaveTournamentInput {
     sourceUrl: string;
     venueId: string;
     data: GameDataInput;
+    // ✅ NEW: Add existingGameId for update logic
+    existingGameId?: string | null;
+    // ✅ NEW: Add doNotScrape flag
+    doNotScrape?: boolean;
 }
 
 export interface GameDataInput {
     name: string;
-    gameStartDateTime?: string; // ✅ RENAMED
-    gameEndDateTime?: string; // ✅ NEW
+    gameStartDateTime?: string; 
+    gameEndDateTime?: string; 
     status?: GameStatus;
     registrationStatus?: string;
     gameVariant?: string;
@@ -127,6 +138,9 @@ export interface GameDataInput {
     
     // Blind levels
     levels?: TournamentLevelInput[];
+    
+    // ✅ NEW: Flag to control scraping
+    doNotScrape?: boolean;
 }
 
 export interface TournamentLevelInput {
@@ -137,3 +151,4 @@ export interface TournamentLevelInput {
     ante?: number;
     breakMinutes?: number;
 }
+

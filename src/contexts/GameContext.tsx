@@ -21,8 +21,10 @@ const gameReducer = (state: GlobalState, action: GameAction): GlobalState => {
                 id: action.payload.id,
                 source: action.payload.source,
                 status: 'IDLE',
-                autoRefresh: false,
+                autoRefresh: false, // Default to false
+                // ✅ NEW: Initialize fetchCount and existingGameId
                 fetchCount: 0,
+                existingGameId: null, 
             };
             return {
                 ...state,
@@ -97,3 +99,4 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 // Custom hook to easily access the context
 export const useGameContext = () => useContext(GameContext);
+
