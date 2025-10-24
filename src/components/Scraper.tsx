@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useGameTracker } from '../hooks/useGameTracker';
 import type { GameState, MissingField, PlayerResultData, GameData, JobStatus, TournamentLevelData } from '../types/game';
+import { validateStructure } from '../lib/validation'; // ✅ NEW: Import validation utility
 
-// This modal is for viewing the raw HTML source
+// This modal is for viewing the raw HTML source (NO CHANGES)
 const HtmlModal: React.FC<{ 
     isOpen: boolean; 
     onClose: () => void; 
@@ -76,46 +77,86 @@ const HtmlModal: React.FC<{
 };
 
 /**
- * ScraperReport component now shows ALL Game model fields
- * and the structureLabel.
+ * ✅ NEW: ValidationSummary Component
+ * This new component houses the validation logic, providing a clear
+ * summary at the top of the main report without replacing existing details.
+ */
+const ValidationSummary: React.FC<{ data: GameData }> = ({ data }) => {
+    // Cannot generate a summary without the necessary info
+    if (!data.structureLabel || !data.foundKeys) return null;
+
+    const validationResult = validateStructure(data.structureLabel, data.foundKeys);
+
+    const renderMissingOptional = () => {
+        if (validationResult.missingOptionalFields.length === 0) return null;
+        return (
+            <div className="mt-2 text-xs">
+                <p className="text-gray-600">
+                    <strong>Note:</strong> The following optional fields were not found: <code className="font-mono text-gray-500 bg-gray-200 p-1 rounded">{validationResult.missingOptionalFields.join(', ')}</code>.
+                </p>
+            </div>
+        );
+    };
+
+    switch (validationResult.status) {
+        case 'UNPROFILED':
+            return (
+                <div className="p-3 bg-yellow-50 border-l-4 border-yellow-400 mb-4">
+                    <h4 className="font-bold text-yellow-800">Un-profiled Structure Detected</h4>
+                    <p className="text-xs mt-1 text-yellow-700">
+                        This page has a new structure label: <strong className="font-mono">{data.structureLabel}</strong>.
+                        Please review the found data keys and add a new profile to <code>structureManifest.ts</code>.
+                    </p>
+                </div>
+            );
+        case 'MISSING_EXPECTED':
+            return (
+                <div className="p-3 bg-red-50 border-l-4 border-red-400 mb-4">
+                    <h4 className="font-bold text-red-800">High-Priority Error: Missing Required Data!</h4>
+                    <p className="text-xs mt-1 text-red-700">For a "{validationResult.profile?.description}", the following <strong>required</strong> fields were not found:</p>
+                    <ul className="list-disc pl-5 mt-2 text-xs font-mono">
+                        {validationResult.missingExpectedFields.map(field => (
+                            <li key={field} className="text-red-700"><code>{field}</code></li>
+                        ))}
+                    </ul>
+                </div>
+            );
+        case 'VALID':
+            return (
+                <div className="p-3 bg-green-50 border-l-4 border-green-400 mb-4">
+                    <h4 className="font-bold text-green-800">Data Integrity Check: Passed ✅</h4>
+                    <p className="text-xs mt-1 text-green-700">All {validationResult.profile?.expectedFields.length} expected fields for a "{validationResult.profile?.description}" were found.</p>
+                    {renderMissingOptional()}
+                </div>
+            );
+        default:
+            return null;
+    }
+};
+
+/**
+ * ScraperReport component now shows a validation summary AND all Game model fields.
+ * (LOGIC PRESERVED)
  */
 const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] }> = ({ data, missingFields }) => {
     if (!data) return null;
 
-    // reportConfig now includes all relevant Game model fields
+    // reportConfig remains unchanged, driving the detailed report
     const reportConfig = [
         {
             title: 'Game Details',
-            model: 'Game', // Used for finding missing fields
+            model: 'Game',
             fields: [
-                'name', 
-                'gameStartDateTime', 
-                'gameEndDateTime', 
-                'status', 
-                'registrationStatus',
-                'structureLabel', // NEW
-                'seriesName', // NEW
-                'variant', // NEW
-                'gameVariant', 
-                'prizepool', 
-                'revenueByEntries', // NEW
-                'totalEntries', 
-                'totalRebuys', 
-                'totalAddons', 
-                'totalDuration', 
-                'gameTags'
+                'name', 'gameStartDateTime', 'gameEndDateTime', 'status', 'registrationStatus',
+                'structureLabel', 'seriesName', 'variant', 'gameVariant', 'prizepool', 
+                'revenueByEntries', 'totalEntries', 'totalRebuys', 'totalAddons', 'totalDuration', 'gameTags'
             ]
         },
         {
             title: 'Tournament Details',
-            model: 'Game', // These fields are now on the Game model
+            model: 'Game',
             fields: [
-                'tournamentType', 
-                'buyIn', 
-                'rake', 
-                'startingStack', 
-                'hasGuarantee', 
-                'guaranteeAmount'
+                'tournamentType', 'buyIn', 'rake', 'startingStack', 'hasGuarantee', 'guaranteeAmount'
             ]
         }
     ];
@@ -177,7 +218,6 @@ const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] 
         );
     };
     
-    // Component to render the list of found keys
     const FoundKeysList: React.FC<{ keys: string[] | null | undefined }> = ({ keys }) => {
         if (!keys || keys.length === 0) {
              return (
@@ -201,6 +241,13 @@ const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] 
     return (
         <div className="mt-2 bg-gray-50 p-3 rounded-md border border-gray-200 space-y-4">
             <h5 className="text-sm font-semibold text-gray-800">📋 Scraper Report</h5>
+            
+            {/* ✅ NEW: Validation Summary is rendered at the top */}
+            <ValidationSummary data={data} />
+
+            {/* --- Existing Detailed Report Logic Below (Unchanged) --- */}
+            <hr/>
+
             {reportConfig.map(({ title, model, fields }) => (
                 <div key={title}>
                     <h6 className="text-xs font-bold text-gray-600">{title}</h6>
@@ -208,7 +255,6 @@ const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] 
                         {fields.map(field => {
                             const value = (data as any)[field];
                             const missingInfo = getMissingField(model, field);
-                            // Field has a valid value
                             if (value !== undefined && value !== null && !(Array.isArray(value) && value.length === 0)) {
                                 let displayValue: string;
                                 if (Array.isArray(value)) displayValue = `[${value.join(', ')}]`;
@@ -216,7 +262,6 @@ const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] 
                                 else if (typeof value === 'boolean') displayValue = value ? 'Yes' : 'No';
                                 else displayValue = `"${value}"`;
                                 
-                                // Special highlight for structureLabel
                                 const isLabel = field === 'structureLabel';
                                 const valueClass = isLabel 
                                     ? 'font-mono text-purple-700 font-bold' 
@@ -228,7 +273,6 @@ const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] 
                                         <div><span className="font-semibold">{field}:</span> <span className={valueClass}>{displayValue}</span></div>
                                     </li>
                                 );
-                            // Field is explicitly missing (and not just null)
                             } else if (missingInfo) {
                                 return (
                                      <li key={field} className="flex items-start">
@@ -236,7 +280,6 @@ const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] 
                                         <div><span className="font-semibold">{field}:</span> <span className="text-red-700">{missingInfo.reason}</span></div>
                                     </li>
                                 );
-                            // Field was scraped/processed as null (e.g., gameEndDateTime)
                             } else if (value === null) {
                                  return (
                                      <li key={field} className="flex items-start">
@@ -245,7 +288,6 @@ const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] 
                                     </li>
                                 );
                             }
-                            // Field is undefined and not in missing list (e.g. variant)
                             return (
                                  <li key={field} className="flex items-start">
                                     <span className="mr-2">⚪</span>
@@ -258,7 +300,6 @@ const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] 
             ))}
 
             <BlindLevelsTable levels={data.levels} />
-            
             <FoundKeysList keys={data.foundKeys} />
 
             {Object.keys(unscrapableModels).length > 0 && (
@@ -278,8 +319,7 @@ const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] 
     );
 };
 
-
-// This component shows the player results found on the page
+// This component shows the player results found on the page (NO CHANGES)
 const PlayerResults: React.FC<{ results?: PlayerResultData[] }> = ({ results }) => {
     if (!results || results.length === 0) return null;
     return (
@@ -309,10 +349,7 @@ const PlayerResults: React.FC<{ results?: PlayerResultData[] }> = ({ results }) 
     );
 };
 
-/**
- * Save Confirmation Modal, updated to reflect the new schema.
- * All tournament fields are saved directly to the Game model.
- */
+// Save Confirmation Modal (NO CHANGES)
 const SaveConfirmationModal: React.FC<{
     isOpen: boolean;
     onClose: () => void;
@@ -337,7 +374,6 @@ const SaveConfirmationModal: React.FC<{
         return <span className="font-mono text-indigo-700 break-all">{value.toLocaleString()}</span>;
     };
 
-    // This config reflects the *actual* database models
     const modalDataConfig = {
         'Game (To Be Saved)': {
             name: gameData.name,
@@ -356,14 +392,12 @@ const SaveConfirmationModal: React.FC<{
             totalAddons: gameData.totalAddons || null,
             totalDuration: gameData.totalDuration || null,
             gameTags: gameData.gameTags || null,
-            // Tournament fields now on Game
             tournamentType: gameData.tournamentType || 'FREEZEOUT',
             buyIn: gameData.buyIn || null,
             rake: gameData.rake || null,
             startingStack: gameData.startingStack || null,
             hasGuarantee: gameData.hasGuarantee,
             guaranteeAmount: gameData.guaranteeAmount || null,
-            // revenueByEntries is calculated in the backend, not shown here
         },
         'TournamentStructure (To Be Saved)': {
             id: '(generated on save, if levels exist)',
@@ -413,18 +447,14 @@ const SaveConfirmationModal: React.FC<{
     );
 };
 
-/**
- * StructureInfo component to display the detected structure label.
- */
+// StructureInfo component (NO CHANGES)
 const StructureInfo: React.FC<{ 
     isNewStructure: boolean | undefined; 
     structureLabel: string | undefined | null;
     foundKeys: string[] | null | undefined;
 }> = ({ isNewStructure, structureLabel, foundKeys }) => {
-    // Render nothing if the data isn't ready yet
     if (isNewStructure === undefined) return null; 
 
-    // Define styles based on whether the structure is new or known
     const bgColor = isNewStructure ? 'bg-gradient-to-r from-yellow-100 to-amber-200' : 'bg-gradient-to-r from-blue-100 to-cyan-200';
     const borderColor = isNewStructure ? 'border-amber-500' : 'border-cyan-500';
     const iconColor = isNewStructure ? 'text-amber-600' : 'text-cyan-600';
@@ -432,7 +462,6 @@ const StructureInfo: React.FC<{
     const textColor = isNewStructure ? 'text-amber-700' : 'text-cyan-700';
     const title = isNewStructure ? 'New Page Structure Discovered!' : 'Known Page Structure Matched';
     
-    // Choose an icon (warning for new, info for known)
     const icon = isNewStructure ? (
         <svg className={`h-6 w-6 ${iconColor}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -452,7 +481,6 @@ const StructureInfo: React.FC<{
                     <p className={`text-xs ${textColor} mt-1 font-mono`}>{structureLabel || "UNKNOWN"}</p>
                 </div>
             </div>
-            {/* ✅ NEW: Added display for Found Keys */}
             {foundKeys && foundKeys.length > 0 && (
                  <div className={`ml-9 mt-2 text-xs ${textColor} space-y-1`}>
                     <span className="font-semibold">Fields Found ({foundKeys.length}):</span>
@@ -465,7 +493,7 @@ const StructureInfo: React.FC<{
     );
 };
 
-
+// GameCard component (NO CHANGES)
 const GameCard: React.FC<{ 
     game: GameState; 
     onSave: (id: string, venueId: string) => void; 
@@ -509,7 +537,6 @@ const GameCard: React.FC<{
                         <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded flex-shrink-0">{game.source}</span>
                         <p className="text-sm font-mono truncate" title={game.id}>{getDisplayId(game.id)}</p>
                     </div>
-                    {/* ✅ FIXED: Header section with status, launch, and close */}
                     <div className="flex items-center space-x-2 flex-shrink-0">
                         <a 
                             href={game.id} 
@@ -527,10 +554,6 @@ const GameCard: React.FC<{
                 
                 {game.errorMessage && <p className="text-xs text-red-600 bg-red-50 p-2 rounded border border-red-200">{game.errorMessage}</p>}
                 
-                {/* ✅ RE-INTRODUCED: The StructureInfo box is back at the top.
-                    It will only appear *after* the fetch is complete and 
-                    isNewStructure is no longer undefined, fixing the race condition.
-                */}
                 {(game.status !== 'FETCHING' && game.isNewStructure !== undefined) && (
                     <StructureInfo 
                         isNewStructure={game.isNewStructure} 
@@ -547,9 +570,6 @@ const GameCard: React.FC<{
                     </div>
                 )}
                 
-                {/* ✅ FIXED: This block now *only* shows the reports.
-                    The StructureInfo component has been moved out.
-                */}
                 {(game.status === 'READY_TO_SAVE' || game.status === 'DONE' || game.status === 'SAVING' || game.status === 'LIVE') && (
                     <>
                         <PlayerResults results={game.data?.results ?? undefined} />
@@ -599,6 +619,7 @@ const GameCard: React.FC<{
     );
 };
 
+// ScraperDashboard main component (NO CHANGES)
 export const ScraperDashboard = () => {
     const [inputId, setInputId] = useState('');
     const [inputMode, setInputMode] = useState<'AUTO' | 'API'>('AUTO');
@@ -669,5 +690,3 @@ export const ScraperDashboard = () => {
         </div>
     );
 };
-
-
