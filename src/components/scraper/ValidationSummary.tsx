@@ -1,26 +1,34 @@
-import React, { useMemo } from 'react'; // Import useMemo
+import React, { useMemo } from 'react';
 import type { GameData } from '../../types/game';
-// ✅ FIX: Added .ts extension to the import path
 import { validateStructure } from '../../lib/validation.ts';
+
+// Helper component for rendering lists to keep the main component clean
+const FieldList: React.FC<{ fields: string[]; title: string; description?: string; className?: string }> = ({ fields, title, description, className = 'text-red-700' }) => {
+    if (fields.length === 0) return null;
+    return (
+        <div className="mt-3">
+            <h5 className="font-semibold text-gray-800 text-xs">{title}</h5>
+            {description && <p className="text-xs mt-1 text-gray-600">{description}</p>}
+            <ul className="list-disc pl-5 mt-2 text-xs font-mono">
+                {fields.map(field => (
+                    <li key={field} className={className}><code>{field}</code></li>
+                ))}
+            </ul>
+        </div>
+    );
+};
+
 
 export const ValidationSummary: React.FC<{ data: GameData }> = ({ data }) => {
     
-    // ✅ FIX: Use useMemo to prevent re-calculating and re-logging on every render.
-    // This logic will now ONLY run if data.structureLabel or data.foundKeys changes.
     const validationResult = useMemo(() => {
-        // Cannot generate a summary without the necessary info
         if (!data.structureLabel || !data.foundKeys) return null;
-
-        // Your log is now inside useMemo, so it will only fire when data changes.
-        console.log(`[ValidationSummary] Validating structure "${data.structureLabel}" with keys:`, data.foundKeys);
-        
         return validateStructure(data.structureLabel, data.foundKeys);
+    }, [data.structureLabel, data.foundKeys]);
 
-    }, [data.structureLabel, data.foundKeys]); // Dependencies
-
-    // If validation didn't run, render nothing.
     if (!validationResult) return null;
 
+    // ... (renderMissingOptional function remains the same)
     const renderMissingOptional = () => {
         if (validationResult.missingOptionalFields.length === 0) return null;
         return (
@@ -34,6 +42,7 @@ export const ValidationSummary: React.FC<{ data: GameData }> = ({ data }) => {
 
     switch (validationResult.status) {
         case 'UNPROFILED':
+            // ... (this case remains the same)
             return (
                 <div className="p-3 bg-yellow-50 border-l-4 border-yellow-400 mb-4">
                     <h4 className="font-bold text-yellow-800">Un-profiled Structure Detected</h4>
@@ -43,26 +52,44 @@ export const ValidationSummary: React.FC<{ data: GameData }> = ({ data }) => {
                     </p>
                 </div>
             );
+            
         case 'MISSING_EXPECTED':
             return (
                 <div className="p-3 bg-red-50 border-l-4 border-red-400 mb-4">
                     <h4 className="font-bold text-red-800">High-Priority Error: Missing Required Data!</h4>
-                    <p className="text-xs mt-1 text-red-700">For a "{validationResult.profile?.description}", the following <strong>required</strong> fields were not found:</p>
-                    <ul className="list-disc pl-5 mt-2 text-xs font-mono">
-                        {validationResult.missingExpectedFields.map(field => (
-                            <li key={field} className="text-red-700"><code>{field}</code></li>
-                        ))}
-                    </ul>
+                    
+                    {/* ✅ Render the two lists separately */}
+                    <FieldList 
+                        fields={validationResult.missingBaseExpectedFields}
+                        title="Missing Baseline Fields"
+                        description="These fields are required for ALL game structures."
+                    />
+                    
+                    <FieldList
+                        fields={validationResult.missingProfileExpectedFields}
+                        title="Missing Structure-Specific Fields"
+                        description={`For a "${validationResult.profile?.description}", these additional fields were expected:`}
+                    />
                 </div>
             );
+            
         case 'VALID':
             return (
                 <div className="p-3 bg-green-50 border-l-4 border-green-400 mb-4">
                     <h4 className="font-bold text-green-800">Data Integrity Check: Passed ✅</h4>
-                    <p className="text-xs mt-1 text-green-700">All {validationResult.profile?.expectedFields.length} expected fields for a "{validationResult.profile?.description}" were found.</p>
+                    
+                    {/* ✅ Show a detailed success message */}
+                    <div className="text-xs mt-2 space-y-1 text-green-700">
+                        <p>✓ All <strong>{validationResult.baseProfile.expectedFields.length} baseline fields</strong> were found.</p>
+                        {validationResult.profile && validationResult.profile.expectedFields.length > 0 && (
+                             <p>✓ All <strong>{validationResult.profile.expectedFields.length} specific fields</strong> for a "{validationResult.profile.description}" were found.</p>
+                        )}
+                    </div>
+
                     {renderMissingOptional()}
                 </div>
             );
+            
         default:
             return null;
     }
