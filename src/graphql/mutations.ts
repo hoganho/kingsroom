@@ -42,6 +42,8 @@ export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData($
     }
     rawHtml
     isNewStructure
+    structureLabel
+    foundKeys
     __typename
   }
 }

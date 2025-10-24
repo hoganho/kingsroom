@@ -42,8 +42,18 @@ export const useGameTracker = () => {
         try {
             const dataFromBackend = await fetchGameDataFromBackend(id);
             
-            // ✅ FIX: Use nullish coalescing to convert a potential null to undefined
+            // Console log for debugging
+            console.log('[useGameTracker] Raw data from backend:', dataFromBackend);
+
+            // ✅ UPDATED: Get all new fields
             const isNewStructure = dataFromBackend.isNewStructure ?? undefined;
+            // Use 'as any' as a safeguard in case the type file is stale
+            // This is the correct way to access fields that *might* be missing
+            const structureLabel = (dataFromBackend as any).structureLabel || undefined;
+            const foundKeys = (dataFromBackend as any).foundKeys || []; // ✅✅✅ GET foundKeys
+
+            console.log('[useGameTracker] Extracted structureLabel:', structureLabel); 
+            console.log('[useGameTracker] Extracted foundKeys:', foundKeys); // ✅ Debug log
 
             const data: GameData = {
                 name: dataFromBackend.name,
@@ -59,6 +69,7 @@ export const useGameTracker = () => {
                 totalAddons: dataFromBackend.totalAddons || undefined,
                 totalDuration: dataFromBackend.totalDuration || undefined,
                 gameTags: dataFromBackend.gameTags || [],
+                seriesName: (dataFromBackend as any).seriesName || undefined, 
                 
                 // Tournament-specific fields (now directly on Game)
                 tournamentType: 'FREEZEOUT', // Default, could be determined from tags
@@ -86,25 +97,46 @@ export const useGameTracker = () => {
                 })) ?? [],
                 
                 otherDetails: {},
-                rawHtml: dataFromBackend.rawHtml || undefined
+                rawHtml: dataFromBackend.rawHtml || undefined,
+
+                // ✅ UPDATED: Add scraper metadata
+                structureLabel: structureLabel,
+                foundKeys: foundKeys, // ✅✅✅ ADD foundKeys to the data object
             };
 
             // Updated missing fields check for refactored schema
             const missingFields: MissingField[] = [];
             
-            // Game model fields (including tournament-specific ones)
+            // ✅ UPDATED: List of ALL Game model fields to check
             const gameFields: Record<string, string> = {
+                // Core Game Fields
+                'variant': 'Game variant (e.g., NLHE) not found', 
+                'seriesName': 'Series name not found on page',
                 'prizepool': 'Prize pool not found on page',
+                'revenueByEntries': 'Revenue calculated on save',
                 'totalEntries': 'Total entries not found on page',
                 'totalRebuys': 'Total rebuys not found on page',
                 'totalAddons': 'Total addons not found on page',
+                'totalDuration': 'Total duration not found on page',
+                'gameTags': 'Game tags not found on page',
+                // Tournament Specific Fields
                 'tournamentType': 'Tournament type needs manual specification',
+                'buyIn': 'Buy-in amount not found on page',
                 'rake': 'Rake amount not available on page',
+                'startingStack': 'Starting stack not found on page',
+                'guaranteeAmount': 'Guarantee amount not found on page',
             };
 
             Object.entries(gameFields).forEach(([field, reason]) => {
-                if ((data as any)[field] === undefined || (data as any)[field] === null) {
-                    missingFields.push({ model: 'Game', field, reason });
+                const value = (data as any)[field];
+                // Check for undefined, null, or empty array
+                if (value === undefined || value === null || (Array.isArray(value) && value.length === 0)) {
+                    // Special case: hasGuarantee is bool, so check guaranteeAmount
+                    if (field === 'guaranteeAmount' && data.hasGuarantee) {
+                         missingFields.push({ model: 'Game', field, reason });
+                    } else if (field !== 'guaranteeAmount') {
+                         missingFields.push({ model: 'Game', field, reason });
+                    }
                 }
             });
 

@@ -3472,6 +3472,21 @@ export const schema = {
                     "type": "Boolean",
                     "isRequired": false,
                     "attributes": []
+                },
+                "structureLabel": {
+                    "name": "structureLabel",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "foundKeys": {
+                    "name": "foundKeys",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
                 }
             }
         },
@@ -3590,5 +3605,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "e57798b16f38ecabd19f0346ff4e62ec"
+    "version": "abb995265f1133f7aaf5b1d424d62ffe"
 };

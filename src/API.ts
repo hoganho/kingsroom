@@ -24,6 +24,8 @@ export type ScrapedGameData = {
   results?:  Array<ScrapedPlayerResult > | null,
   rawHtml?: string | null,
   isNewStructure?: boolean | null,
+  structureLabel?: string | null,
+  foundKeys?: Array< string | null > | null,
 };
 
 export type ScrapedTournamentLevel = {
@@ -2948,6 +2950,8 @@ export type FetchTournamentDataMutation = {
     } > | null,
     rawHtml?: string | null,
     isNewStructure?: boolean | null,
+    structureLabel?: string | null,
+    foundKeys?: Array< string | null > | null,
   } | null,
 };
 

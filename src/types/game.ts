@@ -19,7 +19,7 @@ export type GameData = {
     // Basic game information
     name: string;
     gameStartDateTime: string; // ✅ RENAMED
-    gameEndDateTime?: string | null; // ✅ NEW
+    gameEndDateTime?: string; // ✅ NEW
     status: string;
     type?: 'TOURNAMENT' | 'CASH_GAME';
     variant?: string | null;
@@ -34,6 +34,7 @@ export type GameData = {
     totalDuration?: string | null;
     gameTags?: (string | null)[] | null;
     seriesName?: string | null;
+    revenueByEntries?: number | null; // ✅ NEW
     
     // Tournament-specific fields (now on Game model)
     tournamentType?: 'FREEZEOUT' | 'REBUY' | 'SATELLITE' | 'DEEPSTACK' | null;
@@ -52,8 +53,10 @@ export type GameData = {
     // Additional data
     otherDetails: Record<string, string>;
     rawHtml?: string | null;
-    revenueByEntries?: number | null;
 
+    // ✅ NEW: Scraper metadata
+    structureLabel?: string;
+    foundKeys?: string[];
 };
 
 export type MissingField = {

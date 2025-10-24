@@ -136,6 +136,8 @@ type ScrapedGameData {
     results: [ScrapedPlayerResult!]
     rawHtml: String
     isNewStructure: Boolean
+    structureLabel: String # ✅ NEW
+    foundKeys: [String] # ✅✅✅ ADDED THIS MISSING FIELD
 }
 
 type ScrapedTournamentLevel {

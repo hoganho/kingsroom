@@ -145,6 +145,8 @@ type EagerScrapedGameData = {
   readonly results?: ScrapedPlayerResult[] | null;
   readonly rawHtml?: string | null;
   readonly isNewStructure?: boolean | null;
+  readonly structureLabel?: string | null;
+  readonly foundKeys?: (string | null)[] | null;
 }
 
 type LazyScrapedGameData = {
@@ -168,6 +170,8 @@ type LazyScrapedGameData = {
   readonly results?: ScrapedPlayerResult[] | null;
   readonly rawHtml?: string | null;
   readonly isNewStructure?: boolean | null;
+  readonly structureLabel?: string | null;
+  readonly foundKeys?: (string | null)[] | null;
 }
 
 export declare type ScrapedGameData = LazyLoading extends LazyLoadingDisabled ? EagerScrapedGameData : LazyScrapedGameData

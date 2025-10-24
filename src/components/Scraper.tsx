@@ -13,14 +13,22 @@ const HtmlModal: React.FC<{
 
     if (!isOpen) return null;
 
-    const handleCopy = async () => {
+    // Use document.execCommand for copying, as navigator.clipboard
+    // can be blocked in iFrames.
+    const handleCopy = () => {
+        const textarea = document.createElement('textarea');
+        textarea.value = html;
+        textarea.style.position = 'fixed'; // Prevent scrolling
+        document.body.appendChild(textarea);
+        textarea.select();
         try {
-            await navigator.clipboard.writeText(html);
+            document.execCommand('copy');
             setCopySuccess(true);
             setTimeout(() => setCopySuccess(false), 2000);
         } catch (err) {
             console.error('Failed to copy:', err);
         }
+        document.body.removeChild(textarea);
     };
 
     return (
@@ -67,22 +75,48 @@ const HtmlModal: React.FC<{
     );
 };
 
-// ✅ UPDATED: The ScraperReport component has been fully updated.
+/**
+ * ScraperReport component now shows ALL Game model fields
+ * and the structureLabel.
+ */
 const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] }> = ({ data, missingFields }) => {
     if (!data) return null;
 
-    // ✅ UPDATED: reportConfig now reflects the flattened Game schema
-    // and includes the new/renamed date fields.
+    // reportConfig now includes all relevant Game model fields
     const reportConfig = [
         {
             title: 'Game Details',
             model: 'Game', // Used for finding missing fields
-            fields: ['name', 'gameStartDateTime', 'gameEndDateTime', 'status', 'registrationStatus', 'gameVariant', 'prizepool', 'totalEntries', 'totalRebuys', 'totalAddons', 'totalDuration', 'gameTags']
+            fields: [
+                'name', 
+                'gameStartDateTime', 
+                'gameEndDateTime', 
+                'status', 
+                'registrationStatus',
+                'structureLabel', // NEW
+                'seriesName', // NEW
+                'variant', // NEW
+                'gameVariant', 
+                'prizepool', 
+                'revenueByEntries', // NEW
+                'totalEntries', 
+                'totalRebuys', 
+                'totalAddons', 
+                'totalDuration', 
+                'gameTags'
+            ]
         },
         {
             title: 'Tournament Details',
             model: 'Game', // These fields are now on the Game model
-            fields: ['tournamentType', 'buyIn', 'rake', 'startingStack', 'hasGuarantee', 'guaranteeAmount']
+            fields: [
+                'tournamentType', 
+                'buyIn', 
+                'rake', 
+                'startingStack', 
+                'hasGuarantee', 
+                'guaranteeAmount'
+            ]
         }
     ];
 
@@ -98,7 +132,6 @@ const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] 
             return acc;
         }, {} as Record<string, string[]>) || {};
 
-    // ✅ NEW: Component to render the expanded blind levels table.
     const BlindLevelsTable: React.FC<{ levels: TournamentLevelData[] }> = ({ levels }) => {
         if (!levels || levels.length === 0) {
             const missingInfo = missingFields?.find(mf => mf.model === 'TournamentStructure' && mf.field === 'levels');
@@ -143,6 +176,27 @@ const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] 
             </div>
         );
     };
+    
+    // Component to render the list of found keys
+    const FoundKeysList: React.FC<{ keys: string[] | null | undefined }> = ({ keys }) => {
+        if (!keys || keys.length === 0) {
+             return (
+                <div>
+                    <h6 className="text-xs font-bold text-gray-600">Found Data Keys</h6>
+                    <p className="text-xs text-gray-500 italic mt-1">No data keys were reported by the scraper.</p>
+                </div>
+            );
+        }
+        
+        return (
+             <div>
+                <h6 className="text-xs font-bold text-gray-600">Found Data Keys ({keys.length})</h6>
+                <div className="mt-1 text-xs font-mono text-gray-600 bg-gray-100 p-2 rounded border max-h-24 overflow-y-auto">
+                    {keys.join(', ')}
+                </div>
+            </div>
+        );
+    };
 
     return (
         <div className="mt-2 bg-gray-50 p-3 rounded-md border border-gray-200 space-y-4">
@@ -154,18 +208,27 @@ const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] 
                         {fields.map(field => {
                             const value = (data as any)[field];
                             const missingInfo = getMissingField(model, field);
+                            // Field has a valid value
                             if (value !== undefined && value !== null && !(Array.isArray(value) && value.length === 0)) {
                                 let displayValue: string;
                                 if (Array.isArray(value)) displayValue = `[${value.join(', ')}]`;
                                 else if (typeof value === 'number') displayValue = value.toLocaleString();
                                 else if (typeof value === 'boolean') displayValue = value ? 'Yes' : 'No';
                                 else displayValue = `"${value}"`;
+                                
+                                // Special highlight for structureLabel
+                                const isLabel = field === 'structureLabel';
+                                const valueClass = isLabel 
+                                    ? 'font-mono text-purple-700 font-bold' 
+                                    : 'font-mono text-indigo-700';
+
                                 return (
                                     <li key={field} className="flex items-start">
                                         <span className="mr-2">✅</span>
-                                        <div><span className="font-semibold">{field}:</span> <span className="font-mono text-indigo-700">{displayValue}</span></div>
+                                        <div><span className="font-semibold">{field}:</span> <span className={valueClass}>{displayValue}</span></div>
                                     </li>
                                 );
+                            // Field is explicitly missing (and not just null)
                             } else if (missingInfo) {
                                 return (
                                      <li key={field} className="flex items-start">
@@ -173,23 +236,30 @@ const ScraperReport: React.FC<{ data?: GameData, missingFields?: MissingField[] 
                                         <div><span className="font-semibold">{field}:</span> <span className="text-red-700">{missingInfo.reason}</span></div>
                                     </li>
                                 );
-                            }
-                            // Only render 'null' for fields that were explicitly scraped as null (like gameEndDateTime)
-                            else if (value === null) {
-                                return (
+                            // Field was scraped/processed as null (e.g., gameEndDateTime)
+                            } else if (value === null) {
+                                 return (
                                      <li key={field} className="flex items-start">
                                         <span className="mr-2">ℹ️</span>
                                         <div><span className="font-semibold">{field}:</span> <span className="text-gray-500 italic">Not found/calculated</span></div>
                                     </li>
                                 );
                             }
-                            return null;
+                            // Field is undefined and not in missing list (e.g. variant)
+                            return (
+                                 <li key={field} className="flex items-start">
+                                    <span className="mr-2">⚪</span>
+                                    <div><span className="font-semibold">{field}:</span> <span className="text-gray-400">Not found</span></div>
+                                </li>
+                            );
                         })}
                     </ul>
                 </div>
             ))}
 
             <BlindLevelsTable levels={data.levels} />
+            
+            <FoundKeysList keys={data.foundKeys} />
 
             {Object.keys(unscrapableModels).length > 0 && (
                 <div>
@@ -240,7 +310,8 @@ const PlayerResults: React.FC<{ results?: PlayerResultData[] }> = ({ results }) 
 };
 
 /**
- * ✅ UPDATED: Save Confirmation Modal with new/renamed date fields.
+ * Save Confirmation Modal, updated to reflect the new schema.
+ * All tournament fields are saved directly to the Game model.
  */
 const SaveConfirmationModal: React.FC<{
     isOpen: boolean;
@@ -266,21 +337,17 @@ const SaveConfirmationModal: React.FC<{
         return <span className="font-mono text-indigo-700 break-all">{value.toLocaleString()}</span>;
     };
 
+    // This config reflects the *actual* database models
     const modalDataConfig = {
-        'Venue': { id: venueId, name: null, address: null, city: null, country: null },
-        'Game': {
-            id: '(generated on save)',
+        'Game (To Be Saved)': {
             name: gameData.name,
             type: 'TOURNAMENT',
             status: gameData.status,
-            gameStartDateTime: gameData.gameStartDateTime, // ✅ RENAMED
-            gameEndDateTime: gameData.gameEndDateTime || null, // ✅ NEW
+            gameStartDateTime: gameData.gameStartDateTime,
+            gameEndDateTime: gameData.gameEndDateTime || null,
             venueId: venueId,
             sourceUrl: sourceUrl,
             seriesName: gameData.seriesName || null,
-            isAdHoc: null,
-            tournamentStructureId: '(generated on save)',
-            cashStructureId: null,
             registrationStatus: gameData.registrationStatus || null,
             gameVariant: gameData.gameVariant || null,
             prizepool: gameData.prizepool || null,
@@ -289,23 +356,22 @@ const SaveConfirmationModal: React.FC<{
             totalAddons: gameData.totalAddons || null,
             totalDuration: gameData.totalDuration || null,
             gameTags: gameData.gameTags || null,
-        },
-        'TournamentStructure': {
-            id: '(generated on save)',
-            name: `${gameData.name} Structure`,
-            type: gameData.tournamentType || 'FREEZEOUT',
+            // Tournament fields now on Game
+            tournamentType: gameData.tournamentType || 'FREEZEOUT',
             buyIn: gameData.buyIn || null,
             rake: gameData.rake || null,
             startingStack: gameData.startingStack || null,
             hasGuarantee: gameData.hasGuarantee,
             guaranteeAmount: gameData.guaranteeAmount || null,
+            // revenueByEntries is calculated in the backend, not shown here
         },
-        'TournamentLevel': {
-            count: `${gameData.levels.length} levels to be created`,
+        'TournamentStructure (To Be Saved)': {
+            id: '(generated on save, if levels exist)',
+            name: `${gameData.name} - Blind Structure`,
+            levels_count: `${gameData.levels.length} levels to be saved`,
             example: gameData.levels.length > 0 ? `Level 1: ${gameData.levels[0].smallBlind}/${gameData.levels[0].bigBlind}` : 'N/A'
         },
         'PlayerResult': { info: `Scraped ${gameData.results?.length || 0} results (not saved as linked PlayerResult entities)` },
-        'Player': null, 'PlayerAccount': null, 'PlayerTransaction': null, 'PlayerTicket': null, 'RakeStructure': null, 'CashStructure': null,
     };
 
     return (
@@ -347,6 +413,58 @@ const SaveConfirmationModal: React.FC<{
     );
 };
 
+/**
+ * StructureInfo component to display the detected structure label.
+ */
+const StructureInfo: React.FC<{ 
+    isNewStructure: boolean | undefined; 
+    structureLabel: string | undefined | null;
+    foundKeys: string[] | null | undefined;
+}> = ({ isNewStructure, structureLabel, foundKeys }) => {
+    // Render nothing if the data isn't ready yet
+    if (isNewStructure === undefined) return null; 
+
+    // Define styles based on whether the structure is new or known
+    const bgColor = isNewStructure ? 'bg-gradient-to-r from-yellow-100 to-amber-200' : 'bg-gradient-to-r from-blue-100 to-cyan-200';
+    const borderColor = isNewStructure ? 'border-amber-500' : 'border-cyan-500';
+    const iconColor = isNewStructure ? 'text-amber-600' : 'text-cyan-600';
+    const titleColor = isNewStructure ? 'text-amber-800' : 'text-cyan-800';
+    const textColor = isNewStructure ? 'text-amber-700' : 'text-cyan-700';
+    const title = isNewStructure ? 'New Page Structure Discovered!' : 'Known Page Structure Matched';
+    
+    // Choose an icon (warning for new, info for known)
+    const icon = isNewStructure ? (
+        <svg className={`h-6 w-6 ${iconColor}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+    ) : (
+        <svg className={`h-6 w-6 ${iconColor}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+    );
+
+    return (
+        <div className={`p-3 my-2 ${bgColor} border-l-4 ${borderColor} rounded-md shadow`}>
+            <div className="flex items-center">
+                <div className="flex-shrink-0">{icon}</div>
+                <div className="ml-3">
+                    <p className={`text-sm font-bold ${titleColor}`}>{title}</p>
+                    <p className={`text-xs ${textColor} mt-1 font-mono`}>{structureLabel || "UNKNOWN"}</p>
+                </div>
+            </div>
+            {/* ✅ NEW: Added display for Found Keys */}
+            {foundKeys && foundKeys.length > 0 && (
+                 <div className={`ml-9 mt-2 text-xs ${textColor} space-y-1`}>
+                    <span className="font-semibold">Fields Found ({foundKeys.length}):</span>
+                    <div className="mt-1 text-xs font-mono bg-black bg-opacity-5 p-2 rounded border border-black border-opacity-10 max-h-24 overflow-y-auto">
+                        {foundKeys.join(', ')}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 
 const GameCard: React.FC<{ 
     game: GameState; 
@@ -376,7 +494,7 @@ const GameCard: React.FC<{
     
     const lastFetchedDate = game.lastFetched ? new Date(game.lastFetched).toLocaleDateString() : 'N/A';
     const lastFetchedTime = game.lastFetched ? new Date(game.lastFetched).toLocaleTimeString() : 'N/A';
-    const isSaveDisabled = !game.data || !venueId || game.status !== 'READY_TO_SAVE';
+    const isSaveDisabled = !game.data || !venueId || (game.status !== 'READY_TO_SAVE' && game.status !== 'LIVE');
     
     const handleConfirmSave = () => {
         onSave(game.id, venueId);
@@ -391,6 +509,7 @@ const GameCard: React.FC<{
                         <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded flex-shrink-0">{game.source}</span>
                         <p className="text-sm font-mono truncate" title={game.id}>{getDisplayId(game.id)}</p>
                     </div>
+                    {/* ✅ FIXED: Header section with status, launch, and close */}
                     <div className="flex items-center space-x-2 flex-shrink-0">
                         <a 
                             href={game.id} 
@@ -405,39 +524,32 @@ const GameCard: React.FC<{
                         <button onClick={() => onRemove(game.id)} className="text-gray-400 hover:text-red-600 font-bold text-xl">×</button>
                     </div>
                 </div>
-
-                {/* ✅ NEW: Announcement for new structures */}
-                {game.isNewStructure && (
-                    <div className="p-3 my-2 bg-gradient-to-r from-yellow-100 to-amber-200 border-l-4 border-amber-500 rounded-md shadow">
-                        <div className="flex items-center">
-                            <div className="flex-shrink-0">
-                                <svg className="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
-                            </div>
-                            <div className="ml-3">
-                                <p className="text-sm font-bold text-amber-800">
-                                    New Page Structure Discovered!
-                                </p>
-                                <p className="text-xs text-amber-700 mt-1">
-                                    This page has a data layout we haven't seen before. The new structure (Label: {game.data?.status} / {game.data?.registrationStatus}) has been saved for review.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                
+                {game.errorMessage && <p className="text-xs text-red-600 bg-red-50 p-2 rounded border border-red-200">{game.errorMessage}</p>}
+                
+                {/* ✅ RE-INTRODUCED: The StructureInfo box is back at the top.
+                    It will only appear *after* the fetch is complete and 
+                    isNewStructure is no longer undefined, fixing the race condition.
+                */}
+                {(game.status !== 'FETCHING' && game.isNewStructure !== undefined) && (
+                    <StructureInfo 
+                        isNewStructure={game.isNewStructure} 
+                        structureLabel={game.data?.structureLabel}
+                        foundKeys={game.data?.foundKeys}
+                    />
                 )}
-
+                
                 {game.data?.name && (
                     <div className="bg-gray-50 p-2 rounded border">
                         <h4 className="font-bold text-lg">{game.data.name}</h4>
-                        {/* ✅ UPDATED: Use gameStartDateTime */}
                         <p className="text-xs text-gray-600">{game.data.gameStartDateTime}</p>
                         <p className="text-xs text-gray-500">Last Fetched: {lastFetchedDate} at {lastFetchedTime}</p>
                     </div>
                 )}
                 
-                {game.errorMessage && <p className="text-xs text-red-600 bg-red-50 p-2 rounded border border-red-200">{game.errorMessage}</p>}
-                
+                {/* ✅ FIXED: This block now *only* shows the reports.
+                    The StructureInfo component has been moved out.
+                */}
                 {(game.status === 'READY_TO_SAVE' || game.status === 'DONE' || game.status === 'SAVING' || game.status === 'LIVE') && (
                     <>
                         <PlayerResults results={game.data?.results ?? undefined} />
@@ -557,3 +669,5 @@ export const ScraperDashboard = () => {
         </div>
     );
 };
+
+

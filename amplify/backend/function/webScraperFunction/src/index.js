@@ -108,12 +108,17 @@ const scrapeDataFromHtml = (html) => {
             foundKeys.add('hasGuarantee');
             return { hasGuarantee: true, guaranteeAmount: parseNumeric(text, 'guaranteeAmount') };
         }
+        // ✅ FIX: Moved the misplaced logic from here
         return { hasGuarantee: false, guaranteeAmount: undefined };
     };
-
+    
+    // ✅ FIX: Moved status and regStatus logic to the correct scope
     const registrationDiv = $('label:contains("Registration")').parent();
     const registrationStatus = registrationDiv.text().replace(/Registration/gi, '').trim() || undefined;
     if (registrationStatus) foundKeys.add('registrationStatus');
+
+    const status = ($('label:contains("Status")').first().next('strong').text().trim().toUpperCase() || 'UNKNOWN_STATUS');
+    if (status !== 'UNKNOWN_STATUS') foundKeys.add('status');
 
     const guaranteeText = $('.cw-game-shortdesc').text().trim();
     const { hasGuarantee, guaranteeAmount } = parseGuarantee(guaranteeText);
@@ -149,11 +154,16 @@ const scrapeDataFromHtml = (html) => {
     // ✅ UPDATED: Corrected totalDuration selector
     const totalDurationText = $('div.cw-clock-label:contains("Total Time")').next().text().trim() || undefined;
     if(totalDurationText) foundKeys.add('totalDuration');
+    
+    // Scrape seriesName (example selector, adjust if needed)
+    // This is a guess, you may need to find the correct selector
+    const seriesNameText = $('.cw-game-series-name-selector').text().trim() || undefined; // ADJUST THIS SELECTOR
+    if(seriesNameText) foundKeys.add('seriesName');
 
     const data = {
         name: getText('.cw-game-title', 'name'),
         gameStartDateTime: getText('#cw_clock_start_date_time_local', 'gameStartDateTime'), // ✅ RENAMED
-        status: $('label:contains("Status")').first().next('strong').text().trim().toUpperCase() || undefined,
+        status: status, // ✅ FIX: Use the calculated status
         registrationStatus,
         gameVariant: getText('#cw_clock_shortlimitgame', 'gameVariant'),
         prizepool: parseNumeric($('#cw_clock_prizepool').text().trim(), 'prizepool'),
@@ -161,12 +171,14 @@ const scrapeDataFromHtml = (html) => {
         totalRebuys: parseNumeric($('#cw_clock_rebuys').text().trim(), 'totalRebuys'),
         totalAddons: parseNumeric($('div.cw-clock-label:contains("Add-Ons")').next().text().trim(), 'totalAddons'),
         totalDuration: totalDurationText, // ✅ UPDATED
+        seriesName: seriesNameText, // ✅ NEW
         buyIn: parseNumeric($('#cw_clock_buyin').text().trim(), 'buyIn'),
         startingStack: parseNumeric($('#cw_clock_startchips').text().trim(), 'startingStack'),
         hasGuarantee,
         guaranteeAmount,
         levels,
         results,
+        // 🛑 REMOVED: structureLabel is no longer calculated here
         rawHtml: html,
     };
     
@@ -195,14 +207,14 @@ const scrapeDataFromHtml = (html) => {
 };
 
 
+// ✅ UPDATED: Logic to create a fingerprint and save/update the structure in DynamoDB
 /**
- * ✅ UPDATED: Logic to create/update the structure fingerprint in DynamoDB.
- * Now includes the structureLabel based on game status.
+ * Now returns both isNew and the structureLabel.
  */
 const processStructureFingerprint = async (foundKeys, sourceUrl, status, registrationStatus) => {
     if (!foundKeys || foundKeys.length === 0) {
         console.log('No keys found, skipping fingerprint generation.');
-        return false;
+        return { isNew: false, structureLabel: null };
     }
 
     foundKeys.sort();
@@ -232,7 +244,7 @@ const processStructureFingerprint = async (foundKeys, sourceUrl, status, registr
                 Item: {
                     id: structureId,
                     fields: foundKeys,
-                    structureLabel: structureLabel, // ✅ NEW
+                    structureLabel: structureLabel, // ✅ Save the label
                     occurrenceCount: 1,
                     firstSeenAt: now,
                     lastSeenAt: now,
@@ -242,48 +254,50 @@ const processStructureFingerprint = async (foundKeys, sourceUrl, status, registr
                     _version: 1,
                 }
             }));
-            return true;
+            // ✅ FIX: Return 'isNewStructure' to match the schema
+            return { isNewStructure: true, structureLabel };
         } else {
             console.log(`Updated existing structure fingerprint with ID: ${structureId}`);
+            // ✅ UPDATED: Per request, no longer updating structureLabel for existing items
             await ddbDocClient.send(new UpdateCommand({
                 TableName: structureTable,
                 Key: { id: structureId },
-                // ✅ UPDATED: Also update label and exampleUrl on subsequent finds
-                UpdateExpression: 'SET #lastSeen = :now, #occ = #occ + :inc, #label = :label, #exampleUrl = :exampleUrl',
+                UpdateExpression: 'SET #lastSeen = :now, #occ = #occ + :inc',
                 ExpressionAttributeNames: {
                     '#lastSeen': 'lastSeenAt',
-                    '#occ': 'occurrenceCount',
-                    '#label': 'structureLabel', // ✅ NEW
-                    '#exampleUrl': 'exampleUrl' // ✅ NEW
+                    '#occ': 'occurrenceCount'
                 },
                 ExpressionAttributeValues: {
                     ':now': now,
-                    ':inc': 1,
-                    ':label': structureLabel, // ✅ NEW
-                    ':exampleUrl': sourceUrl // ✅ NEW
+                    ':inc': 1
                 }
             }));
-            return false;
+            
+            // ✅ FIX: Return 'isNewStructure' to match the schema
+            return { isNewStructure: false, structureLabel }; 
         }
     } catch (error) {
         console.error('Error processing structure fingerprint:', error);
-        return false;
+        // ✅ FIX: Return 'isNewStructure' to match the schema
+        return { isNewStructure: false, structureLabel: null };
     }
 };
 
 /**
  * ✅ UPDATED: The handler now passes status flags to the fingerprint processor
- * and adds the result to the response.
+ * and adds all new fields to the response.
  */
 const handleFetch = async (url) => {
     console.log(`Fetching data from: ${url}`);
     const response = await axios.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    // ✅ UPDATED: Pass structureLabel to the fingerprint processor
     const { data, foundKeys } = scrapeDataFromHtml(response.data);
     
-    // ✅ UPDATED: Pass status and registrationStatus to fingerprint function
-    const isNewStructure = await processStructureFingerprint(foundKeys, url, data.status, data.registrationStatus);
+    // ✅ FIX: This result will now be { isNewStructure: boolean, structureLabel: string }
+    const fingerprintResult = await processStructureFingerprint(foundKeys, url, data.status, data.registrationStatus);
     
-    return { ...data, isNewStructure };
+    // This will correctly merge all fields, including 'isNewStructure'
+    return { ...data, ...fingerprintResult };
 };
 
 // --- HANDLER FOR SAVING/UPDATING DATA ---
@@ -296,8 +310,12 @@ const handleSave = async (input) => {
     
     // ✅ NEW: Helper function to calculate revenue from entries
     const calculateRevenueByEntries = (buyIn, totalEntries) => {
-        if (buyIn && totalEntries) {
-            return buyIn * totalEntries;
+        // Ensure buyIn and totalEntries are valid numbers
+        const numBuyIn = parseFloat(buyIn);
+        const numTotalEntries = parseInt(totalEntries, 10);
+        
+        if (!isNaN(numBuyIn) && !isNaN(numTotalEntries) && numBuyIn > 0 && numTotalEntries > 0) {
+            return numBuyIn * numTotalEntries;
         }
         return null;
     };
@@ -313,6 +331,9 @@ const handleSave = async (input) => {
     const queryResult = await ddbDocClient.send(queryCommand);
     const existingGame = queryResult.Items?.[0];
 
+    // ✅ NEW: Prepare revenueByEntries
+    const revenueByEntries = calculateRevenueByEntries(data.buyIn, data.totalEntries);
+
     if (existingGame) {
         console.log(`Found existing game with ID: ${existingGame.id}. Updating...`);
         
@@ -323,7 +344,9 @@ const handleSave = async (input) => {
             name: data.name,
             status: data.status || 'SCHEDULED',
             registrationStatus: data.registrationStatus,
-            gameVariant: data.gameVariant,
+            gameVariant: data.gameVariant, // This maps to 'gameVariant'
+            variant: data.gameVariant, // ✅ NEW: Also map to 'variant'
+            seriesName: data.seriesName, // ✅ NEW
             prizepool: data.prizepool,
             totalEntries: data.totalEntries,
             totalRebuys: data.totalRebuys,
@@ -338,7 +361,7 @@ const handleSave = async (input) => {
             guaranteeAmount: data.guaranteeAmount,
             tournamentType: data.tournamentType || 'FREEZEOUT',
             // ✅ UPDATED: Calculate and add revenueByEntries
-            revenueByEntries: calculateRevenueByEntries(data.buyIn, data.totalEntries),
+            revenueByEntries: revenueByEntries,
             // Keep existing fields
             venueId,
             // ✅ UPDATED: Use new field names
@@ -439,10 +462,12 @@ const handleSave = async (input) => {
             hasGuarantee: data.hasGuarantee,
             guaranteeAmount: data.guaranteeAmount,
             // ✅ UPDATED: Calculate and add revenueByEntries
-            revenueByEntries: calculateRevenueByEntries(data.buyIn, data.totalEntries),
+            revenueByEntries: revenueByEntries,
             // Other game data
+            seriesName: data.seriesName, // ✅ NEW
             registrationStatus: data.registrationStatus,
-            gameVariant: data.gameVariant,
+            gameVariant: data.gameVariant, // This maps to 'gameVariant'
+            variant: data.gameVariant, // ✅ NEW: Also map to 'variant'
             prizepool: data.prizepool,
             totalEntries: data.totalEntries,
             totalRebuys: data.totalRebuys,
