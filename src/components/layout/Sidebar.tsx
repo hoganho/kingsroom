@@ -1,5 +1,7 @@
+// src/components/layout/Sidebar.tsx
+
 import { NavLink } from 'react-router-dom';
-import { DocumentMagnifyingGlassIcon, QueueListIcon } from '@heroicons/react/24/outline';
+import { DocumentMagnifyingGlassIcon, QueueListIcon, BuildingOffice2Icon } from '@heroicons/react/24/outline';
 
 const getLinkClassName = ({ isActive }: { isActive: boolean }) =>
   `flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${
@@ -23,6 +25,11 @@ export const Sidebar = () => {
           <NavLink to="/bulk-scraper" className={getLinkClassName}>
             <DocumentMagnifyingGlassIcon className="h-5 w-5 mr-3" />
             Bulk Fetcher
+          </NavLink>
+          {/* Add the new link to the Venues page */}
+          <NavLink to="/venues" className={getLinkClassName}>
+            <BuildingOffice2Icon className="h-5 w-5 mr-3" />
+            Venues
           </NavLink>
         </div>
       </nav>
