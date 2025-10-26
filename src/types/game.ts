@@ -15,15 +15,16 @@ export type PlayerResultData = {
     winnings: number;
 };
 
-// ✅ NEW: Type definitions for newly added data structures
 export type PlayerEntryData = {
     name: string;
 };
 
+// ✅ FIXED: Added the missing playerStack property
 export type PlayerSeatingData = {
     name: string;
     table: number;
     seat: number;
+    playerStack?: number | null; // This line was added
 };
 
 export type BreakData = {
@@ -71,7 +72,7 @@ export type GameData = {
     gameVariant?: string | null;
     prizepool?: number | null;
     totalEntries?: number | null;
-    playersRemaining?: number | null; // ✅ NEW
+    playersRemaining?: number | null;
     totalRebuys?: number | null;
     totalAddons?: number | null;
     totalDuration?: string | null;
@@ -93,7 +94,7 @@ export type GameData = {
     // Player results
     results?: PlayerResultData[] | null;
     
-    // ✅ NEW: Add entries, seating, breaks, and tables
+    // Add entries, seating, breaks, and tables
     entries?: PlayerEntryData[] | null;
     seating?: PlayerSeatingData[] | null;
     breaks?: BreakData[] | null;
