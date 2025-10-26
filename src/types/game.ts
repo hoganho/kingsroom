@@ -45,13 +45,13 @@ export type TableData = {
 
 export type BulkGameSummary = {
     id: string;
-    name?: string;
-    status?: string;
-    registrationStatus?: string;
-    gameStartDateTime?: string;
-    inDatabase?: boolean;
-    doNotScrape?: boolean;
-    error?: string;
+    name?: string | null;
+    status?: string | null;
+    registrationStatus?: string | null;
+    gameStartDateTime?: string | null;
+    inDatabase?: boolean | null;
+    doNotScrape?: boolean | null;
+    error?: string | null;
 };
 
 // Tournament/Game status - what's happening with the actual game
