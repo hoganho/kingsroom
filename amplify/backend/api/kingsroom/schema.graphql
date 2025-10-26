@@ -177,6 +177,7 @@ type ScrapedPlayerSeating {
     name: String!
     table: Int
     seat: Int
+    playerStack: Int
 }
 
 type ScrapedPlayerResult {
@@ -243,6 +244,7 @@ input ScrapedPlayerSeatingInput {
     name: String!
     table: Int
     seat: Int
+    playerStack: Int
 }
 
 input ScrapedPlayerResultInput {

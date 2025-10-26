@@ -3727,6 +3727,13 @@ export const schema = {
                     "type": "Int",
                     "isRequired": false,
                     "attributes": []
+                },
+                "playerStack": {
+                    "name": "playerStack",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
                 }
             }
         },
@@ -3867,5 +3874,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "a45d66e724b590a61047e1ef822e6783"
+    "version": "dcacf1e5398b5a3cb0c29f6ab5cfd98c"
 };

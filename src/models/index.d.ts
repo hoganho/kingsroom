@@ -264,12 +264,14 @@ type EagerScrapedPlayerSeating = {
   readonly name: string;
   readonly table?: number | null;
   readonly seat?: number | null;
+  readonly playerStack?: number | null;
 }
 
 type LazyScrapedPlayerSeating = {
   readonly name: string;
   readonly table?: number | null;
   readonly seat?: number | null;
+  readonly playerStack?: number | null;
 }
 
 export declare type ScrapedPlayerSeating = LazyLoading extends LazyLoadingDisabled ? EagerScrapedPlayerSeating : LazyScrapedPlayerSeating

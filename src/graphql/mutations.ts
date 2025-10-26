@@ -48,6 +48,7 @@ export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData($
       name
       table
       seat
+      playerStack
       __typename
     }
     results {

@@ -36,7 +36,6 @@ export const fieldManifest: Record<string, FieldDefinition> = {
   // Prize & Entry Details
   prizepool: { label: 'Prizepool', group: 'Prize & Entry Details', isBaselineExpected: true },
   totalEntries: { label: 'Total Entries', group: 'Prize & Entry Details', isBaselineExpected: true },
-  playersRemaining: { label: 'Players Left', group: 'Prize & Entry Details', isProfileExpected: ["STATUS: RUNNING | REG: CLOSED"] },
   totalRebuys: { label: 'Total Rebuys', group: 'Prize & Entry Details', isBaselineOptional: true },
   totalAddons: { label: 'Total Add-ons', group: 'Prize & Entry Details', isBaselineOptional: true },
   revenueByEntries: { label: 'Revenue', group: 'Prize & Entry Details', isBaselineOptional: true },
@@ -65,6 +64,7 @@ export const fieldManifest: Record<string, FieldDefinition> = {
 
   // Data for Live Games
   tables: { label: 'Live Tables', group: 'Live Tournament Data', isBaselineOptional: true },
+  playersRemaining: { label: 'Players Left', group: 'Live Tournament Data', isProfileExpected: ["STATUS: RUNNING | REG: CLOSED"] },
   totalChipsInPlay: { label: 'Total Chips In Play', group: 'Live Tournament Data', isProfileExpected: ["STATUS: RUNNING | REG: CLOSED"] },
   averagePlayerStack: { label: 'Average Stack', group: 'Live Tournament Data', isProfileExpected: ["STATUS: RUNNING | REG: CLOSED"] },
 

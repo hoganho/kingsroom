@@ -58,6 +58,7 @@ export type ScrapedPlayerSeating = {
   name: string,
   table?: number | null,
   seat?: number | null,
+  playerStack?: number | null,
 };
 
 export type ScrapedPlayerResult = {
@@ -155,6 +156,7 @@ export type ScrapedPlayerSeatingInput = {
   name: string,
   table?: number | null,
   seat?: number | null,
+  playerStack?: number | null,
 };
 
 export type ScrapedPlayerResultInput = {
@@ -3065,6 +3067,7 @@ export type FetchTournamentDataMutation = {
       name: string,
       table?: number | null,
       seat?: number | null,
+      playerStack?: number | null,
     } > | null,
     results?:  Array< {
       __typename: "ScrapedPlayerResult",

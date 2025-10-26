@@ -120,8 +120,13 @@ export const useGameTracker = () => {
                         playerStack: s.playerStack,
                     })) ?? [], // Fallback to an empty array if t.seats is null/undefined
                 })) ?? [],
+                seating: (dataFromBackend as any).seating?.map((s: { name: string; table: number; seat: number; playerStack: number }) => ({ 
+                        name: s.name, 
+                        table: s.table, 
+                        seat: s.seat,
+                        playerStack: s.playerStack,
+                })) ?? [],
                 entries: (dataFromBackend as any).entries?.map((e: { name: string }) => ({ name: e.name })) ?? [],
-                seating: (dataFromBackend as any).seating?.map((s: { name: string, table: number, seat: number }) => ({ name: s.name, table: s.table, seat: s.seat })) ?? [],
                 results: dataFromBackend.results?.map(r => ({ 
                     name: r.name, 
                     rank: r.rank, 
