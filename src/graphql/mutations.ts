@@ -34,10 +34,31 @@ export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData($
       ante
       __typename
     }
+    breaks {
+      levelNumberBeforeBreak
+      levelNumberAfterBreak
+      durationMinutes
+      __typename
+    }
+    entries {
+      name
+      __typename
+    }
+    seating {
+      name
+      table
+      seat
+      __typename
+    }
     results {
       rank
       name
       winnings
+      points
+      __typename
+    }
+    tables {
+      tableName
       __typename
     }
     rawHtml
@@ -62,6 +83,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
     gameEndDateTime
     venueId
     sourceUrl
+    doNotScrape
     seriesName
     isAdHoc
     registrationStatus
@@ -687,6 +709,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
     gameEndDateTime
     venueId
     sourceUrl
+    doNotScrape
     seriesName
     isAdHoc
     registrationStatus
@@ -778,6 +801,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
     gameEndDateTime
     venueId
     sourceUrl
+    doNotScrape
     seriesName
     isAdHoc
     registrationStatus
@@ -869,6 +893,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
     gameEndDateTime
     venueId
     sourceUrl
+    doNotScrape
     seriesName
     isAdHoc
     registrationStatus
@@ -2037,6 +2062,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
       gameEndDateTime
       venueId
       sourceUrl
+      doNotScrape
       seriesName
       isAdHoc
       registrationStatus
@@ -2122,6 +2148,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
       gameEndDateTime
       venueId
       sourceUrl
+      doNotScrape
       seriesName
       isAdHoc
       registrationStatus
@@ -2207,6 +2234,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
       gameEndDateTime
       venueId
       sourceUrl
+      doNotScrape
       seriesName
       isAdHoc
       registrationStatus

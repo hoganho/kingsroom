@@ -46,12 +46,12 @@ enum TicketStatus { ACTIVE, EXPIRED, USED }
 # SCRAPE/DATA SYNC MANAGEMENT
 # =======================================
 type DataSync @model @auth(rules: [{ allow: private }]) {
-id: ID!
-syncedAt: AWSDateTime!
-method: SyncMethod!
-sourceUrl: AWSURL
-title: String
-content: String
+  id: ID!
+  syncedAt: AWSDateTime!
+  method: SyncMethod!
+  sourceUrl: AWSURL
+  title: String
+  content: String
 }
 
 # =======================================
@@ -72,53 +72,64 @@ type ScrapeStructure @model @auth(rules: [{ allow: private }]) {
 # INVENTORY MANAGEMENT
 # =======================================
 type Asset @model @auth(rules: [{ allow: private }]) {
-id: ID!
-name: String!
-type: String! # e.g., "Playing Cards", "Poker Table", "Chip Set"
-condition: AssetCondition!
-acquiredDate: AWSDate!
-lastCheckedDate: AWSDate!
-venueId: ID! @index(name: "byVenue")
-venue: Venue @belongsTo(fields: ["venueId"])
+  id: ID!
+  name: String!
+  type: String! # e.g., "Playing Cards", "Poker Table", "Chip Set"
+  condition: AssetCondition!
+  acquiredDate: AWSDate!
+  lastCheckedDate: AWSDate!
+  venueId: ID! @index(name: "byVenue")
+  venue: Venue @belongsTo(fields: ["venueId"])
 }
 
 # =======================================
 # VENUE MANAGEMENT
 # =======================================
 type Venue @model @auth(rules: [{ allow: private }]) {
-id: ID!
-name: String!
-address: String
-city: String
-country: String
-details: VenueDetails @hasOne
-assets: [Asset] @hasMany(indexName: "byVenue", fields: ["id"])
-games: [Game] @hasMany(indexName: "byVenue", fields: ["id"])
-playerMemberships: [PlayerVenue] @hasMany(indexName: "byVenue", fields: ["id"])
+  id: ID!
+  name: String!
+  address: String
+  city: String
+  country: String
+  details: VenueDetails @hasOne
+  assets: [Asset] @hasMany(indexName: "byVenue", fields: ["id"])
+  games: [Game] @hasMany(indexName: "byVenue", fields: ["id"])
+  playerMemberships: [PlayerVenue] @hasMany(indexName: "byVenue", fields: ["id"])
 }
 
 type VenueDetails @model @auth(rules: [{ allow: private }]) {
-id: ID!
-venueId: ID! @index(name: "byVenue")
-startDate: AWSDate!
-status: VenueStatus!
-lastCustomerSuccessVisit: AWSDate
-totalGamesHeld: Int
-averagePlayersPerGame: Float
-gameNights: [String] # e.g., ["Monday", "Friday"]
-venue: Venue @belongsTo(fields: ["venueId"])
+  id: ID!
+  venueId: ID! @index(name: "byVenue")
+  startDate: AWSDate!
+  status: VenueStatus!
+  lastCustomerSuccessVisit: AWSDate
+  totalGamesHeld: Int
+  averagePlayersPerGame: Float
+  gameNights: [String] # e.g., ["Monday", "Friday"]
+  venue: Venue @belongsTo(fields: ["venueId"])
 }
 
 # =======================================
 # CUSTOM TYPES FOR OUR NEW OPERATIONS
 # =======================================
 
+type ScrapedGameSummary {
+    id: String!
+    name: String
+    status: String
+    registrationStatus: String
+    gameStartDateTime: String
+    inDatabase: Boolean
+    doNotScrape: Boolean
+    error: String
+}
+
 # This type defines the shape of the data our scraper will return.
 # It is NOT a database model.
 type ScrapedGameData {
     name: String!
-    gameStartDateTime: String # ✅ RENAMED
-    gameEndDateTime: String # ✅ NEW
+    gameStartDateTime: String
+    gameEndDateTime: String
     status: String
     registrationStatus: String
     gameVariant: String
@@ -133,11 +144,15 @@ type ScrapedGameData {
     hasGuarantee: Boolean
     guaranteeAmount: Float
     levels: [ScrapedTournamentLevel!]
+    breaks: [ScrapedBreak!]
+    entries: [ScrapedPlayerEntries!]
+    seating: [ScrapedPlayerSeating!]
     results: [ScrapedPlayerResult!]
+    tables: [ScrapedTables!]
     rawHtml: String
     isNewStructure: Boolean
-    structureLabel: String # ✅ NEW
-    foundKeys: [String] # ✅✅✅ ADDED THIS MISSING FIELD
+    structureLabel: String
+    foundKeys: [String]
 }
 
 type ScrapedTournamentLevel {
@@ -148,16 +163,45 @@ type ScrapedTournamentLevel {
     ante: Int
 }
 
+type ScrapedBreak {
+    levelNumberBeforeBreak: Int!
+    levelNumberAfterBreak: Int!
+    durationMinutes: Int
+}
+
+type ScrapedPlayerEntries {
+    name: String!
+}
+
+type ScrapedPlayerSeating {
+    name: String!
+    table: Int
+    seat: Int
+}
+
 type ScrapedPlayerResult {
     rank: Int!
     name: String!
     winnings: Float
+    points: Float
+}
+
+type ScrapedTables {
+    tableName: String!
+    seats: [ScrapedTableSeatsData!]
+}
+
+type ScrapedTableSeatsData {
+    seat: Int!
+    isOccupied: Boolean!
+    playerName: String
+    playerStack: Int
 }
 
 # This is the input type for our save operation.
 input SaveTournamentInput {
-    existingGameId: ID # ✅ RENAMED from 'id' to match frontend and backend logic
-    doNotScrape: Boolean # ✅ ADDED this missing field
+    existingGameId: ID
+    doNotScrape: Boolean
     sourceUrl: AWSURL!
     venueId: ID!
     data: ScrapedGameDataInput!
@@ -165,8 +209,8 @@ input SaveTournamentInput {
 
 input ScrapedGameDataInput {
     name: String!
-    gameStartDateTime: String # ✅ RENAMED
-    gameEndDateTime: String # ✅ NEW
+    gameStartDateTime: String
+    gameEndDateTime: String
     status: GameStatus
     registrationStatus: String
     gameVariant: String
@@ -183,7 +227,31 @@ input ScrapedGameDataInput {
     hasGuarantee: Boolean
     guaranteeAmount: Float
     levels: [ScrapedTournamentLevelInput!]
+    breaks: [ScrapedBreakInput!]
+    # ✅ CORRECTED: Use the new input types below
+    entries: [ScrapedPlayerEntriesInput!]
+    seating: [ScrapedPlayerSeatingInput!]
+    results: [ScrapedPlayerResultInput!]
 }
+
+# ✅ NEW: Corresponding input types for nested data structures
+input ScrapedPlayerEntriesInput {
+    name: String!
+}
+
+input ScrapedPlayerSeatingInput {
+    name: String!
+    table: Int
+    seat: Int
+}
+
+input ScrapedPlayerResultInput {
+    rank: Int!
+    name: String!
+    winnings: Float
+    points: Float
+}
+# (End of new input types)
 
 input ScrapedTournamentLevelInput {
     levelNumber: Int!
@@ -191,6 +259,12 @@ input ScrapedTournamentLevelInput {
     smallBlind: Int
     bigBlind: Int
     ante: Int
+}
+
+input ScrapedBreakInput {
+    levelNumberBeforeBreak: Int!
+    levelNumberAfterBreak: Int!
+    durationMinutes: Int
 }
 
 # =======================================
@@ -202,11 +276,12 @@ type Game @model @auth(rules: [{ allow: private }]) {
     type: GameType!
     variant: String
     status: GameStatus!
-    gameStartDateTime: AWSDateTime! # ✅ RENAMED
-    gameEndDateTime: AWSDateTime # ✅ NEW
-    venueId: ID! @index(name: "byVenue", sortKeyFields: ["gameStartDateTime"]) # ✅ UPDATED sortKeyField
+    gameStartDateTime: AWSDateTime!
+    gameEndDateTime: AWSDateTime
+    venueId: ID! @index(name: "byVenue", sortKeyFields: ["gameStartDateTime"])
     sourceUrl: AWSURL @index(name: "bySourceUrl", queryField: "gameBySourceUrl")
-    
+    doNotScrape: Boolean!
+
     # Basic game info
     seriesName: String
     isAdHoc: Boolean
@@ -266,23 +341,23 @@ type TournamentLevelData {
 }
 
 type RakeStructure @model @auth(rules: [{ allow: private }]) {
-id: ID!
-name: String!
-rakePercentage: Float!
-maxRake: Float!
-cashStructures: [CashStructure] @hasMany(indexName: "byRakeStructure", fields: ["id"])
+  id: ID!
+  name: String!
+  rakePercentage: Float!
+  maxRake: Float!
+  cashStructures: [CashStructure] @hasMany(indexName: "byRakeStructure", fields: ["id"])
 }
 
 type CashStructure @model @auth(rules: [{ allow: private }]) {
-id: ID!
-name: String! # e.g., "$1/$2 NLHE"
-smallBlind: Float!
-bigBlind: Float!
-minBuyIn: Float!
-maxBuyIn: Float!
-rakeStructureId: ID! @index(name: "byRakeStructure")
-rakeStructure: RakeStructure @belongsTo(fields: ["rakeStructureId"])
-games: [Game] @hasMany(indexName: "byCashStructure", fields: ["id"])
+  id: ID!
+  name: String! # e.g., "$1/$2 NLHE"
+  smallBlind: Float!
+  bigBlind: Float!
+  minBuyIn: Float!
+  maxBuyIn: Float!
+  rakeStructureId: ID! @index(name: "byRakeStructure")
+  rakeStructure: RakeStructure @belongsTo(fields: ["rakeStructureId"])
+  games: [Game] @hasMany(indexName: "byCashStructure", fields: ["id"])
 }
 
 # =======================================
@@ -465,8 +540,12 @@ type MarketingMessage @model @auth(rules: [{ allow: private }]) {
 }
 
 # =======================================
-# CUSTOM MUTATIONS
+# CUSTOM MUTATIONS & QUERIES
 # =======================================
+type Query {
+    fetchTournamentDataRange(startId: Int!, endId: Int!): [ScrapedGameSummary!] @function(name: "webScraperFunction-${env}")
+}
+
 type Mutation {
     fetchTournamentData(url: AWSURL!): ScrapedGameData @function(name: "webScraperFunction-${env}")
     saveTournamentData(input: SaveTournamentInput!): Game @function(name: "webScraperFunction-${env}")

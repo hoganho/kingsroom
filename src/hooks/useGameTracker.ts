@@ -58,7 +58,6 @@ export const useGameTracker = () => {
             const structureLabel = (dataFromBackend as any).structureLabel || undefined;
             const foundKeys = (dataFromBackend as any).foundKeys || [];
             
-            // ✅ NEW: Extract existingGameId and doNotScrape flag
             const existingGameId = (dataFromBackend as any).existingGameId || null;
             const doNotScrape = (dataFromBackend as any).doNotScrape || false;
 
@@ -89,39 +88,56 @@ export const useGameTracker = () => {
 
             const data: GameData = {
                 name: dataFromBackend.name,
-                gameStartDateTime: dataFromBackend.gameStartDateTime || undefined, // ✅ REMOVED default value
+                gameStartDateTime: dataFromBackend.gameStartDateTime || undefined,
                 gameEndDateTime: dataFromBackend.gameEndDateTime || undefined,
-                status: mappedStatus, // Use mapped status
-                type: 'TOURNAMENT', // Default to tournament for scraped games
+                status: mappedStatus,
+                type: 'TOURNAMENT',
                 registrationStatus: dataFromBackend.registrationStatus || undefined,
                 gameVariant: dataFromBackend.gameVariant || undefined,
                 prizepool: dataFromBackend.prizepool || undefined,
                 totalEntries: dataFromBackend.totalEntries || undefined,
+                playersRemaining: (dataFromBackend as any).playersRemaining || undefined,
                 totalRebuys: dataFromBackend.totalRebuys || undefined,
                 totalAddons: dataFromBackend.totalAddons || undefined,
                 totalDuration: dataFromBackend.totalDuration || undefined,
                 gameTags: dataFromBackend.gameTags || [],
-                seriesName: (dataFromBackend as any).seriesName || undefined, 
+                seriesName: (dataFromBackend as any).seriesName || undefined,
                 
-                // Tournament-specific fields (now directly on Game)
-                tournamentType: 'FREEZEOUT', // Default, could be determined from tags
+                tournamentType: 'FREEZEOUT',
                 buyIn: dataFromBackend.buyIn || undefined,
-                rake: undefined, // Rake typically not scraped, needs manual input
+                rake: undefined,
                 startingStack: dataFromBackend.startingStack || undefined,
                 hasGuarantee: dataFromBackend.hasGuarantee ?? false,
                 guaranteeAmount: dataFromBackend.guaranteeAmount || undefined,
                 
-                // Blind levels
                 levels: dataFromBackend.levels?.map(l => ({
                     levelNumber: l.levelNumber,
                     durationMinutes: l.durationMinutes || 20,
                     smallBlind: l.smallBlind || 0,
                     bigBlind: l.bigBlind || 0,
                     ante: l.ante,
-                    breakMinutes: undefined
+                    breakMinutes: undefined // This can be populated from the breaks data later
                 })) ?? [],
+
+                // ✅ NEW: Map breaks and tables data
+                breaks: (dataFromBackend as any).breaks?.map((b: any) => ({
+                    levelNumberBeforeBreak: b.levelNumberBeforeBreak,
+                    durationMinutes: b.durationMinutes,
+                })) ?? [],
+
+                tables: (dataFromBackend as any).tables?.map((t: any) => ({
+                    tableName: t.tableName,
+                    seats: t.seats.map((s: any) => ({
+                        seat: s.seat,
+                        isOccupied: s.isOccupied,
+                        playerName: s.playerName,
+                        playerStack: s.playerStack,
+                    })),
+                })) ?? [],
+
+                entries: (dataFromBackend as any).entries?.map((e: { name: string }) => ({ name: e.name })) ?? [],
+                seating: (dataFromBackend as any).seating?.map((s: { name: string, table: number, seat: number }) => ({ name: s.name, table: s.table, seat: s.seat })) ?? [],
                 
-                // Player results
                 results: dataFromBackend.results?.map(r => ({ 
                     name: r.name, 
                     rank: r.rank, 
@@ -131,20 +147,28 @@ export const useGameTracker = () => {
                 otherDetails: {},
                 rawHtml: dataFromBackend.rawHtml || undefined,
 
-                // Scraper metadata
                 structureLabel: structureLabel,
                 foundKeys: foundKeys,
-                
-                // ✅ NEW: Set the doNotScrape flag in the data
                 doNotScrape: doNotScrape,
             };
+
+            // Post-processing: Merge break data into levels
+            if (data.breaks.length > 0 && data.levels.length > 0) {
+                data.breaks.forEach(breakInfo => {
+                    const levelBeforeBreak = data.levels.find(
+                        level => level.levelNumber === breakInfo.levelNumberBeforeBreak
+                    );
+                    if (levelBeforeBreak) {
+                        levelBeforeBreak.breakMinutes = breakInfo.durationMinutes;
+                    }
+                });
+            }
+
 
             // Check for missing fields (same logic as before)
             const missingFields: MissingField[] = [];
             
             const gameFields: Record<string, string> = {
-                // Core Game Fields
-                // ✅ NEW: Add gameStartDateTime as a potential missing field
                 'gameStartDateTime': 'Game start date/time not found',
                 'variant': 'Game variant (e.g., NLHE) not found', 
                 'seriesName': 'Series name not found on page',
@@ -155,7 +179,6 @@ export const useGameTracker = () => {
                 'totalAddons': 'Total addons not found on page',
                 'totalDuration': 'Total duration not found on page',
                 'gameTags': 'Game tags not found on page',
-                // Tournament Specific Fields
                 'tournamentType': 'Tournament type needs manual specification',
                 'buyIn': 'Buy-in amount not found on page',
                 'rake': 'Rake amount not available on page',
@@ -165,9 +188,7 @@ export const useGameTracker = () => {
 
             Object.entries(gameFields).forEach(([field, reason]) => {
                 const value = (data as any)[field];
-                // Check for undefined, null, or empty array
                 if (value === undefined || value === null || (Array.isArray(value) && value.length === 0)) {
-                    // Special case: hasGuarantee is bool, so check guaranteeAmount
                     if (field === 'guaranteeAmount' && data.hasGuarantee) {
                          missingFields.push({ model: 'Game', field, reason });
                     } else if (field !== 'guaranteeAmount') {
@@ -176,7 +197,6 @@ export const useGameTracker = () => {
                 }
             });
 
-            // TournamentStructure check
             if (!data.levels || data.levels.length === 0) {
                 missingFields.push({ 
                     model: 'TournamentStructure', 
@@ -185,7 +205,6 @@ export const useGameTracker = () => {
                 });
             }
 
-            // Add fields that always require manual input
             missingFields.push(
                 { model: 'Venue', field: 'all fields', reason: 'Venue must be selected manually' },
                 { model: 'Player', field: 'all fields', reason: 'Player data cannot be scraped from this page' },
@@ -196,27 +215,21 @@ export const useGameTracker = () => {
                 { model: 'RakeStructure', field: 'all fields', reason: 'Not applicable for tournaments' },
             );
 
-            // Determine if we should enable auto-refresh
             const shouldAutoRefresh = shouldAutoRefreshTournament(data);
-            
-            // ✅ NEW: Increment fetch count
             const newFetchCount = (game?.fetchCount || 0) + 1;
 
-            // Always set status to READY_TO_SAVE regardless of tournament status
-            // This allows users to save any tournament at any time
             updateGameState({
                 id,
                 data,
-                status: 'READY_TO_SAVE', // Always ready to save
+                status: 'READY_TO_SAVE',
                 lastFetched: new Date().toISOString(),
                 missingFields,
                 isNewStructure,
                 autoRefresh: shouldAutoRefresh,
-                fetchCount: newFetchCount, // ✅ Set new fetch count
-                existingGameId: existingGameId, // ✅ Set existing game ID
+                fetchCount: newFetchCount,
+                existingGameId: existingGameId,
             });
 
-            // Log if auto-refresh is enabled
             if (shouldAutoRefresh) {
                 console.log(`[useGameTracker] Auto-refresh enabled for RUNNING tournament: ${id}`);
             }
@@ -224,20 +237,18 @@ export const useGameTracker = () => {
         } catch (error: any) {
             console.error('[useGameTracker] Error fetching data:', error);
             
-            // ✅ NEW: Handle the "Do Not Scrape" error specifically
             const isDoNotScrapeError = error.message.includes('Scraping is disabled');
             
             updateGameState({
                 id,
                 status: 'ERROR',
                 errorMessage: error.message || 'Failed to fetch data from backend.',
-                // If this error was thrown, update the game state to reflect it
                 ...(isDoNotScrapeError && {
                     data: {
                         ...(game?.data as GameData),
                         doNotScrape: true,
                     },
-                    autoRefresh: false, // Turn off auto-refresh
+                    autoRefresh: false,
                 })
             });
         }
@@ -245,10 +256,7 @@ export const useGameTracker = () => {
     
     const trackGame = (id: string, source: DataSource) => {
         if (games[id] && games[id].status !== 'ERROR') {
-            // If it's an error, allow re-tracking.
-            // But if it's an error *because* of doNotScrape, fetchAndLoadData will handle it.
             if (games[id].errorMessage?.includes('Scraping is disabled')) {
-                 // Allow re-fetch, it will just fail again and show the message
                  console.log(`[useGameTracker] Re-tracking ${id}, which is flagged as 'Do Not Scrape'.`);
             } else {
                 console.log(`[useGameTracker] Game ${id} is already being tracked.`);
@@ -257,8 +265,6 @@ export const useGameTracker = () => {
         }
         
         dispatch({ type: 'ADD_GAME', payload: { id, source } });
-        // Use setTimeout to allow the ADD_GAME dispatch to update state
-        // before fetchAndLoadData is called
         setTimeout(() => fetchAndLoadData(id, source), 0);
     };
 
@@ -269,19 +275,16 @@ export const useGameTracker = () => {
             return;
         }
         
-        // All tournaments can be saved regardless of their status
         console.log(`[useGameTracker] Saving ${game.data.status} tournament: ${id}`);
         
         updateGameState({ id, status: 'SAVING' });
         try {
-            // ✅ NEW: Pass the existingGameId to the save function
             const result = await saveGameDataToBackend(id, venueId, game.data, game.existingGameId);
             
             updateGameState({ 
                 id, 
                 status: 'DONE', 
                 saveResult: result,
-                // ✅ NEW: After a successful save, update the existingGameId
                 existingGameId: result.id,
             });
             console.log(`[useGameTracker] Successfully saved ${game.data.status} tournament: ${id}`);
@@ -294,7 +297,6 @@ export const useGameTracker = () => {
         dispatch({ type: 'REMOVE_GAME', payload: { id } });
     };
 
-    // New function to manually refresh a specific game
     const refreshGame = (id: string) => {
         const game = games[id];
         if (game) {

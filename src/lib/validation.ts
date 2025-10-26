@@ -1,60 +1,74 @@
-// ✅ 1. Import the baseExpectations object.
-import { structureManifest, baseExpectations, StructureExpectations } from './structureManifest';
+// lib/validation.ts
 
-// ✅ 2. Update the return type to include separated lists of missing fields.
+import { fieldManifest } from './fieldManifest';
+
 export interface ValidationResult {
-  profile?: StructureExpectations;
-  baseProfile: StructureExpectations; // Always include base for reference
   status: 'VALID' | 'MISSING_EXPECTED' | 'UNPROFILED';
-  missingExpectedFields: string[]; // Combined total missing
-  missingOptionalFields: string[]; // Combined total optional missing
-  missingBaseExpectedFields: string[]; // Base fields missing
-  missingProfileExpectedFields: string[]; // Profile-specific fields missing
+  missingBaseExpectedFields: string[];
+  missingProfileExpectedFields: string[];
+  missingOptionalFields: string[];
 }
+
+// Helper to check if a structure label is recognized by the manifest.
+// This is important for the 'UNPROFILED' status.
+const doesProfileExist = (structureLabel: string): boolean => {
+    // A profile is considered to exist if it's explicitly mentioned in any field's
+    // isProfileExpected or isProfileOptional arrays.
+    for (const key in fieldManifest) {
+        if (fieldManifest[key].isProfileExpected?.includes(structureLabel) ||
+            fieldManifest[key].isProfileOptional?.includes(structureLabel)) {
+            return true;
+        }
+    }
+    // Also, treat baseline-only profiles as existing.
+    // Example: "STATUS: SCHEDULED | REG: OPEN" has no specific profile expectations but is valid.
+    if (structureLabel === "STATUS: SCHEDULED | REG: OPEN") {
+        return true;
+    }
+    return false;
+};
 
 export function validateStructure(
   structureLabel: string,
   foundKeys: string[]
 ): ValidationResult {
   
-  const profile = structureManifest[structureLabel];
-
-  if (!profile) {
+  if (!doesProfileExist(structureLabel)) {
     return {
       status: 'UNPROFILED',
-      baseProfile: baseExpectations,
-      missingExpectedFields: [],
-      missingOptionalFields: [],
       missingBaseExpectedFields: [],
       missingProfileExpectedFields: [],
+      missingOptionalFields: [],
     };
   }
 
   const foundKeysSet = new Set(foundKeys);
+  const missingBaseExpectedFields: string[] = [];
+  const missingProfileExpectedFields: string[] = [];
+  const missingOptionalFields: string[] = [];
 
-  // ✅ 3. Validate base and profile fields separately.
-  const missingBaseExpectedFields = baseExpectations.expectedFields.filter(
-    key => !foundKeysSet.has(key)
-  );
+  // Iterate through the single source of truth to check all fields
+  for (const fieldName in fieldManifest) {
+      const fieldDef = fieldManifest[fieldName];
+      const isFound = foundKeysSet.has(fieldName);
 
-  const missingProfileExpectedFields = profile.expectedFields.filter(
-    key => !foundKeysSet.has(key)
-  );
-
-  const missingOptionalFields = [...baseExpectations.optionalFields, ...profile.optionalFields].filter(
-    key => !foundKeysSet.has(key)
-  );
+      if (!isFound) {
+          if (fieldDef.isBaselineExpected) {
+              missingBaseExpectedFields.push(fieldName);
+          } else if (fieldDef.isProfileExpected?.includes(structureLabel)) {
+              missingProfileExpectedFields.push(fieldName);
+          } else if (fieldDef.isBaselineOptional || fieldDef.isProfileOptional?.includes(structureLabel)) {
+              missingOptionalFields.push(fieldName);
+          }
+      }
+  }
   
-  // Combine for the overall status check
-  const allMissingExpected = [...missingBaseExpectedFields, ...missingProfileExpectedFields];
+  const hasMissingFields = missingBaseExpectedFields.length > 0 || missingProfileExpectedFields.length > 0;
   
   return {
-    profile,
-    baseProfile: baseExpectations,
-    status: allMissingExpected.length > 0 ? 'MISSING_EXPECTED' : 'VALID',
-    missingExpectedFields: allMissingExpected,
+    status: hasMissingFields ? 'MISSING_EXPECTED' : 'VALID',
+    missingBaseExpectedFields,
+    missingProfileExpectedFields,
     missingOptionalFields,
-    missingBaseExpectedFields, // Return the separated list
-    missingProfileExpectedFields, // Return the separated list
   };
 }

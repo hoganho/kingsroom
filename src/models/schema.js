@@ -655,6 +655,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "doNotScrape": {
+                    "name": "doNotScrape",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
                 "seriesName": {
                     "name": "seriesName",
                     "isArray": false,
@@ -3330,6 +3337,67 @@ export const schema = {
         }
     },
     "nonModels": {
+        "ScrapedGameSummary": {
+            "name": "ScrapedGameSummary",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "registrationStatus": {
+                    "name": "registrationStatus",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameStartDateTime": {
+                    "name": "gameStartDateTime",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "inDatabase": {
+                    "name": "inDatabase",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "doNotScrape": {
+                    "name": "doNotScrape",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
         "ScrapedGameData": {
             "name": "ScrapedGameData",
             "fields": {
@@ -3456,11 +3524,51 @@ export const schema = {
                     "attributes": [],
                     "isArrayNullable": true
                 },
+                "breaks": {
+                    "name": "breaks",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "ScrapedBreak"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "entries": {
+                    "name": "entries",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "ScrapedPlayerEntries"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "seating": {
+                    "name": "seating",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "ScrapedPlayerSeating"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
                 "results": {
                     "name": "results",
                     "isArray": true,
                     "type": {
                         "nonModel": "ScrapedPlayerResult"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "tables": {
+                    "name": "tables",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "ScrapedTables"
                     },
                     "isRequired": true,
                     "attributes": [],
@@ -3537,6 +3645,70 @@ export const schema = {
                 }
             }
         },
+        "ScrapedBreak": {
+            "name": "ScrapedBreak",
+            "fields": {
+                "levelNumberBeforeBreak": {
+                    "name": "levelNumberBeforeBreak",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "levelNumberAfterBreak": {
+                    "name": "levelNumberAfterBreak",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "durationMinutes": {
+                    "name": "durationMinutes",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ScrapedPlayerEntries": {
+            "name": "ScrapedPlayerEntries",
+            "fields": {
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "ScrapedPlayerSeating": {
+            "name": "ScrapedPlayerSeating",
+            "fields": {
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "table": {
+                    "name": "table",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seat": {
+                    "name": "seat",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
         "ScrapedPlayerResult": {
             "name": "ScrapedPlayerResult",
             "fields": {
@@ -3558,6 +3730,68 @@ export const schema = {
                     "name": "winnings",
                     "isArray": false,
                     "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "points": {
+                    "name": "points",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ScrapedTables": {
+            "name": "ScrapedTables",
+            "fields": {
+                "tableName": {
+                    "name": "tableName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "seats": {
+                    "name": "seats",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "ScrapedTableSeatsData"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                }
+            }
+        },
+        "ScrapedTableSeatsData": {
+            "name": "ScrapedTableSeatsData",
+            "fields": {
+                "seat": {
+                    "name": "seat",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "isOccupied": {
+                    "name": "isOccupied",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playerName": {
+                    "name": "playerName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerStack": {
+                    "name": "playerStack",
+                    "isArray": false,
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 }
@@ -3612,5 +3846,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "16cb25f19152805fc5da59ff5de38921"
+    "version": "982b56708ed1173a13c5e94999c1fc2b"
 };

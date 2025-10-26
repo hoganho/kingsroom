@@ -520,6 +520,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
     gameEndDateTime
     venueId
     sourceUrl
+    doNotScrape
     seriesName
     isAdHoc
     registrationStatus
@@ -608,6 +609,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
     gameEndDateTime
     venueId
     sourceUrl
+    doNotScrape
     seriesName
     isAdHoc
     registrationStatus
@@ -696,6 +698,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
     gameEndDateTime
     venueId
     sourceUrl
+    doNotScrape
     seriesName
     isAdHoc
     registrationStatus
@@ -1836,6 +1839,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
       gameEndDateTime
       venueId
       sourceUrl
+      doNotScrape
       seriesName
       isAdHoc
       registrationStatus
@@ -1920,6 +1924,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
       gameEndDateTime
       venueId
       sourceUrl
+      doNotScrape
       seriesName
       isAdHoc
       registrationStatus
@@ -2004,6 +2009,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
       gameEndDateTime
       venueId
       sourceUrl
+      doNotScrape
       seriesName
       isAdHoc
       registrationStatus

@@ -15,15 +15,54 @@ export type PlayerResultData = {
     winnings: number;
 };
 
+// ✅ NEW: Type definitions for newly added data structures
+export type PlayerEntryData = {
+    name: string;
+};
+
+export type PlayerSeatingData = {
+    name: string;
+    table: number;
+    seat: number;
+};
+
+export type BreakData = {
+    levelNumberBeforeBreak: number;
+    durationMinutes: number;
+};
+
+export type TableSeatData = {
+    seat: number;
+    isOccupied: boolean;
+    playerName?: string | null;
+    playerStack?: number | null;
+};
+
+export type TableData = {
+    tableName: string;
+    seats: TableSeatData[];
+};
+
+export type BulkGameSummary = {
+    id: string;
+    name?: string;
+    status?: string;
+    registrationStatus?: string;
+    gameStartDateTime?: string;
+    inDatabase?: boolean;
+    doNotScrape?: boolean;
+    error?: string;
+};
+
 // Tournament/Game status - what's happening with the actual game
 export type GameStatus = 'SCHEDULED' | 'RUNNING' | 'COMPLETED' | 'CANCELLED';
 
 export type GameData = {
     // Basic game information
     name: string;
-    gameStartDateTime?: string; // ✅ UPDATED: Now optional
-    gameEndDateTime?: string; // ✅ NEW
-    status: GameStatus; // Changed to use specific type
+    gameStartDateTime?: string;
+    gameEndDateTime?: string;
+    status: GameStatus;
     type?: 'TOURNAMENT' | 'CASH_GAME';
     variant?: string | null;
     
@@ -32,12 +71,13 @@ export type GameData = {
     gameVariant?: string | null;
     prizepool?: number | null;
     totalEntries?: number | null;
+    playersRemaining?: number | null; // ✅ NEW
     totalRebuys?: number | null;
     totalAddons?: number | null;
     totalDuration?: string | null;
     gameTags?: (string | null)[] | null;
     seriesName?: string | null;
-    revenueByEntries?: number | null; // ✅ NEW
+    revenueByEntries?: number | null;
     
     // Tournament-specific fields (now on Game model)
     tournamentType?: 'FREEZEOUT' | 'REBUY' | 'SATELLITE' | 'DEEPSTACK' | null;
@@ -53,6 +93,12 @@ export type GameData = {
     // Player results
     results?: PlayerResultData[] | null;
     
+    // ✅ NEW: Add entries, seating, breaks, and tables
+    entries?: PlayerEntryData[] | null;
+    seating?: PlayerSeatingData[] | null;
+    breaks?: BreakData[] | null;
+    tables?: TableData[] | null;
+
     // Additional data
     otherDetails: Record<string, string>;
     rawHtml?: string | null;
@@ -61,7 +107,6 @@ export type GameData = {
     structureLabel?: string;
     foundKeys?: string[];
     
-    // ✅ NEW: Flag to control scraping
     doNotScrape?: boolean;
 };
 
@@ -94,11 +139,8 @@ export interface GameState {
     errorMessage?: string;
     saveResult?: any;
     isNewStructure?: boolean;
-    // Track if we should auto-refresh (for RUNNING tournaments)
     autoRefresh?: boolean;
-    // ✅ NEW: Track number of fetches
     fetchCount: number;
-    // ✅ NEW: Track if game exists in DB
     existingGameId?: string | null;
 }
 
@@ -108,9 +150,7 @@ export interface SaveTournamentInput {
     sourceUrl: string;
     venueId: string;
     data: GameDataInput;
-    // ✅ NEW: Add existingGameId for update logic
     existingGameId?: string | null;
-    // ✅ NEW: Add doNotScrape flag
     doNotScrape?: boolean;
 }
 
@@ -139,7 +179,6 @@ export interface GameDataInput {
     // Blind levels
     levels?: TournamentLevelInput[];
     
-    // ✅ NEW: Flag to control scraping
     doNotScrape?: boolean;
 }
 
@@ -151,4 +190,3 @@ export interface TournamentLevelInput {
     ante?: number;
     breakMinutes?: number;
 }
-

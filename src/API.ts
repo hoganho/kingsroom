@@ -21,7 +21,11 @@ export type ScrapedGameData = {
   hasGuarantee?: boolean | null,
   guaranteeAmount?: number | null,
   levels?:  Array<ScrapedTournamentLevel > | null,
+  breaks?:  Array<ScrapedBreak > | null,
+  entries?:  Array<ScrapedPlayerEntries > | null,
+  seating?:  Array<ScrapedPlayerSeating > | null,
   results?:  Array<ScrapedPlayerResult > | null,
+  tables?:  Array<ScrapedTables > | null,
   rawHtml?: string | null,
   isNewStructure?: boolean | null,
   structureLabel?: string | null,
@@ -37,11 +41,45 @@ export type ScrapedTournamentLevel = {
   ante?: number | null,
 };
 
+export type ScrapedBreak = {
+  __typename: "ScrapedBreak",
+  levelNumberBeforeBreak: number,
+  levelNumberAfterBreak: number,
+  durationMinutes?: number | null,
+};
+
+export type ScrapedPlayerEntries = {
+  __typename: "ScrapedPlayerEntries",
+  name: string,
+};
+
+export type ScrapedPlayerSeating = {
+  __typename: "ScrapedPlayerSeating",
+  name: string,
+  table?: number | null,
+  seat?: number | null,
+};
+
 export type ScrapedPlayerResult = {
   __typename: "ScrapedPlayerResult",
   rank: number,
   name: string,
   winnings?: number | null,
+  points?: number | null,
+};
+
+export type ScrapedTables = {
+  __typename: "ScrapedTables",
+  tableName: string,
+  seats?:  Array<ScrapedTableSeatsData > | null,
+};
+
+export type ScrapedTableSeatsData = {
+  __typename: "ScrapedTableSeatsData",
+  seat: number,
+  isOccupied: boolean,
+  playerName?: string | null,
+  playerStack?: number | null,
 };
 
 export type SaveTournamentInput = {
@@ -72,6 +110,10 @@ export type ScrapedGameDataInput = {
   hasGuarantee?: boolean | null,
   guaranteeAmount?: number | null,
   levels?: Array< ScrapedTournamentLevelInput > | null,
+  breaks?: Array< ScrapedBreakInput > | null,
+  entries?: Array< ScrapedPlayerEntriesInput > | null,
+  seating?: Array< ScrapedPlayerSeatingInput > | null,
+  results?: Array< ScrapedPlayerResultInput > | null,
 };
 
 export enum GameStatus {
@@ -99,6 +141,29 @@ export type ScrapedTournamentLevelInput = {
   ante?: number | null,
 };
 
+export type ScrapedBreakInput = {
+  levelNumberBeforeBreak: number,
+  levelNumberAfterBreak: number,
+  durationMinutes?: number | null,
+};
+
+export type ScrapedPlayerEntriesInput = {
+  name: string,
+};
+
+export type ScrapedPlayerSeatingInput = {
+  name: string,
+  table?: number | null,
+  seat?: number | null,
+};
+
+export type ScrapedPlayerResultInput = {
+  rank: number,
+  name: string,
+  winnings?: number | null,
+  points?: number | null,
+};
+
 export type Game = {
   __typename: "Game",
   id: string,
@@ -110,6 +175,7 @@ export type Game = {
   gameEndDateTime?: string | null,
   venueId: string,
   sourceUrl?: string | null,
+  doNotScrape: boolean,
   seriesName?: string | null,
   isAdHoc?: boolean | null,
   registrationStatus?: string | null,
@@ -893,6 +959,7 @@ export type CreateGameInput = {
   gameEndDateTime?: string | null,
   venueId: string,
   sourceUrl?: string | null,
+  doNotScrape: boolean,
   seriesName?: string | null,
   isAdHoc?: boolean | null,
   registrationStatus?: string | null,
@@ -925,6 +992,7 @@ export type ModelGameConditionInput = {
   gameEndDateTime?: ModelStringInput | null,
   venueId?: ModelIDInput | null,
   sourceUrl?: ModelStringInput | null,
+  doNotScrape?: ModelBooleanInput | null,
   seriesName?: ModelStringInput | null,
   isAdHoc?: ModelBooleanInput | null,
   registrationStatus?: ModelStringInput | null,
@@ -978,6 +1046,7 @@ export type UpdateGameInput = {
   gameEndDateTime?: string | null,
   venueId?: string | null,
   sourceUrl?: string | null,
+  doNotScrape?: boolean | null,
   seriesName?: string | null,
   isAdHoc?: boolean | null,
   registrationStatus?: string | null,
@@ -1950,6 +2019,18 @@ export type DeleteMarketingMessageInput = {
   _version?: number | null,
 };
 
+export type ScrapedGameSummary = {
+  __typename: "ScrapedGameSummary",
+  id: string,
+  name?: string | null,
+  status?: string | null,
+  registrationStatus?: string | null,
+  gameStartDateTime?: string | null,
+  inDatabase?: boolean | null,
+  doNotScrape?: boolean | null,
+  error?: string | null,
+};
+
 export type ModelDataSyncFilterInput = {
   id?: ModelIDInput | null,
   syncedAt?: ModelStringInput | null,
@@ -2067,6 +2148,7 @@ export type ModelGameFilterInput = {
   gameEndDateTime?: ModelStringInput | null,
   venueId?: ModelIDInput | null,
   sourceUrl?: ModelStringInput | null,
+  doNotScrape?: ModelBooleanInput | null,
   seriesName?: ModelStringInput | null,
   isAdHoc?: ModelBooleanInput | null,
   registrationStatus?: ModelStringInput | null,
@@ -2620,6 +2702,7 @@ export type ModelSubscriptionGameFilterInput = {
   gameEndDateTime?: ModelSubscriptionStringInput | null,
   venueId?: ModelSubscriptionIDInput | null,
   sourceUrl?: ModelSubscriptionStringInput | null,
+  doNotScrape?: ModelSubscriptionBooleanInput | null,
   seriesName?: ModelSubscriptionStringInput | null,
   isAdHoc?: ModelSubscriptionBooleanInput | null,
   registrationStatus?: ModelSubscriptionStringInput | null,
@@ -2949,11 +3032,32 @@ export type FetchTournamentDataMutation = {
       bigBlind?: number | null,
       ante?: number | null,
     } > | null,
+    breaks?:  Array< {
+      __typename: "ScrapedBreak",
+      levelNumberBeforeBreak: number,
+      levelNumberAfterBreak: number,
+      durationMinutes?: number | null,
+    } > | null,
+    entries?:  Array< {
+      __typename: "ScrapedPlayerEntries",
+      name: string,
+    } > | null,
+    seating?:  Array< {
+      __typename: "ScrapedPlayerSeating",
+      name: string,
+      table?: number | null,
+      seat?: number | null,
+    } > | null,
     results?:  Array< {
       __typename: "ScrapedPlayerResult",
       rank: number,
       name: string,
       winnings?: number | null,
+      points?: number | null,
+    } > | null,
+    tables?:  Array< {
+      __typename: "ScrapedTables",
+      tableName: string,
     } > | null,
     rawHtml?: string | null,
     isNewStructure?: boolean | null,
@@ -2978,6 +3082,7 @@ export type SaveTournamentDataMutation = {
     gameEndDateTime?: string | null,
     venueId: string,
     sourceUrl?: string | null,
+    doNotScrape: boolean,
     seriesName?: string | null,
     isAdHoc?: boolean | null,
     registrationStatus?: string | null,
@@ -3587,6 +3692,7 @@ export type CreateGameMutation = {
     gameEndDateTime?: string | null,
     venueId: string,
     sourceUrl?: string | null,
+    doNotScrape: boolean,
     seriesName?: string | null,
     isAdHoc?: boolean | null,
     registrationStatus?: string | null,
@@ -3677,6 +3783,7 @@ export type UpdateGameMutation = {
     gameEndDateTime?: string | null,
     venueId: string,
     sourceUrl?: string | null,
+    doNotScrape: boolean,
     seriesName?: string | null,
     isAdHoc?: boolean | null,
     registrationStatus?: string | null,
@@ -3767,6 +3874,7 @@ export type DeleteGameMutation = {
     gameEndDateTime?: string | null,
     venueId: string,
     sourceUrl?: string | null,
+    doNotScrape: boolean,
     seriesName?: string | null,
     isAdHoc?: boolean | null,
     registrationStatus?: string | null,
@@ -4914,6 +5022,7 @@ export type CreatePlayerResultMutation = {
       gameEndDateTime?: string | null,
       venueId: string,
       sourceUrl?: string | null,
+      doNotScrape: boolean,
       seriesName?: string | null,
       isAdHoc?: boolean | null,
       registrationStatus?: string | null,
@@ -4998,6 +5107,7 @@ export type UpdatePlayerResultMutation = {
       gameEndDateTime?: string | null,
       venueId: string,
       sourceUrl?: string | null,
+      doNotScrape: boolean,
       seriesName?: string | null,
       isAdHoc?: boolean | null,
       registrationStatus?: string | null,
@@ -5082,6 +5192,7 @@ export type DeletePlayerResultMutation = {
       gameEndDateTime?: string | null,
       venueId: string,
       sourceUrl?: string | null,
+      doNotScrape: boolean,
       seriesName?: string | null,
       isAdHoc?: boolean | null,
       registrationStatus?: string | null,
@@ -6003,6 +6114,25 @@ export type DeleteMarketingMessageMutation = {
   } | null,
 };
 
+export type FetchTournamentDataRangeQueryVariables = {
+  startId: number,
+  endId: number,
+};
+
+export type FetchTournamentDataRangeQuery = {
+  fetchTournamentDataRange?:  Array< {
+    __typename: "ScrapedGameSummary",
+    id: string,
+    name?: string | null,
+    status?: string | null,
+    registrationStatus?: string | null,
+    gameStartDateTime?: string | null,
+    inDatabase?: boolean | null,
+    doNotScrape?: boolean | null,
+    error?: string | null,
+  } > | null,
+};
+
 export type GetDataSyncQueryVariables = {
   id: string,
 };
@@ -6480,6 +6610,7 @@ export type GetGameQuery = {
     gameEndDateTime?: string | null,
     venueId: string,
     sourceUrl?: string | null,
+    doNotScrape: boolean,
     seriesName?: string | null,
     isAdHoc?: boolean | null,
     registrationStatus?: string | null,
@@ -6573,6 +6704,7 @@ export type ListGamesQuery = {
       gameEndDateTime?: string | null,
       venueId: string,
       sourceUrl?: string | null,
+      doNotScrape: boolean,
       seriesName?: string | null,
       isAdHoc?: boolean | null,
       registrationStatus?: string | null,
@@ -6625,6 +6757,7 @@ export type SyncGamesQuery = {
       gameEndDateTime?: string | null,
       venueId: string,
       sourceUrl?: string | null,
+      doNotScrape: boolean,
       seriesName?: string | null,
       isAdHoc?: boolean | null,
       registrationStatus?: string | null,
@@ -7463,6 +7596,7 @@ export type GetPlayerResultQuery = {
       gameEndDateTime?: string | null,
       venueId: string,
       sourceUrl?: string | null,
+      doNotScrape: boolean,
       seriesName?: string | null,
       isAdHoc?: boolean | null,
       registrationStatus?: string | null,
@@ -8499,6 +8633,7 @@ export type GamesByVenueIdAndGameStartDateTimeQuery = {
       gameEndDateTime?: string | null,
       venueId: string,
       sourceUrl?: string | null,
+      doNotScrape: boolean,
       seriesName?: string | null,
       isAdHoc?: boolean | null,
       registrationStatus?: string | null,
@@ -8552,6 +8687,7 @@ export type GameBySourceUrlQuery = {
       gameEndDateTime?: string | null,
       venueId: string,
       sourceUrl?: string | null,
+      doNotScrape: boolean,
       seriesName?: string | null,
       isAdHoc?: boolean | null,
       registrationStatus?: string | null,
@@ -8605,6 +8741,7 @@ export type GamesByTournamentStructureIdQuery = {
       gameEndDateTime?: string | null,
       venueId: string,
       sourceUrl?: string | null,
+      doNotScrape: boolean,
       seriesName?: string | null,
       isAdHoc?: boolean | null,
       registrationStatus?: string | null,
@@ -8658,6 +8795,7 @@ export type GamesByCashStructureIdQuery = {
       gameEndDateTime?: string | null,
       venueId: string,
       sourceUrl?: string | null,
+      doNotScrape: boolean,
       seriesName?: string | null,
       isAdHoc?: boolean | null,
       registrationStatus?: string | null,
@@ -9792,6 +9930,7 @@ export type OnCreateGameSubscription = {
     gameEndDateTime?: string | null,
     venueId: string,
     sourceUrl?: string | null,
+    doNotScrape: boolean,
     seriesName?: string | null,
     isAdHoc?: boolean | null,
     registrationStatus?: string | null,
@@ -9881,6 +10020,7 @@ export type OnUpdateGameSubscription = {
     gameEndDateTime?: string | null,
     venueId: string,
     sourceUrl?: string | null,
+    doNotScrape: boolean,
     seriesName?: string | null,
     isAdHoc?: boolean | null,
     registrationStatus?: string | null,
@@ -9970,6 +10110,7 @@ export type OnDeleteGameSubscription = {
     gameEndDateTime?: string | null,
     venueId: string,
     sourceUrl?: string | null,
+    doNotScrape: boolean,
     seriesName?: string | null,
     isAdHoc?: boolean | null,
     registrationStatus?: string | null,
@@ -11095,6 +11236,7 @@ export type OnCreatePlayerResultSubscription = {
       gameEndDateTime?: string | null,
       venueId: string,
       sourceUrl?: string | null,
+      doNotScrape: boolean,
       seriesName?: string | null,
       isAdHoc?: boolean | null,
       registrationStatus?: string | null,
@@ -11178,6 +11320,7 @@ export type OnUpdatePlayerResultSubscription = {
       gameEndDateTime?: string | null,
       venueId: string,
       sourceUrl?: string | null,
+      doNotScrape: boolean,
       seriesName?: string | null,
       isAdHoc?: boolean | null,
       registrationStatus?: string | null,
@@ -11261,6 +11404,7 @@ export type OnDeletePlayerResultSubscription = {
       gameEndDateTime?: string | null,
       venueId: string,
       sourceUrl?: string | null,
+      doNotScrape: boolean,
       seriesName?: string | null,
       isAdHoc?: boolean | null,
       registrationStatus?: string | null,

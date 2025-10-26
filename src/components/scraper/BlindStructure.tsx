@@ -16,15 +16,25 @@ export const BlindStructure: React.FC<{ levels?: TournamentLevelData[] | null }>
                             <th className="px-2 py-1 text-left">Duration</th>
                             <th className="px-2 py-1 text-left">Blinds</th>
                             <th className="px-2 py-1 text-left">Ante</th>
+                            {/* ✅ NEW: Show break column only if data exists */}
+                            {levels.some(l => l.breakMinutes) && (
+                                <th className="px-2 py-1 text-left">Break</th>
+                            )}
                         </tr>
                     </thead>
                     <tbody>
                         {levels.map((level, idx) => (
-                            <tr key={idx} className="border-b">
+                            <tr key={idx} className={`border-b ${level.breakMinutes ? 'bg-blue-50' : ''}`}>
                                 <td className="px-2 py-1">{level.levelNumber}</td>
                                 <td className="px-2 py-1">{level.durationMinutes}min</td>
                                 <td className="px-2 py-1">{level.smallBlind}/{level.bigBlind}</td>
                                 <td className="px-2 py-1">{level.ante || '-'}</td>
+                                {/* ✅ NEW: Show break data */}
+                                {levels.some(l => l.breakMinutes) && (
+                                    <td className="px-2 py-1 font-medium text-blue-700">
+                                        {level.breakMinutes ? `${level.breakMinutes}min` : '-'}
+                                    </td>
+                                )}
                             </tr>
                         ))}
                     </tbody>
@@ -33,4 +43,3 @@ export const BlindStructure: React.FC<{ levels?: TournamentLevelData[] | null }>
         </div>
     );
 };
-

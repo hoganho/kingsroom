@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import type { GameData } from '../../types/game';
-import { validateStructure } from '../../lib/validation.ts';
+import { validateStructure } from '../../lib/validation';
+// Import the descriptions from your single source of truth
+import { profileDescriptions } from '../../lib/fieldManifest';
 
 // Helper component for rendering lists to keep the main component clean
 const FieldList: React.FC<{ fields: string[]; title: string; description?: string; className?: string }> = ({ fields, title, description, className = 'text-red-700' }) => {
@@ -28,7 +30,9 @@ export const ValidationSummary: React.FC<{ data: GameData }> = ({ data }) => {
 
     if (!validationResult) return null;
 
-    // ... (renderMissingOptional function remains the same)
+    // Get the profile description from the new manifest
+    const profileDescription = data.structureLabel ? profileDescriptions[data.structureLabel] : 'unknown profile';
+
     const renderMissingOptional = () => {
         if (validationResult.missingOptionalFields.length === 0) return null;
         return (
@@ -42,13 +46,12 @@ export const ValidationSummary: React.FC<{ data: GameData }> = ({ data }) => {
 
     switch (validationResult.status) {
         case 'UNPROFILED':
-            // ... (this case remains the same)
             return (
                 <div className="p-3 bg-yellow-50 border-l-4 border-yellow-400 mb-4">
                     <h4 className="font-bold text-yellow-800">Un-profiled Structure Detected</h4>
                     <p className="text-xs mt-1 text-yellow-700">
                         This page has a new structure label: <strong className="font-mono">{data.structureLabel}</strong>.
-                        Please review the found data keys and add a new profile to <code>structureManifest.ts</code>.
+                        Please review the found data keys and add a new profile to <code>fieldManifest.ts</code>.
                     </p>
                 </div>
             );
@@ -58,7 +61,6 @@ export const ValidationSummary: React.FC<{ data: GameData }> = ({ data }) => {
                 <div className="p-3 bg-red-50 border-l-4 border-red-400 mb-4">
                     <h4 className="font-bold text-red-800">High-Priority Error: Missing Required Data!</h4>
                     
-                    {/* ✅ Render the two lists separately */}
                     <FieldList 
                         fields={validationResult.missingBaseExpectedFields}
                         title="Missing Baseline Fields"
@@ -68,7 +70,7 @@ export const ValidationSummary: React.FC<{ data: GameData }> = ({ data }) => {
                     <FieldList
                         fields={validationResult.missingProfileExpectedFields}
                         title="Missing Structure-Specific Fields"
-                        description={`For a "${validationResult.profile?.description}", these additional fields were expected:`}
+                        description={`For a "${profileDescription}", these additional fields were expected:`}
                     />
                 </div>
             );
@@ -78,11 +80,10 @@ export const ValidationSummary: React.FC<{ data: GameData }> = ({ data }) => {
                 <div className="p-3 bg-green-50 border-l-4 border-green-400 mb-4">
                     <h4 className="font-bold text-green-800">Data Integrity Check: Passed ✅</h4>
                     
-                    {/* ✅ Show a detailed success message */}
                     <div className="text-xs mt-2 space-y-1 text-green-700">
-                        <p>✓ All <strong>{validationResult.baseProfile.expectedFields.length} baseline fields</strong> were found.</p>
-                        {validationResult.profile && validationResult.profile.expectedFields.length > 0 && (
-                             <p>✓ All <strong>{validationResult.profile.expectedFields.length} specific fields</strong> for a "{validationResult.profile.description}" were found.</p>
+                        <p>✓ All baseline expected fields were found.</p>
+                        {validationResult.missingProfileExpectedFields.length === 0 && (
+                             <p>✓ All specific fields for a "{profileDescription}" were found.</p>
                         )}
                     </div>
 

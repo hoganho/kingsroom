@@ -2,6 +2,7 @@
 
 import { generateClient } from 'aws-amplify/api';
 import { fetchTournamentData, saveTournamentData } from '../graphql/mutations';
+import { fetchTournamentDataRange } from '../graphql/queries'; // Assuming you have this query defined
 import * as APITypes from '../API';
 import type { GameData, GameStatus } from '../types/game';
 
@@ -150,4 +151,27 @@ export const shouldAutoRefreshTournament = (data: GameData): boolean => {
         return false;
     }
     return data.status === 'RUNNING';
+};
+
+/**
+ * ✅ UPDATED: This function is now corrected to use the `generateClient` pattern.
+ */
+export const fetchGameDataRangeFromBackend = async (startId: number, endId: number) => {
+    const client = generateClient(); // ✅ Use the modern client
+    console.log(`[GameService] Fetching game range ${startId}-${endId} from backend...`);
+    try {
+        const response = await client.graphql({ // ✅ Call GraphQL using the client
+            query: fetchTournamentDataRange,
+            variables: { startId, endId }
+        });
+
+        if (response.errors) {
+            throw new Error(response.errors[0].message);
+        }
+        
+        return response.data.fetchTournamentDataRange;
+    } catch (error) {
+        console.error('Error fetching game data range from backend:', error);
+        throw error; // Re-throw the error to be handled by the hook
+    }
 };

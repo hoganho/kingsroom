@@ -42,7 +42,6 @@ const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
 const crypto = require('crypto');
 
-// ✅ NEW: Import the runScraper and getStatusAndReg functions
 const {
     runScraper,
     getStatusAndReg
@@ -51,7 +50,6 @@ const {
 const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
 
-// Helper to get table names from environment variables
 const getTableName = (modelName) => {
     const envVarName = `API_KINGSROOM_${modelName.toUpperCase()}TABLE_NAME`;
     const tableName = process.env[envVarName];
@@ -61,30 +59,16 @@ const getTableName = (modelName) => {
 
 // --- SCRAPING LOGIC ---
 
-/**
- * ✅ REFACTORED: This function is now lightweight.
- * It determines the structure, selects the correct strategy, and executes it.
- */
 const scrapeDataFromHtml = (html) => {
-    // 1. Get Status and Reg to determine structure
-    // NOTE: This is a quick pass just to get the label.
-    // The main runScraper will re-run these functions as part of the full scrape.
     const { status, registrationStatus } = getStatusAndReg(html);
     
-    // ✅ NEW: Create the structureLabel
     const structureLabel = `STATUS: ${status || 'UNKNOWN'} | REG: ${registrationStatus || 'UNKNOWN'}`;
     console.log(`[DEBUG-SCRAPER] Identified Structure: ${structureLabel}`);
     
-    // 2. Run the full scraper strategy
-    // The runScraper function will handle strategy selection based on the label
-    // and execute all scraping functions.
     const { data, foundKeys } = runScraper(html, structureLabel);
     
-    // 3. Manually add the structureLabel to the final data object
-    // (runScraper doesn't add this itself, as it's metadata)
     data.structureLabel = structureLabel;
     
-    // Add to foundKeys for validation, ensuring no duplicates
     if (!foundKeys.includes('structureLabel')) {
         foundKeys.push('structureLabel');
     }
@@ -93,13 +77,10 @@ const scrapeDataFromHtml = (html) => {
 };
 
 
-/**
- * Processes the structure fingerprint
- */
 const processStructureFingerprint = async (foundKeys, structureLabel, sourceUrl) => {
     if (!foundKeys || foundKeys.length === 0) {
         console.log('No keys found, skipping fingerprint generation.');
-        return { isNewStructure: false, structureLabel: structureLabel }; // Return the label even if no keys
+        return { isNewStructure: false, structureLabel: structureLabel };
     }
 
     foundKeys.sort();
@@ -111,8 +92,6 @@ const processStructureFingerprint = async (foundKeys, structureLabel, sourceUrl)
     try {
         const getResponse = await ddbDocClient.send(new QueryCommand({
             TableName: structureTable,
-            // Use the GSI 'byStructureLabel' if 'id' is not the primary key you want to query
-            // Assuming 'id' (the hash) is the primary key
             KeyConditionExpression: 'id = :id',
             ExpressionAttributeValues: { ':id': structureId }
         }));
@@ -126,14 +105,14 @@ const processStructureFingerprint = async (foundKeys, structureLabel, sourceUrl)
                 Item: {
                     id: structureId,
                     fields: foundKeys,
-                    structureLabel: structureLabel, // Save the label
+                    structureLabel: structureLabel,
                     occurrenceCount: 1,
                     firstSeenAt: now,
                     lastSeenAt: now,
                     exampleUrl: sourceUrl,
                     __typename: "ScrapeStructure",
-                    createdAt: now, // Added createdAt
-                    updatedAt: now, // Added updatedAt
+                    createdAt: now,
+                    updatedAt: now,
                     _lastChangedAt: Date.now(),
                     _version: 1,
                 }
@@ -141,10 +120,9 @@ const processStructureFingerprint = async (foundKeys, structureLabel, sourceUrl)
             return { isNewStructure: true, structureLabel };
         } else {
             console.log(`Updated existing structure fingerprint with ID: ${structureId}`);
-            // Use UpdateCommand on the primary key 'id'
             await ddbDocClient.send(new UpdateCommand({
                 TableName: structureTable,
-                Key: { id: structureId }, // Correctly target the item by its primary key
+                Key: { id: structureId },
                 UpdateExpression: 'SET #lastSeenAt = :now, #occurrenceCount = #occurrenceCount + :inc, #updatedAt = :now',
                 ExpressionAttributeNames: {
                     '#lastSeenAt': 'lastSeenAt',
@@ -161,15 +139,10 @@ const processStructureFingerprint = async (foundKeys, structureLabel, sourceUrl)
         }
     } catch (error) {
         console.error('Error processing structure fingerprint:', error);
-        // Return the best-effort info we have
         return { isNewStructure: false, structureLabel: structureLabel };
     }
 };
 
-/**
- * ✅ UPDATED: The handler now queries DynamoDB *first* to check for an existing game
- * and the `doNotScrape` flag before attempting to fetch the URL.
- */
 const handleFetch = async (url) => {
     console.log(`[handleFetch] Processing URL: ${url}`);
     
@@ -177,14 +150,12 @@ const handleFetch = async (url) => {
     let existingGameId = null;
     let doNotScrape = false;
     
-    // --- 1. Check for existing game and `doNotScrape` flag ---
     try {
         const queryCommand = new QueryCommand({
             TableName: gameTable,
-            IndexName: 'bySourceUrl', // Assumes a GSI named 'bySourceUrl' on the 'sourceUrl' field
+            IndexName: 'bySourceUrl',
             KeyConditionExpression: 'sourceUrl = :sourceUrl',
             ExpressionAttributeValues: { ':sourceUrl': url },
-            // Request only the fields we need for this check
             ProjectionExpression: 'id, doNotScrape' 
         });
 
@@ -201,64 +172,46 @@ const handleFetch = async (url) => {
 
     } catch (error) {
         console.warn(`[handleFetch] Error querying for existing game: ${error.message}. Proceeding with scrape.`);
-        // Don't block scraping if the query fails, just log it.
     }
 
-    // --- 2. Honor the `doNotScrape` flag ---
     if (doNotScrape) {
         console.error(`[handleFetch] Scraping is disabled for this URL (doNotScrape=true). Aborting.`);
-        // Throw an error to notify the frontend
-        // Also return the existingGameId so the frontend can manage state
         return {
             existingGameId,
             doNotScrape,
-            // Send minimal data to prevent frontend errors
             name: "Scraping Disabled",
             status: "UNKNOWN",
             gameStartDateTime: new Date().toISOString(),
             foundKeys: [],
             isNewStructure: false,
             structureLabel: "UNKNOWN",
-            // Throwing an error is better
             errorMessage: "Scraping is disabled for this URL. To re-enable, uncheck \"Do Not Scrape\" and save."
         };
-        // throw new Error('Scraping is disabled for this URL. To re-enable, uncheck "Do Not Scrape" and save.');
     }
 
-    // --- 3. Proceed with scraping ---
     console.log(`[handleFetch] Fetching data from: ${url}`);
     const response = await axios.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
     
     const { data, foundKeys } = scrapeDataFromHtml(response.data);
     
-    // --- 4. Process fingerprint ---
     const fingerprintResult = await processStructureFingerprint(foundKeys, data.structureLabel, url);
     
-    // --- 5. Return all data to frontend ---
-    // Includes scraped data, fingerprint results, foundKeys, and existingGameId
     return { 
         ...data, 
         ...fingerprintResult, 
         foundKeys,
-        existingGameId, // ✅ NEW: Send existingGameId to frontend
-        doNotScrape,    // ✅ NEW: Send current doNotScrape status to frontend
+        existingGameId,
+        doNotScrape,
     };
 };
 
-/**
- * ✅ UPDATED: The handler for saving data.
- * It now correctly handles updates vs. creations based on `existingGameId`.
- * It also saves the `doNotScrape` flag.
- */
 const handleSave = async (input) => {
-    // Note: We need GetCommand for the update logic, it's imported in the handler
     const { sourceUrl, venueId, data, existingGameId, doNotScrape } = input;
     const now = new Date().toISOString();
     
     const gameTable = getTableName('Game');
     const structureTable = getTableName('TournamentStructure');
     
-    // Helper function to calculate revenue from entries
     const calculateRevenueByEntries = (buyIn, totalEntries) => {
         const numBuyIn = parseFloat(buyIn);
         const numTotalEntries = parseInt(totalEntries, 10);
@@ -269,14 +222,38 @@ const handleSave = async (input) => {
         return null;
     };
     
-    // Prepare revenueByEntries
     const revenueByEntries = calculateRevenueByEntries(data.buyIn, data.totalEntries);
 
-    // --- 1. Check if this is an UPDATE or a NEW game ---
+    // ✅ **NEW**: Helper function to merge break data into the levels array.
+    const processLevels = (levels = [], breaks = []) => {
+        // Create a map for quick lookups of levels by their number.
+        const levelMap = new Map(levels.map(l => [l.levelNumber, { ...l }]));
+
+        // Iterate over each break and add its duration to the corresponding level.
+        breaks.forEach(breakInfo => {
+            if (levelMap.has(breakInfo.levelNumberBeforeBreak)) {
+                const level = levelMap.get(breakInfo.levelNumberBeforeBreak);
+                level.breakMinutes = breakInfo.durationMinutes || 0;
+            }
+        });
+
+        // Convert the map back to an array and format it for DynamoDB.
+        return Array.from(levelMap.values()).map(level => ({
+            levelNumber: level.levelNumber,
+            durationMinutes: level.durationMinutes || 20,
+            smallBlind: level.smallBlind || 0,
+            bigBlind: level.bigBlind || 0,
+            ante: level.ante || 0,
+            breakMinutes: level.breakMinutes || 0
+        }));
+    };
+
+    // ✅ **NEW**: Call the helper to get the final, processed levels array.
+    const processedLevels = processLevels(data.levels, data.breaks);
+
     if (existingGameId) {
         console.log(`[handleSave] Updating existing game with ID: ${existingGameId}.`);
         
-        // Fetch the full existing game item to merge
         const getResult = await ddbDocClient.send(new GetCommand({
             TableName: gameTable,
             Key: { id: existingGameId }
@@ -287,15 +264,13 @@ const handleSave = async (input) => {
         }
         const existingGame = getResult.Item;
         
-        // Update existing game with new data
         const updatedGameItem = {
             ...existingGame,
-            // Update with new scraped data
             name: data.name,
             status: data.status || 'SCHEDULED',
             registrationStatus: data.registrationStatus,
             gameVariant: data.gameVariant, 
-            variant: data.gameVariant, // Ensure variant is also updated
+            variant: data.gameVariant,
             seriesName: data.seriesName,
             prizepool: data.prizepool,
             totalEntries: data.totalEntries,
@@ -305,25 +280,22 @@ const handleSave = async (input) => {
             totalDuration: data.totalDuration,
             gameTags: data.gameTags,
             buyIn: data.buyIn,
-            rake: data.rake || existingGame.rake || 0, // Keep existing rake if new one isn't provided
+            rake: data.rake || existingGame.rake || 0,
             startingStack: data.startingStack,
             hasGuarantee: data.hasGuarantee,
             guaranteeAmount: data.guaranteeAmount,
             tournamentType: data.tournamentType || 'FREEZEOUT',
             revenueByEntries: revenueByEntries,
-            // Keep existing fields
-            venueId, // Update venueId in case it was changed
+            venueId,
             gameStartDateTime: data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : existingGame.gameStartDateTime,
             gameEndDateTime: data.gameEndDateTime ? new Date(data.gameEndDateTime).toISOString() : (existingGame.gameEndDateTime || null),
-            // ✅ NEW: Update the doNotScrape flag
             doNotScrape: doNotScrape,
             updatedAt: now,
-            _lastChangedAt: Date.now(), // Update DynamoDB metadata
-            _version: (existingGame._version || 1) + 1, // Increment version
+            _lastChangedAt: Date.now(),
+            _version: (existingGame._version || 1) + 1,
         };
 
-        // If there's a tournament structure, update its levels
-        if (existingGame.tournamentStructureId && data.levels && data.levels.length > 0) {
+        if (existingGame.tournamentStructureId && processedLevels.length > 0) {
             const structureUpdate = {
                 TableName: structureTable,
                 Key: { id: existingGame.tournamentStructureId },
@@ -335,14 +307,7 @@ const handleSave = async (input) => {
                     '#_version': '_version'
                 },
                 ExpressionAttributeValues: {
-                    ':levels': data.levels.map(level => ({
-                        levelNumber: level.levelNumber,
-                        durationMinutes: level.durationMinutes,
-                        smallBlind: level.smallBlind,
-                        bigBlind: level.bigBlind,
-                        ante: level.ante,
-                        breakMinutes: level.breakMinutes || 0
-                    })),
+                    ':levels': processedLevels, // ✅ Use the processed levels with breaks
                     ':updatedAt': now,
                     ':_lastChangedAt': Date.now(),
                     ':inc': 1
@@ -353,24 +318,16 @@ const handleSave = async (input) => {
                 ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem })),
                 ddbDocClient.send(new UpdateCommand(structureUpdate))
             ]);
-        } else if (!existingGame.tournamentStructureId && data.levels && data.levels.length > 0) {
-            // Case: Game exists but structure was missing, now we have levels
+        } else if (!existingGame.tournamentStructureId && processedLevels.length > 0) {
             console.log(`[handleSave] Adding new tournament structure to existing game: ${existingGameId}`);
             const structureId = crypto.randomUUID();
-            updatedGameItem.tournamentStructureId = structureId; // Link new structure to game
+            updatedGameItem.tournamentStructureId = structureId;
             
             const structureItem = {
                 id: structureId,
                 name: `${data.name} - Blind Structure`,
                 description: `Blind structure for ${data.name}`,
-                levels: data.levels.map(level => ({
-                    levelNumber: level.levelNumber,
-                    durationMinutes: level.durationMinutes || 20,
-                    smallBlind: level.smallBlind || 0,
-                    bigBlind: level.bigBlind || 0,
-                    ante: level.ante || 0,
-                    breakMinutes: level.breakMinutes || 0
-                })),
+                levels: processedLevels, // ✅ Use the processed levels with breaks
                 createdAt: now,
                 updatedAt: now,
                 _lastChangedAt: Date.now(),
@@ -384,35 +341,25 @@ const handleSave = async (input) => {
             ]);
 
         } else {
-            // Just update the game
             await ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem }));
         }
 
         return updatedGameItem;
 
     } else {
-        // --- 2. This is a NEW game ---
         console.log('[handleSave] No existing game found. Creating new records...');
         
         const gameId = crypto.randomUUID();
         let structureId = null;
         
-        // Only create a tournament structure if we have levels
-        if (data.levels && data.levels.length > 0) {
+        if (processedLevels.length > 0) {
             structureId = crypto.randomUUID();
             
             const structureItem = {
                 id: structureId,
                 name: `${data.name} - Blind Structure`,
                 description: `Blind structure for ${data.name}`,
-                levels: data.levels.map(level => ({
-                    levelNumber: level.levelNumber,
-                    durationMinutes: level.durationMinutes || 20,
-                    smallBlind: level.smallBlind || 0,
-                    bigBlind: level.bigBlind || 0,
-                    ante: level.ante || 0,
-                    breakMinutes: level.breakMinutes || 0
-                })),
+                levels: processedLevels, // ✅ Use the processed levels with breaks
                 createdAt: now,
                 updatedAt: now,
                 _lastChangedAt: Date.now(),
@@ -426,7 +373,6 @@ const handleSave = async (input) => {
             }));
         }
         
-        // Create the game with all tournament fields
         const gameItem = {
             id: gameId,
             name: data.name,
@@ -446,7 +392,7 @@ const handleSave = async (input) => {
             seriesName: data.seriesName,
             registrationStatus: data.registrationStatus,
             gameVariant: data.gameVariant,
-            variant: data.gameVariant, // Ensure variant is also set
+            variant: data.gameVariant,
             prizepool: data.prizepool,
             totalEntries: data.totalEntries,
             playersRemaining: data.playersRemaining,
@@ -455,9 +401,7 @@ const handleSave = async (input) => {
             totalDuration: data.totalDuration,
             gameTags: data.gameTags,
             tournamentStructureId: structureId,
-            // ✅ NEW: Save the doNotScrape flag
             doNotScrape: doNotScrape,
-            // Metadata
             createdAt: now,
             updatedAt: now,
             _lastChangedAt: Date.now(),
@@ -474,29 +418,83 @@ const handleSave = async (input) => {
     }
 };
 
+const handleFetchRange = async (startId, endId) => {
+    console.log(`[handleFetchRange] Processing range from ID ${startId} to ${endId}`);
+
+    // Basic validation
+    if (startId > endId) {
+        throw new Error('Start ID cannot be greater than End ID.');
+    }
+    // Prevent abuse by limiting the range size
+    if (endId - startId + 1 > 50) {
+        throw new Error('The requested range is too large. Please fetch a maximum of 50 games at a time.');
+    }
+
+    const promises = [];
+    for (let i = startId; i <= endId; i++) {
+        const url = `https://kingsroom.com.au/tournament/?id=${i}`;
+        // We call the existing handleFetch logic for each ID.
+        // We add the original ID to the promise chain to use in the result.
+        promises.push(handleFetch(url).then(result => ({ ...result, id: i.toString() })).catch(error => ({ id: i.toString(), error: error.message })));
+    }
+
+    // Use Promise.allSettled to ensure all promises complete, even if some fail.
+    const results = await Promise.allSettled(promises);
+
+    // Map the settled results to the ScrapedGameSummary format.
+    return results.map(res => {
+        if (res.status === 'fulfilled' && !res.value.error) {
+            const data = res.value;
+            return {
+                id: data.id,
+                name: data.name || 'Name not found',
+                status: data.status || 'UNKNOWN',
+                registrationStatus: data.registrationStatus || 'UNKNOWN',
+                gameStartDateTime: data.gameStartDateTime,
+                inDatabase: !!data.existingGameId,
+                doNotScrape: data.doNotScrape || false,
+                error: data.errorMessage || null
+            };
+        } else {
+            // Handle cases where the promise was rejected or returned an error
+            const id = res.status === 'fulfilled' ? res.value.id : res.reason?.id || 'unknown';
+            const errorMessage = res.status === 'fulfilled' ? res.value.error : res.reason?.message || 'Failed to fetch';
+            return {
+                id: id,
+                name: 'Error Fetching Game',
+                status: 'ERROR',
+                registrationStatus: 'ERROR',
+                gameStartDateTime: null,
+                inDatabase: false,
+                doNotScrape: false,
+                error: errorMessage
+            };
+        }
+    });
+};
+
+
 // --- MAIN LAMBDA HANDLER ---
 exports.handler = async (event) => {
     console.log('Event received:', JSON.stringify(event, null, 2));
-    const { arguments } = event;
+    const { arguments, fieldName } = event; // ✅ Use fieldName to route
 
     try {
-        if (arguments.input) {
-            // saveTournamentData mutation
-            return await handleSave(arguments.input);
-        } else if (arguments.url) {
-            // fetchTournamentData mutation
-            const result = await handleFetch(arguments.url);
-            // If handleFetch returned an error message (e.g., for doNotScrape), throw it
-            if (result.errorMessage) {
-                throw new Error(result.errorMessage);
-            }
-            return result;
-        } else {
-            throw new Error(`Could not determine operation. No 'input' or 'url' argument found.`);
+        // ✅ NEW: Route to the correct handler based on the GraphQL field name
+        switch (fieldName) {
+            case 'fetchTournamentData':
+                const result = await handleFetch(arguments.url);
+                if (result.errorMessage) throw new Error(result.errorMessage);
+                return result;
+            case 'saveTournamentData':
+                return await handleSave(arguments.input);
+            case 'fetchTournamentDataRange':
+                return await handleFetchRange(arguments.startId, arguments.endId);
+            default:
+                throw new Error(`Unknown operation: ${fieldName}. No 'input' or 'url' argument found.`);
         }
     } catch (error) {
         console.error('Error during handler execution:', error);
-        // Forward the specific error message
         throw new Error(error.message);
     }
 };

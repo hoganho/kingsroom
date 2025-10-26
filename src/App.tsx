@@ -1,39 +1,31 @@
 import { Authenticator } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css'; // Import default Amplify UI styles
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ScraperDashboard } from './pages/ScraperPage.tsx';
 import { GameProvider } from './contexts/GameContext.tsx';
+import { MainLayout } from './components/layout/MainLayout.tsx';
+import ScraperDashboard from './pages/ScraperPage.tsx';
+import BulkScraperPage from './pages/BulkScraperPage.tsx';
 
 function App() {
   return (
     <Authenticator>
       {({ signOut, user }) => (
         <BrowserRouter>
-          <GameProvider> 
-            <div className="min-h-screen bg-gray-100">
-                <header className="bg-white shadow-sm">
-                  <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-                      <h1 className="text-xl font-bold text-gray-900">Scraper App</h1>
-                      <div className="flex items-center space-x-4">
-                        <span className="text-sm text-gray-600">Logged in as: {user?.signInDetails?.loginId}</span>                          <button
-                              onClick={signOut}
-                              className="py-1 px-3 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700"
-                          >
-                              Sign out
-                          </button>
-                      </div>
-                  </div>
-                </header>
-                <main>
-                  <Routes>
-                    {/* ✅ UPDATED: Route path is now /scraper */}
-                    <Route path="/scraper" element={<ScraperDashboard />} />
-                    {/* ✅ UPDATED: Redirects to /scraper */}
-                    <Route path="/" element={<Navigate to="/scraper" />} /> 
-                    {/* You can now add a new component for /dashboard */}
-                    {/* <Route path="/dashboard" element={<YourNewDashboardComponent />} /> */}
-                  </Routes>
-                </main>
-            </div>
+          <GameProvider>
+            {/* The MainLayout now wraps all your authenticated routes */}
+            <MainLayout user={user} signOut={signOut}>
+              <Routes>
+                {/* Renamed /scraper to /scraper-dashboard for clarity */}
+                <Route path="/scraper-dashboard" element={<ScraperDashboard />} />
+                <Route path="/bulk-scraper" element={<BulkScraperPage />} />
+                
+                {/* Redirect the root path to the main dashboard */}
+                <Route path="/" element={<Navigate to="/scraper-dashboard" replace />} />
+                
+                {/* A fallback for any routes not matched */}
+                <Route path="*" element={<div>404 - Page Not Found</div>} />
+              </Routes>
+            </MainLayout>
           </GameProvider>
         </BrowserRouter>
       )}
@@ -42,4 +34,3 @@ function App() {
 }
 
 export default App;
-

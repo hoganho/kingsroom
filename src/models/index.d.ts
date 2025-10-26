@@ -124,6 +124,32 @@ export enum TicketStatus {
   USED = "USED"
 }
 
+type EagerScrapedGameSummary = {
+  readonly id: string;
+  readonly name?: string | null;
+  readonly status?: string | null;
+  readonly registrationStatus?: string | null;
+  readonly gameStartDateTime?: string | null;
+  readonly inDatabase?: boolean | null;
+  readonly doNotScrape?: boolean | null;
+  readonly error?: string | null;
+}
+
+type LazyScrapedGameSummary = {
+  readonly id: string;
+  readonly name?: string | null;
+  readonly status?: string | null;
+  readonly registrationStatus?: string | null;
+  readonly gameStartDateTime?: string | null;
+  readonly inDatabase?: boolean | null;
+  readonly doNotScrape?: boolean | null;
+  readonly error?: string | null;
+}
+
+export declare type ScrapedGameSummary = LazyLoading extends LazyLoadingDisabled ? EagerScrapedGameSummary : LazyScrapedGameSummary
+
+export declare const ScrapedGameSummary: (new (init: ModelInit<ScrapedGameSummary>) => ScrapedGameSummary)
+
 type EagerScrapedGameData = {
   readonly name: string;
   readonly gameStartDateTime?: string | null;
@@ -142,7 +168,11 @@ type EagerScrapedGameData = {
   readonly hasGuarantee?: boolean | null;
   readonly guaranteeAmount?: number | null;
   readonly levels?: ScrapedTournamentLevel[] | null;
+  readonly breaks?: ScrapedBreak[] | null;
+  readonly entries?: ScrapedPlayerEntries[] | null;
+  readonly seating?: ScrapedPlayerSeating[] | null;
   readonly results?: ScrapedPlayerResult[] | null;
+  readonly tables?: ScrapedTables[] | null;
   readonly rawHtml?: string | null;
   readonly isNewStructure?: boolean | null;
   readonly structureLabel?: string | null;
@@ -167,7 +197,11 @@ type LazyScrapedGameData = {
   readonly hasGuarantee?: boolean | null;
   readonly guaranteeAmount?: number | null;
   readonly levels?: ScrapedTournamentLevel[] | null;
+  readonly breaks?: ScrapedBreak[] | null;
+  readonly entries?: ScrapedPlayerEntries[] | null;
+  readonly seating?: ScrapedPlayerSeating[] | null;
   readonly results?: ScrapedPlayerResult[] | null;
+  readonly tables?: ScrapedTables[] | null;
   readonly rawHtml?: string | null;
   readonly isNewStructure?: boolean | null;
   readonly structureLabel?: string | null;
@@ -198,21 +232,99 @@ export declare type ScrapedTournamentLevel = LazyLoading extends LazyLoadingDisa
 
 export declare const ScrapedTournamentLevel: (new (init: ModelInit<ScrapedTournamentLevel>) => ScrapedTournamentLevel)
 
+type EagerScrapedBreak = {
+  readonly levelNumberBeforeBreak: number;
+  readonly levelNumberAfterBreak: number;
+  readonly durationMinutes?: number | null;
+}
+
+type LazyScrapedBreak = {
+  readonly levelNumberBeforeBreak: number;
+  readonly levelNumberAfterBreak: number;
+  readonly durationMinutes?: number | null;
+}
+
+export declare type ScrapedBreak = LazyLoading extends LazyLoadingDisabled ? EagerScrapedBreak : LazyScrapedBreak
+
+export declare const ScrapedBreak: (new (init: ModelInit<ScrapedBreak>) => ScrapedBreak)
+
+type EagerScrapedPlayerEntries = {
+  readonly name: string;
+}
+
+type LazyScrapedPlayerEntries = {
+  readonly name: string;
+}
+
+export declare type ScrapedPlayerEntries = LazyLoading extends LazyLoadingDisabled ? EagerScrapedPlayerEntries : LazyScrapedPlayerEntries
+
+export declare const ScrapedPlayerEntries: (new (init: ModelInit<ScrapedPlayerEntries>) => ScrapedPlayerEntries)
+
+type EagerScrapedPlayerSeating = {
+  readonly name: string;
+  readonly table?: number | null;
+  readonly seat?: number | null;
+}
+
+type LazyScrapedPlayerSeating = {
+  readonly name: string;
+  readonly table?: number | null;
+  readonly seat?: number | null;
+}
+
+export declare type ScrapedPlayerSeating = LazyLoading extends LazyLoadingDisabled ? EagerScrapedPlayerSeating : LazyScrapedPlayerSeating
+
+export declare const ScrapedPlayerSeating: (new (init: ModelInit<ScrapedPlayerSeating>) => ScrapedPlayerSeating)
+
 type EagerScrapedPlayerResult = {
   readonly rank: number;
   readonly name: string;
   readonly winnings?: number | null;
+  readonly points?: number | null;
 }
 
 type LazyScrapedPlayerResult = {
   readonly rank: number;
   readonly name: string;
   readonly winnings?: number | null;
+  readonly points?: number | null;
 }
 
 export declare type ScrapedPlayerResult = LazyLoading extends LazyLoadingDisabled ? EagerScrapedPlayerResult : LazyScrapedPlayerResult
 
 export declare const ScrapedPlayerResult: (new (init: ModelInit<ScrapedPlayerResult>) => ScrapedPlayerResult)
+
+type EagerScrapedTables = {
+  readonly tableName: string;
+  readonly seats?: ScrapedTableSeatsData[] | null;
+}
+
+type LazyScrapedTables = {
+  readonly tableName: string;
+  readonly seats?: ScrapedTableSeatsData[] | null;
+}
+
+export declare type ScrapedTables = LazyLoading extends LazyLoadingDisabled ? EagerScrapedTables : LazyScrapedTables
+
+export declare const ScrapedTables: (new (init: ModelInit<ScrapedTables>) => ScrapedTables)
+
+type EagerScrapedTableSeatsData = {
+  readonly seat: number;
+  readonly isOccupied: boolean;
+  readonly playerName?: string | null;
+  readonly playerStack?: number | null;
+}
+
+type LazyScrapedTableSeatsData = {
+  readonly seat: number;
+  readonly isOccupied: boolean;
+  readonly playerName?: string | null;
+  readonly playerStack?: number | null;
+}
+
+export declare type ScrapedTableSeatsData = LazyLoading extends LazyLoadingDisabled ? EagerScrapedTableSeatsData : LazyScrapedTableSeatsData
+
+export declare const ScrapedTableSeatsData: (new (init: ModelInit<ScrapedTableSeatsData>) => ScrapedTableSeatsData)
 
 type EagerTournamentLevelData = {
   readonly levelNumber: number;
@@ -450,6 +562,7 @@ type EagerGame = {
   readonly gameEndDateTime?: string | null;
   readonly venueId: string;
   readonly sourceUrl?: string | null;
+  readonly doNotScrape: boolean;
   readonly seriesName?: string | null;
   readonly isAdHoc?: boolean | null;
   readonly registrationStatus?: string | null;
@@ -492,6 +605,7 @@ type LazyGame = {
   readonly gameEndDateTime?: string | null;
   readonly venueId: string;
   readonly sourceUrl?: string | null;
+  readonly doNotScrape: boolean;
   readonly seriesName?: string | null;
   readonly isAdHoc?: boolean | null;
   readonly registrationStatus?: string | null;

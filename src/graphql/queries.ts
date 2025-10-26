@@ -8,6 +8,23 @@ type GeneratedQuery<InputType, OutputType> = string & {
   __generatedQueryOutput: OutputType;
 };
 
+export const fetchTournamentDataRange = /* GraphQL */ `query FetchTournamentDataRange($startId: Int!, $endId: Int!) {
+  fetchTournamentDataRange(startId: $startId, endId: $endId) {
+    id
+    name
+    status
+    registrationStatus
+    gameStartDateTime
+    inDatabase
+    doNotScrape
+    error
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.FetchTournamentDataRangeQueryVariables,
+  APITypes.FetchTournamentDataRangeQuery
+>;
 export const getDataSync = /* GraphQL */ `query GetDataSync($id: ID!) {
   getDataSync(id: $id) {
     id
@@ -504,6 +521,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
     gameEndDateTime
     venueId
     sourceUrl
+    doNotScrape
     seriesName
     isAdHoc
     registrationStatus
@@ -594,6 +612,7 @@ export const listGames = /* GraphQL */ `query ListGames(
       gameEndDateTime
       venueId
       sourceUrl
+      doNotScrape
       seriesName
       isAdHoc
       registrationStatus
@@ -649,6 +668,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
       gameEndDateTime
       venueId
       sourceUrl
+      doNotScrape
       seriesName
       isAdHoc
       registrationStatus
@@ -1530,6 +1550,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
       gameEndDateTime
       venueId
       sourceUrl
+      doNotScrape
       seriesName
       isAdHoc
       registrationStatus
@@ -2645,6 +2666,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
       gameEndDateTime
       venueId
       sourceUrl
+      doNotScrape
       seriesName
       isAdHoc
       registrationStatus
@@ -2705,6 +2727,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
       gameEndDateTime
       venueId
       sourceUrl
+      doNotScrape
       seriesName
       isAdHoc
       registrationStatus
@@ -2765,6 +2788,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
       gameEndDateTime
       venueId
       sourceUrl
+      doNotScrape
       seriesName
       isAdHoc
       registrationStatus
@@ -2825,6 +2849,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
       gameEndDateTime
       venueId
       sourceUrl
+      doNotScrape
       seriesName
       isAdHoc
       registrationStatus
