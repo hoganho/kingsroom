@@ -177,6 +177,7 @@ type EagerScrapedGameData = {
   readonly isNewStructure?: boolean | null;
   readonly structureLabel?: string | null;
   readonly foundKeys?: (string | null)[] | null;
+  readonly venueMatch?: ScrapedVenueMatch | null;
 }
 
 type LazyScrapedGameData = {
@@ -206,6 +207,7 @@ type LazyScrapedGameData = {
   readonly isNewStructure?: boolean | null;
   readonly structureLabel?: string | null;
   readonly foundKeys?: (string | null)[] | null;
+  readonly venueMatch?: ScrapedVenueMatch | null;
 }
 
 export declare type ScrapedGameData = LazyLoading extends LazyLoadingDisabled ? EagerScrapedGameData : LazyScrapedGameData
@@ -309,6 +311,36 @@ type LazyScrapedTables = {
 export declare type ScrapedTables = LazyLoading extends LazyLoadingDisabled ? EagerScrapedTables : LazyScrapedTables
 
 export declare const ScrapedTables: (new (init: ModelInit<ScrapedTables>) => ScrapedTables)
+
+type EagerScrapedVenueMatch = {
+  readonly bestMatch: ScrapedVenueMatchDetails;
+  readonly matchType: string;
+}
+
+type LazyScrapedVenueMatch = {
+  readonly bestMatch: ScrapedVenueMatchDetails;
+  readonly matchType: string;
+}
+
+export declare type ScrapedVenueMatch = LazyLoading extends LazyLoadingDisabled ? EagerScrapedVenueMatch : LazyScrapedVenueMatch
+
+export declare const ScrapedVenueMatch: (new (init: ModelInit<ScrapedVenueMatch>) => ScrapedVenueMatch)
+
+type EagerScrapedVenueMatchDetails = {
+  readonly id: string;
+  readonly name: string;
+  readonly score: number;
+}
+
+type LazyScrapedVenueMatchDetails = {
+  readonly id: string;
+  readonly name: string;
+  readonly score: number;
+}
+
+export declare type ScrapedVenueMatchDetails = LazyLoading extends LazyLoadingDisabled ? EagerScrapedVenueMatchDetails : LazyScrapedVenueMatchDetails
+
+export declare const ScrapedVenueMatchDetails: (new (init: ModelInit<ScrapedVenueMatchDetails>) => ScrapedVenueMatchDetails)
 
 type EagerScrapedTableSeatsData = {
   readonly seat: number;

@@ -60,12 +60,29 @@ export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData($
     }
     tables {
       tableName
+      seats {
+        seat
+        isOccupied
+        playerName
+        playerStack
+        __typename
+      }
       __typename
     }
     rawHtml
     isNewStructure
     structureLabel
     foundKeys
+    venueMatch {
+      bestMatch {
+        id
+        name
+        score
+        __typename
+      }
+      matchType
+      __typename
+    }
     __typename
   }
 }
@@ -114,6 +131,250 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
       address
       city
       country
+      details {
+        id
+        venueId
+        startDate
+        status
+        lastCustomerSuccessVisit
+        totalGamesHeld
+        averagePlayersPerGame
+        gameNights
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -126,6 +387,106 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
       id
       name
       description
+      levels {
+        levelNumber
+        durationMinutes
+        smallBlind
+        bigBlind
+        ante
+        breakMinutes
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -141,6 +502,129 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
       minBuyIn
       maxBuyIn
       rakeStructureId
+      rakeStructure {
+        id
+        name
+        rakePercentage
+        maxRake
+        cashStructures {
+          items {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -149,6 +633,187 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
       __typename
     }
     playerResults {
+      items {
+        id
+        playerId
+        gameId
+        finishingPlace
+        isMultiDayQualification
+        prizeWon
+        amountWon
+        totalRunners
+        game {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -324,6 +989,250 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
       address
       city
       country
+      details {
+        id
+        venueId
+        startDate
+        status
+        lastCustomerSuccessVisit
+        totalGamesHeld
+        averagePlayersPerGame
+        gameNights
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -362,6 +1271,250 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
       address
       city
       country
+      details {
+        id
+        venueId
+        startDate
+        status
+        lastCustomerSuccessVisit
+        totalGamesHeld
+        averagePlayersPerGame
+        gameNights
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -400,6 +1553,250 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
       address
       city
       country
+      details {
+        id
+        venueId
+        startDate
+        status
+        lastCustomerSuccessVisit
+        totalGamesHeld
+        averagePlayersPerGame
+        gameNights
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -439,6 +1836,137 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
       totalGamesHeld
       averagePlayersPerGame
       gameNights
+      venue {
+        id
+        name
+        address
+        city
+        country
+        details {
+          id
+          venueId
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            playerId
+            venueId
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -447,16 +1975,380 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
       __typename
     }
     assets {
+      items {
+        id
+        name
+        type
+        condition
+        acquiredDate
+        lastCheckedDate
+        venueId
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
     }
     games {
+      items {
+        id
+        name
+        type
+        status
+        gameStartDateTime
+        gameEndDateTime
+        venueId
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        seriesName
+        isAdHoc
+        isSeries
+        isRecurring
+        isSatellite
+        registrationStatus
+        gameVariant
+        prizepool
+        revenueByEntries
+        totalEntries
+        totalRebuys
+        totalAddons
+        totalDuration
+        gameTags
+        tournamentType
+        buyIn
+        rake
+        startingStack
+        hasGuarantee
+        guaranteeAmount
+        playersRemaining
+        tournamentStructureId
+        cashStructureId
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        tournamentStructure {
+          id
+          name
+          description
+          levels {
+            levelNumber
+            durationMinutes
+            smallBlind
+            bigBlind
+            ante
+            breakMinutes
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        cashStructure {
+          id
+          name
+          smallBlind
+          bigBlind
+          minBuyIn
+          maxBuyIn
+          rakeStructureId
+          rakeStructure {
+            id
+            name
+            rakePercentage
+            maxRake
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        playerResults {
+          items {
+            id
+            playerId
+            gameId
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
     }
     playerMemberships {
+      items {
+        id
+        playerId
+        venueId
+        totalGamesPlayed
+        averageBuyIn
+        firstPlayedDate
+        lastPlayedDate
+        targetingClassification
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -493,6 +2385,137 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
       totalGamesHeld
       averagePlayersPerGame
       gameNights
+      venue {
+        id
+        name
+        address
+        city
+        country
+        details {
+          id
+          venueId
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            playerId
+            venueId
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -501,16 +2524,380 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
       __typename
     }
     assets {
+      items {
+        id
+        name
+        type
+        condition
+        acquiredDate
+        lastCheckedDate
+        venueId
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
     }
     games {
+      items {
+        id
+        name
+        type
+        status
+        gameStartDateTime
+        gameEndDateTime
+        venueId
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        seriesName
+        isAdHoc
+        isSeries
+        isRecurring
+        isSatellite
+        registrationStatus
+        gameVariant
+        prizepool
+        revenueByEntries
+        totalEntries
+        totalRebuys
+        totalAddons
+        totalDuration
+        gameTags
+        tournamentType
+        buyIn
+        rake
+        startingStack
+        hasGuarantee
+        guaranteeAmount
+        playersRemaining
+        tournamentStructureId
+        cashStructureId
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        tournamentStructure {
+          id
+          name
+          description
+          levels {
+            levelNumber
+            durationMinutes
+            smallBlind
+            bigBlind
+            ante
+            breakMinutes
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        cashStructure {
+          id
+          name
+          smallBlind
+          bigBlind
+          minBuyIn
+          maxBuyIn
+          rakeStructureId
+          rakeStructure {
+            id
+            name
+            rakePercentage
+            maxRake
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        playerResults {
+          items {
+            id
+            playerId
+            gameId
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
     }
     playerMemberships {
+      items {
+        id
+        playerId
+        venueId
+        totalGamesPlayed
+        averageBuyIn
+        firstPlayedDate
+        lastPlayedDate
+        targetingClassification
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -547,6 +2934,137 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
       totalGamesHeld
       averagePlayersPerGame
       gameNights
+      venue {
+        id
+        name
+        address
+        city
+        country
+        details {
+          id
+          venueId
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            playerId
+            venueId
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -555,16 +3073,380 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
       __typename
     }
     assets {
+      items {
+        id
+        name
+        type
+        condition
+        acquiredDate
+        lastCheckedDate
+        venueId
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
     }
     games {
+      items {
+        id
+        name
+        type
+        status
+        gameStartDateTime
+        gameEndDateTime
+        venueId
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        seriesName
+        isAdHoc
+        isSeries
+        isRecurring
+        isSatellite
+        registrationStatus
+        gameVariant
+        prizepool
+        revenueByEntries
+        totalEntries
+        totalRebuys
+        totalAddons
+        totalDuration
+        gameTags
+        tournamentType
+        buyIn
+        rake
+        startingStack
+        hasGuarantee
+        guaranteeAmount
+        playersRemaining
+        tournamentStructureId
+        cashStructureId
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        tournamentStructure {
+          id
+          name
+          description
+          levels {
+            levelNumber
+            durationMinutes
+            smallBlind
+            bigBlind
+            ante
+            breakMinutes
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        cashStructure {
+          id
+          name
+          smallBlind
+          bigBlind
+          minBuyIn
+          maxBuyIn
+          rakeStructureId
+          rakeStructure {
+            id
+            name
+            rakePercentage
+            maxRake
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        playerResults {
+          items {
+            id
+            playerId
+            gameId
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
     }
     playerMemberships {
+      items {
+        id
+        playerId
+        venueId
+        totalGamesPlayed
+        averageBuyIn
+        firstPlayedDate
+        lastPlayedDate
+        targetingClassification
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -601,6 +3483,250 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
       address
       city
       country
+      details {
+        id
+        venueId
+        startDate
+        status
+        lastCustomerSuccessVisit
+        totalGamesHeld
+        averagePlayersPerGame
+        gameNights
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -640,6 +3766,250 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
       address
       city
       country
+      details {
+        id
+        venueId
+        startDate
+        status
+        lastCustomerSuccessVisit
+        totalGamesHeld
+        averagePlayersPerGame
+        gameNights
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -679,6 +4049,250 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
       address
       city
       country
+      details {
+        id
+        venueId
+        startDate
+        status
+        lastCustomerSuccessVisit
+        totalGamesHeld
+        averagePlayersPerGame
+        gameNights
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -743,6 +4357,250 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
       address
       city
       country
+      details {
+        id
+        venueId
+        startDate
+        status
+        lastCustomerSuccessVisit
+        totalGamesHeld
+        averagePlayersPerGame
+        gameNights
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -755,6 +4613,106 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
       id
       name
       description
+      levels {
+        levelNumber
+        durationMinutes
+        smallBlind
+        bigBlind
+        ante
+        breakMinutes
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -770,6 +4728,129 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
       minBuyIn
       maxBuyIn
       rakeStructureId
+      rakeStructure {
+        id
+        name
+        rakePercentage
+        maxRake
+        cashStructures {
+          items {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -778,6 +4859,187 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
       __typename
     }
     playerResults {
+      items {
+        id
+        playerId
+        gameId
+        finishingPlace
+        isMultiDayQualification
+        prizeWon
+        amountWon
+        totalRunners
+        game {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -838,6 +5100,250 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
       address
       city
       country
+      details {
+        id
+        venueId
+        startDate
+        status
+        lastCustomerSuccessVisit
+        totalGamesHeld
+        averagePlayersPerGame
+        gameNights
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -850,6 +5356,106 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
       id
       name
       description
+      levels {
+        levelNumber
+        durationMinutes
+        smallBlind
+        bigBlind
+        ante
+        breakMinutes
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -865,6 +5471,129 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
       minBuyIn
       maxBuyIn
       rakeStructureId
+      rakeStructure {
+        id
+        name
+        rakePercentage
+        maxRake
+        cashStructures {
+          items {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -873,6 +5602,187 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
       __typename
     }
     playerResults {
+      items {
+        id
+        playerId
+        gameId
+        finishingPlace
+        isMultiDayQualification
+        prizeWon
+        amountWon
+        totalRunners
+        game {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -933,6 +5843,250 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
       address
       city
       country
+      details {
+        id
+        venueId
+        startDate
+        status
+        lastCustomerSuccessVisit
+        totalGamesHeld
+        averagePlayersPerGame
+        gameNights
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -945,6 +6099,106 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
       id
       name
       description
+      levels {
+        levelNumber
+        durationMinutes
+        smallBlind
+        bigBlind
+        ante
+        breakMinutes
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -960,6 +6214,129 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
       minBuyIn
       maxBuyIn
       rakeStructureId
+      rakeStructure {
+        id
+        name
+        rakePercentage
+        maxRake
+        cashStructures {
+          items {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -968,6 +6345,187 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
       __typename
     }
     playerResults {
+      items {
+        id
+        playerId
+        gameId
+        finishingPlace
+        isMultiDayQualification
+        prizeWon
+        amountWon
+        totalRunners
+        game {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -1002,6 +6560,170 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
       __typename
     }
     games {
+      items {
+        id
+        name
+        type
+        status
+        gameStartDateTime
+        gameEndDateTime
+        venueId
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        seriesName
+        isAdHoc
+        isSeries
+        isRecurring
+        isSatellite
+        registrationStatus
+        gameVariant
+        prizepool
+        revenueByEntries
+        totalEntries
+        totalRebuys
+        totalAddons
+        totalDuration
+        gameTags
+        tournamentType
+        buyIn
+        rake
+        startingStack
+        hasGuarantee
+        guaranteeAmount
+        playersRemaining
+        tournamentStructureId
+        cashStructureId
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        tournamentStructure {
+          id
+          name
+          description
+          levels {
+            levelNumber
+            durationMinutes
+            smallBlind
+            bigBlind
+            ante
+            breakMinutes
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        cashStructure {
+          id
+          name
+          smallBlind
+          bigBlind
+          minBuyIn
+          maxBuyIn
+          rakeStructureId
+          rakeStructure {
+            id
+            name
+            rakePercentage
+            maxRake
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        playerResults {
+          items {
+            id
+            playerId
+            gameId
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -1036,6 +6758,170 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
       __typename
     }
     games {
+      items {
+        id
+        name
+        type
+        status
+        gameStartDateTime
+        gameEndDateTime
+        venueId
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        seriesName
+        isAdHoc
+        isSeries
+        isRecurring
+        isSatellite
+        registrationStatus
+        gameVariant
+        prizepool
+        revenueByEntries
+        totalEntries
+        totalRebuys
+        totalAddons
+        totalDuration
+        gameTags
+        tournamentType
+        buyIn
+        rake
+        startingStack
+        hasGuarantee
+        guaranteeAmount
+        playersRemaining
+        tournamentStructureId
+        cashStructureId
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        tournamentStructure {
+          id
+          name
+          description
+          levels {
+            levelNumber
+            durationMinutes
+            smallBlind
+            bigBlind
+            ante
+            breakMinutes
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        cashStructure {
+          id
+          name
+          smallBlind
+          bigBlind
+          minBuyIn
+          maxBuyIn
+          rakeStructureId
+          rakeStructure {
+            id
+            name
+            rakePercentage
+            maxRake
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        playerResults {
+          items {
+            id
+            playerId
+            gameId
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -1070,6 +6956,170 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
       __typename
     }
     games {
+      items {
+        id
+        name
+        type
+        status
+        gameStartDateTime
+        gameEndDateTime
+        venueId
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        seriesName
+        isAdHoc
+        isSeries
+        isRecurring
+        isSatellite
+        registrationStatus
+        gameVariant
+        prizepool
+        revenueByEntries
+        totalEntries
+        totalRebuys
+        totalAddons
+        totalDuration
+        gameTags
+        tournamentType
+        buyIn
+        rake
+        startingStack
+        hasGuarantee
+        guaranteeAmount
+        playersRemaining
+        tournamentStructureId
+        cashStructureId
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        tournamentStructure {
+          id
+          name
+          description
+          levels {
+            levelNumber
+            durationMinutes
+            smallBlind
+            bigBlind
+            ante
+            breakMinutes
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        cashStructure {
+          id
+          name
+          smallBlind
+          bigBlind
+          minBuyIn
+          maxBuyIn
+          rakeStructureId
+          rakeStructure {
+            id
+            name
+            rakePercentage
+            maxRake
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        playerResults {
+          items {
+            id
+            playerId
+            gameId
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -1096,6 +7146,84 @@ export const createRakeStructure = /* GraphQL */ `mutation CreateRakeStructure(
     rakePercentage
     maxRake
     cashStructures {
+      items {
+        id
+        name
+        smallBlind
+        bigBlind
+        minBuyIn
+        maxBuyIn
+        rakeStructureId
+        rakeStructure {
+          id
+          name
+          rakePercentage
+          maxRake
+          cashStructures {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -1122,6 +7250,84 @@ export const updateRakeStructure = /* GraphQL */ `mutation UpdateRakeStructure(
     rakePercentage
     maxRake
     cashStructures {
+      items {
+        id
+        name
+        smallBlind
+        bigBlind
+        minBuyIn
+        maxBuyIn
+        rakeStructureId
+        rakeStructure {
+          id
+          name
+          rakePercentage
+          maxRake
+          cashStructures {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -1148,6 +7354,84 @@ export const deleteRakeStructure = /* GraphQL */ `mutation DeleteRakeStructure(
     rakePercentage
     maxRake
     cashStructures {
+      items {
+        id
+        name
+        smallBlind
+        bigBlind
+        minBuyIn
+        maxBuyIn
+        rakeStructureId
+        rakeStructure {
+          id
+          name
+          rakePercentage
+          maxRake
+          cashStructures {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -1181,6 +7465,43 @@ export const createCashStructure = /* GraphQL */ `mutation CreateCashStructure(
       name
       rakePercentage
       maxRake
+      cashStructures {
+        items {
+          id
+          name
+          smallBlind
+          bigBlind
+          minBuyIn
+          maxBuyIn
+          rakeStructureId
+          rakeStructure {
+            id
+            name
+            rakePercentage
+            maxRake
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1189,6 +7510,170 @@ export const createCashStructure = /* GraphQL */ `mutation CreateCashStructure(
       __typename
     }
     games {
+      items {
+        id
+        name
+        type
+        status
+        gameStartDateTime
+        gameEndDateTime
+        venueId
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        seriesName
+        isAdHoc
+        isSeries
+        isRecurring
+        isSatellite
+        registrationStatus
+        gameVariant
+        prizepool
+        revenueByEntries
+        totalEntries
+        totalRebuys
+        totalAddons
+        totalDuration
+        gameTags
+        tournamentType
+        buyIn
+        rake
+        startingStack
+        hasGuarantee
+        guaranteeAmount
+        playersRemaining
+        tournamentStructureId
+        cashStructureId
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        tournamentStructure {
+          id
+          name
+          description
+          levels {
+            levelNumber
+            durationMinutes
+            smallBlind
+            bigBlind
+            ante
+            breakMinutes
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        cashStructure {
+          id
+          name
+          smallBlind
+          bigBlind
+          minBuyIn
+          maxBuyIn
+          rakeStructureId
+          rakeStructure {
+            id
+            name
+            rakePercentage
+            maxRake
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        playerResults {
+          items {
+            id
+            playerId
+            gameId
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -1222,6 +7707,43 @@ export const updateCashStructure = /* GraphQL */ `mutation UpdateCashStructure(
       name
       rakePercentage
       maxRake
+      cashStructures {
+        items {
+          id
+          name
+          smallBlind
+          bigBlind
+          minBuyIn
+          maxBuyIn
+          rakeStructureId
+          rakeStructure {
+            id
+            name
+            rakePercentage
+            maxRake
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1230,6 +7752,170 @@ export const updateCashStructure = /* GraphQL */ `mutation UpdateCashStructure(
       __typename
     }
     games {
+      items {
+        id
+        name
+        type
+        status
+        gameStartDateTime
+        gameEndDateTime
+        venueId
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        seriesName
+        isAdHoc
+        isSeries
+        isRecurring
+        isSatellite
+        registrationStatus
+        gameVariant
+        prizepool
+        revenueByEntries
+        totalEntries
+        totalRebuys
+        totalAddons
+        totalDuration
+        gameTags
+        tournamentType
+        buyIn
+        rake
+        startingStack
+        hasGuarantee
+        guaranteeAmount
+        playersRemaining
+        tournamentStructureId
+        cashStructureId
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        tournamentStructure {
+          id
+          name
+          description
+          levels {
+            levelNumber
+            durationMinutes
+            smallBlind
+            bigBlind
+            ante
+            breakMinutes
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        cashStructure {
+          id
+          name
+          smallBlind
+          bigBlind
+          minBuyIn
+          maxBuyIn
+          rakeStructureId
+          rakeStructure {
+            id
+            name
+            rakePercentage
+            maxRake
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        playerResults {
+          items {
+            id
+            playerId
+            gameId
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -1263,6 +7949,43 @@ export const deleteCashStructure = /* GraphQL */ `mutation DeleteCashStructure(
       name
       rakePercentage
       maxRake
+      cashStructures {
+        items {
+          id
+          name
+          smallBlind
+          bigBlind
+          minBuyIn
+          maxBuyIn
+          rakeStructureId
+          rakeStructure {
+            id
+            name
+            rakePercentage
+            maxRake
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1271,6 +7994,170 @@ export const deleteCashStructure = /* GraphQL */ `mutation DeleteCashStructure(
       __typename
     }
     games {
+      items {
+        id
+        name
+        type
+        status
+        gameStartDateTime
+        gameEndDateTime
+        venueId
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        seriesName
+        isAdHoc
+        isSeries
+        isRecurring
+        isSatellite
+        registrationStatus
+        gameVariant
+        prizepool
+        revenueByEntries
+        totalEntries
+        totalRebuys
+        totalAddons
+        totalDuration
+        gameTags
+        tournamentType
+        buyIn
+        rake
+        startingStack
+        hasGuarantee
+        guaranteeAmount
+        playersRemaining
+        tournamentStructureId
+        cashStructureId
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        tournamentStructure {
+          id
+          name
+          description
+          levels {
+            levelNumber
+            durationMinutes
+            smallBlind
+            bigBlind
+            ante
+            breakMinutes
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        cashStructure {
+          id
+          name
+          smallBlind
+          bigBlind
+          minBuyIn
+          maxBuyIn
+          rakeStructureId
+          rakeStructure {
+            id
+            name
+            rakePercentage
+            maxRake
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        playerResults {
+          items {
+            id
+            playerId
+            gameId
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -1306,16 +8193,407 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
     targetingClassification
     tier
     transactions {
+      items {
+        id
+        playerId
+        type
+        amount
+        paymentSource
+        transactionDate
+        rake
+        notes
+        gameId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
     }
     results {
+      items {
+        id
+        playerId
+        gameId
+        finishingPlace
+        isMultiDayQualification
+        prizeWon
+        amountWon
+        totalRunners
+        game {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
     }
     tickets {
+      items {
+        id
+        playerId
+        ticketTemplateId
+        assignedAt
+        expiryDate
+        status
+        usedInGameId
+        ticketTemplate {
+          id
+          name
+          description
+          value
+          validityDays
+          originGameId
+          targetGameId
+          playerTickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -1325,6 +8603,195 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
       playerId
       optOutSms
       optOutEmail
+      player {
+        id
+        firstName
+        givenName
+        lastName
+        email
+        phone
+        registrationVenueId
+        creationDate
+        lastPlayedDate
+        status
+        category
+        targetingClassification
+        tier
+        transactions {
+          items {
+            id
+            playerId
+            type
+            amount
+            paymentSource
+            transactionDate
+            rake
+            notes
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        results {
+          items {
+            id
+            playerId
+            gameId
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        tickets {
+          items {
+            id
+            playerId
+            ticketTemplateId
+            assignedAt
+            expiryDate
+            status
+            usedInGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        marketingPreferences {
+          id
+          playerId
+          optOutSms
+          optOutEmail
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            playerId
+            venueId
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        summary {
+          id
+          playerId
+          venuesVisited
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          tournamentWinnings
+          tournamentBuyIns
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          tournamentITM
+          tournamentsCashed
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        playerMarketingPreferencesId
+        playerSummaryId
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1333,6 +8800,146 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
       __typename
     }
     venueMemberships {
+      items {
+        id
+        playerId
+        venueId
+        totalGamesPlayed
+        averageBuyIn
+        firstPlayedDate
+        lastPlayedDate
+        targetingClassification
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -1354,6 +8961,195 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
       tournamentITM
       tournamentsCashed
       lastUpdated
+      player {
+        id
+        firstName
+        givenName
+        lastName
+        email
+        phone
+        registrationVenueId
+        creationDate
+        lastPlayedDate
+        status
+        category
+        targetingClassification
+        tier
+        transactions {
+          items {
+            id
+            playerId
+            type
+            amount
+            paymentSource
+            transactionDate
+            rake
+            notes
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        results {
+          items {
+            id
+            playerId
+            gameId
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        tickets {
+          items {
+            id
+            playerId
+            ticketTemplateId
+            assignedAt
+            expiryDate
+            status
+            usedInGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        marketingPreferences {
+          id
+          playerId
+          optOutSms
+          optOutEmail
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            playerId
+            venueId
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        summary {
+          id
+          playerId
+          venuesVisited
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          tournamentWinnings
+          tournamentBuyIns
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          tournamentITM
+          tournamentsCashed
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        playerMarketingPreferencesId
+        playerSummaryId
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1394,16 +9190,407 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
     targetingClassification
     tier
     transactions {
+      items {
+        id
+        playerId
+        type
+        amount
+        paymentSource
+        transactionDate
+        rake
+        notes
+        gameId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
     }
     results {
+      items {
+        id
+        playerId
+        gameId
+        finishingPlace
+        isMultiDayQualification
+        prizeWon
+        amountWon
+        totalRunners
+        game {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
     }
     tickets {
+      items {
+        id
+        playerId
+        ticketTemplateId
+        assignedAt
+        expiryDate
+        status
+        usedInGameId
+        ticketTemplate {
+          id
+          name
+          description
+          value
+          validityDays
+          originGameId
+          targetGameId
+          playerTickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -1413,6 +9600,195 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
       playerId
       optOutSms
       optOutEmail
+      player {
+        id
+        firstName
+        givenName
+        lastName
+        email
+        phone
+        registrationVenueId
+        creationDate
+        lastPlayedDate
+        status
+        category
+        targetingClassification
+        tier
+        transactions {
+          items {
+            id
+            playerId
+            type
+            amount
+            paymentSource
+            transactionDate
+            rake
+            notes
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        results {
+          items {
+            id
+            playerId
+            gameId
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        tickets {
+          items {
+            id
+            playerId
+            ticketTemplateId
+            assignedAt
+            expiryDate
+            status
+            usedInGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        marketingPreferences {
+          id
+          playerId
+          optOutSms
+          optOutEmail
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            playerId
+            venueId
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        summary {
+          id
+          playerId
+          venuesVisited
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          tournamentWinnings
+          tournamentBuyIns
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          tournamentITM
+          tournamentsCashed
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        playerMarketingPreferencesId
+        playerSummaryId
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1421,6 +9797,146 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
       __typename
     }
     venueMemberships {
+      items {
+        id
+        playerId
+        venueId
+        totalGamesPlayed
+        averageBuyIn
+        firstPlayedDate
+        lastPlayedDate
+        targetingClassification
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -1442,6 +9958,195 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
       tournamentITM
       tournamentsCashed
       lastUpdated
+      player {
+        id
+        firstName
+        givenName
+        lastName
+        email
+        phone
+        registrationVenueId
+        creationDate
+        lastPlayedDate
+        status
+        category
+        targetingClassification
+        tier
+        transactions {
+          items {
+            id
+            playerId
+            type
+            amount
+            paymentSource
+            transactionDate
+            rake
+            notes
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        results {
+          items {
+            id
+            playerId
+            gameId
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        tickets {
+          items {
+            id
+            playerId
+            ticketTemplateId
+            assignedAt
+            expiryDate
+            status
+            usedInGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        marketingPreferences {
+          id
+          playerId
+          optOutSms
+          optOutEmail
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            playerId
+            venueId
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        summary {
+          id
+          playerId
+          venuesVisited
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          tournamentWinnings
+          tournamentBuyIns
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          tournamentITM
+          tournamentsCashed
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        playerMarketingPreferencesId
+        playerSummaryId
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1482,16 +10187,407 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
     targetingClassification
     tier
     transactions {
+      items {
+        id
+        playerId
+        type
+        amount
+        paymentSource
+        transactionDate
+        rake
+        notes
+        gameId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
     }
     results {
+      items {
+        id
+        playerId
+        gameId
+        finishingPlace
+        isMultiDayQualification
+        prizeWon
+        amountWon
+        totalRunners
+        game {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
     }
     tickets {
+      items {
+        id
+        playerId
+        ticketTemplateId
+        assignedAt
+        expiryDate
+        status
+        usedInGameId
+        ticketTemplate {
+          id
+          name
+          description
+          value
+          validityDays
+          originGameId
+          targetGameId
+          playerTickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -1501,6 +10597,195 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
       playerId
       optOutSms
       optOutEmail
+      player {
+        id
+        firstName
+        givenName
+        lastName
+        email
+        phone
+        registrationVenueId
+        creationDate
+        lastPlayedDate
+        status
+        category
+        targetingClassification
+        tier
+        transactions {
+          items {
+            id
+            playerId
+            type
+            amount
+            paymentSource
+            transactionDate
+            rake
+            notes
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        results {
+          items {
+            id
+            playerId
+            gameId
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        tickets {
+          items {
+            id
+            playerId
+            ticketTemplateId
+            assignedAt
+            expiryDate
+            status
+            usedInGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        marketingPreferences {
+          id
+          playerId
+          optOutSms
+          optOutEmail
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            playerId
+            venueId
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        summary {
+          id
+          playerId
+          venuesVisited
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          tournamentWinnings
+          tournamentBuyIns
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          tournamentITM
+          tournamentsCashed
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        playerMarketingPreferencesId
+        playerSummaryId
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1509,6 +10794,146 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
       __typename
     }
     venueMemberships {
+      items {
+        id
+        playerId
+        venueId
+        totalGamesPlayed
+        averageBuyIn
+        firstPlayedDate
+        lastPlayedDate
+        targetingClassification
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -1530,6 +10955,195 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
       tournamentITM
       tournamentsCashed
       lastUpdated
+      player {
+        id
+        firstName
+        givenName
+        lastName
+        email
+        phone
+        registrationVenueId
+        creationDate
+        lastPlayedDate
+        status
+        category
+        targetingClassification
+        tier
+        transactions {
+          items {
+            id
+            playerId
+            type
+            amount
+            paymentSource
+            transactionDate
+            rake
+            notes
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        results {
+          items {
+            id
+            playerId
+            gameId
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        tickets {
+          items {
+            id
+            playerId
+            ticketTemplateId
+            assignedAt
+            expiryDate
+            status
+            usedInGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        marketingPreferences {
+          id
+          playerId
+          optOutSms
+          optOutEmail
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            playerId
+            venueId
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        summary {
+          id
+          playerId
+          venuesVisited
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          tournamentWinnings
+          tournamentBuyIns
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          tournamentITM
+          tournamentsCashed
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        playerMarketingPreferencesId
+        playerSummaryId
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1586,6 +11200,446 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
       category
       targetingClassification
       tier
+      transactions {
+        items {
+          id
+          playerId
+          type
+          amount
+          paymentSource
+          transactionDate
+          rake
+          notes
+          gameId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        playerId
+        optOutSms
+        optOutEmail
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      summary {
+        id
+        playerId
+        venuesVisited
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        tournamentWinnings
+        tournamentBuyIns
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        tournamentITM
+        tournamentsCashed
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1642,6 +11696,446 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
       category
       targetingClassification
       tier
+      transactions {
+        items {
+          id
+          playerId
+          type
+          amount
+          paymentSource
+          transactionDate
+          rake
+          notes
+          gameId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        playerId
+        optOutSms
+        optOutEmail
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      summary {
+        id
+        playerId
+        venuesVisited
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        tournamentWinnings
+        tournamentBuyIns
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        tournamentITM
+        tournamentsCashed
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1698,6 +12192,446 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
       category
       targetingClassification
       tier
+      transactions {
+        items {
+          id
+          playerId
+          type
+          amount
+          paymentSource
+          transactionDate
+          rake
+          notes
+          gameId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        playerId
+        optOutSms
+        optOutEmail
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      summary {
+        id
+        playerId
+        venuesVisited
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        tournamentWinnings
+        tournamentBuyIns
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        tournamentITM
+        tournamentsCashed
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1746,6 +12680,446 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
       category
       targetingClassification
       tier
+      transactions {
+        items {
+          id
+          playerId
+          type
+          amount
+          paymentSource
+          transactionDate
+          rake
+          notes
+          gameId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        playerId
+        optOutSms
+        optOutEmail
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      summary {
+        id
+        playerId
+        venuesVisited
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        tournamentWinnings
+        tournamentBuyIns
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        tournamentITM
+        tournamentsCashed
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1761,6 +13135,250 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
       address
       city
       country
+      details {
+        id
+        venueId
+        startDate
+        status
+        lastCustomerSuccessVisit
+        totalGamesHeld
+        averagePlayersPerGame
+        gameNights
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1808,6 +13426,446 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
       category
       targetingClassification
       tier
+      transactions {
+        items {
+          id
+          playerId
+          type
+          amount
+          paymentSource
+          transactionDate
+          rake
+          notes
+          gameId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        playerId
+        optOutSms
+        optOutEmail
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      summary {
+        id
+        playerId
+        venuesVisited
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        tournamentWinnings
+        tournamentBuyIns
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        tournamentITM
+        tournamentsCashed
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1823,6 +13881,250 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
       address
       city
       country
+      details {
+        id
+        venueId
+        startDate
+        status
+        lastCustomerSuccessVisit
+        totalGamesHeld
+        averagePlayersPerGame
+        gameNights
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1870,6 +14172,446 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
       category
       targetingClassification
       tier
+      transactions {
+        items {
+          id
+          playerId
+          type
+          amount
+          paymentSource
+          transactionDate
+          rake
+          notes
+          gameId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        playerId
+        optOutSms
+        optOutEmail
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      summary {
+        id
+        playerId
+        venuesVisited
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        tournamentWinnings
+        tournamentBuyIns
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        tournamentITM
+        tournamentsCashed
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1885,6 +14627,250 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
       address
       city
       country
+      details {
+        id
+        venueId
+        startDate
+        status
+        lastCustomerSuccessVisit
+        totalGamesHeld
+        averagePlayersPerGame
+        gameNights
+        venue {
+          id
+          name
+          address
+          city
+          country
+          details {
+            id
+            venueId
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          type
+          status
+          gameStartDateTime
+          gameEndDateTime
+          venueId
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          seriesName
+          isAdHoc
+          isSeries
+          isRecurring
+          isSatellite
+          registrationStatus
+          gameVariant
+          prizepool
+          revenueByEntries
+          totalEntries
+          totalRebuys
+          totalAddons
+          totalDuration
+          gameTags
+          tournamentType
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          playersRemaining
+          tournamentStructureId
+          cashStructureId
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1933,6 +14919,446 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
       category
       targetingClassification
       tier
+      transactions {
+        items {
+          id
+          playerId
+          type
+          amount
+          paymentSource
+          transactionDate
+          rake
+          notes
+          gameId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        playerId
+        optOutSms
+        optOutEmail
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      summary {
+        id
+        playerId
+        venuesVisited
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        tournamentWinnings
+        tournamentBuyIns
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        tournamentITM
+        tournamentsCashed
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1982,6 +15408,446 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
       category
       targetingClassification
       tier
+      transactions {
+        items {
+          id
+          playerId
+          type
+          amount
+          paymentSource
+          transactionDate
+          rake
+          notes
+          gameId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        playerId
+        optOutSms
+        optOutEmail
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      summary {
+        id
+        playerId
+        venuesVisited
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        tournamentWinnings
+        tournamentBuyIns
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        tournamentITM
+        tournamentsCashed
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2031,6 +15897,446 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
       category
       targetingClassification
       tier
+      transactions {
+        items {
+          id
+          playerId
+          type
+          amount
+          paymentSource
+          transactionDate
+          rake
+          notes
+          gameId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        playerId
+        optOutSms
+        optOutEmail
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      summary {
+        id
+        playerId
+        venuesVisited
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        tournamentWinnings
+        tournamentBuyIns
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        tournamentITM
+        tournamentsCashed
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2099,6 +16405,366 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
       playersRemaining
       tournamentStructureId
       cashStructureId
+      venue {
+        id
+        name
+        address
+        city
+        country
+        details {
+          id
+          venueId
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            playerId
+            venueId
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
+      tournamentStructure {
+        id
+        name
+        description
+        levels {
+          levelNumber
+          durationMinutes
+          smallBlind
+          bigBlind
+          ante
+          breakMinutes
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      cashStructure {
+        id
+        name
+        smallBlind
+        bigBlind
+        minBuyIn
+        maxBuyIn
+        rakeStructureId
+        rakeStructure {
+          id
+          name
+          rakePercentage
+          maxRake
+          cashStructures {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      playerResults {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2120,6 +16786,446 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
       category
       targetingClassification
       tier
+      transactions {
+        items {
+          id
+          playerId
+          type
+          amount
+          paymentSource
+          transactionDate
+          rake
+          notes
+          gameId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        playerId
+        optOutSms
+        optOutEmail
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      summary {
+        id
+        playerId
+        venuesVisited
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        tournamentWinnings
+        tournamentBuyIns
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        tournamentITM
+        tournamentsCashed
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2188,6 +17294,366 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
       playersRemaining
       tournamentStructureId
       cashStructureId
+      venue {
+        id
+        name
+        address
+        city
+        country
+        details {
+          id
+          venueId
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            playerId
+            venueId
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
+      tournamentStructure {
+        id
+        name
+        description
+        levels {
+          levelNumber
+          durationMinutes
+          smallBlind
+          bigBlind
+          ante
+          breakMinutes
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      cashStructure {
+        id
+        name
+        smallBlind
+        bigBlind
+        minBuyIn
+        maxBuyIn
+        rakeStructureId
+        rakeStructure {
+          id
+          name
+          rakePercentage
+          maxRake
+          cashStructures {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      playerResults {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2209,6 +17675,446 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
       category
       targetingClassification
       tier
+      transactions {
+        items {
+          id
+          playerId
+          type
+          amount
+          paymentSource
+          transactionDate
+          rake
+          notes
+          gameId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        playerId
+        optOutSms
+        optOutEmail
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      summary {
+        id
+        playerId
+        venuesVisited
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        tournamentWinnings
+        tournamentBuyIns
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        tournamentITM
+        tournamentsCashed
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2277,6 +18183,366 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
       playersRemaining
       tournamentStructureId
       cashStructureId
+      venue {
+        id
+        name
+        address
+        city
+        country
+        details {
+          id
+          venueId
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            playerId
+            venueId
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
+      tournamentStructure {
+        id
+        name
+        description
+        levels {
+          levelNumber
+          durationMinutes
+          smallBlind
+          bigBlind
+          ante
+          breakMinutes
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      cashStructure {
+        id
+        name
+        smallBlind
+        bigBlind
+        minBuyIn
+        maxBuyIn
+        rakeStructureId
+        rakeStructure {
+          id
+          name
+          rakePercentage
+          maxRake
+          cashStructures {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      playerResults {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2298,6 +18564,446 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
       category
       targetingClassification
       tier
+      transactions {
+        items {
+          id
+          playerId
+          type
+          amount
+          paymentSource
+          transactionDate
+          rake
+          notes
+          gameId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        playerId
+        optOutSms
+        optOutEmail
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      summary {
+        id
+        playerId
+        venuesVisited
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        tournamentWinnings
+        tournamentBuyIns
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        tournamentITM
+        tournamentsCashed
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2408,6 +19114,446 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
       category
       targetingClassification
       tier
+      transactions {
+        items {
+          id
+          playerId
+          type
+          amount
+          paymentSource
+          transactionDate
+          rake
+          notes
+          gameId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        playerId
+        optOutSms
+        optOutEmail
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      summary {
+        id
+        playerId
+        venuesVisited
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        tournamentWinnings
+        tournamentBuyIns
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        tournamentITM
+        tournamentsCashed
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2452,6 +19598,446 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
       category
       targetingClassification
       tier
+      transactions {
+        items {
+          id
+          playerId
+          type
+          amount
+          paymentSource
+          transactionDate
+          rake
+          notes
+          gameId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        playerId
+        optOutSms
+        optOutEmail
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      summary {
+        id
+        playerId
+        venuesVisited
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        tournamentWinnings
+        tournamentBuyIns
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        tournamentITM
+        tournamentsCashed
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2496,6 +20082,446 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
       category
       targetingClassification
       tier
+      transactions {
+        items {
+          id
+          playerId
+          type
+          amount
+          paymentSource
+          transactionDate
+          rake
+          notes
+          gameId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        playerId
+        optOutSms
+        optOutEmail
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      summary {
+        id
+        playerId
+        venuesVisited
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        tournamentWinnings
+        tournamentBuyIns
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        tournamentITM
+        tournamentsCashed
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2530,6 +20556,120 @@ export const createTicketTemplate = /* GraphQL */ `mutation CreateTicketTemplate
     originGameId
     targetGameId
     playerTickets {
+      items {
+        id
+        playerId
+        ticketTemplateId
+        assignedAt
+        expiryDate
+        status
+        usedInGameId
+        ticketTemplate {
+          id
+          name
+          description
+          value
+          validityDays
+          originGameId
+          targetGameId
+          playerTickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -2559,6 +20699,120 @@ export const updateTicketTemplate = /* GraphQL */ `mutation UpdateTicketTemplate
     originGameId
     targetGameId
     playerTickets {
+      items {
+        id
+        playerId
+        ticketTemplateId
+        assignedAt
+        expiryDate
+        status
+        usedInGameId
+        ticketTemplate {
+          id
+          name
+          description
+          value
+          validityDays
+          originGameId
+          targetGameId
+          playerTickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -2588,6 +20842,120 @@ export const deleteTicketTemplate = /* GraphQL */ `mutation DeleteTicketTemplate
     originGameId
     targetGameId
     playerTickets {
+      items {
+        id
+        playerId
+        ticketTemplateId
+        assignedAt
+        expiryDate
+        status
+        usedInGameId
+        ticketTemplate {
+          id
+          name
+          description
+          value
+          validityDays
+          originGameId
+          targetGameId
+          playerTickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -2624,6 +20992,64 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
       validityDays
       originGameId
       targetGameId
+      playerTickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2645,6 +21071,446 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
       category
       targetingClassification
       tier
+      transactions {
+        items {
+          id
+          playerId
+          type
+          amount
+          paymentSource
+          transactionDate
+          rake
+          notes
+          gameId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        playerId
+        optOutSms
+        optOutEmail
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      summary {
+        id
+        playerId
+        venuesVisited
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        tournamentWinnings
+        tournamentBuyIns
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        tournamentITM
+        tournamentsCashed
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2686,6 +21552,64 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
       validityDays
       originGameId
       targetGameId
+      playerTickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2707,6 +21631,446 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
       category
       targetingClassification
       tier
+      transactions {
+        items {
+          id
+          playerId
+          type
+          amount
+          paymentSource
+          transactionDate
+          rake
+          notes
+          gameId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        playerId
+        optOutSms
+        optOutEmail
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      summary {
+        id
+        playerId
+        venuesVisited
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        tournamentWinnings
+        tournamentBuyIns
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        tournamentITM
+        tournamentsCashed
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2748,6 +22112,64 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
       validityDays
       originGameId
       targetGameId
+      playerTickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2769,6 +22191,446 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
       category
       targetingClassification
       tier
+      transactions {
+        items {
+          id
+          playerId
+          type
+          amount
+          paymentSource
+          transactionDate
+          rake
+          notes
+          gameId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          playerId
+          gameId
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          game {
+            id
+            name
+            type
+            status
+            gameStartDateTime
+            gameEndDateTime
+            venueId
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            seriesName
+            isAdHoc
+            isSeries
+            isRecurring
+            isSatellite
+            registrationStatus
+            gameVariant
+            prizepool
+            revenueByEntries
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            playersRemaining
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          playerId
+          ticketTemplateId
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        playerId
+        optOutSms
+        optOutEmail
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          playerId
+          venueId
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            registrationVenueId
+            creationDate
+            lastPlayedDate
+            status
+            category
+            targetingClassification
+            tier
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerMarketingPreferencesId
+            playerSummaryId
+            __typename
+          }
+          venue {
+            id
+            name
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      summary {
+        id
+        playerId
+        venuesVisited
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        tournamentWinnings
+        tournamentBuyIns
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        tournamentITM
+        tournamentsCashed
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          registrationVenueId
+          creationDate
+          lastPlayedDate
+          status
+          category
+          targetingClassification
+          tier
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            playerId
+            optOutSms
+            optOutEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          summary {
+            id
+            playerId
+            venuesVisited
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            tournamentWinnings
+            tournamentBuyIns
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            tournamentITM
+            tournamentsCashed
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerMarketingPreferencesId
+          playerSummaryId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2800,6 +22662,19 @@ export const createUser = /* GraphQL */ `mutation CreateUser(
     email
     role
     preferences {
+      items {
+        id
+        userId
+        page
+        widget
+        preference
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -2826,6 +22701,19 @@ export const updateUser = /* GraphQL */ `mutation UpdateUser(
     email
     role
     preferences {
+      items {
+        id
+        userId
+        page
+        widget
+        preference
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -2852,6 +22740,19 @@ export const deleteUser = /* GraphQL */ `mutation DeleteUser(
     email
     role
     preferences {
+      items {
+        id
+        userId
+        page
+        widget
+        preference
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -3143,6 +23044,19 @@ export const createMarketingMessage = /* GraphQL */ `mutation CreateMarketingMes
     emailBody
     smsBody
     sentMessages {
+      items {
+        id
+        playerId
+        marketingMessageId
+        status
+        sentAt
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -3170,6 +23084,19 @@ export const updateMarketingMessage = /* GraphQL */ `mutation UpdateMarketingMes
     emailBody
     smsBody
     sentMessages {
+      items {
+        id
+        playerId
+        marketingMessageId
+        status
+        sentAt
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename
@@ -3197,6 +23124,19 @@ export const deleteMarketingMessage = /* GraphQL */ `mutation DeleteMarketingMes
     emailBody
     smsBody
     sentMessages {
+      items {
+        id
+        playerId
+        marketingMessageId
+        status
+        sentAt
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       nextToken
       startedAt
       __typename

@@ -107,8 +107,8 @@ export type GameData = {
     // Scraper metadata
     structureLabel?: string;
     foundKeys?: string[];
-    
     doNotScrape?: boolean;
+    venueMatch?: VenueMatch | null;
 };
 
 export type MissingField = {
@@ -190,4 +190,13 @@ export interface TournamentLevelInput {
     bigBlind?: number;
     ante?: number;
     breakMinutes?: number;
+}
+
+export interface VenueMatch {
+  bestMatch: {
+    id: string;
+    name: string;
+    score: number;
+  };
+  matchType: 'AUTO_ASSIGN' | 'SUGGESTION' | 'NO_MATCH';
 }

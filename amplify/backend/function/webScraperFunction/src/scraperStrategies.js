@@ -1,4 +1,5 @@
 const cheerio = require('cheerio');
+const stringSimilarity = require('string-similarity');
 
 /**
  * Parses duration strings (e.g., "1h 30m") into milliseconds.
@@ -20,6 +21,17 @@ const parseDurationToMilliseconds = (durationStr) => {
     return totalMilliseconds;
 };
 
+const AUTO_ASSIGN_THRESHOLD = 0.90; // 90% similarity - high confidence
+const SUGGEST_THRESHOLD = 0.60;     // 60% similarity - medium confidence, suggest to user
+
+const cleanupVenueName = (name) => {
+    if (!name) return '';
+    
+    const wordsToRemove = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const regex = new RegExp(`\\b(${wordsToRemove.join('|')})\\b`, 'gi');
+    return name.replace(regex, '').replace(/\s+/g, ' ').trim();
+};
+
 /**
  * A context class to hold the scraper state.
  */
@@ -33,10 +45,6 @@ class ScrapeContext {
         this._parseEmbeddedData();
     }
     
-    /**
-     * A private helper method to find and parse the embedded JSON
-     * data from the script tags upon initialization.
-     */
     _parseEmbeddedData() {
         const html = this.$.html();
         try {
@@ -152,7 +160,8 @@ const defaultStrategy = {
                 const playersRemaining = parts[0];
                 const totalEntries = parts[1];
                 
-                ctx.add('playersRemaining', playersRemaining);
+                // This value is now derived in getSeatingAndPlayersRemaining to be more accurate
+                // ctx.add('playersRemaining', playersRemaining); 
                 ctx.add('totalEntries', totalEntries);
             }
         } else {
@@ -221,6 +230,39 @@ const defaultStrategy = {
     
     getSeriesName(ctx) {
         ctx.getText('seriesName', '.your-selector-for-series-name');
+    },
+
+    getSeatingAndPlayersRemaining(ctx) {
+        const seating = [];
+        const entriesTable = ctx.$('h4.cw-text-center:contains("Entries")').next('table').find('tbody tr');
+        
+        entriesTable.each((i, el) => {
+            const $row = ctx.$(el);
+            const $tds = $row.find('td');
+
+            if ($tds.length < 4) return;
+
+            const name = $tds.eq(1).text().trim();
+            const tableSeatInfo = $tds.eq(2).text().trim();
+            const chips = $tds.eq(3).text().trim();
+
+            if (chips && tableSeatInfo.includes('Table')) {
+                const tableSeatMatch = tableSeatInfo.match(/Table(\d+)\s*\/\s*(\d+)/);
+                
+                if (name && tableSeatMatch) {
+                    seating.push({
+                        name: name,
+                        table: parseInt(tableSeatMatch[1], 10),
+                        seat: parseInt(tableSeatMatch[2], 10),
+                    });
+                }
+            }
+        });
+
+        if (seating.length > 0) {
+            ctx.add('seating', seating);
+        }
+        ctx.add('playersRemaining', seating.length);
     },
 
     getResults(ctx) {
@@ -307,8 +349,6 @@ const defaultStrategy = {
         if (levels.length > 0) ctx.add('levels', levels);
     },
 
-    // ✅ FIXED: This function now correctly creates both 'levelNumberBeforeBreak'
-    // and 'levelNumberAfterBreak' for each break found.
     getBreaks(ctx) {
         if (!ctx.levelData) return;
         const breaks = [];
@@ -320,11 +360,9 @@ const defaultStrategy = {
                 const levelBefore = currentLevel.ID || 0;
                 let levelAfter = 0;
 
-                // Check if there is a next level in the array to get its ID
                 if (i + 1 < ctx.levelData.length) {
                     levelAfter = ctx.levelData[i + 1].ID || 0;
                 } else {
-                    // If it's the last level, we assume the next level is just an increment
                     levelAfter = levelBefore + 1;
                 }
 
@@ -337,6 +375,59 @@ const defaultStrategy = {
         }
 
         if (breaks.length > 0) ctx.add('breaks', breaks);
+    },
+
+    getMatchingVenue(ctx, venues) {
+        if (!ctx.data.name || !venues || venues.length === 0) {
+            console.log('[DEBUG-MATCHING] Skipped: Missing scraped name or venue list.');
+            return;
+        }
+
+        const cleanedScrapedName = cleanupVenueName(ctx.data.name);
+        const cleanedVenueNames = venues.map(v => cleanupVenueName(v.name));
+
+        console.log(`[DEBUG-MATCHING] Raw scraped name: "${ctx.data.name}"`);
+        console.log(`[DEBUG-MATCHING] Cleaned scraped name: "${cleanedScrapedName}"`);
+        console.log('[DEBUG-MATCHING] Cleaned DB venue names:', JSON.stringify(cleanedVenueNames));
+
+        const bestMatch = stringSimilarity.findBestMatch(
+            cleanedScrapedName, 
+            cleanedVenueNames
+        );
+        
+        console.log('[DEBUG-MATCHING] Best match found by library:', JSON.stringify(bestMatch, null, 2));
+
+        if (bestMatch.bestMatch.rating > 0) {
+            const score = bestMatch.bestMatch.rating;
+            const matchedVenueName = bestMatch.bestMatch.target;
+            
+            const originalVenue = venues.find(v => cleanupVenueName(v.name) === matchedVenueName);
+
+            if (originalVenue) {
+                let matchType = 'NO_MATCH';
+                if (score >= AUTO_ASSIGN_THRESHOLD) {
+                    matchType = 'AUTO_ASSIGN';
+                } else if (score >= SUGGEST_THRESHOLD) {
+                    matchType = 'SUGGESTION';
+                }
+
+                const venueMatch = {
+                    bestMatch: {
+                        id: originalVenue.id,
+                        name: originalVenue.name,
+                        score: score
+                    },
+                    matchType: matchType
+                };
+                
+                console.log(`[DEBUG-MATCHING] Decision: ${matchType} for venue "${originalVenue.name}" with score ${score.toFixed(2)}`);
+                ctx.add('venueMatch', venueMatch);
+            } else {
+                console.log(`[DEBUG-MATCHING] Error: Could not find original venue object for matched name "${matchedVenueName}"`);
+            }
+        } else {
+            console.log('[DEBUG-MATCHING] No match found above 0% similarity.');
+        }
     }
 };
 
@@ -351,7 +442,8 @@ const strategyMap = {
      "STATUS: SCHEDULED | REG: OPEN": defaultStrategy,
 };
 
-const runScraper = (html, structureLabel) => {
+// ✅ FIXED: The function signature was updated to accept the 'venues' parameter.
+const runScraper = (html, structureLabel, venues = []) => {
     const ctx = new ScrapeContext(html);
     const strategy = defaultStrategy; 
     console.log(`[Scraper] Using unified robust strategy.`);
@@ -359,7 +451,12 @@ const runScraper = (html, structureLabel) => {
     for (const key in strategy) {
         if (typeof strategy[key] === 'function') {
             try {
-                strategy[key](ctx);
+                // Pass the venues list to the matching function
+                if (key === 'getMatchingVenue') {
+                    strategy[key](ctx, venues);
+                } else {
+                    strategy[key](ctx);
+                }
             } catch (e) {
                 console.error(`[Scraper] Error running strategy function "${key}":`, e.message);
             }

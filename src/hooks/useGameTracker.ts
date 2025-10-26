@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useGameContext } from '../contexts/GameContext';
 import { fetchGameDataFromBackend, saveGameDataToBackend, shouldAutoRefreshTournament } from '../services/gameService';
-import type { GameState, DataSource, GameData, MissingField, GameStatus } from '../types/game';
+import type { GameState, DataSource, GameData, MissingField, GameStatus, VenueMatch } from '../types/game';
 
 export const POLLING_INTERVAL = 5 * 60 * 1000; 
 
@@ -46,6 +46,7 @@ export const useGameTracker = () => {
             const dataFromBackend = await fetchGameDataFromBackend(id);
             console.log('[useGameTracker] Raw data from backend:', dataFromBackend);
 
+            const venueMatch = (dataFromBackend as any).venueMatch as VenueMatch || null;
             const isNewStructure = dataFromBackend.isNewStructure ?? undefined;
             const structureLabel = (dataFromBackend as any).structureLabel || undefined;
             const foundKeys = (dataFromBackend as any).foundKeys || [];
@@ -137,6 +138,7 @@ export const useGameTracker = () => {
                 structureLabel: structureLabel,
                 foundKeys: foundKeys,
                 doNotScrape: doNotScrape,
+                venueMatch: venueMatch,
             };
 
             if (data.breaks && data.breaks.length > 0 && data.levels && data.levels.length > 0) {

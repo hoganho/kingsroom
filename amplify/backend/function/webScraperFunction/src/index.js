@@ -39,7 +39,7 @@ Amplify Params - DO NOT EDIT */
 
 const axios = require('axios');
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand, GetCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
 const crypto = require('crypto');
 
 const {
@@ -57,15 +57,31 @@ const getTableName = (modelName) => {
     return tableName;
 };
 
-// --- SCRAPING LOGIC ---
+const getAllVenues = async () => {
+    const venueTable = getTableName('Venue');
+    try {
+        const command = new ScanCommand({
+            TableName: venueTable,
+            ProjectionExpression: 'id, #name', // Only get the ID and name for efficiency
+            ExpressionAttributeNames: { '#name': 'name' }
+        });
+        const response = await ddbDocClient.send(command);
+        return response.Items || [];
+    } catch (error) {
+        console.error('Error fetching venues from DynamoDB:', error);
+        return []; // Return empty array on error
+    }
+};
 
-const scrapeDataFromHtml = (html) => {
+// --- SCRAPING LOGIC ---
+const scrapeDataFromHtml = (html, venues) => {
     const { status, registrationStatus } = getStatusAndReg(html);
     
     const structureLabel = `STATUS: ${status || 'UNKNOWN'} | REG: ${registrationStatus || 'UNKNOWN'}`;
     console.log(`[DEBUG-SCRAPER] Identified Structure: ${structureLabel}`);
     
-    const { data, foundKeys } = runScraper(html, structureLabel);
+    // Pass venues to the scraper
+    const { data, foundKeys } = runScraper(html, structureLabel, venues);
     
     data.structureLabel = structureLabel;
     
@@ -75,7 +91,6 @@ const scrapeDataFromHtml = (html) => {
 
     return { data, foundKeys };
 };
-
 
 const processStructureFingerprint = async (foundKeys, structureLabel, sourceUrl) => {
     if (!foundKeys || foundKeys.length === 0) {
@@ -189,10 +204,15 @@ const handleFetch = async (url) => {
         };
     }
 
+    // ✅ 1. Fetch all venues before scraping
+    const venues = await getAllVenues();
+    console.log(`[handleFetch] Loaded ${venues.length} venues for matching.`);
+
     console.log(`[handleFetch] Fetching data from: ${url}`);
     const response = await axios.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
     
-    const { data, foundKeys } = scrapeDataFromHtml(response.data);
+    // ✅ 2. Pass the venues list to the scraper
+    const { data, foundKeys } = scrapeDataFromHtml(response.data, venues);
     
     const fingerprintResult = await processStructureFingerprint(foundKeys, data.structureLabel, url);
     

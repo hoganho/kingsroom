@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import type { GameData } from '../../types/game';
 import { fieldManifest, profileDescriptions } from '../../lib/fieldManifest';
+import { VenueMatchDisplay } from './VenueMatchDisplay';
 
 // (The getValidationStatus helper function remains the same as before)
 const getValidationStatus = (
@@ -67,6 +68,12 @@ export const FieldManifestReport: React.FC<{ data: GameData | undefined }> = ({ 
     }, []);
 
     const renderField = (key: string) => {
+        // ✅ NEW: Add special handling for the 'venueName' field
+        if (key === 'venueName') {
+            return <VenueMatchDisplay key={key} venueMatch={data.venueMatch} />;
+        }
+        
+        // --- Existing generic rendering logic for all other fields ---
         const validation = getValidationStatus(key, data, gameProfileKey);
         if (!validation) return null;
 
@@ -97,6 +104,7 @@ export const FieldManifestReport: React.FC<{ data: GameData | undefined }> = ({ 
         );
     };
 
+    
     return (
         <div className="space-y-4">
             {profileDescription && (

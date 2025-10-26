@@ -27,7 +27,7 @@ export const fieldManifest: Record<string, FieldDefinition> = {
   
   // Derived and Manual Details
   seriesName: { label: 'Series Name', group: 'Derived and Manual Details', isBaselineOptional: true },
-  venueName: { label: 'Venue Name', group: 'Derived and Manual Details', isBaselineExpected: true },
+  venueName: { label: 'Venue Name', group: 'Derived and Manual Details', isBaselineOptional: true },
   isAdHoc: { label: 'Is Adhoc', group: 'Derived and Manual Details', isBaselineExpected: true },
   isSeries: { label: 'Is Series', group: 'Derived and Manual Details', isBaselineExpected: true },
   isRecurring: { label: 'Is Recurring', group: 'Derived and Manual Details', isBaselineExpected: true },

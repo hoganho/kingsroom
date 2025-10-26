@@ -124,7 +124,7 @@ const TicketStatus = {
   "USED": "USED"
 };
 
-const { DataSync, ScrapeStructure, Asset, Venue, VenueDetails, Game, TournamentStructure, RakeStructure, CashStructure, Player, PlayerSummary, PlayerVenue, PlayerTransaction, PlayerResult, PlayerMarketingMessage, PlayerMarketingPreferences, TicketTemplate, PlayerTicket, User, Staff, UserPreference, SocialPost, SocialAccount, MarketingMessage, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntries, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTables, ScrapedTableSeatsData, TournamentLevelData } = initSchema(schema);
+const { DataSync, ScrapeStructure, Asset, Venue, VenueDetails, Game, TournamentStructure, RakeStructure, CashStructure, Player, PlayerSummary, PlayerVenue, PlayerTransaction, PlayerResult, PlayerMarketingMessage, PlayerMarketingPreferences, TicketTemplate, PlayerTicket, User, Staff, UserPreference, SocialPost, SocialAccount, MarketingMessage, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntries, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTables, ScrapedVenueMatch, ScrapedVenueMatchDetails, ScrapedTableSeatsData, TournamentLevelData } = initSchema(schema);
 
 export {
   DataSync,
@@ -175,6 +175,8 @@ export {
   ScrapedPlayerSeating,
   ScrapedPlayerResult,
   ScrapedTables,
+  ScrapedVenueMatch,
+  ScrapedVenueMatchDetails,
   ScrapedTableSeatsData,
   TournamentLevelData
 };

@@ -3623,6 +3623,15 @@ export const schema = {
                     "isRequired": false,
                     "attributes": [],
                     "isArrayNullable": true
+                },
+                "venueMatch": {
+                    "name": "venueMatch",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "ScrapedVenueMatch"
+                    },
+                    "isRequired": false,
+                    "attributes": []
                 }
             }
         },
@@ -3792,6 +3801,53 @@ export const schema = {
                 }
             }
         },
+        "ScrapedVenueMatch": {
+            "name": "ScrapedVenueMatch",
+            "fields": {
+                "bestMatch": {
+                    "name": "bestMatch",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "ScrapedVenueMatchDetails"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "matchType": {
+                    "name": "matchType",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "ScrapedVenueMatchDetails": {
+            "name": "ScrapedVenueMatchDetails",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "score": {
+                    "name": "score",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
         "ScrapedTableSeatsData": {
             "name": "ScrapedTableSeatsData",
             "fields": {
@@ -3874,5 +3930,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "dcacf1e5398b5a3cb0c29f6ab5cfd98c"
+    "version": "01c4d7d183d6d43fd06ef8770a525e4b"
 };

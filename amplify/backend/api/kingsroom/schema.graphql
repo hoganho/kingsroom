@@ -153,6 +153,7 @@ type ScrapedGameData {
     isNewStructure: Boolean
     structureLabel: String
     foundKeys: [String]
+    venueMatch: ScrapedVenueMatch
 }
 
 type ScrapedTournamentLevel {
@@ -190,6 +191,17 @@ type ScrapedPlayerResult {
 type ScrapedTables {
     tableName: String!
     seats: [ScrapedTableSeatsData!]
+}
+
+type ScrapedVenueMatch {
+    bestMatch: ScrapedVenueMatchDetails!
+    matchType: String! # Will be 'AUTO_ASSIGN', 'SUGGESTION', or 'NO_MATCH'
+}
+
+type ScrapedVenueMatchDetails {
+    id: ID!
+    name: String!
+    score: Float!
 }
 
 type ScrapedTableSeatsData {
