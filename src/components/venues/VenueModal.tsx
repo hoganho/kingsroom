@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import * as APITypes from '../../API';
+import { VenueFormData } from '../../types/venue';
 
 type Venue = APITypes.Venue;
 
 interface VenueModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (venueData: Omit<Venue, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => void;
+  // ✅ CHANGED: Use the simpler VenueFormData type for the onSave prop
+  onSave: (venueData: VenueFormData) => void;
   venue: Venue | null;
 }
 
@@ -18,7 +20,6 @@ export const VenueModal: React.FC<VenueModalProps> = ({ isOpen, onClose, onSave,
   const [formData, setFormData] = useState(initialFormState);
 
   useEffect(() => {
-    // When the modal opens, populate the form if we are editing a venue
     if (isOpen && venue) {
       setFormData({
         name: venue.name,
@@ -27,7 +28,6 @@ export const VenueModal: React.FC<VenueModalProps> = ({ isOpen, onClose, onSave,
         country: venue.country || 'Australia',
       });
     } else {
-      // Otherwise, reset to the initial empty state
       setFormData(initialFormState);
     }
   }, [venue, isOpen]);
@@ -39,7 +39,7 @@ export const VenueModal: React.FC<VenueModalProps> = ({ isOpen, onClose, onSave,
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.name) { // Basic validation
+    if (formData.name) {
         onSave(formData);
     }
   };
@@ -57,11 +57,11 @@ export const VenueModal: React.FC<VenueModalProps> = ({ isOpen, onClose, onSave,
           </div>
           <div>
             <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
-            <input type="text" name="address" id="address" value={formData.address} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+            <input type="text" name="address" id="address" value={formData.address || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
           </div>
           <div>
             <label htmlFor="city" className="block text-sm font-medium text-gray-700">City</label>
-            <input type="text" name="city" id="city" value={formData.city} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+            <input type="text" name="city" id="city" value={formData.city || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
           </div>
           <div className="flex justify-end space-x-4 pt-4">
             <button type="button" onClick={onClose} className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">Cancel</button>

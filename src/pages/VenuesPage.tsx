@@ -8,16 +8,12 @@ import { VenueTable } from '../components/venues/VenueTable';
 import { VenueModal } from '../components/venues/VenueModal';
 import { DeleteConfirmationModal } from '../components/venues/DeleteConfirmationModal';
 import * as APITypes from '../API';
+import { VenueFormData } from '../types/venue'; // ✅ Import the new type
 
 type Venue = APITypes.Venue;
 
-// ⛔️ This was the problem: The client was created before Amplify was configured.
-// const client = generateClient(); 
-
 const VenuesPage = () => {
-  // ✅ FIXED: Create the client inside the component function.
   const client = generateClient();
-
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -64,7 +60,8 @@ const VenuesPage = () => {
       setIsDeleteModalOpen(true);
   };
 
-  const handleSaveVenue = async (venueData: Omit<Venue, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => {
+  // ✅ CHANGED: Update the function signature to use VenueFormData
+  const handleSaveVenue = async (venueData: VenueFormData) => {
     try {
       const { name, address, city, country } = venueData;
       if (editingVenue) {
@@ -98,7 +95,7 @@ const VenuesPage = () => {
           fetchVenues();
       } catch (err) {
           console.error('Error deleting venue:', err);
-          setError('Failed to delete venue.');
+setError('Failed to delete venue.');
       }
   };
 
