@@ -77,13 +77,13 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
     id
     name
     type
-    variant
     status
     gameStartDateTime
     gameEndDateTime
     venueId
     sourceUrl
     doNotScrape
+    sourceDataIssue
     seriesName
     isAdHoc
     registrationStatus
@@ -703,13 +703,13 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
     id
     name
     type
-    variant
     status
     gameStartDateTime
     gameEndDateTime
     venueId
     sourceUrl
     doNotScrape
+    sourceDataIssue
     seriesName
     isAdHoc
     registrationStatus
@@ -795,13 +795,13 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
     id
     name
     type
-    variant
     status
     gameStartDateTime
     gameEndDateTime
     venueId
     sourceUrl
     doNotScrape
+    sourceDataIssue
     seriesName
     isAdHoc
     registrationStatus
@@ -887,13 +887,13 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
     id
     name
     type
-    variant
     status
     gameStartDateTime
     gameEndDateTime
     venueId
     sourceUrl
     doNotScrape
+    sourceDataIssue
     seriesName
     isAdHoc
     registrationStatus
@@ -2056,13 +2056,13 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
       id
       name
       type
-      variant
       status
       gameStartDateTime
       gameEndDateTime
       venueId
       sourceUrl
       doNotScrape
+      sourceDataIssue
       seriesName
       isAdHoc
       registrationStatus
@@ -2142,13 +2142,13 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
       id
       name
       type
-      variant
       status
       gameStartDateTime
       gameEndDateTime
       venueId
       sourceUrl
       doNotScrape
+      sourceDataIssue
       seriesName
       isAdHoc
       registrationStatus
@@ -2228,13 +2228,13 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
       id
       name
       type
-      variant
       status
       gameStartDateTime
       gameEndDateTime
       venueId
       sourceUrl
       doNotScrape
+      sourceDataIssue
       seriesName
       isAdHoc
       registrationStatus

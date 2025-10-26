@@ -515,13 +515,13 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
     id
     name
     type
-    variant
     status
     gameStartDateTime
     gameEndDateTime
     venueId
     sourceUrl
     doNotScrape
+    sourceDataIssue
     seriesName
     isAdHoc
     registrationStatus
@@ -606,13 +606,13 @@ export const listGames = /* GraphQL */ `query ListGames(
       id
       name
       type
-      variant
       status
       gameStartDateTime
       gameEndDateTime
       venueId
       sourceUrl
       doNotScrape
+      sourceDataIssue
       seriesName
       isAdHoc
       registrationStatus
@@ -662,13 +662,13 @@ export const syncGames = /* GraphQL */ `query SyncGames(
       id
       name
       type
-      variant
       status
       gameStartDateTime
       gameEndDateTime
       venueId
       sourceUrl
       doNotScrape
+      sourceDataIssue
       seriesName
       isAdHoc
       registrationStatus
@@ -1544,13 +1544,13 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
       id
       name
       type
-      variant
       status
       gameStartDateTime
       gameEndDateTime
       venueId
       sourceUrl
       doNotScrape
+      sourceDataIssue
       seriesName
       isAdHoc
       registrationStatus
@@ -2660,13 +2660,13 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
       id
       name
       type
-      variant
       status
       gameStartDateTime
       gameEndDateTime
       venueId
       sourceUrl
       doNotScrape
+      sourceDataIssue
       seriesName
       isAdHoc
       registrationStatus
@@ -2721,13 +2721,13 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
       id
       name
       type
-      variant
       status
       gameStartDateTime
       gameEndDateTime
       venueId
       sourceUrl
       doNotScrape
+      sourceDataIssue
       seriesName
       isAdHoc
       registrationStatus
@@ -2782,13 +2782,13 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
       id
       name
       type
-      variant
       status
       gameStartDateTime
       gameEndDateTime
       venueId
       sourceUrl
       doNotScrape
+      sourceDataIssue
       seriesName
       isAdHoc
       registrationStatus
@@ -2843,13 +2843,13 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
       id
       name
       type
-      variant
       status
       gameStartDateTime
       gameEndDateTime
       venueId
       sourceUrl
       doNotScrape
+      sourceDataIssue
       seriesName
       isAdHoc
       registrationStatus

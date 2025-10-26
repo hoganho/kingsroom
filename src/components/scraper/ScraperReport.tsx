@@ -10,123 +10,76 @@ import { PlayerSeating } from './PlayerSeating';
 import { LiveTables } from './LiveTables';
 import { Breaks } from './Breaks';
 import { fieldManifest } from '../../lib/fieldManifest';
-
-const ReportField: React.FC<{
-    fieldName: string;
-    fieldValue: any;
-    status: 'found' | 'missing' | 'optional-missing' | 'unprofiled';
-}> = ({ fieldName, fieldValue, status }) => {
-    
-    const renderValue = () => {
-        if (fieldValue === null || fieldValue === undefined) return null;
-        if (Array.isArray(fieldValue)) {
-            if (fieldValue.length === 0) return null;
-            if (['levels', 'results', 'entries', 'seating', 'tables', 'breaks'].includes(fieldName)) {
-                 return <span className="font-mono text-xs text-gray-500">[{fieldValue.length} items] - See component below</span>;
-            }
-            return <span className="font-mono text-xs">[{fieldValue.join(', ')}]</span>;
-        }
-        if (typeof fieldValue === 'boolean') return fieldValue ? 'Yes' : 'No';
-        return String(fieldValue);
-    };
-
-    const value = renderValue();
-
-    return (
-        <div className="flex items-center text-xs py-1 border-b last:border-b-0">
-            <span className="font-medium text-gray-600 w-32 flex-shrink-0">{fieldName}:</span>
-            {status === 'found' ? (
-                <span className="text-gray-800">{value}</span>
-            ) : (
-                <span className={`italic ${
-                    status === 'missing' ? 'text-red-500 font-medium' :
-                    status === 'optional-missing' ? 'text-gray-400' :
-                    'text-blue-500'
-                }`}>
-                    {status === 'missing' && 'Missing (Expected)'}
-                    {status === 'optional-missing' && 'Missing (Optional)'}
-                    {status === 'unprofiled' && 'Missing (Unprofiled)'}
-                </span>
-            )}
-        </div>
-    );
-};
+import { FieldManifestReport } from './FieldManifestReport';
+import { CollapsibleSection } from '../layout/CollapsibleSection';
 
 export const ScraperReport: React.FC<{ data?: GameData }> = ({ data }) => {
     if (!data) return null;
 
-    // Dynamically build the report sections from the manifest
-    const reportSections = useMemo(() => {
-        const sections: Record<string, string[]> = {};
-        for (const fieldName in fieldManifest) {
-            const group = fieldManifest[fieldName].group;
-            if (!sections[group]) {
-                sections[group] = [];
-            }
-            sections[group].push(fieldName);
-        }
-        return Object.entries(sections);
-    }, []);
-
-    const foundKeysSet = useMemo(() => new Set(data.foundKeys || []), [data.foundKeys]);
-
-    // Determines the status of a field for rendering
-    const getFieldStatus = (fieldName: string): 'found' | 'missing' | 'optional-missing' | 'unprofiled' => {
-        if (foundKeysSet.has(fieldName)) return 'found';
-        
-        const def = fieldManifest[fieldName];
-        if (!def) return 'unprofiled';
-
-        if (def.isBaselineExpected || def.isProfileExpected?.includes(data.structureLabel || '')) {
-            return 'missing';
-        }
-        
-        if (def.isBaselineOptional || def.isProfileOptional?.includes(data.structureLabel || '')) {
-            return 'optional-missing';
-        }
-
-        return 'unprofiled';
-    };
-
     const manifestKeys = useMemo(() => new Set(Object.keys(fieldManifest)), []);
     const otherFoundKeys = (data.foundKeys || []).filter(key => !manifestKeys.has(key));
 
+    // Helper function to check if an array is not empty
+    const hasData = (arr: unknown[] | undefined) => arr && arr.length > 0;
+
     return (
         <div className="mt-4 space-y-4">
+            {/* --- Main summary remains visible at the top --- */}
             <ValidationSummary data={data} />
             
-            {reportSections.map(([title, fields]) => (
-                <div key={title} className="border rounded-lg bg-gray-50">
-                    <h4 className="font-bold text-sm mb-2 text-gray-700 p-3 border-b bg-gray-100">{title}</h4>
-                    <div className="grid grid-cols-1 gap-0 p-3">
-                        {fields.map(fieldName => (
-                            <ReportField 
-                                key={fieldName}
-                                fieldName={fieldName}
-                                fieldValue={(data as any)[fieldName]}
-                                status={getFieldStatus(fieldName)}
-                            />
-                        ))}
-                    </div>
-                </div>
-            ))}
+            {/* --- Collapsible Field Details --- */}
+            <CollapsibleSection title="Field Details" defaultOpen={true}>
+                <FieldManifestReport data={data} />
+            </CollapsibleSection>
 
-            {/* Complex Data Components */}
-            <LiveTables tables={data.tables} />
-            <PlayerResults results={data.results} />
-            <PlayerSeating seating={data.seating} />
-            <PlayerEntries entries={data.entries} />
-            <Breaks breaks={data.breaks} levels={data.levels} />
-            <BlindStructure levels={data.levels} />
+            {/* --- Complex Data Components (Now Collapsible) --- */}
+            {hasData(data.tables) && (
+                 <CollapsibleSection title={`Live Tables (${data.tables!.length})`}>
+                    <LiveTables tables={data.tables} />
+                </CollapsibleSection>
+            )}
 
+            {hasData(data.results) && (
+                <CollapsibleSection title={`Player Results (${data.results!.length})`}>
+                    <PlayerResults results={data.results} />
+                </CollapsibleSection>
+            )}
+
+            {hasData(data.seating) && (
+                 <CollapsibleSection title={`Player Seating (${data.seating!.length})`}>
+                    <PlayerSeating seating={data.seating} />
+                </CollapsibleSection>
+            )}
+
+            {hasData(data.entries) && (
+                <CollapsibleSection title={`Player Entries (${data.entries!.length})`}>
+                    <PlayerEntries entries={data.entries} />
+                </CollapsibleSection>
+            )}
+
+            {hasData(data.breaks) && (
+                <CollapsibleSection title={`Breaks (${data.breaks!.length})`}>
+                    <Breaks breaks={data.breaks} levels={data.levels} />
+                </CollapsibleSection>
+            )}
+
+             {hasData(data.levels) && (
+                <CollapsibleSection title={`Blind Structure (${data.levels!.length} Levels)`}>
+                    <BlindStructure levels={data.levels} />
+                </CollapsibleSection>
+            )}
+
+            {/* --- Other Found Keys Section (Styled consistently) --- */}
             {otherFoundKeys.length > 0 && (
-                <details className="border rounded-lg p-3 bg-blue-50">
-                    <summary className="cursor-pointer text-sm font-medium text-blue-800">
+                <details className="border border-yellow-300 rounded-lg bg-yellow-50">
+                    <summary className="cursor-pointer select-none p-3 text-sm font-medium text-yellow-800">
                         Other Found Keys ({otherFoundKeys.length})
                     </summary>
-                    <p className="text-xs text-blue-700 mt-1">These keys were found on the page but are not defined in the field manifest.</p>
-                    <div className="mt-2 text-xs font-mono text-blue-700">
-                        {otherFoundKeys.join(', ')}
+                    <div className="p-3 border-t border-yellow-200">
+                        <p className="text-xs text-yellow-700 mt-1">These keys were found on the page but are not defined in the field manifest.</p>
+                        <div className="mt-2 text-xs font-mono text-yellow-900">
+                            {otherFoundKeys.join(', ')}
+                        </div>
                     </div>
                 </details>
             )}

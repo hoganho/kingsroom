@@ -611,13 +611,6 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "variant": {
-                    "name": "variant",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
                 "status": {
                     "name": "status",
                     "isArray": false,
@@ -657,6 +650,13 @@ export const schema = {
                 },
                 "doNotScrape": {
                     "name": "doNotScrape",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "sourceDataIssue": {
+                    "name": "sourceDataIssue",
                     "isArray": false,
                     "type": "Boolean",
                     "isRequired": true,
@@ -3846,5 +3846,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "982b56708ed1173a13c5e94999c1fc2b"
+    "version": "7dd8c8029db44af14ffd499df7ce623f"
 };

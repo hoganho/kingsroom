@@ -22,9 +22,8 @@ export const fieldManifest: Record<string, FieldDefinition> = {
   gameEndDateTime: { label: 'End Time', group: 'Core Game Details', isProfileExpected: ["STATUS: COMPLETED | REG: CLOSED"] },
   status: { label: 'Status', group: 'Core Game Details', isBaselineExpected: true },
   registrationStatus: { label: 'Registration', group: 'Core Game Details', isBaselineExpected: true },
-  structureLabel: { label: 'Structure Label', group: 'Core Game Details', isBaselineOptional: true },
+  structureLabel: { label: 'Structure Label', group: 'Core Game Details', isBaselineExpected: true },
   seriesName: { label: 'Series Name', group: 'Core Game Details', isBaselineOptional: true },
-  variant: { label: 'Variant', group: 'Core Game Details', isBaselineOptional: true },
   gameVariant: { label: 'Game Variant', group: 'Core Game Details', isBaselineExpected: true },
 
   // Prize & Entry Details
@@ -56,6 +55,11 @@ export const fieldManifest: Record<string, FieldDefinition> = {
     isProfileExpected: ["STATUS: COMPLETED | REG: CLOSED"],
     isProfileOptional: ["STATUS: RUNNING | REG: CLOSED"] 
   },
-  tables: { label: 'Live Tables', group: 'Structure & Player Data', isBaselineOptional: true },
-  rawHtml: { label: 'Raw HTML', group: 'Structure & Player Data', isBaselineOptional: true },
+
+  // Data for Live Games
+  tables: { label: 'Live Tables', group: 'Live Tournament Data', isBaselineOptional: true },
+  totalChipsInPlay: { label: 'Total Chips In Play', group: 'Live Tournament Data', isProfileExpected: ["STATUS: RUNNING | REG: CLOSED"] },
+  averagePlayerStack: { label: 'Average Stack', group: 'Live Tournament Data', isProfileExpected: ["STATUS: RUNNING | REG: CLOSED"] },
+
+//  rawHtml: { label: 'Raw HTML', group: 'Structure & Player Data', isBaselineOptional: true },
 };

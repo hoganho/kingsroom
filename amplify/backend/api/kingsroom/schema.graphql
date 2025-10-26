@@ -274,13 +274,13 @@ type Game @model @auth(rules: [{ allow: private }]) {
     id: ID!
     name: String!
     type: GameType!
-    variant: String
     status: GameStatus!
     gameStartDateTime: AWSDateTime!
     gameEndDateTime: AWSDateTime
     venueId: ID! @index(name: "byVenue", sortKeyFields: ["gameStartDateTime"])
     sourceUrl: AWSURL @index(name: "bySourceUrl", queryField: "gameBySourceUrl")
     doNotScrape: Boolean!
+    sourceDataIssue: Boolean!
 
     # Basic game info
     seriesName: String
