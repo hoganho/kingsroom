@@ -29,7 +29,7 @@
         },
         "webScraperFunction": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/webScraperFunction-726b715a57394a763266-build.zip"
+          "s3Key": "amplify-builds/webScraperFunction-7045493571494766546c-build.zip"
         }
       }
     }

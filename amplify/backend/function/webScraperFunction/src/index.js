@@ -418,31 +418,47 @@ const handleSave = async (input) => {
     }
 };
 
+/**
+ * ✅ UPDATED: Handler for fetching a range of tournament data summaries.
+ * It now processes the range in chunks of 10 to prevent timeouts.
+ */
 const handleFetchRange = async (startId, endId) => {
     console.log(`[handleFetchRange] Processing range from ID ${startId} to ${endId}`);
 
-    // Basic validation
     if (startId > endId) {
         throw new Error('Start ID cannot be greater than End ID.');
     }
-    // Prevent abuse by limiting the range size
-    if (endId - startId + 1 > 50) {
-        throw new Error('The requested range is too large. Please fetch a maximum of 50 games at a time.');
+    // You can keep a reasonable upper limit to protect against very large requests
+    if (endId - startId + 1 > 100) { 
+        throw new Error('The requested range is too large. Please fetch a maximum of 100 games at a time.');
     }
 
-    const promises = [];
-    for (let i = startId; i <= endId; i++) {
-        const url = `https://kingsroom.com.au/tournament/?id=${i}`;
-        // We call the existing handleFetch logic for each ID.
-        // We add the original ID to the promise chain to use in the result.
-        promises.push(handleFetch(url).then(result => ({ ...result, id: i.toString() })).catch(error => ({ id: i.toString(), error: error.message })));
+    const allResults = [];
+    const chunkSize = 10; // Process 10 IDs at a time
+
+    // Loop through the total range in chunks
+    for (let i = startId; i <= endId; i += chunkSize) {
+        const chunkStart = i;
+        const chunkEnd = Math.min(i + chunkSize - 1, endId);
+        console.log(`[handleFetchRange] Processing chunk: ${chunkStart} to ${chunkEnd}`);
+        
+        const chunkPromises = [];
+        for (let j = chunkStart; j <= chunkEnd; j++) {
+            const url = `https://kingsroom.com.au/tournament/?id=${j}`;
+            chunkPromises.push(
+                handleFetch(url)
+                    .then(result => ({ ...result, id: j.toString() }))
+                    .catch(error => ({ id: j.toString(), error: error.message }))
+            );
+        }
+
+        // Wait for the current chunk of 10 to complete before starting the next
+        const settledResults = await Promise.allSettled(chunkPromises);
+        allResults.push(...settledResults);
     }
 
-    // Use Promise.allSettled to ensure all promises complete, even if some fail.
-    const results = await Promise.allSettled(promises);
-
-    // Map the settled results to the ScrapedGameSummary format.
-    return results.map(res => {
+    // Map the final accumulated results to the summary format
+    return allResults.map(res => {
         if (res.status === 'fulfilled' && !res.value.error) {
             const data = res.value;
             return {
@@ -456,7 +472,6 @@ const handleFetchRange = async (startId, endId) => {
                 error: data.errorMessage || null
             };
         } else {
-            // Handle cases where the promise was rejected or returned an error
             const id = res.status === 'fulfilled' ? res.value.id : res.reason?.id || 'unknown';
             const errorMessage = res.status === 'fulfilled' ? res.value.error : res.reason?.message || 'Failed to fetch';
             return {
