@@ -13,7 +13,8 @@ export const useBulkGameFetcher = () => {
         setGames([]); // Clear previous results
         try {
             const results = await fetchGameDataRangeFromBackend(startId, endId);
-            setGames(results);
+            // ✅ FIX: Provide a fallback empty array in case the API returns null/undefined
+            setGames(results || []);
             setStatus('DONE');
         } catch (error: any) {
             setErrorMessage(error.message || 'An unknown error occurred.');

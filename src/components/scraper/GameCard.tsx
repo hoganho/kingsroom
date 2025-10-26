@@ -3,39 +3,29 @@ import type { GameState, GameData } from '../../types/game.ts';
 import { getStatusColor } from './helpers.ts';
 import { HtmlModal } from './HtmlModal.tsx';
 import { SaveConfirmationModal } from './SaveConfirmationModal.tsx';
-import { PlayerResults } from './PlayerResults.tsx';
 import { ScraperReport } from './ScraperReport.tsx';
 import { StructureInfo } from './StructureInfo.tsx';
-import { POLLING_INTERVAL } from '../../hooks/useGameTracker.ts'; // Import polling interval
-import { useGameContext } from '../../contexts/GameContext.tsx'; // Import context to update state
+import { POLLING_INTERVAL } from '../../hooks/useGameTracker.ts';
+import { useGameContext } from '../../contexts/GameContext.tsx';
 
-/**
- * GameCard component
- */
 export const GameCard: React.FC<{ 
     game: GameState; 
     onSave: (id: string, venueId: string) => void; 
     onRemove: (id: string) => void;
 }> = ({ game, onSave, onRemove }) => {
-    const { dispatch } = useGameContext(); // Get dispatch to update game state
+    const { dispatch } = useGameContext();
     const [venueId, setVenueId] = useState('');
     const [showHtmlModal, setShowHtmlModal] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [countdown, setCountdown] = useState('');
-
-    // ✅ NEW: Local state for the doNotScrape checkbox
-    // We initialize it from the game data and keep it in sync
     const [doNotScrape, setDoNotScrape] = useState(game.data?.doNotScrape ?? false);
 
-    // Update local state if game data changes from a fetch
     useEffect(() => {
         setDoNotScrape(game.data?.doNotScrape ?? false);
     }, [game.data?.doNotScrape]);
 
-    // ✅ NEW: Countdown timer effect
     useEffect(() => {
         let interval: NodeJS.Timeout | null = null;
-
         if (game.autoRefresh && game.lastFetched && !game.data?.doNotScrape) {
             const calculateCountdown = () => {
                 const lastFetchTime = new Date(game.lastFetched as string).getTime();
@@ -51,15 +41,13 @@ export const GameCard: React.FC<{
                     setCountdown(`Next fetch in ${minutes}m ${seconds.toString().padStart(2, '0')}s`);
                 }
             };
-            
-            calculateCountdown(); // Run once immediately
-            interval = setInterval(calculateCountdown, 1000); // Update every second
+            calculateCountdown();
+            interval = setInterval(calculateCountdown, 1000);
         } else {
-            setCountdown(''); // Clear countdown if not auto-refreshing
+            setCountdown('');
         }
-
         return () => {
-            if (interval) clearInterval(interval); // Cleanup interval
+            if (interval) clearInterval(interval);
         };
     }, [game.autoRefresh, game.lastFetched, game.data?.doNotScrape]);
     
@@ -67,9 +55,6 @@ export const GameCard: React.FC<{
     const lastFetched = game.lastFetched ? new Date(game.lastFetched) : null;
     const lastFetchedDate = lastFetched?.toLocaleDateString() || 'Never';
     const lastFetchedTime = lastFetched?.toLocaleTimeString() || '';
-
-    // ✅ UPDATED: Save button is enabled as long as venueId is present,
-    // to allow updating the doNotScrape flag even on DONE games.
     const isSaveDisabled = !venueId || game.status === 'SAVING';
 
     const getDisplayId = (id: string) => {
@@ -87,12 +72,9 @@ export const GameCard: React.FC<{
         setIsConfirmModalOpen(false);
     };
 
-    // ✅ NEW: Handler to update the doNotScrape flag in the global state
     const handleDoNotScrapeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const isChecked = e.target.checked;
-        setDoNotScrape(isChecked); // Update local state
-
-        // Dispatch update to global state so it's included when we save
+        setDoNotScrape(isChecked);
         dispatch({
             type: 'UPDATE_GAME_STATE',
             payload: {
@@ -101,7 +83,6 @@ export const GameCard: React.FC<{
                     ...(game.data as GameData),
                     doNotScrape: isChecked,
                 },
-                // If we check "Do Not Scrape", immediately turn off auto-refresh
                 ...(isChecked && { autoRefresh: false })
             }
         });
@@ -110,6 +91,7 @@ export const GameCard: React.FC<{
     return (
         <>
             <div className="border border-gray-200 rounded-lg p-4 space-y-2 shadow-md bg-white">
+                {/* Card Header */}
                 <div className="flex justify-between items-start">
                     <div className="flex items-center space-x-2 min-w-0">
                         <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded flex-shrink-0">{game.source}</span>
@@ -140,7 +122,6 @@ export const GameCard: React.FC<{
                     </p>
                 )}
 
-                {/* ✅ NEW: "Do Not Scrape" warning */}
                 {game.data?.doNotScrape && game.status !== 'ERROR' && (
                     <div className="p-2 bg-yellow-50 border border-yellow-200 rounded">
                         <p className="text-xs font-medium text-yellow-800">
@@ -159,7 +140,6 @@ export const GameCard: React.FC<{
                 
                 {game.data?.name && (
                     <div className="bg-gray-50 p-2 rounded border">
-                        {/* ✅ NEW: Existing Game ID indicator */}
                         {game.existingGameId && (
                             <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full mb-2 inline-block">
                                 ✓ Existing Game in DB
@@ -167,7 +147,6 @@ export const GameCard: React.FC<{
                         )}
                         <h4 className="font-bold text-lg">{game.data.name}</h4>
                         <div className="flex items-center gap-2 flex-wrap">
-                            {/* Updated to check for value before displaying */}
                             {game.data.gameStartDateTime ? (
                                 <p className="text-xs text-gray-600">{game.data.gameStartDateTime}</p>
                             ) : (
@@ -192,17 +171,15 @@ export const GameCard: React.FC<{
                         </div>
                         <div className="text-xs text-gray-500 mt-1">
                             <span>Last Fetched: {lastFetchedDate} at {lastFetchedTime}</span>
-                            {/* ✅ NEW: Fetch count display */}
                             <span className="ml-2">(Fetches: {game.fetchCount})</span>
                         </div>
                     </div>
                 )}
                 
                 {(game.status === 'READY_TO_SAVE' || game.status === 'DONE' || game.status === 'SAVING') && (
-                    <>
-                        <PlayerResults results={game.data?.results ?? undefined} />
-                        <ScraperReport data={game.data} missingFields={game.missingFields} />
-                    </>
+                    // ✅ FIX: Removed the redundant `PlayerResults` component here
+                    // ✅ FIX: Removed the `missingFields` prop as it's no longer needed
+                    <ScraperReport data={game.data} />
                 )}
                 
                 {game.saveResult && <p className="text-xs text-green-600">Successfully saved! Game ID: {game.saveResult.id}</p>}
@@ -233,7 +210,6 @@ export const GameCard: React.FC<{
                     </button>
                 </div>
 
-                {/* ✅ NEW: "Do Not Scrape" Checkbox */}
                 <div className="pt-2 border-t border-gray-100 mt-3">
                     <label className="flex items-center text-xs text-gray-700">
                         <input
@@ -259,5 +235,3 @@ export const GameCard: React.FC<{
         </>
     );
 };
-
-

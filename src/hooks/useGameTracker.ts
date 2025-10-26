@@ -3,7 +3,6 @@ import { useGameContext } from '../contexts/GameContext';
 import { fetchGameDataFromBackend, saveGameDataToBackend, shouldAutoRefreshTournament } from '../services/gameService';
 import type { GameState, DataSource, GameData, MissingField, GameStatus } from '../types/game';
 
-// 5 minute polling interval
 export const POLLING_INTERVAL = 5 * 60 * 1000; 
 
 export const useGameTracker = () => {
@@ -14,7 +13,6 @@ export const useGameTracker = () => {
         const intervalId = setInterval(() => {
             console.log(`[useGameTracker] Polling check initiated at ${new Date().toLocaleTimeString()}`);
             Object.values(games).forEach(game => {
-                // Auto-refresh RUNNING tournaments that are not flagged as "doNotScrape"
                 if (game.autoRefresh && game.data?.status === 'RUNNING' && !game.data.doNotScrape) {
                     console.log(`[useGameTracker] Re-fetching updates for RUNNING tournament: ${game.id}`);
                     fetchAndLoadData(game.id, game.source);
@@ -25,7 +23,7 @@ export const useGameTracker = () => {
         }, POLLING_INTERVAL);
 
         return () => clearInterval(intervalId);
-    }, [games]); // Dependency on games ensures the loop always has the latest state
+    }, [games]);
 
     const updateGameState = (payload: Partial<GameState> & { id: string }) => {
         dispatch({ type: 'UPDATE_GAME_STATE', payload });
@@ -40,24 +38,17 @@ export const useGameTracker = () => {
 
         const game = state.games[id];
         
-        // Set initial fetching status only if not auto-refreshing
         if (!game?.autoRefresh) {
             updateGameState({ id, status: 'FETCHING', errorMessage: undefined, missingFields: [] });
         }
         
         try {
-            // Note: The backend will handle SCRAPING and PARSING status internally
-            // We just get the final result here
             const dataFromBackend = await fetchGameDataFromBackend(id);
-            
-            // Console log for debugging
             console.log('[useGameTracker] Raw data from backend:', dataFromBackend);
 
-            // Extract all fields including new structure metadata
             const isNewStructure = dataFromBackend.isNewStructure ?? undefined;
             const structureLabel = (dataFromBackend as any).structureLabel || undefined;
             const foundKeys = (dataFromBackend as any).foundKeys || [];
-            
             const existingGameId = (dataFromBackend as any).existingGameId || null;
             const doNotScrape = (dataFromBackend as any).doNotScrape || false;
 
@@ -67,7 +58,6 @@ export const useGameTracker = () => {
             console.log('[useGameTracker] Extracted existingGameId:', existingGameId);
             console.log('[useGameTracker] Extracted doNotScrape:', doNotScrape);
 
-            // Map backend status values - convert LIVE to RUNNING
             let mappedStatus: GameStatus = 'SCHEDULED';
             const backendStatus = (dataFromBackend.status || 'SCHEDULED').toUpperCase();
             
@@ -102,29 +92,24 @@ export const useGameTracker = () => {
                 totalDuration: dataFromBackend.totalDuration || undefined,
                 gameTags: dataFromBackend.gameTags || [],
                 seriesName: (dataFromBackend as any).seriesName || undefined,
-                
                 tournamentType: 'FREEZEOUT',
                 buyIn: dataFromBackend.buyIn || undefined,
                 rake: undefined,
                 startingStack: dataFromBackend.startingStack || undefined,
                 hasGuarantee: dataFromBackend.hasGuarantee ?? false,
                 guaranteeAmount: dataFromBackend.guaranteeAmount || undefined,
-                
                 levels: dataFromBackend.levels?.map(l => ({
                     levelNumber: l.levelNumber,
                     durationMinutes: l.durationMinutes || 20,
                     smallBlind: l.smallBlind || 0,
                     bigBlind: l.bigBlind || 0,
                     ante: l.ante,
-                    breakMinutes: undefined // This can be populated from the breaks data later
+                    breakMinutes: undefined
                 })) ?? [],
-
-                // ✅ NEW: Map breaks and tables data
                 breaks: (dataFromBackend as any).breaks?.map((b: any) => ({
                     levelNumberBeforeBreak: b.levelNumberBeforeBreak,
                     durationMinutes: b.durationMinutes,
                 })) ?? [],
-
                 tables: (dataFromBackend as any).tables?.map((t: any) => ({
                     tableName: t.tableName,
                     seats: t.seats.map((s: any) => ({
@@ -134,26 +119,22 @@ export const useGameTracker = () => {
                         playerStack: s.playerStack,
                     })),
                 })) ?? [],
-
                 entries: (dataFromBackend as any).entries?.map((e: { name: string }) => ({ name: e.name })) ?? [],
                 seating: (dataFromBackend as any).seating?.map((s: { name: string, table: number, seat: number }) => ({ name: s.name, table: s.table, seat: s.seat })) ?? [],
-                
                 results: dataFromBackend.results?.map(r => ({ 
                     name: r.name, 
                     rank: r.rank, 
                     winnings: r.winnings ?? 0 
                 })) ?? [],
-                
                 otherDetails: {},
                 rawHtml: dataFromBackend.rawHtml || undefined,
-
                 structureLabel: structureLabel,
                 foundKeys: foundKeys,
                 doNotScrape: doNotScrape,
             };
 
-            // Post-processing: Merge break data into levels
-            if (data.breaks.length > 0 && data.levels.length > 0) {
+            // ✅ FIX: Check for the existence of data.breaks before accessing its properties.
+            if (data.breaks && data.breaks.length > 0 && data.levels && data.levels.length > 0) {
                 data.breaks.forEach(breakInfo => {
                     const levelBeforeBreak = data.levels.find(
                         level => level.levelNumber === breakInfo.levelNumberBeforeBreak
@@ -164,10 +145,7 @@ export const useGameTracker = () => {
                 });
             }
 
-
-            // Check for missing fields (same logic as before)
             const missingFields: MissingField[] = [];
-            
             const gameFields: Record<string, string> = {
                 'gameStartDateTime': 'Game start date/time not found',
                 'variant': 'Game variant (e.g., NLHE) not found', 
@@ -236,9 +214,7 @@ export const useGameTracker = () => {
 
         } catch (error: any) {
             console.error('[useGameTracker] Error fetching data:', error);
-            
             const isDoNotScrapeError = error.message.includes('Scraping is disabled');
-            
             updateGameState({
                 id,
                 status: 'ERROR',
@@ -263,7 +239,6 @@ export const useGameTracker = () => {
                 return; 
             }
         }
-        
         dispatch({ type: 'ADD_GAME', payload: { id, source } });
         setTimeout(() => fetchAndLoadData(id, source), 0);
     };
@@ -276,11 +251,9 @@ export const useGameTracker = () => {
         }
         
         console.log(`[useGameTracker] Saving ${game.data.status} tournament: ${id}`);
-        
         updateGameState({ id, status: 'SAVING' });
         try {
             const result = await saveGameDataToBackend(id, venueId, game.data, game.existingGameId);
-            
             updateGameState({ 
                 id, 
                 status: 'DONE', 
