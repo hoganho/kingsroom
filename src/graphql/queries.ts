@@ -524,6 +524,9 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
     sourceDataIssue
     seriesName
     isAdHoc
+    isSeries
+    isRecurring
+    isSatellite
     registrationStatus
     gameVariant
     prizepool
@@ -615,6 +618,9 @@ export const listGames = /* GraphQL */ `query ListGames(
       sourceDataIssue
       seriesName
       isAdHoc
+      isSeries
+      isRecurring
+      isSatellite
       registrationStatus
       gameVariant
       prizepool
@@ -671,6 +677,9 @@ export const syncGames = /* GraphQL */ `query SyncGames(
       sourceDataIssue
       seriesName
       isAdHoc
+      isSeries
+      isRecurring
+      isSatellite
       registrationStatus
       gameVariant
       prizepool
@@ -1553,6 +1562,9 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
       sourceDataIssue
       seriesName
       isAdHoc
+      isSeries
+      isRecurring
+      isSatellite
       registrationStatus
       gameVariant
       prizepool
@@ -2669,6 +2681,9 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
       sourceDataIssue
       seriesName
       isAdHoc
+      isSeries
+      isRecurring
+      isSatellite
       registrationStatus
       gameVariant
       prizepool
@@ -2730,6 +2745,9 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
       sourceDataIssue
       seriesName
       isAdHoc
+      isSeries
+      isRecurring
+      isSatellite
       registrationStatus
       gameVariant
       prizepool
@@ -2791,6 +2809,9 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
       sourceDataIssue
       seriesName
       isAdHoc
+      isSeries
+      isRecurring
+      isSatellite
       registrationStatus
       gameVariant
       prizepool
@@ -2852,6 +2873,9 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
       sourceDataIssue
       seriesName
       isAdHoc
+      isSeries
+      isRecurring
+      isSatellite
       registrationStatus
       gameVariant
       prizepool

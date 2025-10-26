@@ -86,6 +86,9 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
     sourceDataIssue
     seriesName
     isAdHoc
+    isSeries
+    isRecurring
+    isSatellite
     registrationStatus
     gameVariant
     prizepool
@@ -712,6 +715,9 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
     sourceDataIssue
     seriesName
     isAdHoc
+    isSeries
+    isRecurring
+    isSatellite
     registrationStatus
     gameVariant
     prizepool
@@ -804,6 +810,9 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
     sourceDataIssue
     seriesName
     isAdHoc
+    isSeries
+    isRecurring
+    isSatellite
     registrationStatus
     gameVariant
     prizepool
@@ -896,6 +905,9 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
     sourceDataIssue
     seriesName
     isAdHoc
+    isSeries
+    isRecurring
+    isSatellite
     registrationStatus
     gameVariant
     prizepool
@@ -2065,6 +2077,9 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
       sourceDataIssue
       seriesName
       isAdHoc
+      isSeries
+      isRecurring
+      isSatellite
       registrationStatus
       gameVariant
       prizepool
@@ -2151,6 +2166,9 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
       sourceDataIssue
       seriesName
       isAdHoc
+      isSeries
+      isRecurring
+      isSatellite
       registrationStatus
       gameVariant
       prizepool
@@ -2237,6 +2255,9 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
       sourceDataIssue
       seriesName
       isAdHoc
+      isSeries
+      isRecurring
+      isSatellite
       registrationStatus
       gameVariant
       prizepool

@@ -28,15 +28,14 @@ class ScrapeContext {
         this.$ = cheerio.load(html);
         this.data = {};
         this.foundKeys = new Set();
-        // ✅ NEW: Properties to hold parsed JSON data from the script tags.
         this.gameData = null;
         this.levelData = null;
         this._parseEmbeddedData();
     }
     
     /**
-     * ✅ NEW: A private helper method to find and parse the embedded JSON
-     * data from the script tags upon initialization. This is more robust.
+     * A private helper method to find and parse the embedded JSON
+     * data from the script tags upon initialization.
      */
     _parseEmbeddedData() {
         const html = this.$.html();
@@ -61,7 +60,6 @@ class ScrapeContext {
         }
     }
 
-    /** Helper to get text from a selector and add the key if found. */
     getText(key, selector) {
         const text = this.$(selector).first().text().trim();
         if (text) {
@@ -72,7 +70,6 @@ class ScrapeContext {
         return undefined;
     }
 
-    /** Helper to parse a number from a selector and add the key if found. */
     parseNumeric(key, selector) {
         const str = this.$(selector).first().text().trim();
         if (!str) return undefined;
@@ -86,7 +83,6 @@ class ScrapeContext {
         return undefined;
     }
 
-    /** Helper to add a key/value pair directly. */
     add(key, value) {
         if (value !== undefined && value !== null) {
             this.foundKeys.add(key);
@@ -105,7 +101,6 @@ const defaultStrategy = {
         ctx.getText('name', '.cw-game-title');
     },
     
-    // ✅ MODIFIED: Pulls from the reliable embedded JSON data first.
     getGameStartDateTime(ctx) {
         if (ctx.gameData && ctx.gameData.start_local) {
             ctx.add('gameStartDateTime', new Date(ctx.gameData.start_local).toISOString());
@@ -131,7 +126,6 @@ const defaultStrategy = {
         return registrationStatus;
     },
     
-    // ✅ MODIFIED: Pulls from embedded JSON data.
     getGameVariant(ctx) {
         if (ctx.gameData && ctx.gameData.shortlimitgame) {
             ctx.add('gameVariant', ctx.gameData.shortlimitgame);
@@ -174,16 +168,13 @@ const defaultStrategy = {
     },
     
     getTotalAddons(ctx) {
-        // This selector is a placeholder; the provided HTML does not contain Add-Ons.
         ctx.parseNumeric('totalAddons', 'div.cw-clock-label:contains("Add-Ons")');
     },
 
     getTotalDuration(ctx) {
-        // This selector is a placeholder; this info isn't in the running game HTML.
         ctx.getText('totalDuration', 'div.cw-clock-label:contains("Total Time")');
     },
     
-    // ✅ MODIFIED: Pulls from embedded JSON data.
     getBuyIn(ctx) {
         if (ctx.gameData && ctx.gameData.costspb0 && ctx.gameData.costspb0.cost) {
             const buyIn = ctx.gameData.costspb0.cost + (ctx.gameData.costspb0.fee || 0);
@@ -193,14 +184,12 @@ const defaultStrategy = {
         }
     },
     
-    // ✅ NEW: Function to get rake from embedded JSON data.
     getRake(ctx) {
         if (ctx.gameData && ctx.gameData.costspb0 && ctx.gameData.costspb0.fee) {
             ctx.add('rake', ctx.gameData.costspb0.fee);
         }
     },
     
-    // ✅ MODIFIED: Pulls from embedded JSON data.
     getStartingStack(ctx) {
         if (ctx.gameData && ctx.gameData.costspb0 && ctx.gameData.costspb0.chips) {
             ctx.add('startingStack', ctx.gameData.costspb0.chips);
@@ -223,7 +212,7 @@ const defaultStrategy = {
             const str = ctx.$('.cw-game-shortdesc').first().text().trim();
             const num = parseInt(str.replace(/[^0-9.-]+/g, ''), 10);
             if (!isNaN(num)) {
-                 ctx.add('guaranteeAmount', num * 1000); // Handle 'k' for thousand if needed
+                 ctx.add('guaranteeAmount', num * 1000);
             }
         } else {
             ctx.add('hasGuarantee', false);
@@ -231,25 +220,21 @@ const defaultStrategy = {
     },
     
     getSeriesName(ctx) {
-        // Placeholder, no clear series name in the provided HTML.
         ctx.getText('seriesName', '.your-selector-for-series-name');
     },
 
-    // ✅ MODIFIED: Extracts results from the complex "Entries" table.
     getResults(ctx) {
         const results = [];
         const entriesTable = ctx.$('h4.cw-text-center:contains("Entries")').next('table').find('tbody tr');
         
         entriesTable.each((i, el) => {
             const $el = ctx.$(el);
-            const rankText = $el.find('td').eq(2).text().trim(); // Rank is in the 3rd column for eliminated players
+            const rankText = $el.find('td').eq(2).text().trim();
             
-            // We identify a result row by the presence of "Out" in the rank text
             if (rankText.toLowerCase().includes('out')) {
                 const name = $el.find('td').eq(1).text().trim();
                 const rank = parseInt(rankText.replace(/\D/g, ''), 10);
                 
-                // Winnings are not present in this HTML for eliminated players, default to 0
                 if (name && !isNaN(rank)) {
                     results.push({ rank, name, winnings: 0 });
                 }
@@ -261,7 +246,6 @@ const defaultStrategy = {
         }
     },
 
-    // ✅ NEW: Scrapes live table and stack information.
     getTables(ctx) {
         const tables = [];
         const tablesContainer = ctx.$('h4.cw-text-center:contains("Tables")').next('table').find('tbody');
@@ -271,16 +255,13 @@ const defaultStrategy = {
         tablesContainer.find('tr.cw-tr').each((i, el) => {
             const $row = ctx.$(el);
             
-            // Check if this is a table header row (e.g., "Table4")
             if ($row.find('td[colspan="4"]').length > 0) {
-                // If we were processing a previous table, save it first.
                 if (currentTableName && currentSeats.length > 0) {
                     tables.push({ tableName: currentTableName, seats: currentSeats });
                 }
-                // Start a new table
                 currentTableName = $row.find('td').text().trim();
                 currentSeats = [];
-            } else { // This is a player/seat row
+            } else {
                 const seatNumber = parseInt($row.find('td').eq(0).text().trim(), 10);
                 const playerName = $row.find('td').eq(2).text().trim();
                 const playerStackStr = $row.find('td').eq(3).text().trim().replace(/,/g, '');
@@ -297,7 +278,6 @@ const defaultStrategy = {
             }
         });
 
-        // Add the last processed table
         if (currentTableName && currentSeats.length > 0) {
             tables.push({ tableName: currentTableName, seats: currentSeats });
         }
@@ -307,17 +287,14 @@ const defaultStrategy = {
         }
     },
     
-    // ✅ NEW: Scrape total chips from the clock display.
     getTotalChipsInPlay(ctx) {
         ctx.parseNumeric('totalChipsInPlay', '#cw_clock_entire_stack');
     },
     
-    // ✅ NEW: Scrape average stack from the clock display.
     getAveragePlayerStack(ctx) {
         ctx.parseNumeric('averagePlayerStack', '#cw_clock_avg_stack');
     },
 
-    // ✅ MODIFIED: Uses the parsed `levelData` which is much more reliable.
     getLevels(ctx) {
         if (!ctx.levelData) return;
         const levels = ctx.levelData.map(level => ({
@@ -330,19 +307,35 @@ const defaultStrategy = {
         if (levels.length > 0) ctx.add('levels', levels);
     },
 
-    // ✅ MODIFIED: Creates the breaks array from the `breakduration` property
-    // found within the `levelData` object.
+    // ✅ FIXED: This function now correctly creates both 'levelNumberBeforeBreak'
+    // and 'levelNumberAfterBreak' for each break found.
     getBreaks(ctx) {
         if (!ctx.levelData) return;
         const breaks = [];
-        ctx.levelData.forEach(level => {
-            if (level.breakduration > 0) {
+
+        for (let i = 0; i < ctx.levelData.length; i++) {
+            const currentLevel = ctx.levelData[i];
+
+            if (currentLevel.breakduration > 0) {
+                const levelBefore = currentLevel.ID || 0;
+                let levelAfter = 0;
+
+                // Check if there is a next level in the array to get its ID
+                if (i + 1 < ctx.levelData.length) {
+                    levelAfter = ctx.levelData[i + 1].ID || 0;
+                } else {
+                    // If it's the last level, we assume the next level is just an increment
+                    levelAfter = levelBefore + 1;
+                }
+
                 breaks.push({
-                    levelNumberBeforeBreak: level.ID || 0,
-                    durationMinutes: level.breakduration || 0,
+                    levelNumberBeforeBreak: levelBefore,
+                    levelNumberAfterBreak: levelAfter,
+                    durationMinutes: currentLevel.breakduration || 0,
                 });
             }
-        });
+        }
+
         if (breaks.length > 0) ctx.add('breaks', breaks);
     }
 };
@@ -360,8 +353,6 @@ const strategyMap = {
 
 const runScraper = (html, structureLabel) => {
     const ctx = new ScrapeContext(html);
-
-    // Use the default strategy for all structures for now, as it's now robust.
     const strategy = defaultStrategy; 
     console.log(`[Scraper] Using unified robust strategy.`);
     
@@ -374,13 +365,7 @@ const runScraper = (html, structureLabel) => {
             }
         }
     }
-
-    if (ctx.data.gameStartDateTime && ctx.data.totalDuration) {
-        // This logic remains for completed games that have a duration string
-    }
-    
-    // The post-processing logic in index.js will handle merging breaks, so no changes needed here.
-    
+    ctx.add('rawHtml', html);
     return { data: ctx.data, foundKeys: Array.from(ctx.foundKeys) };
 };
 

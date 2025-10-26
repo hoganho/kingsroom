@@ -676,6 +676,27 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "isSeries": {
+                    "name": "isSeries",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isRecurring": {
+                    "name": "isRecurring",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isSatellite": {
+                    "name": "isSatellite",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "registrationStatus": {
                     "name": "registrationStatus",
                     "isArray": false,
@@ -3846,5 +3867,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "7dd8c8029db44af14ffd499df7ce623f"
+    "version": "a45d66e724b590a61047e1ef822e6783"
 };

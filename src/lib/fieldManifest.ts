@@ -23,8 +23,15 @@ export const fieldManifest: Record<string, FieldDefinition> = {
   status: { label: 'Status', group: 'Core Game Details', isBaselineExpected: true },
   registrationStatus: { label: 'Registration', group: 'Core Game Details', isBaselineExpected: true },
   structureLabel: { label: 'Structure Label', group: 'Core Game Details', isBaselineExpected: true },
-  seriesName: { label: 'Series Name', group: 'Core Game Details', isBaselineOptional: true },
   gameVariant: { label: 'Game Variant', group: 'Core Game Details', isBaselineExpected: true },
+  
+  // Derived and Manual Details
+  seriesName: { label: 'Series Name', group: 'Derived and Manual Details', isBaselineOptional: true },
+  venueName: { label: 'Venue Name', group: 'Derived and Manual Details', isBaselineExpected: true },
+  isAdHoc: { label: 'Is Adhoc', group: 'Derived and Manual Details', isBaselineExpected: true },
+  isSeries: { label: 'Is Series', group: 'Derived and Manual Details', isBaselineExpected: true },
+  isRecurring: { label: 'Is Recurring', group: 'Derived and Manual Details', isBaselineExpected: true },
+  isSatellite: { label: 'Is Satellite', group: 'Derived and Manual Details', isBaselineExpected: true },
 
   // Prize & Entry Details
   prizepool: { label: 'Prizepool', group: 'Prize & Entry Details', isBaselineExpected: true },

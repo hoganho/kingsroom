@@ -263,7 +263,7 @@ input ScrapedTournamentLevelInput {
 
 input ScrapedBreakInput {
     levelNumberBeforeBreak: Int!
-    levelNumberAfterBreak: Int!
+    levelNumberAfterBreak: Int
     durationMinutes: Int
 }
 
@@ -285,6 +285,9 @@ type Game @model @auth(rules: [{ allow: private }]) {
     # Basic game info
     seriesName: String
     isAdHoc: Boolean
+    isSeries: Boolean
+    isRecurring: Boolean
+    isSatellite: Boolean
     registrationStatus: String
     gameVariant: String
     prizepool: Float

@@ -110,14 +110,15 @@ export const useGameTracker = () => {
                     levelNumberBeforeBreak: b.levelNumberBeforeBreak,
                     durationMinutes: b.durationMinutes,
                 })) ?? [],
+                // ✅ FIXED: Added safety checks to the inner `t.seats.map` call.
                 tables: (dataFromBackend as any).tables?.map((t: any) => ({
                     tableName: t.tableName,
-                    seats: t.seats.map((s: any) => ({
+                    seats: t.seats?.map((s: any) => ({
                         seat: s.seat,
                         isOccupied: s.isOccupied,
                         playerName: s.playerName,
                         playerStack: s.playerStack,
-                    })),
+                    })) ?? [], // Fallback to an empty array if t.seats is null/undefined
                 })) ?? [],
                 entries: (dataFromBackend as any).entries?.map((e: { name: string }) => ({ name: e.name })) ?? [],
                 seating: (dataFromBackend as any).seating?.map((s: { name: string, table: number, seat: number }) => ({ name: s.name, table: s.table, seat: s.seat })) ?? [],
@@ -133,7 +134,6 @@ export const useGameTracker = () => {
                 doNotScrape: doNotScrape,
             };
 
-            // ✅ FIX: Check for the existence of data.breaks before accessing its properties.
             if (data.breaks && data.breaks.length > 0 && data.levels && data.levels.length > 0) {
                 data.breaks.forEach(breakInfo => {
                     const levelBeforeBreak = data.levels.find(

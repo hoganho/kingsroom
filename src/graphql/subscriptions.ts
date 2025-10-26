@@ -523,6 +523,9 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
     sourceDataIssue
     seriesName
     isAdHoc
+    isSeries
+    isRecurring
+    isSatellite
     registrationStatus
     gameVariant
     prizepool
@@ -612,6 +615,9 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
     sourceDataIssue
     seriesName
     isAdHoc
+    isSeries
+    isRecurring
+    isSatellite
     registrationStatus
     gameVariant
     prizepool
@@ -701,6 +707,9 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
     sourceDataIssue
     seriesName
     isAdHoc
+    isSeries
+    isRecurring
+    isSatellite
     registrationStatus
     gameVariant
     prizepool
@@ -1842,6 +1851,9 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
       sourceDataIssue
       seriesName
       isAdHoc
+      isSeries
+      isRecurring
+      isSatellite
       registrationStatus
       gameVariant
       prizepool
@@ -1927,6 +1939,9 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
       sourceDataIssue
       seriesName
       isAdHoc
+      isSeries
+      isRecurring
+      isSatellite
       registrationStatus
       gameVariant
       prizepool
@@ -2012,6 +2027,9 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
       sourceDataIssue
       seriesName
       isAdHoc
+      isSeries
+      isRecurring
+      isSatellite
       registrationStatus
       gameVariant
       prizepool

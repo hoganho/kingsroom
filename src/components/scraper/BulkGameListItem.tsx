@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import type { BulkGameSummary } from '../../types/game';
 
-// ✅ NEW: Helper function to determine list item color based on game status
+// Helper function to determine list item color based on game status
 const getListItemColorClass = (status?: string, registrationStatus?: string): string => {
     switch (status) {
         case 'RUNNING':
@@ -37,14 +37,13 @@ export const BulkGameListItem: React.FC<{ game: BulkGameSummary }> = ({ game }) 
 
     const hasError = !!game.error;
 
-    // ✅ UPDATED: Determine the color and whether the item is actionable
-    const colorClass = getListItemColorClass(game.status, game.registrationStatus);
+    // ✅ FIXED: Convert potential `null` values to `undefined` to match the function signature.
+    const colorClass = getListItemColorClass(game.status ?? undefined, game.registrationStatus ?? undefined);
     const isActionable = !hasError && game.status !== 'FINISHED' && !colorClass.includes('red');
 
     return (
         <div
             onClick={isActionable ? handleClick : undefined}
-            // ✅ UPDATED: Dynamically apply classes for color, cursor, and hover effects
             className={`flex items-center justify-between p-3 border rounded-lg transition-all ${
                 hasError
                     ? 'bg-red-50 border-red-200'
