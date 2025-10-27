@@ -229,16 +229,40 @@ const defaultStrategy = {
             ctx.add('hasGuarantee', false);
             return;
         }
-        
+
         const guaranteeRegex = /(gtd|guaranteed|g'teed)/i;
         if (guaranteeRegex.test(text)) {
             ctx.add('hasGuarantee', true);
             
-            const str = ctx.$('.cw-game-shortdesc').first().text().trim();
-            const num = parseInt(str.replace(/[^0-9.-]+/g, ''), 10);
-            if (!isNaN(num)) {
-                 ctx.add('guaranteeAmount', num * 1000);
+            let guaranteeAmount = null;
+
+            // Regex for 1-2 digits followed by 'M' (e.g., "1M", "25M")
+            const millionMatch = text.match(/\b(\d{1,2})M\b/i);
+            
+            // Regex for 1-3 digits followed by 'K' (e.g., "5K", "100K")
+            const thousandMatch = text.match(/\b(\d{1,3})K\b/i);
+
+            if (millionMatch && millionMatch[1]) {
+                // Case 1: Handle millions (e.g., "1M")
+                guaranteeAmount = parseInt(millionMatch[1], 10) * 1000000;
+            
+            } else if (thousandMatch && thousandMatch[1]) {
+                // Case 2: Handle thousands (e.g., "5K")
+                guaranteeAmount = parseInt(thousandMatch[1], 10) * 1000;
+            
+            } else {
+                // Case 3: Fallback for plain numbers (e.g., "5000")
+                const num = parseInt(text.replace(/[^0-9.-]+/g, ''), 10);
+                if (!isNaN(num)) {
+                    guaranteeAmount = num;
+                }
             }
+            
+            // Only add the value if one of the cases found a number
+            if (guaranteeAmount !== null) {
+                ctx.add('guaranteeAmount', guaranteeAmount);
+            }
+
         } else {
             ctx.add('hasGuarantee', false);
         }
@@ -278,8 +302,66 @@ const defaultStrategy = {
         ctx.getText('seriesName', '.your-selector-for-series-name');
     },
 
+    /**
+     * Calculates the guarantee surplus or overlay.
+     * This depends on hasGuarantee, prizepool, and guaranteeAmount.
+     */
+    calculateGuaranteeMetrics(ctx) {
+        // Step 1: Check if there is a guarantee. If not, we can't calculate anything.
+        if (!ctx.data.hasGuarantee) {
+            return; 
+        }
+
+        const prizepool = ctx.data.prizepool || 0;
+        const guarantee = ctx.data.guaranteeAmount || 0;
+
+        // Step 2: Ensure we have the necessary numbers to work with.
+        if (prizepool <= 0 || guarantee <= 0) {
+            console.log('[DEBUG-GUARANTEE] Skipping metrics: Missing prizepool or guarantee amount.');
+            return;
+        }
+
+        const difference = prizepool - guarantee;
+
+        // Step 3: Determine if it's a surplus or overlay.
+        if (difference > 0) {
+            // The prizepool exceeded the guarantee.
+            ctx.add('guaranteeSurplus', difference);
+            ctx.add('guaranteeOverlay', 0);
+        } else {
+            // The prizepool did not meet the guarantee.
+            ctx.add('guaranteeSurplus', 0);
+            ctx.add('guaranteeOverlay', Math.abs(difference)); // Overlay is a positive number
+        }
+    },
+
+    /**
+     * Calculates the total rake collected from entries and rebuys.
+     * This depends on totalEntries, totalRebuys, and rake.
+     */
+    calculateTotalRake(ctx) {
+        const rake = ctx.data.rake;
+
+        // Step 1: Check if the rake amount is known.
+        if (rake === undefined || rake === null || rake <= 0) {
+            console.log('[DEBUG-RAKE] Skipping total rake calculation: Rake is unknown.');
+            return;
+        }
+
+        // Step 2: Get the number of transactions that include rake.
+        // Add-ons typically do not have a rake component.
+        const entries = ctx.data.totalEntries || 0;
+        const rebuys = ctx.data.totalRebuys || 0;
+        const totalRakedTransactions = entries + rebuys;
+        
+        // Step 3: Calculate and add the total rake.
+        const totalRake = totalRakedTransactions * rake;
+        ctx.add('totalRake', totalRake);
+    },
+
     getSeatingAndPlayersRemaining(ctx) {
         const seating = [];
+        // This selector correctly finds the "Entries" table which lists players still in the game.
         const entriesTable = ctx.$('h4.cw-text-center:contains("Entries")').next('table').find('tbody tr');
         
         entriesTable.each((i, el) => {
@@ -290,16 +372,23 @@ const defaultStrategy = {
 
             const name = $tds.eq(1).text().trim();
             const tableSeatInfo = $tds.eq(2).text().trim();
-            const chips = $tds.eq(3).text().trim();
+            // This variable holds the stack as a string (e.g., "30,000")
+            const chipsStr = $tds.eq(3).text().trim();
 
-            if (chips && tableSeatInfo.includes('Table')) {
+            // A player is considered "seated" if they have a chip count.
+            if (chipsStr && tableSeatInfo.includes('Table')) {
                 const tableSeatMatch = tableSeatInfo.match(/Table(\d+)\s*\/\s*(\d+)/);
                 
                 if (name && tableSeatMatch) {
+                    // Convert the chip string to a number for the stack.
+                    const stack = parseInt(chipsStr.replace(/,/g, ''), 10);
+
                     seating.push({
                         name: name,
                         table: parseInt(tableSeatMatch[1], 10),
                         seat: parseInt(tableSeatMatch[2], 10),
+                        // ✅ THE FIX: Add the parsed playerStack here.
+                        playerStack: !isNaN(stack) ? stack : null
                     });
                 }
             }
@@ -308,6 +397,7 @@ const defaultStrategy = {
         if (seating.length > 0) {
             ctx.add('seating', seating);
         }
+        // This also ensures playersRemaining is accurate.
         ctx.add('playersRemaining', seating.length);
     },
 

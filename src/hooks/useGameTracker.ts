@@ -46,6 +46,9 @@ export const useGameTracker = () => {
             const dataFromBackend = await fetchGameDataFromBackend(id);
             console.log('[useGameTracker] Raw data from backend:', dataFromBackend);
 
+            console.log('[useGameTracker] revenueByBuyIns value:', dataFromBackend.revenueByBuyIns);
+            console.log('[useGameTracker] typeof revenueByBuyIns:', typeof dataFromBackend.revenueByBuyIns);
+
             const venueMatch = (dataFromBackend as any).venueMatch as ScrapedVenueMatch || null;
             const isNewStructure = dataFromBackend.isNewStructure ?? undefined;
             const structureLabel = (dataFromBackend as any).structureLabel || undefined;
