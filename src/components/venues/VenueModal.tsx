@@ -3,21 +3,24 @@
 import { useState, useEffect } from 'react';
 import * as APITypes from '../../API';
 import { VenueFormData } from '../../types/venue';
+import { XCircleIcon } from '@heroicons/react/24/solid';
 
 type Venue = APITypes.Venue;
 
 interface VenueModalProps {
   isOpen: boolean;
   onClose: () => void;
-  // ✅ CHANGED: Use the simpler VenueFormData type for the onSave prop
   onSave: (venueData: VenueFormData) => void;
   venue: Venue | null;
 }
 
-const initialFormState = { name: '', address: '', city: '', country: 'Australia' };
+// ✅ UPDATED: Include aliases in the initial state
+const initialFormState: VenueFormData = { name: '', address: '', city: '', country: 'Australia', aliases: [] };
 
 export const VenueModal: React.FC<VenueModalProps> = ({ isOpen, onClose, onSave, venue }) => {
-  const [formData, setFormData] = useState(initialFormState);
+  const [formData, setFormData] = useState<VenueFormData>(initialFormState);
+  // ✅ NEW: State to manage the alias input field
+  const [currentAlias, setCurrentAlias] = useState('');
 
   useEffect(() => {
     if (isOpen && venue) {
@@ -26,6 +29,8 @@ export const VenueModal: React.FC<VenueModalProps> = ({ isOpen, onClose, onSave,
         address: venue.address || '',
         city: venue.city || '',
         country: venue.country || 'Australia',
+        // ✅ UPDATED: Populate aliases from the venue prop
+        aliases: venue.aliases?.filter(Boolean) as string[] || [],
       });
     } else {
       setFormData(initialFormState);
@@ -37,10 +42,26 @@ export const VenueModal: React.FC<VenueModalProps> = ({ isOpen, onClose, onSave,
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // ✅ NEW: Handler to add an alias to the list
+  const handleAddAlias = () => {
+    if (currentAlias && !formData.aliases.includes(currentAlias)) {
+      setFormData(prev => ({ ...prev, aliases: [...prev.aliases, currentAlias] }));
+      setCurrentAlias('');
+    }
+  };
+  
+  // ✅ NEW: Handler to remove an alias from the list
+  const handleRemoveAlias = (aliasToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      aliases: prev.aliases.filter(alias => alias !== aliasToRemove),
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.name) {
-        onSave(formData);
+      onSave(formData);
     }
   };
 
@@ -62,6 +83,40 @@ export const VenueModal: React.FC<VenueModalProps> = ({ isOpen, onClose, onSave,
           <div>
             <label htmlFor="city" className="block text-sm font-medium text-gray-700">City</label>
             <input type="text" name="city" id="city" value={formData.city || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          </div>
+            <div>
+            <label htmlFor="aliases" className="block text-sm font-medium text-gray-700">Aliases</label>
+            <div className="mt-1 flex rounded-md shadow-sm">
+              <input
+                type="text"
+                name="aliases"
+                id="aliases"
+                value={currentAlias}
+                onChange={(e) => setCurrentAlias(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddAlias(); }}}
+                className="block w-full flex-1 rounded-none rounded-l-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                placeholder="e.g., The Kings Room"
+              />
+              <button
+                type="button"
+                onClick={handleAddAlias}
+                className="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 bg-gray-50 px-3 text-sm text-gray-500 hover:bg-gray-100"
+              >
+                Add
+              </button>
+            </div>
+            {formData.aliases.length > 0 && (
+              <div className="mt-2 space-x-2">
+                {formData.aliases.map(alias => (
+                  <span key={alias} className="inline-flex items-center gap-x-1 rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
+                    {alias}
+                    <button type="button" onClick={() => handleRemoveAlias(alias)} className="group relative -mr-1 h-3.5 w-3.5 rounded-sm hover:bg-gray-500/20">
+                      <XCircleIcon className="h-3.5 w-3.5 text-gray-400 group-hover:text-gray-600" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           <div className="flex justify-end space-x-4 pt-4">
             <button type="button" onClick={onClose} className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">Cancel</button>

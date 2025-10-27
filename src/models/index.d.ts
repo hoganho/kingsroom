@@ -313,13 +313,13 @@ export declare type ScrapedTables = LazyLoading extends LazyLoadingDisabled ? Ea
 export declare const ScrapedTables: (new (init: ModelInit<ScrapedTables>) => ScrapedTables)
 
 type EagerScrapedVenueMatch = {
-  readonly bestMatch: ScrapedVenueMatchDetails;
-  readonly matchType: string;
+  readonly autoAssignedVenue?: ScrapedVenueMatchDetails | null;
+  readonly suggestions?: ScrapedVenueMatchDetails[] | null;
 }
 
 type LazyScrapedVenueMatch = {
-  readonly bestMatch: ScrapedVenueMatchDetails;
-  readonly matchType: string;
+  readonly autoAssignedVenue?: ScrapedVenueMatchDetails | null;
+  readonly suggestions?: ScrapedVenueMatchDetails[] | null;
 }
 
 export declare type ScrapedVenueMatch = LazyLoading extends LazyLoadingDisabled ? EagerScrapedVenueMatch : LazyScrapedVenueMatch
@@ -504,6 +504,7 @@ type EagerVenue = {
   readonly id: string;
   readonly venueNumber: number;
   readonly name: string;
+  readonly aliases?: (string | null)[] | null;
   readonly address?: string | null;
   readonly city?: string | null;
   readonly country?: string | null;
@@ -524,6 +525,7 @@ type LazyVenue = {
   readonly id: string;
   readonly venueNumber: number;
   readonly name: string;
+  readonly aliases?: (string | null)[] | null;
   readonly address?: string | null;
   readonly city?: string | null;
   readonly country?: string | null;

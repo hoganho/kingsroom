@@ -150,6 +150,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -166,6 +167,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -228,6 +230,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -289,6 +292,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -379,6 +383,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -434,6 +439,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -450,6 +456,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -512,6 +519,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -573,6 +581,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -663,6 +672,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -718,6 +728,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -734,6 +745,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -796,6 +808,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -857,6 +870,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -947,6 +961,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -994,6 +1009,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
     id
     venueNumber
     name
+    aliases
     address
     city
     country
@@ -1010,6 +1026,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -1026,6 +1043,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -1159,6 +1177,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -1251,6 +1270,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -1475,6 +1495,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -1546,6 +1567,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
     id
     venueNumber
     name
+    aliases
     address
     city
     country
@@ -1562,6 +1584,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -1578,6 +1601,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -1711,6 +1735,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -1803,6 +1828,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -2027,6 +2053,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -2098,6 +2125,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
     id
     venueNumber
     name
+    aliases
     address
     city
     country
@@ -2114,6 +2142,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -2130,6 +2159,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -2263,6 +2293,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -2355,6 +2386,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -2579,6 +2611,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -2661,6 +2694,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -2677,6 +2711,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -2739,6 +2774,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -2800,6 +2836,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -2890,6 +2927,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -2948,6 +2986,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -2964,6 +3003,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -3026,6 +3066,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -3087,6 +3128,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -3177,6 +3219,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -3235,6 +3278,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -3251,6 +3295,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -3313,6 +3358,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -3374,6 +3420,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -3464,6 +3511,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -3545,6 +3593,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -3561,6 +3610,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -3623,6 +3673,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -3684,6 +3735,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -3774,6 +3826,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -3856,6 +3909,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -3995,6 +4049,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -4103,6 +4158,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -4293,6 +4349,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -4309,6 +4366,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -4371,6 +4429,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -4432,6 +4491,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -4522,6 +4582,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -4604,6 +4665,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -4743,6 +4805,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -4851,6 +4914,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -5041,6 +5105,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -5057,6 +5122,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -5119,6 +5185,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -5180,6 +5247,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -5270,6 +5338,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -5352,6 +5421,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -5491,6 +5561,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -5599,6 +5670,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -5805,6 +5877,7 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -6003,6 +6076,7 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -6201,6 +6275,7 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -6752,6 +6827,7 @@ export const onCreateCashStructure = /* GraphQL */ `subscription OnCreateCashStr
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -6994,6 +7070,7 @@ export const onUpdateCashStructure = /* GraphQL */ `subscription OnUpdateCashStr
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -7236,6 +7313,7 @@ export const onDeleteCashStructure = /* GraphQL */ `subscription OnDeleteCashStr
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -7543,6 +7621,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -8095,6 +8174,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -8539,6 +8619,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -9091,6 +9172,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -9535,6 +9617,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -10087,6 +10170,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -10717,6 +10801,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -11213,6 +11298,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -11709,6 +11795,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -12197,6 +12284,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -12335,6 +12423,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -12351,6 +12440,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -12413,6 +12503,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -12474,6 +12565,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -12564,6 +12656,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -12948,6 +13041,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -13086,6 +13180,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -13102,6 +13197,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -13164,6 +13260,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -13225,6 +13322,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -13315,6 +13413,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -13699,6 +13798,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -13837,6 +13937,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -13853,6 +13954,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -13915,6 +14017,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -13976,6 +14079,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -14066,6 +14170,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -14451,6 +14556,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -14940,6 +15046,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -15429,6 +15536,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -15625,6 +15733,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -15641,6 +15750,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -16320,6 +16430,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -16516,6 +16627,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -16532,6 +16644,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -17211,6 +17324,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -17407,6 +17521,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -17423,6 +17538,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -18102,6 +18218,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -18649,6 +18766,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -19133,6 +19251,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -19617,6 +19736,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -20603,6 +20723,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -21163,6 +21284,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -21723,6 +21845,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             id
             venueNumber
             name
+            aliases
             address
             city
             country

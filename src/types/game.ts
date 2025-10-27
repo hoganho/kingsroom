@@ -108,7 +108,7 @@ export type GameData = {
     structureLabel?: string;
     foundKeys?: string[];
     doNotScrape?: boolean;
-    venueMatch?: VenueMatch | null;
+    venueMatch?: ScrapedVenueMatch | null;
 };
 
 export type MissingField = {
@@ -192,11 +192,15 @@ export interface TournamentLevelInput {
     breakMinutes?: number;
 }
 
-export interface VenueMatch {
-  bestMatch: {
-    id: string;
-    name: string;
-    score: number;
-  };
-  matchType: 'AUTO_ASSIGN' | 'SUGGESTION' | 'NO_MATCH';
-}
+// ✅ NEW: Defines the shape of a single venue suggestion.
+export type ScrapedVenueMatchDetails = {
+  id: string;
+  name: string;
+  score: number;
+};
+
+// ✅ REVISED: This replaces the old VenueMatch type to align with the new backend response.
+export type ScrapedVenueMatch = {
+  autoAssignedVenue?: ScrapedVenueMatchDetails | null;
+  suggestions?: ScrapedVenueMatchDetails[] | null;
+};

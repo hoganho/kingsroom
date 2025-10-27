@@ -62,7 +62,7 @@ const getAllVenues = async () => {
     try {
         const command = new ScanCommand({
             TableName: venueTable,
-            ProjectionExpression: 'id, #name', // Only get the ID and name for efficiency
+            ProjectionExpression: 'id, #name, aliases',
             ExpressionAttributeNames: { '#name': 'name' }
         });
         const response = await ddbDocClient.send(command);

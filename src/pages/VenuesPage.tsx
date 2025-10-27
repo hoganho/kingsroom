@@ -77,7 +77,8 @@ const VenuesPage = () => {
 
   const handleSaveVenue = async (venueData: VenueFormData) => {
     try {
-      const { name, address, city, country } = venueData;
+      // ✅ UPDATED: Destructure aliases from the form data
+      const { name, address, city, country, aliases } = venueData;
       
       if (editingVenue) {
         // When editing, keep the existing venueNumber
@@ -85,11 +86,13 @@ const VenuesPage = () => {
           query: updateVenue,
           variables: { 
             input: { 
+              _version: editingVenue._version,
               id: editingVenue.id, 
               name, 
               address, 
               city, 
               country,
+              aliases, // ✅ Pass aliases on update
               venueNumber: editingVenue.venueNumber 
             } 
           },
@@ -104,6 +107,7 @@ const VenuesPage = () => {
               address, 
               city, 
               country,
+              aliases, // ✅ Pass aliases on create
               venueNumber: nextVenueNumber 
             } 
           },

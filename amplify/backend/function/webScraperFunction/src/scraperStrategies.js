@@ -384,50 +384,66 @@ const defaultStrategy = {
         }
 
         const cleanedScrapedName = cleanupVenueName(ctx.data.name);
-        const cleanedVenueNames = venues.map(v => cleanupVenueName(v.name));
 
-        console.log(`[DEBUG-MATCHING] Raw scraped name: "${ctx.data.name}"`);
-        console.log(`[DEBUG-MATCHING] Cleaned scraped name: "${cleanedScrapedName}"`);
-        console.log('[DEBUG-MATCHING] Cleaned DB venue names:', JSON.stringify(cleanedVenueNames));
-
-        const bestMatch = stringSimilarity.findBestMatch(
-            cleanedScrapedName, 
-            cleanedVenueNames
-        );
+        // 1. Create a flattened list of all possible names (primary + aliases) to match against.
+        const allNamesToMatch = venues.flatMap(venue => {
+            const names = [venue.name, ...(venue.aliases || [])];
+            return names.map(name => ({
+                venueId: venue.id,
+                venueName: venue.name, // Keep the original primary name for display
+                matchName: cleanupVenueName(name)
+            }));
+        });
         
-        console.log('[DEBUG-MATCHING] Best match found by library:', JSON.stringify(bestMatch, null, 2));
+        console.log(`[DEBUG-MATCHING] Cleaned scraped name: "${cleanedScrapedName}"`);
 
-        if (bestMatch.bestMatch.rating > 0) {
-            const score = bestMatch.bestMatch.rating;
-            const matchedVenueName = bestMatch.bestMatch.target;
-            
-            const originalVenue = venues.find(v => cleanupVenueName(v.name) === matchedVenueName);
+        // 2. Get ratings for the scraped name against all possible venue names/aliases.
+        const { ratings } = stringSimilarity.findBestMatch(
+            cleanedScrapedName,
+            allNamesToMatch.map(item => item.matchName)
+        );
 
-            if (originalVenue) {
-                let matchType = 'NO_MATCH';
-                if (score >= AUTO_ASSIGN_THRESHOLD) {
-                    matchType = 'AUTO_ASSIGN';
-                } else if (score >= SUGGEST_THRESHOLD) {
-                    matchType = 'SUGGESTION';
-                }
+        // 3. Process ratings to find the single best score for each unique venue.
+        const bestScoresByVenue = new Map();
+        ratings.forEach((rating, index) => {
+            const { venueId, venueName } = allNamesToMatch[index];
+            const score = rating.rating;
 
-                const venueMatch = {
-                    bestMatch: {
-                        id: originalVenue.id,
-                        name: originalVenue.name,
-                        score: score
-                    },
-                    matchType: matchType
-                };
-                
-                console.log(`[DEBUG-MATCHING] Decision: ${matchType} for venue "${originalVenue.name}" with score ${score.toFixed(2)}`);
-                ctx.add('venueMatch', venueMatch);
-            } else {
-                console.log(`[DEBUG-MATCHING] Error: Could not find original venue object for matched name "${matchedVenueName}"`);
+            if (!bestScoresByVenue.has(venueId) || score > bestScoresByVenue.get(venueId).score) {
+                bestScoresByVenue.set(venueId, {
+                    id: venueId,
+                    name: venueName,
+                    score: score
+                });
             }
-        } else {
-            console.log('[DEBUG-MATCHING] No match found above 0% similarity.');
+        });
+
+        // 4. Sort the unique venues by their best score and take the top 3.
+        const sortedSuggestions = Array.from(bestScoresByVenue.values())
+            .sort((a, b) => b.score - a.score)
+            .filter(v => v.score > 0) // Exclude venues with 0 score
+            .slice(0, 3);
+            
+        if (sortedSuggestions.length === 0) {
+            console.log('[DEBUG-MATCHING] No suggestions found after processing.');
+            ctx.add('venueMatch', { suggestions: [] });
+            return;
         }
+
+        // 5. Determine if the top match qualifies for auto-assignment.
+        let autoAssignedVenue = null;
+        if (sortedSuggestions[0].score >= AUTO_ASSIGN_THRESHOLD) {
+            autoAssignedVenue = sortedSuggestions[0];
+        }
+
+        // 6. Construct the final result object.
+        const venueMatch = {
+            autoAssignedVenue,
+            suggestions: sortedSuggestions
+        };
+        
+        console.log('[DEBUG-MATCHING] Final match result:', JSON.stringify(venueMatch, null, 2));
+        ctx.add('venueMatch', venueMatch);
     }
 };
 

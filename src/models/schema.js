@@ -328,6 +328,14 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "aliases": {
+                    "name": "aliases",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
                 "address": {
                     "name": "address",
                     "isArray": false,
@@ -3821,21 +3829,24 @@ export const schema = {
         "ScrapedVenueMatch": {
             "name": "ScrapedVenueMatch",
             "fields": {
-                "bestMatch": {
-                    "name": "bestMatch",
+                "autoAssignedVenue": {
+                    "name": "autoAssignedVenue",
                     "isArray": false,
                     "type": {
                         "nonModel": "ScrapedVenueMatchDetails"
                     },
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
-                "matchType": {
-                    "name": "matchType",
-                    "isArray": false,
-                    "type": "String",
+                "suggestions": {
+                    "name": "suggestions",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "ScrapedVenueMatchDetails"
+                    },
                     "isRequired": true,
-                    "attributes": []
+                    "attributes": [],
+                    "isArrayNullable": true
                 }
             }
         },
@@ -3947,5 +3958,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "e7763a16c39edb0fc77017a5f60a0b82"
+    "version": "39d9c61cd9e861c06bfc01d0fc783a7b"
 };

@@ -209,6 +209,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -225,6 +226,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -287,6 +289,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -348,6 +351,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -438,6 +442,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -495,6 +500,7 @@ export const listAssets = /* GraphQL */ `query ListAssets(
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -511,6 +517,7 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -664,6 +671,7 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -680,6 +688,7 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -814,6 +823,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
     id
     venueNumber
     name
+    aliases
     address
     city
     country
@@ -830,6 +840,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -846,6 +857,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -979,6 +991,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -1071,6 +1084,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -1295,6 +1309,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -1368,6 +1383,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -1384,6 +1400,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -1446,6 +1463,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -1507,6 +1525,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -1597,6 +1616,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -1652,6 +1672,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -1668,6 +1689,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -1730,6 +1752,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -1791,6 +1814,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -1881,6 +1905,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -1934,6 +1959,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -1950,6 +1976,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -2012,6 +2039,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -2073,6 +2101,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -2163,6 +2192,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -2224,6 +2254,7 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -2240,6 +2271,7 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -2394,6 +2426,7 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -2410,6 +2443,7 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -2578,6 +2612,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -2594,6 +2629,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -2656,6 +2692,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -2717,6 +2754,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -2807,6 +2845,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -2889,6 +2928,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -3028,6 +3068,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -3136,6 +3177,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -3328,6 +3370,7 @@ export const listGames = /* GraphQL */ `query ListGames(
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -3344,6 +3387,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -3749,6 +3793,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -3765,6 +3810,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -4173,6 +4219,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -4378,6 +4425,7 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -4511,6 +4559,7 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -4912,6 +4961,7 @@ export const getCashStructure = /* GraphQL */ `query GetCashStructure($id: ID!) 
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -5140,6 +5190,7 @@ export const listCashStructures = /* GraphQL */ `query ListCashStructures(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -5300,6 +5351,7 @@ export const syncCashStructures = /* GraphQL */ `query SyncCashStructures(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -5533,6 +5585,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -6085,6 +6138,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -6698,6 +6752,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -7183,6 +7238,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -7674,6 +7730,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -8622,6 +8679,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -8760,6 +8818,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -8776,6 +8835,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -8838,6 +8898,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -8899,6 +8960,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -8989,6 +9051,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -9239,6 +9302,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -9255,6 +9319,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -9598,6 +9663,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -9614,6 +9680,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -10084,6 +10151,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -10730,6 +10798,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -10746,6 +10815,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -11425,6 +11495,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -11624,6 +11695,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -12015,6 +12087,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -12768,6 +12841,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -14090,6 +14164,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -15349,6 +15424,7 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -15365,6 +15441,7 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -15514,6 +15591,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
       id
       venueNumber
       name
+      aliases
       address
       city
       country
@@ -15530,6 +15608,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -15592,6 +15671,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -15653,6 +15733,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -15743,6 +15824,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -15809,6 +15891,7 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -15825,6 +15908,7 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -16008,6 +16092,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -16024,6 +16109,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -16434,6 +16520,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -16450,6 +16537,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -16860,6 +16948,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -16876,6 +16965,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -17286,6 +17376,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -17302,6 +17393,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -17753,6 +17845,7 @@ export const cashStructuresByRakeStructureId = /* GraphQL */ `query CashStructur
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -18166,6 +18259,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -18653,6 +18747,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -19250,6 +19345,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -19266,6 +19362,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -19613,6 +19710,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
         id
         venueNumber
         name
+        aliases
         address
         city
         country
@@ -19629,6 +19727,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             id
             venueNumber
             name
+            aliases
             address
             city
             country
@@ -20279,6 +20378,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
           id
           venueNumber
           name
+          aliases
           address
           city
           country
@@ -20672,6 +20772,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
           id
           venueNumber
           name
+          aliases
           address
           city
           country

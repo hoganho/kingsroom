@@ -89,6 +89,7 @@ type Venue @model @auth(rules: [{ allow: private }]) {
   id: ID!
   venueNumber: Int! @index(name: "byVenueNumber", sortKeyFields: ["name"])
   name: String!
+  aliases: [String]
   address: String
   city: String
   country: String
@@ -195,8 +196,8 @@ type ScrapedTables {
 }
 
 type ScrapedVenueMatch {
-    bestMatch: ScrapedVenueMatchDetails!
-    matchType: String! # Will be 'AUTO_ASSIGN', 'SUGGESTION', or 'NO_MATCH'
+    autoAssignedVenue: ScrapedVenueMatchDetails
+    suggestions: [ScrapedVenueMatchDetails!]
 }
 
 type ScrapedVenueMatchDetails {
