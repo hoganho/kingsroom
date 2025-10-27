@@ -158,7 +158,7 @@ export const useGameTracker = () => {
                 'variant': 'Game variant (e.g., NLHE) not found', 
                 'seriesName': 'Series name not found on page',
                 'prizepool': 'Prize pool not found on page',
-                'revenueByEntries': 'Revenue calculated on save',
+                'revenueByBuyIns': 'Revenue calculated on save',
                 'totalEntries': 'Total entries not found on page',
                 'totalRebuys': 'Total rebuys not found on page',
                 'totalAddons': 'Total addons not found on page',

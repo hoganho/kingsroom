@@ -332,7 +332,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -576,7 +576,7 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -747,7 +747,7 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -916,7 +916,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -1065,7 +1065,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
         registrationStatus
         gameVariant
         prizepool
-        revenueByEntries
+        revenueByBuyIns
         totalEntries
         totalRebuys
         totalAddons
@@ -1506,7 +1506,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -1795,7 +1795,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -2082,7 +2082,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -2330,7 +2330,7 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -2502,7 +2502,7 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -2593,7 +2593,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
     registrationStatus
     gameVariant
     prizepool
-    revenueByEntries
+    revenueByBuyIns
     totalEntries
     totalRebuys
     totalAddons
@@ -2735,7 +2735,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -2909,7 +2909,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -3049,7 +3049,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -3158,7 +3158,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -3351,7 +3351,7 @@ export const listGames = /* GraphQL */ `query ListGames(
       registrationStatus
       gameVariant
       prizepool
-      revenueByEntries
+      revenueByBuyIns
       totalEntries
       totalRebuys
       totalAddons
@@ -3446,7 +3446,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -3534,7 +3534,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -3612,7 +3612,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -3674,7 +3674,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -3774,7 +3774,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
       registrationStatus
       gameVariant
       prizepool
-      revenueByEntries
+      revenueByBuyIns
       totalEntries
       totalRebuys
       totalAddons
@@ -3869,7 +3869,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -3957,7 +3957,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -4035,7 +4035,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -4097,7 +4097,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -4200,7 +4200,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
         registrationStatus
         gameVariant
         prizepool
-        revenueByEntries
+        revenueByBuyIns
         totalEntries
         totalRebuys
         totalAddons
@@ -4406,7 +4406,7 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -4540,7 +4540,7 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -4681,7 +4681,7 @@ export const getRakeStructure = /* GraphQL */ `query GetRakeStructure($id: ID!) 
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -4942,7 +4942,7 @@ export const getCashStructure = /* GraphQL */ `query GetCashStructure($id: ID!) 
         registrationStatus
         gameVariant
         prizepool
-        revenueByEntries
+        revenueByBuyIns
         totalEntries
         totalRebuys
         totalAddons
@@ -5171,7 +5171,7 @@ export const listCashStructures = /* GraphQL */ `query ListCashStructures(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -5332,7 +5332,7 @@ export const syncCashStructures = /* GraphQL */ `query SyncCashStructures(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -5566,7 +5566,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -6510,7 +6510,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -6996,7 +6996,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -7488,7 +7488,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -8437,7 +8437,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -8941,7 +8941,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -9378,7 +9378,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -9739,7 +9739,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -9909,7 +9909,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -10779,7 +10779,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
       registrationStatus
       gameVariant
       prizepool
-      revenueByEntries
+      revenueByBuyIns
       totalEntries
       totalRebuys
       totalAddons
@@ -10874,7 +10874,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -10962,7 +10962,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -11040,7 +11040,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -11102,7 +11102,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -11253,7 +11253,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -11676,7 +11676,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
         registrationStatus
         gameVariant
         prizepool
-        revenueByEntries
+        revenueByBuyIns
         totalEntries
         totalRebuys
         totalAddons
@@ -12068,7 +12068,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
         registrationStatus
         gameVariant
         prizepool
-        revenueByEntries
+        revenueByBuyIns
         totalEntries
         totalRebuys
         totalAddons
@@ -12599,7 +12599,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -13922,7 +13922,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -15500,7 +15500,7 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -15714,7 +15714,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -15967,7 +15967,7 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -16073,7 +16073,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
       registrationStatus
       gameVariant
       prizepool
-      revenueByEntries
+      revenueByBuyIns
       totalEntries
       totalRebuys
       totalAddons
@@ -16168,7 +16168,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -16256,7 +16256,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -16334,7 +16334,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -16396,7 +16396,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -16501,7 +16501,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
       registrationStatus
       gameVariant
       prizepool
-      revenueByEntries
+      revenueByBuyIns
       totalEntries
       totalRebuys
       totalAddons
@@ -16596,7 +16596,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -16684,7 +16684,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -16762,7 +16762,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -16824,7 +16824,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -16929,7 +16929,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
       registrationStatus
       gameVariant
       prizepool
-      revenueByEntries
+      revenueByBuyIns
       totalEntries
       totalRebuys
       totalAddons
@@ -17024,7 +17024,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -17112,7 +17112,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -17190,7 +17190,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -17252,7 +17252,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -17357,7 +17357,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
       registrationStatus
       gameVariant
       prizepool
-      revenueByEntries
+      revenueByBuyIns
       totalEntries
       totalRebuys
       totalAddons
@@ -17452,7 +17452,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -17540,7 +17540,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -17618,7 +17618,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -17680,7 +17680,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -17826,7 +17826,7 @@ export const cashStructuresByRakeStructureId = /* GraphQL */ `query CashStructur
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -18017,7 +18017,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -18505,7 +18505,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -19421,7 +19421,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -19786,7 +19786,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -20359,7 +20359,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
         registrationStatus
         gameVariant
         prizepool
-        revenueByEntries
+        revenueByBuyIns
         totalEntries
         totalRebuys
         totalAddons
@@ -20753,7 +20753,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
         registrationStatus
         gameVariant
         prizepool
-        revenueByEntries
+        revenueByBuyIns
         totalEntries
         totalRebuys
         totalAddons

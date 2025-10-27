@@ -232,7 +232,7 @@ const handleSave = async (input) => {
     const gameTable = getTableName('Game');
     const structureTable = getTableName('TournamentStructure');
     
-    const calculateRevenueByEntries = (buyIn, totalEntries) => {
+    const calculateRevenueByBuyIns = (buyIn, totalEntries) => {
         const numBuyIn = parseFloat(buyIn);
         const numTotalEntries = parseInt(totalEntries, 10);
         
@@ -242,7 +242,7 @@ const handleSave = async (input) => {
         return null;
     };
     
-    const revenueByEntries = calculateRevenueByEntries(data.buyIn, data.totalEntries);
+    const revenueByBuyIns = calculateRevenueByBuyIns(data.buyIn, data.totalEntries);
 
     // ✅ **NEW**: Helper function to merge break data into the levels array.
     const processLevels = (levels = [], breaks = []) => {
@@ -305,7 +305,7 @@ const handleSave = async (input) => {
             hasGuarantee: data.hasGuarantee,
             guaranteeAmount: data.guaranteeAmount,
             tournamentType: data.tournamentType || 'FREEZEOUT',
-            revenueByEntries: revenueByEntries,
+            revenueByBuyIns: revenueByBuyIns,
             venueId,
             gameStartDateTime: data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : existingGame.gameStartDateTime,
             gameEndDateTime: data.gameEndDateTime ? new Date(data.gameEndDateTime).toISOString() : (existingGame.gameEndDateTime || null),
@@ -408,7 +408,7 @@ const handleSave = async (input) => {
             startingStack: data.startingStack,
             hasGuarantee: data.hasGuarantee,
             guaranteeAmount: data.guaranteeAmount,
-            revenueByEntries: revenueByEntries,
+            revenueByBuyIns: revenueByBuyIns,
             seriesName: data.seriesName,
             registrationStatus: data.registrationStatus,
             gameVariant: data.gameVariant,

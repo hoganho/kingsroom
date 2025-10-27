@@ -38,7 +38,7 @@ export const fieldManifest: Record<string, FieldDefinition> = {
   totalEntries: { label: 'Total Entries', group: 'Prize & Entry Details', isBaselineExpected: true },
   totalRebuys: { label: 'Total Rebuys', group: 'Prize & Entry Details', isBaselineOptional: true },
   totalAddons: { label: 'Total Add-ons', group: 'Prize & Entry Details', isBaselineOptional: true },
-  revenueByEntries: { label: 'Revenue', group: 'Prize & Entry Details', isBaselineOptional: true },
+  revenueByBuyIns: { label: 'Revenue', group: 'Prize & Entry Details', isBaselineOptional: true },
   totalDuration: { label: 'Total Duration', group: 'Prize & Entry Details', isBaselineOptional: true },
   gameTags: { label: 'Game Tags', group: 'Prize & Entry Details', isBaselineOptional: true },
 

@@ -743,8 +743,8 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "revenueByEntries": {
-                    "name": "revenueByEntries",
+                "revenueByBuyIns": {
+                    "name": "revenueByBuyIns",
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
@@ -3958,5 +3958,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "39d9c61cd9e861c06bfc01d0fc783a7b"
+    "version": "8d83d020f439af747936e6ebc3944b4e"
 };

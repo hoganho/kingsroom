@@ -78,7 +78,7 @@ export type GameData = {
     totalDuration?: string | null;
     gameTags?: (string | null)[] | null;
     seriesName?: string | null;
-    revenueByEntries?: number | null;
+    revenueByBuyIns?: number | null;
     
     // Tournament-specific fields (now on Game model)
     tournamentType?: 'FREEZEOUT' | 'REBUY' | 'SATELLITE' | 'DEEPSTACK' | null;

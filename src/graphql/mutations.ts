@@ -115,7 +115,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
     registrationStatus
     gameVariant
     prizepool
-    revenueByEntries
+    revenueByBuyIns
     totalEntries
     totalRebuys
     totalAddons
@@ -257,7 +257,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -431,7 +431,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -571,7 +571,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -680,7 +680,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -1131,7 +1131,7 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -1423,7 +1423,7 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -1715,7 +1715,7 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -1969,7 +1969,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -2118,7 +2118,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
         registrationStatus
         gameVariant
         prizepool
-        revenueByEntries
+        revenueByBuyIns
         totalEntries
         totalRebuys
         totalAddons
@@ -2530,7 +2530,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -2679,7 +2679,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
         registrationStatus
         gameVariant
         prizepool
-        revenueByEntries
+        revenueByBuyIns
         totalEntries
         totalRebuys
         totalAddons
@@ -3091,7 +3091,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -3240,7 +3240,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
         registrationStatus
         gameVariant
         prizepool
-        revenueByEntries
+        revenueByBuyIns
         totalEntries
         totalRebuys
         totalAddons
@@ -3691,7 +3691,7 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -3984,7 +3984,7 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -4277,7 +4277,7 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -4453,7 +4453,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
     registrationStatus
     gameVariant
     prizepool
-    revenueByEntries
+    revenueByBuyIns
     totalEntries
     totalRebuys
     totalAddons
@@ -4595,7 +4595,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -4769,7 +4769,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -4909,7 +4909,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -5018,7 +5018,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -5212,7 +5212,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
     registrationStatus
     gameVariant
     prizepool
-    revenueByEntries
+    revenueByBuyIns
     totalEntries
     totalRebuys
     totalAddons
@@ -5354,7 +5354,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -5528,7 +5528,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -5668,7 +5668,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -5777,7 +5777,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -5971,7 +5971,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
     registrationStatus
     gameVariant
     prizepool
-    revenueByEntries
+    revenueByBuyIns
     totalEntries
     totalRebuys
     totalAddons
@@ -6113,7 +6113,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -6287,7 +6287,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -6427,7 +6427,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -6536,7 +6536,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -6744,7 +6744,7 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
         registrationStatus
         gameVariant
         prizepool
-        revenueByEntries
+        revenueByBuyIns
         totalEntries
         totalRebuys
         totalAddons
@@ -6944,7 +6944,7 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
         registrationStatus
         gameVariant
         prizepool
-        revenueByEntries
+        revenueByBuyIns
         totalEntries
         totalRebuys
         totalAddons
@@ -7144,7 +7144,7 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
         registrationStatus
         gameVariant
         prizepool
-        revenueByEntries
+        revenueByBuyIns
         totalEntries
         totalRebuys
         totalAddons
@@ -7362,7 +7362,7 @@ export const createRakeStructure = /* GraphQL */ `mutation CreateRakeStructure(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -7466,7 +7466,7 @@ export const updateRakeStructure = /* GraphQL */ `mutation UpdateRakeStructure(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -7570,7 +7570,7 @@ export const deleteRakeStructure = /* GraphQL */ `mutation DeleteRakeStructure(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -7700,7 +7700,7 @@ export const createCashStructure = /* GraphQL */ `mutation CreateCashStructure(
         registrationStatus
         gameVariant
         prizepool
-        revenueByEntries
+        revenueByBuyIns
         totalEntries
         totalRebuys
         totalAddons
@@ -7944,7 +7944,7 @@ export const updateCashStructure = /* GraphQL */ `mutation UpdateCashStructure(
         registrationStatus
         gameVariant
         prizepool
-        revenueByEntries
+        revenueByBuyIns
         totalEntries
         totalRebuys
         totalAddons
@@ -8188,7 +8188,7 @@ export const deleteCashStructure = /* GraphQL */ `mutation DeleteCashStructure(
         registrationStatus
         gameVariant
         prizepool
-        revenueByEntries
+        revenueByBuyIns
         totalEntries
         totalRebuys
         totalAddons
@@ -8499,7 +8499,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -9500,7 +9500,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -10501,7 +10501,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -11463,7 +11463,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -11961,7 +11961,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -12459,7 +12459,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -12949,7 +12949,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -13453,7 +13453,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -13707,7 +13707,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -14211,7 +14211,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -14465,7 +14465,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -14969,7 +14969,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           registrationStatus
           gameVariant
           prizepool
-          revenueByEntries
+          revenueByBuyIns
           totalEntries
           totalRebuys
           totalAddons
@@ -15224,7 +15224,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -15715,7 +15715,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -16206,7 +16206,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -16627,7 +16627,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
       registrationStatus
       gameVariant
       prizepool
-      revenueByEntries
+      revenueByBuyIns
       totalEntries
       totalRebuys
       totalAddons
@@ -16722,7 +16722,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -16810,7 +16810,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -16888,7 +16888,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -16950,7 +16950,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -17101,7 +17101,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -17522,7 +17522,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
       registrationStatus
       gameVariant
       prizepool
-      revenueByEntries
+      revenueByBuyIns
       totalEntries
       totalRebuys
       totalAddons
@@ -17617,7 +17617,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -17705,7 +17705,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -17783,7 +17783,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -17845,7 +17845,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -17996,7 +17996,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -18417,7 +18417,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
       registrationStatus
       gameVariant
       prizepool
-      revenueByEntries
+      revenueByBuyIns
       totalEntries
       totalRebuys
       totalAddons
@@ -18512,7 +18512,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -18600,7 +18600,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -18678,7 +18678,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -18740,7 +18740,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -18891,7 +18891,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -19443,7 +19443,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -19929,7 +19929,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -20415,7 +20415,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -21406,7 +21406,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -21968,7 +21968,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
@@ -22530,7 +22530,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             registrationStatus
             gameVariant
             prizepool
-            revenueByEntries
+            revenueByBuyIns
             totalEntries
             totalRebuys
             totalAddons
