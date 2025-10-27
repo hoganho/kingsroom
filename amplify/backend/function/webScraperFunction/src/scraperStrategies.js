@@ -124,7 +124,7 @@ const defaultStrategy = {
             ctx.add('gameTags', tags);
         }
     },
-    
+
     getGameStartDateTime(ctx) {
         if (ctx.gameData && ctx.gameData.start_local) {
             ctx.add('gameStartDateTime', new Date(ctx.gameData.start_local).toISOString());
@@ -243,7 +243,37 @@ const defaultStrategy = {
             ctx.add('hasGuarantee', false);
         }
     },
-    
+
+    calculateRevenueByBuyIns(ctx) {
+        const entries = ctx.data.totalEntries || 0;
+        const rebuys = ctx.data.totalRebuys || 0;
+        const addons = ctx.data.totalAddons || 0;
+        const buyIn = ctx.data.buyIn || 0;
+        
+        // =================================================================
+        // ✅ DEBUG LOGGING START
+        // =================================================================
+        console.log('[DEBUG-REVENUE] Calculating Revenue...');
+        console.log(`[DEBUG-REVENUE] -> Entries: ${entries}, Rebuys: ${rebuys}, Addons: ${addons}`);
+        console.log(`[DEBUG-REVENUE] -> Buy-In: ${buyIn}`);
+        // =================================================================
+
+        if (buyIn <= 0) {
+            // ✅ Log why the calculation is being skipped
+            console.log('[DEBUG-REVENUE] Skipping calculation: Buy-In is zero or missing.');
+            return;
+        }
+
+        const totalTransactions = entries + rebuys + addons;
+        const revenue = totalTransactions * buyIn;
+        
+        // ✅ Log the final calculated values
+        console.log(`[DEBUG-REVENUE] -> Total Transactions: ${totalTransactions}`);
+        console.log(`[DEBUG-REVENUE] -> Calculated Revenue: ${revenue}`);
+
+        ctx.add('revenueByBuyIns', revenue);
+    },
+
     getSeriesName(ctx) {
         ctx.getText('seriesName', '.your-selector-for-series-name');
     },

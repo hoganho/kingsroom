@@ -215,6 +215,7 @@ const handleFetch = async (url) => {
     const { data, foundKeys } = scrapeDataFromHtml(response.data, venues);
     
     const fingerprintResult = await processStructureFingerprint(foundKeys, data.structureLabel, url);
+    console.log(`[DEBUG-FETCH] Does data object have revenueByBuyIns before return? ${data.hasOwnProperty('revenueByBuyIns')}`);
     
     return { 
         ...data, 
@@ -231,18 +232,6 @@ const handleSave = async (input) => {
     
     const gameTable = getTableName('Game');
     const structureTable = getTableName('TournamentStructure');
-    
-    const calculateRevenueByBuyIns = (buyIn, totalEntries) => {
-        const numBuyIn = parseFloat(buyIn);
-        const numTotalEntries = parseInt(totalEntries, 10);
-        
-        if (!isNaN(numBuyIn) && !isNaN(numTotalEntries) && numBuyIn > 0 && numTotalEntries > 0) {
-            return numBuyIn * numTotalEntries;
-        }
-        return null;
-    };
-    
-    const revenueByBuyIns = calculateRevenueByBuyIns(data.buyIn, data.totalEntries);
 
     // ✅ **NEW**: Helper function to merge break data into the levels array.
     const processLevels = (levels = [], breaks = []) => {
@@ -305,7 +294,7 @@ const handleSave = async (input) => {
             hasGuarantee: data.hasGuarantee,
             guaranteeAmount: data.guaranteeAmount,
             tournamentType: data.tournamentType || 'FREEZEOUT',
-            revenueByBuyIns: revenueByBuyIns,
+            revenueByBuyIns: data.revenueByBuyIns,
             venueId,
             gameStartDateTime: data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : existingGame.gameStartDateTime,
             gameEndDateTime: data.gameEndDateTime ? new Date(data.gameEndDateTime).toISOString() : (existingGame.gameEndDateTime || null),
@@ -408,7 +397,7 @@ const handleSave = async (input) => {
             startingStack: data.startingStack,
             hasGuarantee: data.hasGuarantee,
             guaranteeAmount: data.guaranteeAmount,
-            revenueByBuyIns: revenueByBuyIns,
+            revenueByBuyIns: data.revenueByBuyIns,
             seriesName: data.seriesName,
             registrationStatus: data.registrationStatus,
             gameVariant: data.gameVariant,

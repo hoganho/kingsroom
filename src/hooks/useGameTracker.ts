@@ -87,6 +87,7 @@ export const useGameTracker = () => {
                 gameVariant: dataFromBackend.gameVariant || undefined,
                 prizepool: dataFromBackend.prizepool || undefined,
                 totalEntries: dataFromBackend.totalEntries || undefined,
+                revenueByBuyIns: (dataFromBackend as any).revenueByBuyIns || undefined,
                 playersRemaining: (dataFromBackend as any).playersRemaining || undefined,
                 totalRebuys: dataFromBackend.totalRebuys || undefined,
                 totalAddons: dataFromBackend.totalAddons || undefined,

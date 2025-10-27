@@ -809,6 +809,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "totalRake": {
+                    "name": "totalRake",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "startingStack": {
                     "name": "startingStack",
                     "isArray": false,
@@ -825,6 +832,20 @@ export const schema = {
                 },
                 "guaranteeAmount": {
                     "name": "guaranteeAmount",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeOverlay": {
+                    "name": "guaranteeOverlay",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeSurplus": {
+                    "name": "guaranteeSurplus",
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
@@ -3496,6 +3517,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "revenueByBuyIns": {
+                    "name": "revenueByBuyIns",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "totalEntries": {
                     "name": "totalEntries",
                     "isArray": false,
@@ -3539,6 +3567,20 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "rake": {
+                    "name": "rake",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalRake": {
+                    "name": "totalRake",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "startingStack": {
                     "name": "startingStack",
                     "isArray": false,
@@ -3555,6 +3597,20 @@ export const schema = {
                 },
                 "guaranteeAmount": {
                     "name": "guaranteeAmount",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeOverlay": {
+                    "name": "guaranteeOverlay",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeSurplus": {
+                    "name": "guaranteeSurplus",
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
@@ -3958,5 +4014,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "8d83d020f439af747936e6ebc3944b4e"
+    "version": "ff70ec630096414631d5d3db220ad2ae"
 };

@@ -136,15 +136,20 @@ type ScrapedGameData {
     registrationStatus: String
     gameVariant: String
     prizepool: Float
+    revenueByBuyIns: Float
     totalEntries: Int
     totalRebuys: Int
     totalAddons: Int
     totalDuration: String
     gameTags: [String]
     buyIn: Float
+    rake: Float
+    totalRake: Float
     startingStack: Int
     hasGuarantee: Boolean
     guaranteeAmount: Float
+    guaranteeOverlay: Float
+    guaranteeSurplus: Float
     levels: [ScrapedTournamentLevel!]
     breaks: [ScrapedBreak!]
     entries: [ScrapedPlayerEntries!]
@@ -318,9 +323,12 @@ type Game @model @auth(rules: [{ allow: private }]) {
     tournamentType: TournamentType # FREEZEOUT, REBUY, etc.
     buyIn: Float
     rake: Float
+    totalRake: Float
     startingStack: Int
     hasGuarantee: Boolean
     guaranteeAmount: Float
+    guaranteeOverlay: Float
+    guaranteeSurplus: Float
 
     # Running game info
     playersRemaining: Int

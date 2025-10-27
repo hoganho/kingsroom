@@ -341,9 +341,12 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -585,9 +588,12 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -756,9 +762,12 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -925,9 +934,12 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -1074,9 +1086,12 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -1515,9 +1530,12 @@ export const listVenues = /* GraphQL */ `query ListVenues(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -1804,9 +1822,12 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -2091,9 +2112,12 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -2339,9 +2363,12 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -2511,9 +2538,12 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -2602,9 +2632,12 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
     tournamentType
     buyIn
     rake
+    totalRake
     startingStack
     hasGuarantee
     guaranteeAmount
+    guaranteeOverlay
+    guaranteeSurplus
     playersRemaining
     tournamentStructureId
     cashStructureId
@@ -2744,9 +2777,12 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -2918,9 +2954,12 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -3058,9 +3097,12 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -3167,9 +3209,12 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -3360,9 +3405,12 @@ export const listGames = /* GraphQL */ `query ListGames(
       tournamentType
       buyIn
       rake
+      totalRake
       startingStack
       hasGuarantee
       guaranteeAmount
+      guaranteeOverlay
+      guaranteeSurplus
       playersRemaining
       tournamentStructureId
       cashStructureId
@@ -3455,9 +3503,12 @@ export const listGames = /* GraphQL */ `query ListGames(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -3543,9 +3594,12 @@ export const listGames = /* GraphQL */ `query ListGames(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -3621,9 +3675,12 @@ export const listGames = /* GraphQL */ `query ListGames(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -3683,9 +3740,12 @@ export const listGames = /* GraphQL */ `query ListGames(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -3783,9 +3843,12 @@ export const syncGames = /* GraphQL */ `query SyncGames(
       tournamentType
       buyIn
       rake
+      totalRake
       startingStack
       hasGuarantee
       guaranteeAmount
+      guaranteeOverlay
+      guaranteeSurplus
       playersRemaining
       tournamentStructureId
       cashStructureId
@@ -3878,9 +3941,12 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -3966,9 +4032,12 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -4044,9 +4113,12 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -4106,9 +4178,12 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -4209,9 +4284,12 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -4415,9 +4493,12 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -4549,9 +4630,12 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -4690,9 +4774,12 @@ export const getRakeStructure = /* GraphQL */ `query GetRakeStructure($id: ID!) 
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -4951,9 +5038,12 @@ export const getCashStructure = /* GraphQL */ `query GetCashStructure($id: ID!) 
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -5180,9 +5270,12 @@ export const listCashStructures = /* GraphQL */ `query ListCashStructures(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -5341,9 +5434,12 @@ export const syncCashStructures = /* GraphQL */ `query SyncCashStructures(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -5575,9 +5671,12 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -6519,9 +6618,12 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -7005,9 +7107,12 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -7497,9 +7602,12 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -8446,9 +8554,12 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -8950,9 +9061,12 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -9387,9 +9501,12 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -9748,9 +9865,12 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -9918,9 +10038,12 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -10788,9 +10911,12 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
       tournamentType
       buyIn
       rake
+      totalRake
       startingStack
       hasGuarantee
       guaranteeAmount
+      guaranteeOverlay
+      guaranteeSurplus
       playersRemaining
       tournamentStructureId
       cashStructureId
@@ -10883,9 +11009,12 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -10971,9 +11100,12 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -11049,9 +11181,12 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -11111,9 +11246,12 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -11262,9 +11400,12 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -11685,9 +11826,12 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -12077,9 +12221,12 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -12608,9 +12755,12 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -13931,9 +14081,12 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -15509,9 +15662,12 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -15723,9 +15879,12 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -15976,9 +16135,12 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16082,9 +16244,12 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
       tournamentType
       buyIn
       rake
+      totalRake
       startingStack
       hasGuarantee
       guaranteeAmount
+      guaranteeOverlay
+      guaranteeSurplus
       playersRemaining
       tournamentStructureId
       cashStructureId
@@ -16177,9 +16342,12 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16265,9 +16433,12 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16343,9 +16514,12 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16405,9 +16579,12 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16510,9 +16687,12 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
       tournamentType
       buyIn
       rake
+      totalRake
       startingStack
       hasGuarantee
       guaranteeAmount
+      guaranteeOverlay
+      guaranteeSurplus
       playersRemaining
       tournamentStructureId
       cashStructureId
@@ -16605,9 +16785,12 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16693,9 +16876,12 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16771,9 +16957,12 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16833,9 +17022,12 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16938,9 +17130,12 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
       tournamentType
       buyIn
       rake
+      totalRake
       startingStack
       hasGuarantee
       guaranteeAmount
+      guaranteeOverlay
+      guaranteeSurplus
       playersRemaining
       tournamentStructureId
       cashStructureId
@@ -17033,9 +17228,12 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17121,9 +17319,12 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17199,9 +17400,12 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17261,9 +17465,12 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17366,9 +17573,12 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
       tournamentType
       buyIn
       rake
+      totalRake
       startingStack
       hasGuarantee
       guaranteeAmount
+      guaranteeOverlay
+      guaranteeSurplus
       playersRemaining
       tournamentStructureId
       cashStructureId
@@ -17461,9 +17671,12 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17549,9 +17762,12 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17627,9 +17843,12 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17689,9 +17908,12 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17835,9 +18057,12 @@ export const cashStructuresByRakeStructureId = /* GraphQL */ `query CashStructur
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -18026,9 +18251,12 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -18514,9 +18742,12 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -19430,9 +19661,12 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -19795,9 +20029,12 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -20368,9 +20605,12 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -20762,9 +21002,12 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId

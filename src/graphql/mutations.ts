@@ -17,15 +17,20 @@ export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData($
     registrationStatus
     gameVariant
     prizepool
+    revenueByBuyIns
     totalEntries
     totalRebuys
     totalAddons
     totalDuration
     gameTags
     buyIn
+    rake
+    totalRake
     startingStack
     hasGuarantee
     guaranteeAmount
+    guaranteeOverlay
+    guaranteeSurplus
     levels {
       levelNumber
       durationMinutes
@@ -124,9 +129,12 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
     tournamentType
     buyIn
     rake
+    totalRake
     startingStack
     hasGuarantee
     guaranteeAmount
+    guaranteeOverlay
+    guaranteeSurplus
     playersRemaining
     tournamentStructureId
     cashStructureId
@@ -266,9 +274,12 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -440,9 +451,12 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -580,9 +594,12 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -689,9 +706,12 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -1140,9 +1160,12 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -1432,9 +1455,12 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -1724,9 +1750,12 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -1978,9 +2007,12 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -2127,9 +2159,12 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -2539,9 +2574,12 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -2688,9 +2726,12 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -3100,9 +3141,12 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -3249,9 +3293,12 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -3700,9 +3747,12 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -3993,9 +4043,12 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -4286,9 +4339,12 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -4462,9 +4518,12 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
     tournamentType
     buyIn
     rake
+    totalRake
     startingStack
     hasGuarantee
     guaranteeAmount
+    guaranteeOverlay
+    guaranteeSurplus
     playersRemaining
     tournamentStructureId
     cashStructureId
@@ -4604,9 +4663,12 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -4778,9 +4840,12 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -4918,9 +4983,12 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -5027,9 +5095,12 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -5221,9 +5292,12 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
     tournamentType
     buyIn
     rake
+    totalRake
     startingStack
     hasGuarantee
     guaranteeAmount
+    guaranteeOverlay
+    guaranteeSurplus
     playersRemaining
     tournamentStructureId
     cashStructureId
@@ -5363,9 +5437,12 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -5537,9 +5614,12 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -5677,9 +5757,12 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -5786,9 +5869,12 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -5980,9 +6066,12 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
     tournamentType
     buyIn
     rake
+    totalRake
     startingStack
     hasGuarantee
     guaranteeAmount
+    guaranteeOverlay
+    guaranteeSurplus
     playersRemaining
     tournamentStructureId
     cashStructureId
@@ -6122,9 +6211,12 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -6296,9 +6388,12 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -6436,9 +6531,12 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -6545,9 +6643,12 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -6753,9 +6854,12 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -6953,9 +7057,12 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -7153,9 +7260,12 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -7371,9 +7481,12 @@ export const createRakeStructure = /* GraphQL */ `mutation CreateRakeStructure(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -7475,9 +7588,12 @@ export const updateRakeStructure = /* GraphQL */ `mutation UpdateRakeStructure(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -7579,9 +7695,12 @@ export const deleteRakeStructure = /* GraphQL */ `mutation DeleteRakeStructure(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -7709,9 +7828,12 @@ export const createCashStructure = /* GraphQL */ `mutation CreateCashStructure(
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -7953,9 +8075,12 @@ export const updateCashStructure = /* GraphQL */ `mutation UpdateCashStructure(
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -8197,9 +8322,12 @@ export const deleteCashStructure = /* GraphQL */ `mutation DeleteCashStructure(
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -8508,9 +8636,12 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -9509,9 +9640,12 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -10510,9 +10644,12 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -11472,9 +11609,12 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -11970,9 +12110,12 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -12468,9 +12611,12 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -12958,9 +13104,12 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -13462,9 +13611,12 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -13716,9 +13868,12 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -14220,9 +14375,12 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -14474,9 +14632,12 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -14978,9 +15139,12 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -15233,9 +15397,12 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -15724,9 +15891,12 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16215,9 +16385,12 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16636,9 +16809,12 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
       tournamentType
       buyIn
       rake
+      totalRake
       startingStack
       hasGuarantee
       guaranteeAmount
+      guaranteeOverlay
+      guaranteeSurplus
       playersRemaining
       tournamentStructureId
       cashStructureId
@@ -16731,9 +16907,12 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16819,9 +16998,12 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16897,9 +17079,12 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16959,9 +17144,12 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17110,9 +17298,12 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17531,9 +17722,12 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
       tournamentType
       buyIn
       rake
+      totalRake
       startingStack
       hasGuarantee
       guaranteeAmount
+      guaranteeOverlay
+      guaranteeSurplus
       playersRemaining
       tournamentStructureId
       cashStructureId
@@ -17626,9 +17820,12 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17714,9 +17911,12 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17792,9 +17992,12 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17854,9 +18057,12 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -18005,9 +18211,12 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -18426,9 +18635,12 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
       tournamentType
       buyIn
       rake
+      totalRake
       startingStack
       hasGuarantee
       guaranteeAmount
+      guaranteeOverlay
+      guaranteeSurplus
       playersRemaining
       tournamentStructureId
       cashStructureId
@@ -18521,9 +18733,12 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -18609,9 +18824,12 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -18687,9 +18905,12 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -18749,9 +18970,12 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -18900,9 +19124,12 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -19452,9 +19679,12 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -19938,9 +20168,12 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -20424,9 +20657,12 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -21415,9 +21651,12 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -21977,9 +22216,12 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -22539,9 +22781,12 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId

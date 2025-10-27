@@ -282,9 +282,12 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -571,9 +574,12 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -860,9 +866,12 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -1111,9 +1120,12 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -1260,9 +1272,12 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -1669,9 +1684,12 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -1818,9 +1836,12 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -2227,9 +2248,12 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -2376,9 +2400,12 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -2826,9 +2853,12 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -3118,9 +3148,12 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -3410,9 +3443,12 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -3583,9 +3619,12 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
     tournamentType
     buyIn
     rake
+    totalRake
     startingStack
     hasGuarantee
     guaranteeAmount
+    guaranteeOverlay
+    guaranteeSurplus
     playersRemaining
     tournamentStructureId
     cashStructureId
@@ -3725,9 +3764,12 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -3899,9 +3941,12 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -4039,9 +4084,12 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -4148,9 +4196,12 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -4339,9 +4390,12 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
     tournamentType
     buyIn
     rake
+    totalRake
     startingStack
     hasGuarantee
     guaranteeAmount
+    guaranteeOverlay
+    guaranteeSurplus
     playersRemaining
     tournamentStructureId
     cashStructureId
@@ -4481,9 +4535,12 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -4655,9 +4712,12 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -4795,9 +4855,12 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -4904,9 +4967,12 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -5095,9 +5161,12 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
     tournamentType
     buyIn
     rake
+    totalRake
     startingStack
     hasGuarantee
     guaranteeAmount
+    guaranteeOverlay
+    guaranteeSurplus
     playersRemaining
     tournamentStructureId
     cashStructureId
@@ -5237,9 +5306,12 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -5411,9 +5483,12 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -5551,9 +5626,12 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -5660,9 +5738,12 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -5867,9 +5948,12 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -6066,9 +6150,12 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -6265,9 +6352,12 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -6482,9 +6572,12 @@ export const onCreateRakeStructure = /* GraphQL */ `subscription OnCreateRakeStr
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -6585,9 +6678,12 @@ export const onUpdateRakeStructure = /* GraphQL */ `subscription OnUpdateRakeStr
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -6688,9 +6784,12 @@ export const onDeleteRakeStructure = /* GraphQL */ `subscription OnDeleteRakeStr
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -6817,9 +6916,12 @@ export const onCreateCashStructure = /* GraphQL */ `subscription OnCreateCashStr
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -7060,9 +7162,12 @@ export const onUpdateCashStructure = /* GraphQL */ `subscription OnUpdateCashStr
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -7303,9 +7408,12 @@ export const onDeleteCashStructure = /* GraphQL */ `subscription OnDeleteCashStr
         tournamentType
         buyIn
         rake
+        totalRake
         startingStack
         hasGuarantee
         guaranteeAmount
+        guaranteeOverlay
+        guaranteeSurplus
         playersRemaining
         tournamentStructureId
         cashStructureId
@@ -7611,9 +7719,12 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -8609,9 +8720,12 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -9607,9 +9721,12 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -10568,9 +10685,12 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -11065,9 +11185,12 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -11562,9 +11685,12 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -12051,9 +12177,12 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -12555,9 +12684,12 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -12808,9 +12940,12 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -13312,9 +13447,12 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -13565,9 +13703,12 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -14069,9 +14210,12 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
           tournamentType
           buyIn
           rake
+          totalRake
           startingStack
           hasGuarantee
           guaranteeAmount
+          guaranteeOverlay
+          guaranteeSurplus
           playersRemaining
           tournamentStructureId
           cashStructureId
@@ -14323,9 +14467,12 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -14813,9 +14960,12 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -15303,9 +15453,12 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -15723,9 +15876,12 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
       tournamentType
       buyIn
       rake
+      totalRake
       startingStack
       hasGuarantee
       guaranteeAmount
+      guaranteeOverlay
+      guaranteeSurplus
       playersRemaining
       tournamentStructureId
       cashStructureId
@@ -15818,9 +15974,12 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -15906,9 +16065,12 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -15984,9 +16146,12 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16046,9 +16211,12 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16197,9 +16365,12 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16617,9 +16788,12 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
       tournamentType
       buyIn
       rake
+      totalRake
       startingStack
       hasGuarantee
       guaranteeAmount
+      guaranteeOverlay
+      guaranteeSurplus
       playersRemaining
       tournamentStructureId
       cashStructureId
@@ -16712,9 +16886,12 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16800,9 +16977,12 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16878,9 +17058,12 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -16940,9 +17123,12 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17091,9 +17277,12 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17511,9 +17700,12 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
       tournamentType
       buyIn
       rake
+      totalRake
       startingStack
       hasGuarantee
       guaranteeAmount
+      guaranteeOverlay
+      guaranteeSurplus
       playersRemaining
       tournamentStructureId
       cashStructureId
@@ -17606,9 +17798,12 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17694,9 +17889,12 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17772,9 +17970,12 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17834,9 +18035,12 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -17985,9 +18189,12 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -18533,9 +18740,12 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -19018,9 +19228,12 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -19503,9 +19716,12 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -20490,9 +20706,12 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -21051,9 +21270,12 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
@@ -21612,9 +21834,12 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             tournamentType
             buyIn
             rake
+            totalRake
             startingStack
             hasGuarantee
             guaranteeAmount
+            guaranteeOverlay
+            guaranteeSurplus
             playersRemaining
             tournamentStructureId
             cashStructureId
