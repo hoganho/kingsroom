@@ -342,6 +342,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -589,6 +590,7 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -763,6 +765,7 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -935,6 +938,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -1087,6 +1091,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
         buyIn
         rake
         totalRake
+        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
@@ -1531,6 +1536,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -1823,6 +1829,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -2113,6 +2120,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -2364,6 +2372,7 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -2539,6 +2548,7 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -2633,6 +2643,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
     buyIn
     rake
     totalRake
+    profitLoss
     startingStack
     hasGuarantee
     guaranteeAmount
@@ -2778,6 +2789,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -2955,6 +2967,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -3098,6 +3111,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -3210,6 +3224,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -3406,6 +3421,7 @@ export const listGames = /* GraphQL */ `query ListGames(
       buyIn
       rake
       totalRake
+      profitLoss
       startingStack
       hasGuarantee
       guaranteeAmount
@@ -3504,6 +3520,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -3595,6 +3612,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -3676,6 +3694,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -3741,6 +3760,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -3844,6 +3864,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
       buyIn
       rake
       totalRake
+      profitLoss
       startingStack
       hasGuarantee
       guaranteeAmount
@@ -3942,6 +3963,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -4033,6 +4055,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -4114,6 +4137,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -4179,6 +4203,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -4285,6 +4310,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
         buyIn
         rake
         totalRake
+        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
@@ -4494,6 +4520,7 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -4631,6 +4658,7 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -4775,6 +4803,7 @@ export const getRakeStructure = /* GraphQL */ `query GetRakeStructure($id: ID!) 
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -5039,6 +5068,7 @@ export const getCashStructure = /* GraphQL */ `query GetCashStructure($id: ID!) 
         buyIn
         rake
         totalRake
+        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
@@ -5271,6 +5301,7 @@ export const listCashStructures = /* GraphQL */ `query ListCashStructures(
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -5435,6 +5466,7 @@ export const syncCashStructures = /* GraphQL */ `query SyncCashStructures(
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -5672,6 +5704,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -6619,6 +6652,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -7108,6 +7142,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -7603,6 +7638,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -8555,6 +8591,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -9062,6 +9099,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -9502,6 +9540,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -9866,6 +9905,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -10039,6 +10079,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -10912,6 +10953,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
       buyIn
       rake
       totalRake
+      profitLoss
       startingStack
       hasGuarantee
       guaranteeAmount
@@ -11010,6 +11052,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -11101,6 +11144,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -11182,6 +11226,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -11247,6 +11292,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -11401,6 +11447,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -11827,6 +11874,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
         buyIn
         rake
         totalRake
+        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
@@ -12222,6 +12270,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
         buyIn
         rake
         totalRake
+        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
@@ -12756,6 +12805,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -14082,6 +14132,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -15663,6 +15714,7 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -15880,6 +15932,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -16136,6 +16189,7 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -16245,6 +16299,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
       buyIn
       rake
       totalRake
+      profitLoss
       startingStack
       hasGuarantee
       guaranteeAmount
@@ -16343,6 +16398,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -16434,6 +16490,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -16515,6 +16572,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -16580,6 +16638,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -16688,6 +16747,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
       buyIn
       rake
       totalRake
+      profitLoss
       startingStack
       hasGuarantee
       guaranteeAmount
@@ -16786,6 +16846,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -16877,6 +16938,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -16958,6 +17020,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -17023,6 +17086,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -17131,6 +17195,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
       buyIn
       rake
       totalRake
+      profitLoss
       startingStack
       hasGuarantee
       guaranteeAmount
@@ -17229,6 +17294,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -17320,6 +17386,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -17401,6 +17468,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -17466,6 +17534,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -17574,6 +17643,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
       buyIn
       rake
       totalRake
+      profitLoss
       startingStack
       hasGuarantee
       guaranteeAmount
@@ -17672,6 +17742,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -17763,6 +17834,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -17844,6 +17916,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -17909,6 +17982,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -18058,6 +18132,7 @@ export const cashStructuresByRakeStructureId = /* GraphQL */ `query CashStructur
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -18252,6 +18327,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -18743,6 +18819,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -19662,6 +19739,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -20030,6 +20108,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -20606,6 +20685,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
         buyIn
         rake
         totalRake
+        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
@@ -21003,6 +21083,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
         buyIn
         rake
         totalRake
+        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount

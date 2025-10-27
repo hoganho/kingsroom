@@ -816,6 +816,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "profitLoss": {
+                    "name": "profitLoss",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "startingStack": {
                     "name": "startingStack",
                     "isArray": false,
@@ -3510,6 +3517,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "tournamentType": {
+                    "name": "tournamentType",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "prizepool": {
                     "name": "prizepool",
                     "isArray": false,
@@ -3519,6 +3533,13 @@ export const schema = {
                 },
                 "revenueByBuyIns": {
                     "name": "revenueByBuyIns",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "profitLoss": {
+                    "name": "profitLoss",
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
@@ -4014,5 +4035,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "ff70ec630096414631d5d3db220ad2ae"
+    "version": "3085d231430a20f3dd7b4d780a83b6bb"
 };

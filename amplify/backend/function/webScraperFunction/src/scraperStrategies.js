@@ -309,11 +309,17 @@ const defaultStrategy = {
     calculateGuaranteeMetrics(ctx) {
         // Step 1: Check if there is a guarantee. If not, we can't calculate anything.
         if (!ctx.data.hasGuarantee) {
+            // ✅ Log why the calculation is being skipped
+            console.log('[DEBUG-GUARANTEE] Skipping metrics: Game has no guarantee.');
             return; 
         }
 
         const prizepool = ctx.data.prizepool || 0;
         const guarantee = ctx.data.guaranteeAmount || 0;
+
+        // ✅ Log the inputs being used for the calculation
+        console.log('[DEBUG-GUARANTEE] Calculating metrics...');
+        console.log(`[DEBUG-GUARANTEE] -> Prizepool: ${prizepool}, Guarantee: ${guarantee}`);
 
         // Step 2: Ensure we have the necessary numbers to work with.
         if (prizepool <= 0 || guarantee <= 0) {
@@ -322,16 +328,22 @@ const defaultStrategy = {
         }
 
         const difference = prizepool - guarantee;
+        // ✅ Log the calculated difference
+        console.log(`[DEBUG-GUARANTEE] -> Difference (Prizepool - Guarantee): ${difference}`);
 
         // Step 3: Determine if it's a surplus or overlay.
         if (difference > 0) {
             // The prizepool exceeded the guarantee.
             ctx.add('guaranteeSurplus', difference);
             ctx.add('guaranteeOverlay', 0);
+            // ✅ Log the final result
+            console.log(`[DEBUG-GUARANTEE] -> Result: Surplus=${difference}, Overlay=0`);
         } else {
             // The prizepool did not meet the guarantee.
             ctx.add('guaranteeSurplus', 0);
             ctx.add('guaranteeOverlay', Math.abs(difference)); // Overlay is a positive number
+            // ✅ Log the final result
+            console.log(`[DEBUG-GUARANTEE] -> Result: Surplus=0, Overlay=${Math.abs(difference)}`);
         }
     },
 
@@ -344,21 +356,56 @@ const defaultStrategy = {
 
         // Step 1: Check if the rake amount is known.
         if (rake === undefined || rake === null || rake <= 0) {
-            console.log('[DEBUG-RAKE] Skipping total rake calculation: Rake is unknown.');
+            console.log('[DEBUG-RAKE] Skipping total rake calculation: Rake is unknown or zero.');
             return;
         }
 
-        // Step 2: Get the number of transactions that include rake.
-        // Add-ons typically do not have a rake component.
         const entries = ctx.data.totalEntries || 0;
         const rebuys = ctx.data.totalRebuys || 0;
+
+        // ✅ Log the inputs being used for the calculation
+        console.log('[DEBUG-RAKE] Calculating total rake...');
+        console.log(`[DEBUG-RAKE] -> Rake per transaction: ${rake}, Entries: ${entries}, Rebuys: ${rebuys}`);
+        
+        // Step 2: Get the number of transactions that include rake.
+        // Add-ons typically do not have a rake component.
         const totalRakedTransactions = entries + rebuys;
+        console.log(`[DEBUG-RAKE] -> Total Raked Transactions: ${totalRakedTransactions}`);
         
         // Step 3: Calculate and add the total rake.
         const totalRake = totalRakedTransactions * rake;
         ctx.add('totalRake', totalRake);
+        // ✅ Log the final result
+        console.log(`[DEBUG-RAKE] -> Final Total Rake: ${totalRake}`);
     },
 
+    /**
+     * Calculates the profit or loss for the game operator.
+     * This is determined by revenueByBuyIns - prizepool.
+     */
+    calculateProfitLoss(ctx) {
+        const revenue = ctx.data.revenueByBuyIns;
+        const prizepool = ctx.data.prizepool;
+
+        // Step 1: Check if the necessary values are available to calculate.
+        if (revenue === undefined || revenue === null || prizepool === undefined || prizepool === null) {
+            console.log('[DEBUG-PROFIT] Skipping profit/loss calculation: Missing revenue or prizepool data.');
+            return;
+        }
+
+        // Log the inputs for debugging.
+        console.log('[DEBUG-PROFIT] Calculating profit/loss...');
+        console.log(`[DEBUG-PROFIT] -> Revenue By Buy-Ins: ${revenue}`);
+        console.log(`[DEBUG-PROFIT] -> Prizepool: ${prizepool}`);
+
+        // Step 2: Perform the calculation.
+        const profitLoss = revenue - prizepool;
+        
+        // Step 3: Add the result to the scraped data and log the final value.
+        ctx.add('profitLoss', profitLoss);
+        console.log(`[DEBUG-PROFIT] -> Final Profit/Loss: ${profitLoss}`);
+    },
+    
     getSeatingAndPlayersRemaining(ctx) {
         const seating = [];
         // This selector correctly finds the "Entries" table which lists players still in the game.

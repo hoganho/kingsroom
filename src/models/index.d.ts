@@ -157,8 +157,10 @@ type EagerScrapedGameData = {
   readonly status?: string | null;
   readonly registrationStatus?: string | null;
   readonly gameVariant?: string | null;
+  readonly tournamentType?: string | null;
   readonly prizepool?: number | null;
   readonly revenueByBuyIns?: number | null;
+  readonly profitLoss?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
@@ -192,8 +194,10 @@ type LazyScrapedGameData = {
   readonly status?: string | null;
   readonly registrationStatus?: string | null;
   readonly gameVariant?: string | null;
+  readonly tournamentType?: string | null;
   readonly prizepool?: number | null;
   readonly revenueByBuyIns?: number | null;
+  readonly profitLoss?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
@@ -629,6 +633,7 @@ type EagerGame = {
   readonly buyIn?: number | null;
   readonly rake?: number | null;
   readonly totalRake?: number | null;
+  readonly profitLoss?: number | null;
   readonly startingStack?: number | null;
   readonly hasGuarantee?: boolean | null;
   readonly guaranteeAmount?: number | null;
@@ -678,6 +683,7 @@ type LazyGame = {
   readonly buyIn?: number | null;
   readonly rake?: number | null;
   readonly totalRake?: number | null;
+  readonly profitLoss?: number | null;
   readonly startingStack?: number | null;
   readonly hasGuarantee?: boolean | null;
   readonly guaranteeAmount?: number | null;

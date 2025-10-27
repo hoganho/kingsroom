@@ -283,6 +283,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -575,6 +576,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -867,6 +869,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -1121,6 +1124,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -1273,6 +1277,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
         buyIn
         rake
         totalRake
+        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
@@ -1685,6 +1690,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -1837,6 +1843,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
         buyIn
         rake
         totalRake
+        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
@@ -2249,6 +2256,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -2401,6 +2409,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
         buyIn
         rake
         totalRake
+        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
@@ -2854,6 +2863,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -3149,6 +3159,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -3444,6 +3455,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -3620,6 +3632,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
     buyIn
     rake
     totalRake
+    profitLoss
     startingStack
     hasGuarantee
     guaranteeAmount
@@ -3765,6 +3778,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -3942,6 +3956,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -4085,6 +4100,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -4197,6 +4213,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -4391,6 +4408,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
     buyIn
     rake
     totalRake
+    profitLoss
     startingStack
     hasGuarantee
     guaranteeAmount
@@ -4536,6 +4554,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -4713,6 +4732,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -4856,6 +4876,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -4968,6 +4989,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -5162,6 +5184,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
     buyIn
     rake
     totalRake
+    profitLoss
     startingStack
     hasGuarantee
     guaranteeAmount
@@ -5307,6 +5330,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -5484,6 +5508,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -5627,6 +5652,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -5739,6 +5765,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -5949,6 +5976,7 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
         buyIn
         rake
         totalRake
+        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
@@ -6151,6 +6179,7 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
         buyIn
         rake
         totalRake
+        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
@@ -6353,6 +6382,7 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
         buyIn
         rake
         totalRake
+        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
@@ -6573,6 +6603,7 @@ export const onCreateRakeStructure = /* GraphQL */ `subscription OnCreateRakeStr
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -6679,6 +6710,7 @@ export const onUpdateRakeStructure = /* GraphQL */ `subscription OnUpdateRakeStr
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -6785,6 +6817,7 @@ export const onDeleteRakeStructure = /* GraphQL */ `subscription OnDeleteRakeStr
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -6917,6 +6950,7 @@ export const onCreateCashStructure = /* GraphQL */ `subscription OnCreateCashStr
         buyIn
         rake
         totalRake
+        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
@@ -7163,6 +7197,7 @@ export const onUpdateCashStructure = /* GraphQL */ `subscription OnUpdateCashStr
         buyIn
         rake
         totalRake
+        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
@@ -7409,6 +7444,7 @@ export const onDeleteCashStructure = /* GraphQL */ `subscription OnDeleteCashStr
         buyIn
         rake
         totalRake
+        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
@@ -7720,6 +7756,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -8721,6 +8758,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -9722,6 +9760,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -10686,6 +10725,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -11186,6 +11226,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -11686,6 +11727,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -12178,6 +12220,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -12685,6 +12728,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -12941,6 +12985,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -13448,6 +13493,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -13704,6 +13750,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -14211,6 +14258,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
           buyIn
           rake
           totalRake
+          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
@@ -14468,6 +14516,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -14961,6 +15010,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -15454,6 +15504,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -15877,6 +15928,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
       buyIn
       rake
       totalRake
+      profitLoss
       startingStack
       hasGuarantee
       guaranteeAmount
@@ -15975,6 +16027,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -16066,6 +16119,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -16147,6 +16201,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -16212,6 +16267,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -16366,6 +16422,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -16789,6 +16846,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
       buyIn
       rake
       totalRake
+      profitLoss
       startingStack
       hasGuarantee
       guaranteeAmount
@@ -16887,6 +16945,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -16978,6 +17037,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -17059,6 +17119,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -17124,6 +17185,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -17278,6 +17340,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -17701,6 +17764,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
       buyIn
       rake
       totalRake
+      profitLoss
       startingStack
       hasGuarantee
       guaranteeAmount
@@ -17799,6 +17863,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -17890,6 +17955,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -17971,6 +18037,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -18036,6 +18103,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -18190,6 +18258,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -18741,6 +18810,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -19229,6 +19299,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -19717,6 +19788,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -20707,6 +20779,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -21271,6 +21344,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
@@ -21835,6 +21909,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             buyIn
             rake
             totalRake
+            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount

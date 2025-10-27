@@ -1,5 +1,7 @@
 // Updated type definitions to match the refactored schema
 
+import { NumberValue } from "@aws-sdk/lib-dynamodb";
+
 export type TournamentLevelData = {
     levelNumber: number;
     durationMinutes: number;
@@ -79,15 +81,19 @@ export type GameData = {
     gameTags?: (string | null)[] | null;
     seriesName?: string | null;
     revenueByBuyIns?: number | null;
-    
+    profitLoss?: number | null;
+
     // Tournament-specific fields (now on Game model)
     tournamentType?: 'FREEZEOUT' | 'REBUY' | 'SATELLITE' | 'DEEPSTACK' | null;
     buyIn?: number | null;
     rake?: number | null;
+    totalRake?: number | null;
     startingStack?: number | null;
     hasGuarantee: boolean;
     guaranteeAmount?: number | null;
-    
+    guaranteeOverlay?: number | null;
+    guaranteeSurplus?: number | null;
+
     // Blind structure (embedded)
     levels: TournamentLevelData[];
     
@@ -173,10 +179,14 @@ export interface GameDataInput {
     tournamentType?: 'FREEZEOUT' | 'REBUY' | 'SATELLITE' | 'DEEPSTACK';
     buyIn?: number;
     rake?: number;
+    totalRake: number;
+    profitLoss: number;
     startingStack?: number;
     hasGuarantee?: boolean;
     guaranteeAmount?: number;
-    
+    guaranteeOverlay?: number;
+    guaranteeSurplus?: number;
+
     // Blind levels
     levels?: TournamentLevelInput[];
     

@@ -135,8 +135,10 @@ type ScrapedGameData {
     status: String
     registrationStatus: String
     gameVariant: String
+    tournamentType: String
     prizepool: Float
     revenueByBuyIns: Float
+    profitLoss: Float
     totalEntries: Int
     totalRebuys: Int
     totalAddons: Int
@@ -324,6 +326,7 @@ type Game @model @auth(rules: [{ allow: private }]) {
     buyIn: Float
     rake: Float
     totalRake: Float
+    profitLoss: Float
     startingStack: Int
     hasGuarantee: Boolean
     guaranteeAmount: Float
