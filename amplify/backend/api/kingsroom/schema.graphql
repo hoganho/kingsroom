@@ -87,6 +87,7 @@ type Asset @model @auth(rules: [{ allow: private }]) {
 # =======================================
 type Venue @model @auth(rules: [{ allow: private }]) {
   id: ID!
+  venueNumber: Int! @index(name: "byVenueNumber", sortKeyFields: ["name"])
   name: String!
   address: String
   city: String

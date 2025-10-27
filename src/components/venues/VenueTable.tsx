@@ -26,7 +26,8 @@ export const VenueTable: React.FC<VenueTableProps> = ({ venues, loading, onEdit,
       <table className="min-w-full divide-y divide-gray-300">
         <thead className="bg-gray-50">
           <tr>
-            <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Name</th>
+            <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">ID</th>
+            <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Name</th>
             <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Address</th>
             <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">City</th>
             <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
@@ -37,7 +38,10 @@ export const VenueTable: React.FC<VenueTableProps> = ({ venues, loading, onEdit,
         <tbody className="divide-y divide-gray-200 bg-white">
           {venues.map((venue) => (
             <tr key={venue.id} className="hover:bg-gray-50">
-              <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{venue.name}</td>
+              <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-bold text-gray-900 sm:pl-6">
+                {venue.venueNumber !== undefined ? venue.venueNumber : '-'}
+              </td>
+              <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">{venue.name}</td>
               <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{venue.address || 'N/A'}</td>
               <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{venue.city || 'N/A'}</td>
               <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6 space-x-4">

@@ -314,6 +314,13 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "venueNumber": {
+                    "name": "venueNumber",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
                 "name": {
                     "name": "name",
                     "isArray": false,
@@ -438,6 +445,16 @@ export const schema = {
                 {
                     "type": "model",
                     "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byVenueNumber",
+                        "fields": [
+                            "venueNumber",
+                            "name"
+                        ]
+                    }
                 },
                 {
                     "type": "auth",
@@ -3930,5 +3947,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "01c4d7d183d6d43fd06ef8770a525e4b"
+    "version": "e7763a16c39edb0fc77017a5f60a0b82"
 };

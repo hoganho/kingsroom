@@ -127,6 +127,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
     cashStructureId
     venue {
       id
+      venueNumber
       name
       address
       city
@@ -142,6 +143,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
         gameNights
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -203,6 +205,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           venueId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -263,6 +266,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -352,6 +356,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -433,6 +438,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -571,6 +577,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -678,6 +685,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -985,6 +993,7 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
     venueId
     venue {
       id
+      venueNumber
       name
       address
       city
@@ -1000,6 +1009,7 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
         gameNights
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -1061,6 +1071,7 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
           venueId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -1121,6 +1132,7 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -1210,6 +1222,7 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -1267,6 +1280,7 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
     venueId
     venue {
       id
+      venueNumber
       name
       address
       city
@@ -1282,6 +1296,7 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
         gameNights
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -1343,6 +1358,7 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
           venueId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -1403,6 +1419,7 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -1492,6 +1509,7 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -1549,6 +1567,7 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
     venueId
     venue {
       id
+      venueNumber
       name
       address
       city
@@ -1564,6 +1583,7 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
         gameNights
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -1625,6 +1645,7 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
           venueId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -1685,6 +1706,7 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -1774,6 +1796,7 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -1823,6 +1846,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
 ) {
   createVenue(input: $input, condition: $condition) {
     id
+    venueNumber
     name
     address
     city
@@ -1838,6 +1862,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
       gameNights
       venue {
         id
+        venueNumber
         name
         address
         city
@@ -1853,6 +1878,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           gameNights
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -1985,6 +2011,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
         venueId
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -2076,6 +2103,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
         cashStructureId
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -2299,6 +2327,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
         }
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -2372,6 +2401,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
 ) {
   updateVenue(input: $input, condition: $condition) {
     id
+    venueNumber
     name
     address
     city
@@ -2387,6 +2417,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
       gameNights
       venue {
         id
+        venueNumber
         name
         address
         city
@@ -2402,6 +2433,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           gameNights
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -2534,6 +2566,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
         venueId
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -2625,6 +2658,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
         cashStructureId
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -2848,6 +2882,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
         }
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -2921,6 +2956,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
 ) {
   deleteVenue(input: $input, condition: $condition) {
     id
+    venueNumber
     name
     address
     city
@@ -2936,6 +2972,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
       gameNights
       venue {
         id
+        venueNumber
         name
         address
         city
@@ -2951,6 +2988,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           gameNights
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -3083,6 +3121,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
         venueId
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -3174,6 +3213,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
         cashStructureId
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -3397,6 +3437,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
         }
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -3479,6 +3520,7 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
     gameNights
     venue {
       id
+      venueNumber
       name
       address
       city
@@ -3494,6 +3536,7 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
         gameNights
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -3555,6 +3598,7 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
           venueId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -3615,6 +3659,7 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -3704,6 +3749,7 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -3762,6 +3808,7 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
     gameNights
     venue {
       id
+      venueNumber
       name
       address
       city
@@ -3777,6 +3824,7 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
         gameNights
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -3838,6 +3886,7 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
           venueId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -3898,6 +3947,7 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -3987,6 +4037,7 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -4045,6 +4096,7 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
     gameNights
     venue {
       id
+      venueNumber
       name
       address
       city
@@ -4060,6 +4112,7 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
         gameNights
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -4121,6 +4174,7 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
           venueId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -4181,6 +4235,7 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -4270,6 +4325,7 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -4353,6 +4409,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
     cashStructureId
     venue {
       id
+      venueNumber
       name
       address
       city
@@ -4368,6 +4425,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
         gameNights
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -4429,6 +4487,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           venueId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -4489,6 +4548,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -4578,6 +4638,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -4659,6 +4720,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -4797,6 +4859,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -4904,6 +4967,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -5096,6 +5160,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
     cashStructureId
     venue {
       id
+      venueNumber
       name
       address
       city
@@ -5111,6 +5176,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
         gameNights
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -5172,6 +5238,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           venueId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -5232,6 +5299,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -5321,6 +5389,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -5402,6 +5471,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -5540,6 +5610,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -5647,6 +5718,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -5839,6 +5911,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
     cashStructureId
     venue {
       id
+      venueNumber
       name
       address
       city
@@ -5854,6 +5927,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
         gameNights
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -5915,6 +5989,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           venueId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -5975,6 +6050,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -6064,6 +6140,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -6145,6 +6222,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -6283,6 +6361,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -6390,6 +6469,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -6596,6 +6676,7 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
         cashStructureId
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -6794,6 +6875,7 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
         cashStructureId
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -6992,6 +7074,7 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
         cashStructureId
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -7546,6 +7629,7 @@ export const createCashStructure = /* GraphQL */ `mutation CreateCashStructure(
         cashStructureId
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -7788,6 +7872,7 @@ export const updateCashStructure = /* GraphQL */ `mutation UpdateCashStructure(
         cashStructureId
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -8030,6 +8115,7 @@ export const deleteCashStructure = /* GraphQL */ `mutation DeleteCashStructure(
         cashStructureId
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -8339,6 +8425,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -8890,6 +8977,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
         }
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -9336,6 +9424,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -9887,6 +9976,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
         }
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -10333,6 +10423,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -10884,6 +10975,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
         }
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -11514,6 +11606,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -12010,6 +12103,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -12506,6 +12600,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -12994,6 +13089,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -13131,6 +13227,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
     }
     venue {
       id
+      venueNumber
       name
       address
       city
@@ -13146,6 +13243,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
         gameNights
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -13207,6 +13305,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           venueId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -13267,6 +13366,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -13356,6 +13456,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -13740,6 +13841,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -13877,6 +13979,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
     }
     venue {
       id
+      venueNumber
       name
       address
       city
@@ -13892,6 +13995,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
         gameNights
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -13953,6 +14057,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           venueId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -14013,6 +14118,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -14102,6 +14208,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -14486,6 +14593,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -14623,6 +14731,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
     }
     venue {
       id
+      venueNumber
       name
       address
       city
@@ -14638,6 +14747,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
         gameNights
         venue {
           id
+          venueNumber
           name
           address
           city
@@ -14699,6 +14809,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           venueId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -14759,6 +14870,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           cashStructureId
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -14848,6 +14960,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -15233,6 +15346,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -15722,6 +15836,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -16211,6 +16326,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -16407,6 +16523,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
       cashStructureId
       venue {
         id
+        venueNumber
         name
         address
         city
@@ -16422,6 +16539,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
           gameNights
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -17100,6 +17218,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -17296,6 +17415,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
       cashStructureId
       venue {
         id
+        venueNumber
         name
         address
         city
@@ -17311,6 +17431,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
           gameNights
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -17989,6 +18110,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -18185,6 +18307,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
       cashStructureId
       venue {
         id
+        venueNumber
         name
         address
         city
@@ -18200,6 +18323,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
           gameNights
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -18878,6 +19002,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -19428,6 +19553,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -19912,6 +20038,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -20396,6 +20523,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -21385,6 +21513,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -21945,6 +22074,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
           }
           venue {
             id
+            venueNumber
             name
             address
             city
@@ -22505,6 +22635,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
           }
           venue {
             id
+            venueNumber
             name
             address
             city

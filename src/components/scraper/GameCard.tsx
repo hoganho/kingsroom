@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
+import { generateClient } from 'aws-amplify/api';
+import { listVenues } from '../../graphql/queries';
 import type { GameState, GameData } from '../../types/game.ts';
+import * as APITypes from '../../API';
 import { getStatusColor } from './helpers.ts';
 import { HtmlModal } from './HtmlModal.tsx';
 import { SaveConfirmationModal } from './SaveConfirmationModal.tsx';
@@ -8,17 +11,47 @@ import { StructureInfo } from './StructureInfo.tsx';
 import { POLLING_INTERVAL } from '../../hooks/useGameTracker.ts';
 import { useGameContext } from '../../contexts/GameContext.tsx';
 
+type Venue = APITypes.Venue;
+
 export const GameCard: React.FC<{ 
     game: GameState; 
     onSave: (id: string, venueId: string) => void; 
     onRemove: (id: string) => void;
 }> = ({ game, onSave, onRemove }) => {
+    const client = generateClient();
     const { dispatch } = useGameContext();
     const [venueId, setVenueId] = useState('');
     const [showHtmlModal, setShowHtmlModal] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [countdown, setCountdown] = useState('');
     const [doNotScrape, setDoNotScrape] = useState(game.data?.doNotScrape ?? false);
+    const [venues, setVenues] = useState<Venue[]>([]);
+    const [venuesLoading, setVenuesLoading] = useState(false);
+
+    // Fetch venues from database
+    useEffect(() => {
+        const fetchVenues = async () => {
+            setVenuesLoading(true);
+            try {
+                const response = await client.graphql({ query: listVenues });
+                const venueItems = (response.data.listVenues.items as Venue[])
+                    .filter(Boolean)
+                    .sort((a, b) => {
+                        // Sort by venueNumber
+                        if (a.venueNumber !== undefined && b.venueNumber !== undefined) {
+                            return a.venueNumber - b.venueNumber;
+                        }
+                        return a.name.localeCompare(b.name);
+                    });
+                setVenues(venueItems);
+            } catch (err) {
+                console.error('Error fetching venues:', err);
+            } finally {
+                setVenuesLoading(false);
+            }
+        };
+        fetchVenues();
+    }, []);
 
     useEffect(() => {
         setDoNotScrape(game.data?.doNotScrape ?? false);
@@ -86,6 +119,13 @@ export const GameCard: React.FC<{
                 ...(isChecked && { autoRefresh: false })
             }
         });
+    };
+
+    // Format venue for display
+    const formatVenueOption = (venue: Venue) => {
+        return venue.venueNumber !== undefined 
+            ? `${venue.venueNumber} - ${venue.name}`
+            : venue.name;
     };
 
     return (
@@ -177,8 +217,6 @@ export const GameCard: React.FC<{
                 )}
                 
                 {(game.status === 'READY_TO_SAVE' || game.status === 'DONE' || game.status === 'SAVING') && (
-                    // ✅ FIX: Removed the redundant `PlayerResults` component here
-                    // ✅ FIX: Removed the `missingFields` prop as it's no longer needed
                     <ScraperReport data={game.data} />
                 )}
                 
@@ -193,14 +231,27 @@ export const GameCard: React.FC<{
                 )}
 
                 <div className="flex space-x-2 pt-2 items-center">
-                    <input
-                        type="text"
-                        value={venueId}
-                        onChange={(e) => setVenueId(e.target.value)}
-                        className="flex-grow mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm text-sm"
-                        placeholder="Venue ID to Save"
-                        disabled={game.status === 'SAVING'}
-                    />
+                    {venuesLoading ? (
+                        <div className="flex-grow text-center text-gray-500 text-sm">
+                            Loading venues...
+                        </div>
+                    ) : (
+                        <select
+                            value={venueId}
+                            onChange={(e) => setVenueId(e.target.value)}
+                            className="flex-grow mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm text-sm"
+                            disabled={game.status === 'SAVING' || venues.length === 0}
+                        >
+                            <option value="">
+                                {venues.length === 0 ? 'No venues available - Add venues first' : 'Select Venue...'}
+                            </option>
+                            {venues.map(venue => (
+                                <option key={venue.id} value={venue.id}>
+                                    {formatVenueOption(venue)}
+                                </option>
+                            ))}
+                        </select>
+                    )}
                     <button
                         onClick={() => setIsConfirmModalOpen(true)}
                         disabled={isSaveDisabled}

@@ -8,7 +8,7 @@ import { VenueTable } from '../components/venues/VenueTable';
 import { VenueModal } from '../components/venues/VenueModal';
 import { DeleteConfirmationModal } from '../components/venues/DeleteConfirmationModal';
 import * as APITypes from '../API';
-import { VenueFormData } from '../types/venue'; // ✅ Import the new type
+import { VenueFormData } from '../types/venue';
 
 type Venue = APITypes.Venue;
 
@@ -17,6 +17,7 @@ const VenuesPage = () => {
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [nextVenueNumber, setNextVenueNumber] = useState<number>(1);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingVenue, setEditingVenue] = useState<Venue | null>(null);
@@ -31,8 +32,22 @@ const VenuesPage = () => {
       const response = await client.graphql({ query: listVenues });
       const venueItems = (response.data.listVenues.items as Venue[])
         .filter(Boolean)
-        .sort((a, b) => a.name.localeCompare(b.name));
+        .sort((a, b) => {
+          // Sort by venueNumber first, then by name
+          if (a.venueNumber !== undefined && b.venueNumber !== undefined) {
+            return a.venueNumber - b.venueNumber;
+          }
+          return a.name.localeCompare(b.name);
+        });
+      
       setVenues(venueItems);
+      
+      // Calculate the next venue number
+      const maxVenueNumber = venueItems.reduce((max, venue) => {
+        return venue.venueNumber !== undefined && venue.venueNumber > max ? venue.venueNumber : max;
+      }, 0);
+      setNextVenueNumber(maxVenueNumber + 1);
+      
     } catch (err) {
       console.error('Error fetching venues:', err);
       setError('Failed to fetch venues. Please try again.');
@@ -60,26 +75,46 @@ const VenuesPage = () => {
       setIsDeleteModalOpen(true);
   };
 
-  // ✅ CHANGED: Update the function signature to use VenueFormData
   const handleSaveVenue = async (venueData: VenueFormData) => {
     try {
       const { name, address, city, country } = venueData;
+      
       if (editingVenue) {
+        // When editing, keep the existing venueNumber
         await client.graphql({
           query: updateVenue,
-          variables: { input: { id: editingVenue.id, name, address, city, country } },
+          variables: { 
+            input: { 
+              id: editingVenue.id, 
+              name, 
+              address, 
+              city, 
+              country,
+              venueNumber: editingVenue.venueNumber 
+            } 
+          },
         });
       } else {
+        // When creating new venue, use the next available number
         await client.graphql({
           query: createVenue,
-          variables: { input: { name, address, city, country } },
+          variables: { 
+            input: { 
+              name, 
+              address, 
+              city, 
+              country,
+              venueNumber: nextVenueNumber 
+            } 
+          },
         });
       }
+      
       setIsModalOpen(false);
       fetchVenues();
     } catch (err) {
       console.error('Error saving venue:', err);
-      setError('Failed to save venue.');
+      setError('Failed to save venue. Make sure to run "amplify codegen" after updating your schema.');
     }
   };
   
@@ -95,7 +130,7 @@ const VenuesPage = () => {
           fetchVenues();
       } catch (err) {
           console.error('Error deleting venue:', err);
-setError('Failed to delete venue.');
+          setError('Failed to delete venue.');
       }
   };
 
@@ -105,8 +140,13 @@ setError('Failed to delete venue.');
         <div className="sm:flex-auto">
           <h1 className="text-xl font-semibold text-gray-900">Venues</h1>
           <p className="mt-2 text-sm text-gray-700">
-            A list of all the venues in your account including their name, address, and city.
+            A list of all the venues in your account. Each venue has a unique ID number for easy reference.
           </p>
+          {nextVenueNumber && (
+            <p className="mt-1 text-xs text-gray-500">
+              Next venue will be assigned ID: {nextVenueNumber}
+            </p>
+          )}
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
           <button
@@ -119,7 +159,11 @@ setError('Failed to delete venue.');
         </div>
       </div>
       
-      {error && <div className="mt-4 text-red-600">{error}</div>}
+      {error && (
+        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-red-600 text-sm">{error}</p>
+        </div>
+      )}
       
       <div className="mt-8">
         <VenueTable 

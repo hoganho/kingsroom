@@ -235,6 +235,7 @@ export enum GameType {
 export type Venue = {
   __typename: "Venue",
   id: string,
+  venueNumber: number,
   name: string,
   address?: string | null,
   city?: string | null,
@@ -853,6 +854,7 @@ export type DeleteAssetInput = {
 
 export type CreateVenueInput = {
   id?: string | null,
+  venueNumber: number,
   name: string,
   address?: string | null,
   city?: string | null,
@@ -862,6 +864,7 @@ export type CreateVenueInput = {
 };
 
 export type ModelVenueConditionInput = {
+  venueNumber?: ModelIntInput | null,
   name?: ModelStringInput | null,
   address?: ModelStringInput | null,
   city?: ModelStringInput | null,
@@ -893,6 +896,7 @@ export type ModelIDInput = {
 
 export type UpdateVenueInput = {
   id: string,
+  venueNumber?: number | null,
   name?: string | null,
   address?: string | null,
   city?: string | null,
@@ -2122,6 +2126,7 @@ export type ModelAssetFilterInput = {
 
 export type ModelVenueFilterInput = {
   id?: ModelIDInput | null,
+  venueNumber?: ModelIntInput | null,
   name?: ModelStringInput | null,
   address?: ModelStringInput | null,
   city?: ModelStringInput | null,
@@ -2683,6 +2688,7 @@ export type ModelSubscriptionAssetFilterInput = {
 
 export type ModelSubscriptionVenueFilterInput = {
   id?: ModelSubscriptionIDInput | null,
+  venueNumber?: ModelSubscriptionIntInput | null,
   name?: ModelSubscriptionStringInput | null,
   address?: ModelSubscriptionStringInput | null,
   city?: ModelSubscriptionStringInput | null,
@@ -3161,6 +3167,7 @@ export type SaveTournamentDataMutation = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -3178,6 +3185,7 @@ export type SaveTournamentDataMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -3240,6 +3248,7 @@ export type SaveTournamentDataMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -3300,6 +3309,7 @@ export type SaveTournamentDataMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -3389,6 +3399,7 @@ export type SaveTournamentDataMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -3470,6 +3481,7 @@ export type SaveTournamentDataMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -3608,6 +3620,7 @@ export type SaveTournamentDataMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -3715,6 +3728,7 @@ export type SaveTournamentDataMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -4012,6 +4026,7 @@ export type CreateAssetMutation = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -4029,6 +4044,7 @@ export type CreateAssetMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -4091,6 +4107,7 @@ export type CreateAssetMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -4151,6 +4168,7 @@ export type CreateAssetMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -4240,6 +4258,7 @@ export type CreateAssetMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -4293,6 +4312,7 @@ export type UpdateAssetMutation = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -4310,6 +4330,7 @@ export type UpdateAssetMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -4372,6 +4393,7 @@ export type UpdateAssetMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -4432,6 +4454,7 @@ export type UpdateAssetMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -4521,6 +4544,7 @@ export type UpdateAssetMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -4574,6 +4598,7 @@ export type DeleteAssetMutation = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -4591,6 +4616,7 @@ export type DeleteAssetMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -4653,6 +4679,7 @@ export type DeleteAssetMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -4713,6 +4740,7 @@ export type DeleteAssetMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -4802,6 +4830,7 @@ export type DeleteAssetMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -4846,6 +4875,7 @@ export type CreateVenueMutation = {
   createVenue?:  {
     __typename: "Venue",
     id: string,
+    venueNumber: number,
     name: string,
     address?: string | null,
     city?: string | null,
@@ -4863,6 +4893,7 @@ export type CreateVenueMutation = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -4880,6 +4911,7 @@ export type CreateVenueMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -5011,6 +5043,7 @@ export type CreateVenueMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -5102,6 +5135,7 @@ export type CreateVenueMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -5325,6 +5359,7 @@ export type CreateVenueMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -5394,6 +5429,7 @@ export type UpdateVenueMutation = {
   updateVenue?:  {
     __typename: "Venue",
     id: string,
+    venueNumber: number,
     name: string,
     address?: string | null,
     city?: string | null,
@@ -5411,6 +5447,7 @@ export type UpdateVenueMutation = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -5428,6 +5465,7 @@ export type UpdateVenueMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -5559,6 +5597,7 @@ export type UpdateVenueMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -5650,6 +5689,7 @@ export type UpdateVenueMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -5873,6 +5913,7 @@ export type UpdateVenueMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -5942,6 +5983,7 @@ export type DeleteVenueMutation = {
   deleteVenue?:  {
     __typename: "Venue",
     id: string,
+    venueNumber: number,
     name: string,
     address?: string | null,
     city?: string | null,
@@ -5959,6 +6001,7 @@ export type DeleteVenueMutation = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -5976,6 +6019,7 @@ export type DeleteVenueMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -6107,6 +6151,7 @@ export type DeleteVenueMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -6198,6 +6243,7 @@ export type DeleteVenueMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -6421,6 +6467,7 @@ export type DeleteVenueMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -6500,6 +6547,7 @@ export type CreateVenueDetailsMutation = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -6517,6 +6565,7 @@ export type CreateVenueDetailsMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -6579,6 +6628,7 @@ export type CreateVenueDetailsMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -6639,6 +6689,7 @@ export type CreateVenueDetailsMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -6728,6 +6779,7 @@ export type CreateVenueDetailsMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -6782,6 +6834,7 @@ export type UpdateVenueDetailsMutation = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -6799,6 +6852,7 @@ export type UpdateVenueDetailsMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -6861,6 +6915,7 @@ export type UpdateVenueDetailsMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -6921,6 +6976,7 @@ export type UpdateVenueDetailsMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -7010,6 +7066,7 @@ export type UpdateVenueDetailsMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -7064,6 +7121,7 @@ export type DeleteVenueDetailsMutation = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -7081,6 +7139,7 @@ export type DeleteVenueDetailsMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -7143,6 +7202,7 @@ export type DeleteVenueDetailsMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -7203,6 +7263,7 @@ export type DeleteVenueDetailsMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -7292,6 +7353,7 @@ export type DeleteVenueDetailsMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -7371,6 +7433,7 @@ export type CreateGameMutation = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -7388,6 +7451,7 @@ export type CreateGameMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -7450,6 +7514,7 @@ export type CreateGameMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -7510,6 +7575,7 @@ export type CreateGameMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -7599,6 +7665,7 @@ export type CreateGameMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -7680,6 +7747,7 @@ export type CreateGameMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -7818,6 +7886,7 @@ export type CreateGameMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -7925,6 +7994,7 @@ export type CreateGameMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -8113,6 +8183,7 @@ export type UpdateGameMutation = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -8130,6 +8201,7 @@ export type UpdateGameMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -8192,6 +8264,7 @@ export type UpdateGameMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -8252,6 +8325,7 @@ export type UpdateGameMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -8341,6 +8415,7 @@ export type UpdateGameMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -8422,6 +8497,7 @@ export type UpdateGameMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -8560,6 +8636,7 @@ export type UpdateGameMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -8667,6 +8744,7 @@ export type UpdateGameMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -8855,6 +8933,7 @@ export type DeleteGameMutation = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -8872,6 +8951,7 @@ export type DeleteGameMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -8934,6 +9014,7 @@ export type DeleteGameMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -8994,6 +9075,7 @@ export type DeleteGameMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -9083,6 +9165,7 @@ export type DeleteGameMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -9164,6 +9247,7 @@ export type DeleteGameMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -9302,6 +9386,7 @@ export type DeleteGameMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -9409,6 +9494,7 @@ export type DeleteGameMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -9613,6 +9699,7 @@ export type CreateTournamentStructureMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -9810,6 +9897,7 @@ export type UpdateTournamentStructureMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -10007,6 +10095,7 @@ export type DeleteTournamentStructureMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -10557,6 +10646,7 @@ export type CreateCashStructureMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -10798,6 +10888,7 @@ export type UpdateCashStructureMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -11039,6 +11130,7 @@ export type DeleteCashStructureMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -11348,6 +11440,7 @@ export type CreatePlayerMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -11898,6 +11991,7 @@ export type CreatePlayerMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -12344,6 +12438,7 @@ export type UpdatePlayerMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -12894,6 +12989,7 @@ export type UpdatePlayerMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -13340,6 +13436,7 @@ export type DeletePlayerMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -13890,6 +13987,7 @@ export type DeletePlayerMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -14520,6 +14618,7 @@ export type CreatePlayerSummaryMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -15015,6 +15114,7 @@ export type UpdatePlayerSummaryMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -15510,6 +15610,7 @@ export type DeletePlayerSummaryMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -15997,6 +16098,7 @@ export type CreatePlayerVenueMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -16131,6 +16233,7 @@ export type CreatePlayerVenueMutation = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -16148,6 +16251,7 @@ export type CreatePlayerVenueMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -16210,6 +16314,7 @@ export type CreatePlayerVenueMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -16270,6 +16375,7 @@ export type CreatePlayerVenueMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -16359,6 +16465,7 @@ export type CreatePlayerVenueMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -16742,6 +16849,7 @@ export type UpdatePlayerVenueMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -16876,6 +16984,7 @@ export type UpdatePlayerVenueMutation = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -16893,6 +17002,7 @@ export type UpdatePlayerVenueMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -16955,6 +17065,7 @@ export type UpdatePlayerVenueMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -17015,6 +17126,7 @@ export type UpdatePlayerVenueMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -17104,6 +17216,7 @@ export type UpdatePlayerVenueMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -17487,6 +17600,7 @@ export type DeletePlayerVenueMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -17621,6 +17735,7 @@ export type DeletePlayerVenueMutation = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -17638,6 +17753,7 @@ export type DeletePlayerVenueMutation = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -17700,6 +17816,7 @@ export type DeletePlayerVenueMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -17760,6 +17877,7 @@ export type DeletePlayerVenueMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -17849,6 +17967,7 @@ export type DeletePlayerVenueMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -18233,6 +18352,7 @@ export type CreatePlayerTransactionMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -18721,6 +18841,7 @@ export type UpdatePlayerTransactionMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -19209,6 +19330,7 @@ export type DeletePlayerTransactionMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -19402,6 +19524,7 @@ export type CreatePlayerResultMutation = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -19419,6 +19542,7 @@ export type CreatePlayerResultMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -20097,6 +20221,7 @@ export type CreatePlayerResultMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -20290,6 +20415,7 @@ export type UpdatePlayerResultMutation = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -20307,6 +20433,7 @@ export type UpdatePlayerResultMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -20985,6 +21112,7 @@ export type UpdatePlayerResultMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -21178,6 +21306,7 @@ export type DeletePlayerResultMutation = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -21195,6 +21324,7 @@ export type DeletePlayerResultMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -21873,6 +22003,7 @@ export type DeletePlayerResultMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -22419,6 +22550,7 @@ export type CreatePlayerMarketingPreferencesMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -22902,6 +23034,7 @@ export type UpdatePlayerMarketingPreferencesMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -23385,6 +23518,7 @@ export type DeletePlayerMarketingPreferencesMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -24370,6 +24504,7 @@ export type CreatePlayerTicketMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -24929,6 +25064,7 @@ export type UpdatePlayerTicketMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -25488,6 +25624,7 @@ export type DeletePlayerTicketMutation = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -26305,6 +26442,7 @@ export type GetAssetQuery = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -26322,6 +26460,7 @@ export type GetAssetQuery = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -26384,6 +26523,7 @@ export type GetAssetQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -26444,6 +26584,7 @@ export type GetAssetQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -26533,6 +26674,7 @@ export type GetAssetQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -26589,6 +26731,7 @@ export type ListAssetsQuery = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -26606,6 +26749,7 @@ export type ListAssetsQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -26750,6 +26894,7 @@ export type SyncAssetsQuery = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -26767,6 +26912,7 @@ export type SyncAssetsQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -26897,6 +27043,7 @@ export type GetVenueQuery = {
   getVenue?:  {
     __typename: "Venue",
     id: string,
+    venueNumber: number,
     name: string,
     address?: string | null,
     city?: string | null,
@@ -26914,6 +27061,7 @@ export type GetVenueQuery = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -26931,6 +27079,7 @@ export type GetVenueQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -27062,6 +27211,7 @@ export type GetVenueQuery = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -27153,6 +27303,7 @@ export type GetVenueQuery = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -27376,6 +27527,7 @@ export type GetVenueQuery = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -27448,6 +27600,7 @@ export type ListVenuesQuery = {
     items:  Array< {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -27465,6 +27618,7 @@ export type ListVenuesQuery = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -27527,6 +27681,7 @@ export type ListVenuesQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -27587,6 +27742,7 @@ export type ListVenuesQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -27676,6 +27832,7 @@ export type ListVenuesQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -27721,6 +27878,7 @@ export type SyncVenuesQuery = {
     items:  Array< {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -27738,6 +27896,7 @@ export type SyncVenuesQuery = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -27800,6 +27959,7 @@ export type SyncVenuesQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -27860,6 +28020,7 @@ export type SyncVenuesQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -27949,6 +28110,7 @@ export type SyncVenuesQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -27999,6 +28161,7 @@ export type GetVenueDetailsQuery = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -28016,6 +28179,7 @@ export type GetVenueDetailsQuery = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -28078,6 +28242,7 @@ export type GetVenueDetailsQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -28138,6 +28303,7 @@ export type GetVenueDetailsQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -28227,6 +28393,7 @@ export type GetVenueDetailsQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -28284,6 +28451,7 @@ export type ListVenueDetailsQuery = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -28301,6 +28469,7 @@ export type ListVenueDetailsQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -28446,6 +28615,7 @@ export type SyncVenueDetailsQuery = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -28463,6 +28633,7 @@ export type SyncVenueDetailsQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -28628,6 +28799,7 @@ export type GetGameQuery = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -28645,6 +28817,7 @@ export type GetGameQuery = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -28707,6 +28880,7 @@ export type GetGameQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -28767,6 +28941,7 @@ export type GetGameQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -28856,6 +29031,7 @@ export type GetGameQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -28937,6 +29113,7 @@ export type GetGameQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -29075,6 +29252,7 @@ export type GetGameQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -29182,6 +29360,7 @@ export type GetGameQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -29373,6 +29552,7 @@ export type ListGamesQuery = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -29390,6 +29570,7 @@ export type ListGamesQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -29789,6 +29970,7 @@ export type SyncGamesQuery = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -29806,6 +29988,7 @@ export type SyncGamesQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -30216,6 +30399,7 @@ export type GetTournamentStructureQuery = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -30416,6 +30600,7 @@ export type ListTournamentStructuresQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -30542,6 +30727,7 @@ export type SyncTournamentStructuresQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -30936,6 +31122,7 @@ export type GetCashStructureQuery = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -31163,6 +31350,7 @@ export type ListCashStructuresQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -31316,6 +31504,7 @@ export type SyncCashStructuresQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -31549,6 +31738,7 @@ export type GetPlayerQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -32099,6 +32289,7 @@ export type GetPlayerQuery = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -32714,6 +32905,7 @@ export type ListPlayersQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -33192,6 +33384,7 @@ export type SyncPlayersQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -33683,6 +33876,7 @@ export type GetPlayerSummaryQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -34624,6 +34818,7 @@ export type GetPlayerVenueQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -34758,6 +34953,7 @@ export type GetPlayerVenueQuery = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -34775,6 +34971,7 @@ export type GetPlayerVenueQuery = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -34837,6 +35034,7 @@ export type GetPlayerVenueQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -34897,6 +35095,7 @@ export type GetPlayerVenueQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -34986,6 +35185,7 @@ export type GetPlayerVenueQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -35232,6 +35432,7 @@ export type ListPlayerVenuesQuery = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -35249,6 +35450,7 @@ export type ListPlayerVenuesQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -35583,6 +35785,7 @@ export type SyncPlayerVenuesQuery = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -35600,6 +35803,7 @@ export type SyncPlayerVenuesQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -36070,6 +36274,7 @@ export type GetPlayerTransactionQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -36703,6 +36908,7 @@ export type GetPlayerResultQuery = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -36720,6 +36926,7 @@ export type GetPlayerResultQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -37398,6 +37605,7 @@ export type GetPlayerResultQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -37594,6 +37802,7 @@ export type ListPlayerResultsQuery = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -37978,6 +38187,7 @@ export type SyncPlayerResultsQuery = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -38722,6 +38932,7 @@ export type GetPlayerMarketingPreferencesQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -40027,6 +40238,7 @@ export type GetPlayerTicketQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -41251,6 +41463,7 @@ export type AssetsByVenueIdQuery = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -41268,6 +41481,7 @@ export type AssetsByVenueIdQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -41390,6 +41604,286 @@ export type AssetsByVenueIdQuery = {
   } | null,
 };
 
+export type VenuesByVenueNumberAndNameQueryVariables = {
+  venueNumber: number,
+  name?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelVenueFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type VenuesByVenueNumberAndNameQuery = {
+  venuesByVenueNumberAndName?:  {
+    __typename: "ModelVenueConnection",
+    items:  Array< {
+      __typename: "Venue",
+      id: string,
+      venueNumber: number,
+      name: string,
+      address?: string | null,
+      city?: string | null,
+      country?: string | null,
+      details?:  {
+        __typename: "VenueDetails",
+        id: string,
+        venueId: string,
+        startDate: string,
+        status: VenueStatus,
+        lastCustomerSuccessVisit?: string | null,
+        totalGamesHeld?: number | null,
+        averagePlayersPerGame?: number | null,
+        gameNights?: Array< string | null > | null,
+        venue?:  {
+          __typename: "Venue",
+          id: string,
+          venueNumber: number,
+          name: string,
+          address?: string | null,
+          city?: string | null,
+          country?: string | null,
+          details?:  {
+            __typename: "VenueDetails",
+            id: string,
+            venueId: string,
+            startDate: string,
+            status: VenueStatus,
+            lastCustomerSuccessVisit?: string | null,
+            totalGamesHeld?: number | null,
+            averagePlayersPerGame?: number | null,
+            gameNights?: Array< string | null > | null,
+            createdAt: string,
+            updatedAt: string,
+            _version: number,
+            _deleted?: boolean | null,
+            _lastChangedAt: number,
+          } | null,
+          assets?:  {
+            __typename: "ModelAssetConnection",
+            nextToken?: string | null,
+            startedAt?: number | null,
+          } | null,
+          games?:  {
+            __typename: "ModelGameConnection",
+            nextToken?: string | null,
+            startedAt?: number | null,
+          } | null,
+          playerMemberships?:  {
+            __typename: "ModelPlayerVenueConnection",
+            nextToken?: string | null,
+            startedAt?: number | null,
+          } | null,
+          createdAt: string,
+          updatedAt: string,
+          _version: number,
+          _deleted?: boolean | null,
+          _lastChangedAt: number,
+          venueDetailsId?: string | null,
+        } | null,
+        createdAt: string,
+        updatedAt: string,
+        _version: number,
+        _deleted?: boolean | null,
+        _lastChangedAt: number,
+      } | null,
+      assets?:  {
+        __typename: "ModelAssetConnection",
+        items:  Array< {
+          __typename: "Asset",
+          id: string,
+          name: string,
+          type: string,
+          condition: AssetCondition,
+          acquiredDate: string,
+          lastCheckedDate: string,
+          venueId: string,
+          venue?:  {
+            __typename: "Venue",
+            id: string,
+            venueNumber: number,
+            name: string,
+            address?: string | null,
+            city?: string | null,
+            country?: string | null,
+            createdAt: string,
+            updatedAt: string,
+            _version: number,
+            _deleted?: boolean | null,
+            _lastChangedAt: number,
+            venueDetailsId?: string | null,
+          } | null,
+          createdAt: string,
+          updatedAt: string,
+          _version: number,
+          _deleted?: boolean | null,
+          _lastChangedAt: number,
+        } | null >,
+        nextToken?: string | null,
+        startedAt?: number | null,
+      } | null,
+      games?:  {
+        __typename: "ModelGameConnection",
+        items:  Array< {
+          __typename: "Game",
+          id: string,
+          name: string,
+          type: GameType,
+          status: GameStatus,
+          gameStartDateTime: string,
+          gameEndDateTime?: string | null,
+          venueId: string,
+          sourceUrl?: string | null,
+          doNotScrape: boolean,
+          sourceDataIssue: boolean,
+          seriesName?: string | null,
+          isAdHoc?: boolean | null,
+          isSeries?: boolean | null,
+          isRecurring?: boolean | null,
+          isSatellite?: boolean | null,
+          registrationStatus?: string | null,
+          gameVariant?: string | null,
+          prizepool?: number | null,
+          revenueByEntries?: number | null,
+          totalEntries?: number | null,
+          totalRebuys?: number | null,
+          totalAddons?: number | null,
+          totalDuration?: string | null,
+          gameTags?: Array< string | null > | null,
+          tournamentType?: TournamentType | null,
+          buyIn?: number | null,
+          rake?: number | null,
+          startingStack?: number | null,
+          hasGuarantee?: boolean | null,
+          guaranteeAmount?: number | null,
+          playersRemaining?: number | null,
+          tournamentStructureId?: string | null,
+          cashStructureId?: string | null,
+          venue?:  {
+            __typename: "Venue",
+            id: string,
+            venueNumber: number,
+            name: string,
+            address?: string | null,
+            city?: string | null,
+            country?: string | null,
+            createdAt: string,
+            updatedAt: string,
+            _version: number,
+            _deleted?: boolean | null,
+            _lastChangedAt: number,
+            venueDetailsId?: string | null,
+          } | null,
+          tournamentStructure?:  {
+            __typename: "TournamentStructure",
+            id: string,
+            name: string,
+            description?: string | null,
+            createdAt: string,
+            updatedAt: string,
+            _version: number,
+            _deleted?: boolean | null,
+            _lastChangedAt: number,
+          } | null,
+          cashStructure?:  {
+            __typename: "CashStructure",
+            id: string,
+            name: string,
+            smallBlind: number,
+            bigBlind: number,
+            minBuyIn: number,
+            maxBuyIn: number,
+            rakeStructureId: string,
+            createdAt: string,
+            updatedAt: string,
+            _version: number,
+            _deleted?: boolean | null,
+            _lastChangedAt: number,
+          } | null,
+          playerResults?:  {
+            __typename: "ModelPlayerResultConnection",
+            nextToken?: string | null,
+            startedAt?: number | null,
+          } | null,
+          createdAt: string,
+          updatedAt: string,
+          _version: number,
+          _deleted?: boolean | null,
+          _lastChangedAt: number,
+        } | null >,
+        nextToken?: string | null,
+        startedAt?: number | null,
+      } | null,
+      playerMemberships?:  {
+        __typename: "ModelPlayerVenueConnection",
+        items:  Array< {
+          __typename: "PlayerVenue",
+          id: string,
+          playerId: string,
+          venueId: string,
+          totalGamesPlayed?: number | null,
+          averageBuyIn?: number | null,
+          firstPlayedDate?: string | null,
+          lastPlayedDate?: string | null,
+          targetingClassification: PlayerVenueTargetingClassification,
+          player?:  {
+            __typename: "Player",
+            id: string,
+            firstName: string,
+            givenName?: string | null,
+            lastName?: string | null,
+            email?: string | null,
+            phone?: string | null,
+            registrationVenueId: string,
+            creationDate: string,
+            lastPlayedDate?: string | null,
+            status: PlayerAccountStatus,
+            category: PlayerAccountCategory,
+            targetingClassification: PlayerTargetingClassification,
+            tier?: string | null,
+            createdAt: string,
+            updatedAt: string,
+            _version: number,
+            _deleted?: boolean | null,
+            _lastChangedAt: number,
+            playerMarketingPreferencesId?: string | null,
+            playerSummaryId?: string | null,
+          } | null,
+          venue?:  {
+            __typename: "Venue",
+            id: string,
+            venueNumber: number,
+            name: string,
+            address?: string | null,
+            city?: string | null,
+            country?: string | null,
+            createdAt: string,
+            updatedAt: string,
+            _version: number,
+            _deleted?: boolean | null,
+            _lastChangedAt: number,
+            venueDetailsId?: string | null,
+          } | null,
+          createdAt: string,
+          updatedAt: string,
+          _version: number,
+          _deleted?: boolean | null,
+          _lastChangedAt: number,
+        } | null >,
+        nextToken?: string | null,
+        startedAt?: number | null,
+      } | null,
+      createdAt: string,
+      updatedAt: string,
+      _version: number,
+      _deleted?: boolean | null,
+      _lastChangedAt: number,
+      venueDetailsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+    startedAt?: number | null,
+  } | null,
+};
+
 export type VenueDetailsByVenueIdQueryVariables = {
   venueId: string,
   sortDirection?: ModelSortDirection | null,
@@ -41414,6 +41908,7 @@ export type VenueDetailsByVenueIdQuery = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -41431,6 +41926,7 @@ export type VenueDetailsByVenueIdQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -41603,6 +42099,7 @@ export type GamesByVenueIdAndGameStartDateTimeQuery = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -41620,6 +42117,7 @@ export type GamesByVenueIdAndGameStartDateTimeQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -42020,6 +42518,7 @@ export type GameBySourceUrlQuery = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -42037,6 +42536,7 @@ export type GameBySourceUrlQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -42437,6 +42937,7 @@ export type GamesByTournamentStructureIdQuery = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -42454,6 +42955,7 @@ export type GamesByTournamentStructureIdQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -42854,6 +43356,7 @@ export type GamesByCashStructureIdQuery = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -42871,6 +43374,7 @@ export type GamesByCashStructureIdQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -43314,6 +43818,7 @@ export type CashStructuresByRakeStructureIdQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -43719,6 +44224,7 @@ export type PlayerByEmailQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -44198,6 +44704,7 @@ export type PlayersByRegistrationVenueIdQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -44777,6 +45284,7 @@ export type PlayerVenuesByPlayerIdAndVenueIdQuery = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -44794,6 +45302,7 @@ export type PlayerVenuesByPlayerIdAndVenueIdQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -45130,6 +45639,7 @@ export type PlayerVenuesByVenueIdAndPlayerIdQuery = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -45147,6 +45657,7 @@ export type PlayerVenuesByVenueIdAndPlayerIdQuery = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -45773,6 +46284,7 @@ export type PlayerResultsByPlayerIdQuery = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -46158,6 +46670,7 @@ export type PlayerResultsByGameIdQuery = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -47504,6 +48017,7 @@ export type OnCreateAssetSubscription = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -47521,6 +48035,7 @@ export type OnCreateAssetSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -47583,6 +48098,7 @@ export type OnCreateAssetSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -47643,6 +48159,7 @@ export type OnCreateAssetSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -47732,6 +48249,7 @@ export type OnCreateAssetSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -47784,6 +48302,7 @@ export type OnUpdateAssetSubscription = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -47801,6 +48320,7 @@ export type OnUpdateAssetSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -47863,6 +48383,7 @@ export type OnUpdateAssetSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -47923,6 +48444,7 @@ export type OnUpdateAssetSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -48012,6 +48534,7 @@ export type OnUpdateAssetSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -48064,6 +48587,7 @@ export type OnDeleteAssetSubscription = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -48081,6 +48605,7 @@ export type OnDeleteAssetSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -48143,6 +48668,7 @@ export type OnDeleteAssetSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -48203,6 +48729,7 @@ export type OnDeleteAssetSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -48292,6 +48819,7 @@ export type OnDeleteAssetSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -48335,6 +48863,7 @@ export type OnCreateVenueSubscription = {
   onCreateVenue?:  {
     __typename: "Venue",
     id: string,
+    venueNumber: number,
     name: string,
     address?: string | null,
     city?: string | null,
@@ -48352,6 +48881,7 @@ export type OnCreateVenueSubscription = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -48369,6 +48899,7 @@ export type OnCreateVenueSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -48500,6 +49031,7 @@ export type OnCreateVenueSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -48591,6 +49123,7 @@ export type OnCreateVenueSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -48814,6 +49347,7 @@ export type OnCreateVenueSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -48882,6 +49416,7 @@ export type OnUpdateVenueSubscription = {
   onUpdateVenue?:  {
     __typename: "Venue",
     id: string,
+    venueNumber: number,
     name: string,
     address?: string | null,
     city?: string | null,
@@ -48899,6 +49434,7 @@ export type OnUpdateVenueSubscription = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -48916,6 +49452,7 @@ export type OnUpdateVenueSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -49047,6 +49584,7 @@ export type OnUpdateVenueSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -49138,6 +49676,7 @@ export type OnUpdateVenueSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -49361,6 +49900,7 @@ export type OnUpdateVenueSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -49429,6 +49969,7 @@ export type OnDeleteVenueSubscription = {
   onDeleteVenue?:  {
     __typename: "Venue",
     id: string,
+    venueNumber: number,
     name: string,
     address?: string | null,
     city?: string | null,
@@ -49446,6 +49987,7 @@ export type OnDeleteVenueSubscription = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -49463,6 +50005,7 @@ export type OnDeleteVenueSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -49594,6 +50137,7 @@ export type OnDeleteVenueSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -49685,6 +50229,7 @@ export type OnDeleteVenueSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -49908,6 +50453,7 @@ export type OnDeleteVenueSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -49986,6 +50532,7 @@ export type OnCreateVenueDetailsSubscription = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -50003,6 +50550,7 @@ export type OnCreateVenueDetailsSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -50065,6 +50613,7 @@ export type OnCreateVenueDetailsSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -50125,6 +50674,7 @@ export type OnCreateVenueDetailsSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -50214,6 +50764,7 @@ export type OnCreateVenueDetailsSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -50267,6 +50818,7 @@ export type OnUpdateVenueDetailsSubscription = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -50284,6 +50836,7 @@ export type OnUpdateVenueDetailsSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -50346,6 +50899,7 @@ export type OnUpdateVenueDetailsSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -50406,6 +50960,7 @@ export type OnUpdateVenueDetailsSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -50495,6 +51050,7 @@ export type OnUpdateVenueDetailsSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -50548,6 +51104,7 @@ export type OnDeleteVenueDetailsSubscription = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -50565,6 +51122,7 @@ export type OnDeleteVenueDetailsSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -50627,6 +51185,7 @@ export type OnDeleteVenueDetailsSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -50687,6 +51246,7 @@ export type OnDeleteVenueDetailsSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -50776,6 +51336,7 @@ export type OnDeleteVenueDetailsSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -50854,6 +51415,7 @@ export type OnCreateGameSubscription = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -50871,6 +51433,7 @@ export type OnCreateGameSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -50933,6 +51496,7 @@ export type OnCreateGameSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -50993,6 +51557,7 @@ export type OnCreateGameSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -51082,6 +51647,7 @@ export type OnCreateGameSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -51163,6 +51729,7 @@ export type OnCreateGameSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -51301,6 +51868,7 @@ export type OnCreateGameSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -51408,6 +51976,7 @@ export type OnCreateGameSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -51595,6 +52164,7 @@ export type OnUpdateGameSubscription = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -51612,6 +52182,7 @@ export type OnUpdateGameSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -51674,6 +52245,7 @@ export type OnUpdateGameSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -51734,6 +52306,7 @@ export type OnUpdateGameSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -51823,6 +52396,7 @@ export type OnUpdateGameSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -51904,6 +52478,7 @@ export type OnUpdateGameSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -52042,6 +52617,7 @@ export type OnUpdateGameSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -52149,6 +52725,7 @@ export type OnUpdateGameSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -52336,6 +52913,7 @@ export type OnDeleteGameSubscription = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -52353,6 +52931,7 @@ export type OnDeleteGameSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -52415,6 +52994,7 @@ export type OnDeleteGameSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -52475,6 +53055,7 @@ export type OnDeleteGameSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -52564,6 +53145,7 @@ export type OnDeleteGameSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -52645,6 +53227,7 @@ export type OnDeleteGameSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -52783,6 +53366,7 @@ export type OnDeleteGameSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -52890,6 +53474,7 @@ export type OnDeleteGameSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -53093,6 +53678,7 @@ export type OnCreateTournamentStructureSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -53289,6 +53875,7 @@ export type OnUpdateTournamentStructureSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -53485,6 +54072,7 @@ export type OnDeleteTournamentStructureSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -54031,6 +54619,7 @@ export type OnCreateCashStructureSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -54271,6 +54860,7 @@ export type OnUpdateCashStructureSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -54511,6 +55101,7 @@ export type OnDeleteCashStructureSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -54819,6 +55410,7 @@ export type OnCreatePlayerSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -55369,6 +55961,7 @@ export type OnCreatePlayerSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -55814,6 +56407,7 @@ export type OnUpdatePlayerSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -56364,6 +56958,7 @@ export type OnUpdatePlayerSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -56809,6 +57404,7 @@ export type OnDeletePlayerSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -57359,6 +57955,7 @@ export type OnDeletePlayerSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -57988,6 +58585,7 @@ export type OnCreatePlayerSummarySubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -58482,6 +59080,7 @@ export type OnUpdatePlayerSummarySubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -58976,6 +59575,7 @@ export type OnDeletePlayerSummarySubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -59462,6 +60062,7 @@ export type OnCreatePlayerVenueSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -59596,6 +60197,7 @@ export type OnCreatePlayerVenueSubscription = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -59613,6 +60215,7 @@ export type OnCreatePlayerVenueSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -59675,6 +60278,7 @@ export type OnCreatePlayerVenueSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -59735,6 +60339,7 @@ export type OnCreatePlayerVenueSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -59824,6 +60429,7 @@ export type OnCreatePlayerVenueSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -60206,6 +60812,7 @@ export type OnUpdatePlayerVenueSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -60340,6 +60947,7 @@ export type OnUpdatePlayerVenueSubscription = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -60357,6 +60965,7 @@ export type OnUpdatePlayerVenueSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -60419,6 +61028,7 @@ export type OnUpdatePlayerVenueSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -60479,6 +61089,7 @@ export type OnUpdatePlayerVenueSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -60568,6 +61179,7 @@ export type OnUpdatePlayerVenueSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -60950,6 +61562,7 @@ export type OnDeletePlayerVenueSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -61084,6 +61697,7 @@ export type OnDeletePlayerVenueSubscription = {
     venue?:  {
       __typename: "Venue",
       id: string,
+      venueNumber: number,
       name: string,
       address?: string | null,
       city?: string | null,
@@ -61101,6 +61715,7 @@ export type OnDeletePlayerVenueSubscription = {
         venue?:  {
           __typename: "Venue",
           id: string,
+          venueNumber: number,
           name: string,
           address?: string | null,
           city?: string | null,
@@ -61163,6 +61778,7 @@ export type OnDeletePlayerVenueSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -61223,6 +61839,7 @@ export type OnDeletePlayerVenueSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -61312,6 +61929,7 @@ export type OnDeletePlayerVenueSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -61695,6 +62313,7 @@ export type OnCreatePlayerTransactionSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -62182,6 +62801,7 @@ export type OnUpdatePlayerTransactionSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -62669,6 +63289,7 @@ export type OnDeletePlayerTransactionSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -62861,6 +63482,7 @@ export type OnCreatePlayerResultSubscription = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -62878,6 +63500,7 @@ export type OnCreatePlayerResultSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -63556,6 +64179,7 @@ export type OnCreatePlayerResultSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -63748,6 +64372,7 @@ export type OnUpdatePlayerResultSubscription = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -63765,6 +64390,7 @@ export type OnUpdatePlayerResultSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -64443,6 +65069,7 @@ export type OnUpdatePlayerResultSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -64635,6 +65262,7 @@ export type OnDeletePlayerResultSubscription = {
       venue?:  {
         __typename: "Venue",
         id: string,
+        venueNumber: number,
         name: string,
         address?: string | null,
         city?: string | null,
@@ -64652,6 +65280,7 @@ export type OnDeletePlayerResultSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -65330,6 +65959,7 @@ export type OnDeletePlayerResultSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -65872,6 +66502,7 @@ export type OnCreatePlayerMarketingPreferencesSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -66354,6 +66985,7 @@ export type OnUpdatePlayerMarketingPreferencesSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -66836,6 +67468,7 @@ export type OnDeletePlayerMarketingPreferencesSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -67817,6 +68450,7 @@ export type OnCreatePlayerTicketSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -68375,6 +69009,7 @@ export type OnUpdatePlayerTicketSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,
@@ -68933,6 +69568,7 @@ export type OnDeletePlayerTicketSubscription = {
           venue?:  {
             __typename: "Venue",
             id: string,
+            venueNumber: number,
             name: string,
             address?: string | null,
             city?: string | null,

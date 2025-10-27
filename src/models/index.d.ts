@@ -502,6 +502,7 @@ type EagerVenue = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly venueNumber: number;
   readonly name: string;
   readonly address?: string | null;
   readonly city?: string | null;
@@ -521,6 +522,7 @@ type LazyVenue = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly venueNumber: number;
   readonly name: string;
   readonly address?: string | null;
   readonly city?: string | null;
