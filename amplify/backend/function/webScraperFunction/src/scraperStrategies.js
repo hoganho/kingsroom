@@ -109,6 +109,22 @@ const defaultStrategy = {
         ctx.getText('name', '.cw-game-title');
     },
     
+    getGameTags(ctx) {
+        const tags = [];
+        const selector = '.cw-game-buyins .cw-badge';
+
+        ctx.$(selector).each((i, el) => {
+            const tagText = ctx.$(el).text().trim();
+            if (tagText) {
+                tags.push(tagText);
+            }
+        });
+
+        if (tags.length > 0) {
+            ctx.add('gameTags', tags);
+        }
+    },
+    
     getGameStartDateTime(ctx) {
         if (ctx.gameData && ctx.gameData.start_local) {
             ctx.add('gameStartDateTime', new Date(ctx.gameData.start_local).toISOString());
