@@ -11,4 +11,5 @@ export interface VenueFormData {
   address?: string | null;
   city?: string | null;
   country?: string | null;
+  aliases: string[];
 }
