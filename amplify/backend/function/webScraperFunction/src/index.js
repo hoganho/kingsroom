@@ -90,6 +90,192 @@ const getAllSeriesTitles = async () => {
     }
 };
 
+// --- OPTIMIZED SQS PAYLOAD CREATION ---
+/**
+ * Creates an optimized SQS payload specifically structured for player processing
+ * @param {Object} savedGameItem - The saved game record from DynamoDB
+ * @param {Object} scrapedData - The raw scraped data from the page
+ * @param {Object} metadata - Additional metadata (sourceUrl, venueId, etc.)
+ * @returns {Object} Optimized payload for SQS with focus on player data
+ */
+const createOptimizedPlayerPayload = (savedGameItem, scrapedData, metadata) => {
+    const now = new Date().toISOString();
+    
+    // Extract and structure player-specific data
+    const playerData = extractPlayerDataForProcessing(scrapedData);
+    
+    return {
+        // Essential game information for context
+        game: {
+            id: savedGameItem.id,
+            name: savedGameItem.name,
+            venueId: savedGameItem.venueId,
+            gameStartDateTime: savedGameItem.gameStartDateTime,
+            gameEndDateTime: savedGameItem.gameEndDateTime || now,
+            gameType: savedGameItem.gameType,
+            gameVariant: savedGameItem.gameVariant,
+            
+            // Financial data needed for transaction records
+            buyIn: savedGameItem.buyIn || 0,
+            rake: savedGameItem.rake || 0,
+            totalRake: savedGameItem.totalRake || 0,
+            prizepool: savedGameItem.prizepool || 0,
+            totalEntries: savedGameItem.totalEntries || 0,
+            totalRebuys: savedGameItem.totalRebuys || 0,
+            totalAddons: savedGameItem.totalAddons || 0,
+            
+            // Game categorization for player analytics
+            isSeries: savedGameItem.isSeries || false,
+            seriesName: savedGameItem.seriesName || null,
+            gameFrequency: savedGameItem.gameFrequency || 'UNKNOWN',
+            isSatellite: savedGameItem.isSatellite || false
+        },
+        
+        // Structured player data ready for processing
+        players: playerData,
+        
+        // Processing instructions for each player
+        processingInstructions: createPlayerProcessingInstructions(playerData, savedGameItem),
+        
+        // Metadata for tracking and debugging
+        metadata: {
+            processedAt: now,
+            sourceUrl: metadata.sourceUrl,
+            venueId: metadata.venueId,
+            scrapedAt: scrapedData.fetchedAt || now,
+            hasCompleteResults: playerData.hasCompleteResults,
+            totalPlayersProcessed: playerData.allPlayers.length,
+            totalPrizesPaid: playerData.totalPrizesPaid
+        }
+    };
+};
+
+/**
+ * Extracts player data from scraped results and structures it for processing
+ */
+const extractPlayerDataForProcessing = (scrapedData) => {
+    const results = scrapedData.results || [];
+    const entries = scrapedData.entries || [];
+    const seating = scrapedData.seating || [];
+    
+    // Build comprehensive player records
+    const playerMap = new Map();
+    
+    // Process all entries
+    entries.forEach(entry => {
+        if (entry.name) {
+            playerMap.set(entry.name, {
+                name: entry.name,
+                entered: true,
+                finished: false,
+                rank: null,
+                winnings: 0,
+                points: 0
+            });
+        }
+    });
+    
+    // Merge in results data
+    results.forEach(result => {
+        if (result.name) {
+            const existing = playerMap.get(result.name) || {
+                name: result.name,
+                entered: true
+            };
+            
+            playerMap.set(result.name, {
+                ...existing,
+                finished: true,
+                rank: result.rank,
+                winnings: result.winnings || 0,
+                points: result.points || 0
+            });
+        }
+    });
+    
+    // Add seating data if available
+    seating.forEach(seat => {
+        if (seat.name) {
+            const existing = playerMap.get(seat.name);
+            if (existing) {
+                existing.lastKnownStack = seat.playerStack;
+                existing.lastKnownTable = seat.table;
+                existing.lastKnownSeat = seat.seat;
+            }
+        }
+    });
+    
+    // Convert to array and sort
+    const allPlayers = Array.from(playerMap.values())
+        .sort((a, b) => {
+            if (a.rank === null) return 1;
+            if (b.rank === null) return -1;
+            return a.rank - b.rank;
+        });
+    
+    // Calculate aggregates
+    const finishedPlayers = allPlayers.filter(p => p.finished);
+    const totalPrizesPaid = finishedPlayers.reduce((sum, p) => sum + (p.winnings || 0), 0);
+    const playersInTheMoney = finishedPlayers.filter(p => p.winnings > 0);
+    
+    return {
+        allPlayers,
+        finishedPlayers,
+        playersInTheMoney,
+        totalPlayers: allPlayers.length,
+        totalFinished: finishedPlayers.length,
+        totalInTheMoney: playersInTheMoney.length,
+        totalPrizesPaid,
+        hasCompleteResults: finishedPlayers.length > 0,
+        hasEntryList: entries.length > 0,
+        hasSeatingData: seating.length > 0
+    };
+};
+
+/**
+ * Creates specific processing instructions for the downstream Lambda
+ */
+const createPlayerProcessingInstructions = (playerData, gameInfo) => {
+    return playerData.allPlayers.map(player => ({
+        playerName: player.name,
+        requiredActions: {
+            // Player record management
+            upsertPlayer: true,
+            
+            // Create result record for this game
+            createPlayerResult: {
+                finishingPlace: player.rank,
+                prizeWon: player.winnings > 0,
+                amountWon: player.winnings || 0,
+                totalRunners: gameInfo.totalEntries || playerData.totalPlayers
+            },
+            
+            // Create transaction for buy-in
+            createTransaction: {
+                type: 'BUY_IN',
+                amount: (gameInfo.buyIn || 0) + (gameInfo.rake || 0),
+                rake: gameInfo.rake || 0
+            },
+            
+            // Update aggregated statistics
+            updatePlayerSummary: {
+                incrementTournaments: 1,
+                addWinnings: player.winnings || 0,
+                addBuyIn: (gameInfo.buyIn || 0) + (gameInfo.rake || 0),
+                incrementITM: player.winnings > 0 ? 1 : 0,
+                incrementCashes: player.winnings > 0 ? 1 : 0
+            },
+            
+            // Update venue-specific stats
+            updatePlayerVenue: {
+                incrementGamesPlayed: 1,
+                lastPlayedDate: gameInfo.gameEndDateTime || new Date().toISOString()
+            }
+        }
+    }));
+};
+
+
 // --- SCRAPING LOGIC ---
 const scrapeDataFromHtml = (html, venues, seriesTitles) => {
     const { gameStatus, registrationStatus } = getStatusAndReg(html);
@@ -175,6 +361,11 @@ const handleFetch = async (url) => {
     const gameTable = getTableName('Game');
     let existingGameId = null;
     let doNotScrape = false;
+    
+    // Store all scraped data for potential SQS message
+    let scrapedData = null;
+    let foundKeys = [];
+    
     try {
         const queryCommand = new QueryCommand({
             TableName: gameTable,
@@ -195,143 +386,159 @@ const handleFetch = async (url) => {
     } catch (error) {
         console.warn(`[handleFetch] Error querying for existing game: ${error.message}. Proceeding with scrape.`);
     }
+    
     if (doNotScrape) {
         console.error(`[handleFetch] Scraping is disabled for this URL (doNotScrape=true). Aborting.`);
-        return {
-            existingGameId,
-            doNotScrape,
-            name: "Scraping Disabled",
-            gameStatus: "UNKNOWN",
-            gameStartDateTime: new Date().toISOString(),
-            foundKeys: [],
-            isNewStructure: false,
-            structureLabel: "UNKNOWN",
-            errorMessage: "Scraping is disabled for this URL. To re-enable, uncheck \"Do Not Scrape\" and save."
-        };
+        throw new Error('Scraping is disabled for this tournament (doNotScrape=true)');
     }
-    const [venues, seriesTitles] = await Promise.all([
-        getAllVenues(),
-        getAllSeriesTitles()
-    ]);
-    console.log(`[handleFetch] Loaded ${venues.length} venues and ${seriesTitles.length} series titles for matching.`);
-    console.log(`[handleFetch] Fetching data from: ${url}`);
-    const response = await axios.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-    const { data, foundKeys } = scrapeDataFromHtml(response.data, venues, seriesTitles);    
-    const fingerprintResult = await processStructureFingerprint(foundKeys, data.structureLabel, url);
-    return { 
-        ...data, 
-        ...fingerprintResult, 
-        foundKeys,
-        existingGameId,
-        doNotScrape,
-    };
+    
+    console.log(`[handleFetch] Fetching content from ${url}...`);
+    const venues = await getAllVenues();
+    const seriesTitles = await getAllSeriesTitles();
+    
+    try {
+        const response = await axios.get(url, { timeout: 10000, headers: { 'User-Agent': 'KingsRoom-Scraper/1.0' } });
+        const html = response.data;
+        
+        // Scrape the data
+        const scrapingResult = scrapeDataFromHtml(html, venues, seriesTitles);
+        scrapedData = scrapingResult.data;
+        foundKeys = scrapingResult.foundKeys;
+        
+        // ✅ ENHANCEMENT 1: Check if tournament ID is not in use (UNKNOWN_STATUS or empty name)
+        if (scrapedData.gameStatus === 'UNKNOWN_STATUS' || 
+            scrapedData.gameStatus === 'UNKNOWN' ||
+            !scrapedData.name || 
+            scrapedData.name.trim() === '') {
+            
+            console.log(`[handleFetch] Tournament ID not in use for ${url}`);
+            
+            // Return a special response that indicates tournament ID is not in use
+            return {
+                id: existingGameId,
+                name: 'Tournament ID Not In Use',
+                gameStatus: 'NOT_IN_USE',
+                registrationStatus: 'N/A',
+                gameStartDateTime: null,
+                gameEndDateTime: null,
+                gameVariant: 'UNKNOWN',
+                prizepool: 0,
+                totalEntries: 0,
+                tournamentType: 'UNKNOWN',
+                buyIn: 0,
+                rake: 0,
+                startingStack: 0,
+                hasGuarantee: false,
+                guaranteeAmount: 0,
+                gameTags: [],
+                levels: [],
+                isInactive: true,  // Special flag to indicate this tournament ID is not active
+                sourceUrl: url,
+                existingGameId: existingGameId
+            };
+        }
+        
+        // Process structure fingerprint
+        const fingerprint = await processStructureFingerprint(foundKeys, scrapedData.structureLabel, url);
+        
+        // Add metadata
+        scrapedData.existingGameId = existingGameId;
+        scrapedData.sourceUrl = url;
+        scrapedData.fetchedAt = new Date().toISOString();
+        
+        console.log(`[handleFetch] Scraped data successfully for ${url}`);
+        return {
+            ...scrapedData,
+            existingGameId,
+            scrapedData: scrapedData,  // Include the full scraped data
+            foundKeys: foundKeys        // Include the found keys
+        };
+    } catch (error) {
+        console.error(`[handleFetch] Error fetching or scraping ${url}: ${error.message}`);
+        return { existingGameId, errorMessage: error.message };
+    }
 };
 
 const handleSave = async (input) => {
-    const { sourceUrl, venueId, data, existingGameId, doNotScrape } = input;
+    console.log('[handleSave] Processing save request...');
+    const { sourceUrl, venueId, existingGameId, data } = input;
     const now = new Date().toISOString();
-    
     const gameTable = getTableName('Game');
     const structureTable = getTableName('TournamentStructure');
+    
+    // Store a reference to the saved game item
+    let savedGameItem = null;
+    
+    // Store the original scraped data if available
+    let originalScrapedData = input.originalScrapedData || null;
 
-    const processLevels = (levels = [], breaks = []) => {
-        const levelMap = new Map(levels.map(l => [l.levelNumber, { ...l }]));
-        breaks.forEach(breakInfo => {
-            if (levelMap.has(breakInfo.levelNumberBeforeBreak)) {
-                const level = levelMap.get(breakInfo.levelNumberBeforeBreak);
-                level.breakMinutes = breakInfo.durationMinutes || 0;
-            }
-        });
-        return Array.from(levelMap.values()).map(level => ({
-            levelNumber: level.levelNumber,
-            durationMinutes: level.durationMinutes || 20,
-            smallBlind: level.smallBlind || 0,
-            bigBlind: level.bigBlind || 0,
-            ante: level.ante || 0,
-            breakMinutes: level.breakMinutes || 0
-        }));
-    };
-
-    const processedLevels = processLevels(data.levels, data.breaks);
-
-    let savedGameItem; // Variable to hold the final saved item
+    const processedLevels = (data.levels || []).map(level => ({
+        levelNumber: level.levelNumber,
+        durationMinutes: level.durationMinutes || 0,
+        smallBlind: level.smallBlind || 0,
+        bigBlind: level.bigBlind || 0,
+        ante: level.ante || 0,
+        isBreak: level.breakMinutes > 0,
+        breakMinutes: level.breakMinutes || 0
+    }));
+    
+    const doNotScrape = input.doNotScrape || false;
 
     if (existingGameId) {
-        console.log(`[handleSave] Updating existing game with ID: ${existingGameId}.`);
-        const getResult = await ddbDocClient.send(new GetCommand({
-            TableName: gameTable,
-            Key: { id: existingGameId }
-        }));
-        if (!getResult.Item) {
-            throw new Error(`Failed to update. Game with ID ${existingGameId} not found.`);
+        console.log('[handleSave] Updating existing game...');
+        const getCommand = new GetCommand({ TableName: gameTable, Key: { id: existingGameId } });
+        const existingGame = await ddbDocClient.send(getCommand);
+        
+        if (!existingGame.Item) {
+            console.error(`[handleSave] No game found with ID: ${existingGameId}`);
+            throw new Error(`No game found with ID: ${existingGameId}`);
         }
-        const existingGame = getResult.Item;
+        
         const updatedGameItem = {
-            ...existingGame,
+            ...existingGame.Item,
             name: data.name,
-            gameType: data.gameType || 'TOURNAMENT',
-            gameStatus: data.gameStatus || 'SCHEDULED',
-            registrationStatus: data.registrationStatus,
-            gameVariant: data.gameVariant || 'NLHE', 
+            gameType: data.gameType || existingGame.Item.gameType || 'TOURNAMENT',
+            gameStatus: data.gameStatus || existingGame.Item.gameStatus || 'SCHEDULED',
+            gameVariant: data.gameVariant || existingGame.Item.gameVariant || 'NLHE',
+            gameStartDateTime: data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : existingGame.Item.gameStartDateTime,
+            gameEndDateTime: data.gameEndDateTime ? new Date(data.gameEndDateTime).toISOString() : existingGame.Item.gameEndDateTime,
+            tournamentType: data.tournamentType || existingGame.Item.tournamentType,
+            buyIn: data.buyIn !== undefined ? data.buyIn : existingGame.Item.buyIn,
+            rake: data.rake !== undefined ? data.rake : existingGame.Item.rake,
+            startingStack: data.startingStack !== undefined ? data.startingStack : existingGame.Item.startingStack,
+            hasGuarantee: data.hasGuarantee !== undefined ? data.hasGuarantee : existingGame.Item.hasGuarantee,
+            guaranteeAmount: data.guaranteeAmount !== undefined ? data.guaranteeAmount : existingGame.Item.guaranteeAmount,
+            revenueByBuyIns: data.revenueByBuyIns,
+            profitLoss: data.profitLoss,
+            guaranteeSurplus: data.guaranteeSurplus,
+            guaranteeOverlay: data.guaranteeOverlay,
+            totalRake: data.totalRake,
             isSatellite: data.isSatellite,
             isSeries: data.isSeries,
             isRegular: data.isRegular,
             gameFrequency: data.gameFrequency,
             seriesName: data.seriesName,
-            prizepool: data.prizepool,
-            totalEntries: data.totalEntries,
+            registrationStatus: data.registrationStatus || existingGame.Item.registrationStatus,
+            prizepool: data.prizepool !== undefined ? data.prizepool : existingGame.Item.prizepool,
+            totalEntries: data.totalEntries !== undefined ? data.totalEntries : existingGame.Item.totalEntries,
             playersRemaining: data.playersRemaining,
-            totalRebuys: data.totalRebuys,
-            totalAddons: data.totalAddons,
-            totalDuration: data.totalDuration,
-            gameTags: data.gameTags,
-            buyIn: data.buyIn,
-            rake: data.rake || existingGame.rake || 0,
-            startingStack: data.startingStack,
-            hasGuarantee: data.hasGuarantee,
-            guaranteeAmount: data.guaranteeAmount,
-            tournamentType: data.tournamentType,
-            revenueByBuyIns: data.revenueByBuyIns,
+            totalRebuys: data.totalRebuys !== undefined ? data.totalRebuys : existingGame.Item.totalRebuys,
+            totalAddons: data.totalAddons !== undefined ? data.totalAddons : existingGame.Item.totalAddons,
+            totalDuration: data.totalDuration !== undefined ? data.totalDuration : existingGame.Item.totalDuration,
+            gameTags: data.gameTags || existingGame.Item.gameTags,
+            doNotScrape: doNotScrape,
             sourceDataIssue: data.sourceDataIssue || false,
             gameDataVerified: data.gameDataVerified || false,
-            profitLoss: data.profitLoss,
-            guaranteeSurplus: data.guaranteeSurplus,
-            guaranteeOverlay: data.guaranteeOverlay,
-            totalRake: data.totalRake,
-            venueId,
-            gameStartDateTime: data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : existingGame.gameStartDateTime,
-            gameEndDateTime: data.gameEndDateTime ? new Date(data.gameEndDateTime).toISOString() : (existingGame.gameEndDateTime || null),
-            doNotScrape: doNotScrape,
             updatedAt: now,
             _lastChangedAt: Date.now(),
-            _version: (existingGame._version || 1) + 1,
         };
-        if (existingGame.tournamentStructureId && processedLevels.length > 0) {
-            const structureUpdate = {
-                TableName: structureTable,
-                Key: { id: existingGame.tournamentStructureId },
-                UpdateExpression: 'SET #levels = :levels, #updatedAt = :updatedAt, #_lastChangedAt = :_lastChangedAt, #_version = #_version + :inc',
-                ExpressionAttributeNames: {
-                    '#levels': 'levels',
-                    '#updatedAt': 'updatedAt',
-                    '#_lastChangedAt': '_lastChangedAt',
-                    '#_version': '_version'
-                },
-                ExpressionAttributeValues: {
-                    ':levels': processedLevels,
-                    ':updatedAt': now,
-                    ':_lastChangedAt': Date.now(),
-                    ':inc': 1
-                }
-            };
-            await Promise.all([
-                ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem })),
-                ddbDocClient.send(new UpdateCommand(structureUpdate))
-            ]);
-        } else if (!existingGame.tournamentStructureId && processedLevels.length > 0) {
-            console.log(`[handleSave] Adding new tournament structure to existing game: ${existingGameId}`);
-            const structureId = crypto.randomUUID();
-            updatedGameItem.tournamentStructureId = structureId;
+        
+        if (processedLevels.length > 0) {
+            let structureId = existingGame.Item.tournamentStructureId;
+            if (!structureId) {
+                structureId = crypto.randomUUID();
+                updatedGameItem.tournamentStructureId = structureId;
+            }
             const structureItem = {
                 id: structureId,
                 name: `${data.name} - Blind Structure`,
@@ -424,17 +631,44 @@ const handleSave = async (input) => {
         savedGameItem = gameItem; // Assign the new item
     }
 
-    // ✅ 3. After a game is saved, check its status and send to SQS if finished
+    // ✅ ENHANCEMENT 2: Send ALL scraped data to SQS when game is FINISHED
     if (savedGameItem && savedGameItem.gameStatus === 'FINISHED') {
         try {
+            // Create an optimized payload focused on player processing
+            const sqsPayload = createOptimizedPlayerPayload(
+                savedGameItem, 
+                originalScrapedData || data,
+                { sourceUrl, venueId }
+            );
+            
             const command = new SendMessageCommand({
                 // This environment variable MUST be configured on the function
                 QueueUrl: process.env.PLAYER_PROCESSOR_QUEUE_URL,
-                MessageBody: JSON.stringify(savedGameItem),
+                MessageBody: JSON.stringify(sqsPayload),
+                // Optional: Add message attributes for easier filtering/routing
+                MessageAttributes: {
+                    gameId: {
+                        DataType: 'String',
+                        StringValue: savedGameItem.id
+                    },
+                    gameStatus: {
+                        DataType: 'String',
+                        StringValue: 'FINISHED'
+                    },
+                    venueId: {
+                        DataType: 'String',
+                        StringValue: venueId
+                    },
+                    totalPlayers: {
+                        DataType: 'Number',
+                        StringValue: String(sqsPayload.players.totalPlayers || 0)
+                    }
+                }
             });
 
             await sqsClient.send(command);
-            console.log(`[handleSave] Successfully sent finished game ${savedGameItem.id} to SQS queue.`);
+            console.log(`[handleSave] Successfully sent finished game ${savedGameItem.id} to SQS queue with optimized player data.`);
+            console.log(`[handleSave] Payload contains ${sqsPayload.players.totalPlayers} players, ${sqsPayload.players.totalInTheMoney} ITM.`);
 
         } catch (error) {
             console.error('[handleSave] FAILED to send message to SQS:', error);
@@ -481,6 +715,20 @@ const handleFetchRange = async (startId, endId) => {
     return allResults.map(res => {
         if (res.status === 'fulfilled' && !res.value.error) {
             const data = res.value;
+            // Handle the special case where tournament ID is not in use
+            if (data.isInactive || data.gameStatus === 'NOT_IN_USE') {
+                return {
+                    id: data.id,
+                    name: 'Tournament ID Not In Use',
+                    gameStatus: 'NOT_IN_USE',
+                    registrationStatus: 'N/A',
+                    gameStartDateTime: null,
+                    inDatabase: !!data.existingGameId,
+                    doNotScrape: false,
+                    isInactive: true,
+                    error: null
+                };
+            }
             return {
                 id: data.id,
                 name: data.name || 'Name not found',
@@ -518,12 +766,26 @@ exports.handler = async (event) => {
         switch (fieldName) {
             case 'fetchTournamentData':
                 const result = await handleFetch(arguments.url);
+                
+                // ✅ ENHANCEMENT 1: Handle NOT_IN_USE tournaments gracefully
+                if (result.isInactive || result.gameStatus === 'NOT_IN_USE') {
+                    console.log('[Handler] Tournament is not in use, returning placeholder data');
+                    return result; // Return the placeholder data directly
+                }
+                
                 if (result.errorMessage) throw new Error(result.errorMessage);
                 return result;
+                
             case 'saveTournamentData':
+                // Pass the original scraped data along if available
+                if (arguments.input.originalScrapedData) {
+                    return await handleSave(arguments.input);
+                }
                 return await handleSave(arguments.input);
+                
             case 'fetchTournamentDataRange':
                 return await handleFetchRange(arguments.startId, arguments.endId);
+                
             default:
                 throw new Error(`Unknown operation: ${fieldName}. No 'input' or 'url' argument found.`);
         }

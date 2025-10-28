@@ -51,6 +51,7 @@ export type ScrapedGameData = {
 };
 
 export enum GameStatus {
+  INITIATING = "INITIATING",
   SCHEDULED = "SCHEDULED",
   REGISTERING = "REGISTERING",
   RUNNING = "RUNNING",
@@ -192,6 +193,7 @@ export type ScrapedGameDataInput = {
 };
 
 export enum RegistrationStatus {
+  SCHEDULED = "SCHEDULED",
   OPEN = "OPEN",
   FINAL = "FINAL",
   CLOSED = "CLOSED",

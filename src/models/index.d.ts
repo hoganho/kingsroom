@@ -28,6 +28,7 @@ export enum GameType {
 }
 
 export enum GameStatus {
+  INITIATING = "INITIATING",
   SCHEDULED = "SCHEDULED",
   REGISTERING = "REGISTERING",
   RUNNING = "RUNNING",
@@ -53,6 +54,7 @@ export enum GameFrequency {
 }
 
 export enum RegistrationStatus {
+  SCHEDULED = "SCHEDULED",
   OPEN = "OPEN",
   FINAL = "FINAL",
   CLOSED = "CLOSED"

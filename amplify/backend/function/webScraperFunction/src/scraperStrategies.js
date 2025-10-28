@@ -107,9 +107,32 @@ class ScrapeContext {
  */
 const defaultStrategy = {
     getName(ctx, seriesTitles = []) {
-        const gameName = ctx.getText('name', '.cw-game-title');
+        // Try to get the game name
+        let gameName = ctx.$('.cw-game-title').first().text().trim();
+        
+        // If no name found or empty, handle gracefully
+        if (!gameName || gameName === '') {
+            // Check if we already know this is an inactive/unknown tournament
+            if (ctx.data.gameStatus === 'UNKNOWN_STATUS' || ctx.data.isInactive) {
+                // Provide a placeholder name for inactive tournaments
+                ctx.add('name', 'Tournament ID Not In Use');
+                ctx.add('isSeries', false);
+                ctx.add('isRegular', false);
+                ctx.add('isInactive', true);
+                return;
+            } else {
+                // If status is not unknown but name is missing, that's a different issue
+                ctx.add('name', 'Unnamed Tournament');
+                ctx.add('isSeries', false);
+                ctx.add('isRegular', true);
+                return;
+            }
+        }
+        
+        // Normal processing when we have a valid name
+        ctx.add('name', gameName);
 
-        if (!gameName || !seriesTitles || seriesTitles.length === 0) {
+        if (!seriesTitles || seriesTitles.length === 0) {
             ctx.add('isSeries', false);
             ctx.add('isRegular', true);
             return;
@@ -207,16 +230,28 @@ const defaultStrategy = {
     },
     
     getStatus(ctx) {
-        // Renamed 'status' to 'gameStatus' internally for clarity, matching schema
-        const gameStatus = (ctx.$('label:contains("Status")').first().next('strong').text().trim().toUpperCase() || 'UNKNOWN_STATUS');
-        if (gameStatus !== 'UNKNOWN_STATUS') {
-            // Map 'RUNNING' from scrape to 'LIVE' if schema expects LIVE
-            // Or keep as 'RUNNING' if schema expects RUNNING
-            // Assuming schema expects RUNNING for now based on previous discussion context.
-            // If schema expects LIVE, change the next line.
-            const mappedStatus = gameStatus === 'RUNNING' ? 'RUNNING' : gameStatus;
-            ctx.add('gameStatus', mappedStatus); // Add as gameStatus
+        // Get the status text - it might be empty or missing
+        const statusElement = ctx.$('label:contains("Status")').first().next('strong');
+        let gameStatus = statusElement.text().trim().toUpperCase();
+        
+        // If no status found or empty, mark as UNKNOWN_STATUS
+        if (!gameStatus || gameStatus === '') {
+            gameStatus = 'UNKNOWN_STATUS';
         }
+        
+        // Always add the gameStatus to the context, even if it's UNKNOWN_STATUS
+        // This ensures we always have a status value
+        if (gameStatus === 'UNKNOWN_STATUS') {
+            // For unknown status, we'll handle this specially
+            ctx.add('gameStatus', 'UNKNOWN_STATUS');
+            // Also indicate this tournament ID is not in use
+            ctx.add('isInactive', true);
+        } else {
+            // Map 'RUNNING' from scrape to correct status if needed
+            const mappedStatus = gameStatus === 'RUNNING' ? 'RUNNING' : gameStatus;
+            ctx.add('gameStatus', mappedStatus);
+        }
+        
         return gameStatus; // Return the raw scraped status for internal checks
     },
     

@@ -28,6 +28,7 @@ const GameType = {
 };
 
 const GameStatus = {
+  "INITIATING": "INITIATING",
   "SCHEDULED": "SCHEDULED",
   "REGISTERING": "REGISTERING",
   "RUNNING": "RUNNING",
@@ -53,6 +54,7 @@ const GameFrequency = {
 };
 
 const RegistrationStatus = {
+  "SCHEDULED": "SCHEDULED",
   "OPEN": "OPEN",
   "FINAL": "FINAL",
   "CLOSED": "CLOSED"
