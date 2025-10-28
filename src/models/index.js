@@ -48,7 +48,8 @@ const GameFrequency = {
   "FORTNIGHTLY": "FORTNIGHTLY",
   "MONTHLY": "MONTHLY",
   "QUARTERLY": "QUARTERLY",
-  "YEARLY": "YEARLY"
+  "YEARLY": "YEARLY",
+  "UNKNOWN": "UNKNOWN"
 };
 
 const RegistrationStatus = {

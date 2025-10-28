@@ -48,7 +48,8 @@ export enum GameFrequency {
   FORTNIGHTLY = "FORTNIGHTLY",
   MONTHLY = "MONTHLY",
   QUARTERLY = "QUARTERLY",
-  YEARLY = "YEARLY"
+  YEARLY = "YEARLY",
+  UNKNOWN = "UNKNOWN"
 }
 
 export enum RegistrationStatus {

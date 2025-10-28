@@ -1,5 +1,5 @@
 // Updated type definitions to match the refactored schema
-import type { DataSource, GameType, GameStatus, RegistrationStatus, TournamentType, GameVariant } from '../API';
+import type { DataSource, GameType, GameStatus, RegistrationStatus, TournamentType, GameVariant, GameFrequency } from '../API';
 
 export type TournamentLevelData = {
     levelNumber: number;
@@ -64,6 +64,10 @@ export type GameData = {
     gameStatus: GameStatus;
     gameType?: GameType;
     gameVariant?: GameVariant;
+    gameFrequency?: GameFrequency;
+    isSeries?: boolean;
+    isRegular?: boolean;
+    isSatellite?: boolean;
     
     // Game state and metadata
     registrationStatus?: RegistrationStatus;

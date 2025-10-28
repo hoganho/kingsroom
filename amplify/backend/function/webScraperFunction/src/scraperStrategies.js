@@ -23,10 +23,11 @@ const parseDurationToMilliseconds = (durationStr) => {
 
 const AUTO_ASSIGN_THRESHOLD = 0.90; // 90% similarity - high confidence
 const SUGGEST_THRESHOLD = 0.60;     // 60% similarity - medium confidence, suggest to user
+const SERIES_MATCH_THRESHOLD = 0.80; // 80% similarity
 
-const cleanupVenueName = (name) => {
+const cleanupNameForMatching = (name) => {
     if (!name) return '';
-    
+    // This removes weekdays, which is useful for matching a game name to a series title.
     const wordsToRemove = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const regex = new RegExp(`\\b(${wordsToRemove.join('|')})\\b`, 'gi');
     return name.replace(regex, '').replace(/\s+/g, ' ').trim();
@@ -105,8 +106,51 @@ class ScrapeContext {
  * ===================================================================
  */
 const defaultStrategy = {
-    getName(ctx) {
-        ctx.getText('name', '.cw-game-title');
+    getName(ctx, seriesTitles = []) {
+        const gameName = ctx.getText('name', '.cw-game-title');
+
+        if (!gameName || !seriesTitles || seriesTitles.length === 0) {
+            ctx.add('isSeries', false);
+            ctx.add('isRegular', true);
+            return;
+        }
+
+        // 1. Clean the scraped game name to prepare it for matching.
+        const cleanedGameName = cleanupNameForMatching(gameName);
+        
+        // 2. Create a flat list of all possible series names and aliases to match against.
+        const allSeriesNamesToMatch = seriesTitles.flatMap(series => {
+            const names = [series.title, ...(series.aliases || [])];
+            return names.map(name => ({
+                seriesTitle: series.title, // The official title to use if matched
+                matchName: name // The title or alias to compare against
+            }));
+        });
+
+        // 3. Find the best match between the cleaned game name and the list of series names.
+        const { bestMatch } = stringSimilarity.findBestMatch(
+            cleanedGameName,
+            allSeriesNamesToMatch.map(s => s.matchName)
+        );
+
+        // 4. Check if the best match meets our confidence threshold.
+        if (bestMatch && bestMatch.rating >= SERIES_MATCH_THRESHOLD) {
+            console.log(`[DEBUG-SERIES-MATCH] High confidence match found: "${bestMatch.target}" with rating ${bestMatch.rating}`);
+            // Find the original series object to get its official title.
+            const matchedSeries = allSeriesNamesToMatch.find(s => s.matchName === bestMatch.target);
+            
+            if (matchedSeries) {
+                ctx.add('seriesName', matchedSeries.seriesTitle); // Always use the official title
+                ctx.add('isSeries', true);
+                ctx.add('isRegular', false);
+            }
+        } else {
+            if (bestMatch) {
+                 console.log(`[DEBUG-SERIES-MATCH] Low confidence match, ignoring: "${bestMatch.target}" with rating ${bestMatch.rating}`);
+            }
+            ctx.add('isSeries', false);
+            ctx.add('isRegular', true);
+        }
     },
     
     getGameTags(ctx) {
@@ -123,6 +167,35 @@ const defaultStrategy = {
         if (tags.length > 0) {
             ctx.add('gameTags', tags);
         }
+    },
+
+    getTournamentType(ctx) {
+        // This function depends on getGameTags, so it must run after.
+        const tags = ctx.data.gameTags || [];
+        let tournamentType = 'FREEZEOUT'; // Set the default type
+
+        // Define keywords for matching
+        const rebuyKeywords = ['rebuy', 're-buy'];
+        const satelliteKeywords = ['sat', 'satellite', 'satty'];
+
+        // Create case-insensitive regular expressions
+        const rebuyRegex = new RegExp(rebuyKeywords.join('|'), 'i');
+        const satelliteRegex = new RegExp(satelliteKeywords.join('|'), 'i');
+
+        // Check each tag for a match
+        for (const tag of tags) {
+            if (rebuyRegex.test(tag)) {
+                tournamentType = 'REBUY';
+                break; // A rebuy tournament was found, stop checking.
+            }
+            if (satelliteRegex.test(tag)) {
+                tournamentType = 'SATELLITE';
+                break; // A satellite tournament was found, stop checking.
+            }
+        }
+
+        ctx.add('tournamentType', tournamentType);
+        console.log(`[DEBUG-TYPE] Determined tournament type: ${tournamentType}`);
     },
 
     getGameStartDateTime(ctx) {
@@ -455,6 +528,34 @@ const defaultStrategy = {
         // playersRemaining will be calculated in getLiveData now based on seating count
     },
 
+    getEntries(ctx) {
+        const entries = [];
+        // This selector finds the table directly following the 'Entries' heading
+        const entriesTable = ctx.$('h4.cw-text-center:contains("Entries")').next('table').find('tbody tr');
+        
+        entriesTable.each((i, el) => {
+            const $row = ctx.$(el);
+            
+            // Skip any header rows that might be in the tbody
+            if ($row.find('th').length > 0) {
+                return; // 'continue' in a .each loop
+            }
+
+            // The player name is in the second table cell (td)
+            const name = $row.find('td').eq(1).text().trim();
+            
+            // Add the player to the list if a name was found
+            if (name) {
+                entries.push({ name: name });
+            }
+        });
+
+        if (entries.length > 0) {
+            ctx.add('entries', entries);
+            console.log(`[DEBUG-ENTRIES] Found ${entries.length} total player entries.`);
+        }
+    },
+
     getLiveData(ctx) {
         // Get the status added by the getStatus function earlier
         const currentStatus = ctx.data.gameStatus;
@@ -591,7 +692,7 @@ const defaultStrategy = {
             return;
         }
 
-        const cleanedScrapedName = cleanupVenueName(ctx.data.name);
+        const cleanedScrapedName = cleanupNameForMatching(ctx.data.name);
 
         // 1. Create a flattened list of all possible names (primary + aliases) to match against.
         const allNamesToMatch = venues.flatMap(venue => {
@@ -599,7 +700,7 @@ const defaultStrategy = {
             return names.map(name => ({
                 venueId: venue.id,
                 venueName: venue.name, // Keep the original primary name for display
-                matchName: cleanupVenueName(name)
+                matchName: cleanupNameForMatching(name)
             }));
         });
         
@@ -642,6 +743,11 @@ const defaultStrategy = {
         let autoAssignedVenue = null;
         if (sortedSuggestions[0].score >= AUTO_ASSIGN_THRESHOLD) {
             autoAssignedVenue = sortedSuggestions[0];
+
+            if (autoAssignedVenue) {
+                ctx.add('venueName', autoAssignedVenue.name);
+                console.log(`[DEBUG-MATCHING] Added 'venueName: ${autoAssignedVenue.name}' to data.`);
+            }
         }
 
         // 6. Construct the final result object.
@@ -652,7 +758,44 @@ const defaultStrategy = {
         
         console.log('[DEBUG-MATCHING] Final match result:', JSON.stringify(venueMatch, null, 2));
         ctx.add('venueMatch', venueMatch);
-    }
+    },
+
+    getTournamentFlags(ctx) {
+        const name = ctx.data.name || '';
+        const satelliteKeywords = ['satellite', 'satty'];
+        const satelliteRegex = new RegExp(`\\b(${satelliteKeywords.join('|')})\\b`, 'i');
+
+        if (satelliteRegex.test(name)) {
+            ctx.add('isSatellite', true);
+        } else {
+            ctx.add('isSatellite', false);
+        }
+    },
+
+    /**
+     * ✅ NEW: Determines the game's frequency (Weekly, Monthly, etc.) from its name.
+     */
+    getGameFrequency(ctx) {
+        const name = (ctx.data.name || '').toUpperCase();
+        
+        const weekdays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+        const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER', 'JAN', 'FEB', 'MAR', 'APR', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        const quarterly = ['QUARTERLY', 'QTR', 'Q1', 'Q2', 'Q3', 'Q4'];
+        const yearly = ['YEARLY'];
+
+        if (weekdays.some(day => name.includes(day))) {
+            ctx.add('gameFrequency', 'WEEKLY');
+        } else if (months.some(month => name.includes(month))) {
+            ctx.add('gameFrequency', 'MONTHLY');
+        } else if (quarterly.some(term => name.includes(term))) {
+            ctx.add('gameFrequency', 'QUARTERLY');
+        } else if (yearly.some(term => name.includes(term))) {
+            ctx.add('gameFrequency', 'YEARLY');
+        } else {
+            ctx.add('gameFrequency', 'UNKNOWN');
+        }
+    },
+
 };
 
 /**
@@ -666,16 +809,19 @@ const strategyMap = {
      "STATUS: SCHEDULED | REG: OPEN": defaultStrategy,
 };
 
-const runScraper = (html, structureLabel, venues = []) => {
+const runScraper = (html, structureLabel, venues = [], seriesTitles = []) => {
     const ctx = new ScrapeContext(html);
     const strategy = defaultStrategy;
     console.log(`[Scraper] Using unified robust strategy.`);
 
     // Define the order, ensuring status is scraped before getLiveData
     const executionOrder = [
-        'getStatus', // Run this first to determine game status
         'getName',
+        'getTournamentFlags', // Depends on name
+        'getGameFrequency',   // Depends on name
+        'getStatus', // Run this first to determine game status
         'getGameTags',
+        'getTournamentType',
         'getGameStartDateTime',
         'getRegistrationStatus',
         'getGameVariant',
@@ -693,6 +839,7 @@ const runScraper = (html, structureLabel, venues = []) => {
         'calculateProfitLoss',
         'getSeriesName',
         'getTotalDuration',
+        'getEntries', // Scrape seating structure
         'getSeating', // Scrape seating structure
         'getResults', // Scrape results (if any)
         'getTables',  // Scrape table layout
@@ -706,7 +853,10 @@ const runScraper = (html, structureLabel, venues = []) => {
     executionOrder.forEach(key => {
         if (typeof strategy[key] === 'function') {
              try {
-                if (key === 'getMatchingVenue') {
+                // ✅ UPDATED: Pass the seriesTitles list to the getName function.
+                if (key === 'getName') {
+                    strategy[key](ctx, seriesTitles);
+                } else if (key === 'getMatchingVenue') {
                     strategy[key](ctx, venues);
                 } else {
                     strategy[key](ctx);

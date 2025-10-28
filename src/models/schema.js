@@ -3681,7 +3681,8 @@ export const schema = {
                 "FORTNIGHTLY",
                 "MONTHLY",
                 "QUARTERLY",
-                "YEARLY"
+                "YEARLY",
+                "UNKNOWN"
             ]
         },
         "RegistrationStatus": {

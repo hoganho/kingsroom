@@ -88,6 +88,7 @@ export enum GameFrequency {
   MONTHLY = "MONTHLY",
   QUARTERLY = "QUARTERLY",
   YEARLY = "YEARLY",
+  UNKNOWN = "UNKNOWN",
 }
 
 

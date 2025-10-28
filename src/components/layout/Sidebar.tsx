@@ -1,8 +1,8 @@
 // src/components/layout/Sidebar.tsx
 
 import { NavLink } from 'react-router-dom';
-// ✅ 1. Import an appropriate icon, like TrophyIcon, for the series link
 import { DocumentMagnifyingGlassIcon, QueueListIcon, BuildingOffice2Icon, TrophyIcon } from '@heroicons/react/24/outline';
+import logo from '../../assets/Kings-Room-Logo_web.png'; // 1. Import your logo
 
 const getLinkClassName = ({ isActive }: { isActive: boolean }) =>
   `flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${
@@ -14,9 +14,11 @@ const getLinkClassName = ({ isActive }: { isActive: boolean }) =>
 export const Sidebar = () => {
   return (
     <aside className="fixed inset-y-0 left-0 z-10 w-64 flex-col border-r bg-white hidden md:flex">
-      <div className="flex flex-shrink-0 items-center px-4 h-16 border-b">
-        <h1 className="text-xl font-bold text-indigo-600">Kingsroom App</h1>
+      {/* 2. Replace the h1 with an img tag for your logo */}
+      <div className="flex flex-shrink-0 items-center justify-center px-4 h-16 border-b bg-black">
+        <img src={logo} alt="Kings Room Logo" className="h-12 object-contain" />
       </div>
+
       <nav className="flex flex-1 flex-col overflow-y-auto">
         <div className="p-4 space-y-2">
           <NavLink to="/scraper-dashboard" className={getLinkClassName}>
@@ -31,8 +33,6 @@ export const Sidebar = () => {
             <BuildingOffice2Icon className="h-5 w-5 mr-3" />
             Venues
           </NavLink>
-          
-          {/* ✅ 2. Add the new NavLink for your Series Management Page */}
           <NavLink to="/series-management" className={getLinkClassName}>
             <TrophyIcon className="h-5 w-5 mr-3" />
             Series Management

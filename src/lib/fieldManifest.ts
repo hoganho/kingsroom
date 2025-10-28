@@ -31,6 +31,7 @@ export const fieldManifest: Record<string, FieldDefinition> = {
   isSeries: { label: 'Is Series', group: 'Derived and Manual Details', isBaselineExpected: true },
   isRegular: { label: 'Is Regular', group: 'Derived and Manual Details', isBaselineExpected: true },
   isSatellite: { label: 'Is Satellite', group: 'Derived and Manual Details', isBaselineExpected: true },
+  gameFrequency: { label: 'Game Frequency', group: 'Core Game Details', isBaselineExpected: true },
 
   // Prize & Entry Details
   prizepool: { label: 'Prizepool', group: 'Prize & Entry Details', isBaselineExpected: true },

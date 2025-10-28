@@ -1,10 +1,4 @@
 /* Amplify Params - DO NOT EDIT
-	API_KINGSROOM_ASSETTABLE_ARN
-	API_KINGSROOM_ASSETTABLE_NAME
-	API_KINGSROOM_CASHSTRUCTURETABLE_ARN
-	API_KINGSROOM_CASHSTRUCTURETABLE_NAME
-	API_KINGSROOM_DATASYNCTABLE_ARN
-	API_KINGSROOM_DATASYNCTABLE_NAME
 	API_KINGSROOM_GAMETABLE_ARN
 	API_KINGSROOM_GAMETABLE_NAME
 	API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
@@ -15,22 +9,18 @@
 	API_KINGSROOM_PLAYERSUMMARYTABLE_NAME
 	API_KINGSROOM_PLAYERTABLE_ARN
 	API_KINGSROOM_PLAYERTABLE_NAME
-	API_KINGSROOM_PLAYERTICKETTABLE_ARN
-	API_KINGSROOM_PLAYERTICKETTABLE_NAME
 	API_KINGSROOM_PLAYERTRANSACTIONTABLE_ARN
 	API_KINGSROOM_PLAYERTRANSACTIONTABLE_NAME
 	API_KINGSROOM_PLAYERVENUETABLE_ARN
 	API_KINGSROOM_PLAYERVENUETABLE_NAME
-	API_KINGSROOM_RAKESTRUCTURETABLE_ARN
-	API_KINGSROOM_RAKESTRUCTURETABLE_NAME
 	API_KINGSROOM_SCRAPESTRUCTURETABLE_ARN
 	API_KINGSROOM_SCRAPESTRUCTURETABLE_NAME
-	API_KINGSROOM_TICKETTEMPLATETABLE_ARN
-	API_KINGSROOM_TICKETTEMPLATETABLE_NAME
+	API_KINGSROOM_TOURNAMENTSERIESTABLE_ARN
+	API_KINGSROOM_TOURNAMENTSERIESTABLE_NAME
+	API_KINGSROOM_TOURNAMENTSERIESTITLETABLE_ARN
+	API_KINGSROOM_TOURNAMENTSERIESTITLETABLE_NAME
 	API_KINGSROOM_TOURNAMENTSTRUCTURETABLE_ARN
 	API_KINGSROOM_TOURNAMENTSTRUCTURETABLE_NAME
-	API_KINGSROOM_VENUEDETAILSTABLE_ARN
-	API_KINGSROOM_VENUEDETAILSTABLE_NAME
 	API_KINGSROOM_VENUETABLE_ARN
 	API_KINGSROOM_VENUETABLE_NAME
 	ENV
@@ -51,9 +41,15 @@ const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
 
 const getTableName = (modelName) => {
-    const envVarName = `API_KINGSROOM_${modelName.toUpperCase()}TABLE_NAME`;
-    const tableName = process.env[envVarName];
-    if (!tableName) throw new Error(`Table name for model ${modelName} not found in environment variables.`);
+    const apiId = process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT;
+    const env = process.env.ENV;
+
+    if (!apiId || !env) {
+        throw new Error(`API ID or environment name not found in environment variables. Amplify push may have failed.`);
+    }
+
+    // The pattern is always: ModelName-ApiId-Env
+    const tableName = `${modelName}-${apiId}-${env}`;
     return tableName;
 };
 
@@ -73,8 +69,25 @@ const getAllVenues = async () => {
     }
 };
 
+const getAllSeriesTitles = async () => {
+    // Note: The model name is 'TournamentSeriesTitle'
+    const seriesTitleTable = getTableName('TournamentSeriesTitle');
+    try {
+        const command = new ScanCommand({
+            TableName: seriesTitleTable,
+            // Fetch the fields needed for matching
+            ProjectionExpression: 'id, title, aliases'
+        });
+        const response = await ddbDocClient.send(command);
+        return response.Items || [];
+    } catch (error) {
+        console.error('Error fetching series titles from DynamoDB:', error);
+        return [];
+    }
+};
+
 // --- SCRAPING LOGIC ---
-const scrapeDataFromHtml = (html, venues) => {
+const scrapeDataFromHtml = (html, venues, seriesTitles) => {
     // ✅ Renamed 'status' to 'gameStatus'
     const { gameStatus, registrationStatus } = getStatusAndReg(html);
 
@@ -82,7 +95,7 @@ const scrapeDataFromHtml = (html, venues) => {
     const structureLabel = `STATUS: ${gameStatus || 'UNKNOWN'} | REG: ${registrationStatus || 'UNKNOWN'}`;
     console.log(`[DEBUG-SCRAPER] Identified Structure: ${structureLabel}`);
 
-    const { data, foundKeys } = runScraper(html, structureLabel, venues);
+    const { data, foundKeys } = runScraper(html, structureLabel, venues, seriesTitles);
 
     // Ensure gameStatus from initial check is in the final data if not already added by scraper
     if (!data.hasOwnProperty('gameStatus') && gameStatus !== 'UNKNOWN_STATUS') {
@@ -212,16 +225,18 @@ const handleFetch = async (url) => {
         };
     }
 
-    // ✅ 1. Fetch all venues before scraping
-    const venues = await getAllVenues();
-    console.log(`[handleFetch] Loaded ${venues.length} venues for matching.`);
+    // ✅ Fetch both venues and series titles in parallel
+    const [venues, seriesTitles] = await Promise.all([
+        getAllVenues(),
+        getAllSeriesTitles()
+    ]);
+    console.log(`[handleFetch] Loaded ${venues.length} venues and ${seriesTitles.length} series titles for matching.`);
 
     console.log(`[handleFetch] Fetching data from: ${url}`);
     const response = await axios.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
     
     // ✅ 2. Pass the venues list to the scraper
-    const { data, foundKeys } = scrapeDataFromHtml(response.data, venues);
-    
+    const { data, foundKeys } = scrapeDataFromHtml(response.data, venues, seriesTitles);    
     const fingerprintResult = await processStructureFingerprint(foundKeys, data.structureLabel, url);
     
     return { 
@@ -287,7 +302,11 @@ const handleSave = async (input) => {
             gameStatus: data.gameStatus || 'SCHEDULED',
             registrationStatus: data.registrationStatus,
             gameVariant: data.gameVariant || 'NLHE', 
-            seriesName: data.seriesName,
+            isSatellite: data.isSatellite,
+            isSeries: data.isSeries,
+            isRegular: data.isRegular,
+            gameFrequency: data.gameFrequency,
+            seriesName: data.seriesName, // Will be set if isSeries is true
             prizepool: data.prizepool,
             totalEntries: data.totalEntries,
             playersRemaining: data.playersRemaining,
@@ -300,7 +319,7 @@ const handleSave = async (input) => {
             startingStack: data.startingStack,
             hasGuarantee: data.hasGuarantee,
             guaranteeAmount: data.guaranteeAmount,
-            tournamentType: data.tournamentType || 'FREEZEOUT',
+            tournamentType: data.tournamentType,
             revenueByBuyIns: data.revenueByBuyIns,
             profitLoss: data.profitLoss,
             guaranteeSurplus: data.guaranteeSurplus,
@@ -403,7 +422,7 @@ const handleSave = async (input) => {
             gameEndDateTime: data.gameEndDateTime ? new Date(data.gameEndDateTime).toISOString() : null,
             sourceUrl,
             venueId,
-            tournamentType: data.tournamentType || 'FREEZEOUT',
+            tournamentType: data.tournamentType,
             buyIn: data.buyIn,
             rake: data.rake || 0,
             startingStack: data.startingStack,
@@ -414,6 +433,10 @@ const handleSave = async (input) => {
             guaranteeSurplus: data.guaranteeSurplus,
             guaranteeOverlay: data.guaranteeOverlay,
             totalRake: data.totalRake,
+            isSatellite: data.isSatellite,
+            isSeries: data.isSeries,
+            isRegular: data.isRegular,
+            gameFrequency: data.gameFrequency,
             seriesName: data.seriesName,
             registrationStatus: data.registrationStatus,
             gameVariant: data.gameVariant,

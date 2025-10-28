@@ -7,12 +7,28 @@
       ]
     },
     "storage": {
+      "DataSync:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
       "ScrapeStructure:@model(appsync)": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "Asset:@model(appsync)": [
         "create",
         "read",
         "update"
       ],
       "Venue:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "VenueDetails:@model(appsync)": [
         "create",
         "read",
         "update"
@@ -33,6 +49,16 @@
         "update"
       ],
       "TournamentStructure:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "RakeStructure:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "CashStructure:@model(appsync)": [
         "create",
         "read",
         "update"
@@ -58,6 +84,16 @@
         "update"
       ],
       "PlayerResult:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "TicketTemplate:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "PlayerTicket:@model(appsync)": [
         "create",
         "read",
         "update"
