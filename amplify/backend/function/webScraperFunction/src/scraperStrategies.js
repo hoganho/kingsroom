@@ -561,7 +561,7 @@ const defaultStrategy = {
         const currentStatus = ctx.data.gameStatus;
 
         // Skip if the game is already finished
-        if (currentStatus === 'COMPLETED' || currentStatus === 'FINISHED' || currentStatus === 'CANCELLED') {
+        if (currentStatus === 'FINISHED' || currentStatus === 'CANCELLED') {
             console.log(`[DEBUG-LIVE] Skipping live data scrape, game status is ${currentStatus}.`);
             return;
         }
@@ -804,7 +804,7 @@ const defaultStrategy = {
  * ===================================================================
  */
 const strategyMap = {
-     "STATUS: COMPLETED | REG: CLOSED": defaultStrategy,
+     "STATUS: FINISHED | REG: CLOSED": defaultStrategy,
      "STATUS: RUNNING | REG: CLOSED": defaultStrategy,
      "STATUS: SCHEDULED | REG: OPEN": defaultStrategy,
 };

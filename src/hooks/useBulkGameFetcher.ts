@@ -51,7 +51,7 @@ export const useBulkGameFetcher = () => {
                 id: res.id,
                 name: res.name || null,
                 // Use the type guard: if the backend string is a valid status, use it. Otherwise, undefined.
-                gameStatus: isValidGameStatus(res.status) ? res.status : undefined,
+                gameStatus: isValidGameStatus(res.gameStatus) ? res.gameStatus : undefined,
                 registrationStatus: isValidRegistrationStatus(res.registrationStatus) ? res.registrationStatus : undefined,
                 gameStartDateTime: res.gameStartDateTime || null,
                 inDatabase: res.inDatabase || false,

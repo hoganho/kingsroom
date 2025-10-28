@@ -53,7 +53,6 @@ export type ScrapedGameData = {
 export enum GameStatus {
   SCHEDULED = "SCHEDULED",
   RUNNING = "RUNNING",
-  COMPLETED = "COMPLETED",
   CANCELLED = "CANCELLED",
   FINISHED = "FINISHED",
 }
@@ -2297,7 +2296,7 @@ export type ScrapedGameSummary = {
   __typename: "ScrapedGameSummary",
   id: string,
   name?: string | null,
-  status?: string | null,
+  gameStatus?: string | null,
   registrationStatus?: string | null,
   gameStartDateTime?: string | null,
   inDatabase?: boolean | null,
@@ -34528,7 +34527,7 @@ export type FetchTournamentDataRangeQuery = {
     __typename: "ScrapedGameSummary",
     id: string,
     name?: string | null,
-    status?: string | null,
+    gameStatus?: string | null,
     registrationStatus?: string | null,
     gameStartDateTime?: string | null,
     inDatabase?: boolean | null,

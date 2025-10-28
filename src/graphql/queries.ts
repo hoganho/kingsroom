@@ -12,7 +12,7 @@ export const fetchTournamentDataRange = /* GraphQL */ `query FetchTournamentData
   fetchTournamentDataRange(startId: $startId, endId: $endId) {
     id
     name
-    status
+    gameStatus
     registrationStatus
     gameStartDateTime
     inDatabase

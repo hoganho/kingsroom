@@ -3659,7 +3659,6 @@ export const schema = {
             "values": [
                 "SCHEDULED",
                 "RUNNING",
-                "COMPLETED",
                 "CANCELLED",
                 "FINISHED"
             ]
@@ -3830,8 +3829,8 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "status": {
-                    "name": "status",
+                "gameStatus": {
+                    "name": "gameStatus",
                     "isArray": false,
                     "type": "String",
                     "isRequired": false,
@@ -4517,5 +4516,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "b4d5dd643cb778c2c85d94b50e780db1"
+    "version": "a3d1c16ee100def65f870d20eba17f9f"
 };

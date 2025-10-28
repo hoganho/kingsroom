@@ -2,8 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import type { BulkGameSummary } from '../../types/game';
 
 // Helper function to determine list item color based on game status
-const getListItemColorClass = (status?: string, registrationStatus?: string): string => {
-    switch (status) {
+const getListItemColorClass = (gameStatus?: string, registrationStatus?: string): string => {
+    switch (gameStatus) {
         case 'RUNNING':
             if (registrationStatus === 'OPEN') return 'bg-green-100 border-green-200 hover:bg-green-200'; // Light Green
             if (registrationStatus === 'CLOSED') return 'bg-green-200 border-green-300 hover:bg-green-300'; // Normal Green
@@ -39,7 +39,8 @@ export const BulkGameListItem: React.FC<{ game: BulkGameSummary }> = ({ game }) 
 
     // ✅ FIXED: Convert potential `null` values to `undefined` to match the function signature.
     const colorClass = getListItemColorClass(game.gameStatus ?? undefined, game.registrationStatus ?? undefined);
-    const isActionable = !hasError && game.gameStatus !== 'FINISHED' && !colorClass.includes('red');
+    //const isActionable = !hasError && game.gameStatus !== 'FINISHED' && !colorClass.includes('red');
+    const isActionable = true;
 
     return (
         <div

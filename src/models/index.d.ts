@@ -30,7 +30,6 @@ export enum GameType {
 export enum GameStatus {
   SCHEDULED = "SCHEDULED",
   RUNNING = "RUNNING",
-  COMPLETED = "COMPLETED",
   CANCELLED = "CANCELLED",
   FINISHED = "FINISHED"
 }
@@ -155,7 +154,7 @@ export enum TicketStatus {
 type EagerScrapedGameSummary = {
   readonly id: string;
   readonly name?: string | null;
-  readonly status?: string | null;
+  readonly gameStatus?: string | null;
   readonly registrationStatus?: string | null;
   readonly gameStartDateTime?: string | null;
   readonly inDatabase?: boolean | null;
@@ -166,7 +165,7 @@ type EagerScrapedGameSummary = {
 type LazyScrapedGameSummary = {
   readonly id: string;
   readonly name?: string | null;
-  readonly status?: string | null;
+  readonly gameStatus?: string | null;
   readonly registrationStatus?: string | null;
   readonly gameStartDateTime?: string | null;
   readonly inDatabase?: boolean | null;

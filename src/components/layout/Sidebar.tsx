@@ -40,7 +40,7 @@ export const Sidebar = () => {
         </div>
       </nav>
       <div className="p-4 border-t">
-        <p className="text-xs text-gray-500">© 2025 Scraper App</p>
+        <p className="text-xs text-gray-500">© 2025 Top Set Ventures</p>
       </div>
     </aside>
   );

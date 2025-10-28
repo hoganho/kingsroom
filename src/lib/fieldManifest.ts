@@ -12,14 +12,14 @@ export interface FieldDefinition {
 export const profileDescriptions: Record<string, string> = {
   "STATUS: SCHEDULED | REG: OPEN": "A future game where registration is open.",
   "STATUS: RUNNING | REG: CLOSED": "A game currently in progress.",
-  "STATUS: COMPLETED | REG: CLOSED": "A standard completed tournament with results.",
+  "STATUS: FINISHED | REG: CLOSED": "A standard completed tournament with results.",
 };
 
 export const fieldManifest: Record<string, FieldDefinition> = {
   // Core Game Details
   name: { label: 'Name', group: 'Core Game Details', isBaselineExpected: true },
   gameStartDateTime: { label: 'Start Time', group: 'Core Game Details', isBaselineExpected: true },
-  gameEndDateTime: { label: 'End Time', group: 'Core Game Details', isProfileExpected: ["STATUS: COMPLETED | REG: CLOSED"] },
+  gameEndDateTime: { label: 'End Time', group: 'Core Game Details', isProfileExpected: ["STATUS: FINISHED | REG: CLOSED"] },
   gameStatus: { label: 'Game Status', group: 'Core Game Details', isBaselineExpected: true },
   registrationStatus: { label: 'Registration', group: 'Core Game Details', isBaselineExpected: true },
   structureLabel: { label: 'Structure Label', group: 'Core Game Details', isBaselineExpected: true },
@@ -62,7 +62,7 @@ export const fieldManifest: Record<string, FieldDefinition> = {
   results: { 
     label: 'Results', 
     group: 'Structure & Player Data', 
-    isProfileExpected: ["STATUS: COMPLETED | REG: CLOSED"],
+    isProfileExpected: ["STATUS: FINISHED | REG: CLOSED"],
     isProfileOptional: ["STATUS: RUNNING | REG: CLOSED"] 
   },
 

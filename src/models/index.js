@@ -30,7 +30,6 @@ const GameType = {
 const GameStatus = {
   "SCHEDULED": "SCHEDULED",
   "RUNNING": "RUNNING",
-  "COMPLETED": "COMPLETED",
   "CANCELLED": "CANCELLED",
   "FINISHED": "FINISHED"
 };

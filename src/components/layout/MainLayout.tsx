@@ -25,7 +25,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, user, signOut 
           {/* This is the new, centered title */}
           <div className="flex-1 text-center">
             <h1 className="text-2xl font-bold text-gray-800 font-display">
-              Kings Room App
+              Kings Room Concepts
             </h1>
           </div>
 

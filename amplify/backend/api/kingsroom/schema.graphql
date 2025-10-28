@@ -5,7 +5,7 @@ enum DataSource { SCRAPE, API, MANUAL }
 enum AssetCondition { NEW, GOOD, FAIR, POOR, RETIRED }
 enum VenueStatus { ACTIVE, INACTIVE, PENDING }
 enum GameType { TOURNAMENT, CASH_GAME }
-enum GameStatus { SCHEDULED, RUNNING, COMPLETED, CANCELLED, FINISHED }
+enum GameStatus { SCHEDULED, RUNNING, CANCELLED, FINISHED }
 enum GameVariant { NLHE, PLO, PLO5, PLO6 }
 enum GameFrequency { DAILY, WEEKLY, FORTNIGHTLY, MONTHLY, QUARTERLY, YEARLY, UNKNOWN }
 enum RegistrationStatus { OPEN, CLOSED }
@@ -160,7 +160,7 @@ type TournamentSeries @model @auth(rules: [{ allow: private }]) {
 type ScrapedGameSummary {
     id: String!
     name: String
-    status: String
+    gameStatus: String
     registrationStatus: String
     gameStartDateTime: String
     inDatabase: Boolean
