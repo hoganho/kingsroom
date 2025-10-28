@@ -196,7 +196,7 @@ export const GameCard: React.FC<{
                             {game.data.gameStatus && (
                                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                                     game.data.gameStatus === 'RUNNING' ? 'bg-green-100 text-green-800' :
-                                    game.data.gameStatus === 'COMPLETED' ? 'bg-gray-100 text-gray-800' :
+                                    game.data.gameStatus === 'FINISHED' ? 'bg-gray-100 text-gray-800' :
                                     game.data.gameStatus === 'SCHEDULED' ? 'bg-blue-100 text-blue-800' :
                                     'bg-gray-100 text-gray-800'
                                 }`}>
