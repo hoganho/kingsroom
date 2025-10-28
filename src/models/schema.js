@@ -3658,6 +3658,7 @@ export const schema = {
             "name": "GameStatus",
             "values": [
                 "SCHEDULED",
+                "REGISTERING",
                 "RUNNING",
                 "CANCELLED",
                 "FINISHED"
@@ -3688,6 +3689,7 @@ export const schema = {
             "name": "RegistrationStatus",
             "values": [
                 "OPEN",
+                "FINAL",
                 "CLOSED"
             ]
         },

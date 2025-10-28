@@ -340,6 +340,7 @@ input ScrapedTournamentLevelInput {
     smallBlind: Int
     bigBlind: Int
     ante: Int
+    breakMinutes: Int
 }
 
 input ScrapedBreakInput {

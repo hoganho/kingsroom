@@ -175,7 +175,7 @@ const defaultStrategy = {
         let tournamentType = 'FREEZEOUT'; // Set the default type
 
         // Define keywords for matching
-        const rebuyKeywords = ['rebuy', 're-buy'];
+        const rebuyKeywords = ['rebuy', 're-buy', 'reentry', 're-entry'];
         const satelliteKeywords = ['sat', 'satellite', 'satty'];
 
         // Create case-insensitive regular expressions

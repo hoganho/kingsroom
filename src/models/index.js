@@ -29,6 +29,7 @@ const GameType = {
 
 const GameStatus = {
   "SCHEDULED": "SCHEDULED",
+  "REGISTERING": "REGISTERING",
   "RUNNING": "RUNNING",
   "CANCELLED": "CANCELLED",
   "FINISHED": "FINISHED"
@@ -53,6 +54,7 @@ const GameFrequency = {
 
 const RegistrationStatus = {
   "OPEN": "OPEN",
+  "FINAL": "FINAL",
   "CLOSED": "CLOSED"
 };
 

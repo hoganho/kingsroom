@@ -31,6 +31,8 @@ const axios = require('axios');
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand, GetCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
 const crypto = require('crypto');
+// ✅ 1. Import the SQS client and command
+const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
 
 const {
     runScraper,
@@ -39,6 +41,8 @@ const {
 
 const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
+// ✅ 2. Instantiate the SQS client
+const sqsClient = new SQSClient({});
 
 const getTableName = (modelName) => {
     const apiId = process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT;
@@ -88,16 +92,10 @@ const getAllSeriesTitles = async () => {
 
 // --- SCRAPING LOGIC ---
 const scrapeDataFromHtml = (html, venues, seriesTitles) => {
-    // ✅ Renamed 'status' to 'gameStatus'
     const { gameStatus, registrationStatus } = getStatusAndReg(html);
-
-    // ✅ Use gameStatus here
     const structureLabel = `STATUS: ${gameStatus || 'UNKNOWN'} | REG: ${registrationStatus || 'UNKNOWN'}`;
     console.log(`[DEBUG-SCRAPER] Identified Structure: ${structureLabel}`);
-
     const { data, foundKeys } = runScraper(html, structureLabel, venues, seriesTitles);
-
-    // Ensure gameStatus from initial check is in the final data if not already added by scraper
     if (!data.hasOwnProperty('gameStatus') && gameStatus !== 'UNKNOWN_STATUS') {
         data.gameStatus = gameStatus;
         if (!foundKeys.includes('gameStatus')) {
@@ -105,11 +103,9 @@ const scrapeDataFromHtml = (html, venues, seriesTitles) => {
         }
     }
     data.structureLabel = structureLabel;
-
     if (!foundKeys.includes('structureLabel')) {
         foundKeys.push('structureLabel');
     }
-
     return { data, foundKeys };
 };
 
@@ -118,22 +114,18 @@ const processStructureFingerprint = async (foundKeys, structureLabel, sourceUrl)
         console.log('No keys found, skipping fingerprint generation.');
         return { isNewStructure: false, structureLabel: structureLabel };
     }
-
     foundKeys.sort();
     const structureString = foundKeys.join(',');
     const structureId = crypto.createHash('sha256').update(structureString).digest('hex');
     const structureTable = getTableName('ScrapeStructure');
     const now = new Date().toISOString();
-
     try {
         const getResponse = await ddbDocClient.send(new QueryCommand({
             TableName: structureTable,
             KeyConditionExpression: 'id = :id',
             ExpressionAttributeValues: { ':id': structureId }
         }));
-
         const isNew = getResponse.Items.length === 0;
-
         if (isNew) {
             console.log(`Saving new structure fingerprint with ID: ${structureId}`);
             await ddbDocClient.send(new PutCommand({
@@ -170,7 +162,6 @@ const processStructureFingerprint = async (foundKeys, structureLabel, sourceUrl)
                     ':inc': 1
                 }
             }));
-            
             return { isNewStructure: false, structureLabel }; 
         }
     } catch (error) {
@@ -181,11 +172,9 @@ const processStructureFingerprint = async (foundKeys, structureLabel, sourceUrl)
 
 const handleFetch = async (url) => {
     console.log(`[handleFetch] Processing URL: ${url}`);
-    
     const gameTable = getTableName('Game');
     let existingGameId = null;
     let doNotScrape = false;
-    
     try {
         const queryCommand = new QueryCommand({
             TableName: gameTable,
@@ -194,9 +183,7 @@ const handleFetch = async (url) => {
             ExpressionAttributeValues: { ':sourceUrl': url },
             ProjectionExpression: 'id, doNotScrape' 
         });
-
         const queryResult = await ddbDocClient.send(queryCommand);
-        
         if (queryResult.Items && queryResult.Items.length > 0) {
             const game = queryResult.Items[0];
             existingGameId = game.id;
@@ -205,11 +192,9 @@ const handleFetch = async (url) => {
         } else {
             console.log(`[handleFetch] No existing game found for this URL.`);
         }
-
     } catch (error) {
         console.warn(`[handleFetch] Error querying for existing game: ${error.message}. Proceeding with scrape.`);
     }
-
     if (doNotScrape) {
         console.error(`[handleFetch] Scraping is disabled for this URL (doNotScrape=true). Aborting.`);
         return {
@@ -224,21 +209,15 @@ const handleFetch = async (url) => {
             errorMessage: "Scraping is disabled for this URL. To re-enable, uncheck \"Do Not Scrape\" and save."
         };
     }
-
-    // ✅ Fetch both venues and series titles in parallel
     const [venues, seriesTitles] = await Promise.all([
         getAllVenues(),
         getAllSeriesTitles()
     ]);
     console.log(`[handleFetch] Loaded ${venues.length} venues and ${seriesTitles.length} series titles for matching.`);
-
     console.log(`[handleFetch] Fetching data from: ${url}`);
     const response = await axios.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-    
-    // ✅ 2. Pass the venues list to the scraper
     const { data, foundKeys } = scrapeDataFromHtml(response.data, venues, seriesTitles);    
     const fingerprintResult = await processStructureFingerprint(foundKeys, data.structureLabel, url);
-    
     return { 
         ...data, 
         ...fingerprintResult, 
@@ -255,20 +234,14 @@ const handleSave = async (input) => {
     const gameTable = getTableName('Game');
     const structureTable = getTableName('TournamentStructure');
 
-    // ✅ **NEW**: Helper function to merge break data into the levels array.
     const processLevels = (levels = [], breaks = []) => {
-        // Create a map for quick lookups of levels by their number.
         const levelMap = new Map(levels.map(l => [l.levelNumber, { ...l }]));
-
-        // Iterate over each break and add its duration to the corresponding level.
         breaks.forEach(breakInfo => {
             if (levelMap.has(breakInfo.levelNumberBeforeBreak)) {
                 const level = levelMap.get(breakInfo.levelNumberBeforeBreak);
                 level.breakMinutes = breakInfo.durationMinutes || 0;
             }
         });
-
-        // Convert the map back to an array and format it for DynamoDB.
         return Array.from(levelMap.values()).map(level => ({
             levelNumber: level.levelNumber,
             durationMinutes: level.durationMinutes || 20,
@@ -279,22 +252,20 @@ const handleSave = async (input) => {
         }));
     };
 
-    // ✅ **NEW**: Call the helper to get the final, processed levels array.
     const processedLevels = processLevels(data.levels, data.breaks);
+
+    let savedGameItem; // Variable to hold the final saved item
 
     if (existingGameId) {
         console.log(`[handleSave] Updating existing game with ID: ${existingGameId}.`);
-        
         const getResult = await ddbDocClient.send(new GetCommand({
             TableName: gameTable,
             Key: { id: existingGameId }
         }));
-
         if (!getResult.Item) {
             throw new Error(`Failed to update. Game with ID ${existingGameId} not found.`);
         }
         const existingGame = getResult.Item;
-        
         const updatedGameItem = {
             ...existingGame,
             name: data.name,
@@ -306,7 +277,7 @@ const handleSave = async (input) => {
             isSeries: data.isSeries,
             isRegular: data.isRegular,
             gameFrequency: data.gameFrequency,
-            seriesName: data.seriesName, // Will be set if isSeries is true
+            seriesName: data.seriesName,
             prizepool: data.prizepool,
             totalEntries: data.totalEntries,
             playersRemaining: data.playersRemaining,
@@ -333,7 +304,6 @@ const handleSave = async (input) => {
             _lastChangedAt: Date.now(),
             _version: (existingGame._version || 1) + 1,
         };
-
         if (existingGame.tournamentStructureId && processedLevels.length > 0) {
             const structureUpdate = {
                 TableName: structureTable,
@@ -346,13 +316,12 @@ const handleSave = async (input) => {
                     '#_version': '_version'
                 },
                 ExpressionAttributeValues: {
-                    ':levels': processedLevels, // ✅ Use the processed levels with breaks
+                    ':levels': processedLevels,
                     ':updatedAt': now,
                     ':_lastChangedAt': Date.now(),
                     ':inc': 1
                 }
             };
-            
             await Promise.all([
                 ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem })),
                 ddbDocClient.send(new UpdateCommand(structureUpdate))
@@ -361,57 +330,47 @@ const handleSave = async (input) => {
             console.log(`[handleSave] Adding new tournament structure to existing game: ${existingGameId}`);
             const structureId = crypto.randomUUID();
             updatedGameItem.tournamentStructureId = structureId;
-            
             const structureItem = {
                 id: structureId,
                 name: `${data.name} - Blind Structure`,
                 description: `Blind structure for ${data.name}`,
-                levels: processedLevels, // ✅ Use the processed levels with breaks
+                levels: processedLevels,
                 createdAt: now,
                 updatedAt: now,
                 _lastChangedAt: Date.now(),
                 _version: 1,
                 __typename: "TournamentStructure",
             };
-
             await Promise.all([
                 ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem })),
                 ddbDocClient.send(new PutCommand({ TableName: structureTable, Item: structureItem }))
             ]);
-
         } else {
             await ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem }));
         }
-
-        return updatedGameItem;
-
+        savedGameItem = updatedGameItem; // Assign the updated item
     } else {
         console.log('[handleSave] No existing game found. Creating new records...');
-        
         const gameId = crypto.randomUUID();
         let structureId = null;
-        
         if (processedLevels.length > 0) {
             structureId = crypto.randomUUID();
-            
             const structureItem = {
                 id: structureId,
                 name: `${data.name} - Blind Structure`,
                 description: `Blind structure for ${data.name}`,
-                levels: processedLevels, // ✅ Use the processed levels with breaks
+                levels: processedLevels,
                 createdAt: now,
                 updatedAt: now,
                 _lastChangedAt: Date.now(),
                 _version: 1,
                 __typename: "TournamentStructure",
             };
-            
             await ddbDocClient.send(new PutCommand({ 
                 TableName: structureTable, 
                 Item: structureItem 
             }));
         }
-        
         const gameItem = {
             id: gameId,
             name: data.name,
@@ -439,8 +398,6 @@ const handleSave = async (input) => {
             gameFrequency: data.gameFrequency,
             seriesName: data.seriesName,
             registrationStatus: data.registrationStatus,
-            gameVariant: data.gameVariant,
-            variant: data.gameVariant,
             prizepool: data.prizepool,
             totalEntries: data.totalEntries,
             playersRemaining: data.playersRemaining,
@@ -456,35 +413,50 @@ const handleSave = async (input) => {
             _version: 1,
             __typename: "Game",
         };
-        
         await ddbDocClient.send(new PutCommand({ 
             TableName: gameTable, 
             Item: gameItem 
         }));
-        
-        return gameItem;
+        savedGameItem = gameItem; // Assign the new item
     }
+
+    // ✅ 3. After a game is saved, check its status and send to SQS if finished
+    if (savedGameItem && savedGameItem.gameStatus === 'FINISHED') {
+        try {
+            const command = new SendMessageCommand({
+                // This environment variable MUST be configured on the function
+                QueueUrl: process.env.PLAYER_PROCESSOR_QUEUE_URL,
+                MessageBody: JSON.stringify(savedGameItem),
+                MessageGroupId: savedGameItem.id, // Use for FIFO queues if needed, optional for Standard
+                MessageDeduplicationId: `${savedGameItem.id}-${savedGameItem.updatedAt}` // Also for FIFO
+            });
+
+            await sqsClient.send(command);
+            console.log(`[handleSave] Successfully sent finished game ${savedGameItem.id} to SQS queue.`);
+
+        } catch (error) {
+            console.error('[handleSave] FAILED to send message to SQS:', error);
+            // We only log the error here; we don't throw it, because the primary
+            // goal (saving the game) was successful.
+        }
+    }
+
+    return savedGameItem; // Return the saved item
 };
 
-/**
- * ✅ UPDATED: Handler for fetching a range of tournament data summaries.
- * It now processes the range in chunks of 10 to prevent timeouts.
- */
 const handleFetchRange = async (startId, endId) => {
     console.log(`[handleFetchRange] Processing range from ID ${startId} to ${endId}`);
 
     if (startId > endId) {
         throw new Error('Start ID cannot be greater than End ID.');
     }
-    // You can keep a reasonable upper limit to protect against very large requests
     if (endId - startId + 1 > 100) { 
         throw new Error('The requested range is too large. Please fetch a maximum of 100 games at a time.');
     }
 
     const allResults = [];
-    const chunkSize = 10; // Process 10 IDs at a time
+    const chunkSize = 10;
 
-    // Loop through the total range in chunks
     for (let i = startId; i <= endId; i += chunkSize) {
         const chunkStart = i;
         const chunkEnd = Math.min(i + chunkSize - 1, endId);
@@ -500,12 +472,10 @@ const handleFetchRange = async (startId, endId) => {
             );
         }
 
-        // Wait for the current chunk of 10 to complete before starting the next
         const settledResults = await Promise.allSettled(chunkPromises);
         allResults.push(...settledResults);
     }
 
-    // Map the final accumulated results to the summary format
     return allResults.map(res => {
         if (res.status === 'fulfilled' && !res.value.error) {
             const data = res.value;
@@ -540,10 +510,9 @@ const handleFetchRange = async (startId, endId) => {
 // --- MAIN LAMBDA HANDLER ---
 exports.handler = async (event) => {
     console.log('Event received:', JSON.stringify(event, null, 2));
-    const { arguments, fieldName } = event; // ✅ Use fieldName to route
+    const { arguments, fieldName } = event;
 
     try {
-        // ✅ NEW: Route to the correct handler based on the GraphQL field name
         switch (fieldName) {
             case 'fetchTournamentData':
                 const result = await handleFetch(arguments.url);

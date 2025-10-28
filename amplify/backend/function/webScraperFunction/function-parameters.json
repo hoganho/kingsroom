@@ -64,5 +64,11 @@
       ]
     }
   },
-  "lambdaLayers": []
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "playerProcessorQueueUrl",
+      "environmentVariableName": "PLAYER_PROCESSOR_QUEUE_URL"
+    }
+  ]
 }

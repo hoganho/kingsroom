@@ -70,6 +70,21 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "playerDataProcessor": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "webScraperFunction": {
       "build": true,
       "dependsOn": [
@@ -127,7 +142,31 @@
         }
       ]
     },
+    "AMPLIFY_function_playerDataProcessor_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "playerDataProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_playerDataProcessor_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "playerDataProcessor"
+        }
+      ]
+    },
     "AMPLIFY_function_webScraperFunction_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "webScraperFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_webScraperFunction_playerProcessorQueueUrl": {
       "usedBy": [
         {
           "category": "function",

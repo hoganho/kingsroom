@@ -52,6 +52,7 @@ export type ScrapedGameData = {
 
 export enum GameStatus {
   SCHEDULED = "SCHEDULED",
+  REGISTERING = "REGISTERING",
   RUNNING = "RUNNING",
   CANCELLED = "CANCELLED",
   FINISHED = "FINISHED",
@@ -192,6 +193,7 @@ export type ScrapedGameDataInput = {
 
 export enum RegistrationStatus {
   OPEN = "OPEN",
+  FINAL = "FINAL",
   CLOSED = "CLOSED",
 }
 
@@ -202,6 +204,7 @@ export type ScrapedTournamentLevelInput = {
   smallBlind?: number | null,
   bigBlind?: number | null,
   ante?: number | null,
+  breakMinutes?: number | null,
 };
 
 export type ScrapedBreakInput = {
