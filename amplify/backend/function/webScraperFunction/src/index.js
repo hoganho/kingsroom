@@ -292,6 +292,8 @@ const handleSave = async (input) => {
             guaranteeAmount: data.guaranteeAmount,
             tournamentType: data.tournamentType,
             revenueByBuyIns: data.revenueByBuyIns,
+            sourceDataIssue: data.sourceDataIssue || false,
+            gameDataVerified: data.gameDataVerified || false,
             profitLoss: data.profitLoss,
             guaranteeSurplus: data.guaranteeSurplus,
             guaranteeOverlay: data.guaranteeOverlay,
@@ -407,6 +409,8 @@ const handleSave = async (input) => {
             gameTags: data.gameTags,
             tournamentStructureId: structureId,
             doNotScrape: doNotScrape,
+            sourceDataIssue: data.sourceDataIssue || false,
+            gameDataVerified: data.gameDataVerified || false,
             createdAt: now,
             updatedAt: now,
             _lastChangedAt: Date.now(),
@@ -427,8 +431,6 @@ const handleSave = async (input) => {
                 // This environment variable MUST be configured on the function
                 QueueUrl: process.env.PLAYER_PROCESSOR_QUEUE_URL,
                 MessageBody: JSON.stringify(savedGameItem),
-                MessageGroupId: savedGameItem.id, // Use for FIFO queues if needed, optional for Standard
-                MessageDeduplicationId: `${savedGameItem.id}-${savedGameItem.updatedAt}` // Also for FIFO
             });
 
             await sqsClient.send(command);
