@@ -38,8 +38,8 @@ export const BulkGameListItem: React.FC<{ game: BulkGameSummary }> = ({ game }) 
     const hasError = !!game.error;
 
     // ✅ FIXED: Convert potential `null` values to `undefined` to match the function signature.
-    const colorClass = getListItemColorClass(game.status ?? undefined, game.registrationStatus ?? undefined);
-    const isActionable = !hasError && game.status !== 'FINISHED' && !colorClass.includes('red');
+    const colorClass = getListItemColorClass(game.gameStatus ?? undefined, game.registrationStatus ?? undefined);
+    const isActionable = !hasError && game.gameStatus !== 'FINISHED' && !colorClass.includes('red');
 
     return (
         <div
@@ -60,7 +60,7 @@ export const BulkGameListItem: React.FC<{ game: BulkGameSummary }> = ({ game }) 
             </div>
             <div className="flex items-center space-x-3 text-xs text-right">
                 <div className="w-24">
-                    <p>{game.status}</p>
+                    <p>{game.gameStatus}</p>
                     <p className="italic text-gray-400">{game.registrationStatus}</p>
                 </div>
                 {game.inDatabase ? (
