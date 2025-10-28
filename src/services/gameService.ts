@@ -128,7 +128,7 @@ export const shouldAutoRefreshTournament = (data: GameData): boolean => {
     if (data.doNotScrape) {
         return false;
     }
-    return data.status === 'RUNNING';
+    return data.gameStatus === 'RUNNING';
 };
 
 /**

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useGameContext } from '../contexts/GameContext';
 import { fetchGameDataFromBackend, saveGameDataToBackend, shouldAutoRefreshTournament } from '../services/gameService';
 import type { GameState, GameData, MissingField, ScrapedVenueMatch } from '../types/game';
-import type { DataSource, GameStatus } from '../API';
+import type { DataSource } from '../API';
 
 export const POLLING_INTERVAL = 5 * 60 * 1000; 
 
@@ -26,21 +26,21 @@ export const useGameTracker = () => {
         return () => clearInterval(intervalId);
     }, [games]);
 
-    const updateGameState = (payload: Partial<GameState> & { id: string }) => {
+    const updateJobState = (payload: Partial<GameState> & { id: string }) => {
         dispatch({ type: 'UPDATE_GAME_STATE', payload });
     };
 
     const fetchAndLoadData = async (id: string, source: DataSource) => {
         if (source !== 'SCRAPE') {
             console.log("Only SCRAPE source is configured for backend fetching.");
-            updateGameState({ id, jobStatus: 'ERROR', errorMessage: 'Only scraping from a URL is supported.' });
+            updateJobState({ id, jobStatus: 'ERROR', errorMessage: 'Only scraping from a URL is supported.' });
             return;
         }
 
         const game = state.games[id];
         
         if (!game?.autoRefresh) {
-            updateGameState({ id, jobStatus: 'FETCHING', errorMessage: undefined, missingFields: [] });
+            updateJobState({ id, jobStatus: 'FETCHING', errorMessage: undefined, missingFields: [] });
         }
         
         try {
@@ -196,10 +196,10 @@ export const useGameTracker = () => {
             const shouldAutoRefresh = shouldAutoRefreshTournament(data);
             const newFetchCount = (game?.fetchCount || 0) + 1;
 
-            updateGameState({
+            updateJobState({
                 id,
                 data,
-                status: 'READY_TO_SAVE',
+                jobStatus: 'READY_TO_SAVE',
                 lastFetched: new Date().toISOString(),
                 missingFields,
                 isNewStructure,
@@ -215,9 +215,9 @@ export const useGameTracker = () => {
         } catch (error: any) {
             console.error('[useGameTracker] Error fetching data:', error);
             const isDoNotScrapeError = error.message.includes('Scraping is disabled');
-            updateGameState({
+            updateJobState({
                 id,
-                status: 'ERROR',
+                jobStatus: 'ERROR',
                 errorMessage: error.message || 'Failed to fetch data from backend.',
                 ...(isDoNotScrapeError && {
                     data: {
@@ -231,7 +231,7 @@ export const useGameTracker = () => {
     };
     
     const trackGame = (id: string, source: DataSource) => {
-        if (games[id] && games[id].status !== 'ERROR') {
+        if (games[id] && games[id].jobState !== 'ERROR') {
             if (games[id].errorMessage?.includes('Scraping is disabled')) {
                  console.log(`[useGameTracker] Re-tracking ${id}, which is flagged as 'Do Not Scrape'.`);
             } else {
@@ -246,23 +246,23 @@ export const useGameTracker = () => {
     const saveGame = async (id: string, venueId: string) => {
         const game = games[id];
         if (!game || !game.data) {
-            updateGameState({ id, status: 'ERROR', errorMessage: "No data available to save." });
+            updateJobState({ id, jobStatus: 'ERROR', errorMessage: "No data available to save." });
             return;
         }
         
         console.log(`[useGameTracker] Saving ${game.data.gameStatus} tournament: ${id}`);
-        updateGameState({ id, status: 'SAVING' });
+        updateJobState({ id, jobStatus: 'SAVING' });
         try {
             const result = await saveGameDataToBackend(id, venueId, game.data, game.existingGameId);
-            updateGameState({ 
+            updateJobState({ 
                 id, 
-                status: 'DONE', 
+                jobStatus: 'DONE', 
                 saveResult: result,
                 existingGameId: result.id,
             });
             console.log(`[useGameTracker] Successfully saved ${game.data.gameStatus} tournament: ${id}`);
         } catch (error: any) {
-            updateGameState({ id, status: 'ERROR', errorMessage: `Failed to save: ${error.message}` });
+            updateJobState({ id, jobStatus: 'ERROR', errorMessage: `Failed to save: ${error.message}` });
         }
     };
 

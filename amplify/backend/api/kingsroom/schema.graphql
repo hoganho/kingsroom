@@ -312,10 +312,11 @@ type Game @model @auth(rules: [{ allow: private }]) {
     sourceUrl: AWSURL @index(name: "bySourceUrl", queryField: "gameBySourceUrl")
     doNotScrape: Boolean!
     sourceDataIssue: Boolean!
+    gameDataVerified: Boolean!
 
     # Basic game info
     seriesName: String
-    isAdHoc: Boolean
+    isRegular: Boolean
     isSeries: Boolean
     isRecurring: Boolean
     isSatellite: Boolean

@@ -325,8 +325,9 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -575,8 +576,9 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -752,8 +754,9 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -927,8 +930,9 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -1082,8 +1086,9 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
         sourceUrl
         doNotScrape
         sourceDataIssue
+        gameDataVerified
         seriesName
-        isAdHoc
+        isRegular
         isSeries
         isRecurring
         isSatellite
@@ -1529,8 +1534,9 @@ export const listVenues = /* GraphQL */ `query ListVenues(
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -1824,8 +1830,9 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -2117,8 +2124,9 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -2371,8 +2379,9 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -2549,8 +2558,9 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -2646,8 +2656,9 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
     sourceUrl
     doNotScrape
     sourceDataIssue
+    gameDataVerified
     seriesName
-    isAdHoc
+    isRegular
     isSeries
     isRecurring
     isSatellite
@@ -2794,8 +2805,9 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -2974,8 +2986,9 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -3120,8 +3133,9 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -3235,8 +3249,9 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -3434,8 +3449,9 @@ export const listGames = /* GraphQL */ `query ListGames(
       sourceUrl
       doNotScrape
       sourceDataIssue
+      gameDataVerified
       seriesName
-      isAdHoc
+      isRegular
       isSeries
       isRecurring
       isSatellite
@@ -3535,8 +3551,9 @@ export const listGames = /* GraphQL */ `query ListGames(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -3629,8 +3646,9 @@ export const listGames = /* GraphQL */ `query ListGames(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -3713,8 +3731,9 @@ export const listGames = /* GraphQL */ `query ListGames(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -3781,8 +3800,9 @@ export const listGames = /* GraphQL */ `query ListGames(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -3887,8 +3907,9 @@ export const syncGames = /* GraphQL */ `query SyncGames(
       sourceUrl
       doNotScrape
       sourceDataIssue
+      gameDataVerified
       seriesName
-      isAdHoc
+      isRegular
       isSeries
       isRecurring
       isSatellite
@@ -3988,8 +4009,9 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -4082,8 +4104,9 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -4166,8 +4189,9 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -4234,8 +4258,9 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -4343,8 +4368,9 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
         sourceUrl
         doNotScrape
         sourceDataIssue
+        gameDataVerified
         seriesName
-        isAdHoc
+        isRegular
         isSeries
         isRecurring
         isSatellite
@@ -4555,8 +4581,9 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -4695,8 +4722,9 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -4842,8 +4870,9 @@ export const getRakeStructure = /* GraphQL */ `query GetRakeStructure($id: ID!) 
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -5109,8 +5138,9 @@ export const getCashStructure = /* GraphQL */ `query GetCashStructure($id: ID!) 
         sourceUrl
         doNotScrape
         sourceDataIssue
+        gameDataVerified
         seriesName
-        isAdHoc
+        isRegular
         isSeries
         isRecurring
         isSatellite
@@ -5344,8 +5374,9 @@ export const listCashStructures = /* GraphQL */ `query ListCashStructures(
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -5511,8 +5542,9 @@ export const syncCashStructures = /* GraphQL */ `query SyncCashStructures(
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -5751,8 +5783,9 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -6701,8 +6734,9 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -7193,8 +7227,9 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -7691,8 +7726,9 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -8646,8 +8682,9 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -9156,8 +9193,9 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -9599,8 +9637,9 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -9966,8 +10005,9 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -10142,8 +10182,9 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -11018,8 +11059,9 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
       sourceUrl
       doNotScrape
       sourceDataIssue
+      gameDataVerified
       seriesName
-      isAdHoc
+      isRegular
       isSeries
       isRecurring
       isSatellite
@@ -11119,8 +11161,9 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -11213,8 +11256,9 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -11297,8 +11341,9 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -11365,8 +11410,9 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -11522,8 +11568,9 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -11951,8 +11998,9 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
         sourceUrl
         doNotScrape
         sourceDataIssue
+        gameDataVerified
         seriesName
-        isAdHoc
+        isRegular
         isSeries
         isRecurring
         isSatellite
@@ -12349,8 +12397,9 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
         sourceUrl
         doNotScrape
         sourceDataIssue
+        gameDataVerified
         seriesName
-        isAdHoc
+        isRegular
         isSeries
         isRecurring
         isSatellite
@@ -12886,8 +12935,9 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -14215,8 +14265,9 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -15799,8 +15850,9 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -16019,8 +16071,9 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -16278,8 +16331,9 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -16390,8 +16444,9 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
       sourceUrl
       doNotScrape
       sourceDataIssue
+      gameDataVerified
       seriesName
-      isAdHoc
+      isRegular
       isSeries
       isRecurring
       isSatellite
@@ -16491,8 +16546,9 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -16585,8 +16641,9 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -16669,8 +16726,9 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -16737,8 +16795,9 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -16848,8 +16907,9 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
       sourceUrl
       doNotScrape
       sourceDataIssue
+      gameDataVerified
       seriesName
-      isAdHoc
+      isRegular
       isSeries
       isRecurring
       isSatellite
@@ -16949,8 +17009,9 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -17043,8 +17104,9 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -17127,8 +17189,9 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -17195,8 +17258,9 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -17306,8 +17370,9 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
       sourceUrl
       doNotScrape
       sourceDataIssue
+      gameDataVerified
       seriesName
-      isAdHoc
+      isRegular
       isSeries
       isRecurring
       isSatellite
@@ -17407,8 +17472,9 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -17501,8 +17567,9 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -17585,8 +17652,9 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -17653,8 +17721,9 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -17764,8 +17833,9 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
       sourceUrl
       doNotScrape
       sourceDataIssue
+      gameDataVerified
       seriesName
-      isAdHoc
+      isRegular
       isSeries
       isRecurring
       isSatellite
@@ -17865,8 +17935,9 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -17959,8 +18030,9 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -18043,8 +18115,9 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -18111,8 +18184,9 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -18263,8 +18337,9 @@ export const cashStructuresByRakeStructureId = /* GraphQL */ `query CashStructur
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -18460,8 +18535,9 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -18954,8 +19030,9 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -19876,8 +19953,9 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -20247,8 +20325,9 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -20826,8 +20905,9 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
         sourceUrl
         doNotScrape
         sourceDataIssue
+        gameDataVerified
         seriesName
-        isAdHoc
+        isRegular
         isSeries
         isRecurring
         isSatellite
@@ -21226,8 +21306,9 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
         sourceUrl
         doNotScrape
         sourceDataIssue
+        gameDataVerified
         seriesName
-        isAdHoc
+        isRegular
         isSeries
         isRecurring
         isSatellite

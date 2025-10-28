@@ -696,6 +696,13 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "gameDataVerified": {
+                    "name": "gameDataVerified",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
                 "seriesName": {
                     "name": "seriesName",
                     "isArray": false,
@@ -703,8 +710,8 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "isAdHoc": {
-                    "name": "isAdHoc",
+                "isRegular": {
+                    "name": "isRegular",
                     "isArray": false,
                     "type": "Boolean",
                     "isRequired": false,
@@ -4103,5 +4110,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "0077430069ef15bf29396aa72c79304c"
+    "version": "b41af0884a11f3f55f7a85a7a1da078c"
 };

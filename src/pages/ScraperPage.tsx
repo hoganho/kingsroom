@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useGameTracker } from '../hooks/useGameTracker';
 import { GameCard } from '../components/scraper/GameCard';
+import { DataSource } from '../API';
 
 export const ScraperDashboard = () => {
     const [inputId, setInputId] = useState('');
@@ -12,7 +13,7 @@ export const ScraperDashboard = () => {
         const urlToTrack = searchParams.get('trackUrl');
         if (urlToTrack) {
             if (!games[urlToTrack]) {
-                trackGame(urlToTrack, 'SCRAPE');
+                trackGame(urlToTrack, DataSource.SCRAPE);
             }
             setSearchParams({}, { replace: true });
         }
@@ -24,7 +25,7 @@ export const ScraperDashboard = () => {
             if (!id.startsWith('http')) {
                 trackId = `https://kingsroom.com.au/tournament/?id=${id}`;
             }
-            trackGame(trackId, 'SCRAPE');
+            trackGame(trackId, DataSource.SCRAPE);
             setInputId('');
         }
     };

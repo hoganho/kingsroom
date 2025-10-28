@@ -88,7 +88,7 @@ export const GameCard: React.FC<{
     const lastFetched = game.lastFetched ? new Date(game.lastFetched) : null;
     const lastFetchedDate = lastFetched?.toLocaleDateString() || 'Never';
     const lastFetchedTime = lastFetched?.toLocaleTimeString() || '';
-    const isSaveDisabled = !venueId || game.status === 'SAVING';
+    const isSaveDisabled = !venueId || game.jobStatus === 'SAVING';
 
     const getDisplayId = (id: string) => {
         if (id.startsWith('http')) {
@@ -147,7 +147,7 @@ export const GameCard: React.FC<{
                         >
                             Launch URL 🚀
                         </a>
-                        <span className={`px-2 py-1 text-xs font-bold text-white rounded-full ${getStatusColor(game.status)}`}>{game.status}</span>
+                        <span className={`px-2 py-1 text-xs font-bold text-white rounded-full ${getStatusColor(game.jobStatus)}`}>{game.jobStatus}</span>
                         <button onClick={() => onRemove(game.id)} className="text-gray-400 hover:text-red-600 font-bold text-xl">×</button>
                     </div>
                 </div>
@@ -162,7 +162,7 @@ export const GameCard: React.FC<{
                     </p>
                 )}
 
-                {game.data?.doNotScrape && game.status !== 'ERROR' && (
+                {game.data?.doNotScrape && game.jobStatus !== 'ERROR' && (
                     <div className="p-2 bg-yellow-50 border border-yellow-200 rounded">
                         <p className="text-xs font-medium text-yellow-800">
                             ⚠️ This game is flagged "Do Not Scrape". Auto-refresh is disabled.
@@ -170,7 +170,7 @@ export const GameCard: React.FC<{
                     </div>
                 )}
                 
-                {(game.status !== 'FETCHING' && game.status !== 'SCRAPING' && game.status !== 'PARSING' && game.isNewStructure !== undefined) && (
+                {(game.jobStatus !== 'FETCHING' && game.jobStatus !== 'SCRAPING' && game.jobStatus !== 'PARSING' && game.isNewStructure !== undefined) && (
                     <StructureInfo 
                         isNewStructure={game.isNewStructure} 
                         structureLabel={game.data?.structureLabel}
@@ -193,14 +193,14 @@ export const GameCard: React.FC<{
                                 <p className="text-xs text-red-500 italic">Start Time Missing</p>
                             )}
 
-                            {game.data.status && (
+                            {game.data.gameStatus && (
                                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                                    game.data.status === 'RUNNING' ? 'bg-green-100 text-green-800' :
-                                    game.data.status === 'COMPLETED' ? 'bg-gray-100 text-gray-800' :
-                                    game.data.status === 'SCHEDULED' ? 'bg-blue-100 text-blue-800' :
+                                    game.data.gameStatus === 'RUNNING' ? 'bg-green-100 text-green-800' :
+                                    game.data.gameStatus === 'COMPLETED' ? 'bg-gray-100 text-gray-800' :
+                                    game.data.gameStatus === 'SCHEDULED' ? 'bg-blue-100 text-blue-800' :
                                     'bg-gray-100 text-gray-800'
                                 }`}>
-                                    {game.data.status}
+                                    {game.data.gameStatus}
                                 </span>
                             )}
                             {game.autoRefresh && !game.data?.doNotScrape && (
@@ -216,7 +216,7 @@ export const GameCard: React.FC<{
                     </div>
                 )}
                 
-                {(game.status === 'READY_TO_SAVE' || game.status === 'DONE' || game.status === 'SAVING') && (
+                {(game.jobStatus === 'READY_TO_SAVE' || game.jobStatus === 'DONE' || game.jobStatus === 'SAVING') && (
                     <ScraperReport data={game.data} />
                 )}
                 
@@ -240,7 +240,7 @@ export const GameCard: React.FC<{
                             value={venueId}
                             onChange={(e) => setVenueId(e.target.value)}
                             className="flex-grow mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm text-sm"
-                            disabled={game.status === 'SAVING' || venues.length === 0}
+                            disabled={game.jobStatus === 'SAVING' || venues.length === 0}
                         >
                             <option value="">
                                 {venues.length === 0 ? 'No venues available - Add venues first' : 'Select Venue...'}
@@ -257,7 +257,7 @@ export const GameCard: React.FC<{
                         disabled={isSaveDisabled}
                         className="px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400"
                     >
-                        {game.status === 'SAVING' ? 'Saving...' : (game.existingGameId ? 'Update in DB' : 'Save to DB')}
+                        {game.jobStatus === 'SAVING' ? 'Saving...' : (game.existingGameId ? 'Update in DB' : 'Save to DB')}
                     </button>
                 </div>
 

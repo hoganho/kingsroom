@@ -266,8 +266,9 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -561,8 +562,9 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -856,8 +858,9 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -1113,8 +1116,9 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -1268,8 +1272,9 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
         sourceUrl
         doNotScrape
         sourceDataIssue
+        gameDataVerified
         seriesName
-        isAdHoc
+        isRegular
         isSeries
         isRecurring
         isSatellite
@@ -1683,8 +1688,9 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -1838,8 +1844,9 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
         sourceUrl
         doNotScrape
         sourceDataIssue
+        gameDataVerified
         seriesName
-        isAdHoc
+        isRegular
         isSeries
         isRecurring
         isSatellite
@@ -2253,8 +2260,9 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -2408,8 +2416,9 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
         sourceUrl
         doNotScrape
         sourceDataIssue
+        gameDataVerified
         seriesName
-        isAdHoc
+        isRegular
         isSeries
         isRecurring
         isSatellite
@@ -2864,8 +2873,9 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -3162,8 +3172,9 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -3460,8 +3471,9 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -3639,8 +3651,9 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
     sourceUrl
     doNotScrape
     sourceDataIssue
+    gameDataVerified
     seriesName
-    isAdHoc
+    isRegular
     isSeries
     isRecurring
     isSatellite
@@ -3787,8 +3800,9 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -3967,8 +3981,9 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -4113,8 +4128,9 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -4228,8 +4244,9 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -4425,8 +4442,9 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
     sourceUrl
     doNotScrape
     sourceDataIssue
+    gameDataVerified
     seriesName
-    isAdHoc
+    isRegular
     isSeries
     isRecurring
     isSatellite
@@ -4573,8 +4591,9 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -4753,8 +4772,9 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -4899,8 +4919,9 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -5014,8 +5035,9 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -5211,8 +5233,9 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
     sourceUrl
     doNotScrape
     sourceDataIssue
+    gameDataVerified
     seriesName
-    isAdHoc
+    isRegular
     isSeries
     isRecurring
     isSatellite
@@ -5359,8 +5382,9 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -5539,8 +5563,9 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -5685,8 +5710,9 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -5800,8 +5826,9 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -6013,8 +6040,9 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
         sourceUrl
         doNotScrape
         sourceDataIssue
+        gameDataVerified
         seriesName
-        isAdHoc
+        isRegular
         isSeries
         isRecurring
         isSatellite
@@ -6218,8 +6246,9 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
         sourceUrl
         doNotScrape
         sourceDataIssue
+        gameDataVerified
         seriesName
-        isAdHoc
+        isRegular
         isSeries
         isRecurring
         isSatellite
@@ -6423,8 +6452,9 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
         sourceUrl
         doNotScrape
         sourceDataIssue
+        gameDataVerified
         seriesName
-        isAdHoc
+        isRegular
         isSeries
         isRecurring
         isSatellite
@@ -6646,8 +6676,9 @@ export const onCreateRakeStructure = /* GraphQL */ `subscription OnCreateRakeStr
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -6755,8 +6786,9 @@ export const onUpdateRakeStructure = /* GraphQL */ `subscription OnUpdateRakeStr
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -6864,8 +6896,9 @@ export const onDeleteRakeStructure = /* GraphQL */ `subscription OnDeleteRakeStr
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -6999,8 +7032,9 @@ export const onCreateCashStructure = /* GraphQL */ `subscription OnCreateCashStr
         sourceUrl
         doNotScrape
         sourceDataIssue
+        gameDataVerified
         seriesName
-        isAdHoc
+        isRegular
         isSeries
         isRecurring
         isSatellite
@@ -7248,8 +7282,9 @@ export const onUpdateCashStructure = /* GraphQL */ `subscription OnUpdateCashStr
         sourceUrl
         doNotScrape
         sourceDataIssue
+        gameDataVerified
         seriesName
-        isAdHoc
+        isRegular
         isSeries
         isRecurring
         isSatellite
@@ -7497,8 +7532,9 @@ export const onDeleteCashStructure = /* GraphQL */ `subscription OnDeleteCashStr
         sourceUrl
         doNotScrape
         sourceDataIssue
+        gameDataVerified
         seriesName
-        isAdHoc
+        isRegular
         isSeries
         isRecurring
         isSatellite
@@ -7811,8 +7847,9 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -8815,8 +8852,9 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -9819,8 +9857,9 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -10786,8 +10825,9 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -11289,8 +11329,9 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -11792,8 +11833,9 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -12287,8 +12329,9 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -12797,8 +12840,9 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -13056,8 +13100,9 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -13566,8 +13611,9 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -13825,8 +13871,9 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -14335,8 +14382,9 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
           sourceUrl
           doNotScrape
           sourceDataIssue
+          gameDataVerified
           seriesName
-          isAdHoc
+          isRegular
           isSeries
           isRecurring
           isSatellite
@@ -14595,8 +14643,9 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -15091,8 +15140,9 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -15587,8 +15637,9 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -16013,8 +16064,9 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
       sourceUrl
       doNotScrape
       sourceDataIssue
+      gameDataVerified
       seriesName
-      isAdHoc
+      isRegular
       isSeries
       isRecurring
       isSatellite
@@ -16114,8 +16166,9 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -16208,8 +16261,9 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -16292,8 +16346,9 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -16360,8 +16415,9 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -16517,8 +16573,9 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -16943,8 +17000,9 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
       sourceUrl
       doNotScrape
       sourceDataIssue
+      gameDataVerified
       seriesName
-      isAdHoc
+      isRegular
       isSeries
       isRecurring
       isSatellite
@@ -17044,8 +17102,9 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -17138,8 +17197,9 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -17222,8 +17282,9 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -17290,8 +17351,9 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -17447,8 +17509,9 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -17873,8 +17936,9 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
       sourceUrl
       doNotScrape
       sourceDataIssue
+      gameDataVerified
       seriesName
-      isAdHoc
+      isRegular
       isSeries
       isRecurring
       isSatellite
@@ -17974,8 +18038,9 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -18068,8 +18133,9 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -18152,8 +18218,9 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -18220,8 +18287,9 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -18377,8 +18445,9 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -18931,8 +19000,9 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -19422,8 +19492,9 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -19913,8 +19984,9 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -20906,8 +20978,9 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -21473,8 +21546,9 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite
@@ -22040,8 +22114,9 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             sourceUrl
             doNotScrape
             sourceDataIssue
+            gameDataVerified
             seriesName
-            isAdHoc
+            isRegular
             isSeries
             isRecurring
             isSatellite

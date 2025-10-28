@@ -25,7 +25,7 @@ export const SaveConfirmationModal: React.FC<{
                             <p className="text-sm font-medium text-blue-900">Tournament Details</p>
                             <div className="mt-2 space-y-1 text-xs text-blue-700">
                                 <p><strong>Name:</strong> {gameData.name}</p>
-                                <p><strong>Status:</strong> {gameData.status}</p>
+                                <p><strong>Status:</strong> {gameData.gameStatus}</p>
                                 <p><strong>Start:</strong> {gameData.gameStartDateTime || 'Missing'}</p>
                                 <p><strong>URL:</strong> {sourceUrl}</p>
                             </div>
@@ -41,7 +41,7 @@ export const SaveConfirmationModal: React.FC<{
                             <p className="text-sm font-medium text-yellow-900">⚠️ Note</p>
                             <p className="text-xs text-yellow-700 mt-1">
                                 This will save the tournament data to the database. 
-                                {gameData.status === 'RUNNING' && ' The tournament is currently RUNNING and can be refreshed later for updates.'}
+                                {gameData.gameStatus === 'RUNNING' && ' The tournament is currently RUNNING and can be refreshed later for updates.'}
                             </p>
                         </div>
                     </div>

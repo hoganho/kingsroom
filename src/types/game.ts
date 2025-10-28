@@ -48,7 +48,7 @@ export type TableData = {
 export type BulkGameSummary = {
     id: string;
     name?: string | null;
-    status?: GameStatus;
+    gameStatus?: GameStatus;
     registrationStatus?: RegistrationStatus;
     gameStartDateTime?: string | null;
     inDatabase?: boolean | null;

@@ -40,7 +40,7 @@ const getValidationStatus = (
 export const FieldManifestReport: React.FC<{ data: GameData | undefined }> = ({ data }) => {
     if (!data) return null;
 
-    const gameProfileKey = `STATUS: ${data.status || 'UNKNOWN'} | REG: ${data.registrationStatus || 'UNKNOWN'}`;
+    const gameProfileKey = `STATUS: ${data.gameStatus || 'UNKNOWN'} | REG: ${data.registrationStatus || 'UNKNOWN'}`;
     const profileDescription = profileDescriptions[gameProfileKey];
 
     // ✅ 1. Structure fields into the required sub-groups (Baseline/Profile, Expected/Optional)

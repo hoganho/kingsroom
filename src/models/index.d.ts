@@ -636,8 +636,9 @@ type EagerGame = {
   readonly sourceUrl?: string | null;
   readonly doNotScrape: boolean;
   readonly sourceDataIssue: boolean;
+  readonly gameDataVerified: boolean;
   readonly seriesName?: string | null;
-  readonly isAdHoc?: boolean | null;
+  readonly isRegular?: boolean | null;
   readonly isSeries?: boolean | null;
   readonly isRecurring?: boolean | null;
   readonly isSatellite?: boolean | null;
@@ -688,8 +689,9 @@ type LazyGame = {
   readonly sourceUrl?: string | null;
   readonly doNotScrape: boolean;
   readonly sourceDataIssue: boolean;
+  readonly gameDataVerified: boolean;
   readonly seriesName?: string | null;
-  readonly isAdHoc?: boolean | null;
+  readonly isRegular?: boolean | null;
   readonly isSeries?: boolean | null;
   readonly isRecurring?: boolean | null;
   readonly isSatellite?: boolean | null;
