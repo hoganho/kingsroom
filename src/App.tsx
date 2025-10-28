@@ -8,6 +8,7 @@ import { MainLayout } from './components/layout/MainLayout.tsx';
 import ScraperDashboard from './pages/ScraperPage.tsx';
 import BulkScraperPage from './pages/BulkScraperPage.tsx';
 import VenuesPage from './pages/VenuesPage.tsx';
+import { SeriesManagementPage } from './pages/SeriesManagementPage';
 
 // ✅ 1. Import Amplify and your configuration file
 import { Amplify } from 'aws-amplify';
@@ -27,7 +28,7 @@ function App() {
                 <Route path="/scraper-dashboard" element={<ScraperDashboard />} />
                 <Route path="/bulk-scraper" element={<BulkScraperPage />} />
                 <Route path="/venues" element={<VenuesPage />} />
-                
+                <Route path="/series-management" element={<SeriesManagementPage />} />
                 <Route path="/" element={<Navigate to="/scraper-dashboard" replace />} />
                 
                 <Route path="*" element={<div>404 - Page Not Found</div>} />

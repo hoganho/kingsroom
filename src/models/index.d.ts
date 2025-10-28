@@ -75,6 +75,12 @@ export enum PlayerAccountCategory {
   LAPSED = "LAPSED"
 }
 
+export enum SeriesStatus {
+  LIVE = "LIVE",
+  SCHEDULED = "SCHEDULED",
+  COMPLETED = "COMPLETED"
+}
+
 export enum PlayerTargetingClassification {
   NOT_PLAYED = "NotPlayed",
   ACTIVE_EL = "Active_EL",
@@ -545,6 +551,7 @@ type EagerVenue = {
   readonly details?: VenueDetails | null;
   readonly assets?: (Asset | null)[] | null;
   readonly games?: (Game | null)[] | null;
+  readonly series?: (TournamentSeries | null)[] | null;
   readonly playerMemberships?: (PlayerVenue | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
@@ -566,6 +573,7 @@ type LazyVenue = {
   readonly details: AsyncItem<VenueDetails | undefined>;
   readonly assets: AsyncCollection<Asset>;
   readonly games: AsyncCollection<Game>;
+  readonly series: AsyncCollection<TournamentSeries>;
   readonly playerMemberships: AsyncCollection<PlayerVenue>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
@@ -620,6 +628,94 @@ export declare const VenueDetails: (new (init: ModelInit<VenueDetails>) => Venue
   copyOf(source: VenueDetails, mutator: (draft: MutableModel<VenueDetails>) => MutableModel<VenueDetails> | void): VenueDetails;
 }
 
+type EagerTournamentSeriesTitle = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<TournamentSeriesTitle, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly title: string;
+  readonly seriesInstances?: (TournamentSeries | null)[] | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyTournamentSeriesTitle = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<TournamentSeriesTitle, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly title: string;
+  readonly seriesInstances: AsyncCollection<TournamentSeries>;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type TournamentSeriesTitle = LazyLoading extends LazyLoadingDisabled ? EagerTournamentSeriesTitle : LazyTournamentSeriesTitle
+
+export declare const TournamentSeriesTitle: (new (init: ModelInit<TournamentSeriesTitle>) => TournamentSeriesTitle) & {
+  copyOf(source: TournamentSeriesTitle, mutator: (draft: MutableModel<TournamentSeriesTitle>) => MutableModel<TournamentSeriesTitle> | void): TournamentSeriesTitle;
+}
+
+type EagerTournamentSeries = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<TournamentSeries, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly year: number;
+  readonly name: string;
+  readonly aliases?: (string | null)[] | null;
+  readonly startDate?: string | null;
+  readonly endDate?: string | null;
+  readonly events?: (string | null)[] | null;
+  readonly numberOfEvents?: number | null;
+  readonly guaranteedPrizepool?: number | null;
+  readonly estimatedPrizepool?: number | null;
+  readonly actualPrizepool?: number | null;
+  readonly status: SeriesStatus | keyof typeof SeriesStatus;
+  readonly tournamentSeriesTitleId: string;
+  readonly title?: TournamentSeriesTitle | null;
+  readonly venueId: string;
+  readonly venue?: Venue | null;
+  readonly games?: (Game | null)[] | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyTournamentSeries = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<TournamentSeries, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly year: number;
+  readonly name: string;
+  readonly aliases?: (string | null)[] | null;
+  readonly startDate?: string | null;
+  readonly endDate?: string | null;
+  readonly events?: (string | null)[] | null;
+  readonly numberOfEvents?: number | null;
+  readonly guaranteedPrizepool?: number | null;
+  readonly estimatedPrizepool?: number | null;
+  readonly actualPrizepool?: number | null;
+  readonly status: SeriesStatus | keyof typeof SeriesStatus;
+  readonly tournamentSeriesTitleId: string;
+  readonly title: AsyncItem<TournamentSeriesTitle | undefined>;
+  readonly venueId: string;
+  readonly venue: AsyncItem<Venue | undefined>;
+  readonly games: AsyncCollection<Game>;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type TournamentSeries = LazyLoading extends LazyLoadingDisabled ? EagerTournamentSeries : LazyTournamentSeries
+
+export declare const TournamentSeries: (new (init: ModelInit<TournamentSeries>) => TournamentSeries) & {
+  copyOf(source: TournamentSeries, mutator: (draft: MutableModel<TournamentSeries>) => MutableModel<TournamentSeries> | void): TournamentSeries;
+}
+
 type EagerGame = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<Game, 'id'>;
@@ -669,6 +765,8 @@ type EagerGame = {
   readonly tournamentStructure?: TournamentStructure | null;
   readonly cashStructure?: CashStructure | null;
   readonly playerResults?: (PlayerResult | null)[] | null;
+  readonly tournamentSeriesId?: string | null;
+  readonly tournamentSeries?: TournamentSeries | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -722,6 +820,8 @@ type LazyGame = {
   readonly tournamentStructure: AsyncItem<TournamentStructure | undefined>;
   readonly cashStructure: AsyncItem<CashStructure | undefined>;
   readonly playerResults: AsyncCollection<PlayerResult>;
+  readonly tournamentSeriesId?: string | null;
+  readonly tournamentSeries: AsyncItem<TournamentSeries | undefined>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }

@@ -12,6 +12,7 @@ enum TournamentType { FREEZEOUT, REBUY, SATELLITE, DEEPSTACK }
 enum PaymentSourceType { CASH, SQUARE, CREDIT, UNKNOWN }
 enum PlayerAccountStatus { ACTIVE, SUSPENDED, PENDING_VERIFICATION }
 enum PlayerAccountCategory { NEW, RECREATIONAL, REGULAR, VIP, LAPSED }
+enum SeriesStatus { LIVE, SCHEDULED, COMPLETED }
 
 # UPDATED: Populated the enum with targeting values
 enum PlayerTargetingClassification {
@@ -98,6 +99,7 @@ type Venue @model @auth(rules: [{ allow: private }]) {
   details: VenueDetails @hasOne
   assets: [Asset] @hasMany(indexName: "byVenue", fields: ["id"])
   games: [Game] @hasMany(indexName: "byVenue", fields: ["id"])
+  series: [TournamentSeries] @hasMany(indexName: "byVenue", fields: ["id"])
   playerMemberships: [PlayerVenue] @hasMany(indexName: "byVenue", fields: ["id"])
 }
 
@@ -111,6 +113,43 @@ type VenueDetails @model @auth(rules: [{ allow: private }]) {
   averagePlayersPerGame: Float
   gameNights: [String] # e.g., ["Monday", "Friday"]
   venue: Venue @belongsTo(fields: ["venueId"])
+}
+
+# =======================================
+# NEW: TOURNAMENT SERIES MANAGEMENT
+# =======================================
+
+type TournamentSeriesTitle @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  title: String!
+  # One-to-Many: One Title can have many Series instances over the years
+  seriesInstances: [TournamentSeries] @hasMany(indexName: "byTournamentSeriesTitle", fields: ["id"])
+}
+
+type TournamentSeries @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  year: Int!
+  name: String! # e.g., "Sydney Millions 2025"
+  aliases: [String]
+  startDate: AWSDate
+  endDate: AWSDate
+  events: [String] # A simple array of event names or descriptions
+  numberOfEvents: Int
+  guaranteedPrizepool: Float
+  estimatedPrizepool: Float
+  actualPrizepool: Float
+  status: SeriesStatus!
+
+  # Many-to-One: Many series can belong to one title
+  tournamentSeriesTitleId: ID! @index(name: "byTournamentSeriesTitle", sortKeyFields: ["year"])
+  title: TournamentSeriesTitle @belongsTo(fields: ["tournamentSeriesTitleId"])
+
+  # Many-to-One: Many series can be held at one venue
+  venueId: ID! @index(name: "byVenue")
+  venue: Venue @belongsTo(fields: ["venueId"])
+
+  # One-to-Many: One series can contain many games
+  games: [Game] @hasMany(indexName: "byTournamentSeries", fields: ["id"])
 }
 
 # =======================================
@@ -357,6 +396,8 @@ type Game @model @auth(rules: [{ allow: private }]) {
     tournamentStructure: TournamentStructure @belongsTo(fields: ["tournamentStructureId"])
     cashStructure: CashStructure @belongsTo(fields: ["cashStructureId"])
     playerResults: [PlayerResult] @hasMany(indexName: "byGame", fields: ["id"])
+    tournamentSeriesId: ID @index(name: "byTournamentSeries")
+    tournamentSeries: TournamentSeries @belongsTo(fields: ["tournamentSeriesId"])
 }
 
 # Simplified TournamentStructure - now just for blind levels

@@ -75,6 +75,12 @@ const PlayerAccountCategory = {
   "LAPSED": "LAPSED"
 };
 
+const SeriesStatus = {
+  "LIVE": "LIVE",
+  "SCHEDULED": "SCHEDULED",
+  "COMPLETED": "COMPLETED"
+};
+
 const PlayerTargetingClassification = {
   "NOT_PLAYED": "NotPlayed",
   "ACTIVE_EL": "Active_EL",
@@ -136,7 +142,7 @@ const TicketStatus = {
   "USED": "USED"
 };
 
-const { DataSync, ScrapeStructure, Asset, Venue, VenueDetails, Game, TournamentStructure, RakeStructure, CashStructure, Player, PlayerSummary, PlayerVenue, PlayerTransaction, PlayerResult, PlayerMarketingMessage, PlayerMarketingPreferences, TicketTemplate, PlayerTicket, User, Staff, UserPreference, SocialPost, SocialAccount, MarketingMessage, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntries, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTables, ScrapedVenueMatch, ScrapedVenueMatchDetails, ScrapedTableSeatsData, TournamentLevelData } = initSchema(schema);
+const { DataSync, ScrapeStructure, Asset, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, RakeStructure, CashStructure, Player, PlayerSummary, PlayerVenue, PlayerTransaction, PlayerResult, PlayerMarketingMessage, PlayerMarketingPreferences, TicketTemplate, PlayerTicket, User, Staff, UserPreference, SocialPost, SocialAccount, MarketingMessage, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntries, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTables, ScrapedVenueMatch, ScrapedVenueMatchDetails, ScrapedTableSeatsData, TournamentLevelData } = initSchema(schema);
 
 export {
   DataSync,
@@ -144,6 +150,8 @@ export {
   Asset,
   Venue,
   VenueDetails,
+  TournamentSeriesTitle,
+  TournamentSeries,
   Game,
   TournamentStructure,
   RakeStructure,
@@ -174,6 +182,7 @@ export {
   PaymentSourceType,
   PlayerAccountStatus,
   PlayerAccountCategory,
+  SeriesStatus,
   PlayerTargetingClassification,
   PlayerVenueTargetingClassification,
   TransactionType,
