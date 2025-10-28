@@ -1,11 +1,13 @@
 # =======================================
 # CORE ENUMS
 # =======================================
-enum SyncMethod { SCRAPE, API, MANUAL }
+enum DataSource { SCRAPE, API, MANUAL }
 enum AssetCondition { NEW, GOOD, FAIR, POOR, RETIRED }
 enum VenueStatus { ACTIVE, INACTIVE, PENDING }
 enum GameType { TOURNAMENT, CASH_GAME }
-enum GameStatus { SCHEDULED, LIVE, COMPLETED, CANCELLED, FINISHED }
+enum GameStatus { SCHEDULED, RUNNING, COMPLETED, CANCELLED, FINISHED }
+enum GameVariant { NLHE, PLO, PLO5, PLO6 }
+enum RegistrationStatus { OPEN, CLOSED }
 enum TournamentType { FREEZEOUT, REBUY, SATELLITE, DEEPSTACK }
 enum PaymentSourceType { CASH, SQUARE, CREDIT, UNKNOWN }
 enum PlayerAccountStatus { ACTIVE, SUSPENDED, PENDING_VERIFICATION }
@@ -13,7 +15,7 @@ enum PlayerAccountCategory { NEW, RECREATIONAL, REGULAR, VIP, LAPSED }
 
 # UPDATED: Populated the enum with targeting values
 enum PlayerTargetingClassification {
-  NotPlayer
+  NotPlayed
   Active_EL
   Active
   Retain_Inactive31_60d
@@ -48,7 +50,7 @@ enum TicketStatus { ACTIVE, EXPIRED, USED }
 type DataSync @model @auth(rules: [{ allow: private }]) {
   id: ID!
   syncedAt: AWSDateTime!
-  method: SyncMethod!
+  method: DataSource!
   sourceUrl: AWSURL
   title: String
   content: String
@@ -132,12 +134,16 @@ type ScrapedGameData {
     name: String!
     gameStartDateTime: String
     gameEndDateTime: String
-    status: String
+    gameStatus: GameStatus
     registrationStatus: String
-    gameVariant: String
-    tournamentType: String
+    gameType: GameType
+    gameVariant: GameVariant
+    tournamentType: TournamentType
     prizepool: Float
     revenueByBuyIns: Float
+    playersRemaining: Int
+    totalChipsInPlay: Float
+    averagePlayerStack: Float
     profitLoss: Float
     totalEntries: Int
     totalRebuys: Int
@@ -233,9 +239,10 @@ input ScrapedGameDataInput {
     name: String!
     gameStartDateTime: String
     gameEndDateTime: String
-    status: GameStatus
-    registrationStatus: String
-    gameVariant: String
+    gameStatus: GameStatus
+    registrationStatus: RegistrationStatus
+    gameType: GameType
+    gameVariant: GameVariant
     prizepool: Float
     totalEntries: Int
     totalRebuys: Int
@@ -296,8 +303,9 @@ input ScrapedBreakInput {
 type Game @model @auth(rules: [{ allow: private }]) {
     id: ID!
     name: String!
-    type: GameType!
-    status: GameStatus!
+    gameType: GameType!
+    gameVariant: GameVariant!
+    gameStatus: GameStatus!
     gameStartDateTime: AWSDateTime!
     gameEndDateTime: AWSDateTime
     venueId: ID! @index(name: "byVenue", sortKeyFields: ["gameStartDateTime"])
@@ -312,7 +320,6 @@ type Game @model @auth(rules: [{ allow: private }]) {
     isRecurring: Boolean
     isSatellite: Boolean
     registrationStatus: String
-    gameVariant: String
     prizepool: Float
     revenueByBuyIns: Float
     totalEntries: Int
@@ -335,6 +342,8 @@ type Game @model @auth(rules: [{ allow: private }]) {
 
     # Running game info
     playersRemaining: Int
+    totalChipsInPlay: Float
+    averagePlayerStack: Float
 
     # Blind structure reference (optional - for reusable structures)
     tournamentStructureId: ID @index(name: "byTournamentStructure")

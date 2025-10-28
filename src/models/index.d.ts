@@ -2,7 +2,7 @@ import { ModelInit, MutableModel, __modelMeta__, ManagedIdentifier } from "@aws-
 // @ts-ignore
 import { LazyLoading, LazyLoadingDisabled, AsyncItem, AsyncCollection } from "@aws-amplify/datastore";
 
-export enum SyncMethod {
+export enum DataSource {
   SCRAPE = "SCRAPE",
   API = "API",
   MANUAL = "MANUAL"
@@ -29,10 +29,22 @@ export enum GameType {
 
 export enum GameStatus {
   SCHEDULED = "SCHEDULED",
-  LIVE = "LIVE",
+  RUNNING = "RUNNING",
   COMPLETED = "COMPLETED",
   CANCELLED = "CANCELLED",
   FINISHED = "FINISHED"
+}
+
+export enum GameVariant {
+  NLHE = "NLHE",
+  PLO = "PLO",
+  PLO5 = "PLO5",
+  PLO6 = "PLO6"
+}
+
+export enum RegistrationStatus {
+  OPEN = "OPEN",
+  CLOSED = "CLOSED"
 }
 
 export enum TournamentType {
@@ -64,7 +76,7 @@ export enum PlayerAccountCategory {
 }
 
 export enum PlayerTargetingClassification {
-  NOT_PLAYER = "NotPlayer",
+  NOT_PLAYED = "NotPlayed",
   ACTIVE_EL = "Active_EL",
   ACTIVE = "Active",
   RETAIN_INACTIVE31_60D = "Retain_Inactive31_60d",
@@ -154,12 +166,16 @@ type EagerScrapedGameData = {
   readonly name: string;
   readonly gameStartDateTime?: string | null;
   readonly gameEndDateTime?: string | null;
-  readonly status?: string | null;
+  readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
   readonly registrationStatus?: string | null;
-  readonly gameVariant?: string | null;
-  readonly tournamentType?: string | null;
+  readonly gameType?: GameType | keyof typeof GameType | null;
+  readonly gameVariant?: GameVariant | keyof typeof GameVariant | null;
+  readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
   readonly prizepool?: number | null;
   readonly revenueByBuyIns?: number | null;
+  readonly playersRemaining?: number | null;
+  readonly totalChipsInPlay?: number | null;
+  readonly averagePlayerStack?: number | null;
   readonly profitLoss?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
@@ -191,12 +207,16 @@ type LazyScrapedGameData = {
   readonly name: string;
   readonly gameStartDateTime?: string | null;
   readonly gameEndDateTime?: string | null;
-  readonly status?: string | null;
+  readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
   readonly registrationStatus?: string | null;
-  readonly gameVariant?: string | null;
-  readonly tournamentType?: string | null;
+  readonly gameType?: GameType | keyof typeof GameType | null;
+  readonly gameVariant?: GameVariant | keyof typeof GameVariant | null;
+  readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
   readonly prizepool?: number | null;
   readonly revenueByBuyIns?: number | null;
+  readonly playersRemaining?: number | null;
+  readonly totalChipsInPlay?: number | null;
+  readonly averagePlayerStack?: number | null;
   readonly profitLoss?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
@@ -403,7 +423,7 @@ type EagerDataSync = {
   };
   readonly id: string;
   readonly syncedAt: string;
-  readonly method: SyncMethod | keyof typeof SyncMethod;
+  readonly method: DataSource | keyof typeof DataSource;
   readonly sourceUrl?: string | null;
   readonly title?: string | null;
   readonly content?: string | null;
@@ -418,7 +438,7 @@ type LazyDataSync = {
   };
   readonly id: string;
   readonly syncedAt: string;
-  readonly method: SyncMethod | keyof typeof SyncMethod;
+  readonly method: DataSource | keyof typeof DataSource;
   readonly sourceUrl?: string | null;
   readonly title?: string | null;
   readonly content?: string | null;
@@ -607,8 +627,9 @@ type EagerGame = {
   };
   readonly id: string;
   readonly name: string;
-  readonly type: GameType | keyof typeof GameType;
-  readonly status: GameStatus | keyof typeof GameStatus;
+  readonly gameType: GameType | keyof typeof GameType;
+  readonly gameVariant: GameVariant | keyof typeof GameVariant;
+  readonly gameStatus: GameStatus | keyof typeof GameStatus;
   readonly gameStartDateTime: string;
   readonly gameEndDateTime?: string | null;
   readonly venueId: string;
@@ -621,7 +642,6 @@ type EagerGame = {
   readonly isRecurring?: boolean | null;
   readonly isSatellite?: boolean | null;
   readonly registrationStatus?: string | null;
-  readonly gameVariant?: string | null;
   readonly prizepool?: number | null;
   readonly revenueByBuyIns?: number | null;
   readonly totalEntries?: number | null;
@@ -640,6 +660,8 @@ type EagerGame = {
   readonly guaranteeOverlay?: number | null;
   readonly guaranteeSurplus?: number | null;
   readonly playersRemaining?: number | null;
+  readonly totalChipsInPlay?: number | null;
+  readonly averagePlayerStack?: number | null;
   readonly tournamentStructureId?: string | null;
   readonly cashStructureId?: string | null;
   readonly venue?: Venue | null;
@@ -657,8 +679,9 @@ type LazyGame = {
   };
   readonly id: string;
   readonly name: string;
-  readonly type: GameType | keyof typeof GameType;
-  readonly status: GameStatus | keyof typeof GameStatus;
+  readonly gameType: GameType | keyof typeof GameType;
+  readonly gameVariant: GameVariant | keyof typeof GameVariant;
+  readonly gameStatus: GameStatus | keyof typeof GameStatus;
   readonly gameStartDateTime: string;
   readonly gameEndDateTime?: string | null;
   readonly venueId: string;
@@ -671,7 +694,6 @@ type LazyGame = {
   readonly isRecurring?: boolean | null;
   readonly isSatellite?: boolean | null;
   readonly registrationStatus?: string | null;
-  readonly gameVariant?: string | null;
   readonly prizepool?: number | null;
   readonly revenueByBuyIns?: number | null;
   readonly totalEntries?: number | null;
@@ -690,6 +712,8 @@ type LazyGame = {
   readonly guaranteeOverlay?: number | null;
   readonly guaranteeSurplus?: number | null;
   readonly playersRemaining?: number | null;
+  readonly totalChipsInPlay?: number | null;
+  readonly averagePlayerStack?: number | null;
   readonly tournamentStructureId?: string | null;
   readonly cashStructureId?: string | null;
   readonly venue: AsyncItem<Venue | undefined>;

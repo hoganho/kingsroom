@@ -4414,7 +4414,7 @@
             "name" : null,
             "ofType" : {
               "kind" : "ENUM",
-              "name" : "SyncMethod",
+              "name" : "DataSource",
               "ofType" : null
             }
           },
@@ -4549,7 +4549,7 @@
         "possibleTypes" : null
       }, {
         "kind" : "ENUM",
-        "name" : "SyncMethod",
+        "name" : "DataSource",
         "description" : null,
         "fields" : null,
         "inputFields" : null,
@@ -4667,7 +4667,7 @@
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
-            "name" : "ModelSyncMethodInput",
+            "name" : "ModelDataSourceInput",
             "ofType" : null
           },
           "defaultValue" : null
@@ -5161,7 +5161,7 @@
         "possibleTypes" : null
       }, {
         "kind" : "INPUT_OBJECT",
-        "name" : "ModelSyncMethodInput",
+        "name" : "ModelDataSourceInput",
         "description" : null,
         "fields" : null,
         "inputFields" : [ {
@@ -5169,7 +5169,7 @@
           "description" : null,
           "type" : {
             "kind" : "ENUM",
-            "name" : "SyncMethod",
+            "name" : "DataSource",
             "ofType" : null
           },
           "defaultValue" : null
@@ -5178,7 +5178,7 @@
           "description" : null,
           "type" : {
             "kind" : "ENUM",
-            "name" : "SyncMethod",
+            "name" : "DataSource",
             "ofType" : null
           },
           "defaultValue" : null
@@ -6830,7 +6830,7 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "type",
+          "name" : "gameType",
           "description" : null,
           "args" : [ ],
           "type" : {
@@ -6845,7 +6845,22 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "status",
+          "name" : "gameVariant",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "ENUM",
+              "name" : "GameVariant",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "gameStatus",
           "description" : null,
           "args" : [ ],
           "type" : {
@@ -6998,17 +7013,6 @@
           "deprecationReason" : null
         }, {
           "name" : "registrationStatus",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "String",
-            "ofType" : null
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "gameVariant",
           "description" : null,
           "args" : [ ],
           "type" : {
@@ -7221,6 +7225,28 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "totalChipsInPlay",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Float",
+            "ofType" : null
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "averagePlayerStack",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Float",
+            "ofType" : null
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "tournamentStructureId",
           "description" : null,
           "args" : [ ],
@@ -7419,6 +7445,35 @@
         "possibleTypes" : null
       }, {
         "kind" : "ENUM",
+        "name" : "GameVariant",
+        "description" : null,
+        "fields" : null,
+        "inputFields" : null,
+        "interfaces" : null,
+        "enumValues" : [ {
+          "name" : "NLHE",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "PLO",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "PLO5",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "PLO6",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        } ],
+        "possibleTypes" : null
+      }, {
+        "kind" : "ENUM",
         "name" : "GameStatus",
         "description" : null,
         "fields" : null,
@@ -7430,7 +7485,7 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "LIVE",
+          "name" : "RUNNING",
           "description" : null,
           "isDeprecated" : false,
           "deprecationReason" : null
@@ -7778,7 +7833,7 @@
           },
           "defaultValue" : null
         }, {
-          "name" : "type",
+          "name" : "gameType",
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
@@ -7787,7 +7842,16 @@
           },
           "defaultValue" : null
         }, {
-          "name" : "status",
+          "name" : "gameVariant",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelGameVariantInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "gameStatus",
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
@@ -7896,15 +7960,6 @@
           "defaultValue" : null
         }, {
           "name" : "registrationStatus",
-          "description" : null,
-          "type" : {
-            "kind" : "INPUT_OBJECT",
-            "name" : "ModelStringInput",
-            "ofType" : null
-          },
-          "defaultValue" : null
-        }, {
-          "name" : "gameVariant",
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
@@ -8075,6 +8130,24 @@
           },
           "defaultValue" : null
         }, {
+          "name" : "totalChipsInPlay",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelFloatInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "averagePlayerStack",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelFloatInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
           "name" : "tournamentStructureId",
           "description" : null,
           "type" : {
@@ -8178,6 +8251,33 @@
           "type" : {
             "kind" : "ENUM",
             "name" : "GameType",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        } ],
+        "interfaces" : null,
+        "enumValues" : null,
+        "possibleTypes" : null
+      }, {
+        "kind" : "INPUT_OBJECT",
+        "name" : "ModelGameVariantInput",
+        "description" : null,
+        "fields" : null,
+        "inputFields" : [ {
+          "name" : "eq",
+          "description" : null,
+          "type" : {
+            "kind" : "ENUM",
+            "name" : "GameVariant",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "ne",
+          "description" : null,
+          "type" : {
+            "kind" : "ENUM",
+            "name" : "GameVariant",
             "ofType" : null
           },
           "defaultValue" : null
@@ -9766,7 +9866,7 @@
         "inputFields" : null,
         "interfaces" : null,
         "enumValues" : [ {
-          "name" : "NotPlayer",
+          "name" : "NotPlayed",
           "description" : null,
           "isDeprecated" : false,
           "deprecationReason" : null
@@ -18808,12 +18908,12 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "status",
+          "name" : "gameStatus",
           "description" : null,
           "args" : [ ],
           "type" : {
-            "kind" : "SCALAR",
-            "name" : "String",
+            "kind" : "ENUM",
+            "name" : "GameStatus",
             "ofType" : null
           },
           "isDeprecated" : false,
@@ -18830,12 +18930,23 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "gameType",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "ENUM",
+            "name" : "GameType",
+            "ofType" : null
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "gameVariant",
           "description" : null,
           "args" : [ ],
           "type" : {
-            "kind" : "SCALAR",
-            "name" : "String",
+            "kind" : "ENUM",
+            "name" : "GameVariant",
             "ofType" : null
           },
           "isDeprecated" : false,
@@ -18845,8 +18956,8 @@
           "description" : null,
           "args" : [ ],
           "type" : {
-            "kind" : "SCALAR",
-            "name" : "String",
+            "kind" : "ENUM",
+            "name" : "TournamentType",
             "ofType" : null
           },
           "isDeprecated" : false,
@@ -18864,6 +18975,39 @@
           "deprecationReason" : null
         }, {
           "name" : "revenueByBuyIns",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Float",
+            "ofType" : null
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "playersRemaining",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Int",
+            "ofType" : null
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "totalChipsInPlay",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Float",
+            "ofType" : null
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "averagePlayerStack",
           "description" : null,
           "args" : [ ],
           "type" : {
@@ -19769,7 +19913,7 @@
           },
           "defaultValue" : null
         }, {
-          "name" : "status",
+          "name" : "gameStatus",
           "description" : null,
           "type" : {
             "kind" : "ENUM",
@@ -19781,8 +19925,17 @@
           "name" : "registrationStatus",
           "description" : null,
           "type" : {
-            "kind" : "SCALAR",
-            "name" : "String",
+            "kind" : "ENUM",
+            "name" : "RegistrationStatus",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "gameType",
+          "description" : null,
+          "type" : {
+            "kind" : "ENUM",
+            "name" : "GameType",
             "ofType" : null
           },
           "defaultValue" : null
@@ -19790,8 +19943,8 @@
           "name" : "gameVariant",
           "description" : null,
           "type" : {
-            "kind" : "SCALAR",
-            "name" : "String",
+            "kind" : "ENUM",
+            "name" : "GameVariant",
             "ofType" : null
           },
           "defaultValue" : null
@@ -19995,6 +20148,25 @@
         } ],
         "interfaces" : null,
         "enumValues" : null,
+        "possibleTypes" : null
+      }, {
+        "kind" : "ENUM",
+        "name" : "RegistrationStatus",
+        "description" : null,
+        "fields" : null,
+        "inputFields" : null,
+        "interfaces" : null,
+        "enumValues" : [ {
+          "name" : "OPEN",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "CLOSED",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        } ],
         "possibleTypes" : null
       }, {
         "kind" : "INPUT_OBJECT",
@@ -20253,7 +20425,7 @@
             "name" : null,
             "ofType" : {
               "kind" : "ENUM",
-              "name" : "SyncMethod",
+              "name" : "DataSource",
               "ofType" : null
             }
           },
@@ -20317,7 +20489,7 @@
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
-            "name" : "ModelSyncMethodInput",
+            "name" : "ModelDataSourceInput",
             "ofType" : null
           },
           "defaultValue" : null
@@ -20446,7 +20618,7 @@
           "description" : null,
           "type" : {
             "kind" : "ENUM",
-            "name" : "SyncMethod",
+            "name" : "DataSource",
             "ofType" : null
           },
           "defaultValue" : null
@@ -21850,7 +22022,7 @@
           },
           "defaultValue" : null
         }, {
-          "name" : "type",
+          "name" : "gameType",
           "description" : null,
           "type" : {
             "kind" : "NON_NULL",
@@ -21863,7 +22035,20 @@
           },
           "defaultValue" : null
         }, {
-          "name" : "status",
+          "name" : "gameVariant",
+          "description" : null,
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "ENUM",
+              "name" : "GameVariant",
+              "ofType" : null
+            }
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "gameStatus",
           "description" : null,
           "type" : {
             "kind" : "NON_NULL",
@@ -21992,15 +22177,6 @@
           "defaultValue" : null
         }, {
           "name" : "registrationStatus",
-          "description" : null,
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "String",
-            "ofType" : null
-          },
-          "defaultValue" : null
-        }, {
-          "name" : "gameVariant",
           "description" : null,
           "type" : {
             "kind" : "SCALAR",
@@ -22175,6 +22351,24 @@
           },
           "defaultValue" : null
         }, {
+          "name" : "totalChipsInPlay",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Float",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "averagePlayerStack",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Float",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
           "name" : "tournamentStructureId",
           "description" : null,
           "type" : {
@@ -22220,7 +22414,7 @@
           },
           "defaultValue" : null
         }, {
-          "name" : "type",
+          "name" : "gameType",
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
@@ -22229,7 +22423,16 @@
           },
           "defaultValue" : null
         }, {
-          "name" : "status",
+          "name" : "gameVariant",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelGameVariantInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "gameStatus",
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
@@ -22338,15 +22541,6 @@
           "defaultValue" : null
         }, {
           "name" : "registrationStatus",
-          "description" : null,
-          "type" : {
-            "kind" : "INPUT_OBJECT",
-            "name" : "ModelStringInput",
-            "ofType" : null
-          },
-          "defaultValue" : null
-        }, {
-          "name" : "gameVariant",
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
@@ -22517,6 +22711,24 @@
           },
           "defaultValue" : null
         }, {
+          "name" : "totalChipsInPlay",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelFloatInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "averagePlayerStack",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelFloatInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
           "name" : "tournamentStructureId",
           "description" : null,
           "type" : {
@@ -22628,7 +22840,7 @@
           },
           "defaultValue" : null
         }, {
-          "name" : "type",
+          "name" : "gameType",
           "description" : null,
           "type" : {
             "kind" : "ENUM",
@@ -22637,7 +22849,16 @@
           },
           "defaultValue" : null
         }, {
-          "name" : "status",
+          "name" : "gameVariant",
+          "description" : null,
+          "type" : {
+            "kind" : "ENUM",
+            "name" : "GameVariant",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "gameStatus",
           "description" : null,
           "type" : {
             "kind" : "ENUM",
@@ -22746,15 +22967,6 @@
           "defaultValue" : null
         }, {
           "name" : "registrationStatus",
-          "description" : null,
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "String",
-            "ofType" : null
-          },
-          "defaultValue" : null
-        }, {
-          "name" : "gameVariant",
           "description" : null,
           "type" : {
             "kind" : "SCALAR",
@@ -22925,6 +23137,24 @@
           "type" : {
             "kind" : "SCALAR",
             "name" : "Int",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "totalChipsInPlay",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Float",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "averagePlayerStack",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Float",
             "ofType" : null
           },
           "defaultValue" : null
@@ -31643,7 +31873,7 @@
           },
           "defaultValue" : null
         }, {
-          "name" : "type",
+          "name" : "gameType",
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
@@ -31652,7 +31882,16 @@
           },
           "defaultValue" : null
         }, {
-          "name" : "status",
+          "name" : "gameVariant",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelSubscriptionStringInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "gameStatus",
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
@@ -31761,15 +32000,6 @@
           "defaultValue" : null
         }, {
           "name" : "registrationStatus",
-          "description" : null,
-          "type" : {
-            "kind" : "INPUT_OBJECT",
-            "name" : "ModelSubscriptionStringInput",
-            "ofType" : null
-          },
-          "defaultValue" : null
-        }, {
-          "name" : "gameVariant",
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
@@ -31936,6 +32166,24 @@
           "type" : {
             "kind" : "INPUT_OBJECT",
             "name" : "ModelSubscriptionIntInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "totalChipsInPlay",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelSubscriptionFloatInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "averagePlayerStack",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelSubscriptionFloatInput",
             "ofType" : null
           },
           "defaultValue" : null
@@ -35039,65 +35287,6 @@
         "onFragment" : false,
         "onField" : true
       }, {
-        "name" : "aws_publish",
-        "description" : "Tells the service which subscriptions will be published to when this mutation is called. This directive is deprecated use @aws_susbscribe directive instead.",
-        "locations" : [ "FIELD_DEFINITION" ],
-        "args" : [ {
-          "name" : "subscriptions",
-          "description" : "List of subscriptions which will be published to when this mutation is called.",
-          "type" : {
-            "kind" : "LIST",
-            "name" : null,
-            "ofType" : {
-              "kind" : "SCALAR",
-              "name" : "String",
-              "ofType" : null
-            }
-          },
-          "defaultValue" : null
-        } ],
-        "onOperation" : false,
-        "onFragment" : false,
-        "onField" : false
-      }, {
-        "name" : "deprecated",
-        "description" : null,
-        "locations" : [ "FIELD_DEFINITION", "ENUM_VALUE" ],
-        "args" : [ {
-          "name" : "reason",
-          "description" : null,
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "String",
-            "ofType" : null
-          },
-          "defaultValue" : "\"No longer supported\""
-        } ],
-        "onOperation" : false,
-        "onFragment" : false,
-        "onField" : false
-      }, {
-        "name" : "aws_cognito_user_pools",
-        "description" : "Tells the service this field/object has access authorized by a Cognito User Pools token.",
-        "locations" : [ "OBJECT", "FIELD_DEFINITION" ],
-        "args" : [ {
-          "name" : "cognito_groups",
-          "description" : "List of cognito user pool groups which have access on this field",
-          "type" : {
-            "kind" : "LIST",
-            "name" : null,
-            "ofType" : {
-              "kind" : "SCALAR",
-              "name" : "String",
-              "ofType" : null
-            }
-          },
-          "defaultValue" : null
-        } ],
-        "onOperation" : false,
-        "onFragment" : false,
-        "onField" : false
-      }, {
         "name" : "aws_auth",
         "description" : "Directs the schema to enforce authorization on a field",
         "locations" : [ "FIELD_DEFINITION" ],
@@ -35164,10 +35353,69 @@
         "onFragment" : false,
         "onField" : false
       }, {
+        "name" : "deprecated",
+        "description" : null,
+        "locations" : [ "FIELD_DEFINITION", "ENUM_VALUE" ],
+        "args" : [ {
+          "name" : "reason",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "String",
+            "ofType" : null
+          },
+          "defaultValue" : "\"No longer supported\""
+        } ],
+        "onOperation" : false,
+        "onFragment" : false,
+        "onField" : false
+      }, {
         "name" : "aws_iam",
         "description" : "Tells the service this field/object has access authorized by sigv4 signing.",
         "locations" : [ "OBJECT", "FIELD_DEFINITION" ],
         "args" : [ ],
+        "onOperation" : false,
+        "onFragment" : false,
+        "onField" : false
+      }, {
+        "name" : "aws_publish",
+        "description" : "Tells the service which subscriptions will be published to when this mutation is called. This directive is deprecated use @aws_susbscribe directive instead.",
+        "locations" : [ "FIELD_DEFINITION" ],
+        "args" : [ {
+          "name" : "subscriptions",
+          "description" : "List of subscriptions which will be published to when this mutation is called.",
+          "type" : {
+            "kind" : "LIST",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "String",
+              "ofType" : null
+            }
+          },
+          "defaultValue" : null
+        } ],
+        "onOperation" : false,
+        "onFragment" : false,
+        "onField" : false
+      }, {
+        "name" : "aws_cognito_user_pools",
+        "description" : "Tells the service this field/object has access authorized by a Cognito User Pools token.",
+        "locations" : [ "OBJECT", "FIELD_DEFINITION" ],
+        "args" : [ {
+          "name" : "cognito_groups",
+          "description" : "List of cognito user pool groups which have access on this field",
+          "type" : {
+            "kind" : "LIST",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "String",
+              "ofType" : null
+            }
+          },
+          "defaultValue" : null
+        } ],
         "onOperation" : false,
         "onFragment" : false,
         "onField" : false

@@ -1,6 +1,5 @@
 // Updated type definitions to match the refactored schema
-
-import { NumberValue } from "@aws-sdk/lib-dynamodb";
+import type { DataSource, GameType, GameStatus, RegistrationStatus, TournamentType, GameVariant } from '../API';
 
 export type TournamentLevelData = {
     levelNumber: number;
@@ -26,7 +25,7 @@ export type PlayerSeatingData = {
     name: string;
     table: number;
     seat: number;
-    playerStack?: number | null; // This line was added
+    playerStack?: number | null;
 };
 
 export type BreakData = {
@@ -49,32 +48,30 @@ export type TableData = {
 export type BulkGameSummary = {
     id: string;
     name?: string | null;
-    status?: string | null;
-    registrationStatus?: string | null;
+    status?: GameStatus;
+    registrationStatus?: RegistrationStatus;
     gameStartDateTime?: string | null;
     inDatabase?: boolean | null;
     doNotScrape?: boolean | null;
     error?: string | null;
 };
 
-// Tournament/Game status - what's happening with the actual game
-export type GameStatus = 'SCHEDULED' | 'RUNNING' | 'COMPLETED' | 'CANCELLED';
-
 export type GameData = {
     // Basic game information
     name: string;
     gameStartDateTime?: string;
     gameEndDateTime?: string;
-    status: GameStatus;
-    type?: 'TOURNAMENT' | 'CASH_GAME';
-    variant?: string | null;
+    gameStatus: GameStatus;
+    gameType?: GameType;
+    gameVariant?: GameVariant;
     
     // Game state and metadata
-    registrationStatus?: string | null;
-    gameVariant?: string | null;
+    registrationStatus?: RegistrationStatus;
     prizepool?: number | null;
     totalEntries?: number | null;
     playersRemaining?: number | null;
+    totalChipsInPlay?: number | null;
+    averagePlayerStack?: number | null;
     totalRebuys?: number | null;
     totalAddons?: number | null;
     totalDuration?: string | null;
@@ -84,7 +81,7 @@ export type GameData = {
     profitLoss?: number | null;
 
     // Tournament-specific fields (now on Game model)
-    tournamentType?: 'FREEZEOUT' | 'REBUY' | 'SATELLITE' | 'DEEPSTACK' | null;
+    tournamentType?: TournamentType | null;
     buyIn?: number | null;
     rake?: number | null;
     totalRake?: number | null;
@@ -123,8 +120,6 @@ export type MissingField = {
     reason: string;
 };
 
-export type DataSource = 'SCRAPE' | 'API';
-
 // Job/Scraping status - what's happening with our data fetching process
 export type JobStatus = 
     | 'IDLE'           // Not doing anything
@@ -139,7 +134,7 @@ export type JobStatus =
 export interface GameState {
     id: string;
     source: DataSource;
-    status: JobStatus;
+    jobStatus: JobStatus;
     data?: GameData;
     missingFields?: MissingField[];
     lastFetched?: string;
@@ -165,9 +160,10 @@ export interface GameDataInput {
     name: string;
     gameStartDateTime?: string; 
     gameEndDateTime?: string; 
-    status?: GameStatus;
-    registrationStatus?: string;
-    gameVariant?: string;
+    gameStatus?: GameStatus;
+    registrationStatus?: RegistrationStatus;
+    gameVariant?: GameVariant;
+    gameType?: GameType;
     prizepool?: number;
     totalEntries?: number;
     totalRebuys?: number;
@@ -176,7 +172,7 @@ export interface GameDataInput {
     gameTags?: string[];
     
     // Tournament-specific fields (now directly in game input)
-    tournamentType?: 'FREEZEOUT' | 'REBUY' | 'SATELLITE' | 'DEEPSTACK';
+    tournamentType?: TournamentType;
     buyIn?: number;
     rake?: number;
     totalRake: number;

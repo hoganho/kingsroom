@@ -2,7 +2,7 @@
 import { initSchema } from '@aws-amplify/datastore';
 import { schema } from './schema';
 
-const SyncMethod = {
+const DataSource = {
   "SCRAPE": "SCRAPE",
   "API": "API",
   "MANUAL": "MANUAL"
@@ -29,10 +29,22 @@ const GameType = {
 
 const GameStatus = {
   "SCHEDULED": "SCHEDULED",
-  "LIVE": "LIVE",
+  "RUNNING": "RUNNING",
   "COMPLETED": "COMPLETED",
   "CANCELLED": "CANCELLED",
   "FINISHED": "FINISHED"
+};
+
+const GameVariant = {
+  "NLHE": "NLHE",
+  "PLO": "PLO",
+  "PLO5": "PLO5",
+  "PLO6": "PLO6"
+};
+
+const RegistrationStatus = {
+  "OPEN": "OPEN",
+  "CLOSED": "CLOSED"
 };
 
 const TournamentType = {
@@ -64,7 +76,7 @@ const PlayerAccountCategory = {
 };
 
 const PlayerTargetingClassification = {
-  "NOT_PLAYER": "NotPlayer",
+  "NOT_PLAYED": "NotPlayed",
   "ACTIVE_EL": "Active_EL",
   "ACTIVE": "Active",
   "RETAIN_INACTIVE31_60D": "Retain_Inactive31_60d",
@@ -151,11 +163,13 @@ export {
   SocialPost,
   SocialAccount,
   MarketingMessage,
-  SyncMethod,
+  DataSource,
   AssetCondition,
   VenueStatus,
   GameType,
   GameStatus,
+  GameVariant,
+  RegistrationStatus,
   TournamentType,
   PaymentSourceType,
   PlayerAccountStatus,

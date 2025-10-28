@@ -20,7 +20,7 @@ export const fieldManifest: Record<string, FieldDefinition> = {
   name: { label: 'Name', group: 'Core Game Details', isBaselineExpected: true },
   gameStartDateTime: { label: 'Start Time', group: 'Core Game Details', isBaselineExpected: true },
   gameEndDateTime: { label: 'End Time', group: 'Core Game Details', isProfileExpected: ["STATUS: COMPLETED | REG: CLOSED"] },
-  status: { label: 'Status', group: 'Core Game Details', isBaselineExpected: true },
+  gameStatus: { label: 'Game Status', group: 'Core Game Details', isBaselineExpected: true },
   registrationStatus: { label: 'Registration', group: 'Core Game Details', isBaselineExpected: true },
   structureLabel: { label: 'Structure Label', group: 'Core Game Details', isBaselineExpected: true },
   gameVariant: { label: 'Game Variant', group: 'Core Game Details', isBaselineExpected: true },

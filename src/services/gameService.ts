@@ -4,7 +4,7 @@ import { generateClient } from 'aws-amplify/api';
 import { fetchTournamentData, saveTournamentData } from '../graphql/mutations';
 import { fetchTournamentDataRange } from '../graphql/queries'; // Assuming you have this query defined
 import * as APITypes from '../API';
-import type { GameData, GameStatus } from '../types/game';
+import type { GameData } from '../types/game';
 
 /**
  * Calls the backend Lambda to fetch and parse tournament data without saving.
@@ -39,28 +39,6 @@ export const fetchGameDataFromBackend = async (url: string): Promise<APITypes.Sc
 };
 
 /**
- * Converts our internal GameStatus to the API GameStatus enum
- * Handles the LIVE -> RUNNING conversion
- */
-const mapToAPIGameStatus = (status: GameStatus): APITypes.GameStatus => {
-    // Map our internal status to the API enum
-    switch (status) {
-        case 'RUNNING':
-            // If the API still expects 'LIVE', use that, otherwise use 'RUNNING'
-            // Assuming the API has been updated to use 'RUNNING'
-            return 'RUNNING' as APITypes.GameStatus;
-        case 'SCHEDULED':
-            return 'SCHEDULED' as APITypes.GameStatus;
-        case 'COMPLETED':
-            return 'COMPLETED' as APITypes.GameStatus;
-        case 'CANCELLED':
-            return 'CANCELLED' as APITypes.GameStatus;
-        default:
-            return 'SCHEDULED' as APITypes.GameStatus;
-    }
-};
-
-/**
  * Calls the backend Lambda to save or update tournament data.
  * Allows saving tournaments regardless of their status (SCHEDULED, RUNNING, or COMPLETED).
  * @param sourceUrl The original URL of the tournament.
@@ -76,7 +54,7 @@ export const saveGameDataToBackend = async (
     existingGameId: string | null | undefined
 ): Promise<APITypes.Game> => {
     const client = generateClient();
-    console.log(`[GameService] Saving ${data.status} tournament data for ${sourceUrl} to database...`);
+    console.log(`[GameService] Saving ${data.gameStatus} tournament data for ${sourceUrl} to database...`);
     
     try {
         // Prepare the input matching the refactored schema
@@ -90,9 +68,9 @@ export const saveGameDataToBackend = async (
                 gameStartDateTime: data.gameStartDateTime ?? undefined, // Now optional
                 gameEndDateTime: data.gameEndDateTime ?? undefined,
                 // Map the status properly
-                status: mapToAPIGameStatus(data.status),
+                gameStatus: data.gameStatus,
                 registrationStatus: data.registrationStatus ?? undefined,
-                gameVariant: data.gameVariant ?? undefined,
+                gameVariant: data.gameVariant ?? APITypes.GameVariant.NLHE,
                 prizepool: data.prizepool ?? undefined,
                 totalEntries: data.totalEntries ?? undefined,
                 totalRebuys: data.totalRebuys ?? undefined,
@@ -101,7 +79,7 @@ export const saveGameDataToBackend = async (
                 gameTags: data.gameTags?.filter((tag): tag is string => tag !== null) ?? [],
                 
                 // Tournament-specific fields (now part of Game)
-                tournamentType: (data.tournamentType ?? 'FREEZEOUT') as APITypes.TournamentType,
+                tournamentType: data.tournamentType ?? APITypes.TournamentType.FREEZEOUT,
                 buyIn: data.buyIn ?? undefined,
                 rake: data.rake ?? undefined,
                 startingStack: data.startingStack ?? undefined,
@@ -133,7 +111,7 @@ export const saveGameDataToBackend = async (
             throw new Error(response.errors[0].message);
         }
 
-        console.log(`[GameService] Successfully saved ${data.status} tournament to DB:`, response.data.saveTournamentData);
+        console.log(`[GameService] Successfully saved ${data.gameStatus} tournament to DB:`, response.data.saveTournamentData);
         return response.data.saveTournamentData as APITypes.Game;
     } catch (error) {
         console.error('[GameService] Error saving to DB:', error);

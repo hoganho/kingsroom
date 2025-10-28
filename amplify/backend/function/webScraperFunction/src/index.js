@@ -75,16 +75,24 @@ const getAllVenues = async () => {
 
 // --- SCRAPING LOGIC ---
 const scrapeDataFromHtml = (html, venues) => {
-    const { status, registrationStatus } = getStatusAndReg(html);
-    
-    const structureLabel = `STATUS: ${status || 'UNKNOWN'} | REG: ${registrationStatus || 'UNKNOWN'}`;
+    // ✅ Renamed 'status' to 'gameStatus'
+    const { gameStatus, registrationStatus } = getStatusAndReg(html);
+
+    // ✅ Use gameStatus here
+    const structureLabel = `STATUS: ${gameStatus || 'UNKNOWN'} | REG: ${registrationStatus || 'UNKNOWN'}`;
     console.log(`[DEBUG-SCRAPER] Identified Structure: ${structureLabel}`);
-    
-    // Pass venues to the scraper
+
     const { data, foundKeys } = runScraper(html, structureLabel, venues);
-    
+
+    // Ensure gameStatus from initial check is in the final data if not already added by scraper
+    if (!data.hasOwnProperty('gameStatus') && gameStatus !== 'UNKNOWN_STATUS') {
+        data.gameStatus = gameStatus;
+        if (!foundKeys.includes('gameStatus')) {
+             foundKeys.push('gameStatus');
+        }
+    }
     data.structureLabel = structureLabel;
-    
+
     if (!foundKeys.includes('structureLabel')) {
         foundKeys.push('structureLabel');
     }
@@ -195,7 +203,7 @@ const handleFetch = async (url) => {
             existingGameId,
             doNotScrape,
             name: "Scraping Disabled",
-            status: "UNKNOWN",
+            gameStatus: "UNKNOWN",
             gameStartDateTime: new Date().toISOString(),
             foundKeys: [],
             isNewStructure: false,
@@ -215,7 +223,6 @@ const handleFetch = async (url) => {
     const { data, foundKeys } = scrapeDataFromHtml(response.data, venues);
     
     const fingerprintResult = await processStructureFingerprint(foundKeys, data.structureLabel, url);
-    console.log(`[DEBUG-FETCH] Does data object have revenueByBuyIns before return? ${data.hasOwnProperty('revenueByBuyIns')}`);
     
     return { 
         ...data, 
@@ -276,10 +283,10 @@ const handleSave = async (input) => {
         const updatedGameItem = {
             ...existingGame,
             name: data.name,
-            status: data.status || 'SCHEDULED',
+            gameType: data.gameType || 'TOURNAMENT',
+            gameStatus: data.gameStatus || 'SCHEDULED',
             registrationStatus: data.registrationStatus,
-            gameVariant: data.gameVariant, 
-            variant: data.gameVariant,
+            gameVariant: data.gameVariant || 'NLHE', 
             seriesName: data.seriesName,
             prizepool: data.prizepool,
             totalEntries: data.totalEntries,
@@ -389,8 +396,9 @@ const handleSave = async (input) => {
         const gameItem = {
             id: gameId,
             name: data.name,
-            type: 'TOURNAMENT',
-            status: data.status || 'SCHEDULED',
+            gameType: data.gameType || 'TOURNAMENT',
+            gameStatus: data.gameStatus || 'SCHEDULED',
+            gameVariant: data.gameVariant || 'NLHE',
             gameStartDateTime: data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : now,
             gameEndDateTime: data.gameEndDateTime ? new Date(data.gameEndDateTime).toISOString() : null,
             sourceUrl,
@@ -481,7 +489,7 @@ const handleFetchRange = async (startId, endId) => {
             return {
                 id: data.id,
                 name: data.name || 'Name not found',
-                status: data.status || 'UNKNOWN',
+                gameStatus: data.gameStatus || 'UNKNOWN',
                 registrationStatus: data.registrationStatus || 'UNKNOWN',
                 gameStartDateTime: data.gameStartDateTime,
                 inDatabase: !!data.existingGameId,

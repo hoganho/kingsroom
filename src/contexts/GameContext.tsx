@@ -1,5 +1,6 @@
 import React, { createContext, useReducer, Dispatch, useContext } from 'react';
-import type { GameState, DataSource } from '../types/game';
+import type { GameState } from '../types/game';
+import type { DataSource } from '../API';
 
 // Define the shape of our global state
 type GlobalState = {
@@ -20,9 +21,8 @@ const gameReducer = (state: GlobalState, action: GameAction): GlobalState => {
             const newGame: GameState = {
                 id: action.payload.id,
                 source: action.payload.source,
-                status: 'IDLE',
-                autoRefresh: false, // Default to false
-                // ✅ NEW: Initialize fetchCount and existingGameId
+                jobStatus: 'IDLE',
+                autoRefresh: false,
                 fetchCount: 0,
                 existingGameId: null, 
             };

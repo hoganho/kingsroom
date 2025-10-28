@@ -13,12 +13,16 @@ export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData($
     name
     gameStartDateTime
     gameEndDateTime
-    status
+    gameStatus
     registrationStatus
+    gameType
     gameVariant
     tournamentType
     prizepool
     revenueByBuyIns
+    playersRemaining
+    totalChipsInPlay
+    averagePlayerStack
     profitLoss
     totalEntries
     totalRebuys
@@ -106,8 +110,9 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
   saveTournamentData(input: $input) {
     id
     name
-    type
-    status
+    gameType
+    gameVariant
+    gameStatus
     gameStartDateTime
     gameEndDateTime
     venueId
@@ -120,7 +125,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
     isRecurring
     isSatellite
     registrationStatus
-    gameVariant
     prizepool
     revenueByBuyIns
     totalEntries
@@ -139,6 +143,8 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
     guaranteeOverlay
     guaranteeSurplus
     playersRemaining
+    totalChipsInPlay
+    averagePlayerStack
     tournamentStructureId
     cashStructureId
     venue {
@@ -252,8 +258,9 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -266,7 +273,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -285,6 +291,8 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -430,8 +438,9 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -444,7 +453,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -463,6 +471,8 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -574,8 +584,9 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -588,7 +599,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -607,6 +617,8 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -687,8 +699,9 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
         game {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -701,7 +714,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -720,6 +732,8 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -1142,8 +1156,9 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -1156,7 +1171,6 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -1175,6 +1189,8 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -1438,8 +1454,9 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -1452,7 +1469,6 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -1471,6 +1487,8 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -1734,8 +1752,9 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -1748,7 +1767,6 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -1767,6 +1785,8 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -1992,8 +2012,9 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -2006,7 +2027,6 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -2025,6 +2045,8 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -2145,8 +2167,9 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
       items {
         id
         name
-        type
-        status
+        gameType
+        gameVariant
+        gameStatus
         gameStartDateTime
         gameEndDateTime
         venueId
@@ -2159,7 +2182,6 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
         isRecurring
         isSatellite
         registrationStatus
-        gameVariant
         prizepool
         revenueByBuyIns
         totalEntries
@@ -2178,6 +2200,8 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
         tournamentStructureId
         cashStructureId
         venue {
@@ -2561,8 +2585,9 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -2575,7 +2600,6 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -2594,6 +2618,8 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -2714,8 +2740,9 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
       items {
         id
         name
-        type
-        status
+        gameType
+        gameVariant
+        gameStatus
         gameStartDateTime
         gameEndDateTime
         venueId
@@ -2728,7 +2755,6 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
         isRecurring
         isSatellite
         registrationStatus
-        gameVariant
         prizepool
         revenueByBuyIns
         totalEntries
@@ -2747,6 +2773,8 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
         tournamentStructureId
         cashStructureId
         venue {
@@ -3130,8 +3158,9 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -3144,7 +3173,6 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -3163,6 +3191,8 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -3283,8 +3313,9 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
       items {
         id
         name
-        type
-        status
+        gameType
+        gameVariant
+        gameStatus
         gameStartDateTime
         gameEndDateTime
         venueId
@@ -3297,7 +3328,6 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
         isRecurring
         isSatellite
         registrationStatus
-        gameVariant
         prizepool
         revenueByBuyIns
         totalEntries
@@ -3316,6 +3346,8 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
         tournamentStructureId
         cashStructureId
         venue {
@@ -3738,8 +3770,9 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -3752,7 +3785,6 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -3771,6 +3803,8 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -4035,8 +4069,9 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -4049,7 +4084,6 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -4068,6 +4102,8 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -4332,8 +4368,9 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -4346,7 +4383,6 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -4365,6 +4401,8 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -4512,8 +4550,9 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
   createGame(input: $input, condition: $condition) {
     id
     name
-    type
-    status
+    gameType
+    gameVariant
+    gameStatus
     gameStartDateTime
     gameEndDateTime
     venueId
@@ -4526,7 +4565,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
     isRecurring
     isSatellite
     registrationStatus
-    gameVariant
     prizepool
     revenueByBuyIns
     totalEntries
@@ -4545,6 +4583,8 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
     guaranteeOverlay
     guaranteeSurplus
     playersRemaining
+    totalChipsInPlay
+    averagePlayerStack
     tournamentStructureId
     cashStructureId
     venue {
@@ -4658,8 +4698,9 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -4672,7 +4713,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -4691,6 +4731,8 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -4836,8 +4878,9 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -4850,7 +4893,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -4869,6 +4911,8 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -4980,8 +5024,9 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -4994,7 +5039,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -5013,6 +5057,8 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -5093,8 +5139,9 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
         game {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -5107,7 +5154,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -5126,6 +5172,8 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -5291,8 +5339,9 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
   updateGame(input: $input, condition: $condition) {
     id
     name
-    type
-    status
+    gameType
+    gameVariant
+    gameStatus
     gameStartDateTime
     gameEndDateTime
     venueId
@@ -5305,7 +5354,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
     isRecurring
     isSatellite
     registrationStatus
-    gameVariant
     prizepool
     revenueByBuyIns
     totalEntries
@@ -5324,6 +5372,8 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
     guaranteeOverlay
     guaranteeSurplus
     playersRemaining
+    totalChipsInPlay
+    averagePlayerStack
     tournamentStructureId
     cashStructureId
     venue {
@@ -5437,8 +5487,9 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -5451,7 +5502,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -5470,6 +5520,8 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -5615,8 +5667,9 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -5629,7 +5682,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -5648,6 +5700,8 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -5759,8 +5813,9 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -5773,7 +5828,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -5792,6 +5846,8 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -5872,8 +5928,9 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
         game {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -5886,7 +5943,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -5905,6 +5961,8 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -6070,8 +6128,9 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
   deleteGame(input: $input, condition: $condition) {
     id
     name
-    type
-    status
+    gameType
+    gameVariant
+    gameStatus
     gameStartDateTime
     gameEndDateTime
     venueId
@@ -6084,7 +6143,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
     isRecurring
     isSatellite
     registrationStatus
-    gameVariant
     prizepool
     revenueByBuyIns
     totalEntries
@@ -6103,6 +6161,8 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
     guaranteeOverlay
     guaranteeSurplus
     playersRemaining
+    totalChipsInPlay
+    averagePlayerStack
     tournamentStructureId
     cashStructureId
     venue {
@@ -6216,8 +6276,9 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -6230,7 +6291,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -6249,6 +6309,8 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -6394,8 +6456,9 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -6408,7 +6471,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -6427,6 +6489,8 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -6538,8 +6602,9 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -6552,7 +6617,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -6571,6 +6635,8 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -6651,8 +6717,9 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
         game {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -6665,7 +6732,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -6684,6 +6750,8 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -6863,8 +6931,9 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
       items {
         id
         name
-        type
-        status
+        gameType
+        gameVariant
+        gameStatus
         gameStartDateTime
         gameEndDateTime
         venueId
@@ -6877,7 +6946,6 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
         isRecurring
         isSatellite
         registrationStatus
-        gameVariant
         prizepool
         revenueByBuyIns
         totalEntries
@@ -6896,6 +6964,8 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
         tournamentStructureId
         cashStructureId
         venue {
@@ -7067,8 +7137,9 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
       items {
         id
         name
-        type
-        status
+        gameType
+        gameVariant
+        gameStatus
         gameStartDateTime
         gameEndDateTime
         venueId
@@ -7081,7 +7152,6 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
         isRecurring
         isSatellite
         registrationStatus
-        gameVariant
         prizepool
         revenueByBuyIns
         totalEntries
@@ -7100,6 +7170,8 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
         tournamentStructureId
         cashStructureId
         venue {
@@ -7271,8 +7343,9 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
       items {
         id
         name
-        type
-        status
+        gameType
+        gameVariant
+        gameStatus
         gameStartDateTime
         gameEndDateTime
         venueId
@@ -7285,7 +7358,6 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
         isRecurring
         isSatellite
         registrationStatus
-        gameVariant
         prizepool
         revenueByBuyIns
         totalEntries
@@ -7304,6 +7376,8 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
         tournamentStructureId
         cashStructureId
         venue {
@@ -7493,8 +7567,9 @@ export const createRakeStructure = /* GraphQL */ `mutation CreateRakeStructure(
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -7507,7 +7582,6 @@ export const createRakeStructure = /* GraphQL */ `mutation CreateRakeStructure(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -7526,6 +7600,8 @@ export const createRakeStructure = /* GraphQL */ `mutation CreateRakeStructure(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -7601,8 +7677,9 @@ export const updateRakeStructure = /* GraphQL */ `mutation UpdateRakeStructure(
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -7615,7 +7692,6 @@ export const updateRakeStructure = /* GraphQL */ `mutation UpdateRakeStructure(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -7634,6 +7710,8 @@ export const updateRakeStructure = /* GraphQL */ `mutation UpdateRakeStructure(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -7709,8 +7787,9 @@ export const deleteRakeStructure = /* GraphQL */ `mutation DeleteRakeStructure(
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -7723,7 +7802,6 @@ export const deleteRakeStructure = /* GraphQL */ `mutation DeleteRakeStructure(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -7742,6 +7820,8 @@ export const deleteRakeStructure = /* GraphQL */ `mutation DeleteRakeStructure(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -7843,8 +7923,9 @@ export const createCashStructure = /* GraphQL */ `mutation CreateCashStructure(
       items {
         id
         name
-        type
-        status
+        gameType
+        gameVariant
+        gameStatus
         gameStartDateTime
         gameEndDateTime
         venueId
@@ -7857,7 +7938,6 @@ export const createCashStructure = /* GraphQL */ `mutation CreateCashStructure(
         isRecurring
         isSatellite
         registrationStatus
-        gameVariant
         prizepool
         revenueByBuyIns
         totalEntries
@@ -7876,6 +7956,8 @@ export const createCashStructure = /* GraphQL */ `mutation CreateCashStructure(
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
         tournamentStructureId
         cashStructureId
         venue {
@@ -8091,8 +8173,9 @@ export const updateCashStructure = /* GraphQL */ `mutation UpdateCashStructure(
       items {
         id
         name
-        type
-        status
+        gameType
+        gameVariant
+        gameStatus
         gameStartDateTime
         gameEndDateTime
         venueId
@@ -8105,7 +8188,6 @@ export const updateCashStructure = /* GraphQL */ `mutation UpdateCashStructure(
         isRecurring
         isSatellite
         registrationStatus
-        gameVariant
         prizepool
         revenueByBuyIns
         totalEntries
@@ -8124,6 +8206,8 @@ export const updateCashStructure = /* GraphQL */ `mutation UpdateCashStructure(
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
         tournamentStructureId
         cashStructureId
         venue {
@@ -8339,8 +8423,9 @@ export const deleteCashStructure = /* GraphQL */ `mutation DeleteCashStructure(
       items {
         id
         name
-        type
-        status
+        gameType
+        gameVariant
+        gameStatus
         gameStartDateTime
         gameEndDateTime
         venueId
@@ -8353,7 +8438,6 @@ export const deleteCashStructure = /* GraphQL */ `mutation DeleteCashStructure(
         isRecurring
         isSatellite
         registrationStatus
-        gameVariant
         prizepool
         revenueByBuyIns
         totalEntries
@@ -8372,6 +8456,8 @@ export const deleteCashStructure = /* GraphQL */ `mutation DeleteCashStructure(
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
         tournamentStructureId
         cashStructureId
         venue {
@@ -8654,8 +8740,9 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
         game {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -8668,7 +8755,6 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -8687,6 +8773,8 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -9659,8 +9747,9 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
         game {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -9673,7 +9762,6 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -9692,6 +9780,8 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -10664,8 +10754,9 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
         game {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -10678,7 +10769,6 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -10697,6 +10787,8 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -11630,8 +11722,9 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -11644,7 +11737,6 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -11663,6 +11755,8 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -12132,8 +12226,9 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -12146,7 +12241,6 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -12165,6 +12259,8 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -12634,8 +12730,9 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -12648,7 +12745,6 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -12667,6 +12763,8 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -13128,8 +13226,9 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -13142,7 +13241,6 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -13161,6 +13259,8 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -13636,8 +13736,9 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -13650,7 +13751,6 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -13669,6 +13769,8 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -13894,8 +13996,9 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -13908,7 +14011,6 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -13927,6 +14029,8 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -14402,8 +14506,9 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -14416,7 +14521,6 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -14435,6 +14539,8 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -14660,8 +14766,9 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -14674,7 +14781,6 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -14693,6 +14799,8 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -15168,8 +15276,9 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -15182,7 +15291,6 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -15201,6 +15309,8 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -15427,8 +15537,9 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -15441,7 +15552,6 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -15460,6 +15570,8 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -15922,8 +16034,9 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -15936,7 +16049,6 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -15955,6 +16067,8 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -16417,8 +16531,9 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -16431,7 +16546,6 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -16450,6 +16564,8 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -16842,8 +16958,9 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
     game {
       id
       name
-      type
-      status
+      gameType
+      gameVariant
+      gameStatus
       gameStartDateTime
       gameEndDateTime
       venueId
@@ -16856,7 +16973,6 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
       isRecurring
       isSatellite
       registrationStatus
-      gameVariant
       prizepool
       revenueByBuyIns
       totalEntries
@@ -16875,6 +16991,8 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
       guaranteeOverlay
       guaranteeSurplus
       playersRemaining
+      totalChipsInPlay
+      averagePlayerStack
       tournamentStructureId
       cashStructureId
       venue {
@@ -16941,8 +17059,9 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -16955,7 +17074,6 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -16974,6 +17092,8 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -17033,8 +17153,9 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -17047,7 +17168,6 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -17066,6 +17186,8 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -17115,8 +17237,9 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -17129,7 +17252,6 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -17148,6 +17270,8 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -17181,8 +17305,9 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -17195,7 +17320,6 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -17214,6 +17338,8 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -17336,8 +17462,9 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -17350,7 +17477,6 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -17369,6 +17495,8 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -17761,8 +17889,9 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
     game {
       id
       name
-      type
-      status
+      gameType
+      gameVariant
+      gameStatus
       gameStartDateTime
       gameEndDateTime
       venueId
@@ -17775,7 +17904,6 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
       isRecurring
       isSatellite
       registrationStatus
-      gameVariant
       prizepool
       revenueByBuyIns
       totalEntries
@@ -17794,6 +17922,8 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
       guaranteeOverlay
       guaranteeSurplus
       playersRemaining
+      totalChipsInPlay
+      averagePlayerStack
       tournamentStructureId
       cashStructureId
       venue {
@@ -17860,8 +17990,9 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -17874,7 +18005,6 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -17893,6 +18023,8 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -17952,8 +18084,9 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -17966,7 +18099,6 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -17985,6 +18117,8 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -18034,8 +18168,9 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -18048,7 +18183,6 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -18067,6 +18201,8 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -18100,8 +18236,9 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -18114,7 +18251,6 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -18133,6 +18269,8 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -18255,8 +18393,9 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -18269,7 +18408,6 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -18288,6 +18426,8 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -18680,8 +18820,9 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
     game {
       id
       name
-      type
-      status
+      gameType
+      gameVariant
+      gameStatus
       gameStartDateTime
       gameEndDateTime
       venueId
@@ -18694,7 +18835,6 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
       isRecurring
       isSatellite
       registrationStatus
-      gameVariant
       prizepool
       revenueByBuyIns
       totalEntries
@@ -18713,6 +18853,8 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
       guaranteeOverlay
       guaranteeSurplus
       playersRemaining
+      totalChipsInPlay
+      averagePlayerStack
       tournamentStructureId
       cashStructureId
       venue {
@@ -18779,8 +18921,9 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -18793,7 +18936,6 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -18812,6 +18954,8 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -18871,8 +19015,9 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -18885,7 +19030,6 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -18904,6 +19048,8 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -18953,8 +19099,9 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -18967,7 +19114,6 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -18986,6 +19132,8 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -19019,8 +19167,9 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -19033,7 +19182,6 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -19052,6 +19200,8 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -19174,8 +19324,9 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -19188,7 +19339,6 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -19207,6 +19357,8 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -19730,8 +19882,9 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -19744,7 +19897,6 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -19763,6 +19915,8 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -20220,8 +20374,9 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -20234,7 +20389,6 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -20253,6 +20407,8 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -20710,8 +20866,9 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -20724,7 +20881,6 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -20743,6 +20899,8 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -21705,8 +21863,9 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -21719,7 +21878,6 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -21738,6 +21896,8 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -22271,8 +22431,9 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -22285,7 +22446,6 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -22304,6 +22464,8 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -22837,8 +22999,9 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -22851,7 +23014,6 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -22870,6 +23032,8 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt

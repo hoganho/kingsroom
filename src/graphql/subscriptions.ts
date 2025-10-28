@@ -257,8 +257,9 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -271,7 +272,6 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -290,6 +290,8 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -550,8 +552,9 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -564,7 +567,6 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -583,6 +585,8 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -843,8 +847,9 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -857,7 +862,6 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -876,6 +880,8 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -1098,8 +1104,9 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -1112,7 +1119,6 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -1131,6 +1137,8 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -1251,8 +1259,9 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
       items {
         id
         name
-        type
-        status
+        gameType
+        gameVariant
+        gameStatus
         gameStartDateTime
         gameEndDateTime
         venueId
@@ -1265,7 +1274,6 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
         isRecurring
         isSatellite
         registrationStatus
-        gameVariant
         prizepool
         revenueByBuyIns
         totalEntries
@@ -1284,6 +1292,8 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
         tournamentStructureId
         cashStructureId
         venue {
@@ -1664,8 +1674,9 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -1678,7 +1689,6 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -1697,6 +1707,8 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -1817,8 +1829,9 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
       items {
         id
         name
-        type
-        status
+        gameType
+        gameVariant
+        gameStatus
         gameStartDateTime
         gameEndDateTime
         venueId
@@ -1831,7 +1844,6 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
         isRecurring
         isSatellite
         registrationStatus
-        gameVariant
         prizepool
         revenueByBuyIns
         totalEntries
@@ -1850,6 +1862,8 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
         tournamentStructureId
         cashStructureId
         venue {
@@ -2230,8 +2244,9 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -2244,7 +2259,6 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -2263,6 +2277,8 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -2383,8 +2399,9 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
       items {
         id
         name
-        type
-        status
+        gameType
+        gameVariant
+        gameStatus
         gameStartDateTime
         gameEndDateTime
         venueId
@@ -2397,7 +2414,6 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
         isRecurring
         isSatellite
         registrationStatus
-        gameVariant
         prizepool
         revenueByBuyIns
         totalEntries
@@ -2416,6 +2432,8 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
         tournamentStructureId
         cashStructureId
         venue {
@@ -2837,8 +2855,9 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -2851,7 +2870,6 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -2870,6 +2888,8 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -3133,8 +3153,9 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -3147,7 +3168,6 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -3166,6 +3186,8 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -3429,8 +3451,9 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -3443,7 +3466,6 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -3462,6 +3484,8 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -3606,8 +3630,9 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
   onCreateGame(filter: $filter) {
     id
     name
-    type
-    status
+    gameType
+    gameVariant
+    gameStatus
     gameStartDateTime
     gameEndDateTime
     venueId
@@ -3620,7 +3645,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
     isRecurring
     isSatellite
     registrationStatus
-    gameVariant
     prizepool
     revenueByBuyIns
     totalEntries
@@ -3639,6 +3663,8 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
     guaranteeOverlay
     guaranteeSurplus
     playersRemaining
+    totalChipsInPlay
+    averagePlayerStack
     tournamentStructureId
     cashStructureId
     venue {
@@ -3752,8 +3778,9 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -3766,7 +3793,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -3785,6 +3811,8 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -3930,8 +3958,9 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -3944,7 +3973,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -3963,6 +3991,8 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -4074,8 +4104,9 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -4088,7 +4119,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -4107,6 +4137,8 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -4187,8 +4219,9 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
         game {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -4201,7 +4234,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -4220,6 +4252,8 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -4382,8 +4416,9 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
   onUpdateGame(filter: $filter) {
     id
     name
-    type
-    status
+    gameType
+    gameVariant
+    gameStatus
     gameStartDateTime
     gameEndDateTime
     venueId
@@ -4396,7 +4431,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
     isRecurring
     isSatellite
     registrationStatus
-    gameVariant
     prizepool
     revenueByBuyIns
     totalEntries
@@ -4415,6 +4449,8 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
     guaranteeOverlay
     guaranteeSurplus
     playersRemaining
+    totalChipsInPlay
+    averagePlayerStack
     tournamentStructureId
     cashStructureId
     venue {
@@ -4528,8 +4564,9 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -4542,7 +4579,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -4561,6 +4597,8 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -4706,8 +4744,9 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -4720,7 +4759,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -4739,6 +4777,8 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -4850,8 +4890,9 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -4864,7 +4905,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -4883,6 +4923,8 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -4963,8 +5005,9 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
         game {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -4977,7 +5020,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -4996,6 +5038,8 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -5158,8 +5202,9 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
   onDeleteGame(filter: $filter) {
     id
     name
-    type
-    status
+    gameType
+    gameVariant
+    gameStatus
     gameStartDateTime
     gameEndDateTime
     venueId
@@ -5172,7 +5217,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
     isRecurring
     isSatellite
     registrationStatus
-    gameVariant
     prizepool
     revenueByBuyIns
     totalEntries
@@ -5191,6 +5235,8 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
     guaranteeOverlay
     guaranteeSurplus
     playersRemaining
+    totalChipsInPlay
+    averagePlayerStack
     tournamentStructureId
     cashStructureId
     venue {
@@ -5304,8 +5350,9 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -5318,7 +5365,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -5337,6 +5383,8 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -5482,8 +5530,9 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -5496,7 +5545,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -5515,6 +5563,8 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -5626,8 +5676,9 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -5640,7 +5691,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -5659,6 +5709,8 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -5739,8 +5791,9 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
         game {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -5753,7 +5806,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -5772,6 +5824,8 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -5950,8 +6004,9 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
       items {
         id
         name
-        type
-        status
+        gameType
+        gameVariant
+        gameStatus
         gameStartDateTime
         gameEndDateTime
         venueId
@@ -5964,7 +6019,6 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
         isRecurring
         isSatellite
         registrationStatus
-        gameVariant
         prizepool
         revenueByBuyIns
         totalEntries
@@ -5983,6 +6037,8 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
         tournamentStructureId
         cashStructureId
         venue {
@@ -6153,8 +6209,9 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
       items {
         id
         name
-        type
-        status
+        gameType
+        gameVariant
+        gameStatus
         gameStartDateTime
         gameEndDateTime
         venueId
@@ -6167,7 +6224,6 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
         isRecurring
         isSatellite
         registrationStatus
-        gameVariant
         prizepool
         revenueByBuyIns
         totalEntries
@@ -6186,6 +6242,8 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
         tournamentStructureId
         cashStructureId
         venue {
@@ -6356,8 +6414,9 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
       items {
         id
         name
-        type
-        status
+        gameType
+        gameVariant
+        gameStatus
         gameStartDateTime
         gameEndDateTime
         venueId
@@ -6370,7 +6429,6 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
         isRecurring
         isSatellite
         registrationStatus
-        gameVariant
         prizepool
         revenueByBuyIns
         totalEntries
@@ -6389,6 +6447,8 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
         tournamentStructureId
         cashStructureId
         venue {
@@ -6577,8 +6637,9 @@ export const onCreateRakeStructure = /* GraphQL */ `subscription OnCreateRakeStr
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -6591,7 +6652,6 @@ export const onCreateRakeStructure = /* GraphQL */ `subscription OnCreateRakeStr
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -6610,6 +6670,8 @@ export const onCreateRakeStructure = /* GraphQL */ `subscription OnCreateRakeStr
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -6684,8 +6746,9 @@ export const onUpdateRakeStructure = /* GraphQL */ `subscription OnUpdateRakeStr
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -6698,7 +6761,6 @@ export const onUpdateRakeStructure = /* GraphQL */ `subscription OnUpdateRakeStr
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -6717,6 +6779,8 @@ export const onUpdateRakeStructure = /* GraphQL */ `subscription OnUpdateRakeStr
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -6791,8 +6855,9 @@ export const onDeleteRakeStructure = /* GraphQL */ `subscription OnDeleteRakeStr
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -6805,7 +6870,6 @@ export const onDeleteRakeStructure = /* GraphQL */ `subscription OnDeleteRakeStr
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -6824,6 +6888,8 @@ export const onDeleteRakeStructure = /* GraphQL */ `subscription OnDeleteRakeStr
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -6924,8 +6990,9 @@ export const onCreateCashStructure = /* GraphQL */ `subscription OnCreateCashStr
       items {
         id
         name
-        type
-        status
+        gameType
+        gameVariant
+        gameStatus
         gameStartDateTime
         gameEndDateTime
         venueId
@@ -6938,7 +7005,6 @@ export const onCreateCashStructure = /* GraphQL */ `subscription OnCreateCashStr
         isRecurring
         isSatellite
         registrationStatus
-        gameVariant
         prizepool
         revenueByBuyIns
         totalEntries
@@ -6957,6 +7023,8 @@ export const onCreateCashStructure = /* GraphQL */ `subscription OnCreateCashStr
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
         tournamentStructureId
         cashStructureId
         venue {
@@ -7171,8 +7239,9 @@ export const onUpdateCashStructure = /* GraphQL */ `subscription OnUpdateCashStr
       items {
         id
         name
-        type
-        status
+        gameType
+        gameVariant
+        gameStatus
         gameStartDateTime
         gameEndDateTime
         venueId
@@ -7185,7 +7254,6 @@ export const onUpdateCashStructure = /* GraphQL */ `subscription OnUpdateCashStr
         isRecurring
         isSatellite
         registrationStatus
-        gameVariant
         prizepool
         revenueByBuyIns
         totalEntries
@@ -7204,6 +7272,8 @@ export const onUpdateCashStructure = /* GraphQL */ `subscription OnUpdateCashStr
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
         tournamentStructureId
         cashStructureId
         venue {
@@ -7418,8 +7488,9 @@ export const onDeleteCashStructure = /* GraphQL */ `subscription OnDeleteCashStr
       items {
         id
         name
-        type
-        status
+        gameType
+        gameVariant
+        gameStatus
         gameStartDateTime
         gameEndDateTime
         venueId
@@ -7432,7 +7503,6 @@ export const onDeleteCashStructure = /* GraphQL */ `subscription OnDeleteCashStr
         isRecurring
         isSatellite
         registrationStatus
-        gameVariant
         prizepool
         revenueByBuyIns
         totalEntries
@@ -7451,6 +7521,8 @@ export const onDeleteCashStructure = /* GraphQL */ `subscription OnDeleteCashStr
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
         tournamentStructureId
         cashStructureId
         venue {
@@ -7730,8 +7802,9 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
         game {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -7744,7 +7817,6 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -7763,6 +7835,8 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -8732,8 +8806,9 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
         game {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -8746,7 +8821,6 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -8765,6 +8839,8 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -9734,8 +9810,9 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
         game {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -9748,7 +9825,6 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -9767,6 +9843,8 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -10699,8 +10777,9 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -10713,7 +10792,6 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -10732,6 +10810,8 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -11200,8 +11280,9 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -11214,7 +11295,6 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -11233,6 +11313,8 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -11701,8 +11783,9 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -11715,7 +11798,6 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -11734,6 +11816,8 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -12194,8 +12278,9 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -12208,7 +12293,6 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -12227,6 +12311,8 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -12702,8 +12788,9 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -12716,7 +12803,6 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -12735,6 +12821,8 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -12959,8 +13047,9 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -12973,7 +13062,6 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -12992,6 +13080,8 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -13467,8 +13557,9 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -13481,7 +13572,6 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -13500,6 +13590,8 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -13724,8 +13816,9 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -13738,7 +13831,6 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -13757,6 +13849,8 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -14232,8 +14326,9 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
         items {
           id
           name
-          type
-          status
+          gameType
+          gameVariant
+          gameStatus
           gameStartDateTime
           gameEndDateTime
           venueId
@@ -14246,7 +14341,6 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
           isRecurring
           isSatellite
           registrationStatus
-          gameVariant
           prizepool
           revenueByBuyIns
           totalEntries
@@ -14265,6 +14359,8 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
           tournamentStructureId
           cashStructureId
           venue {
@@ -14490,8 +14586,9 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -14504,7 +14601,6 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -14523,6 +14619,8 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -14984,8 +15082,9 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -14998,7 +15097,6 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -15017,6 +15115,8 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -15478,8 +15578,9 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -15492,7 +15593,6 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -15511,6 +15611,8 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -15902,8 +16004,9 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
     game {
       id
       name
-      type
-      status
+      gameType
+      gameVariant
+      gameStatus
       gameStartDateTime
       gameEndDateTime
       venueId
@@ -15916,7 +16019,6 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
       isRecurring
       isSatellite
       registrationStatus
-      gameVariant
       prizepool
       revenueByBuyIns
       totalEntries
@@ -15935,6 +16037,8 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
       guaranteeOverlay
       guaranteeSurplus
       playersRemaining
+      totalChipsInPlay
+      averagePlayerStack
       tournamentStructureId
       cashStructureId
       venue {
@@ -16001,8 +16105,9 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -16015,7 +16120,6 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -16034,6 +16138,8 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -16093,8 +16199,9 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -16107,7 +16214,6 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -16126,6 +16232,8 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -16175,8 +16283,9 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -16189,7 +16298,6 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -16208,6 +16316,8 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -16241,8 +16351,9 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -16255,7 +16366,6 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -16274,6 +16384,8 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -16396,8 +16508,9 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -16410,7 +16523,6 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -16429,6 +16541,8 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -16820,8 +16934,9 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
     game {
       id
       name
-      type
-      status
+      gameType
+      gameVariant
+      gameStatus
       gameStartDateTime
       gameEndDateTime
       venueId
@@ -16834,7 +16949,6 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
       isRecurring
       isSatellite
       registrationStatus
-      gameVariant
       prizepool
       revenueByBuyIns
       totalEntries
@@ -16853,6 +16967,8 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
       guaranteeOverlay
       guaranteeSurplus
       playersRemaining
+      totalChipsInPlay
+      averagePlayerStack
       tournamentStructureId
       cashStructureId
       venue {
@@ -16919,8 +17035,9 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -16933,7 +17050,6 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -16952,6 +17068,8 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -17011,8 +17129,9 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -17025,7 +17144,6 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -17044,6 +17162,8 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -17093,8 +17213,9 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -17107,7 +17228,6 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -17126,6 +17246,8 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -17159,8 +17281,9 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -17173,7 +17296,6 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -17192,6 +17314,8 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -17314,8 +17438,9 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -17328,7 +17453,6 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -17347,6 +17471,8 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -17738,8 +17864,9 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
     game {
       id
       name
-      type
-      status
+      gameType
+      gameVariant
+      gameStatus
       gameStartDateTime
       gameEndDateTime
       venueId
@@ -17752,7 +17879,6 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
       isRecurring
       isSatellite
       registrationStatus
-      gameVariant
       prizepool
       revenueByBuyIns
       totalEntries
@@ -17771,6 +17897,8 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
       guaranteeOverlay
       guaranteeSurplus
       playersRemaining
+      totalChipsInPlay
+      averagePlayerStack
       tournamentStructureId
       cashStructureId
       venue {
@@ -17837,8 +17965,9 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -17851,7 +17980,6 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -17870,6 +17998,8 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -17929,8 +18059,9 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -17943,7 +18074,6 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -17962,6 +18092,8 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -18011,8 +18143,9 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
           items {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -18025,7 +18158,6 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -18044,6 +18176,8 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -18077,8 +18211,9 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -18091,7 +18226,6 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -18110,6 +18244,8 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -18232,8 +18368,9 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -18246,7 +18383,6 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -18265,6 +18401,8 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -18784,8 +18922,9 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -18798,7 +18937,6 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -18817,6 +18955,8 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -19273,8 +19413,9 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -19287,7 +19428,6 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -19306,6 +19446,8 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -19762,8 +19904,9 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -19776,7 +19919,6 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -19795,6 +19937,8 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -20753,8 +20897,9 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -20767,7 +20912,6 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -20786,6 +20930,8 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -21318,8 +21464,9 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -21332,7 +21479,6 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -21351,6 +21497,8 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt
@@ -21883,8 +22031,9 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
           game {
             id
             name
-            type
-            status
+            gameType
+            gameVariant
+            gameStatus
             gameStartDateTime
             gameEndDateTime
             venueId
@@ -21897,7 +22046,6 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             isRecurring
             isSatellite
             registrationStatus
-            gameVariant
             prizepool
             revenueByBuyIns
             totalEntries
@@ -21916,6 +22064,8 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
             tournamentStructureId
             cashStructureId
             createdAt

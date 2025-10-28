@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { useGameContext } from '../contexts/GameContext';
 import { fetchGameDataFromBackend, saveGameDataToBackend, shouldAutoRefreshTournament } from '../services/gameService';
-import type { GameState, DataSource, GameData, MissingField, GameStatus, ScrapedVenueMatch } from '../types/game';
+import type { GameState, GameData, MissingField, ScrapedVenueMatch } from '../types/game';
+import type { DataSource, GameStatus } from '../API';
 
 export const POLLING_INTERVAL = 5 * 60 * 1000; 
 
@@ -13,7 +14,7 @@ export const useGameTracker = () => {
         const intervalId = setInterval(() => {
             console.log(`[useGameTracker] Polling check initiated at ${new Date().toLocaleTimeString()}`);
             Object.values(games).forEach(game => {
-                if (game.autoRefresh && game.data?.status === 'RUNNING' && !game.data.doNotScrape) {
+                if (game.autoRefresh && game.data?.gameStatus === 'RUNNING' && !game.data.doNotScrape) {
                     console.log(`[useGameTracker] Re-fetching updates for RUNNING tournament: ${game.id}`);
                     fetchAndLoadData(game.id, game.source);
                 } else if (game.autoRefresh && game.data?.doNotScrape) {
@@ -32,14 +33,14 @@ export const useGameTracker = () => {
     const fetchAndLoadData = async (id: string, source: DataSource) => {
         if (source !== 'SCRAPE') {
             console.log("Only SCRAPE source is configured for backend fetching.");
-            updateGameState({ id, status: 'ERROR', errorMessage: 'Only scraping from a URL is supported.' });
+            updateGameState({ id, jobStatus: 'ERROR', errorMessage: 'Only scraping from a URL is supported.' });
             return;
         }
 
         const game = state.games[id];
         
         if (!game?.autoRefresh) {
-            updateGameState({ id, status: 'FETCHING', errorMessage: undefined, missingFields: [] });
+            updateGameState({ id, jobStatus: 'FETCHING', errorMessage: undefined, missingFields: [] });
         }
         
         try {
@@ -62,43 +63,27 @@ export const useGameTracker = () => {
             console.log('[useGameTracker] Extracted existingGameId:', existingGameId);
             console.log('[useGameTracker] Extracted doNotScrape:', doNotScrape);
 
-            let mappedStatus: GameStatus = 'SCHEDULED';
-            const backendStatus = (dataFromBackend.status || 'SCHEDULED').toUpperCase();
-            
-            switch (backendStatus) {
-                case 'LIVE':
-                case 'RUNNING':
-                    mappedStatus = 'RUNNING';
-                    break;
-                case 'COMPLETED':
-                    mappedStatus = 'COMPLETED';
-                    break;
-                case 'CANCELLED':
-                    mappedStatus = 'CANCELLED';
-                    break;
-                default:
-                    mappedStatus = 'SCHEDULED';
-            }
-
             const data: GameData = {
                 name: dataFromBackend.name,
                 gameStartDateTime: dataFromBackend.gameStartDateTime || undefined,
                 gameEndDateTime: dataFromBackend.gameEndDateTime || undefined,
-                status: mappedStatus,
-                type: 'TOURNAMENT',
-                registrationStatus: dataFromBackend.registrationStatus || undefined,
+                gameStatus: (dataFromBackend as any).gameStatus || undefined,
+                gameType: dataFromBackend.gameType || undefined,
+                registrationStatus: (dataFromBackend as any).registrationStatus || undefined,
                 gameVariant: dataFromBackend.gameVariant || undefined,
                 prizepool: dataFromBackend.prizepool || undefined,
                 totalEntries: dataFromBackend.totalEntries || undefined,
                 revenueByBuyIns: (dataFromBackend as any).revenueByBuyIns || undefined,
                 profitLoss: dataFromBackend.profitLoss || undefined,
                 playersRemaining: (dataFromBackend as any).playersRemaining || undefined,
+                totalChipsInPlay: (dataFromBackend as any).totalChipsInPlay || undefined,
+                averagePlayerStack: (dataFromBackend as any).averagePlayerStack || undefined,
                 totalRebuys: dataFromBackend.totalRebuys || undefined,
                 totalAddons: dataFromBackend.totalAddons || undefined,
                 totalDuration: dataFromBackend.totalDuration || undefined,
                 gameTags: dataFromBackend.gameTags || [],
                 seriesName: (dataFromBackend as any).seriesName || undefined,
-                tournamentType: dataFromBackend.tournamentType || 'FREEZEOUT',
+                tournamentType: dataFromBackend.tournamentType || undefined,
                 buyIn: dataFromBackend.buyIn || undefined,
                 rake: dataFromBackend.rake || undefined,
                 totalRake: dataFromBackend.totalRake || undefined,
@@ -265,7 +250,7 @@ export const useGameTracker = () => {
             return;
         }
         
-        console.log(`[useGameTracker] Saving ${game.data.status} tournament: ${id}`);
+        console.log(`[useGameTracker] Saving ${game.data.gameStatus} tournament: ${id}`);
         updateGameState({ id, status: 'SAVING' });
         try {
             const result = await saveGameDataToBackend(id, venueId, game.data, game.existingGameId);
@@ -275,7 +260,7 @@ export const useGameTracker = () => {
                 saveResult: result,
                 existingGameId: result.id,
             });
-            console.log(`[useGameTracker] Successfully saved ${game.data.status} tournament: ${id}`);
+            console.log(`[useGameTracker] Successfully saved ${game.data.gameStatus} tournament: ${id}`);
         } catch (error: any) {
             updateGameState({ id, status: 'ERROR', errorMessage: `Failed to save: ${error.message}` });
         }

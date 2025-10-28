@@ -21,7 +21,7 @@ export const schema = {
                     "name": "method",
                     "isArray": false,
                     "type": {
-                        "enum": "SyncMethod"
+                        "enum": "DataSource"
                     },
                     "isRequired": true,
                     "attributes": []
@@ -627,8 +627,8 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "type": {
-                    "name": "type",
+                "gameType": {
+                    "name": "gameType",
                     "isArray": false,
                     "type": {
                         "enum": "GameType"
@@ -636,8 +636,17 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "status": {
-                    "name": "status",
+                "gameVariant": {
+                    "name": "gameVariant",
+                    "isArray": false,
+                    "type": {
+                        "enum": "GameVariant"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameStatus": {
+                    "name": "gameStatus",
                     "isArray": false,
                     "type": {
                         "enum": "GameStatus"
@@ -724,13 +733,6 @@ export const schema = {
                 },
                 "registrationStatus": {
                     "name": "registrationStatus",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gameVariant": {
-                    "name": "gameVariant",
                     "isArray": false,
                     "type": "String",
                     "isRequired": false,
@@ -862,6 +864,20 @@ export const schema = {
                     "name": "playersRemaining",
                     "isArray": false,
                     "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalChipsInPlay": {
+                    "name": "totalChipsInPlay",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "averagePlayerStack": {
+                    "name": "averagePlayerStack",
+                    "isArray": false,
+                    "type": "Float",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -3255,8 +3271,8 @@ export const schema = {
         }
     },
     "enums": {
-        "SyncMethod": {
-            "name": "SyncMethod",
+        "DataSource": {
+            "name": "DataSource",
             "values": [
                 "SCRAPE",
                 "API",
@@ -3292,10 +3308,26 @@ export const schema = {
             "name": "GameStatus",
             "values": [
                 "SCHEDULED",
-                "LIVE",
+                "RUNNING",
                 "COMPLETED",
                 "CANCELLED",
                 "FINISHED"
+            ]
+        },
+        "GameVariant": {
+            "name": "GameVariant",
+            "values": [
+                "NLHE",
+                "PLO",
+                "PLO5",
+                "PLO6"
+            ]
+        },
+        "RegistrationStatus": {
+            "name": "RegistrationStatus",
+            "values": [
+                "OPEN",
+                "CLOSED"
             ]
         },
         "TournamentType": {
@@ -3337,7 +3369,7 @@ export const schema = {
         "PlayerTargetingClassification": {
             "name": "PlayerTargetingClassification",
             "values": [
-                "NotPlayer",
+                "NotPlayed",
                 "Active_EL",
                 "Active",
                 "Retain_Inactive31_60d",
@@ -3496,10 +3528,12 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "status": {
-                    "name": "status",
+                "gameStatus": {
+                    "name": "gameStatus",
                     "isArray": false,
-                    "type": "String",
+                    "type": {
+                        "enum": "GameStatus"
+                    },
                     "isRequired": false,
                     "attributes": []
                 },
@@ -3510,17 +3544,30 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "gameType": {
+                    "name": "gameType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "GameType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "gameVariant": {
                     "name": "gameVariant",
                     "isArray": false,
-                    "type": "String",
+                    "type": {
+                        "enum": "GameVariant"
+                    },
                     "isRequired": false,
                     "attributes": []
                 },
                 "tournamentType": {
                     "name": "tournamentType",
                     "isArray": false,
-                    "type": "String",
+                    "type": {
+                        "enum": "TournamentType"
+                    },
                     "isRequired": false,
                     "attributes": []
                 },
@@ -3533,6 +3580,27 @@ export const schema = {
                 },
                 "revenueByBuyIns": {
                     "name": "revenueByBuyIns",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playersRemaining": {
+                    "name": "playersRemaining",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalChipsInPlay": {
+                    "name": "totalChipsInPlay",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "averagePlayerStack": {
+                    "name": "averagePlayerStack",
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
@@ -4035,5 +4103,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "3085d231430a20f3dd7b4d780a83b6bb"
+    "version": "0077430069ef15bf29396aa72c79304c"
 };

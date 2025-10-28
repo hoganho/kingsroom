@@ -134,11 +134,17 @@ const defaultStrategy = {
     },
     
     getStatus(ctx) {
-        const status = (ctx.$('label:contains("Status")').first().next('strong').text().trim().toUpperCase() || 'UNKNOWN_STATUS');
-        if (status !== 'UNKNOWN_STATUS') {
-            ctx.add('status', status);
+        // Renamed 'status' to 'gameStatus' internally for clarity, matching schema
+        const gameStatus = (ctx.$('label:contains("Status")').first().next('strong').text().trim().toUpperCase() || 'UNKNOWN_STATUS');
+        if (gameStatus !== 'UNKNOWN_STATUS') {
+            // Map 'RUNNING' from scrape to 'LIVE' if schema expects LIVE
+            // Or keep as 'RUNNING' if schema expects RUNNING
+            // Assuming schema expects RUNNING for now based on previous discussion context.
+            // If schema expects LIVE, change the next line.
+            const mappedStatus = gameStatus === 'RUNNING' ? 'RUNNING' : gameStatus;
+            ctx.add('gameStatus', mappedStatus); // Add as gameStatus
         }
-        return status;
+        return gameStatus; // Return the raw scraped status for internal checks
     },
     
     getRegistrationStatus(ctx) {
@@ -151,10 +157,16 @@ const defaultStrategy = {
     },
     
     getGameVariant(ctx) {
+        let variant = null;
         if (ctx.gameData && ctx.gameData.shortlimitgame) {
-            ctx.add('gameVariant', ctx.gameData.shortlimitgame);
+            variant = ctx.gameData.shortlimitgame;
         } else {
-            ctx.getText('gameVariant', '#cw_clock_shortlimitgame');
+            variant = ctx.$('#cw_clock_shortlimitgame').first().text().trim();
+        }
+
+        if (variant) {
+            const cleanedVariant = variant.replace(/\s/g, '');
+            ctx.add('gameVariant', cleanedVariant);
         }
     },
     
@@ -163,28 +175,27 @@ const defaultStrategy = {
     },
     
     getTotalEntries(ctx) {
+        // Simplified: Just extract total entries if available
         const selector = '#cw_clock_playersentries';
         const text = ctx.$(selector).first().text().trim();
-        const currentStatus = ctx.data.status;
 
         if (!text) return;
 
-        if (currentStatus === 'RUNNING' && text.includes('/')) {
+        let totalEntries = null;
+        if (text.includes('/')) {
             const parts = text.split('/').map(part => parseInt(part.trim(), 10));
-            
-            if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-                const playersRemaining = parts[0];
-                const totalEntries = parts[1];
-                
-                // This value is now derived in getSeatingAndPlayersRemaining to be more accurate
-                // ctx.add('playersRemaining', playersRemaining); 
-                ctx.add('totalEntries', totalEntries);
+            if (parts.length === 2 && !isNaN(parts[1])) {
+                totalEntries = parts[1];
             }
         } else {
             const num = parseInt(text.replace(/[^0-9.-]+/g, ''), 10);
             if (!isNaN(num)) {
-                ctx.add('totalEntries', num);
+                totalEntries = num;
             }
+        }
+
+        if (totalEntries !== null) {
+            ctx.add('totalEntries', totalEntries);
         }
     },
 
@@ -406,35 +417,32 @@ const defaultStrategy = {
         console.log(`[DEBUG-PROFIT] -> Final Profit/Loss: ${profitLoss}`);
     },
     
-    getSeatingAndPlayersRemaining(ctx) {
+    getSeating(ctx) { // Renamed from getSeatingAndPlayersRemaining
         const seating = [];
-        // This selector correctly finds the "Entries" table which lists players still in the game.
         const entriesTable = ctx.$('h4.cw-text-center:contains("Entries")').next('table').find('tbody tr');
-        
+
         entriesTable.each((i, el) => {
             const $row = ctx.$(el);
             const $tds = $row.find('td');
 
-            if ($tds.length < 4) return;
+            // Skip header rows or malformed rows
+            if ($tds.length < 4 || $row.find('th').length > 0) return;
 
             const name = $tds.eq(1).text().trim();
             const tableSeatInfo = $tds.eq(2).text().trim();
-            // This variable holds the stack as a string (e.g., "30,000")
             const chipsStr = $tds.eq(3).text().trim();
 
-            // A player is considered "seated" if they have a chip count.
+            // Only add players who have a table/seat listed AND a chip count (implies they are still in)
             if (chipsStr && tableSeatInfo.includes('Table')) {
                 const tableSeatMatch = tableSeatInfo.match(/Table(\d+)\s*\/\s*(\d+)/);
-                
+
                 if (name && tableSeatMatch) {
-                    // Convert the chip string to a number for the stack.
                     const stack = parseInt(chipsStr.replace(/,/g, ''), 10);
 
                     seating.push({
                         name: name,
                         table: parseInt(tableSeatMatch[1], 10),
                         seat: parseInt(tableSeatMatch[2], 10),
-                        // ✅ THE FIX: Add the parsed playerStack here.
                         playerStack: !isNaN(stack) ? stack : null
                     });
                 }
@@ -444,8 +452,33 @@ const defaultStrategy = {
         if (seating.length > 0) {
             ctx.add('seating', seating);
         }
-        // This also ensures playersRemaining is accurate.
-        ctx.add('playersRemaining', seating.length);
+        // playersRemaining will be calculated in getLiveData now based on seating count
+    },
+
+    getLiveData(ctx) {
+        // Get the status added by the getStatus function earlier
+        const currentStatus = ctx.data.gameStatus;
+
+        // Skip if the game is already finished
+        if (currentStatus === 'COMPLETED' || currentStatus === 'FINISHED' || currentStatus === 'CANCELLED') {
+            console.log(`[DEBUG-LIVE] Skipping live data scrape, game status is ${currentStatus}.`);
+            return;
+        }
+
+        console.log(`[DEBUG-LIVE] Scraping live data, game status is ${currentStatus}.`);
+
+        // 1. Players Remaining (derived from seating data)
+        const playersRemaining = ctx.data.seating ? ctx.data.seating.length : 0;
+        ctx.add('playersRemaining', playersRemaining);
+        console.log(`[DEBUG-LIVE] -> Players Remaining: ${playersRemaining}`);
+
+        // 2. Total Chips in Play
+        const totalChips = ctx.parseNumeric('totalChipsInPlay', '#cw_clock_entire_stack');
+        console.log(`[DEBUG-LIVE] -> Total Chips: ${totalChips !== undefined ? totalChips : 'Not Found'}`);
+
+        // 3. Average Player Stack
+        const avgStack = ctx.parseNumeric('averagePlayerStack', '#cw_clock_avg_stack');
+        console.log(`[DEBUG-LIVE] -> Average Stack: ${avgStack !== undefined ? avgStack : 'Not Found'}`);
     },
 
     getResults(ctx) {
@@ -512,14 +545,6 @@ const defaultStrategy = {
         }
     },
     
-    getTotalChipsInPlay(ctx) {
-        ctx.parseNumeric('totalChipsInPlay', '#cw_clock_entire_stack');
-    },
-    
-    getAveragePlayerStack(ctx) {
-        ctx.parseNumeric('averagePlayerStack', '#cw_clock_avg_stack');
-    },
-
     getLevels(ctx) {
         if (!ctx.levelData) return;
         const levels = ctx.levelData.map(level => ({
@@ -641,16 +666,46 @@ const strategyMap = {
      "STATUS: SCHEDULED | REG: OPEN": defaultStrategy,
 };
 
-// ✅ FIXED: The function signature was updated to accept the 'venues' parameter.
 const runScraper = (html, structureLabel, venues = []) => {
     const ctx = new ScrapeContext(html);
-    const strategy = defaultStrategy; 
+    const strategy = defaultStrategy;
     console.log(`[Scraper] Using unified robust strategy.`);
-    
-    for (const key in strategy) {
+
+    // Define the order, ensuring status is scraped before getLiveData
+    const executionOrder = [
+        'getStatus', // Run this first to determine game status
+        'getName',
+        'getGameTags',
+        'getGameStartDateTime',
+        'getRegistrationStatus',
+        'getGameVariant',
+        'getPrizepool',
+        'getTotalEntries', // Scrape base numbers
+        'getTotalRebuys',
+        'getTotalAddons',
+        'getBuyIn',
+        'getRake',
+        'getStartingStack',
+        'getGuarantee',
+        'calculateRevenueByBuyIns', // Calculate derived financials
+        'calculateGuaranteeMetrics',
+        'calculateTotalRake',
+        'calculateProfitLoss',
+        'getSeriesName',
+        'getTotalDuration',
+        'getSeating', // Scrape seating structure
+        'getResults', // Scrape results (if any)
+        'getTables',  // Scrape table layout
+        'getLevels',
+        'getBreaks',
+        'getMatchingVenue',
+        'getLiveData', // Scrape live data *after* status and seating
+    ];
+
+    // Execute functions in defined order
+    executionOrder.forEach(key => {
         if (typeof strategy[key] === 'function') {
-            try {
-                // Pass the venues list to the matching function
+             try {
                 if (key === 'getMatchingVenue') {
                     strategy[key](ctx, venues);
                 } else {
@@ -659,8 +714,12 @@ const runScraper = (html, structureLabel, venues = []) => {
             } catch (e) {
                 console.error(`[Scraper] Error running strategy function "${key}":`, e.message);
             }
+        } else {
+             console.warn(`[Scraper] Strategy function "${key}" not found in defaultStrategy.`);
         }
-    }
+    });
+
+    // Add raw HTML at the end
     ctx.add('rawHtml', html);
     return { data: ctx.data, foundKeys: Array.from(ctx.foundKeys) };
 };
@@ -669,8 +728,10 @@ module.exports = {
     runScraper,
     getStatusAndReg: (html) => {
         const ctx = new ScrapeContext(html);
-        const status = defaultStrategy.getStatus(ctx);
+        // Call the updated getStatus function which adds 'gameStatus' to ctx.data
+        defaultStrategy.getStatus(ctx);
         const registrationStatus = defaultStrategy.getRegistrationStatus(ctx);
-        return { status, registrationStatus };
+        // Return the gameStatus from the context
+        return { gameStatus: ctx.data.gameStatus, registrationStatus };
     }
 };
