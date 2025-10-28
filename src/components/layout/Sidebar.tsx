@@ -14,7 +14,7 @@ export const Sidebar = () => {
   return (
     <aside className="fixed inset-y-0 left-0 z-10 w-64 flex-col border-r bg-white hidden md:flex">
       <div className="flex flex-shrink-0 items-center px-4 h-16 border-b">
-        <h1 className="text-xl font-bold text-indigo-600">Scraper App</h1>
+        <h1 className="text-xl font-bold text-indigo-600">Kingsroom App</h1>
       </div>
       <nav className="flex flex-1 flex-col overflow-y-auto">
         <div className="p-4 space-y-2">

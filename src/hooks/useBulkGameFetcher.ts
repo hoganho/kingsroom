@@ -47,7 +47,7 @@ export const useBulkGameFetcher = () => {
             
             // Map the raw results from the backend to our strictly-typed `BulkGameSummary`.
             // This is where the type guards are used to prevent type errors.
-            const typedSummaries: BulkGameSummary[] = results.map(res => ({
+            const typedSummaries: BulkGameSummary[] = results?.map(res => ({
                 id: res.id,
                 name: res.name || null,
                 // Use the type guard: if the backend string is a valid status, use it. Otherwise, undefined.
@@ -57,7 +57,7 @@ export const useBulkGameFetcher = () => {
                 inDatabase: res.inDatabase || false,
                 doNotScrape: res.doNotScrape || false,
                 error: res.error || null,
-            }));
+            })) || []; // Fallback to an empty array if results is null/undefined
 
             setSummaries(typedSummaries);
 
