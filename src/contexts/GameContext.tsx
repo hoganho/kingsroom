@@ -1,20 +1,29 @@
+// src/contexts/GameContext.tsx
+
 import React, { createContext, useReducer, Dispatch, useContext } from 'react';
-import type { GameState } from '../types/game';
+// ✅ 1. Import BulkGameSummary type
+import type { GameState, BulkGameSummary } from '../types/game';
 import type { DataSource } from '../API';
 
-// Define the shape of our global state
+// ✅ 2. Add bulk scraper state to GlobalState
 type GlobalState = {
-    games: Record<string, GameState>; // A dictionary of games, keyed by ID
+    games: Record<string, GameState>; // For single tracking
+    summaries: BulkGameSummary[];      // For bulk results
+    bulkLoading: boolean;              // Loading state for bulk fetch
+    bulkError: string | null;          // Error state for bulk fetch
 };
 
-// Define the actions that can be dispatched to update the state
+// ✅ 3. Add new actions for the bulk scraper
 type GameAction =
     | { type: 'ADD_GAME'; payload: { id: string; source: DataSource } }
     | { type: 'UPDATE_GAME_STATE'; payload: Partial<GameState> & { id: string } }
     | { type: 'REMOVE_GAME'; payload: { id: string } }
-    | { type: 'TOGGLE_AUTO_REFRESH'; payload: { id: string; enabled: boolean } };
+    | { type: 'TOGGLE_AUTO_REFRESH'; payload: { id: string; enabled: boolean } }
+    | { type: 'FETCH_SUMMARIES_START' }
+    | { type: 'FETCH_SUMMARIES_SUCCESS'; payload: BulkGameSummary[] }
+    | { type: 'FETCH_SUMMARIES_ERROR'; payload: string };
 
-// The reducer function handles state transitions based on dispatched actions
+// ✅ 4. Update the reducer to handle the new actions
 const gameReducer = (state: GlobalState, action: GameAction): GlobalState => {
     switch (action.type) {
         case 'ADD_GAME':
@@ -24,7 +33,7 @@ const gameReducer = (state: GlobalState, action: GameAction): GlobalState => {
                 jobStatus: 'IDLE',
                 autoRefresh: false,
                 fetchCount: 0,
-                existingGameId: null, 
+                existingGameId: null,
             };
             return {
                 ...state,
@@ -67,17 +76,41 @@ const gameReducer = (state: GlobalState, action: GameAction): GlobalState => {
                     },
                 },
             };
+
+        // ✅ 5. Add cases for bulk fetching logic
+        case 'FETCH_SUMMARIES_START':
+            return {
+                ...state,
+                bulkLoading: true,
+                bulkError: null,
+            };
+        case 'FETCH_SUMMARIES_SUCCESS':
+            return {
+                ...state,
+                bulkLoading: false,
+                summaries: action.payload,
+            };
+        case 'FETCH_SUMMARIES_ERROR':
+            return {
+                ...state,
+                bulkLoading: false,
+                bulkError: action.payload,
+            };
             
         default:
             return state;
     }
 };
 
+// ✅ 6. Update the initial state to include the new properties
 const initialState: GlobalState = {
     games: {},
+    summaries: [],
+    bulkLoading: false,
+    bulkError: null,
 };
 
-// Create the context
+// The rest of your file stays the same
 export const GameContext = createContext<{
     state: GlobalState;
     dispatch: Dispatch<GameAction>;
@@ -86,7 +119,6 @@ export const GameContext = createContext<{
     dispatch: () => null,
 });
 
-// Create the provider component
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [state, dispatch] = useReducer(gameReducer, initialState);
 
@@ -97,6 +129,4 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 };
 
-// Custom hook to easily access the context
 export const useGameContext = () => useContext(GameContext);
-

@@ -5,10 +5,10 @@ enum DataSource { SCRAPE, API, MANUAL }
 enum AssetCondition { NEW, GOOD, FAIR, POOR, RETIRED }
 enum VenueStatus { ACTIVE, INACTIVE, PENDING }
 enum GameType { TOURNAMENT, CASH_GAME }
-enum GameStatus { SCHEDULED, RUNNING, CANCELLED, FINISHED }
+enum GameStatus { SCHEDULED, REGISTERING, RUNNING, CANCELLED, FINISHED }
 enum GameVariant { NLHE, PLO, PLO5, PLO6 }
 enum GameFrequency { DAILY, WEEKLY, FORTNIGHTLY, MONTHLY, QUARTERLY, YEARLY, UNKNOWN }
-enum RegistrationStatus { OPEN, CLOSED }
+enum RegistrationStatus { OPEN, FINAL, CLOSED }
 enum TournamentType { FREEZEOUT, REBUY, SATELLITE, DEEPSTACK }
 enum PaymentSourceType { CASH, SQUARE, CREDIT, UNKNOWN }
 enum PlayerAccountStatus { ACTIVE, SUSPENDED, PENDING_VERIFICATION }

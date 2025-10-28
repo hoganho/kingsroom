@@ -530,25 +530,40 @@ const defaultStrategy = {
 
     getEntries(ctx) {
         const entries = [];
-        // This selector finds the table directly following the 'Entries' heading
-        const entriesTable = ctx.$('h4.cw-text-center:contains("Entries")').next('table').find('tbody tr');
+        // First, try the standard 'Entries' table, which is common for live games.
+        let entriesTable = ctx.$('h4.cw-text-center:contains("Entries")').next('table').find('tbody tr');
         
-        entriesTable.each((i, el) => {
-            const $row = ctx.$(el);
-            
-            // Skip any header rows that might be in the tbody
-            if ($row.find('th').length > 0) {
-                return; // 'continue' in a .each loop
-            }
+        if (entriesTable.length > 0) {
+            entriesTable.each((i, el) => {
+                const $row = ctx.$(el);
+                // Skip any header rows that might be in the tbody
+                if ($row.find('th').length > 0) return; 
 
-            // The player name is in the second table cell (td)
-            const name = $row.find('td').eq(1).text().trim();
-            
-            // Add the player to the list if a name was found
-            if (name) {
-                entries.push({ name: name });
+                // In the 'Entries' table, the player name is in the second cell.
+                const name = $row.find('td').eq(1).text().trim();
+                if (name) {
+                    entries.push({ name: name });
+                }
+            });
+        }
+
+        // If no entries were found, it's likely a finished game. Try the 'Result' table.
+        if (entries.length === 0) {
+            const resultTable = ctx.$('h4.cw-text-center:contains("Result")').next('table').find('tbody tr');
+            if (resultTable.length > 0) {
+                console.log("[DEBUG-ENTRIES] 'Entries' table not found, parsing player list from 'Result' table.");
+                resultTable.each((i, el) => {
+                    const $row = ctx.$(el);
+                    if ($row.find('th').length > 0) return; // Skip header rows
+
+                    // In the 'Result' table, the name is in the third cell.
+                    const name = $row.find('td').eq(2).text().trim();
+                    if (name) {
+                        entries.push({ name: name });
+                    }
+                });
             }
-        });
+        }
 
         if (entries.length > 0) {
             ctx.add('entries', entries);
@@ -584,24 +599,51 @@ const defaultStrategy = {
 
     getResults(ctx) {
         const results = [];
-        const entriesTable = ctx.$('h4.cw-text-center:contains("Entries")').next('table').find('tbody tr');
         
-        entriesTable.each((i, el) => {
-            const $el = ctx.$(el);
-            const rankText = $el.find('td').eq(2).text().trim();
-            
-            if (rankText.toLowerCase().includes('out')) {
-                const name = $el.find('td').eq(1).text().trim();
-                const rank = parseInt(rankText.replace(/\D/g, ''), 10);
-                
+        // STRATEGY 1: Check for the "Result" table used in FINISHED games.
+        const resultTable = ctx.$('h4.cw-text-center:contains("Result")').next('table').find('tbody tr');
+
+        if (resultTable.length > 0) {
+            console.log("[DEBUG-RESULTS] Found 'Result' table, parsing as a finished game.");
+            resultTable.each((i, el) => {
+                const $row = ctx.$(el);
+                const rank = parseInt($row.find('td').eq(0).text().trim(), 10);
+                const name = $row.find('td').eq(2).text().trim();
+                const winningsStr = $row.find('td').eq(3).text().trim();
+                const winnings = winningsStr ? parseInt(winningsStr.replace(/[^0-9.-]+/g, ''), 10) : 0;
+
                 if (name && !isNaN(rank)) {
-                    results.push({ rank, name, winnings: 0 });
+                    results.push({
+                        rank,
+                        name,
+                        winnings: isNaN(winnings) ? 0 : winnings,
+                    });
                 }
-            }
-        });
+            });
+        } else {
+            // STRATEGY 2 (FALLBACK): Check the "Entries" table for eliminated players in LIVE games.
+            console.log("[DEBUG-RESULTS] No 'Result' table found. Parsing 'Entries' table for live game knockouts.");
+            const entriesTable = ctx.$('h4.cw-text-center:contains("Entries")').next('table').find('tbody tr');
+            
+            entriesTable.each((i, el) => {
+                const $el = ctx.$(el);
+                const rankText = $el.find('td').eq(2).text().trim();
+                
+                // Look for players who have been marked as "Out".
+                if (rankText.toLowerCase().includes('out')) {
+                    const name = $el.find('td').eq(1).text().trim();
+                    const rank = parseInt(rankText.replace(/\D/g, ''), 10);
+                    
+                    if (name && !isNaN(rank)) {
+                        results.push({ rank, name, winnings: 0 }); // Winnings are 0 as they are just knocked out.
+                    }
+                }
+            });
+        }
 
         if (results.length > 0) {
             ctx.add('results', results);
+            console.log(`[DEBUG-RESULTS] Found ${results.length} results entries.`);
         }
     },
 
