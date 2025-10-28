@@ -1034,6 +1034,15 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "gameFrequency": {
+                    "name": "gameFrequency",
+                    "isArray": false,
+                    "type": {
+                        "enum": "GameFrequency"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "isSatellite": {
                     "name": "isSatellite",
                     "isArray": false,
@@ -3664,6 +3673,17 @@ export const schema = {
                 "PLO6"
             ]
         },
+        "GameFrequency": {
+            "name": "GameFrequency",
+            "values": [
+                "DAILY",
+                "WEEKLY",
+                "FORTNIGHTLY",
+                "MONTHLY",
+                "QUARTERLY",
+                "YEARLY"
+            ]
+        },
         "RegistrationStatus": {
             "name": "RegistrationStatus",
             "values": [
@@ -3934,27 +3954,6 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "playersRemaining": {
-                    "name": "playersRemaining",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalChipsInPlay": {
-                    "name": "totalChipsInPlay",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "averagePlayerStack": {
-                    "name": "averagePlayerStack",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
                 "profitLoss": {
                     "name": "profitLoss",
                     "isArray": false,
@@ -3980,6 +3979,27 @@ export const schema = {
                     "name": "totalAddons",
                     "isArray": false,
                     "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playersRemaining": {
+                    "name": "playersRemaining",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalChipsInPlay": {
+                    "name": "totalChipsInPlay",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "averagePlayerStack": {
+                    "name": "averagePlayerStack",
+                    "isArray": false,
+                    "type": "Float",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -4051,6 +4071,50 @@ export const schema = {
                     "name": "guaranteeSurplus",
                     "isArray": false,
                     "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesName": {
+                    "name": "seriesName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isRegular": {
+                    "name": "isRegular",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isSeries": {
+                    "name": "isSeries",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isRecurring": {
+                    "name": "isRecurring",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameFrequency": {
+                    "name": "gameFrequency",
+                    "isArray": false,
+                    "type": {
+                        "enum": "GameFrequency"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isSatellite": {
+                    "name": "isSatellite",
+                    "isArray": false,
+                    "type": "Boolean",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -4452,5 +4516,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "e62f811c95380db379e154d2537cd4aa"
+    "version": "b4d5dd643cb778c2c85d94b50e780db1"
 };

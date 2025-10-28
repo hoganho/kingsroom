@@ -276,6 +276,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -658,6 +659,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -1040,6 +1042,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -1379,6 +1382,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -1568,6 +1572,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -1888,6 +1893,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -2196,6 +2202,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -2385,6 +2392,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -2705,6 +2713,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -3013,6 +3022,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -3202,6 +3212,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -3522,6 +3533,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -3876,6 +3888,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -4261,6 +4274,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -4646,6 +4660,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -4996,6 +5011,7 @@ export const onCreateTournamentSeriesTitle = /* GraphQL */ `subscription OnCreat
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -5162,6 +5178,7 @@ export const onUpdateTournamentSeriesTitle = /* GraphQL */ `subscription OnUpdat
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -5328,6 +5345,7 @@ export const onDeleteTournamentSeriesTitle = /* GraphQL */ `subscription OnDelet
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -5603,6 +5621,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -5852,6 +5871,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -6299,6 +6319,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -6548,6 +6569,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -6995,6 +7017,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -7244,6 +7267,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -7493,6 +7517,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
     isRegular
     isSeries
     isRecurring
+    gameFrequency
     isSatellite
     registrationStatus
     prizepool
@@ -7647,6 +7672,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -7909,6 +7935,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -8079,6 +8106,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -8218,6 +8246,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -8540,6 +8569,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -8650,6 +8680,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -8792,6 +8823,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
     isRegular
     isSeries
     isRecurring
+    gameFrequency
     isSatellite
     registrationStatus
     prizepool
@@ -8946,6 +8978,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -9208,6 +9241,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -9378,6 +9412,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -9517,6 +9552,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -9839,6 +9875,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -9949,6 +9986,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -10091,6 +10129,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
     isRegular
     isSeries
     isRecurring
+    gameFrequency
     isSatellite
     registrationStatus
     prizepool
@@ -10245,6 +10284,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -10507,6 +10547,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -10677,6 +10718,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -10816,6 +10858,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -11138,6 +11181,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -11248,6 +11292,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -11406,6 +11451,7 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -11671,6 +11717,7 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -11936,6 +11983,7 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -12219,6 +12267,7 @@ export const onCreateRakeStructure = /* GraphQL */ `subscription OnCreateRakeStr
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -12330,6 +12379,7 @@ export const onUpdateRakeStructure = /* GraphQL */ `subscription OnUpdateRakeStr
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -12441,6 +12491,7 @@ export const onDeleteRakeStructure = /* GraphQL */ `subscription OnDeleteRakeStr
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -12578,6 +12629,7 @@ export const onCreateCashStructure = /* GraphQL */ `subscription OnCreateCashStr
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -12887,6 +12939,7 @@ export const onUpdateCashStructure = /* GraphQL */ `subscription OnUpdateCashStr
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -13196,6 +13249,7 @@ export const onDeleteCashStructure = /* GraphQL */ `subscription OnDeleteCashStr
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -13570,6 +13624,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -14603,6 +14658,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -15636,6 +15692,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -16632,6 +16689,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -17137,6 +17195,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -17642,6 +17701,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -18139,6 +18199,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -18656,6 +18717,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -18997,6 +19059,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -19514,6 +19577,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -19855,6 +19919,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -20372,6 +20437,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -20714,6 +20780,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -21212,6 +21279,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -21710,6 +21778,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -22138,6 +22207,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
       isRegular
       isSeries
       isRecurring
+      gameFrequency
       isSatellite
       registrationStatus
       prizepool
@@ -22240,6 +22310,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -22363,6 +22434,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -22449,6 +22521,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -22519,6 +22592,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -22686,6 +22760,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -22822,6 +22897,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -23250,6 +23326,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
       isRegular
       isSeries
       isRecurring
+      gameFrequency
       isSatellite
       registrationStatus
       prizepool
@@ -23352,6 +23429,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -23475,6 +23553,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -23561,6 +23640,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -23631,6 +23711,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -23798,6 +23879,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -23934,6 +24016,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -24362,6 +24445,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
       isRegular
       isSeries
       isRecurring
+      gameFrequency
       isSatellite
       registrationStatus
       prizepool
@@ -24464,6 +24548,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -24587,6 +24672,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -24673,6 +24759,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -24743,6 +24830,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -24910,6 +24998,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -25046,6 +25135,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -25602,6 +25692,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -26095,6 +26186,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -26588,6 +26680,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -27583,6 +27676,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -28152,6 +28246,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -28721,6 +28816,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool

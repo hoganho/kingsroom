@@ -42,6 +42,15 @@ const GameVariant = {
   "PLO6": "PLO6"
 };
 
+const GameFrequency = {
+  "DAILY": "DAILY",
+  "WEEKLY": "WEEKLY",
+  "FORTNIGHTLY": "FORTNIGHTLY",
+  "MONTHLY": "MONTHLY",
+  "QUARTERLY": "QUARTERLY",
+  "YEARLY": "YEARLY"
+};
+
 const RegistrationStatus = {
   "OPEN": "OPEN",
   "CLOSED": "CLOSED"
@@ -177,6 +186,7 @@ export {
   GameType,
   GameStatus,
   GameVariant,
+  GameFrequency,
   RegistrationStatus,
   TournamentType,
   PaymentSourceType,

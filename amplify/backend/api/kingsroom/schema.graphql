@@ -7,6 +7,7 @@ enum VenueStatus { ACTIVE, INACTIVE, PENDING }
 enum GameType { TOURNAMENT, CASH_GAME }
 enum GameStatus { SCHEDULED, RUNNING, COMPLETED, CANCELLED, FINISHED }
 enum GameVariant { NLHE, PLO, PLO5, PLO6 }
+enum GameFrequency { DAILY, WEEKLY, FORTNIGHTLY, MONTHLY, QUARTERLY, YEARLY }
 enum RegistrationStatus { OPEN, CLOSED }
 enum TournamentType { FREEZEOUT, REBUY, SATELLITE, DEEPSTACK }
 enum PaymentSourceType { CASH, SQUARE, CREDIT, UNKNOWN }
@@ -180,13 +181,16 @@ type ScrapedGameData {
     tournamentType: TournamentType
     prizepool: Float
     revenueByBuyIns: Float
-    playersRemaining: Int
-    totalChipsInPlay: Float
-    averagePlayerStack: Float
     profitLoss: Float
     totalEntries: Int
     totalRebuys: Int
     totalAddons: Int
+    
+    # Running game info
+    playersRemaining: Int
+    totalChipsInPlay: Float
+    averagePlayerStack: Float
+    
     totalDuration: String
     gameTags: [String]
     buyIn: Float
@@ -197,6 +201,14 @@ type ScrapedGameData {
     guaranteeAmount: Float
     guaranteeOverlay: Float
     guaranteeSurplus: Float
+    
+    seriesName: String
+    isRegular: Boolean
+    isSeries: Boolean
+    isRecurring: Boolean
+    gameFrequency: GameFrequency
+
+    isSatellite: Boolean
     levels: [ScrapedTournamentLevel!]
     breaks: [ScrapedBreak!]
     entries: [ScrapedPlayerEntries!]
@@ -358,6 +370,7 @@ type Game @model @auth(rules: [{ allow: private }]) {
     isRegular: Boolean
     isSeries: Boolean
     isRecurring: Boolean
+    gameFrequency: GameFrequency
     isSatellite: Boolean
     registrationStatus: String
     prizepool: Float

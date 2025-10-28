@@ -335,6 +335,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -667,6 +668,7 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -873,6 +875,7 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -1077,6 +1080,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -1266,6 +1270,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -1586,6 +1591,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -1931,6 +1937,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -2313,6 +2320,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -2693,6 +2701,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -3029,6 +3038,7 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -3236,6 +3246,7 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -3449,6 +3460,7 @@ export const getTournamentSeriesTitle = /* GraphQL */ `query GetTournamentSeries
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -3898,6 +3910,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -4147,6 +4160,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -4514,6 +4528,7 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -4624,6 +4639,7 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -4887,6 +4903,7 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -4997,6 +5014,7 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -5136,6 +5154,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
     isRegular
     isSeries
     isRecurring
+    gameFrequency
     isSatellite
     registrationStatus
     prizepool
@@ -5290,6 +5309,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -5552,6 +5572,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -5722,6 +5743,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -5861,6 +5883,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -6183,6 +6206,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -6293,6 +6317,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -6437,6 +6462,7 @@ export const listGames = /* GraphQL */ `query ListGames(
       isRegular
       isSeries
       isRecurring
+      gameFrequency
       isSatellite
       registrationStatus
       prizepool
@@ -6539,6 +6565,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -6662,6 +6689,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -6748,6 +6776,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -6818,6 +6847,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -6985,6 +7015,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -7070,6 +7101,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
       isRegular
       isSeries
       isRecurring
+      gameFrequency
       isSatellite
       registrationStatus
       prizepool
@@ -7172,6 +7204,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -7295,6 +7328,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -7381,6 +7415,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -7451,6 +7486,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -7618,6 +7654,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -7706,6 +7743,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -7978,6 +8016,7 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -8142,6 +8181,7 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -8313,6 +8353,7 @@ export const getRakeStructure = /* GraphQL */ `query GetRakeStructure($id: ID!) 
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -8582,6 +8623,7 @@ export const getCashStructure = /* GraphQL */ `query GetCashStructure($id: ID!) 
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -8877,6 +8919,7 @@ export const listCashStructures = /* GraphQL */ `query ListCashStructures(
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -9068,6 +9111,7 @@ export const syncCashStructures = /* GraphQL */ `query SyncCashStructures(
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -9332,6 +9376,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -10311,6 +10356,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -10805,6 +10851,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -11305,6 +11352,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -12262,6 +12310,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -12779,6 +12828,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -13304,6 +13354,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -13700,6 +13751,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -13905,6 +13957,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -14783,6 +14836,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
       isRegular
       isSeries
       isRecurring
+      gameFrequency
       isSatellite
       registrationStatus
       prizepool
@@ -14885,6 +14939,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -15008,6 +15063,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -15094,6 +15150,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -15164,6 +15221,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -15331,6 +15389,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -15467,6 +15526,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -15898,6 +15958,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -16356,6 +16417,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -16953,6 +17015,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -18284,6 +18347,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -19870,6 +19934,7 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -20124,6 +20189,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -20465,6 +20531,7 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -20719,6 +20786,7 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -20829,6 +20897,7 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -21094,6 +21163,7 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -21204,6 +21274,7 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -21358,6 +21429,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
       isRegular
       isSeries
       isRecurring
+      gameFrequency
       isSatellite
       registrationStatus
       prizepool
@@ -21460,6 +21532,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -21583,6 +21656,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -21669,6 +21743,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -21739,6 +21814,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -21906,6 +21982,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -21996,6 +22073,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
       isRegular
       isSeries
       isRecurring
+      gameFrequency
       isSatellite
       registrationStatus
       prizepool
@@ -22098,6 +22176,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -22221,6 +22300,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -22307,6 +22387,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -22377,6 +22458,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -22544,6 +22626,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -22634,6 +22717,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
       isRegular
       isSeries
       isRecurring
+      gameFrequency
       isSatellite
       registrationStatus
       prizepool
@@ -22736,6 +22820,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -22859,6 +22944,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -22945,6 +23031,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -23015,6 +23102,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -23182,6 +23270,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -23272,6 +23361,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
       isRegular
       isSeries
       isRecurring
+      gameFrequency
       isSatellite
       registrationStatus
       prizepool
@@ -23374,6 +23464,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -23497,6 +23588,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -23583,6 +23675,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -23653,6 +23746,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -23820,6 +23914,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -23910,6 +24005,7 @@ export const gamesByTournamentSeriesId = /* GraphQL */ `query GamesByTournamentS
       isRegular
       isSeries
       isRecurring
+      gameFrequency
       isSatellite
       registrationStatus
       prizepool
@@ -24012,6 +24108,7 @@ export const gamesByTournamentSeriesId = /* GraphQL */ `query GamesByTournamentS
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -24135,6 +24232,7 @@ export const gamesByTournamentSeriesId = /* GraphQL */ `query GamesByTournamentS
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -24221,6 +24319,7 @@ export const gamesByTournamentSeriesId = /* GraphQL */ `query GamesByTournamentS
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -24291,6 +24390,7 @@ export const gamesByTournamentSeriesId = /* GraphQL */ `query GamesByTournamentS
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -24458,6 +24558,7 @@ export const gamesByTournamentSeriesId = /* GraphQL */ `query GamesByTournamentS
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -24589,6 +24690,7 @@ export const cashStructuresByRakeStructureId = /* GraphQL */ `query CashStructur
           isRegular
           isSeries
           isRecurring
+          gameFrequency
           isSatellite
           registrationStatus
           prizepool
@@ -24810,6 +24912,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -25306,6 +25409,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -26230,6 +26334,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -26630,6 +26735,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             isRegular
             isSeries
             isRecurring
+            gameFrequency
             isSatellite
             registrationStatus
             prizepool
@@ -27238,6 +27344,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool
@@ -27698,6 +27805,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
         isRegular
         isSeries
         isRecurring
+        gameFrequency
         isSatellite
         registrationStatus
         prizepool

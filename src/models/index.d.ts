@@ -42,6 +42,15 @@ export enum GameVariant {
   PLO6 = "PLO6"
 }
 
+export enum GameFrequency {
+  DAILY = "DAILY",
+  WEEKLY = "WEEKLY",
+  FORTNIGHTLY = "FORTNIGHTLY",
+  MONTHLY = "MONTHLY",
+  QUARTERLY = "QUARTERLY",
+  YEARLY = "YEARLY"
+}
+
 export enum RegistrationStatus {
   OPEN = "OPEN",
   CLOSED = "CLOSED"
@@ -179,13 +188,13 @@ type EagerScrapedGameData = {
   readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
   readonly prizepool?: number | null;
   readonly revenueByBuyIns?: number | null;
-  readonly playersRemaining?: number | null;
-  readonly totalChipsInPlay?: number | null;
-  readonly averagePlayerStack?: number | null;
   readonly profitLoss?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
+  readonly playersRemaining?: number | null;
+  readonly totalChipsInPlay?: number | null;
+  readonly averagePlayerStack?: number | null;
   readonly totalDuration?: string | null;
   readonly gameTags?: (string | null)[] | null;
   readonly buyIn?: number | null;
@@ -196,6 +205,12 @@ type EagerScrapedGameData = {
   readonly guaranteeAmount?: number | null;
   readonly guaranteeOverlay?: number | null;
   readonly guaranteeSurplus?: number | null;
+  readonly seriesName?: string | null;
+  readonly isRegular?: boolean | null;
+  readonly isSeries?: boolean | null;
+  readonly isRecurring?: boolean | null;
+  readonly gameFrequency?: GameFrequency | keyof typeof GameFrequency | null;
+  readonly isSatellite?: boolean | null;
   readonly levels?: ScrapedTournamentLevel[] | null;
   readonly breaks?: ScrapedBreak[] | null;
   readonly entries?: ScrapedPlayerEntries[] | null;
@@ -220,13 +235,13 @@ type LazyScrapedGameData = {
   readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
   readonly prizepool?: number | null;
   readonly revenueByBuyIns?: number | null;
-  readonly playersRemaining?: number | null;
-  readonly totalChipsInPlay?: number | null;
-  readonly averagePlayerStack?: number | null;
   readonly profitLoss?: number | null;
   readonly totalEntries?: number | null;
   readonly totalRebuys?: number | null;
   readonly totalAddons?: number | null;
+  readonly playersRemaining?: number | null;
+  readonly totalChipsInPlay?: number | null;
+  readonly averagePlayerStack?: number | null;
   readonly totalDuration?: string | null;
   readonly gameTags?: (string | null)[] | null;
   readonly buyIn?: number | null;
@@ -237,6 +252,12 @@ type LazyScrapedGameData = {
   readonly guaranteeAmount?: number | null;
   readonly guaranteeOverlay?: number | null;
   readonly guaranteeSurplus?: number | null;
+  readonly seriesName?: string | null;
+  readonly isRegular?: boolean | null;
+  readonly isSeries?: boolean | null;
+  readonly isRecurring?: boolean | null;
+  readonly gameFrequency?: GameFrequency | keyof typeof GameFrequency | null;
+  readonly isSatellite?: boolean | null;
   readonly levels?: ScrapedTournamentLevel[] | null;
   readonly breaks?: ScrapedBreak[] | null;
   readonly entries?: ScrapedPlayerEntries[] | null;
@@ -737,6 +758,7 @@ type EagerGame = {
   readonly isRegular?: boolean | null;
   readonly isSeries?: boolean | null;
   readonly isRecurring?: boolean | null;
+  readonly gameFrequency?: GameFrequency | keyof typeof GameFrequency | null;
   readonly isSatellite?: boolean | null;
   readonly registrationStatus?: string | null;
   readonly prizepool?: number | null;
@@ -792,6 +814,7 @@ type LazyGame = {
   readonly isRegular?: boolean | null;
   readonly isSeries?: boolean | null;
   readonly isRecurring?: boolean | null;
+  readonly gameFrequency?: GameFrequency | keyof typeof GameFrequency | null;
   readonly isSatellite?: boolean | null;
   readonly registrationStatus?: string | null;
   readonly prizepool?: number | null;
