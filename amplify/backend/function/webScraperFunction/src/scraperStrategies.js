@@ -710,11 +710,13 @@ const defaultStrategy = {
                 let points = 0;
                 let isQualification = false;
 
+                // Determine qualification status first
                 if (winningsCellHtml && winningsCellHtml.toUpperCase().includes('QUALIFIED')) {
                     isQualification = true;
                     winnings = 0;
                     points = 0;
                 } else {
+                    // Not qualified, parse winnings/points
                     let winningsStr = '';
                     let pointsStr = '';
                     if (winningsCellHtml && winningsCellHtml.includes('<br>')) {
@@ -724,16 +726,36 @@ const defaultStrategy = {
                     } else {
                         winningsStr = winningsCellHtml ? winningsCellHtml.trim() : '';
                     }
-                    winnings = winningsStr ? parseInt(winningsStr.replace(/[^0-9.-]+/g, ''), 10) : 0;
-                    points = pointsStr ? parseInt(pointsStr.replace(/[^0-9.-]+/g, ''), 10) : 0;
+                    // Use isNaN check for safety, default to 0
+                    const parsedWinnings = winningsStr ? parseInt(winningsStr.replace(/[^0-9.-]+/g, ''), 10) : NaN;
+                    const parsedPoints = pointsStr ? parseInt(pointsStr.replace(/[^0-9.-]+/g, ''), 10) : NaN;
+                    winnings = isNaN(parsedWinnings) ? 0 : parsedWinnings;
+                    points = isNaN(parsedPoints) ? 0 : parsedPoints;
                 }
 
+                // Determine the final rank based on the new logic
+                let finalRank;
+                if (!isNaN(parsedRank)) {
+                    // If rank was successfully parsed, use it.
+                    finalRank = parsedRank;
+                } else {
+                    // If rank parsing failed (NaN)...
+                    if (isQualification) {
+                        // ...and they qualified, set rank to 1.
+                        finalRank = 1;
+                    } else {
+                        // ...and they didn't qualify (just finished without rank/winnings), set rank to 0.
+                        finalRank = 0;
+                    }
+                }
+
+                // Push the result if a name exists
                 if (name) {
                     results.push({
-                        rank: isNaN(parsedRank) ? 1 : parsedRank,
-                        name,
-                        winnings: isNaN(winnings) ? 0 : winnings,
-                        points: isNaN(points) ? 0 : points,
+                        rank: finalRank, // Use the determined final rank
+                        name: name,
+                        winnings: winnings, // Winnings already defaulted to 0 if NaN
+                        points: points,     // Points already defaulted to 0 if NaN
                         isQualification: isQualification,
                     });
                 }
