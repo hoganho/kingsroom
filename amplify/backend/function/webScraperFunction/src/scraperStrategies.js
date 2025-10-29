@@ -27,6 +27,7 @@ const SERIES_MATCH_THRESHOLD = 0.80; // 80% similarity
 
 /**
  * ✅ NEW: Cleans a game name for matching based on a specific context (venue or series).
+ * This function now also removes special characters to improve matching accuracy.
  * @param {string} name - The original game name.
  * @param {'venue' | 'series'} context - What are we trying to find?
  * @param {object} options - Contains lists of venues and series to remove from the name.
@@ -37,46 +38,48 @@ const SERIES_MATCH_THRESHOLD = 0.80; // 80% similarity
 const cleanupNameForMatching = (name, context, options = {}) => {
     if (!name) return '';
 
-    let cleanedName = ` ${name} `; // Pad with spaces for easier regex word boundary matching
+    // Step 1: Remove all special characters (except spaces) to simplify matching.
+    let cleanedName = ` ${name.replace(/[^a-zA-Z0-9\s]/g, '')} `;
 
-    // 1. Common Tournament Jargon Removal (applies to both contexts)
+    // Step 2: Define and remove all common tournament jargon.
     const jargonRegexes = [
+        // ✅ NEW: This single regex replaces the three separate ones.
+        // It matches "Event", "Flight", or "Day" followed by any block of text containing at least one digit.
+        /\b(Event|Flight|Day)\s+[a-zA-Z0-9]*\d[a-zA-Z0-9]*\b/gi,
+
+        // Other common phrases to remove
         /\bMain Event\b/gi,
-        /\bEvent \d+\b/gi,         // "Event 8"
-        /\bFlight [A-Z0-9]+\b/gi, // "Flight 1C"
-        /\bDay \d+[A-Z]?\b/gi,    // "Day 1", "Day 2A"
         /\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b/gi,
     ];
+
     jargonRegexes.forEach(regex => {
         cleanedName = cleanedName.replace(regex, ' ');
     });
 
-    // 2. Context-Specific Removal
+    // Step 3: Remove context-specific names.
     if (context === 'venue') {
-        // We are looking for a VENUE, so remove all known SERIES names.
-        const seriesTitles = options.seriesTitles || [];
-        seriesTitles.forEach(series => {
-            const allSeriesNames = [series.title, ...(series.aliases || [])];
-            allSeriesNames.forEach(seriesName => {
-                // Create a dynamic regex for each series name to remove it
-                const seriesRegex = new RegExp(`\\b${seriesName}\\b`, 'gi');
+        // Looking for a VENUE, so remove known SERIES names.
+        (options.seriesTitles || []).forEach(series => {
+            [series.title, ...(series.aliases || [])].forEach(seriesName => {
+                // Clean the series name itself before creating the regex
+                const cleanedSeriesName = seriesName.replace(/[^a-zA-Z0-9\s]/g, '');
+                const seriesRegex = new RegExp(`\\b${cleanedSeriesName}\\b`, 'gi');
                 cleanedName = cleanedName.replace(seriesRegex, ' ');
             });
         });
     } else if (context === 'series') {
-        // We are looking for a SERIES, so remove all known VENUE names.
-        const venues = options.venues || [];
-        venues.forEach(venue => {
-            const allVenueNames = [venue.name, ...(venue.aliases || [])];
-            allVenueNames.forEach(venueName => {
-                // Create a dynamic regex for each venue name to remove it
-                const venueRegex = new RegExp(`\\b${venueName}\\b`, 'gi');
+        // Looking for a SERIES, so remove known VENUE names.
+        (options.venues || []).forEach(venue => {
+            [venue.name, ...(venue.aliases || [])].forEach(venueName => {
+                // Clean the venue name itself before creating the regex
+                const cleanedVenueName = venueName.replace(/[^a-zA-Z0-9\s]/g, '');
+                const venueRegex = new RegExp(`\\b${cleanedVenueName}\\b`, 'gi');
                 cleanedName = cleanedName.replace(venueRegex, ' ');
             });
         });
     }
 
-    // 3. Final cleanup: remove extra spaces and trim.
+    // Step 4: Final cleanup to remove extra whitespace.
     return cleanedName.replace(/\s+/g, ' ').trim();
 };
 
@@ -153,54 +156,71 @@ class ScrapeContext {
  * ===================================================================
  */
 const defaultStrategy = {
-    getName(ctx, seriesTitles = [], venues = []) { // ✅ ADD venues parameter
+
+    getName(ctx, seriesTitles = [], venues = []) {
         const mainTitle = ctx.$('.cw-game-title').first().text().trim();
         const subTitle = ctx.$('.cw-game-shortdesc').first().text().trim();
         const gameName = [mainTitle, subTitle].filter(Boolean).join(' ');
         
         if (!gameName || gameName === '') {
-            // ... (error handling code remains the same)
+            // ... (error handling remains the same)
             if (ctx.data.gameStatus === 'UNKNOWN_STATUS' || ctx.data.isInactive) {
-                ctx.add('name', 'Tournament ID Not In Use');
-                ctx.add('isSeries', false);
-                ctx.add('isRegular', false);
-                ctx.add('isInactive', true);
-                return;
+                ctx.add('name', 'Tournament ID Not In Use'); ctx.add('isSeries', false); ctx.add('isRegular', false); ctx.add('isInactive', true); return;
             } else {
-                ctx.add('name', 'Unnamed Tournament');
-                ctx.add('isSeries', false);
-                ctx.add('isRegular', true);
-                return;
+                ctx.add('name', 'Unnamed Tournament'); ctx.add('isSeries', false); ctx.add('isRegular', true); return;
             }
         }
         
         ctx.add('name', gameName);
 
         if (!seriesTitles || seriesTitles.length === 0) {
-            ctx.add('isSeries', false);
-            ctx.add('isRegular', true);
-            return;
+            ctx.add('isSeries', false); ctx.add('isRegular', true); return;
         }
 
-        // ✅ UPDATED: Clean the game name specifically for finding a SERIES.
+        // ✅ START: STEP 1 - Exact Substring Match (High Confidence)
+        let exactMatchFound = null;
+        const upperCaseGameName = gameName.toUpperCase();
+
+        for (const series of seriesTitles) {
+            const allSeriesNames = [series.title, ...(series.aliases || [])];
+            for (const seriesName of allSeriesNames) {
+                if (upperCaseGameName.includes(seriesName.toUpperCase())) {
+                    exactMatchFound = series;
+                    break; // Found a match, stop checking aliases for this series
+                }
+            }
+            if (exactMatchFound) break; // Found a match, stop checking other series
+        }
+
+        if (exactMatchFound) {
+            console.log(`[DEBUG-SERIES-MATCH] Found exact substring match: "${exactMatchFound.title}"`);
+            ctx.add('seriesName', exactMatchFound.title);
+            ctx.add('isSeries', true);
+            ctx.add('isRegular', false);
+            return; // Exit function, we are done
+        }
+        // ✅ END: STEP 1
+
+        // ✅ STEP 2 - Fallback to Fuzzy Matching (if no exact match was found)
+        console.log('[DEBUG-SERIES-MATCH] No exact match found. Falling back to fuzzy matching.');
         const cleanedGameNameForSeriesMatch = cleanupNameForMatching(gameName, 'series', { venues });
-        console.log(`[DEBUG-SERIES-MATCH] Cleaned scraped name for series match: "${cleanedGameNameForSeriesMatch}"`);
+        console.log(`[DEBUG-SERIES-MATCH] Cleaned scraped name for fuzzy series match: "${cleanedGameNameForSeriesMatch}"`);
         
         const allSeriesNamesToMatch = seriesTitles.flatMap(series => {
             const names = [series.title, ...(series.aliases || [])];
             return names.map(name => ({
                 seriesTitle: series.title,
-                matchName: name
+                matchName: name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
             }));
         });
 
         const { bestMatch } = stringSimilarity.findBestMatch(
-            cleanedGameNameForSeriesMatch, // ✅ Use the newly cleaned name
+            cleanedGameNameForSeriesMatch,
             allSeriesNamesToMatch.map(s => s.matchName)
         );
 
         if (bestMatch && bestMatch.rating >= SERIES_MATCH_THRESHOLD) {
-            console.log(`[DEBUG-SERIES-MATCH] High confidence match found: "${bestMatch.target}" with rating ${bestMatch.rating}`);
+            console.log(`[DEBUG-SERIES-MATCH] High confidence fuzzy match found: "${bestMatch.target}" with rating ${bestMatch.rating}`);
             const matchedSeries = allSeriesNamesToMatch.find(s => s.matchName === bestMatch.target);
             
             if (matchedSeries) {
@@ -210,7 +230,7 @@ const defaultStrategy = {
             }
         } else {
             if (bestMatch) {
-                 console.log(`[DEBUG-SERIES-MATCH] Low confidence match, ignoring: "${bestMatch.target}" with rating ${bestMatch.rating}`);
+                 console.log(`[DEBUG-SERIES-MATCH] Low confidence fuzzy match, ignoring: "${bestMatch.target}" with rating ${bestMatch.rating}`);
             }
             ctx.add('isSeries', false);
             ctx.add('isRegular', true);
@@ -809,45 +829,71 @@ const defaultStrategy = {
         if (breaks.length > 0) ctx.add('breaks', breaks);
     },
 
-    getMatchingVenue(ctx, venues, seriesTitles = []) { // ✅ ADD seriesTitles parameter
-        if (!ctx.data.name || !venues || venues.length === 0) {
-            console.log('[DEBUG-MATCHING] Skipped: Missing scraped name or venue list.');
+    getMatchingVenue(ctx, venues, seriesTitles = []) {
+        const gameName = ctx.data.name;
+        if (!gameName || !venues || venues.length === 0) {
+            console.log('[DEBUG-VENUE-MATCH] Skipped: Missing scraped name or venue list.');
             return;
         }
 
-        // ✅ UPDATED: Use the new cleanup function with the 'venue' context.
-        const cleanedScrapedName = cleanupNameForMatching(ctx.data.name, 'venue', { seriesTitles });
+        // ✅ START: STEP 1 - Exact Substring Match (High Confidence)
+        let exactVenueMatch = null;
+        const upperCaseGameName = gameName.toUpperCase();
 
-        // 1. Create a flattened list of all possible names (primary + aliases) to match against.
+        for (const venue of venues) {
+            const allVenueNames = [venue.name, ...(venue.aliases || [])];
+            for (const venueName of allVenueNames) {
+                if (upperCaseGameName.includes(venueName.toUpperCase())) {
+                    exactVenueMatch = venue;
+                    break;
+                }
+            }
+            if (exactVenueMatch) break;
+        }
+
+        if (exactVenueMatch) {
+            console.log(`[DEBUG-VENUE-MATCH] Found exact substring match: "${exactVenueMatch.name}"`);
+            const matchResult = {
+                id: exactVenueMatch.id,
+                name: exactVenueMatch.name,
+                score: 1.0 // 100% confidence
+            };
+            const venueMatch = {
+                autoAssignedVenue: matchResult,
+                suggestions: [matchResult]
+            };
+            ctx.add('venueMatch', venueMatch);
+            ctx.add('venueName', exactVenueMatch.name);
+            return; // Exit function
+        }
+        // ✅ END: STEP 1
+
+        // ✅ STEP 2 - Fallback to Fuzzy Matching
+        console.log('[DEBUG-VENUE-MATCH] No exact match found. Falling back to fuzzy matching.');
+        const cleanedScrapedName = cleanupNameForMatching(gameName, 'venue', { seriesTitles });
+
         const allNamesToMatch = venues.flatMap(venue => {
             const names = [venue.name, ...(venue.aliases || [])];
             return names.map(name => ({
                 venueId: venue.id,
-                venueName: venue.name, // Keep the original primary name for display
-                matchName: name // We match against the original venue name, not a cleaned one
+                venueName: venue.name,
+                matchName: name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
             }));
         });
         
-        console.log(`[DEBUG-VENUE-MATCHING] Cleaned scraped name for venue match: "${cleanedScrapedName}"`);
+        console.log(`[DEBUG-VENUE-MATCH] Cleaned scraped name for fuzzy venue match: "${cleanedScrapedName}"`);
 
-        // 2. Get ratings for the cleaned scraped name against all possible venue names/aliases.
         const { ratings } = stringSimilarity.findBestMatch(
             cleanedScrapedName,
             allNamesToMatch.map(item => item.matchName)
         );
 
-        // ... the rest of the function remains the same ...
         const bestScoresByVenue = new Map();
         ratings.forEach((rating, index) => {
             const { venueId, venueName } = allNamesToMatch[index];
             const score = rating.rating;
-
             if (!bestScoresByVenue.has(venueId) || score > bestScoresByVenue.get(venueId).score) {
-                bestScoresByVenue.set(venueId, {
-                    id: venueId,
-                    name: venueName,
-                    score: score
-                });
+                bestScoresByVenue.set(venueId, { id: venueId, name: venueName, score: score });
             }
         });
 
@@ -857,7 +903,6 @@ const defaultStrategy = {
             .slice(0, 3);
             
         if (sortedSuggestions.length === 0) {
-            console.log('[DEBUG-MATCHING] No suggestions found after processing.');
             ctx.add('venueMatch', { suggestions: [] });
             return;
         }
@@ -865,19 +910,12 @@ const defaultStrategy = {
         let autoAssignedVenue = null;
         if (sortedSuggestions[0].score >= AUTO_ASSIGN_THRESHOLD) {
             autoAssignedVenue = sortedSuggestions[0];
-
             if (autoAssignedVenue) {
                 ctx.add('venueName', autoAssignedVenue.name);
-                console.log(`[DEBUG-MATCHING] Added 'venueName: ${autoAssignedVenue.name}' to data.`);
             }
         }
 
-        const venueMatch = {
-            autoAssignedVenue,
-            suggestions: sortedSuggestions
-        };
-        
-        console.log('[DEBUG-MATCHING] Final match result:', JSON.stringify(venueMatch, null, 2));
+        const venueMatch = { autoAssignedVenue, suggestions: sortedSuggestions };
         ctx.add('venueMatch', venueMatch);
     },
 
