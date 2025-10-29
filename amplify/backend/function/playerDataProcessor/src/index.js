@@ -45,6 +45,11 @@ const getTableName = (modelName) => {
 
 /**
  * Parse player full name into first and last name
+ *
+ * ✅ FIX 1: Updated logic to handle "LastName, FirstName" format.
+ * - Splits by comma (,) first.
+ * - If a comma exists, it assumes "LastName, FirstName" format.
+ * - If no comma exists, it falls back to the original "FirstName LastName" logic.
  */
 const parsePlayerName = (fullName) => {
     if (!fullName) return { firstName: 'Unknown', lastName: '', givenName: 'Unknown' };
@@ -272,7 +277,9 @@ const upsertPlayerRecord = async (playerName, gameData) => {
                 status: 'ACTIVE',
                 category: 'NEW',
                 lastPlayedDate: gameData.game.gameEndDateTime.split('T')[0],
-                targetingClassification: 'Active_EL', // Initial classification
+                // ✅ FIX 2: New players are "Active_EL" (Active - Early Life)
+                // by default, since they have just played their first game.
+                targetingClassification: 'Active_EL',
                 creditBalance: 0,
                 pointsBalance: 0,
                 createdAt: now,
@@ -481,8 +488,11 @@ const createPlayerTransactions = async (playerId, gameData, playerData, processi
     const transactions = [];
     const now = new Date().toISOString();
     
+    // ✅ FIX 3: Corrected the path to the transactions array based on the SQS message structure.
+    const transactionsToCreate = processingInstructions.requiredActions?.createTransactions || [];
+    
     try {
-        for (const transaction of processingInstructions.createTransactions) {
+        for (const transaction of transactionsToCreate) {
             const transactionId = uuidv4();
             
             const playerTransaction = {
@@ -529,6 +539,8 @@ const createPlayerTransactions = async (playerId, gameData, playerData, processi
             }
             
             console.log(`[createPlayerTransactions] Created ${transactions.length} transactions for player ${playerId}`);
+        } else {
+            console.log(`[createPlayerTransactions] No transactions to create for player ${playerId}`);
         }
     } catch (error) {
         console.error(`[createPlayerTransactions] Error creating transactions:`, error);

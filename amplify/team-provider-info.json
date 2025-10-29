@@ -34,7 +34,7 @@
         },
         "playerDataProcessor": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/playerDataProcessor-534c4e732f6939337737-build.zip"
+          "s3Key": "amplify-builds/playerDataProcessor-4f485430685a3354624e-build.zip"
         }
       }
     }
