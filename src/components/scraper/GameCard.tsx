@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import { listVenues } from '../../graphql/queries';
+import { listVenuesForDropdown } from '../../graphql/customQueries';
 import type { GameState, GameData } from '../../types/game.ts';
 import * as APITypes from '../../API';
 import { getStatusColor } from './helpers.ts';
@@ -10,6 +10,7 @@ import { ScraperReport } from './ScraperReport.tsx';
 import { StructureInfo } from './StructureInfo.tsx';
 import { POLLING_INTERVAL } from '../../hooks/useGameTracker.ts';
 import { useGameContext } from '../../contexts/GameContext.tsx';
+import { type GraphQLResult } from '@aws-amplify/api-graphql';
 
 type Venue = APITypes.Venue;
 
@@ -33,11 +34,17 @@ export const GameCard: React.FC<{
         const fetchVenues = async () => {
             setVenuesLoading(true);
             try {
-                const response = await client.graphql({ query: listVenues });
-                const venueItems = (response.data.listVenues.items as Venue[])
+                // ✅ 2. Cast the result of the graphql call to the expected type.
+                // This tells TypeScript that we expect a 'data' property.
+                const response = (await client.graphql({ 
+                    query: listVenuesForDropdown 
+                })) as GraphQLResult<{ listVenues: { items: Venue[] } }>;
+
+                // Use optional chaining (?.) for added safety
+                const venueItems = (response.data?.listVenues.items as Venue[])
                     .filter(Boolean)
                     .sort((a, b) => {
-                        // Sort by venueNumber
+                        // Your existing sorting logic...
                         if (a.venueNumber !== undefined && b.venueNumber !== undefined) {
                             return a.venueNumber - b.venueNumber;
                         }

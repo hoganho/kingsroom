@@ -2,264 +2,11 @@
 /* eslint-disable */
 //  This file was automatically generated and should not be edited.
 
-export type ScrapedGameData = {
-  __typename: "ScrapedGameData",
-  name: string,
-  gameStartDateTime?: string | null,
-  gameEndDateTime?: string | null,
-  gameStatus?: GameStatus | null,
-  registrationStatus?: string | null,
-  gameType?: GameType | null,
-  gameVariant?: GameVariant | null,
-  tournamentType?: TournamentType | null,
-  prizepool?: number | null,
-  revenueByBuyIns?: number | null,
-  profitLoss?: number | null,
-  buyIn?: number | null,
-  rake?: number | null,
-  totalRake?: number | null,
-  startingStack?: number | null,
-  hasGuarantee?: boolean | null,
-  guaranteeAmount?: number | null,
-  guaranteeOverlay?: number | null,
-  guaranteeSurplus?: number | null,
-  totalEntries?: number | null,
-  totalRebuys?: number | null,
-  totalAddons?: number | null,
-  totalDuration?: string | null,
-  playersRemaining?: number | null,
-  totalChipsInPlay?: number | null,
-  averagePlayerStack?: number | null,
-  seriesName?: string | null,
-  isRegular?: boolean | null,
-  isSeries?: boolean | null,
-  isSatellite?: boolean | null,
-  gameFrequency?: GameFrequency | null,
-  gameTags?: Array< string | null > | null,
-  levels?:  Array<ScrapedTournamentLevel > | null,
-  breaks?:  Array<ScrapedBreak > | null,
-  entries?:  Array<ScrapedPlayerEntry > | null,
-  seating?:  Array<ScrapedPlayerSeating > | null,
-  results?:  Array<ScrapedPlayerResult > | null,
-  tables?:  Array<ScrapedTable > | null,
-  rawHtml?: string | null,
-  isNewStructure?: boolean | null,
-  structureLabel?: string | null,
-  foundKeys?: Array< string | null > | null,
-  venueMatch?: ScrapedVenueMatch | null,
-};
-
-export enum GameStatus {
-  INITIATING = "INITIATING",
-  SCHEDULED = "SCHEDULED",
-  REGISTERING = "REGISTERING",
-  RUNNING = "RUNNING",
-  CANCELLED = "CANCELLED",
-  FINISHED = "FINISHED",
-  NOT_IN_USE = "NOT_IN_USE",
-}
-
-
-export enum GameType {
-  TOURNAMENT = "TOURNAMENT",
-  CASH_GAME = "CASH_GAME",
-}
-
-
-export enum GameVariant {
-  NLHE = "NLHE",
-  PLO = "PLO",
-  PLO5 = "PLO5",
-  PLO6 = "PLO6",
-}
-
-
-export enum TournamentType {
-  FREEZEOUT = "FREEZEOUT",
-  REBUY = "REBUY",
-  SATELLITE = "SATELLITE",
-  DEEPSTACK = "DEEPSTACK",
-}
-
-
-export enum GameFrequency {
-  DAILY = "DAILY",
-  WEEKLY = "WEEKLY",
-  FORTNIGHTLY = "FORTNIGHTLY",
-  MONTHLY = "MONTHLY",
-  QUARTERLY = "QUARTERLY",
-  YEARLY = "YEARLY",
-  UNKNOWN = "UNKNOWN",
-}
-
-
-export type ScrapedTournamentLevel = {
-  __typename: "ScrapedTournamentLevel",
-  levelNumber: number,
-  durationMinutes?: number | null,
-  smallBlind?: number | null,
-  bigBlind?: number | null,
-  ante?: number | null,
-};
-
-export type ScrapedBreak = {
-  __typename: "ScrapedBreak",
-  levelNumberBeforeBreak: number,
-  durationMinutes?: number | null,
-};
-
-export type ScrapedPlayerEntry = {
-  __typename: "ScrapedPlayerEntry",
-  name: string,
-};
-
-export type ScrapedPlayerSeating = {
-  __typename: "ScrapedPlayerSeating",
-  name: string,
-  table?: number | null,
-  seat?: number | null,
-  playerStack?: number | null,
-};
-
-export type ScrapedPlayerResult = {
-  __typename: "ScrapedPlayerResult",
-  rank: number,
-  name: string,
-  winnings?: number | null,
-  points?: number | null,
-  isQualification?: boolean | null,
-};
-
-export type ScrapedTable = {
-  __typename: "ScrapedTable",
-  tableName: string,
-  seats?:  Array<ScrapedTableSeatData > | null,
-};
-
-export type ScrapedTableSeatData = {
-  __typename: "ScrapedTableSeatData",
-  seat: number,
-  isOccupied: boolean,
-  playerName?: string | null,
-  playerStack?: number | null,
-};
-
-export type ScrapedVenueMatch = {
-  __typename: "ScrapedVenueMatch",
-  autoAssignedVenue?: ScrapedVenueMatchDetails | null,
-  suggestions?:  Array<ScrapedVenueMatchDetails > | null,
-};
-
-export type ScrapedVenueMatchDetails = {
-  __typename: "ScrapedVenueMatchDetails",
-  id: string,
-  name: string,
-  score: number,
-};
-
-export type SaveTournamentInput = {
-  sourceUrl: string,
-  venueId: string,
-  existingGameId?: string | null,
-  doNotScrape?: boolean | null,
-  data: ScrapedGameDataInput,
-  originalScrapedData?: string | null,
-};
-
-export type ScrapedGameDataInput = {
-  name: string,
-  gameStartDateTime?: string | null,
-  gameEndDateTime?: string | null,
-  gameStatus?: GameStatus | null,
-  registrationStatus?: RegistrationStatus | null,
-  gameVariant?: GameVariant | null,
-  gameType?: GameType | null,
-  prizepool?: number | null,
-  totalEntries?: number | null,
-  totalRebuys?: number | null,
-  totalAddons?: number | null,
-  totalDuration?: string | null,
-  gameTags?: Array< string | null > | null,
-  tournamentType?: TournamentType | null,
-  buyIn?: number | null,
-  rake?: number | null,
-  startingStack?: number | null,
-  hasGuarantee?: boolean | null,
-  guaranteeAmount?: number | null,
-  levels?: Array< ScrapedTournamentLevelInput > | null,
-};
-
-export enum RegistrationStatus {
-  SCHEDULED = "SCHEDULED",
-  OPEN = "OPEN",
-  FINAL = "FINAL",
-  CLOSED = "CLOSED",
-  N_A = "N_A",
-}
-
-
-export type ScrapedTournamentLevelInput = {
-  levelNumber: number,
-  durationMinutes?: number | null,
-  smallBlind?: number | null,
-  bigBlind?: number | null,
-  ante?: number | null,
-  breakMinutes?: number | null,
-};
-
-export type Game = {
-  __typename: "Game",
-  id: string,
-  name: string,
-  gameType: GameType,
-  gameVariant: GameVariant,
-  gameStatus: GameStatus,
-  gameStartDateTime: string,
-  gameEndDateTime?: string | null,
-  registrationStatus?: string | null,
-  totalDuration?: string | null,
-  gameFrequency?: GameFrequency | null,
-  buyIn?: number | null,
-  rake?: number | null,
-  startingStack?: number | null,
-  hasGuarantee?: boolean | null,
-  guaranteeAmount?: number | null,
-  prizepool?: number | null,
-  totalEntries?: number | null,
-  totalRebuys?: number | null,
-  totalAddons?: number | null,
-  revenueByBuyIns?: number | null,
-  totalRake?: number | null,
-  profitLoss?: number | null,
-  guaranteeOverlay?: number | null,
-  guaranteeSurplus?: number | null,
-  playersRemaining?: number | null,
-  totalChipsInPlay?: number | null,
-  averagePlayerStack?: number | null,
-  tournamentType?: TournamentType | null,
-  isRegular?: boolean | null,
-  isSeries?: boolean | null,
-  isSatellite?: boolean | null,
-  seriesName?: string | null,
-  gameTags?: Array< string | null > | null,
-  sourceUrl?: string | null,
-  doNotScrape?: boolean | null,
-  sourceDataIssue?: boolean | null,
-  gameDataVerified?: boolean | null,
-  venueId: string,
-  venue?: Venue | null,
-  tournamentSeriesId?: string | null,
-  tournamentSeries?: TournamentSeries | null,
-  tournamentStructureId?: string | null,
-  tournamentStructure?: TournamentStructure | null,
-  cashStructureId?: string | null,
-  cashStructure?: CashStructure | null,
-  playerResults?: ModelPlayerResultConnection | null,
-  createdAt: string,
-  updatedAt: string,
-  _version: number,
-  _deleted?: boolean | null,
-  _lastChangedAt: number,
+export type ModelVenueConnection = {
+  __typename: "ModelVenueConnection",
+  items:  Array<Venue | null >,
+  nextToken?: string | null,
+  startedAt?: number | null,
 };
 
 export type Venue = {
@@ -349,12 +96,104 @@ export type ModelGameConnection = {
   startedAt?: number | null,
 };
 
-export type ModelTournamentSeriesConnection = {
-  __typename: "ModelTournamentSeriesConnection",
-  items:  Array<TournamentSeries | null >,
-  nextToken?: string | null,
-  startedAt?: number | null,
+export type Game = {
+  __typename: "Game",
+  id: string,
+  name: string,
+  gameType: GameType,
+  gameVariant: GameVariant,
+  gameStatus: GameStatus,
+  gameStartDateTime: string,
+  gameEndDateTime?: string | null,
+  registrationStatus?: string | null,
+  totalDuration?: string | null,
+  gameFrequency?: GameFrequency | null,
+  buyIn?: number | null,
+  rake?: number | null,
+  startingStack?: number | null,
+  hasGuarantee?: boolean | null,
+  guaranteeAmount?: number | null,
+  prizepool?: number | null,
+  totalEntries?: number | null,
+  totalRebuys?: number | null,
+  totalAddons?: number | null,
+  revenueByBuyIns?: number | null,
+  totalRake?: number | null,
+  profitLoss?: number | null,
+  guaranteeOverlay?: number | null,
+  guaranteeSurplus?: number | null,
+  playersRemaining?: number | null,
+  totalChipsInPlay?: number | null,
+  averagePlayerStack?: number | null,
+  tournamentType?: TournamentType | null,
+  isRegular?: boolean | null,
+  isSeries?: boolean | null,
+  isSatellite?: boolean | null,
+  seriesName?: string | null,
+  gameTags?: Array< string | null > | null,
+  sourceUrl?: string | null,
+  doNotScrape?: boolean | null,
+  sourceDataIssue?: boolean | null,
+  gameDataVerified?: boolean | null,
+  venueId: string,
+  venue?: Venue | null,
+  tournamentSeriesId?: string | null,
+  tournamentSeries?: TournamentSeries | null,
+  tournamentStructureId?: string | null,
+  tournamentStructure?: TournamentStructure | null,
+  cashStructureId?: string | null,
+  cashStructure?: CashStructure | null,
+  playerResults?: ModelPlayerResultConnection | null,
+  createdAt: string,
+  updatedAt: string,
+  _version: number,
+  _deleted?: boolean | null,
+  _lastChangedAt: number,
 };
+
+export enum GameType {
+  TOURNAMENT = "TOURNAMENT",
+  CASH_GAME = "CASH_GAME",
+}
+
+
+export enum GameVariant {
+  NLHE = "NLHE",
+  PLO = "PLO",
+  PLO5 = "PLO5",
+  PLO6 = "PLO6",
+}
+
+
+export enum GameStatus {
+  INITIATING = "INITIATING",
+  SCHEDULED = "SCHEDULED",
+  REGISTERING = "REGISTERING",
+  RUNNING = "RUNNING",
+  CANCELLED = "CANCELLED",
+  FINISHED = "FINISHED",
+  NOT_IN_USE = "NOT_IN_USE",
+}
+
+
+export enum GameFrequency {
+  DAILY = "DAILY",
+  WEEKLY = "WEEKLY",
+  FORTNIGHTLY = "FORTNIGHTLY",
+  MONTHLY = "MONTHLY",
+  QUARTERLY = "QUARTERLY",
+  YEARLY = "YEARLY",
+  UNKNOWN = "UNKNOWN",
+}
+
+
+export enum TournamentType {
+  FREEZEOUT = "FREEZEOUT",
+  REBUY = "REBUY",
+  SATELLITE = "SATELLITE",
+  DEEPSTACK = "DEEPSTACK",
+}
+
 
 export type TournamentSeries = {
   __typename: "TournamentSeries",
@@ -401,25 +240,20 @@ export type TournamentSeriesTitle = {
   _lastChangedAt: number,
 };
 
-export type ModelPlayerVenueConnection = {
-  __typename: "ModelPlayerVenueConnection",
-  items:  Array<PlayerVenue | null >,
+export type ModelTournamentSeriesConnection = {
+  __typename: "ModelTournamentSeriesConnection",
+  items:  Array<TournamentSeries | null >,
   nextToken?: string | null,
   startedAt?: number | null,
 };
 
-export type PlayerVenue = {
-  __typename: "PlayerVenue",
+export type TournamentStructure = {
+  __typename: "TournamentStructure",
   id: string,
-  totalGamesPlayed?: number | null,
-  averageBuyIn?: number | null,
-  firstPlayedDate?: string | null,
-  lastPlayedDate?: string | null,
-  targetingClassification: PlayerVenueTargetingClassification,
-  playerId: string,
-  player?: Player | null,
-  venueId: string,
-  venue?: Venue | null,
+  name: string,
+  description?: string | null,
+  levels?:  Array<TournamentLevelData | null > | null,
+  games?: ModelGameConnection | null,
   createdAt: string,
   updatedAt: string,
   _version: number,
@@ -427,17 +261,81 @@ export type PlayerVenue = {
   _lastChangedAt: number,
 };
 
-export enum PlayerVenueTargetingClassification {
-  Active_EL = "Active_EL",
-  Active = "Active",
-  Retain_Inactive31_60d = "Retain_Inactive31_60d",
-  Retain_Inactive61_90d = "Retain_Inactive61_90d",
-  Churned_91_120d = "Churned_91_120d",
-  Churned_121_180d = "Churned_121_180d",
-  Churn_181_360d = "Churn_181_360d",
-  Churn_361d = "Churn_361d",
-}
+export type TournamentLevelData = {
+  __typename: "TournamentLevelData",
+  levelNumber: number,
+  durationMinutes: number,
+  smallBlind: number,
+  bigBlind: number,
+  ante?: number | null,
+  breakMinutes?: number | null,
+};
 
+export type CashStructure = {
+  __typename: "CashStructure",
+  id: string,
+  name: string,
+  smallBlind: number,
+  bigBlind: number,
+  minBuyIn: number,
+  maxBuyIn: number,
+  rakeStructureId: string,
+  rakeStructure?: RakeStructure | null,
+  games?: ModelGameConnection | null,
+  createdAt: string,
+  updatedAt: string,
+  _version: number,
+  _deleted?: boolean | null,
+  _lastChangedAt: number,
+};
+
+export type RakeStructure = {
+  __typename: "RakeStructure",
+  id: string,
+  name: string,
+  rakePercentage: number,
+  maxRake: number,
+  cashStructures?: ModelCashStructureConnection | null,
+  createdAt: string,
+  updatedAt: string,
+  _version: number,
+  _deleted?: boolean | null,
+  _lastChangedAt: number,
+};
+
+export type ModelCashStructureConnection = {
+  __typename: "ModelCashStructureConnection",
+  items:  Array<CashStructure | null >,
+  nextToken?: string | null,
+  startedAt?: number | null,
+};
+
+export type ModelPlayerResultConnection = {
+  __typename: "ModelPlayerResultConnection",
+  items:  Array<PlayerResult | null >,
+  nextToken?: string | null,
+  startedAt?: number | null,
+};
+
+export type PlayerResult = {
+  __typename: "PlayerResult",
+  id: string,
+  finishingPlace?: number | null,
+  isMultiDayQualification?: boolean | null,
+  prizeWon?: boolean | null,
+  amountWon?: number | null,
+  totalRunners?: number | null,
+  pointsEarned?: number | null,
+  playerId: string,
+  player?: Player | null,
+  gameId: string,
+  game?: Game | null,
+  createdAt: string,
+  updatedAt: string,
+  _version: number,
+  _deleted?: boolean | null,
+  _lastChangedAt: number,
+};
 
 export type Player = {
   __typename: "Player",
@@ -574,33 +472,6 @@ export enum PaymentSourceType {
 }
 
 
-export type ModelPlayerResultConnection = {
-  __typename: "ModelPlayerResultConnection",
-  items:  Array<PlayerResult | null >,
-  nextToken?: string | null,
-  startedAt?: number | null,
-};
-
-export type PlayerResult = {
-  __typename: "PlayerResult",
-  id: string,
-  finishingPlace?: number | null,
-  isMultiDayQualification?: boolean | null,
-  prizeWon?: boolean | null,
-  amountWon?: number | null,
-  totalRunners?: number | null,
-  pointsEarned?: number | null,
-  playerId: string,
-  player?: Player | null,
-  gameId: string,
-  game?: Game | null,
-  createdAt: string,
-  updatedAt: string,
-  _version: number,
-  _deleted?: boolean | null,
-  _lastChangedAt: number,
-};
-
 export type ModelPlayerTicketConnection = {
   __typename: "ModelPlayerTicketConnection",
   items:  Array<PlayerTicket | null >,
@@ -649,6 +520,44 @@ export type TicketTemplate = {
   _deleted?: boolean | null,
   _lastChangedAt: number,
 };
+
+export type ModelPlayerVenueConnection = {
+  __typename: "ModelPlayerVenueConnection",
+  items:  Array<PlayerVenue | null >,
+  nextToken?: string | null,
+  startedAt?: number | null,
+};
+
+export type PlayerVenue = {
+  __typename: "PlayerVenue",
+  id: string,
+  totalGamesPlayed?: number | null,
+  averageBuyIn?: number | null,
+  firstPlayedDate?: string | null,
+  lastPlayedDate?: string | null,
+  targetingClassification: PlayerVenueTargetingClassification,
+  playerId: string,
+  player?: Player | null,
+  venueId: string,
+  venue?: Venue | null,
+  createdAt: string,
+  updatedAt: string,
+  _version: number,
+  _deleted?: boolean | null,
+  _lastChangedAt: number,
+};
+
+export enum PlayerVenueTargetingClassification {
+  Active_EL = "Active_EL",
+  Active = "Active",
+  Retain_Inactive31_60d = "Retain_Inactive31_60d",
+  Retain_Inactive61_90d = "Retain_Inactive61_90d",
+  Churned_91_120d = "Churned_91_120d",
+  Churned_121_180d = "Churned_121_180d",
+  Churn_181_360d = "Churn_181_360d",
+  Churn_361d = "Churn_361d",
+}
+
 
 export type ModelPlayerCreditsConnection = {
   __typename: "ModelPlayerCreditsConnection",
@@ -737,67 +646,165 @@ export type PlayerMarketingPreferences = {
   _lastChangedAt: number,
 };
 
-export type TournamentStructure = {
-  __typename: "TournamentStructure",
-  id: string,
+export type ScrapedGameData = {
+  __typename: "ScrapedGameData",
   name: string,
-  description?: string | null,
-  levels?:  Array<TournamentLevelData | null > | null,
-  games?: ModelGameConnection | null,
-  createdAt: string,
-  updatedAt: string,
-  _version: number,
-  _deleted?: boolean | null,
-  _lastChangedAt: number,
+  gameStartDateTime?: string | null,
+  gameEndDateTime?: string | null,
+  gameStatus?: GameStatus | null,
+  registrationStatus?: string | null,
+  gameType?: GameType | null,
+  gameVariant?: GameVariant | null,
+  tournamentType?: TournamentType | null,
+  prizepool?: number | null,
+  revenueByBuyIns?: number | null,
+  profitLoss?: number | null,
+  buyIn?: number | null,
+  rake?: number | null,
+  totalRake?: number | null,
+  startingStack?: number | null,
+  hasGuarantee?: boolean | null,
+  guaranteeAmount?: number | null,
+  guaranteeOverlay?: number | null,
+  guaranteeSurplus?: number | null,
+  totalEntries?: number | null,
+  totalRebuys?: number | null,
+  totalAddons?: number | null,
+  totalDuration?: string | null,
+  playersRemaining?: number | null,
+  totalChipsInPlay?: number | null,
+  averagePlayerStack?: number | null,
+  seriesName?: string | null,
+  isRegular?: boolean | null,
+  isSeries?: boolean | null,
+  isSatellite?: boolean | null,
+  gameFrequency?: GameFrequency | null,
+  gameTags?: Array< string | null > | null,
+  levels?:  Array<ScrapedTournamentLevel > | null,
+  breaks?:  Array<ScrapedBreak > | null,
+  entries?:  Array<ScrapedPlayerEntry > | null,
+  seating?:  Array<ScrapedPlayerSeating > | null,
+  results?:  Array<ScrapedPlayerResult > | null,
+  tables?:  Array<ScrapedTable > | null,
+  rawHtml?: string | null,
+  isNewStructure?: boolean | null,
+  structureLabel?: string | null,
+  foundKeys?: Array< string | null > | null,
+  venueMatch?: ScrapedVenueMatch | null,
 };
 
-export type TournamentLevelData = {
-  __typename: "TournamentLevelData",
+export type ScrapedTournamentLevel = {
+  __typename: "ScrapedTournamentLevel",
   levelNumber: number,
-  durationMinutes: number,
-  smallBlind: number,
-  bigBlind: number,
+  durationMinutes?: number | null,
+  smallBlind?: number | null,
+  bigBlind?: number | null,
+  ante?: number | null,
+};
+
+export type ScrapedBreak = {
+  __typename: "ScrapedBreak",
+  levelNumberBeforeBreak: number,
+  durationMinutes?: number | null,
+};
+
+export type ScrapedPlayerEntry = {
+  __typename: "ScrapedPlayerEntry",
+  name: string,
+};
+
+export type ScrapedPlayerSeating = {
+  __typename: "ScrapedPlayerSeating",
+  name: string,
+  table?: number | null,
+  seat?: number | null,
+  playerStack?: number | null,
+};
+
+export type ScrapedPlayerResult = {
+  __typename: "ScrapedPlayerResult",
+  rank: number,
+  name: string,
+  winnings?: number | null,
+  points?: number | null,
+  isQualification?: boolean | null,
+};
+
+export type ScrapedTable = {
+  __typename: "ScrapedTable",
+  tableName: string,
+  seats?:  Array<ScrapedTableSeatData > | null,
+};
+
+export type ScrapedTableSeatData = {
+  __typename: "ScrapedTableSeatData",
+  seat: number,
+  isOccupied: boolean,
+  playerName?: string | null,
+  playerStack?: number | null,
+};
+
+export type ScrapedVenueMatch = {
+  __typename: "ScrapedVenueMatch",
+  autoAssignedVenue?: ScrapedVenueMatchDetails | null,
+  suggestions?:  Array<ScrapedVenueMatchDetails > | null,
+};
+
+export type ScrapedVenueMatchDetails = {
+  __typename: "ScrapedVenueMatchDetails",
+  id: string,
+  name: string,
+  score: number,
+};
+
+export type SaveTournamentInput = {
+  sourceUrl: string,
+  venueId: string,
+  existingGameId?: string | null,
+  doNotScrape?: boolean | null,
+  data: ScrapedGameDataInput,
+  originalScrapedData?: string | null,
+};
+
+export type ScrapedGameDataInput = {
+  name: string,
+  gameStartDateTime?: string | null,
+  gameEndDateTime?: string | null,
+  gameStatus?: GameStatus | null,
+  registrationStatus?: RegistrationStatus | null,
+  gameVariant?: GameVariant | null,
+  gameType?: GameType | null,
+  prizepool?: number | null,
+  totalEntries?: number | null,
+  totalRebuys?: number | null,
+  totalAddons?: number | null,
+  totalDuration?: string | null,
+  gameTags?: Array< string | null > | null,
+  tournamentType?: TournamentType | null,
+  buyIn?: number | null,
+  rake?: number | null,
+  startingStack?: number | null,
+  hasGuarantee?: boolean | null,
+  guaranteeAmount?: number | null,
+  levels?: Array< ScrapedTournamentLevelInput > | null,
+};
+
+export enum RegistrationStatus {
+  SCHEDULED = "SCHEDULED",
+  OPEN = "OPEN",
+  FINAL = "FINAL",
+  CLOSED = "CLOSED",
+  N_A = "N_A",
+}
+
+
+export type ScrapedTournamentLevelInput = {
+  levelNumber: number,
+  durationMinutes?: number | null,
+  smallBlind?: number | null,
+  bigBlind?: number | null,
   ante?: number | null,
   breakMinutes?: number | null,
-};
-
-export type CashStructure = {
-  __typename: "CashStructure",
-  id: string,
-  name: string,
-  smallBlind: number,
-  bigBlind: number,
-  minBuyIn: number,
-  maxBuyIn: number,
-  rakeStructureId: string,
-  rakeStructure?: RakeStructure | null,
-  games?: ModelGameConnection | null,
-  createdAt: string,
-  updatedAt: string,
-  _version: number,
-  _deleted?: boolean | null,
-  _lastChangedAt: number,
-};
-
-export type RakeStructure = {
-  __typename: "RakeStructure",
-  id: string,
-  name: string,
-  rakePercentage: number,
-  maxRake: number,
-  cashStructures?: ModelCashStructureConnection | null,
-  createdAt: string,
-  updatedAt: string,
-  _version: number,
-  _deleted?: boolean | null,
-  _lastChangedAt: number,
-};
-
-export type ModelCashStructureConnection = {
-  __typename: "ModelCashStructureConnection",
-  items:  Array<CashStructure | null >,
-  nextToken?: string | null,
-  startedAt?: number | null,
 };
 
 export type CreateScrapeStructureInput = {
@@ -2541,13 +2548,6 @@ export type ModelVenueFilterInput = {
   venueDetailsId?: ModelIDInput | null,
 };
 
-export type ModelVenueConnection = {
-  __typename: "ModelVenueConnection",
-  items:  Array<Venue | null >,
-  nextToken?: string | null,
-  startedAt?: number | null,
-};
-
 export type ModelVenueDetailsFilterInput = {
   id?: ModelIDInput | null,
   startDate?: ModelStringInput | null,
@@ -3635,6 +3635,21 @@ export type ModelSubscriptionSocialPostFilterInput = {
   and?: Array< ModelSubscriptionSocialPostFilterInput | null > | null,
   or?: Array< ModelSubscriptionSocialPostFilterInput | null > | null,
   _deleted?: ModelBooleanInput | null,
+};
+
+export type ListVenuesForDropdownQueryVariables = {
+};
+
+export type ListVenuesForDropdownQuery = {
+  listVenues?:  {
+    __typename: "ModelVenueConnection",
+    items:  Array< {
+      __typename: "Venue",
+      id: string,
+      name: string,
+      venueNumber: number,
+    } | null >,
+  } | null,
 };
 
 export type FetchTournamentDataMutationVariables = {
