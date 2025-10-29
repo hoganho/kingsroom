@@ -161,41 +161,42 @@ const extractPlayerDataForProcessing = (scrapedData) => {
     // Build comprehensive player records
     const playerMap = new Map();
     
-    // Process all entries
-    entries.forEach(entry => {
-        if (entry.name) {
-            playerMap.set(entry.name, {
-                name: entry.name,
-                entered: true,
-                finished: false,
-                rank: null,
-                winnings: 0,
-                points: 0,
-                isQualification: false,
-            });
-        }
-    });
+    // ✅ START: REVISED LOGIC
+    // If we have a final results list, use it as the single source of truth.
+    // This is more reliable for finished games and avoids the bug.
+    if (results.length > 0) {
+        results.forEach(result => {
+            if (result.name) {
+                playerMap.set(result.name, {
+                    name: result.name,
+                    entered: true,
+                    finished: true,
+                    rank: result.rank,
+                    winnings: result.winnings || 0,
+                    points: result.points || 0,
+                    isQualification: result.isQualification || false,
+                });
+            }
+        });
+    } else {
+        // Fallback to the entries list ONLY if no results are present (e.g., for a live game).
+        entries.forEach(entry => {
+            if (entry.name) {
+                playerMap.set(entry.name, {
+                    name: entry.name,
+                    entered: true,
+                    finished: false, // Not finished yet if we're using the entries list
+                    rank: null,
+                    winnings: 0,
+                    points: 0,
+                    isQualification: false,
+                });
+            }
+        });
+    }
+    // ✅ END: REVISED LOGIC
     
-    // Merge in results data
-    results.forEach(result => {
-        if (result.name) {
-            const existing = playerMap.get(result.name) || {
-                name: result.name,
-                entered: true
-            };
-            
-            playerMap.set(result.name, {
-                ...existing,
-                finished: true,
-                rank: result.rank,
-                winnings: result.winnings || 0,
-                points: result.points || 0,
-                isQualification: result.isQualification || false,
-            });
-        }
-    });
-    
-    // Add seating data if available
+    // Add seating data if available (this logic remains the same)
     seating.forEach(seat => {
         if (seat.name) {
             const existing = playerMap.get(seat.name);
@@ -207,7 +208,7 @@ const extractPlayerDataForProcessing = (scrapedData) => {
         }
     });
     
-    // Convert to array and sort
+    // Convert to array and sort (this logic remains the same)
     const allPlayers = Array.from(playerMap.values())
         .sort((a, b) => {
             if (a.rank === null) return 1;
@@ -215,7 +216,7 @@ const extractPlayerDataForProcessing = (scrapedData) => {
             return a.rank - b.rank;
         });
     
-    // Calculate aggregates
+    // Calculate aggregates (this logic remains the same)
     const finishedPlayers = allPlayers.filter(p => p.finished);
     const totalPrizesPaid = finishedPlayers.reduce((sum, p) => sum + (p.winnings || 0), 0);
     const playersInTheMoney = finishedPlayers.filter(p => p.winnings > 0);
@@ -231,10 +232,10 @@ const extractPlayerDataForProcessing = (scrapedData) => {
         totalPlayers: allPlayers.length,
         totalFinished: finishedPlayers.length,
         totalInTheMoney: playersInTheMoney.length,
-        totalWithPoints: playersWithPoints.length, // ✅ ADDED
+        totalWithPoints: playersWithPoints.length,
         totalPrizesPaid,
         hasCompleteResults: finishedPlayers.length > 0,
-        hasEntryList: entries.length > 0,
+        hasEntryList: entries.length > 0 || results.length > 0,
         hasSeatingData: seating.length > 0
     };
 };

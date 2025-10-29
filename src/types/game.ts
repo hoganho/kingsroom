@@ -17,6 +17,7 @@ export type PlayerResultData = {
     name: string;
     winnings: number;
     points?: number | null;
+    isQualification?: boolean;
 };
 
 export type PlayerEntryData = {

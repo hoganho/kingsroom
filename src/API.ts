@@ -127,6 +127,7 @@ export type ScrapedPlayerResult = {
   name: string,
   winnings?: number | null,
   points?: number | null,
+  isQualification?: boolean | null,
 };
 
 export type ScrapedTable = {
@@ -3705,6 +3706,7 @@ export type FetchTournamentDataMutation = {
       name: string,
       winnings?: number | null,
       points?: number | null,
+      isQualification?: boolean | null,
     } > | null,
     tables?:  Array< {
       __typename: "ScrapedTable",

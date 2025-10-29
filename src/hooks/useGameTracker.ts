@@ -128,7 +128,9 @@ export const useGameTracker = () => {
                 results: dataFromBackend.results?.map(r => ({ 
                     name: r.name, 
                     rank: r.rank, 
-                    winnings: r.winnings ?? 0 
+                    winnings: r.winnings ?? 0,
+                    points: r.points ?? 0, // Add this line
+                    isQualification: r.isQualification ?? false // Add this line
                 })) ?? [],
                 otherDetails: {},
                 rawHtml: dataFromBackend.rawHtml || undefined,

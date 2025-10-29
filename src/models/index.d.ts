@@ -388,6 +388,7 @@ type EagerScrapedPlayerResult = {
   readonly name: string;
   readonly winnings?: number | null;
   readonly points?: number | null;
+  readonly isQualification?: boolean | null;
 }
 
 type LazyScrapedPlayerResult = {
@@ -395,6 +396,7 @@ type LazyScrapedPlayerResult = {
   readonly name: string;
   readonly winnings?: number | null;
   readonly points?: number | null;
+  readonly isQualification?: boolean | null;
 }
 
 export declare type ScrapedPlayerResult = LazyLoading extends LazyLoadingDisabled ? EagerScrapedPlayerResult : LazyScrapedPlayerResult

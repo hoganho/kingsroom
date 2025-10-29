@@ -4768,6 +4768,13 @@ export const schema = {
                     "type": "Float",
                     "isRequired": false,
                     "attributes": []
+                },
+                "isQualification": {
+                    "name": "isQualification",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
                 }
             }
         },
@@ -4878,5 +4885,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "5833db24f2cbdf3490b706f023553ae6"
+    "version": "4b95cfbb38af9a85d1ce9ebd6f84ccbc"
 };

@@ -691,6 +691,7 @@ type ScrapedPlayerResult {
     name: String!
     winnings: Float
     points: Float
+    isQualification: Boolean
 }
 
 type ScrapedTable {
