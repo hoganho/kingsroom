@@ -1,94 +1,5 @@
 export const schema = {
     "models": {
-        "DataSync": {
-            "name": "DataSync",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "syncedAt": {
-                    "name": "syncedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "method": {
-                    "name": "method",
-                    "isArray": false,
-                    "type": {
-                        "enum": "DataSource"
-                    },
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "sourceUrl": {
-                    "name": "sourceUrl",
-                    "isArray": false,
-                    "type": "AWSURL",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "title": {
-                    "name": "title",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "content": {
-                    "name": "content",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "DataSyncs",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
         "ScrapeStructure": {
             "name": "ScrapeStructure",
             "fields": {
@@ -111,7 +22,7 @@ export const schema = {
                     "name": "structureLabel",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": false,
+                    "isRequired": true,
                     "attributes": []
                 },
                 "occurrenceCount": {
@@ -184,8 +95,8 @@ export const schema = {
                 }
             ]
         },
-        "Asset": {
-            "name": "Asset",
+        "DataSync": {
+            "name": "DataSync",
             "fields": {
                 "id": {
                     "name": "id",
@@ -194,64 +105,42 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "name": {
-                    "name": "name",
+                "syncedAt": {
+                    "name": "syncedAt",
                     "isArray": false,
-                    "type": "String",
+                    "type": "AWSDateTime",
                     "isRequired": true,
                     "attributes": []
                 },
-                "type": {
-                    "name": "type",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "condition": {
-                    "name": "condition",
+                "method": {
+                    "name": "method",
                     "isArray": false,
                     "type": {
-                        "enum": "AssetCondition"
+                        "enum": "DataSource"
                     },
                     "isRequired": true,
                     "attributes": []
                 },
-                "acquiredDate": {
-                    "name": "acquiredDate",
+                "sourceUrl": {
+                    "name": "sourceUrl",
                     "isArray": false,
-                    "type": "AWSDate",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "lastCheckedDate": {
-                    "name": "lastCheckedDate",
-                    "isArray": false,
-                    "type": "AWSDate",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "venueId": {
-                    "name": "venueId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "venue": {
-                    "name": "venue",
-                    "isArray": false,
-                    "type": {
-                        "model": "Venue"
-                    },
+                    "type": "AWSURL",
                     "isRequired": false,
-                    "attributes": [],
-                    "association": {
-                        "connectionType": "BELONGS_TO",
-                        "targetNames": [
-                            "venueId"
-                        ]
-                    }
+                    "attributes": []
+                },
+                "title": {
+                    "name": "title",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "content": {
+                    "name": "content",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
                 },
                 "createdAt": {
                     "name": "createdAt",
@@ -271,20 +160,11 @@ export const schema = {
                 }
             },
             "syncable": true,
-            "pluralName": "Assets",
+            "pluralName": "DataSyncs",
             "attributes": [
                 {
                     "type": "model",
                     "properties": {}
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byVenue",
-                        "fields": [
-                            "venueId"
-                        ]
-                    }
                 },
                 {
                     "type": "auth",
@@ -508,13 +388,6 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "venueId": {
-                    "name": "venueId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
                 "startDate": {
                     "name": "startDate",
                     "isArray": false,
@@ -559,6 +432,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": [],
                     "isArrayNullable": true
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
                 },
                 "venue": {
                     "name": "venue",
@@ -643,6 +523,14 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "aliases": {
+                    "name": "aliases",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
                 "seriesInstances": {
                     "name": "seriesInstances",
                     "isArray": true,
@@ -711,13 +599,6 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "year": {
-                    "name": "year",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
                 "name": {
                     "name": "name",
                     "isArray": false,
@@ -725,13 +606,21 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "aliases": {
-                    "name": "aliases",
-                    "isArray": true,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
+                "year": {
+                    "name": "year",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "SeriesStatus"
+                    },
+                    "isRequired": true,
+                    "attributes": []
                 },
                 "startDate": {
                     "name": "startDate",
@@ -781,15 +670,6 @@ export const schema = {
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
-                    "attributes": []
-                },
-                "status": {
-                    "name": "status",
-                    "isArray": false,
-                    "type": {
-                        "enum": "SeriesStatus"
-                    },
-                    "isRequired": true,
                     "attributes": []
                 },
                 "tournamentSeriesTitleId": {
@@ -971,66 +851,17 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "venueId": {
-                    "name": "venueId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "sourceUrl": {
-                    "name": "sourceUrl",
-                    "isArray": false,
-                    "type": "AWSURL",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "doNotScrape": {
-                    "name": "doNotScrape",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "sourceDataIssue": {
-                    "name": "sourceDataIssue",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "gameDataVerified": {
-                    "name": "gameDataVerified",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "seriesName": {
-                    "name": "seriesName",
+                "registrationStatus": {
+                    "name": "registrationStatus",
                     "isArray": false,
                     "type": "String",
                     "isRequired": false,
                     "attributes": []
                 },
-                "isRegular": {
-                    "name": "isRegular",
+                "totalDuration": {
+                    "name": "totalDuration",
                     "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "isSeries": {
-                    "name": "isSeries",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "isRecurring": {
-                    "name": "isRecurring",
-                    "isArray": false,
-                    "type": "Boolean",
+                    "type": "String",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -1043,29 +874,43 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "isSatellite": {
-                    "name": "isSatellite",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "registrationStatus": {
-                    "name": "registrationStatus",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "prizepool": {
-                    "name": "prizepool",
+                "buyIn": {
+                    "name": "buyIn",
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
                     "attributes": []
                 },
-                "revenueByBuyIns": {
-                    "name": "revenueByBuyIns",
+                "rake": {
+                    "name": "rake",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "startingStack": {
+                    "name": "startingStack",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasGuarantee": {
+                    "name": "hasGuarantee",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeAmount": {
+                    "name": "guaranteeAmount",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepool": {
+                    "name": "prizepool",
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
@@ -1092,39 +937,8 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "totalDuration": {
-                    "name": "totalDuration",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gameTags": {
-                    "name": "gameTags",
-                    "isArray": true,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
-                },
-                "tournamentType": {
-                    "name": "tournamentType",
-                    "isArray": false,
-                    "type": {
-                        "enum": "TournamentType"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "buyIn": {
-                    "name": "buyIn",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "rake": {
-                    "name": "rake",
+                "revenueByBuyIns": {
+                    "name": "revenueByBuyIns",
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
@@ -1139,27 +953,6 @@ export const schema = {
                 },
                 "profitLoss": {
                     "name": "profitLoss",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "startingStack": {
-                    "name": "startingStack",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "hasGuarantee": {
-                    "name": "hasGuarantee",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "guaranteeAmount": {
-                    "name": "guaranteeAmount",
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
@@ -1200,18 +993,84 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "tournamentStructureId": {
-                    "name": "tournamentStructureId",
+                "tournamentType": {
+                    "name": "tournamentType",
                     "isArray": false,
-                    "type": "ID",
+                    "type": {
+                        "enum": "TournamentType"
+                    },
                     "isRequired": false,
                     "attributes": []
                 },
-                "cashStructureId": {
-                    "name": "cashStructureId",
+                "isRegular": {
+                    "name": "isRegular",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isSeries": {
+                    "name": "isSeries",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isSatellite": {
+                    "name": "isSatellite",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesName": {
+                    "name": "seriesName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameTags": {
+                    "name": "gameTags",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "sourceUrl": {
+                    "name": "sourceUrl",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "doNotScrape": {
+                    "name": "doNotScrape",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "sourceDataIssue": {
+                    "name": "sourceDataIssue",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameDataVerified": {
+                    "name": "gameDataVerified",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
                     "isArray": false,
                     "type": "ID",
-                    "isRequired": false,
+                    "isRequired": true,
                     "attributes": []
                 },
                 "venue": {
@@ -1229,6 +1088,35 @@ export const schema = {
                         ]
                     }
                 },
+                "tournamentSeriesId": {
+                    "name": "tournamentSeriesId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tournamentSeries": {
+                    "name": "tournamentSeries",
+                    "isArray": false,
+                    "type": {
+                        "model": "TournamentSeries"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "tournamentSeriesId"
+                        ]
+                    }
+                },
+                "tournamentStructureId": {
+                    "name": "tournamentStructureId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "tournamentStructure": {
                     "name": "tournamentStructure",
                     "isArray": false,
@@ -1243,6 +1131,13 @@ export const schema = {
                             "tournamentStructureId"
                         ]
                     }
+                },
+                "cashStructureId": {
+                    "name": "cashStructureId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
                 },
                 "cashStructure": {
                     "name": "cashStructure",
@@ -1275,28 +1170,6 @@ export const schema = {
                         ]
                     }
                 },
-                "tournamentSeriesId": {
-                    "name": "tournamentSeriesId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "tournamentSeries": {
-                    "name": "tournamentSeries",
-                    "isArray": false,
-                    "type": {
-                        "model": "TournamentSeries"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "association": {
-                        "connectionType": "BELONGS_TO",
-                        "targetNames": [
-                            "tournamentSeriesId"
-                        ]
-                    }
-                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -1324,6 +1197,16 @@ export const schema = {
                 {
                     "type": "key",
                     "properties": {
+                        "name": "bySourceUrl",
+                        "queryField": "gameBySourceUrl",
+                        "fields": [
+                            "sourceUrl"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
                         "name": "byVenue",
                         "fields": [
                             "venueId",
@@ -1334,10 +1217,9 @@ export const schema = {
                 {
                     "type": "key",
                     "properties": {
-                        "name": "bySourceUrl",
-                        "queryField": "gameBySourceUrl",
+                        "name": "byTournamentSeries",
                         "fields": [
-                            "sourceUrl"
+                            "tournamentSeriesId"
                         ]
                     }
                 },
@@ -1356,15 +1238,6 @@ export const schema = {
                         "name": "byCashStructure",
                         "fields": [
                             "cashStructureId"
-                        ]
-                    }
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byTournamentSeries",
-                        "fields": [
-                            "tournamentSeriesId"
                         ]
                     }
                 },
@@ -1455,95 +1328,6 @@ export const schema = {
             },
             "syncable": true,
             "pluralName": "TournamentStructures",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        "RakeStructure": {
-            "name": "RakeStructure",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "name": {
-                    "name": "name",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "rakePercentage": {
-                    "name": "rakePercentage",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "maxRake": {
-                    "name": "maxRake",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "cashStructures": {
-                    "name": "cashStructures",
-                    "isArray": true,
-                    "type": {
-                        "model": "CashStructure"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true,
-                    "association": {
-                        "connectionType": "HAS_MANY",
-                        "associatedWith": [
-                            "rakeStructure"
-                        ]
-                    }
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "RakeStructures",
             "attributes": [
                 {
                     "type": "model",
@@ -1701,6 +1485,95 @@ export const schema = {
                 }
             ]
         },
+        "RakeStructure": {
+            "name": "RakeStructure",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "rakePercentage": {
+                    "name": "rakePercentage",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "maxRake": {
+                    "name": "maxRake",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "cashStructures": {
+                    "name": "cashStructures",
+                    "isArray": true,
+                    "type": {
+                        "model": "CashStructure"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "rakeStructure"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "RakeStructures",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
         "Player": {
             "name": "Player",
             "fields": {
@@ -1746,25 +1619,11 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "registrationVenueId": {
-                    "name": "registrationVenueId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
                 "creationDate": {
                     "name": "creationDate",
                     "isArray": false,
                     "type": "AWSDateTime",
                     "isRequired": true,
-                    "attributes": []
-                },
-                "lastPlayedDate": {
-                    "name": "lastPlayedDate",
-                    "isArray": false,
-                    "type": "AWSDate",
-                    "isRequired": false,
                     "attributes": []
                 },
                 "status": {
@@ -1785,6 +1644,20 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "tier": {
+                    "name": "tier",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastPlayedDate": {
+                    "name": "lastPlayedDate",
+                    "isArray": false,
+                    "type": "AWSDate",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "targetingClassification": {
                     "name": "targetingClassification",
                     "isArray": false,
@@ -1794,12 +1667,30 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "tier": {
-                    "name": "tier",
+                "registrationVenueId": {
+                    "name": "registrationVenueId",
                     "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
+                    "type": "ID",
+                    "isRequired": true,
                     "attributes": []
+                },
+                "summary": {
+                    "name": "summary",
+                    "isArray": false,
+                    "type": {
+                        "model": "PlayerSummary"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "HAS_ONE",
+                        "associatedWith": [
+                            "id"
+                        ],
+                        "targetNames": [
+                            "playerSummaryId"
+                        ]
+                    }
                 },
                 "transactions": {
                     "name": "transactions",
@@ -1849,24 +1740,6 @@ export const schema = {
                         ]
                     }
                 },
-                "marketingPreferences": {
-                    "name": "marketingPreferences",
-                    "isArray": false,
-                    "type": {
-                        "model": "PlayerMarketingPreferences"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "association": {
-                        "connectionType": "HAS_ONE",
-                        "associatedWith": [
-                            "id"
-                        ],
-                        "targetNames": [
-                            "playerMarketingPreferencesId"
-                        ]
-                    }
-                },
                 "venueMemberships": {
                     "name": "venueMemberships",
                     "isArray": true,
@@ -1883,11 +1756,11 @@ export const schema = {
                         ]
                     }
                 },
-                "summary": {
-                    "name": "summary",
+                "marketingPreferences": {
+                    "name": "marketingPreferences",
                     "isArray": false,
                     "type": {
-                        "model": "PlayerSummary"
+                        "model": "PlayerMarketingPreferences"
                     },
                     "isRequired": false,
                     "attributes": [],
@@ -1897,7 +1770,7 @@ export const schema = {
                             "id"
                         ],
                         "targetNames": [
-                            "playerSummaryId"
+                            "playerMarketingPreferencesId"
                         ]
                     }
                 },
@@ -1917,15 +1790,15 @@ export const schema = {
                     "attributes": [],
                     "isReadOnly": true
                 },
-                "playerMarketingPreferencesId": {
-                    "name": "playerMarketingPreferencesId",
+                "playerSummaryId": {
+                    "name": "playerSummaryId",
                     "isArray": false,
                     "type": "ID",
                     "isRequired": false,
                     "attributes": []
                 },
-                "playerSummaryId": {
-                    "name": "playerSummaryId",
+                "playerMarketingPreferencesId": {
+                    "name": "playerMarketingPreferencesId",
                     "isArray": false,
                     "type": "ID",
                     "isRequired": false,
@@ -1993,14 +1866,6 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "venuesVisited": {
-                    "name": "venuesVisited",
-                    "isArray": true,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
-                },
                 "sessionsPlayed": {
                     "name": "sessionsPlayed",
                     "isArray": false,
@@ -2022,6 +1887,14 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "venuesVisited": {
+                    "name": "venuesVisited",
+                    "isArray": true,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
                 "tournamentWinnings": {
                     "name": "tournamentWinnings",
                     "isArray": false,
@@ -2033,6 +1906,20 @@ export const schema = {
                     "name": "tournamentBuyIns",
                     "isArray": false,
                     "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tournamentITM": {
+                    "name": "tournamentITM",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tournamentsCashed": {
+                    "name": "tournamentsCashed",
+                    "isArray": false,
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -2068,20 +1955,6 @@ export const schema = {
                     "name": "netBalance",
                     "isArray": false,
                     "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "tournamentITM": {
-                    "name": "tournamentITM",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "tournamentsCashed": {
-                    "name": "tournamentsCashed",
-                    "isArray": false,
-                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -2158,14 +2031,49 @@ export const schema = {
                 }
             ]
         },
-        "PlayerVenue": {
-            "name": "PlayerVenue",
+        "PlayerResult": {
+            "name": "PlayerResult",
             "fields": {
                 "id": {
                     "name": "id",
                     "isArray": false,
                     "type": "ID",
                     "isRequired": true,
+                    "attributes": []
+                },
+                "finishingPlace": {
+                    "name": "finishingPlace",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isMultiDayQualification": {
+                    "name": "isMultiDayQualification",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizeWon": {
+                    "name": "prizeWon",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "amountWon": {
+                    "name": "amountWon",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalRunners": {
+                    "name": "totalRunners",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
                     "attributes": []
                 },
                 "playerId": {
@@ -2175,8 +2083,108 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "venueId": {
-                    "name": "venueId",
+                "player": {
+                    "name": "player",
+                    "isArray": false,
+                    "type": {
+                        "model": "Player"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "playerId"
+                        ]
+                    }
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "game": {
+                    "name": "game",
+                    "isArray": false,
+                    "type": {
+                        "model": "Game"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "gameId"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "PlayerResults",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byPlayer",
+                        "fields": [
+                            "playerId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byGame",
+                        "fields": [
+                            "gameId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "PlayerVenue": {
+            "name": "PlayerVenue",
+            "fields": {
+                "id": {
+                    "name": "id",
                     "isArray": false,
                     "type": "ID",
                     "isRequired": true,
@@ -2219,6 +2227,13 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "playerId": {
+                    "name": "playerId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
                 "player": {
                     "name": "player",
                     "isArray": false,
@@ -2233,6 +2248,13 @@ export const schema = {
                             "playerId"
                         ]
                     }
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
                 },
                 "venue": {
                     "name": "venue",
@@ -2321,13 +2343,6 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "playerId": {
-                    "name": "playerId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
                 "type": {
                     "name": "type",
                     "isArray": false,
@@ -2342,6 +2357,13 @@ export const schema = {
                     "isArray": false,
                     "type": "Float",
                     "isRequired": true,
+                    "attributes": []
+                },
+                "rake": {
+                    "name": "rake",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
                     "attributes": []
                 },
                 "paymentSource": {
@@ -2360,13 +2382,6 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "rake": {
-                    "name": "rake",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
                 "notes": {
                     "name": "notes",
                     "isArray": false,
@@ -2374,11 +2389,11 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "gameId": {
-                    "name": "gameId",
+                "playerId": {
+                    "name": "playerId",
                     "isArray": false,
                     "type": "ID",
-                    "isRequired": false,
+                    "isRequired": true,
                     "attributes": []
                 },
                 "player": {
@@ -2395,6 +2410,13 @@ export const schema = {
                             "playerId"
                         ]
                     }
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
                 },
                 "createdAt": {
                     "name": "createdAt",
@@ -2436,353 +2458,6 @@ export const schema = {
                         "name": "byGame",
                         "fields": [
                             "gameId"
-                        ]
-                    }
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        "PlayerResult": {
-            "name": "PlayerResult",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "playerId": {
-                    "name": "playerId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "gameId": {
-                    "name": "gameId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "finishingPlace": {
-                    "name": "finishingPlace",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "isMultiDayQualification": {
-                    "name": "isMultiDayQualification",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "prizeWon": {
-                    "name": "prizeWon",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "amountWon": {
-                    "name": "amountWon",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalRunners": {
-                    "name": "totalRunners",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "game": {
-                    "name": "game",
-                    "isArray": false,
-                    "type": {
-                        "model": "Game"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "association": {
-                        "connectionType": "BELONGS_TO",
-                        "targetNames": [
-                            "gameId"
-                        ]
-                    }
-                },
-                "player": {
-                    "name": "player",
-                    "isArray": false,
-                    "type": {
-                        "model": "Player"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "association": {
-                        "connectionType": "BELONGS_TO",
-                        "targetNames": [
-                            "playerId"
-                        ]
-                    }
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "PlayerResults",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byPlayer",
-                        "fields": [
-                            "playerId"
-                        ]
-                    }
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byGame",
-                        "fields": [
-                            "gameId"
-                        ]
-                    }
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        "PlayerMarketingMessage": {
-            "name": "PlayerMarketingMessage",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "playerId": {
-                    "name": "playerId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "marketingMessageId": {
-                    "name": "marketingMessageId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "status": {
-                    "name": "status",
-                    "isArray": false,
-                    "type": {
-                        "enum": "MessageStatus"
-                    },
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "sentAt": {
-                    "name": "sentAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "PlayerMarketingMessages",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byPlayer",
-                        "fields": [
-                            "playerId",
-                            "sentAt"
-                        ]
-                    }
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byMarketingMessage",
-                        "fields": [
-                            "marketingMessageId"
-                        ]
-                    }
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        "PlayerMarketingPreferences": {
-            "name": "PlayerMarketingPreferences",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "playerId": {
-                    "name": "playerId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "optOutSms": {
-                    "name": "optOutSms",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "optOutEmail": {
-                    "name": "optOutEmail",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "player": {
-                    "name": "player",
-                    "isArray": false,
-                    "type": {
-                        "model": "Player"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "association": {
-                        "connectionType": "BELONGS_TO",
-                        "targetNames": [
-                            "playerId"
-                        ]
-                    }
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "PlayerMarketingPreferences",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byPlayer",
-                        "fields": [
-                            "playerId"
                         ]
                     }
                 },
@@ -2924,20 +2599,6 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "playerId": {
-                    "name": "playerId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "ticketTemplateId": {
-                    "name": "ticketTemplateId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
                 "assignedAt": {
                     "name": "assignedAt",
                     "isArray": false,
@@ -2968,20 +2629,12 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "ticketTemplate": {
-                    "name": "ticketTemplate",
+                "playerId": {
+                    "name": "playerId",
                     "isArray": false,
-                    "type": {
-                        "model": "TicketTemplate"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "association": {
-                        "connectionType": "BELONGS_TO",
-                        "targetNames": [
-                            "ticketTemplateId"
-                        ]
-                    }
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
                 },
                 "player": {
                     "name": "player",
@@ -2995,6 +2648,28 @@ export const schema = {
                         "connectionType": "BELONGS_TO",
                         "targetNames": [
                             "playerId"
+                        ]
+                    }
+                },
+                "ticketTemplateId": {
+                    "name": "ticketTemplateId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "ticketTemplate": {
+                    "name": "ticketTemplate",
+                    "isArray": false,
+                    "type": {
+                        "model": "TicketTemplate"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "ticketTemplateId"
                         ]
                     }
                 },
@@ -3037,6 +2712,300 @@ export const schema = {
                         "name": "byTicketTemplate",
                         "fields": [
                             "ticketTemplateId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "MarketingMessage": {
+            "name": "MarketingMessage",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "subject": {
+                    "name": "subject",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "emailBody": {
+                    "name": "emailBody",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "smsBody": {
+                    "name": "smsBody",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "sentMessages": {
+                    "name": "sentMessages",
+                    "isArray": true,
+                    "type": {
+                        "model": "PlayerMarketingMessage"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "marketingMessageId"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "MarketingMessages",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "PlayerMarketingMessage": {
+            "name": "PlayerMarketingMessage",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "MessageStatus"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "sentAt": {
+                    "name": "sentAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playerId": {
+                    "name": "playerId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "marketingMessageId": {
+                    "name": "marketingMessageId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "PlayerMarketingMessages",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byPlayer",
+                        "fields": [
+                            "playerId",
+                            "sentAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byMarketingMessage",
+                        "fields": [
+                            "marketingMessageId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "PlayerMarketingPreferences": {
+            "name": "PlayerMarketingPreferences",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "optOutSms": {
+                    "name": "optOutSms",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "optOutEmail": {
+                    "name": "optOutEmail",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerId": {
+                    "name": "playerId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "player": {
+                    "name": "player",
+                    "isArray": false,
+                    "type": {
+                        "model": "Player"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "playerId"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "PlayerMarketingPreferences",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byPlayer",
+                        "fields": [
+                            "playerId"
                         ]
                     }
                 },
@@ -3170,6 +3139,98 @@ export const schema = {
                 }
             ]
         },
+        "UserPreference": {
+            "name": "UserPreference",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "page": {
+                    "name": "page",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "widget": {
+                    "name": "widget",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "preference": {
+                    "name": "preference",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "userId": {
+                    "name": "userId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "UserPreferences",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byUser",
+                        "fields": [
+                            "userId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "provider": "userPools",
+                                "ownerField": "userId",
+                                "allow": "owner",
+                                "identityClaim": "cognito:username",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
         "Staff": {
             "name": "Staff",
             "fields": {
@@ -3261,8 +3322,8 @@ export const schema = {
                 }
             ]
         },
-        "UserPreference": {
-            "name": "UserPreference",
+        "Asset": {
+            "name": "Asset",
             "fields": {
                 "id": {
                     "name": "id",
@@ -3271,33 +3332,64 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "userId": {
-                    "name": "userId",
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "type": {
+                    "name": "type",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "condition": {
+                    "name": "condition",
+                    "isArray": false,
+                    "type": {
+                        "enum": "AssetCondition"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "acquiredDate": {
+                    "name": "acquiredDate",
+                    "isArray": false,
+                    "type": "AWSDate",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastCheckedDate": {
+                    "name": "lastCheckedDate",
+                    "isArray": false,
+                    "type": "AWSDate",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
                     "isArray": false,
                     "type": "ID",
                     "isRequired": true,
                     "attributes": []
                 },
-                "page": {
-                    "name": "page",
+                "venue": {
+                    "name": "venue",
                     "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "widget": {
-                    "name": "widget",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "preference": {
-                    "name": "preference",
-                    "isArray": false,
-                    "type": "AWSJSON",
+                    "type": {
+                        "model": "Venue"
+                    },
                     "isRequired": false,
-                    "attributes": []
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "venueId"
+                        ]
+                    }
                 },
                 "createdAt": {
                     "name": "createdAt",
@@ -3317,7 +3409,7 @@ export const schema = {
                 }
             },
             "syncable": true,
-            "pluralName": "UserPreferences",
+            "pluralName": "Assets",
             "attributes": [
                 {
                     "type": "model",
@@ -3326,102 +3418,9 @@ export const schema = {
                 {
                     "type": "key",
                     "properties": {
-                        "name": "byUser",
+                        "name": "byVenue",
                         "fields": [
-                            "userId"
-                        ]
-                    }
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "provider": "userPools",
-                                "ownerField": "userId",
-                                "allow": "owner",
-                                "identityClaim": "cognito:username",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        "SocialPost": {
-            "name": "SocialPost",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "socialAccountId": {
-                    "name": "socialAccountId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "content": {
-                    "name": "content",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "imageUrl": {
-                    "name": "imageUrl",
-                    "isArray": false,
-                    "type": "AWSURL",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "postedAt": {
-                    "name": "postedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "SocialPosts",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "bySocialAccount",
-                        "fields": [
-                            "socialAccountId",
-                            "postedAt"
+                            "venueId"
                         ]
                     }
                 },
@@ -3523,8 +3522,8 @@ export const schema = {
                 }
             ]
         },
-        "MarketingMessage": {
-            "name": "MarketingMessage",
+        "SocialPost": {
+            "name": "SocialPost",
             "fields": {
                 "id": {
                     "name": "id",
@@ -3533,49 +3532,33 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "name": {
-                    "name": "name",
+                "content": {
+                    "name": "content",
                     "isArray": false,
                     "type": "String",
                     "isRequired": true,
                     "attributes": []
                 },
-                "subject": {
-                    "name": "subject",
+                "imageUrl": {
+                    "name": "imageUrl",
                     "isArray": false,
-                    "type": "String",
+                    "type": "AWSURL",
                     "isRequired": false,
                     "attributes": []
                 },
-                "emailBody": {
-                    "name": "emailBody",
+                "postedAt": {
+                    "name": "postedAt",
                     "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
                     "attributes": []
                 },
-                "smsBody": {
-                    "name": "smsBody",
+                "socialAccountId": {
+                    "name": "socialAccountId",
                     "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
+                    "type": "ID",
+                    "isRequired": true,
                     "attributes": []
-                },
-                "sentMessages": {
-                    "name": "sentMessages",
-                    "isArray": true,
-                    "type": {
-                        "model": "PlayerMarketingMessage"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true,
-                    "association": {
-                        "connectionType": "HAS_MANY",
-                        "associatedWith": [
-                            "marketingMessageId"
-                        ]
-                    }
                 },
                 "createdAt": {
                     "name": "createdAt",
@@ -3595,11 +3578,21 @@ export const schema = {
                 }
             },
             "syncable": true,
-            "pluralName": "MarketingMessages",
+            "pluralName": "SocialPosts",
             "attributes": [
                 {
                     "type": "model",
                     "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "bySocialAccount",
+                        "fields": [
+                            "socialAccountId",
+                            "postedAt"
+                        ]
+                    }
                 },
                 {
                     "type": "auth",
@@ -3662,7 +3655,8 @@ export const schema = {
                 "REGISTERING",
                 "RUNNING",
                 "CANCELLED",
-                "FINISHED"
+                "FINISHED",
+                "NOT_IN_USE"
             ]
         },
         "GameVariant": {
@@ -3692,7 +3686,8 @@ export const schema = {
                 "SCHEDULED",
                 "OPEN",
                 "FINAL",
-                "CLOSED"
+                "CLOSED",
+                "N_A"
             ]
         },
         "TournamentType": {
@@ -3816,6 +3811,53 @@ export const schema = {
         }
     },
     "nonModels": {
+        "TournamentLevelData": {
+            "name": "TournamentLevelData",
+            "fields": {
+                "levelNumber": {
+                    "name": "levelNumber",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "durationMinutes": {
+                    "name": "durationMinutes",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "smallBlind": {
+                    "name": "smallBlind",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "bigBlind": {
+                    "name": "bigBlind",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "ante": {
+                    "name": "ante",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "breakMinutes": {
+                    "name": "breakMinutes",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
         "ScrapedGameSummary": {
             "name": "ScrapedGameSummary",
             "fields": {
@@ -3965,63 +4007,6 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "totalEntries": {
-                    "name": "totalEntries",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalRebuys": {
-                    "name": "totalRebuys",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalAddons": {
-                    "name": "totalAddons",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "playersRemaining": {
-                    "name": "playersRemaining",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalChipsInPlay": {
-                    "name": "totalChipsInPlay",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "averagePlayerStack": {
-                    "name": "averagePlayerStack",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalDuration": {
-                    "name": "totalDuration",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gameTags": {
-                    "name": "gameTags",
-                    "isArray": true,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
-                },
                 "buyIn": {
                     "name": "buyIn",
                     "isArray": false,
@@ -4078,6 +4063,55 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "totalEntries": {
+                    "name": "totalEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalRebuys": {
+                    "name": "totalRebuys",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalAddons": {
+                    "name": "totalAddons",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalDuration": {
+                    "name": "totalDuration",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playersRemaining": {
+                    "name": "playersRemaining",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalChipsInPlay": {
+                    "name": "totalChipsInPlay",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "averagePlayerStack": {
+                    "name": "averagePlayerStack",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "seriesName": {
                     "name": "seriesName",
                     "isArray": false,
@@ -4099,8 +4133,8 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "isRecurring": {
-                    "name": "isRecurring",
+                "isSatellite": {
+                    "name": "isSatellite",
                     "isArray": false,
                     "type": "Boolean",
                     "isRequired": false,
@@ -4115,12 +4149,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "isSatellite": {
-                    "name": "isSatellite",
-                    "isArray": false,
-                    "type": "Boolean",
+                "gameTags": {
+                    "name": "gameTags",
+                    "isArray": true,
+                    "type": "String",
                     "isRequired": false,
-                    "attributes": []
+                    "attributes": [],
+                    "isArrayNullable": true
                 },
                 "levels": {
                     "name": "levels",
@@ -4146,7 +4181,7 @@ export const schema = {
                     "name": "entries",
                     "isArray": true,
                     "type": {
-                        "nonModel": "ScrapedPlayerEntries"
+                        "nonModel": "ScrapedPlayerEntry"
                     },
                     "isRequired": true,
                     "attributes": [],
@@ -4176,7 +4211,7 @@ export const schema = {
                     "name": "tables",
                     "isArray": true,
                     "type": {
-                        "nonModel": "ScrapedTables"
+                        "nonModel": "ScrapedTable"
                     },
                     "isRequired": true,
                     "attributes": [],
@@ -4272,13 +4307,6 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "levelNumberAfterBreak": {
-                    "name": "levelNumberAfterBreak",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
                 "durationMinutes": {
                     "name": "durationMinutes",
                     "isArray": false,
@@ -4288,8 +4316,8 @@ export const schema = {
                 }
             }
         },
-        "ScrapedPlayerEntries": {
-            "name": "ScrapedPlayerEntries",
+        "ScrapedPlayerEntry": {
+            "name": "ScrapedPlayerEntry",
             "fields": {
                 "name": {
                     "name": "name",
@@ -4366,8 +4394,8 @@ export const schema = {
                 }
             }
         },
-        "ScrapedTables": {
-            "name": "ScrapedTables",
+        "ScrapedTable": {
+            "name": "ScrapedTable",
             "fields": {
                 "tableName": {
                     "name": "tableName",
@@ -4380,11 +4408,44 @@ export const schema = {
                     "name": "seats",
                     "isArray": true,
                     "type": {
-                        "nonModel": "ScrapedTableSeatsData"
+                        "nonModel": "ScrapedTableSeatData"
                     },
                     "isRequired": true,
                     "attributes": [],
                     "isArrayNullable": true
+                }
+            }
+        },
+        "ScrapedTableSeatData": {
+            "name": "ScrapedTableSeatData",
+            "fields": {
+                "seat": {
+                    "name": "seat",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "isOccupied": {
+                    "name": "isOccupied",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playerName": {
+                    "name": "playerName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerStack": {
+                    "name": "playerStack",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
                 }
             }
         },
@@ -4437,88 +4498,8 @@ export const schema = {
                     "attributes": []
                 }
             }
-        },
-        "ScrapedTableSeatsData": {
-            "name": "ScrapedTableSeatsData",
-            "fields": {
-                "seat": {
-                    "name": "seat",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "isOccupied": {
-                    "name": "isOccupied",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "playerName": {
-                    "name": "playerName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "playerStack": {
-                    "name": "playerStack",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "TournamentLevelData": {
-            "name": "TournamentLevelData",
-            "fields": {
-                "levelNumber": {
-                    "name": "levelNumber",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "durationMinutes": {
-                    "name": "durationMinutes",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "smallBlind": {
-                    "name": "smallBlind",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "bigBlind": {
-                    "name": "bigBlind",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "ante": {
-                    "name": "ante",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "breakMinutes": {
-                    "name": "breakMinutes",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "a3d1c16ee100def65f870d20eba17f9f"
+    "version": "8c42165985aa946008c7d49584b78f50"
 };

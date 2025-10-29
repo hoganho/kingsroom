@@ -33,7 +33,8 @@ const GameStatus = {
   "REGISTERING": "REGISTERING",
   "RUNNING": "RUNNING",
   "CANCELLED": "CANCELLED",
-  "FINISHED": "FINISHED"
+  "FINISHED": "FINISHED",
+  "NOT_IN_USE": "NOT_IN_USE"
 };
 
 const GameVariant = {
@@ -57,7 +58,8 @@ const RegistrationStatus = {
   "SCHEDULED": "SCHEDULED",
   "OPEN": "OPEN",
   "FINAL": "FINAL",
-  "CLOSED": "CLOSED"
+  "CLOSED": "CLOSED",
+  "N_A": "N_A"
 };
 
 const TournamentType = {
@@ -155,35 +157,35 @@ const TicketStatus = {
   "USED": "USED"
 };
 
-const { DataSync, ScrapeStructure, Asset, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, RakeStructure, CashStructure, Player, PlayerSummary, PlayerVenue, PlayerTransaction, PlayerResult, PlayerMarketingMessage, PlayerMarketingPreferences, TicketTemplate, PlayerTicket, User, Staff, UserPreference, SocialPost, SocialAccount, MarketingMessage, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntries, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTables, ScrapedVenueMatch, ScrapedVenueMatchDetails, ScrapedTableSeatsData, TournamentLevelData } = initSchema(schema);
+const { ScrapeStructure, DataSync, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, CashStructure, RakeStructure, Player, PlayerSummary, PlayerResult, PlayerVenue, PlayerTransaction, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, TournamentLevelData, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails } = initSchema(schema);
 
 export {
-  DataSync,
   ScrapeStructure,
-  Asset,
+  DataSync,
   Venue,
   VenueDetails,
   TournamentSeriesTitle,
   TournamentSeries,
   Game,
   TournamentStructure,
-  RakeStructure,
   CashStructure,
+  RakeStructure,
   Player,
   PlayerSummary,
+  PlayerResult,
   PlayerVenue,
   PlayerTransaction,
-  PlayerResult,
-  PlayerMarketingMessage,
-  PlayerMarketingPreferences,
   TicketTemplate,
   PlayerTicket,
-  User,
-  Staff,
-  UserPreference,
-  SocialPost,
-  SocialAccount,
   MarketingMessage,
+  PlayerMarketingMessage,
+  PlayerMarketingPreferences,
+  User,
+  UserPreference,
+  Staff,
+  Asset,
+  SocialAccount,
+  SocialPost,
   DataSource,
   AssetCondition,
   VenueStatus,
@@ -204,16 +206,16 @@ export {
   UserRole,
   StaffRole,
   TicketStatus,
+  TournamentLevelData,
   ScrapedGameSummary,
   ScrapedGameData,
   ScrapedTournamentLevel,
   ScrapedBreak,
-  ScrapedPlayerEntries,
+  ScrapedPlayerEntry,
   ScrapedPlayerSeating,
   ScrapedPlayerResult,
-  ScrapedTables,
+  ScrapedTable,
+  ScrapedTableSeatData,
   ScrapedVenueMatch,
-  ScrapedVenueMatchDetails,
-  ScrapedTableSeatsData,
-  TournamentLevelData
+  ScrapedVenueMatchDetails
 };

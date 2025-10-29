@@ -1,3 +1,5 @@
+// services/gameService.ts
+
 // Updated service to handle refactored schema with RUNNING status
 
 import { generateClient } from 'aws-amplify/api';
@@ -63,30 +65,32 @@ export const saveGameDataToBackend = async (
             venueId,
             existingGameId: existingGameId,
             doNotScrape: data.doNotScrape ?? false,
+
+            // ✅ FIXED: Stringify the complete data object before sending.
+            // This converts the JavaScript object into a JSON string, which is what the AWSJSON type expects.
+            originalScrapedData: JSON.stringify(data),
+            
+            // This is the 'clean' object, containing only fields for the Game table.
             data: {
                 name: data.name,
-                gameStartDateTime: data.gameStartDateTime ?? undefined, // Now optional
+                gameStartDateTime: data.gameStartDateTime ?? undefined,
                 gameEndDateTime: data.gameEndDateTime ?? undefined,
-                // Map the status properly
                 gameStatus: data.gameStatus,
-                registrationStatus: data.registrationStatus ?? undefined,
+                registrationStatus: data.registrationStatus,
                 gameVariant: data.gameVariant ?? APITypes.GameVariant.NLHE,
-                prizepool: data.prizepool ?? undefined,
-                totalEntries: data.totalEntries ?? undefined,
-                totalRebuys: data.totalRebuys ?? undefined,
-                totalAddons: data.totalAddons ?? undefined,
-                totalDuration: data.totalDuration ?? undefined,
-                gameTags: data.gameTags?.filter((tag): tag is string => tag !== null) ?? [],
-                
-                // Tournament-specific fields (now part of Game)
-                tournamentType: data.tournamentType ?? APITypes.TournamentType.FREEZEOUT,
-                buyIn: data.buyIn ?? undefined,
-                rake: data.rake ?? undefined,
-                startingStack: data.startingStack ?? undefined,
+                gameType: data.gameType,
+                prizepool: data.prizepool,
+                totalEntries: data.totalEntries,
+                totalRebuys: data.totalRebuys,
+                totalAddons: data.totalAddons,
+                totalDuration: data.totalDuration,
+                gameTags: data.gameTags?.filter((tag): tag is string => tag !== null),
+                tournamentType: data.tournamentType,
+                buyIn: data.buyIn,
+                rake: data.rake,
+                startingStack: data.startingStack,
                 hasGuarantee: data.hasGuarantee,
-                guaranteeAmount: data.guaranteeAmount ?? undefined,
-                
-                // Blind levels (will be embedded in TournamentStructure)
+                guaranteeAmount: data.guaranteeAmount,
                 levels: data.levels?.map(l => ({
                     levelNumber: l.levelNumber,
                     durationMinutes: l.durationMinutes,
@@ -95,10 +99,6 @@ export const saveGameDataToBackend = async (
                     ante: l.ante ?? undefined,
                     breakMinutes: l.breakMinutes ?? undefined,
                 })) || [],
-                
-                // Note: Player results are not included in the save input
-                // They need to be handled separately through PlayerResult mutations
-                // after players are linked to their accounts
             },
         };
 
@@ -108,7 +108,7 @@ export const saveGameDataToBackend = async (
         });
         
         if (response.errors) {
-            throw new Error(response.errors[0].message);
+            throw new Error(JSON.stringify(response.errors));
         }
 
         console.log(`[GameService] Successfully saved ${data.gameStatus} tournament to DB:`, response.data.saveTournamentData);

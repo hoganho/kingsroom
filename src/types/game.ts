@@ -1,3 +1,5 @@
+// types/game.ts
+
 // Updated type definitions to match the refactored schema
 import type { DataSource, GameType, GameStatus, RegistrationStatus, TournamentType, GameVariant, GameFrequency } from '../API';
 
@@ -48,8 +50,8 @@ export type TableData = {
 export type BulkGameSummary = {
     id: string;
     name?: string | null;
-    gameStatus?: GameStatus;
-    registrationStatus?: RegistrationStatus;
+    gameStatus?: GameStatus | 'NOT_IN_USE' | null;
+    registrationStatus?: RegistrationStatus | 'N_A' | null;
     gameStartDateTime?: string | null;
     inDatabase?: boolean | null;
     doNotScrape?: boolean | null;
@@ -158,6 +160,7 @@ export interface SaveTournamentInput {
     data: GameDataInput;
     existingGameId?: string | null;
     doNotScrape?: boolean;
+    originalScrapedData?: GameData;
 }
 
 export interface GameDataInput {
@@ -179,18 +182,12 @@ export interface GameDataInput {
     tournamentType?: TournamentType;
     buyIn?: number;
     rake?: number;
-    totalRake: number;
-    profitLoss: number;
     startingStack?: number;
     hasGuarantee?: boolean;
     guaranteeAmount?: number;
-    guaranteeOverlay?: number;
-    guaranteeSurplus?: number;
-
+    
     // Blind levels
     levels?: TournamentLevelInput[];
-    
-    doNotScrape?: boolean;
 }
 
 export interface TournamentLevelInput {

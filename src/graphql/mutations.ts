@@ -21,14 +21,6 @@ export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData($
     prizepool
     revenueByBuyIns
     profitLoss
-    totalEntries
-    totalRebuys
-    totalAddons
-    playersRemaining
-    totalChipsInPlay
-    averagePlayerStack
-    totalDuration
-    gameTags
     buyIn
     rake
     totalRake
@@ -37,12 +29,19 @@ export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData($
     guaranteeAmount
     guaranteeOverlay
     guaranteeSurplus
+    totalEntries
+    totalRebuys
+    totalAddons
+    totalDuration
+    playersRemaining
+    totalChipsInPlay
+    averagePlayerStack
     seriesName
     isRegular
     isSeries
-    isRecurring
-    gameFrequency
     isSatellite
+    gameFrequency
+    gameTags
     levels {
       levelNumber
       durationMinutes
@@ -53,7 +52,6 @@ export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData($
     }
     breaks {
       levelNumberBeforeBreak
-      levelNumberAfterBreak
       durationMinutes
       __typename
     }
@@ -121,40 +119,37 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
     gameStatus
     gameStartDateTime
     gameEndDateTime
-    venueId
-    sourceUrl
-    doNotScrape
-    sourceDataIssue
-    gameDataVerified
-    seriesName
-    isRegular
-    isSeries
-    isRecurring
-    gameFrequency
-    isSatellite
     registrationStatus
-    prizepool
-    revenueByBuyIns
-    totalEntries
-    totalRebuys
-    totalAddons
     totalDuration
-    gameTags
-    tournamentType
+    gameFrequency
     buyIn
     rake
-    totalRake
-    profitLoss
     startingStack
     hasGuarantee
     guaranteeAmount
+    prizepool
+    totalEntries
+    totalRebuys
+    totalAddons
+    revenueByBuyIns
+    totalRake
+    profitLoss
     guaranteeOverlay
     guaranteeSurplus
     playersRemaining
     totalChipsInPlay
     averagePlayerStack
-    tournamentStructureId
-    cashStructureId
+    tournamentType
+    isRegular
+    isSeries
+    isSatellite
+    seriesName
+    gameTags
+    sourceUrl
+    doNotScrape
+    sourceDataIssue
+    gameDataVerified
+    venueId
     venue {
       id
       venueNumber
@@ -165,13 +160,13 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
       country
       details {
         id
-        venueId
         startDate
         status
         lastCustomerSuccessVisit
         totalGamesHeld
         averagePlayersPerGame
         gameNights
+        venueId
         venue {
           id
           venueNumber
@@ -182,13 +177,13 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -276,40 +271,37 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -326,6 +318,29 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -337,6 +352,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -357,29 +373,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             startedAt
             __typename
           }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -394,9 +387,9 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
       series {
         items {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -404,11 +397,11 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -452,13 +445,12 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
       playerMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -466,22 +458,23 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -517,546 +510,12 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
       venueDetailsId
       __typename
     }
-    tournamentStructure {
-      id
-      name
-      description
-      levels {
-        levelNumber
-        durationMinutes
-        smallBlind
-        bigBlind
-        ante
-        breakMinutes
-        __typename
-      }
-      games {
-        items {
-          id
-          name
-          gameType
-          gameVariant
-          gameStatus
-          gameStartDateTime
-          gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
-          registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
-          totalDuration
-          gameTags
-          tournamentType
-          buyIn
-          rake
-          totalRake
-          profitLoss
-          startingStack
-          hasGuarantee
-          guaranteeAmount
-          guaranteeOverlay
-          guaranteeSurplus
-          playersRemaining
-          totalChipsInPlay
-          averagePlayerStack
-          tournamentStructureId
-          cashStructureId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          tournamentStructure {
-            id
-            name
-            description
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          cashStructure {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
-            __typename
-          }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    cashStructure {
-      id
-      name
-      smallBlind
-      bigBlind
-      minBuyIn
-      maxBuyIn
-      rakeStructureId
-      rakeStructure {
-        id
-        name
-        rakePercentage
-        maxRake
-        cashStructures {
-          items {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      games {
-        items {
-          id
-          name
-          gameType
-          gameVariant
-          gameStatus
-          gameStartDateTime
-          gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
-          registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
-          totalDuration
-          gameTags
-          tournamentType
-          buyIn
-          rake
-          totalRake
-          profitLoss
-          startingStack
-          hasGuarantee
-          guaranteeAmount
-          guaranteeOverlay
-          guaranteeSurplus
-          playersRemaining
-          totalChipsInPlay
-          averagePlayerStack
-          tournamentStructureId
-          cashStructureId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          tournamentStructure {
-            id
-            name
-            description
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          cashStructure {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
-            __typename
-          }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    playerResults {
-      items {
-        id
-        playerId
-        gameId
-        finishingPlace
-        isMultiDayQualification
-        prizeWon
-        amountWon
-        totalRunners
-        game {
-          id
-          name
-          gameType
-          gameVariant
-          gameStatus
-          gameStartDateTime
-          gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
-          registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
-          totalDuration
-          gameTags
-          tournamentType
-          buyIn
-          rake
-          totalRake
-          profitLoss
-          startingStack
-          hasGuarantee
-          guaranteeAmount
-          guaranteeOverlay
-          guaranteeSurplus
-          playersRemaining
-          totalChipsInPlay
-          averagePlayerStack
-          tournamentStructureId
-          cashStructureId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          tournamentStructure {
-            id
-            name
-            description
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          cashStructure {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
-            __typename
-          }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      nextToken
-      startedAt
-      __typename
-    }
     tournamentSeriesId
     tournamentSeries {
       id
-      year
       name
-      aliases
+      year
+      status
       startDate
       endDate
       events
@@ -1064,17 +523,17 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
       guaranteedPrizepool
       estimatedPrizepool
       actualPrizepool
-      status
       tournamentSeriesTitleId
       title {
         id
         title
+        aliases
         seriesInstances {
           items {
             id
-            year
             name
-            aliases
+            year
+            status
             startDate
             endDate
             events
@@ -1082,7 +541,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             guaranteedPrizepool
             estimatedPrizepool
             actualPrizepool
-            status
             tournamentSeriesTitleId
             venueId
             createdAt
@@ -1114,13 +572,13 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
         country
         details {
           id
-          venueId
           startDate
           status
           lastCustomerSuccessVisit
           totalGamesHeld
           averagePlayersPerGame
           gameNights
+          venueId
           venue {
             id
             venueNumber
@@ -1173,41 +631,40 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
@@ -1222,9 +679,9 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
         series {
           items {
             id
-            year
             name
-            aliases
+            year
+            status
             startDate
             endDate
             events
@@ -1232,7 +689,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             guaranteedPrizepool
             estimatedPrizepool
             actualPrizepool
-            status
             tournamentSeriesTitleId
             venueId
             createdAt
@@ -1249,13 +705,13 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
         playerMemberships {
           items {
             id
-            playerId
-            venueId
             totalGamesPlayed
             averageBuyIn
             firstPlayedDate
             lastPlayedDate
             targetingClassification
+            playerId
+            venueId
             createdAt
             updatedAt
             _version
@@ -1284,40 +740,37 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -1334,6 +787,29 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -1345,6 +821,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -1365,12 +842,100 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             startedAt
             __typename
           }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    tournamentStructureId
+    tournamentStructure {
+      id
+      name
+      description
+      levels {
+        levelNumber
+        durationMinutes
+        smallBlind
+        bigBlind
+        ante
+        breakMinutes
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
           tournamentSeriesId
           tournamentSeries {
             id
-            year
             name
-            aliases
+            year
+            status
             startDate
             endDate
             events
@@ -1378,7 +943,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             guaranteedPrizepool
             estimatedPrizepool
             actualPrizepool
-            status
             tournamentSeriesTitleId
             venueId
             createdAt
@@ -1386,6 +950,39 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructureId
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
             __typename
           }
           createdAt
@@ -1406,6 +1003,393 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
       _lastChangedAt
       __typename
     }
+    cashStructureId
+    cashStructure {
+      id
+      name
+      smallBlind
+      bigBlind
+      minBuyIn
+      maxBuyIn
+      rakeStructureId
+      rakeStructure {
+        id
+        name
+        rakePercentage
+        maxRake
+        cashStructures {
+          items {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructureId
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    playerResults {
+      items {
+        id
+        finishingPlace
+        isMultiDayQualification
+        prizeWon
+        amountWon
+        totalRunners
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        gameId
+        game {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructureId
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -1417,75 +1401,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
 ` as GeneratedMutation<
   APITypes.SaveTournamentDataMutationVariables,
   APITypes.SaveTournamentDataMutation
->;
-export const createDataSync = /* GraphQL */ `mutation CreateDataSync(
-  $input: CreateDataSyncInput!
-  $condition: ModelDataSyncConditionInput
-) {
-  createDataSync(input: $input, condition: $condition) {
-    id
-    syncedAt
-    method
-    sourceUrl
-    title
-    content
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreateDataSyncMutationVariables,
-  APITypes.CreateDataSyncMutation
->;
-export const updateDataSync = /* GraphQL */ `mutation UpdateDataSync(
-  $input: UpdateDataSyncInput!
-  $condition: ModelDataSyncConditionInput
-) {
-  updateDataSync(input: $input, condition: $condition) {
-    id
-    syncedAt
-    method
-    sourceUrl
-    title
-    content
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdateDataSyncMutationVariables,
-  APITypes.UpdateDataSyncMutation
->;
-export const deleteDataSync = /* GraphQL */ `mutation DeleteDataSync(
-  $input: DeleteDataSyncInput!
-  $condition: ModelDataSyncConditionInput
-) {
-  deleteDataSync(input: $input, condition: $condition) {
-    id
-    syncedAt
-    method
-    sourceUrl
-    title
-    content
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteDataSyncMutationVariables,
-  APITypes.DeleteDataSyncMutation
 >;
 export const createScrapeStructure = /* GraphQL */ `mutation CreateScrapeStructure(
   $input: CreateScrapeStructureInput!
@@ -1559,380 +1474,17 @@ export const deleteScrapeStructure = /* GraphQL */ `mutation DeleteScrapeStructu
   APITypes.DeleteScrapeStructureMutationVariables,
   APITypes.DeleteScrapeStructureMutation
 >;
-export const createAsset = /* GraphQL */ `mutation CreateAsset(
-  $input: CreateAssetInput!
-  $condition: ModelAssetConditionInput
+export const createDataSync = /* GraphQL */ `mutation CreateDataSync(
+  $input: CreateDataSyncInput!
+  $condition: ModelDataSyncConditionInput
 ) {
-  createAsset(input: $input, condition: $condition) {
+  createDataSync(input: $input, condition: $condition) {
     id
-    name
-    type
-    condition
-    acquiredDate
-    lastCheckedDate
-    venueId
-    venue {
-      id
-      venueNumber
-      name
-      aliases
-      address
-      city
-      country
-      details {
-        id
-        venueId
-        startDate
-        status
-        lastCustomerSuccessVisit
-        totalGamesHeld
-        averagePlayersPerGame
-        gameNights
-        venue {
-          id
-          venueNumber
-          name
-          aliases
-          address
-          city
-          country
-          details {
-            id
-            venueId
-            startDate
-            status
-            lastCustomerSuccessVisit
-            totalGamesHeld
-            averagePlayersPerGame
-            gameNights
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          assets {
-            nextToken
-            startedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          series {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          venueDetailsId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      assets {
-        items {
-          id
-          name
-          type
-          condition
-          acquiredDate
-          lastCheckedDate
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      games {
-        items {
-          id
-          name
-          gameType
-          gameVariant
-          gameStatus
-          gameStartDateTime
-          gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
-          registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
-          totalDuration
-          gameTags
-          tournamentType
-          buyIn
-          rake
-          totalRake
-          profitLoss
-          startingStack
-          hasGuarantee
-          guaranteeAmount
-          guaranteeOverlay
-          guaranteeSurplus
-          playersRemaining
-          totalChipsInPlay
-          averagePlayerStack
-          tournamentStructureId
-          cashStructureId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          tournamentStructure {
-            id
-            name
-            description
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          cashStructure {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
-            __typename
-          }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      series {
-        items {
-          id
-          year
-          name
-          aliases
-          startDate
-          endDate
-          events
-          numberOfEvents
-          guaranteedPrizepool
-          estimatedPrizepool
-          actualPrizepool
-          status
-          tournamentSeriesTitleId
-          title {
-            id
-            title
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      playerMemberships {
-        items {
-          id
-          playerId
-          venueId
-          totalGamesPlayed
-          averageBuyIn
-          firstPlayedDate
-          lastPlayedDate
-          targetingClassification
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      venueDetailsId
-      __typename
-    }
+    syncedAt
+    method
+    sourceUrl
+    title
+    content
     createdAt
     updatedAt
     _version
@@ -1942,383 +1494,20 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
   }
 }
 ` as GeneratedMutation<
-  APITypes.CreateAssetMutationVariables,
-  APITypes.CreateAssetMutation
+  APITypes.CreateDataSyncMutationVariables,
+  APITypes.CreateDataSyncMutation
 >;
-export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
-  $input: UpdateAssetInput!
-  $condition: ModelAssetConditionInput
+export const updateDataSync = /* GraphQL */ `mutation UpdateDataSync(
+  $input: UpdateDataSyncInput!
+  $condition: ModelDataSyncConditionInput
 ) {
-  updateAsset(input: $input, condition: $condition) {
+  updateDataSync(input: $input, condition: $condition) {
     id
-    name
-    type
-    condition
-    acquiredDate
-    lastCheckedDate
-    venueId
-    venue {
-      id
-      venueNumber
-      name
-      aliases
-      address
-      city
-      country
-      details {
-        id
-        venueId
-        startDate
-        status
-        lastCustomerSuccessVisit
-        totalGamesHeld
-        averagePlayersPerGame
-        gameNights
-        venue {
-          id
-          venueNumber
-          name
-          aliases
-          address
-          city
-          country
-          details {
-            id
-            venueId
-            startDate
-            status
-            lastCustomerSuccessVisit
-            totalGamesHeld
-            averagePlayersPerGame
-            gameNights
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          assets {
-            nextToken
-            startedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          series {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          venueDetailsId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      assets {
-        items {
-          id
-          name
-          type
-          condition
-          acquiredDate
-          lastCheckedDate
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      games {
-        items {
-          id
-          name
-          gameType
-          gameVariant
-          gameStatus
-          gameStartDateTime
-          gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
-          registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
-          totalDuration
-          gameTags
-          tournamentType
-          buyIn
-          rake
-          totalRake
-          profitLoss
-          startingStack
-          hasGuarantee
-          guaranteeAmount
-          guaranteeOverlay
-          guaranteeSurplus
-          playersRemaining
-          totalChipsInPlay
-          averagePlayerStack
-          tournamentStructureId
-          cashStructureId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          tournamentStructure {
-            id
-            name
-            description
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          cashStructure {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
-            __typename
-          }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      series {
-        items {
-          id
-          year
-          name
-          aliases
-          startDate
-          endDate
-          events
-          numberOfEvents
-          guaranteedPrizepool
-          estimatedPrizepool
-          actualPrizepool
-          status
-          tournamentSeriesTitleId
-          title {
-            id
-            title
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      playerMemberships {
-        items {
-          id
-          playerId
-          venueId
-          totalGamesPlayed
-          averageBuyIn
-          firstPlayedDate
-          lastPlayedDate
-          targetingClassification
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      venueDetailsId
-      __typename
-    }
+    syncedAt
+    method
+    sourceUrl
+    title
+    content
     createdAt
     updatedAt
     _version
@@ -2328,383 +1517,20 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
   }
 }
 ` as GeneratedMutation<
-  APITypes.UpdateAssetMutationVariables,
-  APITypes.UpdateAssetMutation
+  APITypes.UpdateDataSyncMutationVariables,
+  APITypes.UpdateDataSyncMutation
 >;
-export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
-  $input: DeleteAssetInput!
-  $condition: ModelAssetConditionInput
+export const deleteDataSync = /* GraphQL */ `mutation DeleteDataSync(
+  $input: DeleteDataSyncInput!
+  $condition: ModelDataSyncConditionInput
 ) {
-  deleteAsset(input: $input, condition: $condition) {
+  deleteDataSync(input: $input, condition: $condition) {
     id
-    name
-    type
-    condition
-    acquiredDate
-    lastCheckedDate
-    venueId
-    venue {
-      id
-      venueNumber
-      name
-      aliases
-      address
-      city
-      country
-      details {
-        id
-        venueId
-        startDate
-        status
-        lastCustomerSuccessVisit
-        totalGamesHeld
-        averagePlayersPerGame
-        gameNights
-        venue {
-          id
-          venueNumber
-          name
-          aliases
-          address
-          city
-          country
-          details {
-            id
-            venueId
-            startDate
-            status
-            lastCustomerSuccessVisit
-            totalGamesHeld
-            averagePlayersPerGame
-            gameNights
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          assets {
-            nextToken
-            startedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          series {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          venueDetailsId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      assets {
-        items {
-          id
-          name
-          type
-          condition
-          acquiredDate
-          lastCheckedDate
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      games {
-        items {
-          id
-          name
-          gameType
-          gameVariant
-          gameStatus
-          gameStartDateTime
-          gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
-          registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
-          totalDuration
-          gameTags
-          tournamentType
-          buyIn
-          rake
-          totalRake
-          profitLoss
-          startingStack
-          hasGuarantee
-          guaranteeAmount
-          guaranteeOverlay
-          guaranteeSurplus
-          playersRemaining
-          totalChipsInPlay
-          averagePlayerStack
-          tournamentStructureId
-          cashStructureId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          tournamentStructure {
-            id
-            name
-            description
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          cashStructure {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
-            __typename
-          }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      series {
-        items {
-          id
-          year
-          name
-          aliases
-          startDate
-          endDate
-          events
-          numberOfEvents
-          guaranteedPrizepool
-          estimatedPrizepool
-          actualPrizepool
-          status
-          tournamentSeriesTitleId
-          title {
-            id
-            title
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      playerMemberships {
-        items {
-          id
-          playerId
-          venueId
-          totalGamesPlayed
-          averageBuyIn
-          firstPlayedDate
-          lastPlayedDate
-          targetingClassification
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      venueDetailsId
-      __typename
-    }
+    syncedAt
+    method
+    sourceUrl
+    title
+    content
     createdAt
     updatedAt
     _version
@@ -2714,8 +1540,8 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
   }
 }
 ` as GeneratedMutation<
-  APITypes.DeleteAssetMutationVariables,
-  APITypes.DeleteAssetMutation
+  APITypes.DeleteDataSyncMutationVariables,
+  APITypes.DeleteDataSyncMutation
 >;
 export const createVenue = /* GraphQL */ `mutation CreateVenue(
   $input: CreateVenueInput!
@@ -2731,13 +1557,13 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
     country
     details {
       id
-      venueId
       startDate
       status
       lastCustomerSuccessVisit
       totalGamesHeld
       averagePlayersPerGame
       gameNights
+      venueId
       venue {
         id
         venueNumber
@@ -2748,13 +1574,13 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
         country
         details {
           id
-          venueId
           startDate
           status
           lastCustomerSuccessVisit
           totalGamesHeld
           averagePlayersPerGame
           gameNights
+          venueId
           venue {
             id
             venueNumber
@@ -2807,41 +1633,40 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
@@ -2856,9 +1681,9 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
         series {
           items {
             id
-            year
             name
-            aliases
+            year
+            status
             startDate
             endDate
             events
@@ -2866,7 +1691,6 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             guaranteedPrizepool
             estimatedPrizepool
             actualPrizepool
-            status
             tournamentSeriesTitleId
             venueId
             createdAt
@@ -2883,13 +1707,13 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
         playerMemberships {
           items {
             id
-            playerId
-            venueId
             totalGamesPlayed
             averageBuyIn
             firstPlayedDate
             lastPlayedDate
             targetingClassification
+            playerId
+            venueId
             createdAt
             updatedAt
             _version
@@ -2935,13 +1759,13 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -2997,40 +1821,37 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
         gameStatus
         gameStartDateTime
         gameEndDateTime
-        venueId
-        sourceUrl
-        doNotScrape
-        sourceDataIssue
-        gameDataVerified
-        seriesName
-        isRegular
-        isSeries
-        isRecurring
-        gameFrequency
-        isSatellite
         registrationStatus
-        prizepool
-        revenueByBuyIns
-        totalEntries
-        totalRebuys
-        totalAddons
         totalDuration
-        gameTags
-        tournamentType
+        gameFrequency
         buyIn
         rake
-        totalRake
-        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
+        prizepool
+        totalEntries
+        totalRebuys
+        totalAddons
+        revenueByBuyIns
+        totalRake
+        profitLoss
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
         totalChipsInPlay
         averagePlayerStack
-        tournamentStructureId
-        cashStructureId
+        tournamentType
+        isRegular
+        isSeries
+        isSatellite
+        seriesName
+        gameTags
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        gameDataVerified
+        venueId
         venue {
           id
           venueNumber
@@ -3041,13 +1862,13 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -3083,90 +1904,12 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           venueDetailsId
           __typename
         }
-        tournamentStructure {
-          id
-          name
-          description
-          levels {
-            levelNumber
-            durationMinutes
-            smallBlind
-            bigBlind
-            ante
-            breakMinutes
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        cashStructure {
-          id
-          name
-          smallBlind
-          bigBlind
-          minBuyIn
-          maxBuyIn
-          rakeStructureId
-          rakeStructure {
-            id
-            name
-            rakePercentage
-            maxRake
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        playerResults {
-          items {
-            id
-            playerId
-            gameId
-            finishingPlace
-            isMultiDayQualification
-            prizeWon
-            amountWon
-            totalRunners
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
         tournamentSeriesId
         tournamentSeries {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -3174,11 +1917,11 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -3215,6 +1958,86 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           _lastChangedAt
           __typename
         }
+        tournamentStructureId
+        tournamentStructure {
+          id
+          name
+          description
+          levels {
+            levelNumber
+            durationMinutes
+            smallBlind
+            bigBlind
+            ante
+            breakMinutes
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        cashStructureId
+        cashStructure {
+          id
+          name
+          smallBlind
+          bigBlind
+          minBuyIn
+          maxBuyIn
+          rakeStructureId
+          rakeStructure {
+            id
+            name
+            rakePercentage
+            maxRake
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        playerResults {
+          items {
+            id
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -3229,9 +2052,9 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
     series {
       items {
         id
-        year
         name
-        aliases
+        year
+        status
         startDate
         endDate
         events
@@ -3239,11 +2062,11 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
         guaranteedPrizepool
         estimatedPrizepool
         actualPrizepool
-        status
         tournamentSeriesTitleId
         title {
           id
           title
+          aliases
           seriesInstances {
             nextToken
             startedAt
@@ -3267,13 +2090,13 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -3318,41 +2141,40 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
@@ -3378,13 +2200,12 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
     playerMemberships {
       items {
         id
-        playerId
-        venueId
         totalGamesPlayed
         averageBuyIn
         firstPlayedDate
         lastPlayedDate
         targetingClassification
+        playerId
         player {
           id
           firstName
@@ -3392,13 +2213,37 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -3414,40 +2259,16 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -3460,10 +2281,11 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
+        venueId
         venue {
           id
           venueNumber
@@ -3474,13 +2296,13 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -3554,13 +2376,13 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
     country
     details {
       id
-      venueId
       startDate
       status
       lastCustomerSuccessVisit
       totalGamesHeld
       averagePlayersPerGame
       gameNights
+      venueId
       venue {
         id
         venueNumber
@@ -3571,13 +2393,13 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
         country
         details {
           id
-          venueId
           startDate
           status
           lastCustomerSuccessVisit
           totalGamesHeld
           averagePlayersPerGame
           gameNights
+          venueId
           venue {
             id
             venueNumber
@@ -3630,41 +2452,40 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
@@ -3679,9 +2500,9 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
         series {
           items {
             id
-            year
             name
-            aliases
+            year
+            status
             startDate
             endDate
             events
@@ -3689,7 +2510,6 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             guaranteedPrizepool
             estimatedPrizepool
             actualPrizepool
-            status
             tournamentSeriesTitleId
             venueId
             createdAt
@@ -3706,13 +2526,13 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
         playerMemberships {
           items {
             id
-            playerId
-            venueId
             totalGamesPlayed
             averageBuyIn
             firstPlayedDate
             lastPlayedDate
             targetingClassification
+            playerId
+            venueId
             createdAt
             updatedAt
             _version
@@ -3758,13 +2578,13 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -3820,40 +2640,37 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
         gameStatus
         gameStartDateTime
         gameEndDateTime
-        venueId
-        sourceUrl
-        doNotScrape
-        sourceDataIssue
-        gameDataVerified
-        seriesName
-        isRegular
-        isSeries
-        isRecurring
-        gameFrequency
-        isSatellite
         registrationStatus
-        prizepool
-        revenueByBuyIns
-        totalEntries
-        totalRebuys
-        totalAddons
         totalDuration
-        gameTags
-        tournamentType
+        gameFrequency
         buyIn
         rake
-        totalRake
-        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
+        prizepool
+        totalEntries
+        totalRebuys
+        totalAddons
+        revenueByBuyIns
+        totalRake
+        profitLoss
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
         totalChipsInPlay
         averagePlayerStack
-        tournamentStructureId
-        cashStructureId
+        tournamentType
+        isRegular
+        isSeries
+        isSatellite
+        seriesName
+        gameTags
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        gameDataVerified
+        venueId
         venue {
           id
           venueNumber
@@ -3864,13 +2681,13 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -3906,90 +2723,12 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           venueDetailsId
           __typename
         }
-        tournamentStructure {
-          id
-          name
-          description
-          levels {
-            levelNumber
-            durationMinutes
-            smallBlind
-            bigBlind
-            ante
-            breakMinutes
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        cashStructure {
-          id
-          name
-          smallBlind
-          bigBlind
-          minBuyIn
-          maxBuyIn
-          rakeStructureId
-          rakeStructure {
-            id
-            name
-            rakePercentage
-            maxRake
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        playerResults {
-          items {
-            id
-            playerId
-            gameId
-            finishingPlace
-            isMultiDayQualification
-            prizeWon
-            amountWon
-            totalRunners
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
         tournamentSeriesId
         tournamentSeries {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -3997,11 +2736,11 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -4038,6 +2777,86 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           _lastChangedAt
           __typename
         }
+        tournamentStructureId
+        tournamentStructure {
+          id
+          name
+          description
+          levels {
+            levelNumber
+            durationMinutes
+            smallBlind
+            bigBlind
+            ante
+            breakMinutes
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        cashStructureId
+        cashStructure {
+          id
+          name
+          smallBlind
+          bigBlind
+          minBuyIn
+          maxBuyIn
+          rakeStructureId
+          rakeStructure {
+            id
+            name
+            rakePercentage
+            maxRake
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        playerResults {
+          items {
+            id
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -4052,9 +2871,9 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
     series {
       items {
         id
-        year
         name
-        aliases
+        year
+        status
         startDate
         endDate
         events
@@ -4062,11 +2881,11 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
         guaranteedPrizepool
         estimatedPrizepool
         actualPrizepool
-        status
         tournamentSeriesTitleId
         title {
           id
           title
+          aliases
           seriesInstances {
             nextToken
             startedAt
@@ -4090,13 +2909,13 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -4141,41 +2960,40 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
@@ -4201,13 +3019,12 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
     playerMemberships {
       items {
         id
-        playerId
-        venueId
         totalGamesPlayed
         averageBuyIn
         firstPlayedDate
         lastPlayedDate
         targetingClassification
+        playerId
         player {
           id
           firstName
@@ -4215,13 +3032,37 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -4237,40 +3078,16 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -4283,10 +3100,11 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
+        venueId
         venue {
           id
           venueNumber
@@ -4297,13 +3115,13 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -4377,13 +3195,13 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
     country
     details {
       id
-      venueId
       startDate
       status
       lastCustomerSuccessVisit
       totalGamesHeld
       averagePlayersPerGame
       gameNights
+      venueId
       venue {
         id
         venueNumber
@@ -4394,13 +3212,13 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
         country
         details {
           id
-          venueId
           startDate
           status
           lastCustomerSuccessVisit
           totalGamesHeld
           averagePlayersPerGame
           gameNights
+          venueId
           venue {
             id
             venueNumber
@@ -4453,41 +3271,40 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
@@ -4502,9 +3319,9 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
         series {
           items {
             id
-            year
             name
-            aliases
+            year
+            status
             startDate
             endDate
             events
@@ -4512,7 +3329,6 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             guaranteedPrizepool
             estimatedPrizepool
             actualPrizepool
-            status
             tournamentSeriesTitleId
             venueId
             createdAt
@@ -4529,13 +3345,13 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
         playerMemberships {
           items {
             id
-            playerId
-            venueId
             totalGamesPlayed
             averageBuyIn
             firstPlayedDate
             lastPlayedDate
             targetingClassification
+            playerId
+            venueId
             createdAt
             updatedAt
             _version
@@ -4581,13 +3397,13 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -4643,40 +3459,37 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
         gameStatus
         gameStartDateTime
         gameEndDateTime
-        venueId
-        sourceUrl
-        doNotScrape
-        sourceDataIssue
-        gameDataVerified
-        seriesName
-        isRegular
-        isSeries
-        isRecurring
-        gameFrequency
-        isSatellite
         registrationStatus
-        prizepool
-        revenueByBuyIns
-        totalEntries
-        totalRebuys
-        totalAddons
         totalDuration
-        gameTags
-        tournamentType
+        gameFrequency
         buyIn
         rake
-        totalRake
-        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
+        prizepool
+        totalEntries
+        totalRebuys
+        totalAddons
+        revenueByBuyIns
+        totalRake
+        profitLoss
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
         totalChipsInPlay
         averagePlayerStack
-        tournamentStructureId
-        cashStructureId
+        tournamentType
+        isRegular
+        isSeries
+        isSatellite
+        seriesName
+        gameTags
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        gameDataVerified
+        venueId
         venue {
           id
           venueNumber
@@ -4687,13 +3500,13 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -4729,90 +3542,12 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           venueDetailsId
           __typename
         }
-        tournamentStructure {
-          id
-          name
-          description
-          levels {
-            levelNumber
-            durationMinutes
-            smallBlind
-            bigBlind
-            ante
-            breakMinutes
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        cashStructure {
-          id
-          name
-          smallBlind
-          bigBlind
-          minBuyIn
-          maxBuyIn
-          rakeStructureId
-          rakeStructure {
-            id
-            name
-            rakePercentage
-            maxRake
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        playerResults {
-          items {
-            id
-            playerId
-            gameId
-            finishingPlace
-            isMultiDayQualification
-            prizeWon
-            amountWon
-            totalRunners
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
         tournamentSeriesId
         tournamentSeries {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -4820,11 +3555,11 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -4861,6 +3596,86 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           _lastChangedAt
           __typename
         }
+        tournamentStructureId
+        tournamentStructure {
+          id
+          name
+          description
+          levels {
+            levelNumber
+            durationMinutes
+            smallBlind
+            bigBlind
+            ante
+            breakMinutes
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        cashStructureId
+        cashStructure {
+          id
+          name
+          smallBlind
+          bigBlind
+          minBuyIn
+          maxBuyIn
+          rakeStructureId
+          rakeStructure {
+            id
+            name
+            rakePercentage
+            maxRake
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        playerResults {
+          items {
+            id
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -4875,9 +3690,9 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
     series {
       items {
         id
-        year
         name
-        aliases
+        year
+        status
         startDate
         endDate
         events
@@ -4885,11 +3700,11 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
         guaranteedPrizepool
         estimatedPrizepool
         actualPrizepool
-        status
         tournamentSeriesTitleId
         title {
           id
           title
+          aliases
           seriesInstances {
             nextToken
             startedAt
@@ -4913,13 +3728,13 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -4964,41 +3779,40 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
@@ -5024,13 +3838,12 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
     playerMemberships {
       items {
         id
-        playerId
-        venueId
         totalGamesPlayed
         averageBuyIn
         firstPlayedDate
         lastPlayedDate
         targetingClassification
+        playerId
         player {
           id
           firstName
@@ -5038,13 +3851,37 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -5060,40 +3897,16 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -5106,10 +3919,11 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
+        venueId
         venue {
           id
           venueNumber
@@ -5120,13 +3934,13 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -5192,13 +4006,13 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
 ) {
   createVenueDetails(input: $input, condition: $condition) {
     id
-    venueId
     startDate
     status
     lastCustomerSuccessVisit
     totalGamesHeld
     averagePlayersPerGame
     gameNights
+    venueId
     venue {
       id
       venueNumber
@@ -5209,13 +4023,13 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
       country
       details {
         id
-        venueId
         startDate
         status
         lastCustomerSuccessVisit
         totalGamesHeld
         averagePlayersPerGame
         gameNights
+        venueId
         venue {
           id
           venueNumber
@@ -5226,13 +4040,13 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -5320,40 +4134,37 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -5370,6 +4181,29 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -5381,6 +4215,7 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -5401,29 +4236,6 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
             startedAt
             __typename
           }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -5438,9 +4250,9 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
       series {
         items {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -5448,11 +4260,11 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -5496,13 +4308,12 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
       playerMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -5510,22 +4321,23 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -5579,13 +4391,13 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
 ) {
   updateVenueDetails(input: $input, condition: $condition) {
     id
-    venueId
     startDate
     status
     lastCustomerSuccessVisit
     totalGamesHeld
     averagePlayersPerGame
     gameNights
+    venueId
     venue {
       id
       venueNumber
@@ -5596,13 +4408,13 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
       country
       details {
         id
-        venueId
         startDate
         status
         lastCustomerSuccessVisit
         totalGamesHeld
         averagePlayersPerGame
         gameNights
+        venueId
         venue {
           id
           venueNumber
@@ -5613,13 +4425,13 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -5707,40 +4519,37 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -5757,6 +4566,29 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -5768,6 +4600,7 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -5788,29 +4621,6 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
             startedAt
             __typename
           }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -5825,9 +4635,9 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
       series {
         items {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -5835,11 +4645,11 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -5883,13 +4693,12 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
       playerMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -5897,22 +4706,23 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -5966,13 +4776,13 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
 ) {
   deleteVenueDetails(input: $input, condition: $condition) {
     id
-    venueId
     startDate
     status
     lastCustomerSuccessVisit
     totalGamesHeld
     averagePlayersPerGame
     gameNights
+    venueId
     venue {
       id
       venueNumber
@@ -5983,13 +4793,13 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
       country
       details {
         id
-        venueId
         startDate
         status
         lastCustomerSuccessVisit
         totalGamesHeld
         averagePlayersPerGame
         gameNights
+        venueId
         venue {
           id
           venueNumber
@@ -6000,13 +4810,13 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -6094,40 +4904,37 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -6144,6 +4951,29 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -6155,6 +4985,7 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -6175,29 +5006,6 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
             startedAt
             __typename
           }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -6212,9 +5020,9 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
       series {
         items {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -6222,11 +5030,11 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -6270,13 +5078,12 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
       playerMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -6284,22 +5091,23 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -6354,12 +5162,13 @@ export const createTournamentSeriesTitle = /* GraphQL */ `mutation CreateTournam
   createTournamentSeriesTitle(input: $input, condition: $condition) {
     id
     title
+    aliases
     seriesInstances {
       items {
         id
-        year
         name
-        aliases
+        year
+        status
         startDate
         endDate
         events
@@ -6367,11 +5176,11 @@ export const createTournamentSeriesTitle = /* GraphQL */ `mutation CreateTournam
         guaranteedPrizepool
         estimatedPrizepool
         actualPrizepool
-        status
         tournamentSeriesTitleId
         title {
           id
           title
+          aliases
           seriesInstances {
             nextToken
             startedAt
@@ -6395,13 +5204,13 @@ export const createTournamentSeriesTitle = /* GraphQL */ `mutation CreateTournam
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -6446,41 +5255,40 @@ export const createTournamentSeriesTitle = /* GraphQL */ `mutation CreateTournam
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
@@ -6522,12 +5330,13 @@ export const updateTournamentSeriesTitle = /* GraphQL */ `mutation UpdateTournam
   updateTournamentSeriesTitle(input: $input, condition: $condition) {
     id
     title
+    aliases
     seriesInstances {
       items {
         id
-        year
         name
-        aliases
+        year
+        status
         startDate
         endDate
         events
@@ -6535,11 +5344,11 @@ export const updateTournamentSeriesTitle = /* GraphQL */ `mutation UpdateTournam
         guaranteedPrizepool
         estimatedPrizepool
         actualPrizepool
-        status
         tournamentSeriesTitleId
         title {
           id
           title
+          aliases
           seriesInstances {
             nextToken
             startedAt
@@ -6563,13 +5372,13 @@ export const updateTournamentSeriesTitle = /* GraphQL */ `mutation UpdateTournam
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -6614,41 +5423,40 @@ export const updateTournamentSeriesTitle = /* GraphQL */ `mutation UpdateTournam
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
@@ -6690,12 +5498,13 @@ export const deleteTournamentSeriesTitle = /* GraphQL */ `mutation DeleteTournam
   deleteTournamentSeriesTitle(input: $input, condition: $condition) {
     id
     title
+    aliases
     seriesInstances {
       items {
         id
-        year
         name
-        aliases
+        year
+        status
         startDate
         endDate
         events
@@ -6703,11 +5512,11 @@ export const deleteTournamentSeriesTitle = /* GraphQL */ `mutation DeleteTournam
         guaranteedPrizepool
         estimatedPrizepool
         actualPrizepool
-        status
         tournamentSeriesTitleId
         title {
           id
           title
+          aliases
           seriesInstances {
             nextToken
             startedAt
@@ -6731,13 +5540,13 @@ export const deleteTournamentSeriesTitle = /* GraphQL */ `mutation DeleteTournam
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -6782,41 +5591,40 @@ export const deleteTournamentSeriesTitle = /* GraphQL */ `mutation DeleteTournam
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
@@ -6857,9 +5665,9 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
 ) {
   createTournamentSeries(input: $input, condition: $condition) {
     id
-    year
     name
-    aliases
+    year
+    status
     startDate
     endDate
     events
@@ -6867,17 +5675,17 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
     guaranteedPrizepool
     estimatedPrizepool
     actualPrizepool
-    status
     tournamentSeriesTitleId
     title {
       id
       title
+      aliases
       seriesInstances {
         items {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -6885,11 +5693,11 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -6948,13 +5756,13 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
       country
       details {
         id
-        venueId
         startDate
         status
         lastCustomerSuccessVisit
         totalGamesHeld
         averagePlayersPerGame
         gameNights
+        venueId
         venue {
           id
           venueNumber
@@ -6965,13 +5773,13 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -7059,40 +5867,37 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -7109,6 +5914,29 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -7120,6 +5948,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -7140,29 +5969,6 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             startedAt
             __typename
           }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -7177,9 +5983,9 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
       series {
         items {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -7187,11 +5993,11 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -7235,13 +6041,12 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
       playerMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -7249,22 +6054,23 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -7309,40 +6115,37 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
         gameStatus
         gameStartDateTime
         gameEndDateTime
-        venueId
-        sourceUrl
-        doNotScrape
-        sourceDataIssue
-        gameDataVerified
-        seriesName
-        isRegular
-        isSeries
-        isRecurring
-        gameFrequency
-        isSatellite
         registrationStatus
-        prizepool
-        revenueByBuyIns
-        totalEntries
-        totalRebuys
-        totalAddons
         totalDuration
-        gameTags
-        tournamentType
+        gameFrequency
         buyIn
         rake
-        totalRake
-        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
+        prizepool
+        totalEntries
+        totalRebuys
+        totalAddons
+        revenueByBuyIns
+        totalRake
+        profitLoss
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
         totalChipsInPlay
         averagePlayerStack
-        tournamentStructureId
-        cashStructureId
+        tournamentType
+        isRegular
+        isSeries
+        isSatellite
+        seriesName
+        gameTags
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        gameDataVerified
+        venueId
         venue {
           id
           venueNumber
@@ -7353,13 +6156,13 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -7395,6 +6198,61 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
           venueDetailsId
           __typename
         }
+        tournamentSeriesId
+        tournamentSeries {
+          id
+          name
+          year
+          status
+          startDate
+          endDate
+          events
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        tournamentStructureId
         tournamentStructure {
           id
           name
@@ -7420,6 +6278,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
           _lastChangedAt
           __typename
         }
+        cashStructureId
         cashStructure {
           id
           name
@@ -7455,13 +6314,13 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
         playerResults {
           items {
             id
-            playerId
-            gameId
             finishingPlace
             isMultiDayQualification
             prizeWon
             amountWon
             totalRunners
+            playerId
+            gameId
             createdAt
             updatedAt
             _version
@@ -7471,60 +6330,6 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
           }
           nextToken
           startedAt
-          __typename
-        }
-        tournamentSeriesId
-        tournamentSeries {
-          id
-          year
-          name
-          aliases
-          startDate
-          endDate
-          events
-          numberOfEvents
-          guaranteedPrizepool
-          estimatedPrizepool
-          actualPrizepool
-          status
-          tournamentSeriesTitleId
-          title {
-            id
-            title
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
           __typename
         }
         createdAt
@@ -7556,9 +6361,9 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
 ) {
   updateTournamentSeries(input: $input, condition: $condition) {
     id
-    year
     name
-    aliases
+    year
+    status
     startDate
     endDate
     events
@@ -7566,17 +6371,17 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
     guaranteedPrizepool
     estimatedPrizepool
     actualPrizepool
-    status
     tournamentSeriesTitleId
     title {
       id
       title
+      aliases
       seriesInstances {
         items {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -7584,11 +6389,11 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -7647,13 +6452,13 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
       country
       details {
         id
-        venueId
         startDate
         status
         lastCustomerSuccessVisit
         totalGamesHeld
         averagePlayersPerGame
         gameNights
+        venueId
         venue {
           id
           venueNumber
@@ -7664,13 +6469,13 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -7758,40 +6563,37 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -7808,6 +6610,29 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -7819,6 +6644,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -7839,29 +6665,6 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             startedAt
             __typename
           }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -7876,9 +6679,9 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
       series {
         items {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -7886,11 +6689,11 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -7934,13 +6737,12 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
       playerMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -7948,22 +6750,23 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -8008,40 +6811,37 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
         gameStatus
         gameStartDateTime
         gameEndDateTime
-        venueId
-        sourceUrl
-        doNotScrape
-        sourceDataIssue
-        gameDataVerified
-        seriesName
-        isRegular
-        isSeries
-        isRecurring
-        gameFrequency
-        isSatellite
         registrationStatus
-        prizepool
-        revenueByBuyIns
-        totalEntries
-        totalRebuys
-        totalAddons
         totalDuration
-        gameTags
-        tournamentType
+        gameFrequency
         buyIn
         rake
-        totalRake
-        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
+        prizepool
+        totalEntries
+        totalRebuys
+        totalAddons
+        revenueByBuyIns
+        totalRake
+        profitLoss
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
         totalChipsInPlay
         averagePlayerStack
-        tournamentStructureId
-        cashStructureId
+        tournamentType
+        isRegular
+        isSeries
+        isSatellite
+        seriesName
+        gameTags
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        gameDataVerified
+        venueId
         venue {
           id
           venueNumber
@@ -8052,13 +6852,13 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -8094,6 +6894,61 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
           venueDetailsId
           __typename
         }
+        tournamentSeriesId
+        tournamentSeries {
+          id
+          name
+          year
+          status
+          startDate
+          endDate
+          events
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        tournamentStructureId
         tournamentStructure {
           id
           name
@@ -8119,6 +6974,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
           _lastChangedAt
           __typename
         }
+        cashStructureId
         cashStructure {
           id
           name
@@ -8154,13 +7010,13 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
         playerResults {
           items {
             id
-            playerId
-            gameId
             finishingPlace
             isMultiDayQualification
             prizeWon
             amountWon
             totalRunners
+            playerId
+            gameId
             createdAt
             updatedAt
             _version
@@ -8170,60 +7026,6 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
           }
           nextToken
           startedAt
-          __typename
-        }
-        tournamentSeriesId
-        tournamentSeries {
-          id
-          year
-          name
-          aliases
-          startDate
-          endDate
-          events
-          numberOfEvents
-          guaranteedPrizepool
-          estimatedPrizepool
-          actualPrizepool
-          status
-          tournamentSeriesTitleId
-          title {
-            id
-            title
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
           __typename
         }
         createdAt
@@ -8255,9 +7057,9 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
 ) {
   deleteTournamentSeries(input: $input, condition: $condition) {
     id
-    year
     name
-    aliases
+    year
+    status
     startDate
     endDate
     events
@@ -8265,17 +7067,17 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
     guaranteedPrizepool
     estimatedPrizepool
     actualPrizepool
-    status
     tournamentSeriesTitleId
     title {
       id
       title
+      aliases
       seriesInstances {
         items {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -8283,11 +7085,11 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -8346,13 +7148,13 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
       country
       details {
         id
-        venueId
         startDate
         status
         lastCustomerSuccessVisit
         totalGamesHeld
         averagePlayersPerGame
         gameNights
+        venueId
         venue {
           id
           venueNumber
@@ -8363,13 +7165,13 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -8457,40 +7259,37 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -8507,6 +7306,29 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -8518,6 +7340,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -8538,29 +7361,6 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             startedAt
             __typename
           }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -8575,9 +7375,9 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
       series {
         items {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -8585,11 +7385,11 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -8633,13 +7433,12 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
       playerMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -8647,22 +7446,23 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -8707,40 +7507,37 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
         gameStatus
         gameStartDateTime
         gameEndDateTime
-        venueId
-        sourceUrl
-        doNotScrape
-        sourceDataIssue
-        gameDataVerified
-        seriesName
-        isRegular
-        isSeries
-        isRecurring
-        gameFrequency
-        isSatellite
         registrationStatus
-        prizepool
-        revenueByBuyIns
-        totalEntries
-        totalRebuys
-        totalAddons
         totalDuration
-        gameTags
-        tournamentType
+        gameFrequency
         buyIn
         rake
-        totalRake
-        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
+        prizepool
+        totalEntries
+        totalRebuys
+        totalAddons
+        revenueByBuyIns
+        totalRake
+        profitLoss
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
         totalChipsInPlay
         averagePlayerStack
-        tournamentStructureId
-        cashStructureId
+        tournamentType
+        isRegular
+        isSeries
+        isSatellite
+        seriesName
+        gameTags
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        gameDataVerified
+        venueId
         venue {
           id
           venueNumber
@@ -8751,13 +7548,13 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -8793,6 +7590,61 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
           venueDetailsId
           __typename
         }
+        tournamentSeriesId
+        tournamentSeries {
+          id
+          name
+          year
+          status
+          startDate
+          endDate
+          events
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        tournamentStructureId
         tournamentStructure {
           id
           name
@@ -8818,6 +7670,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
           _lastChangedAt
           __typename
         }
+        cashStructureId
         cashStructure {
           id
           name
@@ -8853,13 +7706,13 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
         playerResults {
           items {
             id
-            playerId
-            gameId
             finishingPlace
             isMultiDayQualification
             prizeWon
             amountWon
             totalRunners
+            playerId
+            gameId
             createdAt
             updatedAt
             _version
@@ -8869,60 +7722,6 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
           }
           nextToken
           startedAt
-          __typename
-        }
-        tournamentSeriesId
-        tournamentSeries {
-          id
-          year
-          name
-          aliases
-          startDate
-          endDate
-          events
-          numberOfEvents
-          guaranteedPrizepool
-          estimatedPrizepool
-          actualPrizepool
-          status
-          tournamentSeriesTitleId
-          title {
-            id
-            title
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
           __typename
         }
         createdAt
@@ -8960,40 +7759,37 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
     gameStatus
     gameStartDateTime
     gameEndDateTime
-    venueId
-    sourceUrl
-    doNotScrape
-    sourceDataIssue
-    gameDataVerified
-    seriesName
-    isRegular
-    isSeries
-    isRecurring
-    gameFrequency
-    isSatellite
     registrationStatus
-    prizepool
-    revenueByBuyIns
-    totalEntries
-    totalRebuys
-    totalAddons
     totalDuration
-    gameTags
-    tournamentType
+    gameFrequency
     buyIn
     rake
-    totalRake
-    profitLoss
     startingStack
     hasGuarantee
     guaranteeAmount
+    prizepool
+    totalEntries
+    totalRebuys
+    totalAddons
+    revenueByBuyIns
+    totalRake
+    profitLoss
     guaranteeOverlay
     guaranteeSurplus
     playersRemaining
     totalChipsInPlay
     averagePlayerStack
-    tournamentStructureId
-    cashStructureId
+    tournamentType
+    isRegular
+    isSeries
+    isSatellite
+    seriesName
+    gameTags
+    sourceUrl
+    doNotScrape
+    sourceDataIssue
+    gameDataVerified
+    venueId
     venue {
       id
       venueNumber
@@ -9004,13 +7800,13 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
       country
       details {
         id
-        venueId
         startDate
         status
         lastCustomerSuccessVisit
         totalGamesHeld
         averagePlayersPerGame
         gameNights
+        venueId
         venue {
           id
           venueNumber
@@ -9021,13 +7817,13 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -9115,40 +7911,37 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -9165,6 +7958,29 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -9176,6 +7992,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -9196,29 +8013,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             startedAt
             __typename
           }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -9233,9 +8027,9 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
       series {
         items {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -9243,11 +8037,11 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -9291,13 +8085,12 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
       playerMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -9305,22 +8098,23 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -9356,546 +8150,12 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
       venueDetailsId
       __typename
     }
-    tournamentStructure {
-      id
-      name
-      description
-      levels {
-        levelNumber
-        durationMinutes
-        smallBlind
-        bigBlind
-        ante
-        breakMinutes
-        __typename
-      }
-      games {
-        items {
-          id
-          name
-          gameType
-          gameVariant
-          gameStatus
-          gameStartDateTime
-          gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
-          registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
-          totalDuration
-          gameTags
-          tournamentType
-          buyIn
-          rake
-          totalRake
-          profitLoss
-          startingStack
-          hasGuarantee
-          guaranteeAmount
-          guaranteeOverlay
-          guaranteeSurplus
-          playersRemaining
-          totalChipsInPlay
-          averagePlayerStack
-          tournamentStructureId
-          cashStructureId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          tournamentStructure {
-            id
-            name
-            description
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          cashStructure {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
-            __typename
-          }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    cashStructure {
-      id
-      name
-      smallBlind
-      bigBlind
-      minBuyIn
-      maxBuyIn
-      rakeStructureId
-      rakeStructure {
-        id
-        name
-        rakePercentage
-        maxRake
-        cashStructures {
-          items {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      games {
-        items {
-          id
-          name
-          gameType
-          gameVariant
-          gameStatus
-          gameStartDateTime
-          gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
-          registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
-          totalDuration
-          gameTags
-          tournamentType
-          buyIn
-          rake
-          totalRake
-          profitLoss
-          startingStack
-          hasGuarantee
-          guaranteeAmount
-          guaranteeOverlay
-          guaranteeSurplus
-          playersRemaining
-          totalChipsInPlay
-          averagePlayerStack
-          tournamentStructureId
-          cashStructureId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          tournamentStructure {
-            id
-            name
-            description
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          cashStructure {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
-            __typename
-          }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    playerResults {
-      items {
-        id
-        playerId
-        gameId
-        finishingPlace
-        isMultiDayQualification
-        prizeWon
-        amountWon
-        totalRunners
-        game {
-          id
-          name
-          gameType
-          gameVariant
-          gameStatus
-          gameStartDateTime
-          gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
-          registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
-          totalDuration
-          gameTags
-          tournamentType
-          buyIn
-          rake
-          totalRake
-          profitLoss
-          startingStack
-          hasGuarantee
-          guaranteeAmount
-          guaranteeOverlay
-          guaranteeSurplus
-          playersRemaining
-          totalChipsInPlay
-          averagePlayerStack
-          tournamentStructureId
-          cashStructureId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          tournamentStructure {
-            id
-            name
-            description
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          cashStructure {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
-            __typename
-          }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      nextToken
-      startedAt
-      __typename
-    }
     tournamentSeriesId
     tournamentSeries {
       id
-      year
       name
-      aliases
+      year
+      status
       startDate
       endDate
       events
@@ -9903,17 +8163,17 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
       guaranteedPrizepool
       estimatedPrizepool
       actualPrizepool
-      status
       tournamentSeriesTitleId
       title {
         id
         title
+        aliases
         seriesInstances {
           items {
             id
-            year
             name
-            aliases
+            year
+            status
             startDate
             endDate
             events
@@ -9921,7 +8181,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             guaranteedPrizepool
             estimatedPrizepool
             actualPrizepool
-            status
             tournamentSeriesTitleId
             venueId
             createdAt
@@ -9953,13 +8212,13 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
         country
         details {
           id
-          venueId
           startDate
           status
           lastCustomerSuccessVisit
           totalGamesHeld
           averagePlayersPerGame
           gameNights
+          venueId
           venue {
             id
             venueNumber
@@ -10012,41 +8271,40 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
@@ -10061,9 +8319,9 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
         series {
           items {
             id
-            year
             name
-            aliases
+            year
+            status
             startDate
             endDate
             events
@@ -10071,7 +8329,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             guaranteedPrizepool
             estimatedPrizepool
             actualPrizepool
-            status
             tournamentSeriesTitleId
             venueId
             createdAt
@@ -10088,13 +8345,13 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
         playerMemberships {
           items {
             id
-            playerId
-            venueId
             totalGamesPlayed
             averageBuyIn
             firstPlayedDate
             lastPlayedDate
             targetingClassification
+            playerId
+            venueId
             createdAt
             updatedAt
             _version
@@ -10123,40 +8380,37 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -10173,6 +8427,29 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -10184,6 +8461,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -10204,12 +8482,100 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             startedAt
             __typename
           }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    tournamentStructureId
+    tournamentStructure {
+      id
+      name
+      description
+      levels {
+        levelNumber
+        durationMinutes
+        smallBlind
+        bigBlind
+        ante
+        breakMinutes
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
           tournamentSeriesId
           tournamentSeries {
             id
-            year
             name
-            aliases
+            year
+            status
             startDate
             endDate
             events
@@ -10217,7 +8583,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             guaranteedPrizepool
             estimatedPrizepool
             actualPrizepool
-            status
             tournamentSeriesTitleId
             venueId
             createdAt
@@ -10225,6 +8590,39 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructureId
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
             __typename
           }
           createdAt
@@ -10243,6 +8641,393 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
       _version
       _deleted
       _lastChangedAt
+      __typename
+    }
+    cashStructureId
+    cashStructure {
+      id
+      name
+      smallBlind
+      bigBlind
+      minBuyIn
+      maxBuyIn
+      rakeStructureId
+      rakeStructure {
+        id
+        name
+        rakePercentage
+        maxRake
+        cashStructures {
+          items {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructureId
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    playerResults {
+      items {
+        id
+        finishingPlace
+        isMultiDayQualification
+        prizeWon
+        amountWon
+        totalRunners
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        gameId
+        game {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructureId
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
       __typename
     }
     createdAt
@@ -10269,40 +9054,37 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
     gameStatus
     gameStartDateTime
     gameEndDateTime
-    venueId
-    sourceUrl
-    doNotScrape
-    sourceDataIssue
-    gameDataVerified
-    seriesName
-    isRegular
-    isSeries
-    isRecurring
-    gameFrequency
-    isSatellite
     registrationStatus
-    prizepool
-    revenueByBuyIns
-    totalEntries
-    totalRebuys
-    totalAddons
     totalDuration
-    gameTags
-    tournamentType
+    gameFrequency
     buyIn
     rake
-    totalRake
-    profitLoss
     startingStack
     hasGuarantee
     guaranteeAmount
+    prizepool
+    totalEntries
+    totalRebuys
+    totalAddons
+    revenueByBuyIns
+    totalRake
+    profitLoss
     guaranteeOverlay
     guaranteeSurplus
     playersRemaining
     totalChipsInPlay
     averagePlayerStack
-    tournamentStructureId
-    cashStructureId
+    tournamentType
+    isRegular
+    isSeries
+    isSatellite
+    seriesName
+    gameTags
+    sourceUrl
+    doNotScrape
+    sourceDataIssue
+    gameDataVerified
+    venueId
     venue {
       id
       venueNumber
@@ -10313,13 +9095,13 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
       country
       details {
         id
-        venueId
         startDate
         status
         lastCustomerSuccessVisit
         totalGamesHeld
         averagePlayersPerGame
         gameNights
+        venueId
         venue {
           id
           venueNumber
@@ -10330,13 +9112,13 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -10424,40 +9206,37 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -10474,6 +9253,29 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -10485,6 +9287,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -10505,29 +9308,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             startedAt
             __typename
           }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -10542,9 +9322,9 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
       series {
         items {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -10552,11 +9332,11 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -10600,13 +9380,12 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
       playerMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -10614,22 +9393,23 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -10665,546 +9445,12 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
       venueDetailsId
       __typename
     }
-    tournamentStructure {
-      id
-      name
-      description
-      levels {
-        levelNumber
-        durationMinutes
-        smallBlind
-        bigBlind
-        ante
-        breakMinutes
-        __typename
-      }
-      games {
-        items {
-          id
-          name
-          gameType
-          gameVariant
-          gameStatus
-          gameStartDateTime
-          gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
-          registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
-          totalDuration
-          gameTags
-          tournamentType
-          buyIn
-          rake
-          totalRake
-          profitLoss
-          startingStack
-          hasGuarantee
-          guaranteeAmount
-          guaranteeOverlay
-          guaranteeSurplus
-          playersRemaining
-          totalChipsInPlay
-          averagePlayerStack
-          tournamentStructureId
-          cashStructureId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          tournamentStructure {
-            id
-            name
-            description
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          cashStructure {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
-            __typename
-          }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    cashStructure {
-      id
-      name
-      smallBlind
-      bigBlind
-      minBuyIn
-      maxBuyIn
-      rakeStructureId
-      rakeStructure {
-        id
-        name
-        rakePercentage
-        maxRake
-        cashStructures {
-          items {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      games {
-        items {
-          id
-          name
-          gameType
-          gameVariant
-          gameStatus
-          gameStartDateTime
-          gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
-          registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
-          totalDuration
-          gameTags
-          tournamentType
-          buyIn
-          rake
-          totalRake
-          profitLoss
-          startingStack
-          hasGuarantee
-          guaranteeAmount
-          guaranteeOverlay
-          guaranteeSurplus
-          playersRemaining
-          totalChipsInPlay
-          averagePlayerStack
-          tournamentStructureId
-          cashStructureId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          tournamentStructure {
-            id
-            name
-            description
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          cashStructure {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
-            __typename
-          }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    playerResults {
-      items {
-        id
-        playerId
-        gameId
-        finishingPlace
-        isMultiDayQualification
-        prizeWon
-        amountWon
-        totalRunners
-        game {
-          id
-          name
-          gameType
-          gameVariant
-          gameStatus
-          gameStartDateTime
-          gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
-          registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
-          totalDuration
-          gameTags
-          tournamentType
-          buyIn
-          rake
-          totalRake
-          profitLoss
-          startingStack
-          hasGuarantee
-          guaranteeAmount
-          guaranteeOverlay
-          guaranteeSurplus
-          playersRemaining
-          totalChipsInPlay
-          averagePlayerStack
-          tournamentStructureId
-          cashStructureId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          tournamentStructure {
-            id
-            name
-            description
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          cashStructure {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
-            __typename
-          }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      nextToken
-      startedAt
-      __typename
-    }
     tournamentSeriesId
     tournamentSeries {
       id
-      year
       name
-      aliases
+      year
+      status
       startDate
       endDate
       events
@@ -11212,17 +9458,17 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
       guaranteedPrizepool
       estimatedPrizepool
       actualPrizepool
-      status
       tournamentSeriesTitleId
       title {
         id
         title
+        aliases
         seriesInstances {
           items {
             id
-            year
             name
-            aliases
+            year
+            status
             startDate
             endDate
             events
@@ -11230,7 +9476,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             guaranteedPrizepool
             estimatedPrizepool
             actualPrizepool
-            status
             tournamentSeriesTitleId
             venueId
             createdAt
@@ -11262,13 +9507,13 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
         country
         details {
           id
-          venueId
           startDate
           status
           lastCustomerSuccessVisit
           totalGamesHeld
           averagePlayersPerGame
           gameNights
+          venueId
           venue {
             id
             venueNumber
@@ -11321,41 +9566,40 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
@@ -11370,9 +9614,9 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
         series {
           items {
             id
-            year
             name
-            aliases
+            year
+            status
             startDate
             endDate
             events
@@ -11380,7 +9624,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             guaranteedPrizepool
             estimatedPrizepool
             actualPrizepool
-            status
             tournamentSeriesTitleId
             venueId
             createdAt
@@ -11397,13 +9640,13 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
         playerMemberships {
           items {
             id
-            playerId
-            venueId
             totalGamesPlayed
             averageBuyIn
             firstPlayedDate
             lastPlayedDate
             targetingClassification
+            playerId
+            venueId
             createdAt
             updatedAt
             _version
@@ -11432,40 +9675,37 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -11482,6 +9722,29 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -11493,6 +9756,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -11513,12 +9777,100 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             startedAt
             __typename
           }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    tournamentStructureId
+    tournamentStructure {
+      id
+      name
+      description
+      levels {
+        levelNumber
+        durationMinutes
+        smallBlind
+        bigBlind
+        ante
+        breakMinutes
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
           tournamentSeriesId
           tournamentSeries {
             id
-            year
             name
-            aliases
+            year
+            status
             startDate
             endDate
             events
@@ -11526,7 +9878,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             guaranteedPrizepool
             estimatedPrizepool
             actualPrizepool
-            status
             tournamentSeriesTitleId
             venueId
             createdAt
@@ -11534,6 +9885,39 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructureId
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
             __typename
           }
           createdAt
@@ -11552,6 +9936,393 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
       _version
       _deleted
       _lastChangedAt
+      __typename
+    }
+    cashStructureId
+    cashStructure {
+      id
+      name
+      smallBlind
+      bigBlind
+      minBuyIn
+      maxBuyIn
+      rakeStructureId
+      rakeStructure {
+        id
+        name
+        rakePercentage
+        maxRake
+        cashStructures {
+          items {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructureId
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    playerResults {
+      items {
+        id
+        finishingPlace
+        isMultiDayQualification
+        prizeWon
+        amountWon
+        totalRunners
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        gameId
+        game {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructureId
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
       __typename
     }
     createdAt
@@ -11578,40 +10349,37 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
     gameStatus
     gameStartDateTime
     gameEndDateTime
-    venueId
-    sourceUrl
-    doNotScrape
-    sourceDataIssue
-    gameDataVerified
-    seriesName
-    isRegular
-    isSeries
-    isRecurring
-    gameFrequency
-    isSatellite
     registrationStatus
-    prizepool
-    revenueByBuyIns
-    totalEntries
-    totalRebuys
-    totalAddons
     totalDuration
-    gameTags
-    tournamentType
+    gameFrequency
     buyIn
     rake
-    totalRake
-    profitLoss
     startingStack
     hasGuarantee
     guaranteeAmount
+    prizepool
+    totalEntries
+    totalRebuys
+    totalAddons
+    revenueByBuyIns
+    totalRake
+    profitLoss
     guaranteeOverlay
     guaranteeSurplus
     playersRemaining
     totalChipsInPlay
     averagePlayerStack
-    tournamentStructureId
-    cashStructureId
+    tournamentType
+    isRegular
+    isSeries
+    isSatellite
+    seriesName
+    gameTags
+    sourceUrl
+    doNotScrape
+    sourceDataIssue
+    gameDataVerified
+    venueId
     venue {
       id
       venueNumber
@@ -11622,13 +10390,13 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
       country
       details {
         id
-        venueId
         startDate
         status
         lastCustomerSuccessVisit
         totalGamesHeld
         averagePlayersPerGame
         gameNights
+        venueId
         venue {
           id
           venueNumber
@@ -11639,13 +10407,13 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -11733,40 +10501,37 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -11783,6 +10548,29 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -11794,6 +10582,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -11814,29 +10603,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             startedAt
             __typename
           }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -11851,9 +10617,9 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
       series {
         items {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -11861,11 +10627,11 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -11909,13 +10675,12 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
       playerMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -11923,22 +10688,23 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -11974,546 +10740,12 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
       venueDetailsId
       __typename
     }
-    tournamentStructure {
-      id
-      name
-      description
-      levels {
-        levelNumber
-        durationMinutes
-        smallBlind
-        bigBlind
-        ante
-        breakMinutes
-        __typename
-      }
-      games {
-        items {
-          id
-          name
-          gameType
-          gameVariant
-          gameStatus
-          gameStartDateTime
-          gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
-          registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
-          totalDuration
-          gameTags
-          tournamentType
-          buyIn
-          rake
-          totalRake
-          profitLoss
-          startingStack
-          hasGuarantee
-          guaranteeAmount
-          guaranteeOverlay
-          guaranteeSurplus
-          playersRemaining
-          totalChipsInPlay
-          averagePlayerStack
-          tournamentStructureId
-          cashStructureId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          tournamentStructure {
-            id
-            name
-            description
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          cashStructure {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
-            __typename
-          }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    cashStructure {
-      id
-      name
-      smallBlind
-      bigBlind
-      minBuyIn
-      maxBuyIn
-      rakeStructureId
-      rakeStructure {
-        id
-        name
-        rakePercentage
-        maxRake
-        cashStructures {
-          items {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      games {
-        items {
-          id
-          name
-          gameType
-          gameVariant
-          gameStatus
-          gameStartDateTime
-          gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
-          registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
-          totalDuration
-          gameTags
-          tournamentType
-          buyIn
-          rake
-          totalRake
-          profitLoss
-          startingStack
-          hasGuarantee
-          guaranteeAmount
-          guaranteeOverlay
-          guaranteeSurplus
-          playersRemaining
-          totalChipsInPlay
-          averagePlayerStack
-          tournamentStructureId
-          cashStructureId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          tournamentStructure {
-            id
-            name
-            description
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          cashStructure {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
-            __typename
-          }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    playerResults {
-      items {
-        id
-        playerId
-        gameId
-        finishingPlace
-        isMultiDayQualification
-        prizeWon
-        amountWon
-        totalRunners
-        game {
-          id
-          name
-          gameType
-          gameVariant
-          gameStatus
-          gameStartDateTime
-          gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
-          registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
-          totalDuration
-          gameTags
-          tournamentType
-          buyIn
-          rake
-          totalRake
-          profitLoss
-          startingStack
-          hasGuarantee
-          guaranteeAmount
-          guaranteeOverlay
-          guaranteeSurplus
-          playersRemaining
-          totalChipsInPlay
-          averagePlayerStack
-          tournamentStructureId
-          cashStructureId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          tournamentStructure {
-            id
-            name
-            description
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          cashStructure {
-            id
-            name
-            smallBlind
-            bigBlind
-            minBuyIn
-            maxBuyIn
-            rakeStructureId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
-            __typename
-          }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      nextToken
-      startedAt
-      __typename
-    }
     tournamentSeriesId
     tournamentSeries {
       id
-      year
       name
-      aliases
+      year
+      status
       startDate
       endDate
       events
@@ -12521,17 +10753,17 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
       guaranteedPrizepool
       estimatedPrizepool
       actualPrizepool
-      status
       tournamentSeriesTitleId
       title {
         id
         title
+        aliases
         seriesInstances {
           items {
             id
-            year
             name
-            aliases
+            year
+            status
             startDate
             endDate
             events
@@ -12539,7 +10771,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             guaranteedPrizepool
             estimatedPrizepool
             actualPrizepool
-            status
             tournamentSeriesTitleId
             venueId
             createdAt
@@ -12571,13 +10802,13 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
         country
         details {
           id
-          venueId
           startDate
           status
           lastCustomerSuccessVisit
           totalGamesHeld
           averagePlayersPerGame
           gameNights
+          venueId
           venue {
             id
             venueNumber
@@ -12630,41 +10861,40 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
@@ -12679,9 +10909,9 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
         series {
           items {
             id
-            year
             name
-            aliases
+            year
+            status
             startDate
             endDate
             events
@@ -12689,7 +10919,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             guaranteedPrizepool
             estimatedPrizepool
             actualPrizepool
-            status
             tournamentSeriesTitleId
             venueId
             createdAt
@@ -12706,13 +10935,13 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
         playerMemberships {
           items {
             id
-            playerId
-            venueId
             totalGamesPlayed
             averageBuyIn
             firstPlayedDate
             lastPlayedDate
             targetingClassification
+            playerId
+            venueId
             createdAt
             updatedAt
             _version
@@ -12741,40 +10970,37 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -12791,6 +11017,29 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -12802,6 +11051,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -12822,12 +11072,100 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             startedAt
             __typename
           }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    tournamentStructureId
+    tournamentStructure {
+      id
+      name
+      description
+      levels {
+        levelNumber
+        durationMinutes
+        smallBlind
+        bigBlind
+        ante
+        breakMinutes
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
           tournamentSeriesId
           tournamentSeries {
             id
-            year
             name
-            aliases
+            year
+            status
             startDate
             endDate
             events
@@ -12835,7 +11173,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             guaranteedPrizepool
             estimatedPrizepool
             actualPrizepool
-            status
             tournamentSeriesTitleId
             venueId
             createdAt
@@ -12843,6 +11180,39 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             _version
             _deleted
             _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructureId
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
             __typename
           }
           createdAt
@@ -12861,6 +11231,393 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
       _version
       _deleted
       _lastChangedAt
+      __typename
+    }
+    cashStructureId
+    cashStructure {
+      id
+      name
+      smallBlind
+      bigBlind
+      minBuyIn
+      maxBuyIn
+      rakeStructureId
+      rakeStructure {
+        id
+        name
+        rakePercentage
+        maxRake
+        cashStructures {
+          items {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructureId
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    playerResults {
+      items {
+        id
+        finishingPlace
+        isMultiDayQualification
+        prizeWon
+        amountWon
+        totalRunners
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        gameId
+        game {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructureId
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
       __typename
     }
     createdAt
@@ -12901,40 +11658,37 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
         gameStatus
         gameStartDateTime
         gameEndDateTime
-        venueId
-        sourceUrl
-        doNotScrape
-        sourceDataIssue
-        gameDataVerified
-        seriesName
-        isRegular
-        isSeries
-        isRecurring
-        gameFrequency
-        isSatellite
         registrationStatus
-        prizepool
-        revenueByBuyIns
-        totalEntries
-        totalRebuys
-        totalAddons
         totalDuration
-        gameTags
-        tournamentType
+        gameFrequency
         buyIn
         rake
-        totalRake
-        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
+        prizepool
+        totalEntries
+        totalRebuys
+        totalAddons
+        revenueByBuyIns
+        totalRake
+        profitLoss
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
         totalChipsInPlay
         averagePlayerStack
-        tournamentStructureId
-        cashStructureId
+        tournamentType
+        isRegular
+        isSeries
+        isSatellite
+        seriesName
+        gameTags
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        gameDataVerified
+        venueId
         venue {
           id
           venueNumber
@@ -12945,13 +11699,13 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -12987,6 +11741,61 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
           venueDetailsId
           __typename
         }
+        tournamentSeriesId
+        tournamentSeries {
+          id
+          name
+          year
+          status
+          startDate
+          endDate
+          events
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        tournamentStructureId
         tournamentStructure {
           id
           name
@@ -13012,6 +11821,7 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
           _lastChangedAt
           __typename
         }
+        cashStructureId
         cashStructure {
           id
           name
@@ -13047,13 +11857,13 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
         playerResults {
           items {
             id
-            playerId
-            gameId
             finishingPlace
             isMultiDayQualification
             prizeWon
             amountWon
             totalRunners
+            playerId
+            gameId
             createdAt
             updatedAt
             _version
@@ -13063,60 +11873,6 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
           }
           nextToken
           startedAt
-          __typename
-        }
-        tournamentSeriesId
-        tournamentSeries {
-          id
-          year
-          name
-          aliases
-          startDate
-          endDate
-          events
-          numberOfEvents
-          guaranteedPrizepool
-          estimatedPrizepool
-          actualPrizepool
-          status
-          tournamentSeriesTitleId
-          title {
-            id
-            title
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
           __typename
         }
         createdAt
@@ -13168,40 +11924,37 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
         gameStatus
         gameStartDateTime
         gameEndDateTime
-        venueId
-        sourceUrl
-        doNotScrape
-        sourceDataIssue
-        gameDataVerified
-        seriesName
-        isRegular
-        isSeries
-        isRecurring
-        gameFrequency
-        isSatellite
         registrationStatus
-        prizepool
-        revenueByBuyIns
-        totalEntries
-        totalRebuys
-        totalAddons
         totalDuration
-        gameTags
-        tournamentType
+        gameFrequency
         buyIn
         rake
-        totalRake
-        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
+        prizepool
+        totalEntries
+        totalRebuys
+        totalAddons
+        revenueByBuyIns
+        totalRake
+        profitLoss
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
         totalChipsInPlay
         averagePlayerStack
-        tournamentStructureId
-        cashStructureId
+        tournamentType
+        isRegular
+        isSeries
+        isSatellite
+        seriesName
+        gameTags
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        gameDataVerified
+        venueId
         venue {
           id
           venueNumber
@@ -13212,13 +11965,13 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -13254,6 +12007,61 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
           venueDetailsId
           __typename
         }
+        tournamentSeriesId
+        tournamentSeries {
+          id
+          name
+          year
+          status
+          startDate
+          endDate
+          events
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        tournamentStructureId
         tournamentStructure {
           id
           name
@@ -13279,6 +12087,7 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
           _lastChangedAt
           __typename
         }
+        cashStructureId
         cashStructure {
           id
           name
@@ -13314,13 +12123,13 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
         playerResults {
           items {
             id
-            playerId
-            gameId
             finishingPlace
             isMultiDayQualification
             prizeWon
             amountWon
             totalRunners
+            playerId
+            gameId
             createdAt
             updatedAt
             _version
@@ -13330,60 +12139,6 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
           }
           nextToken
           startedAt
-          __typename
-        }
-        tournamentSeriesId
-        tournamentSeries {
-          id
-          year
-          name
-          aliases
-          startDate
-          endDate
-          events
-          numberOfEvents
-          guaranteedPrizepool
-          estimatedPrizepool
-          actualPrizepool
-          status
-          tournamentSeriesTitleId
-          title {
-            id
-            title
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
           __typename
         }
         createdAt
@@ -13435,40 +12190,37 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
         gameStatus
         gameStartDateTime
         gameEndDateTime
-        venueId
-        sourceUrl
-        doNotScrape
-        sourceDataIssue
-        gameDataVerified
-        seriesName
-        isRegular
-        isSeries
-        isRecurring
-        gameFrequency
-        isSatellite
         registrationStatus
-        prizepool
-        revenueByBuyIns
-        totalEntries
-        totalRebuys
-        totalAddons
         totalDuration
-        gameTags
-        tournamentType
+        gameFrequency
         buyIn
         rake
-        totalRake
-        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
+        prizepool
+        totalEntries
+        totalRebuys
+        totalAddons
+        revenueByBuyIns
+        totalRake
+        profitLoss
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
         totalChipsInPlay
         averagePlayerStack
-        tournamentStructureId
-        cashStructureId
+        tournamentType
+        isRegular
+        isSeries
+        isSatellite
+        seriesName
+        gameTags
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        gameDataVerified
+        venueId
         venue {
           id
           venueNumber
@@ -13479,13 +12231,13 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -13521,90 +12273,12 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
           venueDetailsId
           __typename
         }
-        tournamentStructure {
-          id
-          name
-          description
-          levels {
-            levelNumber
-            durationMinutes
-            smallBlind
-            bigBlind
-            ante
-            breakMinutes
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        cashStructure {
-          id
-          name
-          smallBlind
-          bigBlind
-          minBuyIn
-          maxBuyIn
-          rakeStructureId
-          rakeStructure {
-            id
-            name
-            rakePercentage
-            maxRake
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        playerResults {
-          items {
-            id
-            playerId
-            gameId
-            finishingPlace
-            isMultiDayQualification
-            prizeWon
-            amountWon
-            totalRunners
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
         tournamentSeriesId
         tournamentSeries {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -13612,11 +12286,11 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -13653,6 +12327,86 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
           _lastChangedAt
           __typename
         }
+        tournamentStructureId
+        tournamentStructure {
+          id
+          name
+          description
+          levels {
+            levelNumber
+            durationMinutes
+            smallBlind
+            bigBlind
+            ante
+            breakMinutes
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        cashStructureId
+        cashStructure {
+          id
+          name
+          smallBlind
+          bigBlind
+          minBuyIn
+          maxBuyIn
+          rakeStructureId
+          rakeStructure {
+            id
+            name
+            rakePercentage
+            maxRake
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        playerResults {
+          items {
+            id
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -13675,345 +12429,6 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
 ` as GeneratedMutation<
   APITypes.DeleteTournamentStructureMutationVariables,
   APITypes.DeleteTournamentStructureMutation
->;
-export const createRakeStructure = /* GraphQL */ `mutation CreateRakeStructure(
-  $input: CreateRakeStructureInput!
-  $condition: ModelRakeStructureConditionInput
-) {
-  createRakeStructure(input: $input, condition: $condition) {
-    id
-    name
-    rakePercentage
-    maxRake
-    cashStructures {
-      items {
-        id
-        name
-        smallBlind
-        bigBlind
-        minBuyIn
-        maxBuyIn
-        rakeStructureId
-        rakeStructure {
-          id
-          name
-          rakePercentage
-          maxRake
-          cashStructures {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      nextToken
-      startedAt
-      __typename
-    }
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreateRakeStructureMutationVariables,
-  APITypes.CreateRakeStructureMutation
->;
-export const updateRakeStructure = /* GraphQL */ `mutation UpdateRakeStructure(
-  $input: UpdateRakeStructureInput!
-  $condition: ModelRakeStructureConditionInput
-) {
-  updateRakeStructure(input: $input, condition: $condition) {
-    id
-    name
-    rakePercentage
-    maxRake
-    cashStructures {
-      items {
-        id
-        name
-        smallBlind
-        bigBlind
-        minBuyIn
-        maxBuyIn
-        rakeStructureId
-        rakeStructure {
-          id
-          name
-          rakePercentage
-          maxRake
-          cashStructures {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      nextToken
-      startedAt
-      __typename
-    }
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdateRakeStructureMutationVariables,
-  APITypes.UpdateRakeStructureMutation
->;
-export const deleteRakeStructure = /* GraphQL */ `mutation DeleteRakeStructure(
-  $input: DeleteRakeStructureInput!
-  $condition: ModelRakeStructureConditionInput
-) {
-  deleteRakeStructure(input: $input, condition: $condition) {
-    id
-    name
-    rakePercentage
-    maxRake
-    cashStructures {
-      items {
-        id
-        name
-        smallBlind
-        bigBlind
-        minBuyIn
-        maxBuyIn
-        rakeStructureId
-        rakeStructure {
-          id
-          name
-          rakePercentage
-          maxRake
-          cashStructures {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      nextToken
-      startedAt
-      __typename
-    }
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteRakeStructureMutationVariables,
-  APITypes.DeleteRakeStructureMutation
 >;
 export const createCashStructure = /* GraphQL */ `mutation CreateCashStructure(
   $input: CreateCashStructureInput!
@@ -14085,40 +12500,37 @@ export const createCashStructure = /* GraphQL */ `mutation CreateCashStructure(
         gameStatus
         gameStartDateTime
         gameEndDateTime
-        venueId
-        sourceUrl
-        doNotScrape
-        sourceDataIssue
-        gameDataVerified
-        seriesName
-        isRegular
-        isSeries
-        isRecurring
-        gameFrequency
-        isSatellite
         registrationStatus
-        prizepool
-        revenueByBuyIns
-        totalEntries
-        totalRebuys
-        totalAddons
         totalDuration
-        gameTags
-        tournamentType
+        gameFrequency
         buyIn
         rake
-        totalRake
-        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
+        prizepool
+        totalEntries
+        totalRebuys
+        totalAddons
+        revenueByBuyIns
+        totalRake
+        profitLoss
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
         totalChipsInPlay
         averagePlayerStack
-        tournamentStructureId
-        cashStructureId
+        tournamentType
+        isRegular
+        isSeries
+        isSatellite
+        seriesName
+        gameTags
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        gameDataVerified
+        venueId
         venue {
           id
           venueNumber
@@ -14129,13 +12541,13 @@ export const createCashStructure = /* GraphQL */ `mutation CreateCashStructure(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -14171,6 +12583,61 @@ export const createCashStructure = /* GraphQL */ `mutation CreateCashStructure(
           venueDetailsId
           __typename
         }
+        tournamentSeriesId
+        tournamentSeries {
+          id
+          name
+          year
+          status
+          startDate
+          endDate
+          events
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        tournamentStructureId
         tournamentStructure {
           id
           name
@@ -14196,6 +12663,7 @@ export const createCashStructure = /* GraphQL */ `mutation CreateCashStructure(
           _lastChangedAt
           __typename
         }
+        cashStructureId
         cashStructure {
           id
           name
@@ -14231,13 +12699,13 @@ export const createCashStructure = /* GraphQL */ `mutation CreateCashStructure(
         playerResults {
           items {
             id
-            playerId
-            gameId
             finishingPlace
             isMultiDayQualification
             prizeWon
             amountWon
             totalRunners
+            playerId
+            gameId
             createdAt
             updatedAt
             _version
@@ -14247,60 +12715,6 @@ export const createCashStructure = /* GraphQL */ `mutation CreateCashStructure(
           }
           nextToken
           startedAt
-          __typename
-        }
-        tournamentSeriesId
-        tournamentSeries {
-          id
-          year
-          name
-          aliases
-          startDate
-          endDate
-          events
-          numberOfEvents
-          guaranteedPrizepool
-          estimatedPrizepool
-          actualPrizepool
-          status
-          tournamentSeriesTitleId
-          title {
-            id
-            title
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
           __typename
         }
         createdAt
@@ -14396,40 +12810,37 @@ export const updateCashStructure = /* GraphQL */ `mutation UpdateCashStructure(
         gameStatus
         gameStartDateTime
         gameEndDateTime
-        venueId
-        sourceUrl
-        doNotScrape
-        sourceDataIssue
-        gameDataVerified
-        seriesName
-        isRegular
-        isSeries
-        isRecurring
-        gameFrequency
-        isSatellite
         registrationStatus
-        prizepool
-        revenueByBuyIns
-        totalEntries
-        totalRebuys
-        totalAddons
         totalDuration
-        gameTags
-        tournamentType
+        gameFrequency
         buyIn
         rake
-        totalRake
-        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
+        prizepool
+        totalEntries
+        totalRebuys
+        totalAddons
+        revenueByBuyIns
+        totalRake
+        profitLoss
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
         totalChipsInPlay
         averagePlayerStack
-        tournamentStructureId
-        cashStructureId
+        tournamentType
+        isRegular
+        isSeries
+        isSatellite
+        seriesName
+        gameTags
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        gameDataVerified
+        venueId
         venue {
           id
           venueNumber
@@ -14440,13 +12851,13 @@ export const updateCashStructure = /* GraphQL */ `mutation UpdateCashStructure(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -14482,6 +12893,61 @@ export const updateCashStructure = /* GraphQL */ `mutation UpdateCashStructure(
           venueDetailsId
           __typename
         }
+        tournamentSeriesId
+        tournamentSeries {
+          id
+          name
+          year
+          status
+          startDate
+          endDate
+          events
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        tournamentStructureId
         tournamentStructure {
           id
           name
@@ -14507,6 +12973,7 @@ export const updateCashStructure = /* GraphQL */ `mutation UpdateCashStructure(
           _lastChangedAt
           __typename
         }
+        cashStructureId
         cashStructure {
           id
           name
@@ -14542,13 +13009,13 @@ export const updateCashStructure = /* GraphQL */ `mutation UpdateCashStructure(
         playerResults {
           items {
             id
-            playerId
-            gameId
             finishingPlace
             isMultiDayQualification
             prizeWon
             amountWon
             totalRunners
+            playerId
+            gameId
             createdAt
             updatedAt
             _version
@@ -14558,60 +13025,6 @@ export const updateCashStructure = /* GraphQL */ `mutation UpdateCashStructure(
           }
           nextToken
           startedAt
-          __typename
-        }
-        tournamentSeriesId
-        tournamentSeries {
-          id
-          year
-          name
-          aliases
-          startDate
-          endDate
-          events
-          numberOfEvents
-          guaranteedPrizepool
-          estimatedPrizepool
-          actualPrizepool
-          status
-          tournamentSeriesTitleId
-          title {
-            id
-            title
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
           __typename
         }
         createdAt
@@ -14707,40 +13120,37 @@ export const deleteCashStructure = /* GraphQL */ `mutation DeleteCashStructure(
         gameStatus
         gameStartDateTime
         gameEndDateTime
-        venueId
-        sourceUrl
-        doNotScrape
-        sourceDataIssue
-        gameDataVerified
-        seriesName
-        isRegular
-        isSeries
-        isRecurring
-        gameFrequency
-        isSatellite
         registrationStatus
-        prizepool
-        revenueByBuyIns
-        totalEntries
-        totalRebuys
-        totalAddons
         totalDuration
-        gameTags
-        tournamentType
+        gameFrequency
         buyIn
         rake
-        totalRake
-        profitLoss
         startingStack
         hasGuarantee
         guaranteeAmount
+        prizepool
+        totalEntries
+        totalRebuys
+        totalAddons
+        revenueByBuyIns
+        totalRake
+        profitLoss
         guaranteeOverlay
         guaranteeSurplus
         playersRemaining
         totalChipsInPlay
         averagePlayerStack
-        tournamentStructureId
-        cashStructureId
+        tournamentType
+        isRegular
+        isSeries
+        isSatellite
+        seriesName
+        gameTags
+        sourceUrl
+        doNotScrape
+        sourceDataIssue
+        gameDataVerified
+        venueId
         venue {
           id
           venueNumber
@@ -14751,13 +13161,13 @@ export const deleteCashStructure = /* GraphQL */ `mutation DeleteCashStructure(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -14793,6 +13203,61 @@ export const deleteCashStructure = /* GraphQL */ `mutation DeleteCashStructure(
           venueDetailsId
           __typename
         }
+        tournamentSeriesId
+        tournamentSeries {
+          id
+          name
+          year
+          status
+          startDate
+          endDate
+          events
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        tournamentStructureId
         tournamentStructure {
           id
           name
@@ -14818,6 +13283,7 @@ export const deleteCashStructure = /* GraphQL */ `mutation DeleteCashStructure(
           _lastChangedAt
           __typename
         }
+        cashStructureId
         cashStructure {
           id
           name
@@ -14853,13 +13319,13 @@ export const deleteCashStructure = /* GraphQL */ `mutation DeleteCashStructure(
         playerResults {
           items {
             id
-            playerId
-            gameId
             finishingPlace
             isMultiDayQualification
             prizeWon
             amountWon
             totalRunners
+            playerId
+            gameId
             createdAt
             updatedAt
             _version
@@ -14869,60 +13335,6 @@ export const deleteCashStructure = /* GraphQL */ `mutation DeleteCashStructure(
           }
           nextToken
           startedAt
-          __typename
-        }
-        tournamentSeriesId
-        tournamentSeries {
-          id
-          year
-          name
-          aliases
-          startDate
-          endDate
-          events
-          numberOfEvents
-          guaranteedPrizepool
-          estimatedPrizepool
-          actualPrizepool
-          status
-          tournamentSeriesTitleId
-          title {
-            id
-            title
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
           __typename
         }
         createdAt
@@ -14948,6 +13360,342 @@ export const deleteCashStructure = /* GraphQL */ `mutation DeleteCashStructure(
   APITypes.DeleteCashStructureMutationVariables,
   APITypes.DeleteCashStructureMutation
 >;
+export const createRakeStructure = /* GraphQL */ `mutation CreateRakeStructure(
+  $input: CreateRakeStructureInput!
+  $condition: ModelRakeStructureConditionInput
+) {
+  createRakeStructure(input: $input, condition: $condition) {
+    id
+    name
+    rakePercentage
+    maxRake
+    cashStructures {
+      items {
+        id
+        name
+        smallBlind
+        bigBlind
+        minBuyIn
+        maxBuyIn
+        rakeStructureId
+        rakeStructure {
+          id
+          name
+          rakePercentage
+          maxRake
+          cashStructures {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateRakeStructureMutationVariables,
+  APITypes.CreateRakeStructureMutation
+>;
+export const updateRakeStructure = /* GraphQL */ `mutation UpdateRakeStructure(
+  $input: UpdateRakeStructureInput!
+  $condition: ModelRakeStructureConditionInput
+) {
+  updateRakeStructure(input: $input, condition: $condition) {
+    id
+    name
+    rakePercentage
+    maxRake
+    cashStructures {
+      items {
+        id
+        name
+        smallBlind
+        bigBlind
+        minBuyIn
+        maxBuyIn
+        rakeStructureId
+        rakeStructure {
+          id
+          name
+          rakePercentage
+          maxRake
+          cashStructures {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateRakeStructureMutationVariables,
+  APITypes.UpdateRakeStructureMutation
+>;
+export const deleteRakeStructure = /* GraphQL */ `mutation DeleteRakeStructure(
+  $input: DeleteRakeStructureInput!
+  $condition: ModelRakeStructureConditionInput
+) {
+  deleteRakeStructure(input: $input, condition: $condition) {
+    id
+    name
+    rakePercentage
+    maxRake
+    cashStructures {
+      items {
+        id
+        name
+        smallBlind
+        bigBlind
+        minBuyIn
+        maxBuyIn
+        rakeStructureId
+        rakeStructure {
+          id
+          name
+          rakePercentage
+          maxRake
+          cashStructures {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteRakeStructureMutationVariables,
+  APITypes.DeleteRakeStructureMutation
+>;
 export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
   $input: CreatePlayerInput!
   $condition: ModelPlayerConditionInput
@@ -14959,24 +13707,236 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
     lastName
     email
     phone
-    registrationVenueId
     creationDate
-    lastPlayedDate
     status
     category
-    targetingClassification
     tier
+    lastPlayedDate
+    targetingClassification
+    registrationVenueId
+    summary {
+      id
+      playerId
+      sessionsPlayed
+      tournamentsPlayed
+      cashGamesPlayed
+      venuesVisited
+      tournamentWinnings
+      tournamentBuyIns
+      tournamentITM
+      tournamentsCashed
+      cashGameWinnings
+      cashGameBuyIns
+      totalWinnings
+      totalBuyIns
+      netBalance
+      lastUpdated
+      player {
+        id
+        firstName
+        givenName
+        lastName
+        email
+        phone
+        creationDate
+        status
+        category
+        tier
+        lastPlayedDate
+        targetingClassification
+        registrationVenueId
+        summary {
+          id
+          playerId
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          venuesVisited
+          tournamentWinnings
+          tournamentBuyIns
+          tournamentITM
+          tournamentsCashed
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        transactions {
+          items {
+            id
+            type
+            amount
+            rake
+            paymentSource
+            transactionDate
+            notes
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        results {
+          items {
+            id
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        tickets {
+          items {
+            id
+            assignedAt
+            expiryDate
+            status
+            usedInGameId
+            playerId
+            ticketTemplateId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        marketingPreferences {
+          id
+          optOutSms
+          optOutEmail
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        playerSummaryId
+        playerMarketingPreferencesId
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
     transactions {
       items {
         id
-        playerId
         type
         amount
+        rake
         paymentSource
         transactionDate
-        rake
         notes
-        gameId
+        playerId
         player {
           id
           firstName
@@ -14984,13 +13944,37 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -15006,40 +13990,16 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -15052,10 +14012,11 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
+        gameId
         createdAt
         updatedAt
         _version
@@ -15070,13 +14031,92 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
     results {
       items {
         id
-        playerId
-        gameId
         finishingPlace
         isMultiDayQualification
         prizeWon
         amountWon
         totalRunners
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        gameId
         game {
           id
           name
@@ -15085,40 +14125,37 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -15135,6 +14172,29 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -15146,6 +14206,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -15166,113 +14227,11 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             startedAt
             __typename
           }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           createdAt
           updatedAt
           _version
           _deleted
           _lastChangedAt
-          __typename
-        }
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
           __typename
         }
         createdAt
@@ -15289,12 +14248,91 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
     tickets {
       items {
         id
-        playerId
-        ticketTemplateId
         assignedAt
         expiryDate
         status
         usedInGameId
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        ticketTemplateId
         ticketTemplate {
           id
           name
@@ -15315,85 +14353,6 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           _lastChangedAt
           __typename
         }
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
         createdAt
         updatedAt
         _version
@@ -15405,217 +14364,15 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
       startedAt
       __typename
     }
-    marketingPreferences {
-      id
-      playerId
-      optOutSms
-      optOutEmail
-      player {
-        id
-        firstName
-        givenName
-        lastName
-        email
-        phone
-        registrationVenueId
-        creationDate
-        lastPlayedDate
-        status
-        category
-        targetingClassification
-        tier
-        transactions {
-          items {
-            id
-            playerId
-            type
-            amount
-            paymentSource
-            transactionDate
-            rake
-            notes
-            gameId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        results {
-          items {
-            id
-            playerId
-            gameId
-            finishingPlace
-            isMultiDayQualification
-            prizeWon
-            amountWon
-            totalRunners
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        tickets {
-          items {
-            id
-            playerId
-            ticketTemplateId
-            assignedAt
-            expiryDate
-            status
-            usedInGameId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        marketingPreferences {
-          id
-          playerId
-          optOutSms
-          optOutEmail
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        venueMemberships {
-          items {
-            id
-            playerId
-            venueId
-            totalGamesPlayed
-            averageBuyIn
-            firstPlayedDate
-            lastPlayedDate
-            targetingClassification
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        summary {
-          id
-          playerId
-          venuesVisited
-          sessionsPlayed
-          tournamentsPlayed
-          cashGamesPlayed
-          tournamentWinnings
-          tournamentBuyIns
-          cashGameWinnings
-          cashGameBuyIns
-          totalWinnings
-          totalBuyIns
-          netBalance
-          tournamentITM
-          tournamentsCashed
-          lastUpdated
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        playerMarketingPreferencesId
-        playerSummaryId
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
     venueMemberships {
       items {
         id
-        playerId
-        venueId
         totalGamesPlayed
         averageBuyIn
         firstPlayedDate
         lastPlayedDate
         targetingClassification
+        playerId
         player {
           id
           firstName
@@ -15623,13 +14380,37 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -15645,40 +14426,16 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -15691,10 +14448,11 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
+        venueId
         venue {
           id
           venueNumber
@@ -15705,13 +14463,13 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -15758,23 +14516,11 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
       startedAt
       __typename
     }
-    summary {
+    marketingPreferences {
       id
+      optOutSms
+      optOutEmail
       playerId
-      venuesVisited
-      sessionsPlayed
-      tournamentsPlayed
-      cashGamesPlayed
-      tournamentWinnings
-      tournamentBuyIns
-      cashGameWinnings
-      cashGameBuyIns
-      totalWinnings
-      totalBuyIns
-      netBalance
-      tournamentITM
-      tournamentsCashed
-      lastUpdated
       player {
         id
         firstName
@@ -15782,23 +14528,70 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
         lastName
         email
         phone
-        registrationVenueId
         creationDate
-        lastPlayedDate
         status
         category
-        targetingClassification
         tier
+        lastPlayedDate
+        targetingClassification
+        registrationVenueId
+        summary {
+          id
+          playerId
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          venuesVisited
+          tournamentWinnings
+          tournamentBuyIns
+          tournamentITM
+          tournamentsCashed
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         transactions {
           items {
             id
-            playerId
             type
             amount
+            rake
             paymentSource
             transactionDate
-            rake
             notes
+            playerId
             gameId
             createdAt
             updatedAt
@@ -15814,13 +14607,13 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
         results {
           items {
             id
-            playerId
-            gameId
             finishingPlace
             isMultiDayQualification
             prizeWon
             amountWon
             totalRunners
+            playerId
+            gameId
             createdAt
             updatedAt
             _version
@@ -15835,12 +14628,33 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
         tickets {
           items {
             id
-            playerId
-            ticketTemplateId
             assignedAt
             expiryDate
             status
             usedInGameId
+            playerId
+            ticketTemplateId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
             createdAt
             updatedAt
             _version
@@ -15854,77 +14668,9 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
         }
         marketingPreferences {
           id
-          playerId
           optOutSms
           optOutEmail
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        venueMemberships {
-          items {
-            id
-            playerId
-            venueId
-            totalGamesPlayed
-            averageBuyIn
-            firstPlayedDate
-            lastPlayedDate
-            targetingClassification
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        summary {
-          id
           playerId
-          venuesVisited
-          sessionsPlayed
-          tournamentsPlayed
-          cashGamesPlayed
-          tournamentWinnings
-          tournamentBuyIns
-          cashGameWinnings
-          cashGameBuyIns
-          totalWinnings
-          totalBuyIns
-          netBalance
-          tournamentITM
-          tournamentsCashed
-          lastUpdated
           player {
             id
             firstName
@@ -15932,20 +14678,20 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
           createdAt
@@ -15960,8 +14706,8 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
         _version
         _deleted
         _lastChangedAt
-        playerMarketingPreferencesId
         playerSummaryId
+        playerMarketingPreferencesId
         __typename
       }
       createdAt
@@ -15976,8 +14722,8 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
     _version
     _deleted
     _lastChangedAt
-    playerMarketingPreferencesId
     playerSummaryId
+    playerMarketingPreferencesId
     __typename
   }
 }
@@ -15996,24 +14742,236 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
     lastName
     email
     phone
-    registrationVenueId
     creationDate
-    lastPlayedDate
     status
     category
-    targetingClassification
     tier
+    lastPlayedDate
+    targetingClassification
+    registrationVenueId
+    summary {
+      id
+      playerId
+      sessionsPlayed
+      tournamentsPlayed
+      cashGamesPlayed
+      venuesVisited
+      tournamentWinnings
+      tournamentBuyIns
+      tournamentITM
+      tournamentsCashed
+      cashGameWinnings
+      cashGameBuyIns
+      totalWinnings
+      totalBuyIns
+      netBalance
+      lastUpdated
+      player {
+        id
+        firstName
+        givenName
+        lastName
+        email
+        phone
+        creationDate
+        status
+        category
+        tier
+        lastPlayedDate
+        targetingClassification
+        registrationVenueId
+        summary {
+          id
+          playerId
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          venuesVisited
+          tournamentWinnings
+          tournamentBuyIns
+          tournamentITM
+          tournamentsCashed
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        transactions {
+          items {
+            id
+            type
+            amount
+            rake
+            paymentSource
+            transactionDate
+            notes
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        results {
+          items {
+            id
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        tickets {
+          items {
+            id
+            assignedAt
+            expiryDate
+            status
+            usedInGameId
+            playerId
+            ticketTemplateId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        marketingPreferences {
+          id
+          optOutSms
+          optOutEmail
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        playerSummaryId
+        playerMarketingPreferencesId
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
     transactions {
       items {
         id
-        playerId
         type
         amount
+        rake
         paymentSource
         transactionDate
-        rake
         notes
-        gameId
+        playerId
         player {
           id
           firstName
@@ -16021,13 +14979,37 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -16043,40 +15025,16 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -16089,10 +15047,11 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
+        gameId
         createdAt
         updatedAt
         _version
@@ -16107,13 +15066,92 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
     results {
       items {
         id
-        playerId
-        gameId
         finishingPlace
         isMultiDayQualification
         prizeWon
         amountWon
         totalRunners
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        gameId
         game {
           id
           name
@@ -16122,40 +15160,37 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -16172,6 +15207,29 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -16183,6 +15241,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -16203,113 +15262,11 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             startedAt
             __typename
           }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           createdAt
           updatedAt
           _version
           _deleted
           _lastChangedAt
-          __typename
-        }
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
           __typename
         }
         createdAt
@@ -16326,12 +15283,91 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
     tickets {
       items {
         id
-        playerId
-        ticketTemplateId
         assignedAt
         expiryDate
         status
         usedInGameId
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        ticketTemplateId
         ticketTemplate {
           id
           name
@@ -16352,85 +15388,6 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           _lastChangedAt
           __typename
         }
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
         createdAt
         updatedAt
         _version
@@ -16442,217 +15399,15 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
       startedAt
       __typename
     }
-    marketingPreferences {
-      id
-      playerId
-      optOutSms
-      optOutEmail
-      player {
-        id
-        firstName
-        givenName
-        lastName
-        email
-        phone
-        registrationVenueId
-        creationDate
-        lastPlayedDate
-        status
-        category
-        targetingClassification
-        tier
-        transactions {
-          items {
-            id
-            playerId
-            type
-            amount
-            paymentSource
-            transactionDate
-            rake
-            notes
-            gameId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        results {
-          items {
-            id
-            playerId
-            gameId
-            finishingPlace
-            isMultiDayQualification
-            prizeWon
-            amountWon
-            totalRunners
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        tickets {
-          items {
-            id
-            playerId
-            ticketTemplateId
-            assignedAt
-            expiryDate
-            status
-            usedInGameId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        marketingPreferences {
-          id
-          playerId
-          optOutSms
-          optOutEmail
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        venueMemberships {
-          items {
-            id
-            playerId
-            venueId
-            totalGamesPlayed
-            averageBuyIn
-            firstPlayedDate
-            lastPlayedDate
-            targetingClassification
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        summary {
-          id
-          playerId
-          venuesVisited
-          sessionsPlayed
-          tournamentsPlayed
-          cashGamesPlayed
-          tournamentWinnings
-          tournamentBuyIns
-          cashGameWinnings
-          cashGameBuyIns
-          totalWinnings
-          totalBuyIns
-          netBalance
-          tournamentITM
-          tournamentsCashed
-          lastUpdated
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        playerMarketingPreferencesId
-        playerSummaryId
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
     venueMemberships {
       items {
         id
-        playerId
-        venueId
         totalGamesPlayed
         averageBuyIn
         firstPlayedDate
         lastPlayedDate
         targetingClassification
+        playerId
         player {
           id
           firstName
@@ -16660,13 +15415,37 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -16682,40 +15461,16 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -16728,10 +15483,11 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
+        venueId
         venue {
           id
           venueNumber
@@ -16742,13 +15498,13 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -16795,23 +15551,11 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
       startedAt
       __typename
     }
-    summary {
+    marketingPreferences {
       id
+      optOutSms
+      optOutEmail
       playerId
-      venuesVisited
-      sessionsPlayed
-      tournamentsPlayed
-      cashGamesPlayed
-      tournamentWinnings
-      tournamentBuyIns
-      cashGameWinnings
-      cashGameBuyIns
-      totalWinnings
-      totalBuyIns
-      netBalance
-      tournamentITM
-      tournamentsCashed
-      lastUpdated
       player {
         id
         firstName
@@ -16819,23 +15563,70 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
         lastName
         email
         phone
-        registrationVenueId
         creationDate
-        lastPlayedDate
         status
         category
-        targetingClassification
         tier
+        lastPlayedDate
+        targetingClassification
+        registrationVenueId
+        summary {
+          id
+          playerId
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          venuesVisited
+          tournamentWinnings
+          tournamentBuyIns
+          tournamentITM
+          tournamentsCashed
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         transactions {
           items {
             id
-            playerId
             type
             amount
+            rake
             paymentSource
             transactionDate
-            rake
             notes
+            playerId
             gameId
             createdAt
             updatedAt
@@ -16851,13 +15642,13 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
         results {
           items {
             id
-            playerId
-            gameId
             finishingPlace
             isMultiDayQualification
             prizeWon
             amountWon
             totalRunners
+            playerId
+            gameId
             createdAt
             updatedAt
             _version
@@ -16872,12 +15663,33 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
         tickets {
           items {
             id
-            playerId
-            ticketTemplateId
             assignedAt
             expiryDate
             status
             usedInGameId
+            playerId
+            ticketTemplateId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
             createdAt
             updatedAt
             _version
@@ -16891,77 +15703,9 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
         }
         marketingPreferences {
           id
-          playerId
           optOutSms
           optOutEmail
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        venueMemberships {
-          items {
-            id
-            playerId
-            venueId
-            totalGamesPlayed
-            averageBuyIn
-            firstPlayedDate
-            lastPlayedDate
-            targetingClassification
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        summary {
-          id
           playerId
-          venuesVisited
-          sessionsPlayed
-          tournamentsPlayed
-          cashGamesPlayed
-          tournamentWinnings
-          tournamentBuyIns
-          cashGameWinnings
-          cashGameBuyIns
-          totalWinnings
-          totalBuyIns
-          netBalance
-          tournamentITM
-          tournamentsCashed
-          lastUpdated
           player {
             id
             firstName
@@ -16969,20 +15713,20 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
           createdAt
@@ -16997,8 +15741,8 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
         _version
         _deleted
         _lastChangedAt
-        playerMarketingPreferencesId
         playerSummaryId
+        playerMarketingPreferencesId
         __typename
       }
       createdAt
@@ -17013,8 +15757,8 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
     _version
     _deleted
     _lastChangedAt
-    playerMarketingPreferencesId
     playerSummaryId
+    playerMarketingPreferencesId
     __typename
   }
 }
@@ -17033,24 +15777,236 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
     lastName
     email
     phone
-    registrationVenueId
     creationDate
-    lastPlayedDate
     status
     category
-    targetingClassification
     tier
+    lastPlayedDate
+    targetingClassification
+    registrationVenueId
+    summary {
+      id
+      playerId
+      sessionsPlayed
+      tournamentsPlayed
+      cashGamesPlayed
+      venuesVisited
+      tournamentWinnings
+      tournamentBuyIns
+      tournamentITM
+      tournamentsCashed
+      cashGameWinnings
+      cashGameBuyIns
+      totalWinnings
+      totalBuyIns
+      netBalance
+      lastUpdated
+      player {
+        id
+        firstName
+        givenName
+        lastName
+        email
+        phone
+        creationDate
+        status
+        category
+        tier
+        lastPlayedDate
+        targetingClassification
+        registrationVenueId
+        summary {
+          id
+          playerId
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          venuesVisited
+          tournamentWinnings
+          tournamentBuyIns
+          tournamentITM
+          tournamentsCashed
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        transactions {
+          items {
+            id
+            type
+            amount
+            rake
+            paymentSource
+            transactionDate
+            notes
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        results {
+          items {
+            id
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        tickets {
+          items {
+            id
+            assignedAt
+            expiryDate
+            status
+            usedInGameId
+            playerId
+            ticketTemplateId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        marketingPreferences {
+          id
+          optOutSms
+          optOutEmail
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        playerSummaryId
+        playerMarketingPreferencesId
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
     transactions {
       items {
         id
-        playerId
         type
         amount
+        rake
         paymentSource
         transactionDate
-        rake
         notes
-        gameId
+        playerId
         player {
           id
           firstName
@@ -17058,13 +16014,37 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -17080,40 +16060,16 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -17126,10 +16082,11 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
+        gameId
         createdAt
         updatedAt
         _version
@@ -17144,13 +16101,92 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
     results {
       items {
         id
-        playerId
-        gameId
         finishingPlace
         isMultiDayQualification
         prizeWon
         amountWon
         totalRunners
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        gameId
         game {
           id
           name
@@ -17159,40 +16195,37 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -17209,6 +16242,29 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -17220,6 +16276,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -17240,113 +16297,11 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             startedAt
             __typename
           }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           createdAt
           updatedAt
           _version
           _deleted
           _lastChangedAt
-          __typename
-        }
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
           __typename
         }
         createdAt
@@ -17363,12 +16318,91 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
     tickets {
       items {
         id
-        playerId
-        ticketTemplateId
         assignedAt
         expiryDate
         status
         usedInGameId
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        ticketTemplateId
         ticketTemplate {
           id
           name
@@ -17389,85 +16423,6 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           _lastChangedAt
           __typename
         }
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
         createdAt
         updatedAt
         _version
@@ -17479,217 +16434,15 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
       startedAt
       __typename
     }
-    marketingPreferences {
-      id
-      playerId
-      optOutSms
-      optOutEmail
-      player {
-        id
-        firstName
-        givenName
-        lastName
-        email
-        phone
-        registrationVenueId
-        creationDate
-        lastPlayedDate
-        status
-        category
-        targetingClassification
-        tier
-        transactions {
-          items {
-            id
-            playerId
-            type
-            amount
-            paymentSource
-            transactionDate
-            rake
-            notes
-            gameId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        results {
-          items {
-            id
-            playerId
-            gameId
-            finishingPlace
-            isMultiDayQualification
-            prizeWon
-            amountWon
-            totalRunners
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        tickets {
-          items {
-            id
-            playerId
-            ticketTemplateId
-            assignedAt
-            expiryDate
-            status
-            usedInGameId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        marketingPreferences {
-          id
-          playerId
-          optOutSms
-          optOutEmail
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        venueMemberships {
-          items {
-            id
-            playerId
-            venueId
-            totalGamesPlayed
-            averageBuyIn
-            firstPlayedDate
-            lastPlayedDate
-            targetingClassification
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        summary {
-          id
-          playerId
-          venuesVisited
-          sessionsPlayed
-          tournamentsPlayed
-          cashGamesPlayed
-          tournamentWinnings
-          tournamentBuyIns
-          cashGameWinnings
-          cashGameBuyIns
-          totalWinnings
-          totalBuyIns
-          netBalance
-          tournamentITM
-          tournamentsCashed
-          lastUpdated
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        playerMarketingPreferencesId
-        playerSummaryId
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
     venueMemberships {
       items {
         id
-        playerId
-        venueId
         totalGamesPlayed
         averageBuyIn
         firstPlayedDate
         lastPlayedDate
         targetingClassification
+        playerId
         player {
           id
           firstName
@@ -17697,13 +16450,37 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -17719,40 +16496,16 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -17765,10 +16518,11 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
+        venueId
         venue {
           id
           venueNumber
@@ -17779,13 +16533,13 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -17832,23 +16586,11 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
       startedAt
       __typename
     }
-    summary {
+    marketingPreferences {
       id
+      optOutSms
+      optOutEmail
       playerId
-      venuesVisited
-      sessionsPlayed
-      tournamentsPlayed
-      cashGamesPlayed
-      tournamentWinnings
-      tournamentBuyIns
-      cashGameWinnings
-      cashGameBuyIns
-      totalWinnings
-      totalBuyIns
-      netBalance
-      tournamentITM
-      tournamentsCashed
-      lastUpdated
       player {
         id
         firstName
@@ -17856,23 +16598,70 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
         lastName
         email
         phone
-        registrationVenueId
         creationDate
-        lastPlayedDate
         status
         category
-        targetingClassification
         tier
+        lastPlayedDate
+        targetingClassification
+        registrationVenueId
+        summary {
+          id
+          playerId
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          venuesVisited
+          tournamentWinnings
+          tournamentBuyIns
+          tournamentITM
+          tournamentsCashed
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         transactions {
           items {
             id
-            playerId
             type
             amount
+            rake
             paymentSource
             transactionDate
-            rake
             notes
+            playerId
             gameId
             createdAt
             updatedAt
@@ -17888,13 +16677,13 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
         results {
           items {
             id
-            playerId
-            gameId
             finishingPlace
             isMultiDayQualification
             prizeWon
             amountWon
             totalRunners
+            playerId
+            gameId
             createdAt
             updatedAt
             _version
@@ -17909,12 +16698,33 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
         tickets {
           items {
             id
-            playerId
-            ticketTemplateId
             assignedAt
             expiryDate
             status
             usedInGameId
+            playerId
+            ticketTemplateId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
             createdAt
             updatedAt
             _version
@@ -17928,77 +16738,9 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
         }
         marketingPreferences {
           id
-          playerId
           optOutSms
           optOutEmail
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        venueMemberships {
-          items {
-            id
-            playerId
-            venueId
-            totalGamesPlayed
-            averageBuyIn
-            firstPlayedDate
-            lastPlayedDate
-            targetingClassification
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        summary {
-          id
           playerId
-          venuesVisited
-          sessionsPlayed
-          tournamentsPlayed
-          cashGamesPlayed
-          tournamentWinnings
-          tournamentBuyIns
-          cashGameWinnings
-          cashGameBuyIns
-          totalWinnings
-          totalBuyIns
-          netBalance
-          tournamentITM
-          tournamentsCashed
-          lastUpdated
           player {
             id
             firstName
@@ -18006,20 +16748,20 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
           createdAt
@@ -18034,8 +16776,8 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
         _version
         _deleted
         _lastChangedAt
-        playerMarketingPreferencesId
         playerSummaryId
+        playerMarketingPreferencesId
         __typename
       }
       createdAt
@@ -18050,8 +16792,8 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
     _version
     _deleted
     _lastChangedAt
-    playerMarketingPreferencesId
     playerSummaryId
+    playerMarketingPreferencesId
     __typename
   }
 }
@@ -18066,19 +16808,19 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
   createPlayerSummary(input: $input, condition: $condition) {
     id
     playerId
-    venuesVisited
     sessionsPlayed
     tournamentsPlayed
     cashGamesPlayed
+    venuesVisited
     tournamentWinnings
     tournamentBuyIns
+    tournamentITM
+    tournamentsCashed
     cashGameWinnings
     cashGameBuyIns
     totalWinnings
     totalBuyIns
     netBalance
-    tournamentITM
-    tournamentsCashed
     lastUpdated
     player {
       id
@@ -18087,24 +16829,126 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
       lastName
       email
       phone
-      registrationVenueId
       creationDate
-      lastPlayedDate
       status
       category
-      targetingClassification
       tier
+      lastPlayedDate
+      targetingClassification
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       transactions {
         items {
           id
-          playerId
           type
           amount
+          rake
           paymentSource
           transactionDate
-          rake
           notes
-          gameId
+          playerId
           player {
             id
             firstName
@@ -18112,22 +16956,23 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          gameId
           createdAt
           updatedAt
           _version
@@ -18142,13 +16987,36 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
       results {
         items {
           id
-          playerId
-          gameId
           finishingPlace
           isMultiDayQualification
           prizeWon
           amountWon
           totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
           game {
             id
             name
@@ -18157,69 +17025,45 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
             __typename
           }
           createdAt
@@ -18236,12 +17080,35 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
       tickets {
         items {
           id
-          playerId
-          ticketTemplateId
           assignedAt
           expiryDate
           status
           usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
           ticketTemplate {
             id
             name
@@ -18257,29 +17124,6 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             _lastChangedAt
             __typename
           }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -18291,107 +17135,15 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
         startedAt
         __typename
       }
-      marketingPreferences {
-        id
-        playerId
-        optOutSms
-        optOutEmail
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       venueMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -18399,22 +17151,23 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -18442,23 +17195,11 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
         startedAt
         __typename
       }
-      summary {
+      marketingPreferences {
         id
+        optOutSms
+        optOutEmail
         playerId
-        venuesVisited
-        sessionsPlayed
-        tournamentsPlayed
-        cashGamesPlayed
-        tournamentWinnings
-        tournamentBuyIns
-        cashGameWinnings
-        cashGameBuyIns
-        totalWinnings
-        totalBuyIns
-        netBalance
-        tournamentITM
-        tournamentsCashed
-        lastUpdated
         player {
           id
           firstName
@@ -18466,13 +17207,37 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -18488,40 +17253,16 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -18534,8 +17275,8 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
         createdAt
@@ -18550,8 +17291,8 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
       _version
       _deleted
       _lastChangedAt
-      playerMarketingPreferencesId
       playerSummaryId
+      playerMarketingPreferencesId
       __typename
     }
     createdAt
@@ -18573,19 +17314,19 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
   updatePlayerSummary(input: $input, condition: $condition) {
     id
     playerId
-    venuesVisited
     sessionsPlayed
     tournamentsPlayed
     cashGamesPlayed
+    venuesVisited
     tournamentWinnings
     tournamentBuyIns
+    tournamentITM
+    tournamentsCashed
     cashGameWinnings
     cashGameBuyIns
     totalWinnings
     totalBuyIns
     netBalance
-    tournamentITM
-    tournamentsCashed
     lastUpdated
     player {
       id
@@ -18594,24 +17335,126 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
       lastName
       email
       phone
-      registrationVenueId
       creationDate
-      lastPlayedDate
       status
       category
-      targetingClassification
       tier
+      lastPlayedDate
+      targetingClassification
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       transactions {
         items {
           id
-          playerId
           type
           amount
+          rake
           paymentSource
           transactionDate
-          rake
           notes
-          gameId
+          playerId
           player {
             id
             firstName
@@ -18619,22 +17462,23 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          gameId
           createdAt
           updatedAt
           _version
@@ -18649,13 +17493,36 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
       results {
         items {
           id
-          playerId
-          gameId
           finishingPlace
           isMultiDayQualification
           prizeWon
           amountWon
           totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
           game {
             id
             name
@@ -18664,69 +17531,45 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
             __typename
           }
           createdAt
@@ -18743,12 +17586,35 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
       tickets {
         items {
           id
-          playerId
-          ticketTemplateId
           assignedAt
           expiryDate
           status
           usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
           ticketTemplate {
             id
             name
@@ -18764,29 +17630,6 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             _lastChangedAt
             __typename
           }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -18798,107 +17641,15 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
         startedAt
         __typename
       }
-      marketingPreferences {
-        id
-        playerId
-        optOutSms
-        optOutEmail
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       venueMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -18906,22 +17657,23 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -18949,23 +17701,11 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
         startedAt
         __typename
       }
-      summary {
+      marketingPreferences {
         id
+        optOutSms
+        optOutEmail
         playerId
-        venuesVisited
-        sessionsPlayed
-        tournamentsPlayed
-        cashGamesPlayed
-        tournamentWinnings
-        tournamentBuyIns
-        cashGameWinnings
-        cashGameBuyIns
-        totalWinnings
-        totalBuyIns
-        netBalance
-        tournamentITM
-        tournamentsCashed
-        lastUpdated
         player {
           id
           firstName
@@ -18973,13 +17713,37 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -18995,40 +17759,16 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -19041,8 +17781,8 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
         createdAt
@@ -19057,8 +17797,8 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
       _version
       _deleted
       _lastChangedAt
-      playerMarketingPreferencesId
       playerSummaryId
+      playerMarketingPreferencesId
       __typename
     }
     createdAt
@@ -19080,19 +17820,19 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
   deletePlayerSummary(input: $input, condition: $condition) {
     id
     playerId
-    venuesVisited
     sessionsPlayed
     tournamentsPlayed
     cashGamesPlayed
+    venuesVisited
     tournamentWinnings
     tournamentBuyIns
+    tournamentITM
+    tournamentsCashed
     cashGameWinnings
     cashGameBuyIns
     totalWinnings
     totalBuyIns
     netBalance
-    tournamentITM
-    tournamentsCashed
     lastUpdated
     player {
       id
@@ -19101,24 +17841,126 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
       lastName
       email
       phone
-      registrationVenueId
       creationDate
-      lastPlayedDate
       status
       category
-      targetingClassification
       tier
+      lastPlayedDate
+      targetingClassification
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       transactions {
         items {
           id
-          playerId
           type
           amount
+          rake
           paymentSource
           transactionDate
-          rake
           notes
-          gameId
+          playerId
           player {
             id
             firstName
@@ -19126,22 +17968,23 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          gameId
           createdAt
           updatedAt
           _version
@@ -19156,13 +17999,36 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
       results {
         items {
           id
-          playerId
-          gameId
           finishingPlace
           isMultiDayQualification
           prizeWon
           amountWon
           totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
           game {
             id
             name
@@ -19171,69 +18037,45 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
             __typename
           }
           createdAt
@@ -19250,12 +18092,35 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
       tickets {
         items {
           id
-          playerId
-          ticketTemplateId
           assignedAt
           expiryDate
           status
           usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
           ticketTemplate {
             id
             name
@@ -19271,29 +18136,6 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             _lastChangedAt
             __typename
           }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -19305,107 +18147,15 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
         startedAt
         __typename
       }
-      marketingPreferences {
-        id
-        playerId
-        optOutSms
-        optOutEmail
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       venueMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -19413,22 +18163,23 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -19456,23 +18207,11 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
         startedAt
         __typename
       }
-      summary {
+      marketingPreferences {
         id
+        optOutSms
+        optOutEmail
         playerId
-        venuesVisited
-        sessionsPlayed
-        tournamentsPlayed
-        cashGamesPlayed
-        tournamentWinnings
-        tournamentBuyIns
-        cashGameWinnings
-        cashGameBuyIns
-        totalWinnings
-        totalBuyIns
-        netBalance
-        tournamentITM
-        tournamentsCashed
-        lastUpdated
         player {
           id
           firstName
@@ -19480,13 +18219,37 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -19502,40 +18265,16 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -19548,8 +18287,8 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
         createdAt
@@ -19564,8 +18303,8 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
       _version
       _deleted
       _lastChangedAt
-      playerMarketingPreferencesId
       playerSummaryId
+      playerMarketingPreferencesId
       __typename
     }
     createdAt
@@ -19580,19 +18319,18 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
   APITypes.DeletePlayerSummaryMutationVariables,
   APITypes.DeletePlayerSummaryMutation
 >;
-export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
-  $input: CreatePlayerVenueInput!
-  $condition: ModelPlayerVenueConditionInput
+export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
+  $input: CreatePlayerResultInput!
+  $condition: ModelPlayerResultConditionInput
 ) {
-  createPlayerVenue(input: $input, condition: $condition) {
+  createPlayerResult(input: $input, condition: $condition) {
     id
+    finishingPlace
+    isMultiDayQualification
+    prizeWon
+    amountWon
+    totalRunners
     playerId
-    venueId
-    totalGamesPlayed
-    averageBuyIn
-    firstPlayedDate
-    lastPlayedDate
-    targetingClassification
     player {
       id
       firstName
@@ -19600,24 +18338,126 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
       lastName
       email
       phone
-      registrationVenueId
       creationDate
-      lastPlayedDate
       status
       category
-      targetingClassification
       tier
+      lastPlayedDate
+      targetingClassification
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       transactions {
         items {
           id
-          playerId
           type
           amount
+          rake
           paymentSource
           transactionDate
-          rake
           notes
-          gameId
+          playerId
           player {
             id
             firstName
@@ -19625,22 +18465,23 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          gameId
           createdAt
           updatedAt
           _version
@@ -19655,13 +18496,36 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
       results {
         items {
           id
-          playerId
-          gameId
           finishingPlace
           isMultiDayQualification
           prizeWon
           amountWon
           totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
           game {
             id
             name
@@ -19670,69 +18534,45 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
             __typename
           }
           createdAt
@@ -19749,12 +18589,35 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
       tickets {
         items {
           id
-          playerId
-          ticketTemplateId
           assignedAt
           expiryDate
           status
           usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
           ticketTemplate {
             id
             name
@@ -19770,29 +18633,6 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             _lastChangedAt
             __typename
           }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -19804,107 +18644,15 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
         startedAt
         __typename
       }
-      marketingPreferences {
-        id
-        playerId
-        optOutSms
-        optOutEmail
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       venueMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -19912,22 +18660,23 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -19955,23 +18704,11 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
         startedAt
         __typename
       }
-      summary {
+      marketingPreferences {
         id
+        optOutSms
+        optOutEmail
         playerId
-        venuesVisited
-        sessionsPlayed
-        tournamentsPlayed
-        cashGamesPlayed
-        tournamentWinnings
-        tournamentBuyIns
-        cashGameWinnings
-        cashGameBuyIns
-        totalWinnings
-        totalBuyIns
-        netBalance
-        tournamentITM
-        tournamentsCashed
-        lastUpdated
         player {
           id
           firstName
@@ -19979,13 +18716,37 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -20001,40 +18762,16 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -20047,8 +18784,8 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
         createdAt
@@ -20063,27 +18800,250 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
       _version
       _deleted
       _lastChangedAt
-      playerMarketingPreferencesId
       playerSummaryId
+      playerMarketingPreferencesId
       __typename
     }
-    venue {
+    gameId
+    game {
       id
-      venueNumber
       name
-      aliases
-      address
-      city
-      country
-      details {
+      gameType
+      gameVariant
+      gameStatus
+      gameStartDateTime
+      gameEndDateTime
+      registrationStatus
+      totalDuration
+      gameFrequency
+      buyIn
+      rake
+      startingStack
+      hasGuarantee
+      guaranteeAmount
+      prizepool
+      totalEntries
+      totalRebuys
+      totalAddons
+      revenueByBuyIns
+      totalRake
+      profitLoss
+      guaranteeOverlay
+      guaranteeSurplus
+      playersRemaining
+      totalChipsInPlay
+      averagePlayerStack
+      tournamentType
+      isRegular
+      isSeries
+      isSatellite
+      seriesName
+      gameTags
+      sourceUrl
+      doNotScrape
+      sourceDataIssue
+      gameDataVerified
+      venueId
+      venue {
         id
-        venueId
-        startDate
+        venueNumber
+        name
+        aliases
+        address
+        city
+        country
+        details {
+          id
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        series {
+          items {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
+      tournamentSeriesId
+      tournamentSeries {
+        id
+        name
+        year
         status
-        lastCustomerSuccessVisit
-        totalGamesHeld
-        averagePlayersPerGame
-        gameNights
+        startDate
+        endDate
+        events
+        numberOfEvents
+        guaranteedPrizepool
+        estimatedPrizepool
+        actualPrizepool
+        tournamentSeriesTitleId
+        title {
+          id
+          title
+          aliases
+          seriesInstances {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        venueId
         venue {
           id
           venueNumber
@@ -20094,13 +19054,3127 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      tournamentStructureId
+      tournamentStructure {
+        id
+        name
+        description
+        levels {
+          levelNumber
+          durationMinutes
+          smallBlind
+          bigBlind
+          ante
+          breakMinutes
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      cashStructureId
+      cashStructure {
+        id
+        name
+        smallBlind
+        bigBlind
+        minBuyIn
+        maxBuyIn
+        rakeStructureId
+        rakeStructure {
+          id
+          name
+          rakePercentage
+          maxRake
+          cashStructures {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      playerResults {
+        items {
+          id
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreatePlayerResultMutationVariables,
+  APITypes.CreatePlayerResultMutation
+>;
+export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
+  $input: UpdatePlayerResultInput!
+  $condition: ModelPlayerResultConditionInput
+) {
+  updatePlayerResult(input: $input, condition: $condition) {
+    id
+    finishingPlace
+    isMultiDayQualification
+    prizeWon
+    amountWon
+    totalRunners
+    playerId
+    player {
+      id
+      firstName
+      givenName
+      lastName
+      email
+      phone
+      creationDate
+      status
+      category
+      tier
+      lastPlayedDate
+      targetingClassification
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      transactions {
+        items {
+          id
+          type
+          amount
+          rake
+          paymentSource
+          transactionDate
+          notes
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        optOutSms
+        optOutEmail
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      playerSummaryId
+      playerMarketingPreferencesId
+      __typename
+    }
+    gameId
+    game {
+      id
+      name
+      gameType
+      gameVariant
+      gameStatus
+      gameStartDateTime
+      gameEndDateTime
+      registrationStatus
+      totalDuration
+      gameFrequency
+      buyIn
+      rake
+      startingStack
+      hasGuarantee
+      guaranteeAmount
+      prizepool
+      totalEntries
+      totalRebuys
+      totalAddons
+      revenueByBuyIns
+      totalRake
+      profitLoss
+      guaranteeOverlay
+      guaranteeSurplus
+      playersRemaining
+      totalChipsInPlay
+      averagePlayerStack
+      tournamentType
+      isRegular
+      isSeries
+      isSatellite
+      seriesName
+      gameTags
+      sourceUrl
+      doNotScrape
+      sourceDataIssue
+      gameDataVerified
+      venueId
+      venue {
+        id
+        venueNumber
+        name
+        aliases
+        address
+        city
+        country
+        details {
+          id
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        series {
+          items {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
+      tournamentSeriesId
+      tournamentSeries {
+        id
+        name
+        year
+        status
+        startDate
+        endDate
+        events
+        numberOfEvents
+        guaranteedPrizepool
+        estimatedPrizepool
+        actualPrizepool
+        tournamentSeriesTitleId
+        title {
+          id
+          title
+          aliases
+          seriesInstances {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        venueId
+        venue {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      tournamentStructureId
+      tournamentStructure {
+        id
+        name
+        description
+        levels {
+          levelNumber
+          durationMinutes
+          smallBlind
+          bigBlind
+          ante
+          breakMinutes
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      cashStructureId
+      cashStructure {
+        id
+        name
+        smallBlind
+        bigBlind
+        minBuyIn
+        maxBuyIn
+        rakeStructureId
+        rakeStructure {
+          id
+          name
+          rakePercentage
+          maxRake
+          cashStructures {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      playerResults {
+        items {
+          id
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdatePlayerResultMutationVariables,
+  APITypes.UpdatePlayerResultMutation
+>;
+export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
+  $input: DeletePlayerResultInput!
+  $condition: ModelPlayerResultConditionInput
+) {
+  deletePlayerResult(input: $input, condition: $condition) {
+    id
+    finishingPlace
+    isMultiDayQualification
+    prizeWon
+    amountWon
+    totalRunners
+    playerId
+    player {
+      id
+      firstName
+      givenName
+      lastName
+      email
+      phone
+      creationDate
+      status
+      category
+      tier
+      lastPlayedDate
+      targetingClassification
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      transactions {
+        items {
+          id
+          type
+          amount
+          rake
+          paymentSource
+          transactionDate
+          notes
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        optOutSms
+        optOutEmail
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      playerSummaryId
+      playerMarketingPreferencesId
+      __typename
+    }
+    gameId
+    game {
+      id
+      name
+      gameType
+      gameVariant
+      gameStatus
+      gameStartDateTime
+      gameEndDateTime
+      registrationStatus
+      totalDuration
+      gameFrequency
+      buyIn
+      rake
+      startingStack
+      hasGuarantee
+      guaranteeAmount
+      prizepool
+      totalEntries
+      totalRebuys
+      totalAddons
+      revenueByBuyIns
+      totalRake
+      profitLoss
+      guaranteeOverlay
+      guaranteeSurplus
+      playersRemaining
+      totalChipsInPlay
+      averagePlayerStack
+      tournamentType
+      isRegular
+      isSeries
+      isSatellite
+      seriesName
+      gameTags
+      sourceUrl
+      doNotScrape
+      sourceDataIssue
+      gameDataVerified
+      venueId
+      venue {
+        id
+        venueNumber
+        name
+        aliases
+        address
+        city
+        country
+        details {
+          id
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        series {
+          items {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
+      tournamentSeriesId
+      tournamentSeries {
+        id
+        name
+        year
+        status
+        startDate
+        endDate
+        events
+        numberOfEvents
+        guaranteedPrizepool
+        estimatedPrizepool
+        actualPrizepool
+        tournamentSeriesTitleId
+        title {
+          id
+          title
+          aliases
+          seriesInstances {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        venueId
+        venue {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      tournamentStructureId
+      tournamentStructure {
+        id
+        name
+        description
+        levels {
+          levelNumber
+          durationMinutes
+          smallBlind
+          bigBlind
+          ante
+          breakMinutes
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      cashStructureId
+      cashStructure {
+        id
+        name
+        smallBlind
+        bigBlind
+        minBuyIn
+        maxBuyIn
+        rakeStructureId
+        rakeStructure {
+          id
+          name
+          rakePercentage
+          maxRake
+          cashStructures {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      playerResults {
+        items {
+          id
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeletePlayerResultMutationVariables,
+  APITypes.DeletePlayerResultMutation
+>;
+export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
+  $input: CreatePlayerVenueInput!
+  $condition: ModelPlayerVenueConditionInput
+) {
+  createPlayerVenue(input: $input, condition: $condition) {
+    id
+    totalGamesPlayed
+    averageBuyIn
+    firstPlayedDate
+    lastPlayedDate
+    targetingClassification
+    playerId
+    player {
+      id
+      firstName
+      givenName
+      lastName
+      email
+      phone
+      creationDate
+      status
+      category
+      tier
+      lastPlayedDate
+      targetingClassification
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      transactions {
+        items {
+          id
+          type
+          amount
+          rake
+          paymentSource
+          transactionDate
+          notes
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        optOutSms
+        optOutEmail
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      playerSummaryId
+      playerMarketingPreferencesId
+      __typename
+    }
+    venueId
+    venue {
+      id
+      venueNumber
+      name
+      aliases
+      address
+      city
+      country
+      details {
+        id
+        startDate
+        status
+        lastCustomerSuccessVisit
+        totalGamesHeld
+        averagePlayersPerGame
+        gameNights
+        venueId
+        venue {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -20188,40 +22262,37 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -20238,6 +22309,29 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -20249,6 +22343,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -20269,29 +22364,6 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             startedAt
             __typename
           }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -20306,9 +22378,9 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
       series {
         items {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -20316,11 +22388,11 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -20364,13 +22436,12 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
       playerMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -20378,22 +22449,23 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -20447,13 +22519,12 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
 ) {
   updatePlayerVenue(input: $input, condition: $condition) {
     id
-    playerId
-    venueId
     totalGamesPlayed
     averageBuyIn
     firstPlayedDate
     lastPlayedDate
     targetingClassification
+    playerId
     player {
       id
       firstName
@@ -20461,24 +22532,126 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
       lastName
       email
       phone
-      registrationVenueId
       creationDate
-      lastPlayedDate
       status
       category
-      targetingClassification
       tier
+      lastPlayedDate
+      targetingClassification
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       transactions {
         items {
           id
-          playerId
           type
           amount
+          rake
           paymentSource
           transactionDate
-          rake
           notes
-          gameId
+          playerId
           player {
             id
             firstName
@@ -20486,22 +22659,23 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          gameId
           createdAt
           updatedAt
           _version
@@ -20516,13 +22690,36 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
       results {
         items {
           id
-          playerId
-          gameId
           finishingPlace
           isMultiDayQualification
           prizeWon
           amountWon
           totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
           game {
             id
             name
@@ -20531,69 +22728,45 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
             __typename
           }
           createdAt
@@ -20610,12 +22783,35 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
       tickets {
         items {
           id
-          playerId
-          ticketTemplateId
           assignedAt
           expiryDate
           status
           usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
           ticketTemplate {
             id
             name
@@ -20631,29 +22827,6 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             _lastChangedAt
             __typename
           }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -20665,107 +22838,15 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
         startedAt
         __typename
       }
-      marketingPreferences {
-        id
-        playerId
-        optOutSms
-        optOutEmail
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       venueMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -20773,22 +22854,23 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -20816,23 +22898,11 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
         startedAt
         __typename
       }
-      summary {
+      marketingPreferences {
         id
+        optOutSms
+        optOutEmail
         playerId
-        venuesVisited
-        sessionsPlayed
-        tournamentsPlayed
-        cashGamesPlayed
-        tournamentWinnings
-        tournamentBuyIns
-        cashGameWinnings
-        cashGameBuyIns
-        totalWinnings
-        totalBuyIns
-        netBalance
-        tournamentITM
-        tournamentsCashed
-        lastUpdated
         player {
           id
           firstName
@@ -20840,13 +22910,37 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -20862,40 +22956,16 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -20908,8 +22978,8 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
         createdAt
@@ -20924,10 +22994,11 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
       _version
       _deleted
       _lastChangedAt
-      playerMarketingPreferencesId
       playerSummaryId
+      playerMarketingPreferencesId
       __typename
     }
+    venueId
     venue {
       id
       venueNumber
@@ -20938,13 +23009,13 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
       country
       details {
         id
-        venueId
         startDate
         status
         lastCustomerSuccessVisit
         totalGamesHeld
         averagePlayersPerGame
         gameNights
+        venueId
         venue {
           id
           venueNumber
@@ -20955,13 +23026,13 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -21049,40 +23120,37 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -21099,6 +23167,29 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -21110,6 +23201,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -21130,29 +23222,6 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             startedAt
             __typename
           }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -21167,9 +23236,9 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
       series {
         items {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -21177,11 +23246,11 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -21225,13 +23294,12 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
       playerMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -21239,22 +23307,23 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -21308,13 +23377,12 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
 ) {
   deletePlayerVenue(input: $input, condition: $condition) {
     id
-    playerId
-    venueId
     totalGamesPlayed
     averageBuyIn
     firstPlayedDate
     lastPlayedDate
     targetingClassification
+    playerId
     player {
       id
       firstName
@@ -21322,24 +23390,126 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
       lastName
       email
       phone
-      registrationVenueId
       creationDate
-      lastPlayedDate
       status
       category
-      targetingClassification
       tier
+      lastPlayedDate
+      targetingClassification
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       transactions {
         items {
           id
-          playerId
           type
           amount
+          rake
           paymentSource
           transactionDate
-          rake
           notes
-          gameId
+          playerId
           player {
             id
             firstName
@@ -21347,22 +23517,23 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          gameId
           createdAt
           updatedAt
           _version
@@ -21377,13 +23548,36 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
       results {
         items {
           id
-          playerId
-          gameId
           finishingPlace
           isMultiDayQualification
           prizeWon
           amountWon
           totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
           game {
             id
             name
@@ -21392,69 +23586,45 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
             __typename
           }
           createdAt
@@ -21471,12 +23641,35 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
       tickets {
         items {
           id
-          playerId
-          ticketTemplateId
           assignedAt
           expiryDate
           status
           usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
           ticketTemplate {
             id
             name
@@ -21492,29 +23685,6 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             _lastChangedAt
             __typename
           }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -21526,107 +23696,15 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
         startedAt
         __typename
       }
-      marketingPreferences {
-        id
-        playerId
-        optOutSms
-        optOutEmail
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       venueMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -21634,22 +23712,23 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -21677,23 +23756,11 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
         startedAt
         __typename
       }
-      summary {
+      marketingPreferences {
         id
+        optOutSms
+        optOutEmail
         playerId
-        venuesVisited
-        sessionsPlayed
-        tournamentsPlayed
-        cashGamesPlayed
-        tournamentWinnings
-        tournamentBuyIns
-        cashGameWinnings
-        cashGameBuyIns
-        totalWinnings
-        totalBuyIns
-        netBalance
-        tournamentITM
-        tournamentsCashed
-        lastUpdated
         player {
           id
           firstName
@@ -21701,13 +23768,37 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -21723,40 +23814,16 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -21769,8 +23836,8 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
         createdAt
@@ -21785,10 +23852,11 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
       _version
       _deleted
       _lastChangedAt
-      playerMarketingPreferencesId
       playerSummaryId
+      playerMarketingPreferencesId
       __typename
     }
+    venueId
     venue {
       id
       venueNumber
@@ -21799,13 +23867,13 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
       country
       details {
         id
-        venueId
         startDate
         status
         lastCustomerSuccessVisit
         totalGamesHeld
         averagePlayersPerGame
         gameNights
+        venueId
         venue {
           id
           venueNumber
@@ -21816,13 +23884,13 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           country
           details {
             id
-            venueId
             startDate
             status
             lastCustomerSuccessVisit
             totalGamesHeld
             averagePlayersPerGame
             gameNights
+            venueId
             createdAt
             updatedAt
             _version
@@ -21910,40 +23978,37 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           gameStatus
           gameStartDateTime
           gameEndDateTime
-          venueId
-          sourceUrl
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          seriesName
-          isRegular
-          isSeries
-          isRecurring
-          gameFrequency
-          isSatellite
           registrationStatus
-          prizepool
-          revenueByBuyIns
-          totalEntries
-          totalRebuys
-          totalAddons
           totalDuration
-          gameTags
-          tournamentType
+          gameFrequency
           buyIn
           rake
-          totalRake
-          profitLoss
           startingStack
           hasGuarantee
           guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
           guaranteeOverlay
           guaranteeSurplus
           playersRemaining
           totalChipsInPlay
           averagePlayerStack
-          tournamentStructureId
-          cashStructureId
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
           venue {
             id
             venueNumber
@@ -21960,6 +24025,29 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             venueDetailsId
             __typename
           }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
           tournamentStructure {
             id
             name
@@ -21971,6 +24059,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             _lastChangedAt
             __typename
           }
+          cashStructureId
           cashStructure {
             id
             name
@@ -21991,29 +24080,6 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             startedAt
             __typename
           }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -22028,9 +24094,9 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
       series {
         items {
           id
-          year
           name
-          aliases
+          year
+          status
           startDate
           endDate
           events
@@ -22038,11 +24104,11 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           guaranteedPrizepool
           estimatedPrizepool
           actualPrizepool
-          status
           tournamentSeriesTitleId
           title {
             id
             title
+            aliases
             createdAt
             updatedAt
             _version
@@ -22086,13 +24152,12 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
       playerMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -22100,22 +24165,23 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -22169,14 +24235,13 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
 ) {
   createPlayerTransaction(input: $input, condition: $condition) {
     id
-    playerId
     type
     amount
+    rake
     paymentSource
     transactionDate
-    rake
     notes
-    gameId
+    playerId
     player {
       id
       firstName
@@ -22184,24 +24249,126 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
       lastName
       email
       phone
-      registrationVenueId
       creationDate
-      lastPlayedDate
       status
       category
-      targetingClassification
       tier
+      lastPlayedDate
+      targetingClassification
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       transactions {
         items {
           id
-          playerId
           type
           amount
+          rake
           paymentSource
           transactionDate
-          rake
           notes
-          gameId
+          playerId
           player {
             id
             firstName
@@ -22209,22 +24376,23 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          gameId
           createdAt
           updatedAt
           _version
@@ -22239,13 +24407,36 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
       results {
         items {
           id
-          playerId
-          gameId
           finishingPlace
           isMultiDayQualification
           prizeWon
           amountWon
           totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
           game {
             id
             name
@@ -22254,69 +24445,45 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
             __typename
           }
           createdAt
@@ -22333,12 +24500,35 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
       tickets {
         items {
           id
-          playerId
-          ticketTemplateId
           assignedAt
           expiryDate
           status
           usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
           ticketTemplate {
             id
             name
@@ -22354,29 +24544,6 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             _lastChangedAt
             __typename
           }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -22388,107 +24555,15 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
         startedAt
         __typename
       }
-      marketingPreferences {
-        id
-        playerId
-        optOutSms
-        optOutEmail
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       venueMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -22496,22 +24571,23 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -22539,23 +24615,11 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
         startedAt
         __typename
       }
-      summary {
+      marketingPreferences {
         id
+        optOutSms
+        optOutEmail
         playerId
-        venuesVisited
-        sessionsPlayed
-        tournamentsPlayed
-        cashGamesPlayed
-        tournamentWinnings
-        tournamentBuyIns
-        cashGameWinnings
-        cashGameBuyIns
-        totalWinnings
-        totalBuyIns
-        netBalance
-        tournamentITM
-        tournamentsCashed
-        lastUpdated
         player {
           id
           firstName
@@ -22563,13 +24627,37 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -22585,40 +24673,16 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -22631,8 +24695,8 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
         createdAt
@@ -22647,10 +24711,11 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
       _version
       _deleted
       _lastChangedAt
-      playerMarketingPreferencesId
       playerSummaryId
+      playerMarketingPreferencesId
       __typename
     }
+    gameId
     createdAt
     updatedAt
     _version
@@ -22669,14 +24734,13 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
 ) {
   updatePlayerTransaction(input: $input, condition: $condition) {
     id
-    playerId
     type
     amount
+    rake
     paymentSource
     transactionDate
-    rake
     notes
-    gameId
+    playerId
     player {
       id
       firstName
@@ -22684,24 +24748,126 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
       lastName
       email
       phone
-      registrationVenueId
       creationDate
-      lastPlayedDate
       status
       category
-      targetingClassification
       tier
+      lastPlayedDate
+      targetingClassification
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       transactions {
         items {
           id
-          playerId
           type
           amount
+          rake
           paymentSource
           transactionDate
-          rake
           notes
-          gameId
+          playerId
           player {
             id
             firstName
@@ -22709,22 +24875,23 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          gameId
           createdAt
           updatedAt
           _version
@@ -22739,13 +24906,36 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
       results {
         items {
           id
-          playerId
-          gameId
           finishingPlace
           isMultiDayQualification
           prizeWon
           amountWon
           totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
           game {
             id
             name
@@ -22754,69 +24944,45 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
             __typename
           }
           createdAt
@@ -22833,12 +24999,35 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
       tickets {
         items {
           id
-          playerId
-          ticketTemplateId
           assignedAt
           expiryDate
           status
           usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
           ticketTemplate {
             id
             name
@@ -22854,29 +25043,6 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             _lastChangedAt
             __typename
           }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -22888,107 +25054,15 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
         startedAt
         __typename
       }
-      marketingPreferences {
-        id
-        playerId
-        optOutSms
-        optOutEmail
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       venueMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -22996,22 +25070,23 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -23039,23 +25114,11 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
         startedAt
         __typename
       }
-      summary {
+      marketingPreferences {
         id
+        optOutSms
+        optOutEmail
         playerId
-        venuesVisited
-        sessionsPlayed
-        tournamentsPlayed
-        cashGamesPlayed
-        tournamentWinnings
-        tournamentBuyIns
-        cashGameWinnings
-        cashGameBuyIns
-        totalWinnings
-        totalBuyIns
-        netBalance
-        tournamentITM
-        tournamentsCashed
-        lastUpdated
         player {
           id
           firstName
@@ -23063,13 +25126,37 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -23085,40 +25172,16 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -23131,8 +25194,8 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
         createdAt
@@ -23147,10 +25210,11 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
       _version
       _deleted
       _lastChangedAt
-      playerMarketingPreferencesId
       playerSummaryId
+      playerMarketingPreferencesId
       __typename
     }
+    gameId
     createdAt
     updatedAt
     _version
@@ -23169,14 +25233,13 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
 ) {
   deletePlayerTransaction(input: $input, condition: $condition) {
     id
-    playerId
     type
     amount
+    rake
     paymentSource
     transactionDate
-    rake
     notes
-    gameId
+    playerId
     player {
       id
       firstName
@@ -23184,24 +25247,126 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
       lastName
       email
       phone
-      registrationVenueId
       creationDate
-      lastPlayedDate
       status
       category
-      targetingClassification
       tier
+      lastPlayedDate
+      targetingClassification
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       transactions {
         items {
           id
-          playerId
           type
           amount
+          rake
           paymentSource
           transactionDate
-          rake
           notes
-          gameId
+          playerId
           player {
             id
             firstName
@@ -23209,22 +25374,23 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          gameId
           createdAt
           updatedAt
           _version
@@ -23239,13 +25405,36 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
       results {
         items {
           id
-          playerId
-          gameId
           finishingPlace
           isMultiDayQualification
           prizeWon
           amountWon
           totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
           game {
             id
             name
@@ -23254,69 +25443,45 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
             __typename
           }
           createdAt
@@ -23333,12 +25498,35 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
       tickets {
         items {
           id
-          playerId
-          ticketTemplateId
           assignedAt
           expiryDate
           status
           usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
           ticketTemplate {
             id
             name
@@ -23354,29 +25542,6 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             _lastChangedAt
             __typename
           }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -23388,107 +25553,15 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
         startedAt
         __typename
       }
-      marketingPreferences {
-        id
-        playerId
-        optOutSms
-        optOutEmail
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       venueMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -23496,22 +25569,23 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -23539,23 +25613,11 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
         startedAt
         __typename
       }
-      summary {
+      marketingPreferences {
         id
+        optOutSms
+        optOutEmail
         playerId
-        venuesVisited
-        sessionsPlayed
-        tournamentsPlayed
-        cashGamesPlayed
-        tournamentWinnings
-        tournamentBuyIns
-        cashGameWinnings
-        cashGameBuyIns
-        totalWinnings
-        totalBuyIns
-        netBalance
-        tournamentITM
-        tournamentsCashed
-        lastUpdated
         player {
           id
           firstName
@@ -23563,13 +25625,37 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -23585,40 +25671,16 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -23631,8 +25693,8 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
         createdAt
@@ -23647,10 +25709,11 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
       _version
       _deleted
       _lastChangedAt
-      playerMarketingPreferencesId
       playerSummaryId
+      playerMarketingPreferencesId
       __typename
     }
+    gameId
     createdAt
     updatedAt
     _version
@@ -23662,4917 +25725,6 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
 ` as GeneratedMutation<
   APITypes.DeletePlayerTransactionMutationVariables,
   APITypes.DeletePlayerTransactionMutation
->;
-export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
-  $input: CreatePlayerResultInput!
-  $condition: ModelPlayerResultConditionInput
-) {
-  createPlayerResult(input: $input, condition: $condition) {
-    id
-    playerId
-    gameId
-    finishingPlace
-    isMultiDayQualification
-    prizeWon
-    amountWon
-    totalRunners
-    game {
-      id
-      name
-      gameType
-      gameVariant
-      gameStatus
-      gameStartDateTime
-      gameEndDateTime
-      venueId
-      sourceUrl
-      doNotScrape
-      sourceDataIssue
-      gameDataVerified
-      seriesName
-      isRegular
-      isSeries
-      isRecurring
-      gameFrequency
-      isSatellite
-      registrationStatus
-      prizepool
-      revenueByBuyIns
-      totalEntries
-      totalRebuys
-      totalAddons
-      totalDuration
-      gameTags
-      tournamentType
-      buyIn
-      rake
-      totalRake
-      profitLoss
-      startingStack
-      hasGuarantee
-      guaranteeAmount
-      guaranteeOverlay
-      guaranteeSurplus
-      playersRemaining
-      totalChipsInPlay
-      averagePlayerStack
-      tournamentStructureId
-      cashStructureId
-      venue {
-        id
-        venueNumber
-        name
-        aliases
-        address
-        city
-        country
-        details {
-          id
-          venueId
-          startDate
-          status
-          lastCustomerSuccessVisit
-          totalGamesHeld
-          averagePlayersPerGame
-          gameNights
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        assets {
-          items {
-            id
-            name
-            type
-            condition
-            acquiredDate
-            lastCheckedDate
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        series {
-          items {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        playerMemberships {
-          items {
-            id
-            playerId
-            venueId
-            totalGamesPlayed
-            averageBuyIn
-            firstPlayedDate
-            lastPlayedDate
-            targetingClassification
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        venueDetailsId
-        __typename
-      }
-      tournamentStructure {
-        id
-        name
-        description
-        levels {
-          levelNumber
-          durationMinutes
-          smallBlind
-          bigBlind
-          ante
-          breakMinutes
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      cashStructure {
-        id
-        name
-        smallBlind
-        bigBlind
-        minBuyIn
-        maxBuyIn
-        rakeStructureId
-        rakeStructure {
-          id
-          name
-          rakePercentage
-          maxRake
-          cashStructures {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      playerResults {
-        items {
-          id
-          playerId
-          gameId
-          finishingPlace
-          isMultiDayQualification
-          prizeWon
-          amountWon
-          totalRunners
-          game {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      tournamentSeriesId
-      tournamentSeries {
-        id
-        year
-        name
-        aliases
-        startDate
-        endDate
-        events
-        numberOfEvents
-        guaranteedPrizepool
-        estimatedPrizepool
-        actualPrizepool
-        status
-        tournamentSeriesTitleId
-        title {
-          id
-          title
-          seriesInstances {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        venueId
-        venue {
-          id
-          venueNumber
-          name
-          aliases
-          address
-          city
-          country
-          details {
-            id
-            venueId
-            startDate
-            status
-            lastCustomerSuccessVisit
-            totalGamesHeld
-            averagePlayersPerGame
-            gameNights
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          assets {
-            nextToken
-            startedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          series {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          venueDetailsId
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    player {
-      id
-      firstName
-      givenName
-      lastName
-      email
-      phone
-      registrationVenueId
-      creationDate
-      lastPlayedDate
-      status
-      category
-      targetingClassification
-      tier
-      transactions {
-        items {
-          id
-          playerId
-          type
-          amount
-          paymentSource
-          transactionDate
-          rake
-          notes
-          gameId
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      results {
-        items {
-          id
-          playerId
-          gameId
-          finishingPlace
-          isMultiDayQualification
-          prizeWon
-          amountWon
-          totalRunners
-          game {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      tickets {
-        items {
-          id
-          playerId
-          ticketTemplateId
-          assignedAt
-          expiryDate
-          status
-          usedInGameId
-          ticketTemplate {
-            id
-            name
-            description
-            value
-            validityDays
-            originGameId
-            targetGameId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      marketingPreferences {
-        id
-        playerId
-        optOutSms
-        optOutEmail
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      venueMemberships {
-        items {
-          id
-          playerId
-          venueId
-          totalGamesPlayed
-          averageBuyIn
-          firstPlayedDate
-          lastPlayedDate
-          targetingClassification
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      summary {
-        id
-        playerId
-        venuesVisited
-        sessionsPlayed
-        tournamentsPlayed
-        cashGamesPlayed
-        tournamentWinnings
-        tournamentBuyIns
-        cashGameWinnings
-        cashGameBuyIns
-        totalWinnings
-        totalBuyIns
-        netBalance
-        tournamentITM
-        tournamentsCashed
-        lastUpdated
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      playerMarketingPreferencesId
-      playerSummaryId
-      __typename
-    }
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreatePlayerResultMutationVariables,
-  APITypes.CreatePlayerResultMutation
->;
-export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
-  $input: UpdatePlayerResultInput!
-  $condition: ModelPlayerResultConditionInput
-) {
-  updatePlayerResult(input: $input, condition: $condition) {
-    id
-    playerId
-    gameId
-    finishingPlace
-    isMultiDayQualification
-    prizeWon
-    amountWon
-    totalRunners
-    game {
-      id
-      name
-      gameType
-      gameVariant
-      gameStatus
-      gameStartDateTime
-      gameEndDateTime
-      venueId
-      sourceUrl
-      doNotScrape
-      sourceDataIssue
-      gameDataVerified
-      seriesName
-      isRegular
-      isSeries
-      isRecurring
-      gameFrequency
-      isSatellite
-      registrationStatus
-      prizepool
-      revenueByBuyIns
-      totalEntries
-      totalRebuys
-      totalAddons
-      totalDuration
-      gameTags
-      tournamentType
-      buyIn
-      rake
-      totalRake
-      profitLoss
-      startingStack
-      hasGuarantee
-      guaranteeAmount
-      guaranteeOverlay
-      guaranteeSurplus
-      playersRemaining
-      totalChipsInPlay
-      averagePlayerStack
-      tournamentStructureId
-      cashStructureId
-      venue {
-        id
-        venueNumber
-        name
-        aliases
-        address
-        city
-        country
-        details {
-          id
-          venueId
-          startDate
-          status
-          lastCustomerSuccessVisit
-          totalGamesHeld
-          averagePlayersPerGame
-          gameNights
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        assets {
-          items {
-            id
-            name
-            type
-            condition
-            acquiredDate
-            lastCheckedDate
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        series {
-          items {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        playerMemberships {
-          items {
-            id
-            playerId
-            venueId
-            totalGamesPlayed
-            averageBuyIn
-            firstPlayedDate
-            lastPlayedDate
-            targetingClassification
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        venueDetailsId
-        __typename
-      }
-      tournamentStructure {
-        id
-        name
-        description
-        levels {
-          levelNumber
-          durationMinutes
-          smallBlind
-          bigBlind
-          ante
-          breakMinutes
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      cashStructure {
-        id
-        name
-        smallBlind
-        bigBlind
-        minBuyIn
-        maxBuyIn
-        rakeStructureId
-        rakeStructure {
-          id
-          name
-          rakePercentage
-          maxRake
-          cashStructures {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      playerResults {
-        items {
-          id
-          playerId
-          gameId
-          finishingPlace
-          isMultiDayQualification
-          prizeWon
-          amountWon
-          totalRunners
-          game {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      tournamentSeriesId
-      tournamentSeries {
-        id
-        year
-        name
-        aliases
-        startDate
-        endDate
-        events
-        numberOfEvents
-        guaranteedPrizepool
-        estimatedPrizepool
-        actualPrizepool
-        status
-        tournamentSeriesTitleId
-        title {
-          id
-          title
-          seriesInstances {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        venueId
-        venue {
-          id
-          venueNumber
-          name
-          aliases
-          address
-          city
-          country
-          details {
-            id
-            venueId
-            startDate
-            status
-            lastCustomerSuccessVisit
-            totalGamesHeld
-            averagePlayersPerGame
-            gameNights
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          assets {
-            nextToken
-            startedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          series {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          venueDetailsId
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    player {
-      id
-      firstName
-      givenName
-      lastName
-      email
-      phone
-      registrationVenueId
-      creationDate
-      lastPlayedDate
-      status
-      category
-      targetingClassification
-      tier
-      transactions {
-        items {
-          id
-          playerId
-          type
-          amount
-          paymentSource
-          transactionDate
-          rake
-          notes
-          gameId
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      results {
-        items {
-          id
-          playerId
-          gameId
-          finishingPlace
-          isMultiDayQualification
-          prizeWon
-          amountWon
-          totalRunners
-          game {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      tickets {
-        items {
-          id
-          playerId
-          ticketTemplateId
-          assignedAt
-          expiryDate
-          status
-          usedInGameId
-          ticketTemplate {
-            id
-            name
-            description
-            value
-            validityDays
-            originGameId
-            targetGameId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      marketingPreferences {
-        id
-        playerId
-        optOutSms
-        optOutEmail
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      venueMemberships {
-        items {
-          id
-          playerId
-          venueId
-          totalGamesPlayed
-          averageBuyIn
-          firstPlayedDate
-          lastPlayedDate
-          targetingClassification
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      summary {
-        id
-        playerId
-        venuesVisited
-        sessionsPlayed
-        tournamentsPlayed
-        cashGamesPlayed
-        tournamentWinnings
-        tournamentBuyIns
-        cashGameWinnings
-        cashGameBuyIns
-        totalWinnings
-        totalBuyIns
-        netBalance
-        tournamentITM
-        tournamentsCashed
-        lastUpdated
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      playerMarketingPreferencesId
-      playerSummaryId
-      __typename
-    }
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdatePlayerResultMutationVariables,
-  APITypes.UpdatePlayerResultMutation
->;
-export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
-  $input: DeletePlayerResultInput!
-  $condition: ModelPlayerResultConditionInput
-) {
-  deletePlayerResult(input: $input, condition: $condition) {
-    id
-    playerId
-    gameId
-    finishingPlace
-    isMultiDayQualification
-    prizeWon
-    amountWon
-    totalRunners
-    game {
-      id
-      name
-      gameType
-      gameVariant
-      gameStatus
-      gameStartDateTime
-      gameEndDateTime
-      venueId
-      sourceUrl
-      doNotScrape
-      sourceDataIssue
-      gameDataVerified
-      seriesName
-      isRegular
-      isSeries
-      isRecurring
-      gameFrequency
-      isSatellite
-      registrationStatus
-      prizepool
-      revenueByBuyIns
-      totalEntries
-      totalRebuys
-      totalAddons
-      totalDuration
-      gameTags
-      tournamentType
-      buyIn
-      rake
-      totalRake
-      profitLoss
-      startingStack
-      hasGuarantee
-      guaranteeAmount
-      guaranteeOverlay
-      guaranteeSurplus
-      playersRemaining
-      totalChipsInPlay
-      averagePlayerStack
-      tournamentStructureId
-      cashStructureId
-      venue {
-        id
-        venueNumber
-        name
-        aliases
-        address
-        city
-        country
-        details {
-          id
-          venueId
-          startDate
-          status
-          lastCustomerSuccessVisit
-          totalGamesHeld
-          averagePlayersPerGame
-          gameNights
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        assets {
-          items {
-            id
-            name
-            type
-            condition
-            acquiredDate
-            lastCheckedDate
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        series {
-          items {
-            id
-            year
-            name
-            aliases
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            status
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        playerMemberships {
-          items {
-            id
-            playerId
-            venueId
-            totalGamesPlayed
-            averageBuyIn
-            firstPlayedDate
-            lastPlayedDate
-            targetingClassification
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        venueDetailsId
-        __typename
-      }
-      tournamentStructure {
-        id
-        name
-        description
-        levels {
-          levelNumber
-          durationMinutes
-          smallBlind
-          bigBlind
-          ante
-          breakMinutes
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      cashStructure {
-        id
-        name
-        smallBlind
-        bigBlind
-        minBuyIn
-        maxBuyIn
-        rakeStructureId
-        rakeStructure {
-          id
-          name
-          rakePercentage
-          maxRake
-          cashStructures {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      playerResults {
-        items {
-          id
-          playerId
-          gameId
-          finishingPlace
-          isMultiDayQualification
-          prizeWon
-          amountWon
-          totalRunners
-          game {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      tournamentSeriesId
-      tournamentSeries {
-        id
-        year
-        name
-        aliases
-        startDate
-        endDate
-        events
-        numberOfEvents
-        guaranteedPrizepool
-        estimatedPrizepool
-        actualPrizepool
-        status
-        tournamentSeriesTitleId
-        title {
-          id
-          title
-          seriesInstances {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        venueId
-        venue {
-          id
-          venueNumber
-          name
-          aliases
-          address
-          city
-          country
-          details {
-            id
-            venueId
-            startDate
-            status
-            lastCustomerSuccessVisit
-            totalGamesHeld
-            averagePlayersPerGame
-            gameNights
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          assets {
-            nextToken
-            startedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          series {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          venueDetailsId
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    player {
-      id
-      firstName
-      givenName
-      lastName
-      email
-      phone
-      registrationVenueId
-      creationDate
-      lastPlayedDate
-      status
-      category
-      targetingClassification
-      tier
-      transactions {
-        items {
-          id
-          playerId
-          type
-          amount
-          paymentSource
-          transactionDate
-          rake
-          notes
-          gameId
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      results {
-        items {
-          id
-          playerId
-          gameId
-          finishingPlace
-          isMultiDayQualification
-          prizeWon
-          amountWon
-          totalRunners
-          game {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      tickets {
-        items {
-          id
-          playerId
-          ticketTemplateId
-          assignedAt
-          expiryDate
-          status
-          usedInGameId
-          ticketTemplate {
-            id
-            name
-            description
-            value
-            validityDays
-            originGameId
-            targetGameId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      marketingPreferences {
-        id
-        playerId
-        optOutSms
-        optOutEmail
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      venueMemberships {
-        items {
-          id
-          playerId
-          venueId
-          totalGamesPlayed
-          averageBuyIn
-          firstPlayedDate
-          lastPlayedDate
-          targetingClassification
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      summary {
-        id
-        playerId
-        venuesVisited
-        sessionsPlayed
-        tournamentsPlayed
-        cashGamesPlayed
-        tournamentWinnings
-        tournamentBuyIns
-        cashGameWinnings
-        cashGameBuyIns
-        totalWinnings
-        totalBuyIns
-        netBalance
-        tournamentITM
-        tournamentsCashed
-        lastUpdated
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      playerMarketingPreferencesId
-      playerSummaryId
-      __typename
-    }
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeletePlayerResultMutationVariables,
-  APITypes.DeletePlayerResultMutation
->;
-export const createPlayerMarketingMessage = /* GraphQL */ `mutation CreatePlayerMarketingMessage(
-  $input: CreatePlayerMarketingMessageInput!
-  $condition: ModelPlayerMarketingMessageConditionInput
-) {
-  createPlayerMarketingMessage(input: $input, condition: $condition) {
-    id
-    playerId
-    marketingMessageId
-    status
-    sentAt
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreatePlayerMarketingMessageMutationVariables,
-  APITypes.CreatePlayerMarketingMessageMutation
->;
-export const updatePlayerMarketingMessage = /* GraphQL */ `mutation UpdatePlayerMarketingMessage(
-  $input: UpdatePlayerMarketingMessageInput!
-  $condition: ModelPlayerMarketingMessageConditionInput
-) {
-  updatePlayerMarketingMessage(input: $input, condition: $condition) {
-    id
-    playerId
-    marketingMessageId
-    status
-    sentAt
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdatePlayerMarketingMessageMutationVariables,
-  APITypes.UpdatePlayerMarketingMessageMutation
->;
-export const deletePlayerMarketingMessage = /* GraphQL */ `mutation DeletePlayerMarketingMessage(
-  $input: DeletePlayerMarketingMessageInput!
-  $condition: ModelPlayerMarketingMessageConditionInput
-) {
-  deletePlayerMarketingMessage(input: $input, condition: $condition) {
-    id
-    playerId
-    marketingMessageId
-    status
-    sentAt
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeletePlayerMarketingMessageMutationVariables,
-  APITypes.DeletePlayerMarketingMessageMutation
->;
-export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePlayerMarketingPreferences(
-  $input: CreatePlayerMarketingPreferencesInput!
-  $condition: ModelPlayerMarketingPreferencesConditionInput
-) {
-  createPlayerMarketingPreferences(input: $input, condition: $condition) {
-    id
-    playerId
-    optOutSms
-    optOutEmail
-    player {
-      id
-      firstName
-      givenName
-      lastName
-      email
-      phone
-      registrationVenueId
-      creationDate
-      lastPlayedDate
-      status
-      category
-      targetingClassification
-      tier
-      transactions {
-        items {
-          id
-          playerId
-          type
-          amount
-          paymentSource
-          transactionDate
-          rake
-          notes
-          gameId
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      results {
-        items {
-          id
-          playerId
-          gameId
-          finishingPlace
-          isMultiDayQualification
-          prizeWon
-          amountWon
-          totalRunners
-          game {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      tickets {
-        items {
-          id
-          playerId
-          ticketTemplateId
-          assignedAt
-          expiryDate
-          status
-          usedInGameId
-          ticketTemplate {
-            id
-            name
-            description
-            value
-            validityDays
-            originGameId
-            targetGameId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      marketingPreferences {
-        id
-        playerId
-        optOutSms
-        optOutEmail
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      venueMemberships {
-        items {
-          id
-          playerId
-          venueId
-          totalGamesPlayed
-          averageBuyIn
-          firstPlayedDate
-          lastPlayedDate
-          targetingClassification
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      summary {
-        id
-        playerId
-        venuesVisited
-        sessionsPlayed
-        tournamentsPlayed
-        cashGamesPlayed
-        tournamentWinnings
-        tournamentBuyIns
-        cashGameWinnings
-        cashGameBuyIns
-        totalWinnings
-        totalBuyIns
-        netBalance
-        tournamentITM
-        tournamentsCashed
-        lastUpdated
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      playerMarketingPreferencesId
-      playerSummaryId
-      __typename
-    }
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreatePlayerMarketingPreferencesMutationVariables,
-  APITypes.CreatePlayerMarketingPreferencesMutation
->;
-export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePlayerMarketingPreferences(
-  $input: UpdatePlayerMarketingPreferencesInput!
-  $condition: ModelPlayerMarketingPreferencesConditionInput
-) {
-  updatePlayerMarketingPreferences(input: $input, condition: $condition) {
-    id
-    playerId
-    optOutSms
-    optOutEmail
-    player {
-      id
-      firstName
-      givenName
-      lastName
-      email
-      phone
-      registrationVenueId
-      creationDate
-      lastPlayedDate
-      status
-      category
-      targetingClassification
-      tier
-      transactions {
-        items {
-          id
-          playerId
-          type
-          amount
-          paymentSource
-          transactionDate
-          rake
-          notes
-          gameId
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      results {
-        items {
-          id
-          playerId
-          gameId
-          finishingPlace
-          isMultiDayQualification
-          prizeWon
-          amountWon
-          totalRunners
-          game {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      tickets {
-        items {
-          id
-          playerId
-          ticketTemplateId
-          assignedAt
-          expiryDate
-          status
-          usedInGameId
-          ticketTemplate {
-            id
-            name
-            description
-            value
-            validityDays
-            originGameId
-            targetGameId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      marketingPreferences {
-        id
-        playerId
-        optOutSms
-        optOutEmail
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      venueMemberships {
-        items {
-          id
-          playerId
-          venueId
-          totalGamesPlayed
-          averageBuyIn
-          firstPlayedDate
-          lastPlayedDate
-          targetingClassification
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      summary {
-        id
-        playerId
-        venuesVisited
-        sessionsPlayed
-        tournamentsPlayed
-        cashGamesPlayed
-        tournamentWinnings
-        tournamentBuyIns
-        cashGameWinnings
-        cashGameBuyIns
-        totalWinnings
-        totalBuyIns
-        netBalance
-        tournamentITM
-        tournamentsCashed
-        lastUpdated
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      playerMarketingPreferencesId
-      playerSummaryId
-      __typename
-    }
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdatePlayerMarketingPreferencesMutationVariables,
-  APITypes.UpdatePlayerMarketingPreferencesMutation
->;
-export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePlayerMarketingPreferences(
-  $input: DeletePlayerMarketingPreferencesInput!
-  $condition: ModelPlayerMarketingPreferencesConditionInput
-) {
-  deletePlayerMarketingPreferences(input: $input, condition: $condition) {
-    id
-    playerId
-    optOutSms
-    optOutEmail
-    player {
-      id
-      firstName
-      givenName
-      lastName
-      email
-      phone
-      registrationVenueId
-      creationDate
-      lastPlayedDate
-      status
-      category
-      targetingClassification
-      tier
-      transactions {
-        items {
-          id
-          playerId
-          type
-          amount
-          paymentSource
-          transactionDate
-          rake
-          notes
-          gameId
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      results {
-        items {
-          id
-          playerId
-          gameId
-          finishingPlace
-          isMultiDayQualification
-          prizeWon
-          amountWon
-          totalRunners
-          game {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
-            registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            totalRake
-            profitLoss
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentStructureId
-            cashStructureId
-            tournamentSeriesId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      tickets {
-        items {
-          id
-          playerId
-          ticketTemplateId
-          assignedAt
-          expiryDate
-          status
-          usedInGameId
-          ticketTemplate {
-            id
-            name
-            description
-            value
-            validityDays
-            originGameId
-            targetGameId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      marketingPreferences {
-        id
-        playerId
-        optOutSms
-        optOutEmail
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      venueMemberships {
-        items {
-          id
-          playerId
-          venueId
-          totalGamesPlayed
-          averageBuyIn
-          firstPlayedDate
-          lastPlayedDate
-          targetingClassification
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      summary {
-        id
-        playerId
-        venuesVisited
-        sessionsPlayed
-        tournamentsPlayed
-        cashGamesPlayed
-        tournamentWinnings
-        tournamentBuyIns
-        cashGameWinnings
-        cashGameBuyIns
-        totalWinnings
-        totalBuyIns
-        netBalance
-        tournamentITM
-        tournamentsCashed
-        lastUpdated
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      playerMarketingPreferencesId
-      playerSummaryId
-      __typename
-    }
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeletePlayerMarketingPreferencesMutationVariables,
-  APITypes.DeletePlayerMarketingPreferencesMutation
 >;
 export const createTicketTemplate = /* GraphQL */ `mutation CreateTicketTemplate(
   $input: CreateTicketTemplateInput!
@@ -28589,12 +25741,91 @@ export const createTicketTemplate = /* GraphQL */ `mutation CreateTicketTemplate
     playerTickets {
       items {
         id
-        playerId
-        ticketTemplateId
         assignedAt
         expiryDate
         status
         usedInGameId
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        ticketTemplateId
         ticketTemplate {
           id
           name
@@ -28613,85 +25844,6 @@ export const createTicketTemplate = /* GraphQL */ `mutation CreateTicketTemplate
           _version
           _deleted
           _lastChangedAt
-          __typename
-        }
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
           __typename
         }
         createdAt
@@ -28732,12 +25884,91 @@ export const updateTicketTemplate = /* GraphQL */ `mutation UpdateTicketTemplate
     playerTickets {
       items {
         id
-        playerId
-        ticketTemplateId
         assignedAt
         expiryDate
         status
         usedInGameId
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        ticketTemplateId
         ticketTemplate {
           id
           name
@@ -28756,85 +25987,6 @@ export const updateTicketTemplate = /* GraphQL */ `mutation UpdateTicketTemplate
           _version
           _deleted
           _lastChangedAt
-          __typename
-        }
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
           __typename
         }
         createdAt
@@ -28875,12 +26027,91 @@ export const deleteTicketTemplate = /* GraphQL */ `mutation DeleteTicketTemplate
     playerTickets {
       items {
         id
-        playerId
-        ticketTemplateId
         assignedAt
         expiryDate
         status
         usedInGameId
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        ticketTemplateId
         ticketTemplate {
           id
           name
@@ -28899,85 +26130,6 @@ export const deleteTicketTemplate = /* GraphQL */ `mutation DeleteTicketTemplate
           _version
           _deleted
           _lastChangedAt
-          __typename
-        }
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
           __typename
         }
         createdAt
@@ -29009,85 +26161,11 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
 ) {
   createPlayerTicket(input: $input, condition: $condition) {
     id
-    playerId
-    ticketTemplateId
     assignedAt
     expiryDate
     status
     usedInGameId
-    ticketTemplate {
-      id
-      name
-      description
-      value
-      validityDays
-      originGameId
-      targetGameId
-      playerTickets {
-        items {
-          id
-          playerId
-          ticketTemplateId
-          assignedAt
-          expiryDate
-          status
-          usedInGameId
-          ticketTemplate {
-            id
-            name
-            description
-            value
-            validityDays
-            originGameId
-            targetGameId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
+    playerId
     player {
       id
       firstName
@@ -29095,24 +26173,126 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
       lastName
       email
       phone
-      registrationVenueId
       creationDate
-      lastPlayedDate
       status
       category
-      targetingClassification
       tier
+      lastPlayedDate
+      targetingClassification
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       transactions {
         items {
           id
-          playerId
           type
           amount
+          rake
           paymentSource
           transactionDate
-          rake
           notes
-          gameId
+          playerId
           player {
             id
             firstName
@@ -29120,22 +26300,23 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          gameId
           createdAt
           updatedAt
           _version
@@ -29150,13 +26331,36 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
       results {
         items {
           id
-          playerId
-          gameId
           finishingPlace
           isMultiDayQualification
           prizeWon
           amountWon
           totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
           game {
             id
             name
@@ -29165,69 +26369,45 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
             __typename
           }
           createdAt
@@ -29244,12 +26424,35 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
       tickets {
         items {
           id
-          playerId
-          ticketTemplateId
           assignedAt
           expiryDate
           status
           usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
           ticketTemplate {
             id
             name
@@ -29265,29 +26468,6 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             _lastChangedAt
             __typename
           }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -29299,107 +26479,15 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
         startedAt
         __typename
       }
-      marketingPreferences {
-        id
-        playerId
-        optOutSms
-        optOutEmail
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       venueMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -29407,22 +26495,23 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -29450,23 +26539,11 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
         startedAt
         __typename
       }
-      summary {
+      marketingPreferences {
         id
+        optOutSms
+        optOutEmail
         playerId
-        venuesVisited
-        sessionsPlayed
-        tournamentsPlayed
-        cashGamesPlayed
-        tournamentWinnings
-        tournamentBuyIns
-        cashGameWinnings
-        cashGameBuyIns
-        totalWinnings
-        totalBuyIns
-        netBalance
-        tournamentITM
-        tournamentsCashed
-        lastUpdated
         player {
           id
           firstName
@@ -29474,13 +26551,37 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -29496,40 +26597,16 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -29542,8 +26619,8 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
         createdAt
@@ -29558,8 +26635,82 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
       _version
       _deleted
       _lastChangedAt
-      playerMarketingPreferencesId
       playerSummaryId
+      playerMarketingPreferencesId
+      __typename
+    }
+    ticketTemplateId
+    ticketTemplate {
+      id
+      name
+      description
+      value
+      validityDays
+      originGameId
+      targetGameId
+      playerTickets {
+        items {
+          id
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
       __typename
     }
     createdAt
@@ -29580,85 +26731,11 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
 ) {
   updatePlayerTicket(input: $input, condition: $condition) {
     id
-    playerId
-    ticketTemplateId
     assignedAt
     expiryDate
     status
     usedInGameId
-    ticketTemplate {
-      id
-      name
-      description
-      value
-      validityDays
-      originGameId
-      targetGameId
-      playerTickets {
-        items {
-          id
-          playerId
-          ticketTemplateId
-          assignedAt
-          expiryDate
-          status
-          usedInGameId
-          ticketTemplate {
-            id
-            name
-            description
-            value
-            validityDays
-            originGameId
-            targetGameId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
+    playerId
     player {
       id
       firstName
@@ -29666,24 +26743,126 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
       lastName
       email
       phone
-      registrationVenueId
       creationDate
-      lastPlayedDate
       status
       category
-      targetingClassification
       tier
+      lastPlayedDate
+      targetingClassification
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       transactions {
         items {
           id
-          playerId
           type
           amount
+          rake
           paymentSource
           transactionDate
-          rake
           notes
-          gameId
+          playerId
           player {
             id
             firstName
@@ -29691,22 +26870,23 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          gameId
           createdAt
           updatedAt
           _version
@@ -29721,13 +26901,36 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
       results {
         items {
           id
-          playerId
-          gameId
           finishingPlace
           isMultiDayQualification
           prizeWon
           amountWon
           totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
           game {
             id
             name
@@ -29736,69 +26939,45 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
             __typename
           }
           createdAt
@@ -29815,12 +26994,35 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
       tickets {
         items {
           id
-          playerId
-          ticketTemplateId
           assignedAt
           expiryDate
           status
           usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
           ticketTemplate {
             id
             name
@@ -29836,29 +27038,6 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             _lastChangedAt
             __typename
           }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -29870,107 +27049,15 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
         startedAt
         __typename
       }
-      marketingPreferences {
-        id
-        playerId
-        optOutSms
-        optOutEmail
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       venueMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -29978,22 +27065,23 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -30021,23 +27109,11 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
         startedAt
         __typename
       }
-      summary {
+      marketingPreferences {
         id
+        optOutSms
+        optOutEmail
         playerId
-        venuesVisited
-        sessionsPlayed
-        tournamentsPlayed
-        cashGamesPlayed
-        tournamentWinnings
-        tournamentBuyIns
-        cashGameWinnings
-        cashGameBuyIns
-        totalWinnings
-        totalBuyIns
-        netBalance
-        tournamentITM
-        tournamentsCashed
-        lastUpdated
         player {
           id
           firstName
@@ -30045,13 +27121,37 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -30067,40 +27167,16 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -30113,8 +27189,8 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
         createdAt
@@ -30129,8 +27205,82 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
       _version
       _deleted
       _lastChangedAt
-      playerMarketingPreferencesId
       playerSummaryId
+      playerMarketingPreferencesId
+      __typename
+    }
+    ticketTemplateId
+    ticketTemplate {
+      id
+      name
+      description
+      value
+      validityDays
+      originGameId
+      targetGameId
+      playerTickets {
+        items {
+          id
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
       __typename
     }
     createdAt
@@ -30151,85 +27301,11 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
 ) {
   deletePlayerTicket(input: $input, condition: $condition) {
     id
-    playerId
-    ticketTemplateId
     assignedAt
     expiryDate
     status
     usedInGameId
-    ticketTemplate {
-      id
-      name
-      description
-      value
-      validityDays
-      originGameId
-      targetGameId
-      playerTickets {
-        items {
-          id
-          playerId
-          ticketTemplateId
-          assignedAt
-          expiryDate
-          status
-          usedInGameId
-          ticketTemplate {
-            id
-            name
-            description
-            value
-            validityDays
-            originGameId
-            targetGameId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
+    playerId
     player {
       id
       firstName
@@ -30237,24 +27313,126 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
       lastName
       email
       phone
-      registrationVenueId
       creationDate
-      lastPlayedDate
       status
       category
-      targetingClassification
       tier
+      lastPlayedDate
+      targetingClassification
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       transactions {
         items {
           id
-          playerId
           type
           amount
+          rake
           paymentSource
           transactionDate
-          rake
           notes
-          gameId
+          playerId
           player {
             id
             firstName
@@ -30262,22 +27440,23 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          gameId
           createdAt
           updatedAt
           _version
@@ -30292,13 +27471,36 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
       results {
         items {
           id
-          playerId
-          gameId
           finishingPlace
           isMultiDayQualification
           prizeWon
           amountWon
           totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
           game {
             id
             name
@@ -30307,69 +27509,45 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             gameStatus
             gameStartDateTime
             gameEndDateTime
-            venueId
-            sourceUrl
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            seriesName
-            isRegular
-            isSeries
-            isRecurring
-            gameFrequency
-            isSatellite
             registrationStatus
-            prizepool
-            revenueByBuyIns
-            totalEntries
-            totalRebuys
-            totalAddons
             totalDuration
-            gameTags
-            tournamentType
+            gameFrequency
             buyIn
             rake
-            totalRake
-            profitLoss
             startingStack
             hasGuarantee
             guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
             guaranteeOverlay
             guaranteeSurplus
             playersRemaining
             totalChipsInPlay
             averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
             tournamentStructureId
             cashStructureId
-            tournamentSeriesId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            __typename
-          }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
             __typename
           }
           createdAt
@@ -30386,12 +27564,35 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
       tickets {
         items {
           id
-          playerId
-          ticketTemplateId
           assignedAt
           expiryDate
           status
           usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
           ticketTemplate {
             id
             name
@@ -30407,29 +27608,6 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             _lastChangedAt
             __typename
           }
-          player {
-            id
-            firstName
-            givenName
-            lastName
-            email
-            phone
-            registrationVenueId
-            creationDate
-            lastPlayedDate
-            status
-            category
-            targetingClassification
-            tier
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            playerMarketingPreferencesId
-            playerSummaryId
-            __typename
-          }
           createdAt
           updatedAt
           _version
@@ -30441,107 +27619,15 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
         startedAt
         __typename
       }
-      marketingPreferences {
-        id
-        playerId
-        optOutSms
-        optOutEmail
-        player {
-          id
-          firstName
-          givenName
-          lastName
-          email
-          phone
-          registrationVenueId
-          creationDate
-          lastPlayedDate
-          status
-          category
-          targetingClassification
-          tier
-          transactions {
-            nextToken
-            startedAt
-            __typename
-          }
-          results {
-            nextToken
-            startedAt
-            __typename
-          }
-          tickets {
-            nextToken
-            startedAt
-            __typename
-          }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          summary {
-            id
-            playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          playerMarketingPreferencesId
-          playerSummaryId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       venueMemberships {
         items {
           id
-          playerId
-          venueId
           totalGamesPlayed
           averageBuyIn
           firstPlayedDate
           lastPlayedDate
           targetingClassification
+          playerId
           player {
             id
             firstName
@@ -30549,22 +27635,23 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             lastName
             email
             phone
-            registrationVenueId
             creationDate
-            lastPlayedDate
             status
             category
-            targetingClassification
             tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
-            playerMarketingPreferencesId
             playerSummaryId
+            playerMarketingPreferencesId
             __typename
           }
+          venueId
           venue {
             id
             venueNumber
@@ -30592,23 +27679,11 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
         startedAt
         __typename
       }
-      summary {
+      marketingPreferences {
         id
+        optOutSms
+        optOutEmail
         playerId
-        venuesVisited
-        sessionsPlayed
-        tournamentsPlayed
-        cashGamesPlayed
-        tournamentWinnings
-        tournamentBuyIns
-        cashGameWinnings
-        cashGameBuyIns
-        totalWinnings
-        totalBuyIns
-        netBalance
-        tournamentITM
-        tournamentsCashed
-        lastUpdated
         player {
           id
           firstName
@@ -30616,13 +27691,37 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
           lastName
           email
           phone
-          registrationVenueId
           creationDate
-          lastPlayedDate
           status
           category
-          targetingClassification
           tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           transactions {
             nextToken
             startedAt
@@ -30638,40 +27737,16 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             startedAt
             __typename
           }
-          marketingPreferences {
-            id
-            playerId
-            optOutSms
-            optOutEmail
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
           venueMemberships {
             nextToken
             startedAt
             __typename
           }
-          summary {
+          marketingPreferences {
             id
+            optOutSms
+            optOutEmail
             playerId
-            venuesVisited
-            sessionsPlayed
-            tournamentsPlayed
-            cashGamesPlayed
-            tournamentWinnings
-            tournamentBuyIns
-            cashGameWinnings
-            cashGameBuyIns
-            totalWinnings
-            totalBuyIns
-            netBalance
-            tournamentITM
-            tournamentsCashed
-            lastUpdated
             createdAt
             updatedAt
             _version
@@ -30684,8 +27759,8 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
           _version
           _deleted
           _lastChangedAt
-          playerMarketingPreferencesId
           playerSummaryId
+          playerMarketingPreferencesId
           __typename
         }
         createdAt
@@ -30700,8 +27775,82 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
       _version
       _deleted
       _lastChangedAt
-      playerMarketingPreferencesId
       playerSummaryId
+      playerMarketingPreferencesId
+      __typename
+    }
+    ticketTemplateId
+    ticketTemplate {
+      id
+      name
+      description
+      value
+      validityDays
+      originGameId
+      targetGameId
+      playerTickets {
+        items {
+          id
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
       __typename
     }
     createdAt
@@ -30716,6 +27865,1674 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
   APITypes.DeletePlayerTicketMutationVariables,
   APITypes.DeletePlayerTicketMutation
 >;
+export const createMarketingMessage = /* GraphQL */ `mutation CreateMarketingMessage(
+  $input: CreateMarketingMessageInput!
+  $condition: ModelMarketingMessageConditionInput
+) {
+  createMarketingMessage(input: $input, condition: $condition) {
+    id
+    name
+    subject
+    emailBody
+    smsBody
+    sentMessages {
+      items {
+        id
+        status
+        sentAt
+        playerId
+        marketingMessageId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateMarketingMessageMutationVariables,
+  APITypes.CreateMarketingMessageMutation
+>;
+export const updateMarketingMessage = /* GraphQL */ `mutation UpdateMarketingMessage(
+  $input: UpdateMarketingMessageInput!
+  $condition: ModelMarketingMessageConditionInput
+) {
+  updateMarketingMessage(input: $input, condition: $condition) {
+    id
+    name
+    subject
+    emailBody
+    smsBody
+    sentMessages {
+      items {
+        id
+        status
+        sentAt
+        playerId
+        marketingMessageId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateMarketingMessageMutationVariables,
+  APITypes.UpdateMarketingMessageMutation
+>;
+export const deleteMarketingMessage = /* GraphQL */ `mutation DeleteMarketingMessage(
+  $input: DeleteMarketingMessageInput!
+  $condition: ModelMarketingMessageConditionInput
+) {
+  deleteMarketingMessage(input: $input, condition: $condition) {
+    id
+    name
+    subject
+    emailBody
+    smsBody
+    sentMessages {
+      items {
+        id
+        status
+        sentAt
+        playerId
+        marketingMessageId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteMarketingMessageMutationVariables,
+  APITypes.DeleteMarketingMessageMutation
+>;
+export const createPlayerMarketingMessage = /* GraphQL */ `mutation CreatePlayerMarketingMessage(
+  $input: CreatePlayerMarketingMessageInput!
+  $condition: ModelPlayerMarketingMessageConditionInput
+) {
+  createPlayerMarketingMessage(input: $input, condition: $condition) {
+    id
+    status
+    sentAt
+    playerId
+    marketingMessageId
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreatePlayerMarketingMessageMutationVariables,
+  APITypes.CreatePlayerMarketingMessageMutation
+>;
+export const updatePlayerMarketingMessage = /* GraphQL */ `mutation UpdatePlayerMarketingMessage(
+  $input: UpdatePlayerMarketingMessageInput!
+  $condition: ModelPlayerMarketingMessageConditionInput
+) {
+  updatePlayerMarketingMessage(input: $input, condition: $condition) {
+    id
+    status
+    sentAt
+    playerId
+    marketingMessageId
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdatePlayerMarketingMessageMutationVariables,
+  APITypes.UpdatePlayerMarketingMessageMutation
+>;
+export const deletePlayerMarketingMessage = /* GraphQL */ `mutation DeletePlayerMarketingMessage(
+  $input: DeletePlayerMarketingMessageInput!
+  $condition: ModelPlayerMarketingMessageConditionInput
+) {
+  deletePlayerMarketingMessage(input: $input, condition: $condition) {
+    id
+    status
+    sentAt
+    playerId
+    marketingMessageId
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeletePlayerMarketingMessageMutationVariables,
+  APITypes.DeletePlayerMarketingMessageMutation
+>;
+export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePlayerMarketingPreferences(
+  $input: CreatePlayerMarketingPreferencesInput!
+  $condition: ModelPlayerMarketingPreferencesConditionInput
+) {
+  createPlayerMarketingPreferences(input: $input, condition: $condition) {
+    id
+    optOutSms
+    optOutEmail
+    playerId
+    player {
+      id
+      firstName
+      givenName
+      lastName
+      email
+      phone
+      creationDate
+      status
+      category
+      tier
+      lastPlayedDate
+      targetingClassification
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      transactions {
+        items {
+          id
+          type
+          amount
+          rake
+          paymentSource
+          transactionDate
+          notes
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        optOutSms
+        optOutEmail
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      playerSummaryId
+      playerMarketingPreferencesId
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreatePlayerMarketingPreferencesMutationVariables,
+  APITypes.CreatePlayerMarketingPreferencesMutation
+>;
+export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePlayerMarketingPreferences(
+  $input: UpdatePlayerMarketingPreferencesInput!
+  $condition: ModelPlayerMarketingPreferencesConditionInput
+) {
+  updatePlayerMarketingPreferences(input: $input, condition: $condition) {
+    id
+    optOutSms
+    optOutEmail
+    playerId
+    player {
+      id
+      firstName
+      givenName
+      lastName
+      email
+      phone
+      creationDate
+      status
+      category
+      tier
+      lastPlayedDate
+      targetingClassification
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      transactions {
+        items {
+          id
+          type
+          amount
+          rake
+          paymentSource
+          transactionDate
+          notes
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        optOutSms
+        optOutEmail
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      playerSummaryId
+      playerMarketingPreferencesId
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdatePlayerMarketingPreferencesMutationVariables,
+  APITypes.UpdatePlayerMarketingPreferencesMutation
+>;
+export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePlayerMarketingPreferences(
+  $input: DeletePlayerMarketingPreferencesInput!
+  $condition: ModelPlayerMarketingPreferencesConditionInput
+) {
+  deletePlayerMarketingPreferences(input: $input, condition: $condition) {
+    id
+    optOutSms
+    optOutEmail
+    playerId
+    player {
+      id
+      firstName
+      givenName
+      lastName
+      email
+      phone
+      creationDate
+      status
+      category
+      tier
+      lastPlayedDate
+      targetingClassification
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      transactions {
+        items {
+          id
+          type
+          amount
+          rake
+          paymentSource
+          transactionDate
+          notes
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        optOutSms
+        optOutEmail
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      playerSummaryId
+      playerMarketingPreferencesId
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeletePlayerMarketingPreferencesMutationVariables,
+  APITypes.DeletePlayerMarketingPreferencesMutation
+>;
 export const createUser = /* GraphQL */ `mutation CreateUser(
   $input: CreateUserInput!
   $condition: ModelUserConditionInput
@@ -30728,10 +29545,10 @@ export const createUser = /* GraphQL */ `mutation CreateUser(
     preferences {
       items {
         id
-        userId
         page
         widget
         preference
+        userId
         createdAt
         updatedAt
         _version
@@ -30767,10 +29584,10 @@ export const updateUser = /* GraphQL */ `mutation UpdateUser(
     preferences {
       items {
         id
-        userId
         page
         widget
         preference
+        userId
         createdAt
         updatedAt
         _version
@@ -30806,10 +29623,10 @@ export const deleteUser = /* GraphQL */ `mutation DeleteUser(
     preferences {
       items {
         id
-        userId
         page
         widget
         preference
+        userId
         createdAt
         updatedAt
         _version
@@ -30832,6 +29649,72 @@ export const deleteUser = /* GraphQL */ `mutation DeleteUser(
 ` as GeneratedMutation<
   APITypes.DeleteUserMutationVariables,
   APITypes.DeleteUserMutation
+>;
+export const createUserPreference = /* GraphQL */ `mutation CreateUserPreference(
+  $input: CreateUserPreferenceInput!
+  $condition: ModelUserPreferenceConditionInput
+) {
+  createUserPreference(input: $input, condition: $condition) {
+    id
+    page
+    widget
+    preference
+    userId
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateUserPreferenceMutationVariables,
+  APITypes.CreateUserPreferenceMutation
+>;
+export const updateUserPreference = /* GraphQL */ `mutation UpdateUserPreference(
+  $input: UpdateUserPreferenceInput!
+  $condition: ModelUserPreferenceConditionInput
+) {
+  updateUserPreference(input: $input, condition: $condition) {
+    id
+    page
+    widget
+    preference
+    userId
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateUserPreferenceMutationVariables,
+  APITypes.UpdateUserPreferenceMutation
+>;
+export const deleteUserPreference = /* GraphQL */ `mutation DeleteUserPreference(
+  $input: DeleteUserPreferenceInput!
+  $condition: ModelUserPreferenceConditionInput
+) {
+  deleteUserPreference(input: $input, condition: $condition) {
+    id
+    page
+    widget
+    preference
+    userId
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteUserPreferenceMutationVariables,
+  APITypes.DeleteUserPreferenceMutation
 >;
 export const createStaff = /* GraphQL */ `mutation CreateStaff(
   $input: CreateStaffInput!
@@ -30899,16 +29782,378 @@ export const deleteStaff = /* GraphQL */ `mutation DeleteStaff(
   APITypes.DeleteStaffMutationVariables,
   APITypes.DeleteStaffMutation
 >;
-export const createUserPreference = /* GraphQL */ `mutation CreateUserPreference(
-  $input: CreateUserPreferenceInput!
-  $condition: ModelUserPreferenceConditionInput
+export const createAsset = /* GraphQL */ `mutation CreateAsset(
+  $input: CreateAssetInput!
+  $condition: ModelAssetConditionInput
 ) {
-  createUserPreference(input: $input, condition: $condition) {
+  createAsset(input: $input, condition: $condition) {
     id
-    userId
-    page
-    widget
-    preference
+    name
+    type
+    condition
+    acquiredDate
+    lastCheckedDate
+    venueId
+    venue {
+      id
+      venueNumber
+      name
+      aliases
+      address
+      city
+      country
+      details {
+        id
+        startDate
+        status
+        lastCustomerSuccessVisit
+        totalGamesHeld
+        averagePlayersPerGame
+        gameNights
+        venueId
+        venue {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructureId
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      series {
+        items {
+          id
+          name
+          year
+          status
+          startDate
+          endDate
+          events
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMemberships {
+        items {
+          id
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      venueDetailsId
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -30918,19 +30163,381 @@ export const createUserPreference = /* GraphQL */ `mutation CreateUserPreference
   }
 }
 ` as GeneratedMutation<
-  APITypes.CreateUserPreferenceMutationVariables,
-  APITypes.CreateUserPreferenceMutation
+  APITypes.CreateAssetMutationVariables,
+  APITypes.CreateAssetMutation
 >;
-export const updateUserPreference = /* GraphQL */ `mutation UpdateUserPreference(
-  $input: UpdateUserPreferenceInput!
-  $condition: ModelUserPreferenceConditionInput
+export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
+  $input: UpdateAssetInput!
+  $condition: ModelAssetConditionInput
 ) {
-  updateUserPreference(input: $input, condition: $condition) {
+  updateAsset(input: $input, condition: $condition) {
     id
-    userId
-    page
-    widget
-    preference
+    name
+    type
+    condition
+    acquiredDate
+    lastCheckedDate
+    venueId
+    venue {
+      id
+      venueNumber
+      name
+      aliases
+      address
+      city
+      country
+      details {
+        id
+        startDate
+        status
+        lastCustomerSuccessVisit
+        totalGamesHeld
+        averagePlayersPerGame
+        gameNights
+        venueId
+        venue {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructureId
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      series {
+        items {
+          id
+          name
+          year
+          status
+          startDate
+          endDate
+          events
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMemberships {
+        items {
+          id
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      venueDetailsId
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -30940,19 +30547,381 @@ export const updateUserPreference = /* GraphQL */ `mutation UpdateUserPreference
   }
 }
 ` as GeneratedMutation<
-  APITypes.UpdateUserPreferenceMutationVariables,
-  APITypes.UpdateUserPreferenceMutation
+  APITypes.UpdateAssetMutationVariables,
+  APITypes.UpdateAssetMutation
 >;
-export const deleteUserPreference = /* GraphQL */ `mutation DeleteUserPreference(
-  $input: DeleteUserPreferenceInput!
-  $condition: ModelUserPreferenceConditionInput
+export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
+  $input: DeleteAssetInput!
+  $condition: ModelAssetConditionInput
 ) {
-  deleteUserPreference(input: $input, condition: $condition) {
+  deleteAsset(input: $input, condition: $condition) {
     id
-    userId
-    page
-    widget
-    preference
+    name
+    type
+    condition
+    acquiredDate
+    lastCheckedDate
+    venueId
+    venue {
+      id
+      venueNumber
+      name
+      aliases
+      address
+      city
+      country
+      details {
+        id
+        startDate
+        status
+        lastCustomerSuccessVisit
+        totalGamesHeld
+        averagePlayersPerGame
+        gameNights
+        venueId
+        venue {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          tournamentStructureId
+          tournamentStructure {
+            id
+            name
+            description
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          cashStructureId
+          cashStructure {
+            id
+            name
+            smallBlind
+            bigBlind
+            minBuyIn
+            maxBuyIn
+            rakeStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      series {
+        items {
+          id
+          name
+          year
+          status
+          startDate
+          endDate
+          events
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMemberships {
+        items {
+          id
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      venueDetailsId
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -30962,74 +30931,8 @@ export const deleteUserPreference = /* GraphQL */ `mutation DeleteUserPreference
   }
 }
 ` as GeneratedMutation<
-  APITypes.DeleteUserPreferenceMutationVariables,
-  APITypes.DeleteUserPreferenceMutation
->;
-export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
-  $input: CreateSocialPostInput!
-  $condition: ModelSocialPostConditionInput
-) {
-  createSocialPost(input: $input, condition: $condition) {
-    id
-    socialAccountId
-    content
-    imageUrl
-    postedAt
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreateSocialPostMutationVariables,
-  APITypes.CreateSocialPostMutation
->;
-export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
-  $input: UpdateSocialPostInput!
-  $condition: ModelSocialPostConditionInput
-) {
-  updateSocialPost(input: $input, condition: $condition) {
-    id
-    socialAccountId
-    content
-    imageUrl
-    postedAt
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdateSocialPostMutationVariables,
-  APITypes.UpdateSocialPostMutation
->;
-export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
-  $input: DeleteSocialPostInput!
-  $condition: ModelSocialPostConditionInput
-) {
-  deleteSocialPost(input: $input, condition: $condition) {
-    id
-    socialAccountId
-    content
-    imageUrl
-    postedAt
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteSocialPostMutationVariables,
-  APITypes.DeleteSocialPostMutation
+  APITypes.DeleteAssetMutationVariables,
+  APITypes.DeleteAssetMutation
 >;
 export const createSocialAccount = /* GraphQL */ `mutation CreateSocialAccount(
   $input: CreateSocialAccountInput!
@@ -31097,34 +31000,16 @@ export const deleteSocialAccount = /* GraphQL */ `mutation DeleteSocialAccount(
   APITypes.DeleteSocialAccountMutationVariables,
   APITypes.DeleteSocialAccountMutation
 >;
-export const createMarketingMessage = /* GraphQL */ `mutation CreateMarketingMessage(
-  $input: CreateMarketingMessageInput!
-  $condition: ModelMarketingMessageConditionInput
+export const createSocialPost = /* GraphQL */ `mutation CreateSocialPost(
+  $input: CreateSocialPostInput!
+  $condition: ModelSocialPostConditionInput
 ) {
-  createMarketingMessage(input: $input, condition: $condition) {
+  createSocialPost(input: $input, condition: $condition) {
     id
-    name
-    subject
-    emailBody
-    smsBody
-    sentMessages {
-      items {
-        id
-        playerId
-        marketingMessageId
-        status
-        sentAt
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      nextToken
-      startedAt
-      __typename
-    }
+    content
+    imageUrl
+    postedAt
+    socialAccountId
     createdAt
     updatedAt
     _version
@@ -31134,37 +31019,19 @@ export const createMarketingMessage = /* GraphQL */ `mutation CreateMarketingMes
   }
 }
 ` as GeneratedMutation<
-  APITypes.CreateMarketingMessageMutationVariables,
-  APITypes.CreateMarketingMessageMutation
+  APITypes.CreateSocialPostMutationVariables,
+  APITypes.CreateSocialPostMutation
 >;
-export const updateMarketingMessage = /* GraphQL */ `mutation UpdateMarketingMessage(
-  $input: UpdateMarketingMessageInput!
-  $condition: ModelMarketingMessageConditionInput
+export const updateSocialPost = /* GraphQL */ `mutation UpdateSocialPost(
+  $input: UpdateSocialPostInput!
+  $condition: ModelSocialPostConditionInput
 ) {
-  updateMarketingMessage(input: $input, condition: $condition) {
+  updateSocialPost(input: $input, condition: $condition) {
     id
-    name
-    subject
-    emailBody
-    smsBody
-    sentMessages {
-      items {
-        id
-        playerId
-        marketingMessageId
-        status
-        sentAt
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      nextToken
-      startedAt
-      __typename
-    }
+    content
+    imageUrl
+    postedAt
+    socialAccountId
     createdAt
     updatedAt
     _version
@@ -31174,37 +31041,19 @@ export const updateMarketingMessage = /* GraphQL */ `mutation UpdateMarketingMes
   }
 }
 ` as GeneratedMutation<
-  APITypes.UpdateMarketingMessageMutationVariables,
-  APITypes.UpdateMarketingMessageMutation
+  APITypes.UpdateSocialPostMutationVariables,
+  APITypes.UpdateSocialPostMutation
 >;
-export const deleteMarketingMessage = /* GraphQL */ `mutation DeleteMarketingMessage(
-  $input: DeleteMarketingMessageInput!
-  $condition: ModelMarketingMessageConditionInput
+export const deleteSocialPost = /* GraphQL */ `mutation DeleteSocialPost(
+  $input: DeleteSocialPostInput!
+  $condition: ModelSocialPostConditionInput
 ) {
-  deleteMarketingMessage(input: $input, condition: $condition) {
+  deleteSocialPost(input: $input, condition: $condition) {
     id
-    name
-    subject
-    emailBody
-    smsBody
-    sentMessages {
-      items {
-        id
-        playerId
-        marketingMessageId
-        status
-        sentAt
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      nextToken
-      startedAt
-      __typename
-    }
+    content
+    imageUrl
+    postedAt
+    socialAccountId
     createdAt
     updatedAt
     _version
@@ -31214,6 +31063,6 @@ export const deleteMarketingMessage = /* GraphQL */ `mutation DeleteMarketingMes
   }
 }
 ` as GeneratedMutation<
-  APITypes.DeleteMarketingMessageMutationVariables,
-  APITypes.DeleteMarketingMessageMutation
+  APITypes.DeleteSocialPostMutationVariables,
+  APITypes.DeleteSocialPostMutation
 >;
