@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useBulkGameFetcher } from '../hooks/useBulkGameFetcher';
 import { BulkGameListItem } from '../components/scraper/BulkGameListItem';
 import type { BulkGameSummary } from '../types/game'; // Import the type from your file
+import { PageWrapper, PageCard } from '../components/layout/PageWrapper';
 
 /**
  * Renders the page for fetching and displaying a range of tournament summaries.
@@ -33,39 +34,44 @@ export const BulkScraperPage = () => {
     };
 
     return (
-        <div className="p-8 max-w-4xl mx-auto space-y-6">
-            <h2 className="text-3xl font-bold text-center text-gray-800">Bulk Scraper</h2>
+        <PageWrapper title="Bulk Scraper" maxWidth="4xl">
+            {/* ✅ FIX: No extra padding div needed. PageWrapper handles it. */}
+            <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
+                Bulk Scraper
+            </h2>
             
-            {/* Input Form */}
-            <div className="p-4 bg-white rounded-xl shadow-lg">
-                <form className="space-y-3" onSubmit={handleSubmit}>
-                    <div className="flex items-center space-x-2">
-                        <input
-                            type="number"
-                            value={startId}
-                            onChange={(e) => setStartId(e.target.value)}
-                            className="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Start ID (e.g., 1)"
-                            disabled={loading}
-                        />
-                        <input
-                            type="number"
-                            value={endId}
-                            onChange={(e) => setEndId(e.target.value)}
-                            className="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="End ID (e.g., 10)"
-                            disabled={loading}
-                        />
-                        <button
-                            type="submit"
-                            className="px-4 py-2 border rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400"
-                            disabled={loading}
-                        >
-                            {loading ? 'Fetching...' : 'Fetch Games'}
-                        </button>
-                    </div>
-                </form>
-            </div>
+            <PageCard className="mb-6">
+                {/* Input Form */}
+                <div className="p-4">
+                    <form className="space-y-3" onSubmit={handleSubmit}>
+                        <div className="flex items-center space-x-2">
+                            <input
+                                type="number"
+                                value={startId}
+                                onChange={(e) => setStartId(e.target.value)}
+                                className="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="Start ID (e.g., 1)"
+                                disabled={loading}
+                            />
+                            <input
+                                type="number"
+                                value={endId}
+                                onChange={(e) => setEndId(e.target.value)}
+                                className="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="End ID (e.g., 10)"
+                                disabled={loading}
+                            />
+                            <button
+                                type="submit"
+                                className="px-4 py-2 border rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400"
+                                disabled={loading}
+                            >
+                                {loading ? 'Fetching...' : 'Fetch Games'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </PageCard>
 
             {/* Results Section */}
             <div className="space-y-4">
@@ -89,8 +95,9 @@ export const BulkScraperPage = () => {
                     </p>
                 )}
             </div>
-        </div>
+        </PageWrapper>
     );
 };
 
 export default BulkScraperPage;
+

@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Added base layer styles inspired by your base.css
+ * This sets a default background for the app.
+ */
+@layer base {
+  html,
+  body {
+    @apply h-full overflow-x-hidden;
+  }
+  body {
+    @apply bg-gray-100 text-gray-900 antialiased;
+  }
+}
+

@@ -1,8 +1,15 @@
 // src/components/layout/Sidebar.tsx
 
 import { NavLink } from 'react-router-dom';
-import { DocumentMagnifyingGlassIcon, QueueListIcon, BuildingOffice2Icon, TrophyIcon } from '@heroicons/react/24/outline';
-import logo from '../../assets/Kings-Room-Logo_web.png'; // 1. Import your logo
+import {
+  HomeIcon,
+  DocumentMagnifyingGlassIcon,
+  QueueListIcon,
+  BuildingOffice2Icon,
+  TrophyIcon,
+  UserGroupIcon,
+} from '@heroicons/react/24/outline';
+import logo from '../../assets/Kings-Room-Logo_web.png';
 
 const getLinkClassName = ({ isActive }: { isActive: boolean }) =>
   `flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${
@@ -13,14 +20,19 @@ const getLinkClassName = ({ isActive }: { isActive: boolean }) =>
 
 export const Sidebar = () => {
   return (
-    <aside className="fixed inset-y-0 left-0 z-10 w-64 flex-col border-r bg-white hidden md:flex">
-      {/* 2. Replace the h1 with an img tag for your logo */}
+    // ✅ FIX: Added classes to make the sidebar fixed on desktop (md and up)
+    <aside className="md:fixed md:inset-y-0 md:left-0 md:z-30 flex w-64 flex-col border-r bg-white">
       <div className="flex flex-shrink-0 items-center justify-center px-4 h-16 border-b bg-black">
         <img src={logo} alt="Kings Room Logo" className="h-12 object-contain" />
       </div>
 
       <nav className="flex flex-1 flex-col overflow-y-auto">
         <div className="p-4 space-y-2">
+          {/* Link to "/home" which matches your HomePage component */}
+          <NavLink to="/home" className={getLinkClassName}>
+            <HomeIcon className="h-5 w-5 mr-3" />
+            Home
+          </NavLink>
           <NavLink to="/scraper-dashboard" className={getLinkClassName}>
             <QueueListIcon className="h-5 w-5 mr-3" />
             Tracker Dashboard
@@ -36,6 +48,10 @@ export const Sidebar = () => {
           <NavLink to="/series-management" className={getLinkClassName}>
             <TrophyIcon className="h-5 w-5 mr-3" />
             Series Management
+          </NavLink>
+          <NavLink to="/players" className={getLinkClassName}>
+            <UserGroupIcon className="h-5 w-5 mr-3" />
+            Players (Debug)
           </NavLink>
         </div>
       </nav>

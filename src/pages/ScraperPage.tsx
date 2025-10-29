@@ -1,8 +1,10 @@
+// src/pages/ScraperPage.tsx - UPDATED WITH RESPONSIVE LAYOUT
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useGameTracker } from '../hooks/useGameTracker';
 import { GameCard } from '../components/scraper/GameCard';
 import { DataSource } from '../API';
+import { PageWrapper, PageCard } from '../components/layout/PageWrapper';
 
 export const ScraperDashboard = () => {
     const [inputId, setInputId] = useState('');
@@ -37,11 +39,10 @@ export const ScraperDashboard = () => {
     };
 
     return (
-        <div className="p-8 max-w-3xl mx-auto space-y-6">
-            <h2 className="text-3xl font-bold text-center text-gray-800">Game Tracker Dashboard</h2>
-            <div className="p-4 bg-white rounded-xl shadow-lg">
+        <PageWrapper title="Game Tracker Dashboard" maxWidth="4xl">
+            {/* ✅ FIX: No extra padding div needed. PageWrapper handles it. */}
+            <PageCard className="mb-6">
                 <form className="space-y-3" onSubmit={handleSubmit}>
-                    {/* ✅ FIXED: Restored the input field and track button */}
                     <div className="flex items-center space-x-2">
                         <input
                             type="text"
@@ -52,24 +53,30 @@ export const ScraperDashboard = () => {
                         />
                         <button
                             type="submit"
-                            className="px-4 py-2 border rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+                            className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
                             Track
                         </button>
                     </div>
                 </form>
-            </div>
+            </PageCard>
+
             <div className="space-y-4">
                 {Object.values(games).length > 0 ? (
                     Object.values(games).map(game => (
                         <GameCard key={game.id} game={game} onSave={saveGame} onRemove={removeGame} />
                     ))
                 ) : (
-                    <p className="text-center text-gray-500 py-10">No games are being tracked. Add a URL to begin.</p>
+                    <PageCard>
+                        <p className="text-center text-gray-500 py-10">
+                            No games are being tracked. Add a URL to begin.
+                        </p>
+                    </PageCard>
                 )}
             </div>
-        </div>
+        </PageWrapper>
     );
 };
 
 export default ScraperDashboard;
+

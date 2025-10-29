@@ -646,6 +646,56 @@ export type PlayerMarketingPreferences = {
   _lastChangedAt: number,
 };
 
+export type ModelPlayerConnection = {
+  __typename: "ModelPlayerConnection",
+  items:  Array<Player | null >,
+  nextToken?: string | null,
+  startedAt?: number | null,
+};
+
+export type ModelPlayerSummaryConnection = {
+  __typename: "ModelPlayerSummaryConnection",
+  items:  Array<PlayerSummary | null >,
+  nextToken?: string | null,
+  startedAt?: number | null,
+};
+
+export type ModelPlayerMarketingPreferencesConnection = {
+  __typename: "ModelPlayerMarketingPreferencesConnection",
+  items:  Array<PlayerMarketingPreferences | null >,
+  nextToken?: string | null,
+  startedAt?: number | null,
+};
+
+export type ModelPlayerMarketingMessageConnection = {
+  __typename: "ModelPlayerMarketingMessageConnection",
+  items:  Array<PlayerMarketingMessage | null >,
+  nextToken?: string | null,
+  startedAt?: number | null,
+};
+
+export type PlayerMarketingMessage = {
+  __typename: "PlayerMarketingMessage",
+  id: string,
+  status: MessageStatus,
+  sentAt: string,
+  playerId: string,
+  marketingMessageId: string,
+  createdAt: string,
+  updatedAt: string,
+  _version: number,
+  _deleted?: boolean | null,
+  _lastChangedAt: number,
+};
+
+export enum MessageStatus {
+  SENT = "SENT",
+  DELIVERED = "DELIVERED",
+  FAILED = "FAILED",
+  READ = "READ",
+}
+
+
 export type ScrapedGameData = {
   __typename: "ScrapedGameData",
   name: string,
@@ -2043,35 +2093,6 @@ export type MarketingMessage = {
   _lastChangedAt: number,
 };
 
-export type ModelPlayerMarketingMessageConnection = {
-  __typename: "ModelPlayerMarketingMessageConnection",
-  items:  Array<PlayerMarketingMessage | null >,
-  nextToken?: string | null,
-  startedAt?: number | null,
-};
-
-export type PlayerMarketingMessage = {
-  __typename: "PlayerMarketingMessage",
-  id: string,
-  status: MessageStatus,
-  sentAt: string,
-  playerId: string,
-  marketingMessageId: string,
-  createdAt: string,
-  updatedAt: string,
-  _version: number,
-  _deleted?: boolean | null,
-  _lastChangedAt: number,
-};
-
-export enum MessageStatus {
-  SENT = "SENT",
-  DELIVERED = "DELIVERED",
-  FAILED = "FAILED",
-  READ = "READ",
-}
-
-
 export type UpdateMarketingMessageInput = {
   id: string,
   name?: string | null,
@@ -2744,13 +2765,6 @@ export type ModelPlayerFilterInput = {
   playerMarketingPreferencesId?: ModelIDInput | null,
 };
 
-export type ModelPlayerConnection = {
-  __typename: "ModelPlayerConnection",
-  items:  Array<Player | null >,
-  nextToken?: string | null,
-  startedAt?: number | null,
-};
-
 export type ModelPlayerSummaryFilterInput = {
   id?: ModelIDInput | null,
   playerId?: ModelIDInput | null,
@@ -2774,13 +2788,6 @@ export type ModelPlayerSummaryFilterInput = {
   or?: Array< ModelPlayerSummaryFilterInput | null > | null,
   not?: ModelPlayerSummaryFilterInput | null,
   _deleted?: ModelBooleanInput | null,
-};
-
-export type ModelPlayerSummaryConnection = {
-  __typename: "ModelPlayerSummaryConnection",
-  items:  Array<PlayerSummary | null >,
-  nextToken?: string | null,
-  startedAt?: number | null,
 };
 
 export type ModelPlayerResultFilterInput = {
@@ -2959,13 +2966,6 @@ export type ModelPlayerMarketingPreferencesFilterInput = {
   or?: Array< ModelPlayerMarketingPreferencesFilterInput | null > | null,
   not?: ModelPlayerMarketingPreferencesFilterInput | null,
   _deleted?: ModelBooleanInput | null,
-};
-
-export type ModelPlayerMarketingPreferencesConnection = {
-  __typename: "ModelPlayerMarketingPreferencesConnection",
-  items:  Array<PlayerMarketingPreferences | null >,
-  nextToken?: string | null,
-  startedAt?: number | null,
 };
 
 export type ModelUserFilterInput = {
@@ -3648,6 +3648,229 @@ export type ListVenuesForDropdownQuery = {
       id: string,
       name: string,
       venueNumber: number,
+    } | null >,
+  } | null,
+};
+
+export type ListPlayersForDebugQueryVariables = {
+};
+
+export type ListPlayersForDebugQuery = {
+  listPlayers?:  {
+    __typename: "ModelPlayerConnection",
+    items:  Array< {
+      __typename: "Player",
+      id: string,
+      firstName: string,
+      givenName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      creationDate: string,
+      status: PlayerAccountStatus,
+      category: PlayerAccountCategory,
+      tier?: string | null,
+      lastPlayedDate?: string | null,
+      targetingClassification: PlayerTargetingClassification,
+      creditBalance?: number | null,
+      pointsBalance?: number | null,
+      registrationVenueId: string,
+      _version: number,
+    } | null >,
+  } | null,
+};
+
+export type ListPlayerSummariesForDebugQueryVariables = {
+};
+
+export type ListPlayerSummariesForDebugQuery = {
+  listPlayerSummaries?:  {
+    __typename: "ModelPlayerSummaryConnection",
+    items:  Array< {
+      __typename: "PlayerSummary",
+      id: string,
+      playerId: string,
+      sessionsPlayed?: number | null,
+      tournamentsPlayed?: number | null,
+      cashGamesPlayed?: number | null,
+      venuesVisited?: Array< string | null > | null,
+      tournamentWinnings?: number | null,
+      tournamentBuyIns?: number | null,
+      tournamentITM?: number | null,
+      tournamentsCashed?: number | null,
+      cashGameWinnings?: number | null,
+      cashGameBuyIns?: number | null,
+      totalWinnings?: number | null,
+      totalBuyIns?: number | null,
+      netBalance?: number | null,
+      lastUpdated: string,
+      _version: number,
+    } | null >,
+  } | null,
+};
+
+export type ListPlayerResultsForDebugQueryVariables = {
+};
+
+export type ListPlayerResultsForDebugQuery = {
+  listPlayerResults?:  {
+    __typename: "ModelPlayerResultConnection",
+    items:  Array< {
+      __typename: "PlayerResult",
+      id: string,
+      finishingPlace?: number | null,
+      isMultiDayQualification?: boolean | null,
+      prizeWon?: boolean | null,
+      amountWon?: number | null,
+      totalRunners?: number | null,
+      pointsEarned?: number | null,
+      playerId: string,
+      gameId: string,
+      _version: number,
+    } | null >,
+  } | null,
+};
+
+export type ListPlayerVenuesForDebugQueryVariables = {
+};
+
+export type ListPlayerVenuesForDebugQuery = {
+  listPlayerVenues?:  {
+    __typename: "ModelPlayerVenueConnection",
+    items:  Array< {
+      __typename: "PlayerVenue",
+      id: string,
+      totalGamesPlayed?: number | null,
+      averageBuyIn?: number | null,
+      firstPlayedDate?: string | null,
+      lastPlayedDate?: string | null,
+      targetingClassification: PlayerVenueTargetingClassification,
+      playerId: string,
+      venueId: string,
+      _version: number,
+    } | null >,
+  } | null,
+};
+
+export type ListPlayerTransactionsForDebugQueryVariables = {
+};
+
+export type ListPlayerTransactionsForDebugQuery = {
+  listPlayerTransactions?:  {
+    __typename: "ModelPlayerTransactionConnection",
+    items:  Array< {
+      __typename: "PlayerTransaction",
+      id: string,
+      type: TransactionType,
+      amount: number,
+      rake?: number | null,
+      paymentSource: PaymentSourceType,
+      transactionDate: string,
+      notes?: string | null,
+      playerId: string,
+      gameId?: string | null,
+      _version: number,
+    } | null >,
+  } | null,
+};
+
+export type ListPlayerCreditsForDebugQueryVariables = {
+};
+
+export type ListPlayerCreditsForDebugQuery = {
+  listPlayerCredits?:  {
+    __typename: "ModelPlayerCreditsConnection",
+    items:  Array< {
+      __typename: "PlayerCredits",
+      id: string,
+      type: CreditTransactionType,
+      changeAmount: number,
+      balanceAfter: number,
+      transactionDate: string,
+      reason?: string | null,
+      expiryDate?: string | null,
+      playerId: string,
+      relatedGameId?: string | null,
+      relatedTransactionId?: string | null,
+      _version: number,
+    } | null >,
+  } | null,
+};
+
+export type ListPlayerPointsForDebugQueryVariables = {
+};
+
+export type ListPlayerPointsForDebugQuery = {
+  listPlayerPoints?:  {
+    __typename: "ModelPlayerPointsConnection",
+    items:  Array< {
+      __typename: "PlayerPoints",
+      id: string,
+      type: PointsTransactionType,
+      changeAmount: number,
+      balanceAfter: number,
+      transactionDate: string,
+      reason?: string | null,
+      expiryDate?: string | null,
+      playerId: string,
+      relatedGameId?: string | null,
+      relatedTransactionId?: string | null,
+      _version: number,
+    } | null >,
+  } | null,
+};
+
+export type ListPlayerTicketsForDebugQueryVariables = {
+};
+
+export type ListPlayerTicketsForDebugQuery = {
+  listPlayerTickets?:  {
+    __typename: "ModelPlayerTicketConnection",
+    items:  Array< {
+      __typename: "PlayerTicket",
+      id: string,
+      assignedAt: string,
+      expiryDate: string,
+      status: TicketStatus,
+      usedInGameId?: string | null,
+      playerId: string,
+      ticketTemplateId: string,
+      _version: number,
+    } | null >,
+  } | null,
+};
+
+export type ListPlayerMarketingPreferencesForDebugQueryVariables = {
+};
+
+export type ListPlayerMarketingPreferencesForDebugQuery = {
+  listPlayerMarketingPreferences?:  {
+    __typename: "ModelPlayerMarketingPreferencesConnection",
+    items:  Array< {
+      __typename: "PlayerMarketingPreferences",
+      id: string,
+      optOutSms?: boolean | null,
+      optOutEmail?: boolean | null,
+      playerId: string,
+      _version: number,
+    } | null >,
+  } | null,
+};
+
+export type ListPlayerMarketingMessagesForDebugQueryVariables = {
+};
+
+export type ListPlayerMarketingMessagesForDebugQuery = {
+  listPlayerMarketingMessages?:  {
+    __typename: "ModelPlayerMarketingMessageConnection",
+    items:  Array< {
+      __typename: "PlayerMarketingMessage",
+      id: string,
+      status: MessageStatus,
+      sentAt: string,
+      playerId: string,
+      marketingMessageId: string,
+      _version: number,
     } | null >,
   } | null,
 };

@@ -9,6 +9,7 @@ import { VenueModal } from '../components/venues/VenueModal';
 import { DeleteConfirmationModal } from '../components/venues/DeleteConfirmationModal';
 import * as APITypes from '../API';
 import { VenueFormData } from '../types/venue';
+import { PageWrapper } from '../components/layout/PageWrapper';
 
 type Venue = APITypes.Venue;
 
@@ -134,17 +135,31 @@ const VenuesPage = () => {
           fetchVenues();
       } catch (err) {
           console.error('Error deleting venue:', err);
-          setError('Failed to delete venue.');
+setError('Failed to delete venue.');
       }
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
+    <PageWrapper
+      title="Venues"
+      maxWidth="7xl"
+      actions={
+        <button
+          type="button"
+          onClick={handleAddVenue}
+          className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
+        >
+          Add Venue
+        </button>
+      }
+    >
+      {/* ✅ FIX: No extra padding div needed. PageWrapper handles it. */}
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
           <h1 className="text-xl font-semibold text-gray-900">Venues</h1>
           <p className="mt-2 text-sm text-gray-700">
-            A list of all the venues in your account. Each venue has a unique ID number for easy reference.
+            A list of all the venues in your account. Each venue has a unique ID
+            number for easy reference.
           </p>
           {nextVenueNumber && (
             <p className="mt-1 text-xs text-gray-500">
@@ -152,46 +167,39 @@ const VenuesPage = () => {
             </p>
           )}
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-          <button
-            type="button"
-            onClick={handleAddVenue}
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
-          >
-            Add Venue
-          </button>
-        </div>
+        {/* The actions button is now handled by the PageWrapper prop */}
       </div>
-      
+
       {error && (
         <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
           <p className="text-red-600 text-sm">{error}</p>
         </div>
       )}
-      
+
       <div className="mt-8">
-        <VenueTable 
-            venues={venues} 
-            loading={loading}
-            onEdit={handleEditVenue}
-            onDelete={handleDeleteVenue}
+        <VenueTable
+          venues={venues}
+          loading={loading}
+          onEdit={handleEditVenue}
+          onDelete={handleDeleteVenue}
         />
       </div>
 
-      <VenueModal 
+      <VenueModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveVenue}
         venue={editingVenue}
       />
-      
+
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={confirmDelete}
       />
-    </div>
+    </PageWrapper>
   );
 };
 
 export default VenuesPage;
+

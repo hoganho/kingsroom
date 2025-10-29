@@ -9,6 +9,8 @@ import * as APITypes from '../API';
 import { SeriesTitleManager } from '../components/series/SeriesTitleManager';
 import { SeriesInstanceManager } from '../components/series/SeriesInstanceManager';
 
+import { PageWrapper, PageGrid, PageCard } from '../components/layout/PageWrapper';
+
 export const SeriesManagementPage = () => {
     const client = generateClient();
     const [seriesTitles, setSeriesTitles] = useState<APITypes.TournamentSeriesTitle[]>([]);
@@ -207,31 +209,40 @@ export const SeriesManagementPage = () => {
     };
     
     if (loading) {
-        return <div className="p-8 text-center">Loading...</div>;
+        return (
+            <PageWrapper title="Series Management" maxWidth="7xl">
+                <div className="p-8 text-center">Loading...</div>
+            </PageWrapper>
+        );
     }
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-8">
-            <h2 className="text-3xl font-bold text-gray-800">Series Management</h2>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+        <PageWrapper title="Series Management" maxWidth="7xl">
+            {/* ✅ FIX: No extra padding div needed. PageWrapper handles it. */}
+            <PageGrid columns={3} gap="lg">
                 <div className="lg:col-span-1">
-                    <SeriesTitleManager 
-                        titles={seriesTitles}
-                        onSave={handleSaveTitle}
-                        onDelete={handleDeleteTitle}
-                    />
+                    <PageCard>
+                        <SeriesTitleManager 
+                            titles={seriesTitles}
+                            onSave={handleSaveTitle}
+                            onDelete={handleDeleteTitle}
+                        />
+                    </PageCard>
                 </div>
                 <div className="lg:col-span-2">
-                    <SeriesInstanceManager
-                        seriesInstances={seriesInstances}
-                        seriesTitles={seriesTitles}
-                        venues={venues}
-                        onSave={handleSaveInstance}
-                        onDelete={handleDeleteInstance}
-                    />
+                    <PageCard>
+                        <SeriesInstanceManager
+                            seriesInstances={seriesInstances}
+                            seriesTitles={seriesTitles}
+                            venues={venues}
+                            onSave={handleSaveInstance}
+                            onDelete={handleDeleteInstance}
+                        />
+                    </PageCard>
                 </div>
-            </div>
-        </div>
+            </PageGrid>
+        </PageWrapper>
     );
 };
+
