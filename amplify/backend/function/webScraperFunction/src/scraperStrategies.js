@@ -107,8 +107,13 @@ class ScrapeContext {
  */
 const defaultStrategy = {
     getName(ctx, seriesTitles = []) {
-        // Try to get the game name
-        let gameName = ctx.$('.cw-game-title').first().text().trim();
+        // ✅ 1. Get the main and supplementary title parts from the HTML.
+        const mainTitle = ctx.$('.cw-game-title').first().text().trim();
+        const subTitle = ctx.$('.cw-game-shortdesc').first().text().trim();
+
+        // ✅ 2. Combine them into a single name. 
+        // This method filters out any empty parts before joining them with a space.
+        const gameName = [mainTitle, subTitle].filter(Boolean).join(' ');
         
         // If no name found or empty, handle gracefully
         if (!gameName || gameName === '') {
@@ -129,7 +134,7 @@ const defaultStrategy = {
             }
         }
         
-        // Normal processing when we have a valid name
+        // ✅ 3. Normal processing continues with the full, combined name.
         ctx.add('name', gameName);
 
         if (!seriesTitles || seriesTitles.length === 0) {
@@ -138,10 +143,10 @@ const defaultStrategy = {
             return;
         }
 
-        // 1. Clean the scraped game name to prepare it for matching.
+        // Clean the scraped game name to prepare it for matching.
         const cleanedGameName = cleanupNameForMatching(gameName);
         
-        // 2. Create a flat list of all possible series names and aliases to match against.
+        // Create a flat list of all possible series names and aliases to match against.
         const allSeriesNamesToMatch = seriesTitles.flatMap(series => {
             const names = [series.title, ...(series.aliases || [])];
             return names.map(name => ({
@@ -150,13 +155,13 @@ const defaultStrategy = {
             }));
         });
 
-        // 3. Find the best match between the cleaned game name and the list of series names.
+        // Find the best match between the cleaned game name and the list of series names.
         const { bestMatch } = stringSimilarity.findBestMatch(
             cleanedGameName,
             allSeriesNamesToMatch.map(s => s.matchName)
         );
 
-        // 4. Check if the best match meets our confidence threshold.
+        // Check if the best match meets our confidence threshold.
         if (bestMatch && bestMatch.rating >= SERIES_MATCH_THRESHOLD) {
             console.log(`[DEBUG-SERIES-MATCH] High confidence match found: "${bestMatch.target}" with rating ${bestMatch.rating}`);
             // Find the original series object to get its official title.

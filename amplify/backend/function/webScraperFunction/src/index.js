@@ -219,16 +219,19 @@ const extractPlayerDataForProcessing = (scrapedData) => {
     const finishedPlayers = allPlayers.filter(p => p.finished);
     const totalPrizesPaid = finishedPlayers.reduce((sum, p) => sum + (p.winnings || 0), 0);
     const playersInTheMoney = finishedPlayers.filter(p => p.winnings > 0);
+    const playersWithPoints = finishedPlayers.filter(p => p.points > 0);
     const qualifiedPlayers = finishedPlayers.filter(p => p.isQualification);
 
     return {
         allPlayers,
         finishedPlayers,
         playersInTheMoney,
+        playersWithPoints,
         qualifiedPlayers,
         totalPlayers: allPlayers.length,
         totalFinished: finishedPlayers.length,
         totalInTheMoney: playersInTheMoney.length,
+        totalWithPoints: playersWithPoints.length, // ✅ ADDED
         totalPrizesPaid,
         hasCompleteResults: finishedPlayers.length > 0,
         hasEntryList: entries.length > 0,
@@ -552,8 +555,10 @@ const handleSave = async (input) => {
             let structureId = existingGame.Item.tournamentStructureId;
             if (!structureId) {
                 structureId = crypto.randomUUID();
-                updatedGameItem.tournamentStructureId = structureId;
             }
+            // ✅ CHANGE 1: Always assign the structureId to the item being saved
+            updatedGameItem.tournamentStructureId = structureId;
+            
             const structureItem = {
                 id: structureId,
                 name: `${data.name} - Blind Structure`,
@@ -565,14 +570,15 @@ const handleSave = async (input) => {
                 _version: 1,
                 __typename: "TournamentStructure",
             };
-            await Promise.all([
-                ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem })),
-                ddbDocClient.send(new PutCommand({ TableName: structureTable, Item: structureItem }))
-            ]);
+            await ddbDocClient.send(new PutCommand({ TableName: structureTable, Item: structureItem }));
         } else {
-            await ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem }));
+            // If there are no levels, ensure we don't have a null ID
+            delete updatedGameItem.tournamentStructureId;
         }
+
+        await ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem }));
         savedGameItem = updatedGameItem; // Assign the updated item
+
     } else {
         console.log('[handleSave] No existing game found. Creating new records...');
         const gameId = crypto.randomUUID();
@@ -629,7 +635,7 @@ const handleSave = async (input) => {
             totalAddons: data.totalAddons,
             totalDuration: data.totalDuration,
             gameTags: data.gameTags,
-            tournamentStructureId: structureId,
+            // tournamentStructureId is now handled below
             doNotScrape: doNotScrape,
             sourceDataIssue: data.sourceDataIssue || false,
             gameDataVerified: data.gameDataVerified || false,
@@ -639,6 +645,13 @@ const handleSave = async (input) => {
             _version: 1,
             __typename: "Game",
         };
+        
+        // ✅ CHANGE 2: Conditionally add the tournamentStructureId to the object.
+        // If structureId is null, the key will not be added to the object.
+        if (structureId) {
+            gameItem.tournamentStructureId = structureId;
+        }
+
         await ddbDocClient.send(new PutCommand({ 
             TableName: gameTable, 
             Item: gameItem 
