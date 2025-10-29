@@ -16,13 +16,13 @@ export type PlayerResultData = {
     rank: number;
     name: string;
     winnings: number;
+    points?: number | null;
 };
 
 export type PlayerEntryData = {
     name: string;
 };
 
-// ✅ FIXED: Added the missing playerStack property
 export type PlayerSeatingData = {
     name: string;
     table: number;

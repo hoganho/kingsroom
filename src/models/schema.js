@@ -1667,6 +1667,20 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "creditBalance": {
+                    "name": "creditBalance",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "pointsBalance": {
+                    "name": "pointsBalance",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "registrationVenueId": {
                     "name": "registrationVenueId",
                     "isArray": false,
@@ -1745,6 +1759,38 @@ export const schema = {
                     "isArray": true,
                     "type": {
                         "model": "PlayerVenue"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "player"
+                        ]
+                    }
+                },
+                "credits": {
+                    "name": "credits",
+                    "isArray": true,
+                    "type": {
+                        "model": "PlayerCredits"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "player"
+                        ]
+                    }
+                },
+                "points": {
+                    "name": "points",
+                    "isArray": true,
+                    "type": {
+                        "model": "PlayerPoints"
                     },
                     "isRequired": false,
                     "attributes": [],
@@ -2073,6 +2119,13 @@ export const schema = {
                     "name": "totalRunners",
                     "isArray": false,
                     "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "pointsEarned": {
+                    "name": "pointsEarned",
+                    "isArray": false,
+                    "type": "Float",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -2458,6 +2511,308 @@ export const schema = {
                         "name": "byGame",
                         "fields": [
                             "gameId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "PlayerCredits": {
+            "name": "PlayerCredits",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "type": {
+                    "name": "type",
+                    "isArray": false,
+                    "type": {
+                        "enum": "CreditTransactionType"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "changeAmount": {
+                    "name": "changeAmount",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "balanceAfter": {
+                    "name": "balanceAfter",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "transactionDate": {
+                    "name": "transactionDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "reason": {
+                    "name": "reason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "expiryDate": {
+                    "name": "expiryDate",
+                    "isArray": false,
+                    "type": "AWSDate",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerId": {
+                    "name": "playerId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "player": {
+                    "name": "player",
+                    "isArray": false,
+                    "type": {
+                        "model": "Player"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "playerId"
+                        ]
+                    }
+                },
+                "relatedGameId": {
+                    "name": "relatedGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "relatedTransactionId": {
+                    "name": "relatedTransactionId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "PlayerCredits",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byPlayer",
+                        "fields": [
+                            "playerId",
+                            "transactionDate"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byGame",
+                        "fields": [
+                            "relatedGameId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "PlayerPoints": {
+            "name": "PlayerPoints",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "type": {
+                    "name": "type",
+                    "isArray": false,
+                    "type": {
+                        "enum": "PointsTransactionType"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "changeAmount": {
+                    "name": "changeAmount",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "balanceAfter": {
+                    "name": "balanceAfter",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "transactionDate": {
+                    "name": "transactionDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "reason": {
+                    "name": "reason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "expiryDate": {
+                    "name": "expiryDate",
+                    "isArray": false,
+                    "type": "AWSDate",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerId": {
+                    "name": "playerId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "player": {
+                    "name": "player",
+                    "isArray": false,
+                    "type": {
+                        "model": "Player"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "playerId"
+                        ]
+                    }
+                },
+                "relatedGameId": {
+                    "name": "relatedGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "relatedTransactionId": {
+                    "name": "relatedTransactionId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "PlayerPoints",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byPlayer",
+                        "fields": [
+                            "playerId",
+                            "transactionDate"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byGame",
+                        "fields": [
+                            "relatedGameId"
                         ]
                     }
                 },
@@ -3704,7 +4059,8 @@ export const schema = {
             "values": [
                 "CASH",
                 "SQUARE",
-                "CREDIT",
+                "CREDIT_CARD",
+                "INTERNAL_CREDIT",
                 "UNKNOWN"
             ]
         },
@@ -3757,8 +4113,8 @@ export const schema = {
                 "Retain_Inactive61_90d",
                 "Churned_91_120d",
                 "Churned_121_180d",
-                "Churned_181_360d",
-                "Churned_361d"
+                "Churn_181_360d",
+                "Churn_361d"
             ]
         },
         "TransactionType": {
@@ -3807,6 +4163,27 @@ export const schema = {
                 "ACTIVE",
                 "EXPIRED",
                 "USED"
+            ]
+        },
+        "CreditTransactionType": {
+            "name": "CreditTransactionType",
+            "values": [
+                "AWARD_PROMOTION",
+                "AWARD_REFUND",
+                "AWARD_MANUAL",
+                "REDEEM_GAME_BUY_IN",
+                "EXPIRED"
+            ]
+        },
+        "PointsTransactionType": {
+            "name": "PointsTransactionType",
+            "values": [
+                "EARN_FROM_PLAY",
+                "EARN_FROM_PROMOTION",
+                "REDEEM_FOR_BUY_IN",
+                "REDEEM_FOR_MERCH",
+                "ADJUSTMENT_MANUAL",
+                "EXPIRED"
             ]
         }
     },
@@ -4501,5 +4878,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "8c42165985aa946008c7d49584b78f50"
+    "version": "5833db24f2cbdf3490b706f023553ae6"
 };

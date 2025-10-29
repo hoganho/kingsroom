@@ -72,7 +72,8 @@ export enum TournamentType {
 export enum PaymentSourceType {
   CASH = "CASH",
   SQUARE = "SQUARE",
-  CREDIT = "CREDIT",
+  CREDIT_CARD = "CREDIT_CARD",
+  INTERNAL_CREDIT = "INTERNAL_CREDIT",
   UNKNOWN = "UNKNOWN"
 }
 
@@ -115,8 +116,8 @@ export enum PlayerVenueTargetingClassification {
   RETAIN_INACTIVE61_90D = "Retain_Inactive61_90d",
   CHURNED_91_120D = "Churned_91_120d",
   CHURNED_121_180D = "Churned_121_180d",
-  CHURNED_181_360D = "Churned_181_360d",
-  CHURNED_361D = "Churned_361d"
+  CHURN_181_360D = "Churn_181_360d",
+  CHURN_361D = "Churn_361d"
 }
 
 export enum TransactionType {
@@ -155,6 +156,23 @@ export enum TicketStatus {
   ACTIVE = "ACTIVE",
   EXPIRED = "EXPIRED",
   USED = "USED"
+}
+
+export enum CreditTransactionType {
+  AWARD_PROMOTION = "AWARD_PROMOTION",
+  AWARD_REFUND = "AWARD_REFUND",
+  AWARD_MANUAL = "AWARD_MANUAL",
+  REDEEM_GAME_BUY_IN = "REDEEM_GAME_BUY_IN",
+  EXPIRED = "EXPIRED"
+}
+
+export enum PointsTransactionType {
+  EARN_FROM_PLAY = "EARN_FROM_PLAY",
+  EARN_FROM_PROMOTION = "EARN_FROM_PROMOTION",
+  REDEEM_FOR_BUY_IN = "REDEEM_FOR_BUY_IN",
+  REDEEM_FOR_MERCH = "REDEEM_FOR_MERCH",
+  ADJUSTMENT_MANUAL = "ADJUSTMENT_MANUAL",
+  EXPIRED = "EXPIRED"
 }
 
 type EagerTournamentLevelData = {
@@ -942,12 +960,16 @@ type EagerPlayer = {
   readonly tier?: string | null;
   readonly lastPlayedDate?: string | null;
   readonly targetingClassification: PlayerTargetingClassification | keyof typeof PlayerTargetingClassification;
+  readonly creditBalance?: number | null;
+  readonly pointsBalance?: number | null;
   readonly registrationVenueId: string;
   readonly summary?: PlayerSummary | null;
   readonly transactions?: (PlayerTransaction | null)[] | null;
   readonly results?: (PlayerResult | null)[] | null;
   readonly tickets?: (PlayerTicket | null)[] | null;
   readonly venueMemberships?: (PlayerVenue | null)[] | null;
+  readonly credits?: (PlayerCredits | null)[] | null;
+  readonly points?: (PlayerPoints | null)[] | null;
   readonly marketingPreferences?: PlayerMarketingPreferences | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
@@ -972,12 +994,16 @@ type LazyPlayer = {
   readonly tier?: string | null;
   readonly lastPlayedDate?: string | null;
   readonly targetingClassification: PlayerTargetingClassification | keyof typeof PlayerTargetingClassification;
+  readonly creditBalance?: number | null;
+  readonly pointsBalance?: number | null;
   readonly registrationVenueId: string;
   readonly summary: AsyncItem<PlayerSummary | undefined>;
   readonly transactions: AsyncCollection<PlayerTransaction>;
   readonly results: AsyncCollection<PlayerResult>;
   readonly tickets: AsyncCollection<PlayerTicket>;
   readonly venueMemberships: AsyncCollection<PlayerVenue>;
+  readonly credits: AsyncCollection<PlayerCredits>;
+  readonly points: AsyncCollection<PlayerPoints>;
   readonly marketingPreferences: AsyncItem<PlayerMarketingPreferences | undefined>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
@@ -1060,6 +1086,7 @@ type EagerPlayerResult = {
   readonly prizeWon?: boolean | null;
   readonly amountWon?: number | null;
   readonly totalRunners?: number | null;
+  readonly pointsEarned?: number | null;
   readonly playerId: string;
   readonly player?: Player | null;
   readonly gameId: string;
@@ -1079,6 +1106,7 @@ type LazyPlayerResult = {
   readonly prizeWon?: boolean | null;
   readonly amountWon?: number | null;
   readonly totalRunners?: number | null;
+  readonly pointsEarned?: number | null;
   readonly playerId: string;
   readonly player: AsyncItem<Player | undefined>;
   readonly gameId: string;
@@ -1179,6 +1207,98 @@ export declare type PlayerTransaction = LazyLoading extends LazyLoadingDisabled 
 
 export declare const PlayerTransaction: (new (init: ModelInit<PlayerTransaction>) => PlayerTransaction) & {
   copyOf(source: PlayerTransaction, mutator: (draft: MutableModel<PlayerTransaction>) => MutableModel<PlayerTransaction> | void): PlayerTransaction;
+}
+
+type EagerPlayerCredits = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<PlayerCredits, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly type: CreditTransactionType | keyof typeof CreditTransactionType;
+  readonly changeAmount: number;
+  readonly balanceAfter: number;
+  readonly transactionDate: string;
+  readonly reason?: string | null;
+  readonly expiryDate?: string | null;
+  readonly playerId: string;
+  readonly player?: Player | null;
+  readonly relatedGameId?: string | null;
+  readonly relatedTransactionId?: string | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyPlayerCredits = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<PlayerCredits, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly type: CreditTransactionType | keyof typeof CreditTransactionType;
+  readonly changeAmount: number;
+  readonly balanceAfter: number;
+  readonly transactionDate: string;
+  readonly reason?: string | null;
+  readonly expiryDate?: string | null;
+  readonly playerId: string;
+  readonly player: AsyncItem<Player | undefined>;
+  readonly relatedGameId?: string | null;
+  readonly relatedTransactionId?: string | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type PlayerCredits = LazyLoading extends LazyLoadingDisabled ? EagerPlayerCredits : LazyPlayerCredits
+
+export declare const PlayerCredits: (new (init: ModelInit<PlayerCredits>) => PlayerCredits) & {
+  copyOf(source: PlayerCredits, mutator: (draft: MutableModel<PlayerCredits>) => MutableModel<PlayerCredits> | void): PlayerCredits;
+}
+
+type EagerPlayerPoints = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<PlayerPoints, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly type: PointsTransactionType | keyof typeof PointsTransactionType;
+  readonly changeAmount: number;
+  readonly balanceAfter: number;
+  readonly transactionDate: string;
+  readonly reason?: string | null;
+  readonly expiryDate?: string | null;
+  readonly playerId: string;
+  readonly player?: Player | null;
+  readonly relatedGameId?: string | null;
+  readonly relatedTransactionId?: string | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyPlayerPoints = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<PlayerPoints, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly type: PointsTransactionType | keyof typeof PointsTransactionType;
+  readonly changeAmount: number;
+  readonly balanceAfter: number;
+  readonly transactionDate: string;
+  readonly reason?: string | null;
+  readonly expiryDate?: string | null;
+  readonly playerId: string;
+  readonly player: AsyncItem<Player | undefined>;
+  readonly relatedGameId?: string | null;
+  readonly relatedTransactionId?: string | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type PlayerPoints = LazyLoading extends LazyLoadingDisabled ? EagerPlayerPoints : LazyPlayerPoints
+
+export declare const PlayerPoints: (new (init: ModelInit<PlayerPoints>) => PlayerPoints) & {
+  copyOf(source: PlayerPoints, mutator: (draft: MutableModel<PlayerPoints>) => MutableModel<PlayerPoints> | void): PlayerPoints;
 }
 
 type EagerTicketTemplate = {

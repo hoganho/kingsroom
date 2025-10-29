@@ -675,6 +675,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -869,6 +870,8 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -910,6 +913,16 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -1329,6 +1342,8 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -1710,6 +1725,8 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -2089,6 +2106,8 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -3294,6 +3313,8 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -3553,6 +3574,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -4677,6 +4699,8 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -5394,6 +5418,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
         prizeWon
         amountWon
         totalRunners
+        pointsEarned
         playerId
         player {
           id
@@ -5408,6 +5433,8 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -5449,6 +5476,16 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -6140,6 +6177,7 @@ export const listGames = /* GraphQL */ `query ListGames(
           prizeWon
           amountWon
           totalRunners
+          pointsEarned
           playerId
           player {
             id
@@ -6154,6 +6192,8 @@ export const listGames = /* GraphQL */ `query ListGames(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -6772,6 +6812,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
           prizeWon
           amountWon
           totalRunners
+          pointsEarned
           playerId
           player {
             id
@@ -6786,6 +6827,8 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -7097,6 +7140,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -7728,6 +7772,7 @@ export const getCashStructure = /* GraphQL */ `query GetCashStructure($id: ID!) 
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -8395,6 +8440,8 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
     tier
     lastPlayedDate
     targetingClassification
+    creditBalance
+    pointsBalance
     registrationVenueId
     summary {
       id
@@ -8426,6 +8473,8 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -8457,6 +8506,8 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -8504,6 +8555,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -8558,6 +8610,52 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -8576,6 +8674,8 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -8632,6 +8732,8 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -8673,6 +8775,16 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -8718,6 +8830,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
         prizeWon
         amountWon
         totalRunners
+        pointsEarned
         playerId
         player {
           id
@@ -8732,6 +8845,8 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -8773,6 +8888,16 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -8948,6 +9073,8 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -8989,6 +9116,16 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -9068,6 +9205,8 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -9109,6 +9248,16 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -9198,6 +9347,234 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
       startedAt
       __typename
     }
+    credits {
+      items {
+        id
+        type
+        changeAmount
+        balanceAfter
+        transactionDate
+        reason
+        expiryDate
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          creditBalance
+          pointsBalance
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        relatedGameId
+        relatedTransactionId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    points {
+      items {
+        id
+        type
+        changeAmount
+        balanceAfter
+        transactionDate
+        reason
+        expiryDate
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          creditBalance
+          pointsBalance
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        relatedGameId
+        relatedTransactionId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     marketingPreferences {
       id
       optOutSms
@@ -9216,6 +9593,8 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -9247,6 +9626,8 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -9294,6 +9675,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -9348,6 +9730,52 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -9366,6 +9794,8 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -9429,6 +9859,8 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
       tier
       lastPlayedDate
       targetingClassification
+      creditBalance
+      pointsBalance
       registrationVenueId
       summary {
         id
@@ -9460,6 +9892,8 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -9501,6 +9935,16 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -9556,6 +10000,8 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -9586,6 +10032,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
           prizeWon
           amountWon
           totalRunners
+          pointsEarned
           playerId
           player {
             id
@@ -9600,6 +10047,8 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -9692,6 +10141,8 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -9751,6 +10202,8 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -9789,6 +10242,102 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
         startedAt
         __typename
       }
+      credits {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      points {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       marketingPreferences {
         id
         optOutSms
@@ -9807,6 +10356,8 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -9848,6 +10399,16 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -9923,6 +10484,8 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
       tier
       lastPlayedDate
       targetingClassification
+      creditBalance
+      pointsBalance
       registrationVenueId
       summary {
         id
@@ -9954,6 +10517,8 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -9995,6 +10560,16 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -10050,6 +10625,8 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -10080,6 +10657,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
           prizeWon
           amountWon
           totalRunners
+          pointsEarned
           playerId
           player {
             id
@@ -10094,6 +10672,8 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -10186,6 +10766,8 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -10245,6 +10827,8 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -10283,6 +10867,102 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
         startedAt
         __typename
       }
+      credits {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      points {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       marketingPreferences {
         id
         optOutSms
@@ -10301,6 +10981,8 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -10342,6 +11024,16 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -10423,6 +11115,8 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
       tier
       lastPlayedDate
       targetingClassification
+      creditBalance
+      pointsBalance
       registrationVenueId
       summary {
         id
@@ -10454,6 +11148,8 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -10495,6 +11191,16 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -10550,6 +11256,8 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -10580,6 +11288,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
           prizeWon
           amountWon
           totalRunners
+          pointsEarned
           playerId
           player {
             id
@@ -10594,6 +11303,8 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -10686,6 +11397,8 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -10745,6 +11458,8 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -10783,6 +11498,102 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
         startedAt
         __typename
       }
+      credits {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      points {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       marketingPreferences {
         id
         optOutSms
@@ -10801,6 +11612,8 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -10842,6 +11655,16 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -10931,6 +11754,8 @@ export const listPlayerSummaries = /* GraphQL */ `query ListPlayerSummaries(
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -10962,6 +11787,8 @@ export const listPlayerSummaries = /* GraphQL */ `query ListPlayerSummaries(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -11009,6 +11836,7 @@ export const listPlayerSummaries = /* GraphQL */ `query ListPlayerSummaries(
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -11063,6 +11891,52 @@ export const listPlayerSummaries = /* GraphQL */ `query ListPlayerSummaries(
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -11081,6 +11955,8 @@ export const listPlayerSummaries = /* GraphQL */ `query ListPlayerSummaries(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -11165,6 +12041,8 @@ export const syncPlayerSummaries = /* GraphQL */ `query SyncPlayerSummaries(
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -11196,6 +12074,8 @@ export const syncPlayerSummaries = /* GraphQL */ `query SyncPlayerSummaries(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -11243,6 +12123,7 @@ export const syncPlayerSummaries = /* GraphQL */ `query SyncPlayerSummaries(
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -11297,6 +12178,52 @@ export const syncPlayerSummaries = /* GraphQL */ `query SyncPlayerSummaries(
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -11315,6 +12242,8 @@ export const syncPlayerSummaries = /* GraphQL */ `query SyncPlayerSummaries(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -11365,6 +12294,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
     prizeWon
     amountWon
     totalRunners
+    pointsEarned
     playerId
     player {
       id
@@ -11379,6 +12309,8 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
       tier
       lastPlayedDate
       targetingClassification
+      creditBalance
+      pointsBalance
       registrationVenueId
       summary {
         id
@@ -11410,6 +12342,8 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -11451,6 +12385,16 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -11506,6 +12450,8 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -11536,6 +12482,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           prizeWon
           amountWon
           totalRunners
+          pointsEarned
           playerId
           player {
             id
@@ -11550,6 +12497,8 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -11642,6 +12591,8 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -11701,6 +12652,8 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -11739,6 +12692,102 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
         startedAt
         __typename
       }
+      credits {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      points {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       marketingPreferences {
         id
         optOutSms
@@ -11757,6 +12806,8 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -11798,6 +12849,16 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -12362,6 +13423,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           prizeWon
           amountWon
           totalRunners
+          pointsEarned
           playerId
           player {
             id
@@ -12376,6 +13438,8 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -12479,6 +13543,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
       prizeWon
       amountWon
       totalRunners
+      pointsEarned
       playerId
       player {
         id
@@ -12493,6 +13558,8 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -12524,6 +13591,8 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -12571,6 +13640,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -12625,6 +13695,52 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -12643,6 +13759,8 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -12882,6 +14000,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -12937,6 +14056,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
       prizeWon
       amountWon
       totalRunners
+      pointsEarned
       playerId
       player {
         id
@@ -12951,6 +14071,8 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -12982,6 +14104,8 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -13029,6 +14153,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -13083,6 +14208,52 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -13101,6 +14272,8 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -13340,6 +14513,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -13398,6 +14572,8 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
       tier
       lastPlayedDate
       targetingClassification
+      creditBalance
+      pointsBalance
       registrationVenueId
       summary {
         id
@@ -13429,6 +14605,8 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -13470,6 +14648,16 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -13525,6 +14713,8 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -13555,6 +14745,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           prizeWon
           amountWon
           totalRunners
+          pointsEarned
           playerId
           player {
             id
@@ -13569,6 +14760,8 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -13661,6 +14854,8 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -13720,6 +14915,8 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -13758,6 +14955,102 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
         startedAt
         __typename
       }
+      credits {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      points {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       marketingPreferences {
         id
         optOutSms
@@ -13776,6 +15069,8 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -13817,6 +15112,16 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -14173,6 +15478,8 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -14258,6 +15565,8 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -14289,6 +15598,8 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -14336,6 +15647,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -14390,6 +15702,52 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -14408,6 +15766,8 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -14653,6 +16013,8 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -14684,6 +16046,8 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -14731,6 +16095,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -14785,6 +16150,52 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -14803,6 +16214,8 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -15038,6 +16451,8 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
       tier
       lastPlayedDate
       targetingClassification
+      creditBalance
+      pointsBalance
       registrationVenueId
       summary {
         id
@@ -15069,6 +16484,8 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -15110,6 +16527,16 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -15165,6 +16592,8 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -15195,6 +16624,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
           prizeWon
           amountWon
           totalRunners
+          pointsEarned
           playerId
           player {
             id
@@ -15209,6 +16639,8 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -15301,6 +16733,8 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -15360,6 +16794,8 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -15398,6 +16834,102 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
         startedAt
         __typename
       }
+      credits {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      points {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       marketingPreferences {
         id
         optOutSms
@@ -15416,6 +16948,8 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -15457,6 +16991,16 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -15543,6 +17087,8 @@ export const listPlayerTransactions = /* GraphQL */ `query ListPlayerTransaction
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -15574,6 +17120,8 @@ export const listPlayerTransactions = /* GraphQL */ `query ListPlayerTransaction
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -15621,6 +17169,7 @@ export const listPlayerTransactions = /* GraphQL */ `query ListPlayerTransaction
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -15675,6 +17224,52 @@ export const listPlayerTransactions = /* GraphQL */ `query ListPlayerTransaction
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -15693,6 +17288,8 @@ export const listPlayerTransactions = /* GraphQL */ `query ListPlayerTransaction
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -15770,6 +17367,8 @@ export const syncPlayerTransactions = /* GraphQL */ `query SyncPlayerTransaction
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -15801,6 +17400,8 @@ export const syncPlayerTransactions = /* GraphQL */ `query SyncPlayerTransaction
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -15848,6 +17449,7 @@ export const syncPlayerTransactions = /* GraphQL */ `query SyncPlayerTransaction
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -15902,6 +17504,52 @@ export const syncPlayerTransactions = /* GraphQL */ `query SyncPlayerTransaction
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -15920,6 +17568,8 @@ export const syncPlayerTransactions = /* GraphQL */ `query SyncPlayerTransaction
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -15963,23 +17613,49 @@ export const syncPlayerTransactions = /* GraphQL */ `query SyncPlayerTransaction
   APITypes.SyncPlayerTransactionsQueryVariables,
   APITypes.SyncPlayerTransactionsQuery
 >;
-export const getTicketTemplate = /* GraphQL */ `query GetTicketTemplate($id: ID!) {
-  getTicketTemplate(id: $id) {
+export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) {
+  getPlayerCredits(id: $id) {
     id
-    name
-    description
-    value
-    validityDays
-    originGameId
-    targetGameId
-    playerTickets {
-      items {
+    type
+    changeAmount
+    balanceAfter
+    transactionDate
+    reason
+    expiryDate
+    playerId
+    player {
+      id
+      firstName
+      givenName
+      lastName
+      email
+      phone
+      creationDate
+      status
+      category
+      tier
+      lastPlayedDate
+      targetingClassification
+      creditBalance
+      pointsBalance
+      registrationVenueId
+      summary {
         id
-        assignedAt
-        expiryDate
-        status
-        usedInGameId
         playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
         player {
           id
           firstName
@@ -15993,6 +17669,8 @@ export const getTicketTemplate = /* GraphQL */ `query GetTicketTemplate($id: ID!
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -16034,6 +17712,2358 @@ export const getTicketTemplate = /* GraphQL */ `query GetTicketTemplate($id: ID!
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      transactions {
+        items {
+          id
+          type
+          amount
+          rake
+          paymentSource
+          transactionDate
+          notes
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          pointsEarned
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      credits {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      points {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        optOutSms
+        optOutEmail
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          creditBalance
+          pointsBalance
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      playerSummaryId
+      playerMarketingPreferencesId
+      __typename
+    }
+    relatedGameId
+    relatedTransactionId
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetPlayerCreditsQueryVariables,
+  APITypes.GetPlayerCreditsQuery
+>;
+export const listPlayerCredits = /* GraphQL */ `query ListPlayerCredits(
+  $filter: ModelPlayerCreditsFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listPlayerCredits(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      type
+      changeAmount
+      balanceAfter
+      transactionDate
+      reason
+      expiryDate
+      playerId
+      player {
+        id
+        firstName
+        givenName
+        lastName
+        email
+        phone
+        creationDate
+        status
+        category
+        tier
+        lastPlayedDate
+        targetingClassification
+        creditBalance
+        pointsBalance
+        registrationVenueId
+        summary {
+          id
+          playerId
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          venuesVisited
+          tournamentWinnings
+          tournamentBuyIns
+          tournamentITM
+          tournamentsCashed
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        transactions {
+          items {
+            id
+            type
+            amount
+            rake
+            paymentSource
+            transactionDate
+            notes
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        results {
+          items {
+            id
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            pointsEarned
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        tickets {
+          items {
+            id
+            assignedAt
+            expiryDate
+            status
+            usedInGameId
+            playerId
+            ticketTemplateId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        marketingPreferences {
+          id
+          optOutSms
+          optOutEmail
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        playerSummaryId
+        playerMarketingPreferencesId
+        __typename
+      }
+      relatedGameId
+      relatedTransactionId
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListPlayerCreditsQueryVariables,
+  APITypes.ListPlayerCreditsQuery
+>;
+export const syncPlayerCredits = /* GraphQL */ `query SyncPlayerCredits(
+  $filter: ModelPlayerCreditsFilterInput
+  $limit: Int
+  $nextToken: String
+  $lastSync: AWSTimestamp
+) {
+  syncPlayerCredits(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+    lastSync: $lastSync
+  ) {
+    items {
+      id
+      type
+      changeAmount
+      balanceAfter
+      transactionDate
+      reason
+      expiryDate
+      playerId
+      player {
+        id
+        firstName
+        givenName
+        lastName
+        email
+        phone
+        creationDate
+        status
+        category
+        tier
+        lastPlayedDate
+        targetingClassification
+        creditBalance
+        pointsBalance
+        registrationVenueId
+        summary {
+          id
+          playerId
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          venuesVisited
+          tournamentWinnings
+          tournamentBuyIns
+          tournamentITM
+          tournamentsCashed
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        transactions {
+          items {
+            id
+            type
+            amount
+            rake
+            paymentSource
+            transactionDate
+            notes
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        results {
+          items {
+            id
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            pointsEarned
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        tickets {
+          items {
+            id
+            assignedAt
+            expiryDate
+            status
+            usedInGameId
+            playerId
+            ticketTemplateId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        marketingPreferences {
+          id
+          optOutSms
+          optOutEmail
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        playerSummaryId
+        playerMarketingPreferencesId
+        __typename
+      }
+      relatedGameId
+      relatedTransactionId
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.SyncPlayerCreditsQueryVariables,
+  APITypes.SyncPlayerCreditsQuery
+>;
+export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
+  getPlayerPoints(id: $id) {
+    id
+    type
+    changeAmount
+    balanceAfter
+    transactionDate
+    reason
+    expiryDate
+    playerId
+    player {
+      id
+      firstName
+      givenName
+      lastName
+      email
+      phone
+      creationDate
+      status
+      category
+      tier
+      lastPlayedDate
+      targetingClassification
+      creditBalance
+      pointsBalance
+      registrationVenueId
+      summary {
+        id
+        playerId
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        netBalance
+        lastUpdated
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          creditBalance
+          pointsBalance
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      transactions {
+        items {
+          id
+          type
+          amount
+          rake
+          paymentSource
+          transactionDate
+          notes
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      results {
+        items {
+          id
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          pointsEarned
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      tickets {
+        items {
+          id
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          ticketTemplateId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      venueMemberships {
+        items {
+          id
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      credits {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      points {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        optOutSms
+        optOutEmail
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          creditBalance
+          pointsBalance
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          playerSummaryId
+          playerMarketingPreferencesId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      playerSummaryId
+      playerMarketingPreferencesId
+      __typename
+    }
+    relatedGameId
+    relatedTransactionId
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetPlayerPointsQueryVariables,
+  APITypes.GetPlayerPointsQuery
+>;
+export const listPlayerPoints = /* GraphQL */ `query ListPlayerPoints(
+  $filter: ModelPlayerPointsFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listPlayerPoints(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      type
+      changeAmount
+      balanceAfter
+      transactionDate
+      reason
+      expiryDate
+      playerId
+      player {
+        id
+        firstName
+        givenName
+        lastName
+        email
+        phone
+        creationDate
+        status
+        category
+        tier
+        lastPlayedDate
+        targetingClassification
+        creditBalance
+        pointsBalance
+        registrationVenueId
+        summary {
+          id
+          playerId
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          venuesVisited
+          tournamentWinnings
+          tournamentBuyIns
+          tournamentITM
+          tournamentsCashed
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        transactions {
+          items {
+            id
+            type
+            amount
+            rake
+            paymentSource
+            transactionDate
+            notes
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        results {
+          items {
+            id
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            pointsEarned
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        tickets {
+          items {
+            id
+            assignedAt
+            expiryDate
+            status
+            usedInGameId
+            playerId
+            ticketTemplateId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        marketingPreferences {
+          id
+          optOutSms
+          optOutEmail
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        playerSummaryId
+        playerMarketingPreferencesId
+        __typename
+      }
+      relatedGameId
+      relatedTransactionId
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListPlayerPointsQueryVariables,
+  APITypes.ListPlayerPointsQuery
+>;
+export const syncPlayerPoints = /* GraphQL */ `query SyncPlayerPoints(
+  $filter: ModelPlayerPointsFilterInput
+  $limit: Int
+  $nextToken: String
+  $lastSync: AWSTimestamp
+) {
+  syncPlayerPoints(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+    lastSync: $lastSync
+  ) {
+    items {
+      id
+      type
+      changeAmount
+      balanceAfter
+      transactionDate
+      reason
+      expiryDate
+      playerId
+      player {
+        id
+        firstName
+        givenName
+        lastName
+        email
+        phone
+        creationDate
+        status
+        category
+        tier
+        lastPlayedDate
+        targetingClassification
+        creditBalance
+        pointsBalance
+        registrationVenueId
+        summary {
+          id
+          playerId
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          venuesVisited
+          tournamentWinnings
+          tournamentBuyIns
+          tournamentITM
+          tournamentsCashed
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        transactions {
+          items {
+            id
+            type
+            amount
+            rake
+            paymentSource
+            transactionDate
+            notes
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        results {
+          items {
+            id
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            pointsEarned
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        tickets {
+          items {
+            id
+            assignedAt
+            expiryDate
+            status
+            usedInGameId
+            playerId
+            ticketTemplateId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        marketingPreferences {
+          id
+          optOutSms
+          optOutEmail
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        playerSummaryId
+        playerMarketingPreferencesId
+        __typename
+      }
+      relatedGameId
+      relatedTransactionId
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.SyncPlayerPointsQueryVariables,
+  APITypes.SyncPlayerPointsQuery
+>;
+export const getTicketTemplate = /* GraphQL */ `query GetTicketTemplate($id: ID!) {
+  getTicketTemplate(id: $id) {
+    id
+    name
+    description
+    value
+    validityDays
+    originGameId
+    targetGameId
+    playerTickets {
+      items {
+        id
+        assignedAt
+        expiryDate
+        status
+        usedInGameId
+        playerId
+        player {
+          id
+          firstName
+          givenName
+          lastName
+          email
+          phone
+          creationDate
+          status
+          category
+          tier
+          lastPlayedDate
+          targetingClassification
+          creditBalance
+          pointsBalance
+          registrationVenueId
+          summary {
+            id
+            playerId
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            netBalance
+            lastUpdated
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          transactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          results {
+            nextToken
+            startedAt
+            __typename
+          }
+          tickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -16138,6 +20168,8 @@ export const listTicketTemplates = /* GraphQL */ `query ListTicketTemplates(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -16232,6 +20264,8 @@ export const syncTicketTemplates = /* GraphQL */ `query SyncTicketTemplates(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -16306,6 +20340,8 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
       tier
       lastPlayedDate
       targetingClassification
+      creditBalance
+      pointsBalance
       registrationVenueId
       summary {
         id
@@ -16337,6 +20373,8 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -16378,6 +20416,16 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -16433,6 +20481,8 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -16463,6 +20513,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
           prizeWon
           amountWon
           totalRunners
+          pointsEarned
           playerId
           player {
             id
@@ -16477,6 +20528,8 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -16569,6 +20622,8 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -16628,6 +20683,8 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -16666,6 +20723,102 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
         startedAt
         __typename
       }
+      credits {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      points {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       marketingPreferences {
         id
         optOutSms
@@ -16684,6 +20837,8 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -16725,6 +20880,16 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -16796,6 +20961,8 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -16878,6 +21045,8 @@ export const listPlayerTickets = /* GraphQL */ `query ListPlayerTickets(
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -16909,6 +21078,8 @@ export const listPlayerTickets = /* GraphQL */ `query ListPlayerTickets(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -16956,6 +21127,7 @@ export const listPlayerTickets = /* GraphQL */ `query ListPlayerTickets(
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -17010,6 +21182,52 @@ export const listPlayerTickets = /* GraphQL */ `query ListPlayerTickets(
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -17028,6 +21246,8 @@ export const listPlayerTickets = /* GraphQL */ `query ListPlayerTickets(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -17138,6 +21358,8 @@ export const syncPlayerTickets = /* GraphQL */ `query SyncPlayerTickets(
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -17169,6 +21391,8 @@ export const syncPlayerTickets = /* GraphQL */ `query SyncPlayerTickets(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -17216,6 +21440,7 @@ export const syncPlayerTickets = /* GraphQL */ `query SyncPlayerTickets(
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -17270,6 +21495,52 @@ export const syncPlayerTickets = /* GraphQL */ `query SyncPlayerTickets(
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -17288,6 +21559,8 @@ export const syncPlayerTickets = /* GraphQL */ `query SyncPlayerTickets(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -17605,6 +21878,8 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
       tier
       lastPlayedDate
       targetingClassification
+      creditBalance
+      pointsBalance
       registrationVenueId
       summary {
         id
@@ -17636,6 +21911,8 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -17677,6 +21954,16 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -17732,6 +22019,8 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -17762,6 +22051,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
           prizeWon
           amountWon
           totalRunners
+          pointsEarned
           playerId
           player {
             id
@@ -17776,6 +22066,8 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -17868,6 +22160,8 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -17927,6 +22221,8 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -17965,6 +22261,102 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
         startedAt
         __typename
       }
+      credits {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      points {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       marketingPreferences {
         id
         optOutSms
@@ -17983,6 +22375,8 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -18024,6 +22418,16 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -18105,6 +22509,8 @@ export const listPlayerMarketingPreferences = /* GraphQL */ `query ListPlayerMar
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -18136,6 +22542,8 @@ export const listPlayerMarketingPreferences = /* GraphQL */ `query ListPlayerMar
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -18183,6 +22591,7 @@ export const listPlayerMarketingPreferences = /* GraphQL */ `query ListPlayerMar
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -18237,6 +22646,52 @@ export const listPlayerMarketingPreferences = /* GraphQL */ `query ListPlayerMar
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -18255,6 +22710,8 @@ export const listPlayerMarketingPreferences = /* GraphQL */ `query ListPlayerMar
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -18327,6 +22784,8 @@ export const syncPlayerMarketingPreferences = /* GraphQL */ `query SyncPlayerMar
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -18358,6 +22817,8 @@ export const syncPlayerMarketingPreferences = /* GraphQL */ `query SyncPlayerMar
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -18405,6 +22866,7 @@ export const syncPlayerMarketingPreferences = /* GraphQL */ `query SyncPlayerMar
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -18459,6 +22921,52 @@ export const syncPlayerMarketingPreferences = /* GraphQL */ `query SyncPlayerMar
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -18477,6 +22985,8 @@ export const syncPlayerMarketingPreferences = /* GraphQL */ `query SyncPlayerMar
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -19118,6 +23628,8 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -20069,6 +24581,8 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -21614,6 +26128,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
           prizeWon
           amountWon
           totalRunners
+          pointsEarned
           playerId
           player {
             id
@@ -21628,6 +26143,8 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -22253,6 +26770,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
           prizeWon
           amountWon
           totalRunners
+          pointsEarned
           playerId
           player {
             id
@@ -22267,6 +26785,8 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -22890,6 +27410,7 @@ export const gamesByTournamentSeriesId = /* GraphQL */ `query GamesByTournamentS
           prizeWon
           amountWon
           totalRunners
+          pointsEarned
           playerId
           player {
             id
@@ -22904,6 +27425,8 @@ export const gamesByTournamentSeriesId = /* GraphQL */ `query GamesByTournamentS
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -23527,6 +28050,7 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
           prizeWon
           amountWon
           totalRunners
+          pointsEarned
           playerId
           player {
             id
@@ -23541,6 +28065,8 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -24164,6 +28690,7 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
           prizeWon
           amountWon
           totalRunners
+          pointsEarned
           playerId
           player {
             id
@@ -24178,6 +28705,8 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -24484,6 +29013,8 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
       tier
       lastPlayedDate
       targetingClassification
+      creditBalance
+      pointsBalance
       registrationVenueId
       summary {
         id
@@ -24515,6 +29046,8 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -24556,6 +29089,16 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -24611,6 +29154,8 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -24641,6 +29186,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
           prizeWon
           amountWon
           totalRunners
+          pointsEarned
           playerId
           player {
             id
@@ -24655,6 +29201,8 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -24747,6 +29295,8 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -24806,6 +29356,8 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -24844,6 +29396,102 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
         startedAt
         __typename
       }
+      credits {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      points {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       marketingPreferences {
         id
         optOutSms
@@ -24862,6 +29510,8 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -24903,6 +29553,16 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -24980,6 +29640,8 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
       tier
       lastPlayedDate
       targetingClassification
+      creditBalance
+      pointsBalance
       registrationVenueId
       summary {
         id
@@ -25011,6 +29673,8 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -25052,6 +29716,16 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -25107,6 +29781,8 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -25137,6 +29813,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
           prizeWon
           amountWon
           totalRunners
+          pointsEarned
           playerId
           player {
             id
@@ -25151,6 +29828,8 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -25243,6 +29922,8 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -25302,6 +29983,8 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -25340,6 +30023,102 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
         startedAt
         __typename
       }
+      credits {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      points {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
       marketingPreferences {
         id
         optOutSms
@@ -25358,6 +30137,8 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
           tier
           lastPlayedDate
           targetingClassification
+          creditBalance
+          pointsBalance
           registrationVenueId
           summary {
             id
@@ -25399,6 +30180,16 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             __typename
           }
           venueMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          credits {
+            nextToken
+            startedAt
+            __typename
+          }
+          points {
             nextToken
             startedAt
             __typename
@@ -25493,6 +30284,8 @@ export const playerSummariesByPlayerId = /* GraphQL */ `query PlayerSummariesByP
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -25524,6 +30317,8 @@ export const playerSummariesByPlayerId = /* GraphQL */ `query PlayerSummariesByP
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -25571,6 +30366,7 @@ export const playerSummariesByPlayerId = /* GraphQL */ `query PlayerSummariesByP
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -25625,6 +30421,52 @@ export const playerSummariesByPlayerId = /* GraphQL */ `query PlayerSummariesByP
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -25643,6 +30485,8 @@ export const playerSummariesByPlayerId = /* GraphQL */ `query PlayerSummariesByP
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -25706,6 +30550,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
       prizeWon
       amountWon
       totalRunners
+      pointsEarned
       playerId
       player {
         id
@@ -25720,6 +30565,8 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -25751,6 +30598,8 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -25798,6 +30647,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -25852,6 +30702,52 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -25870,6 +30766,8 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -26109,6 +31007,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -26166,6 +31065,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
       prizeWon
       amountWon
       totalRunners
+      pointsEarned
       playerId
       player {
         id
@@ -26180,6 +31080,8 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -26211,6 +31113,8 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -26258,6 +31162,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -26312,6 +31217,52 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -26330,6 +31281,8 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -26569,6 +31522,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -26642,6 +31596,8 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -26673,6 +31629,8 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -26720,6 +31678,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -26774,6 +31733,52 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -26792,6 +31797,8 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -27041,6 +32048,8 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -27072,6 +32081,8 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -27119,6 +32130,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -27173,6 +32185,52 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -27191,6 +32249,8 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -27441,6 +32501,8 @@ export const playerTransactionsByPlayerIdAndTransactionDate = /* GraphQL */ `que
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -27472,6 +32534,8 @@ export const playerTransactionsByPlayerIdAndTransactionDate = /* GraphQL */ `que
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -27519,6 +32583,7 @@ export const playerTransactionsByPlayerIdAndTransactionDate = /* GraphQL */ `que
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -27573,6 +32638,52 @@ export const playerTransactionsByPlayerIdAndTransactionDate = /* GraphQL */ `que
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -27591,6 +32702,8 @@ export const playerTransactionsByPlayerIdAndTransactionDate = /* GraphQL */ `que
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -27670,6 +32783,8 @@ export const playerTransactionsByGameId = /* GraphQL */ `query PlayerTransaction
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -27701,6 +32816,8 @@ export const playerTransactionsByGameId = /* GraphQL */ `query PlayerTransaction
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -27748,6 +32865,7 @@ export const playerTransactionsByGameId = /* GraphQL */ `query PlayerTransaction
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -27802,6 +32920,52 @@ export const playerTransactionsByGameId = /* GraphQL */ `query PlayerTransaction
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -27820,6 +32984,8 @@ export const playerTransactionsByGameId = /* GraphQL */ `query PlayerTransaction
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -27863,15 +33029,17 @@ export const playerTransactionsByGameId = /* GraphQL */ `query PlayerTransaction
   APITypes.PlayerTransactionsByGameIdQueryVariables,
   APITypes.PlayerTransactionsByGameIdQuery
 >;
-export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlayerId(
+export const playerCreditsByPlayerIdAndTransactionDate = /* GraphQL */ `query PlayerCreditsByPlayerIdAndTransactionDate(
   $playerId: ID!
+  $transactionDate: ModelStringKeyConditionInput
   $sortDirection: ModelSortDirection
-  $filter: ModelPlayerTicketFilterInput
+  $filter: ModelPlayerCreditsFilterInput
   $limit: Int
   $nextToken: String
 ) {
-  playerTicketsByPlayerId(
+  playerCreditsByPlayerIdAndTransactionDate(
     playerId: $playerId
+    transactionDate: $transactionDate
     sortDirection: $sortDirection
     filter: $filter
     limit: $limit
@@ -27879,10 +33047,12 @@ export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlaye
   ) {
     items {
       id
-      assignedAt
+      type
+      changeAmount
+      balanceAfter
+      transactionDate
+      reason
       expiryDate
-      status
-      usedInGameId
       playerId
       player {
         id
@@ -27897,6 +33067,8 @@ export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlaye
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -27928,6 +33100,8 @@ export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlaye
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -27975,6 +33149,7 @@ export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlaye
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -28029,6 +33204,52 @@ export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlaye
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -28047,6 +33268,1140 @@ export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlaye
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        playerSummaryId
+        playerMarketingPreferencesId
+        __typename
+      }
+      relatedGameId
+      relatedTransactionId
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.PlayerCreditsByPlayerIdAndTransactionDateQueryVariables,
+  APITypes.PlayerCreditsByPlayerIdAndTransactionDateQuery
+>;
+export const playerCreditsByRelatedGameId = /* GraphQL */ `query PlayerCreditsByRelatedGameId(
+  $relatedGameId: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelPlayerCreditsFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  playerCreditsByRelatedGameId(
+    relatedGameId: $relatedGameId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      type
+      changeAmount
+      balanceAfter
+      transactionDate
+      reason
+      expiryDate
+      playerId
+      player {
+        id
+        firstName
+        givenName
+        lastName
+        email
+        phone
+        creationDate
+        status
+        category
+        tier
+        lastPlayedDate
+        targetingClassification
+        creditBalance
+        pointsBalance
+        registrationVenueId
+        summary {
+          id
+          playerId
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          venuesVisited
+          tournamentWinnings
+          tournamentBuyIns
+          tournamentITM
+          tournamentsCashed
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        transactions {
+          items {
+            id
+            type
+            amount
+            rake
+            paymentSource
+            transactionDate
+            notes
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        results {
+          items {
+            id
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            pointsEarned
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        tickets {
+          items {
+            id
+            assignedAt
+            expiryDate
+            status
+            usedInGameId
+            playerId
+            ticketTemplateId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        marketingPreferences {
+          id
+          optOutSms
+          optOutEmail
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        playerSummaryId
+        playerMarketingPreferencesId
+        __typename
+      }
+      relatedGameId
+      relatedTransactionId
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.PlayerCreditsByRelatedGameIdQueryVariables,
+  APITypes.PlayerCreditsByRelatedGameIdQuery
+>;
+export const playerPointsByPlayerIdAndTransactionDate = /* GraphQL */ `query PlayerPointsByPlayerIdAndTransactionDate(
+  $playerId: ID!
+  $transactionDate: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelPlayerPointsFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  playerPointsByPlayerIdAndTransactionDate(
+    playerId: $playerId
+    transactionDate: $transactionDate
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      type
+      changeAmount
+      balanceAfter
+      transactionDate
+      reason
+      expiryDate
+      playerId
+      player {
+        id
+        firstName
+        givenName
+        lastName
+        email
+        phone
+        creationDate
+        status
+        category
+        tier
+        lastPlayedDate
+        targetingClassification
+        creditBalance
+        pointsBalance
+        registrationVenueId
+        summary {
+          id
+          playerId
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          venuesVisited
+          tournamentWinnings
+          tournamentBuyIns
+          tournamentITM
+          tournamentsCashed
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        transactions {
+          items {
+            id
+            type
+            amount
+            rake
+            paymentSource
+            transactionDate
+            notes
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        results {
+          items {
+            id
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            pointsEarned
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        tickets {
+          items {
+            id
+            assignedAt
+            expiryDate
+            status
+            usedInGameId
+            playerId
+            ticketTemplateId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        marketingPreferences {
+          id
+          optOutSms
+          optOutEmail
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        playerSummaryId
+        playerMarketingPreferencesId
+        __typename
+      }
+      relatedGameId
+      relatedTransactionId
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.PlayerPointsByPlayerIdAndTransactionDateQueryVariables,
+  APITypes.PlayerPointsByPlayerIdAndTransactionDateQuery
+>;
+export const playerPointsByRelatedGameId = /* GraphQL */ `query PlayerPointsByRelatedGameId(
+  $relatedGameId: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelPlayerPointsFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  playerPointsByRelatedGameId(
+    relatedGameId: $relatedGameId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      type
+      changeAmount
+      balanceAfter
+      transactionDate
+      reason
+      expiryDate
+      playerId
+      player {
+        id
+        firstName
+        givenName
+        lastName
+        email
+        phone
+        creationDate
+        status
+        category
+        tier
+        lastPlayedDate
+        targetingClassification
+        creditBalance
+        pointsBalance
+        registrationVenueId
+        summary {
+          id
+          playerId
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          venuesVisited
+          tournamentWinnings
+          tournamentBuyIns
+          tournamentITM
+          tournamentsCashed
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        transactions {
+          items {
+            id
+            type
+            amount
+            rake
+            paymentSource
+            transactionDate
+            notes
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        results {
+          items {
+            id
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            pointsEarned
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        tickets {
+          items {
+            id
+            assignedAt
+            expiryDate
+            status
+            usedInGameId
+            playerId
+            ticketTemplateId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        marketingPreferences {
+          id
+          optOutSms
+          optOutEmail
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        playerSummaryId
+        playerMarketingPreferencesId
+        __typename
+      }
+      relatedGameId
+      relatedTransactionId
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.PlayerPointsByRelatedGameIdQueryVariables,
+  APITypes.PlayerPointsByRelatedGameIdQuery
+>;
+export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlayerId(
+  $playerId: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelPlayerTicketFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  playerTicketsByPlayerId(
+    playerId: $playerId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      assignedAt
+      expiryDate
+      status
+      usedInGameId
+      playerId
+      player {
+        id
+        firstName
+        givenName
+        lastName
+        email
+        phone
+        creationDate
+        status
+        category
+        tier
+        lastPlayedDate
+        targetingClassification
+        creditBalance
+        pointsBalance
+        registrationVenueId
+        summary {
+          id
+          playerId
+          sessionsPlayed
+          tournamentsPlayed
+          cashGamesPlayed
+          venuesVisited
+          tournamentWinnings
+          tournamentBuyIns
+          tournamentITM
+          tournamentsCashed
+          cashGameWinnings
+          cashGameBuyIns
+          totalWinnings
+          totalBuyIns
+          netBalance
+          lastUpdated
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        transactions {
+          items {
+            id
+            type
+            amount
+            rake
+            paymentSource
+            transactionDate
+            notes
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        results {
+          items {
+            id
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            pointsEarned
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        tickets {
+          items {
+            id
+            assignedAt
+            expiryDate
+            status
+            usedInGameId
+            playerId
+            ticketTemplateId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        venueMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        marketingPreferences {
+          id
+          optOutSms
+          optOutEmail
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -28159,6 +34514,8 @@ export const playerTicketsByTicketTemplateId = /* GraphQL */ `query PlayerTicket
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -28190,6 +34547,8 @@ export const playerTicketsByTicketTemplateId = /* GraphQL */ `query PlayerTicket
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -28237,6 +34596,7 @@ export const playerTicketsByTicketTemplateId = /* GraphQL */ `query PlayerTicket
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -28291,6 +34651,52 @@ export const playerTicketsByTicketTemplateId = /* GraphQL */ `query PlayerTicket
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -28309,6 +34715,8 @@ export const playerTicketsByTicketTemplateId = /* GraphQL */ `query PlayerTicket
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -28493,6 +34901,8 @@ export const playerMarketingPreferencesByPlayerId = /* GraphQL */ `query PlayerM
         tier
         lastPlayedDate
         targetingClassification
+        creditBalance
+        pointsBalance
         registrationVenueId
         summary {
           id
@@ -28524,6 +34934,8 @@ export const playerMarketingPreferencesByPlayerId = /* GraphQL */ `query PlayerM
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt
@@ -28571,6 +34983,7 @@ export const playerMarketingPreferencesByPlayerId = /* GraphQL */ `query PlayerM
             prizeWon
             amountWon
             totalRunners
+            pointsEarned
             playerId
             gameId
             createdAt
@@ -28625,6 +35038,52 @@ export const playerMarketingPreferencesByPlayerId = /* GraphQL */ `query PlayerM
           startedAt
           __typename
         }
+        credits {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        points {
+          items {
+            id
+            type
+            changeAmount
+            balanceAfter
+            transactionDate
+            reason
+            expiryDate
+            playerId
+            relatedGameId
+            relatedTransactionId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         marketingPreferences {
           id
           optOutSms
@@ -28643,6 +35102,8 @@ export const playerMarketingPreferencesByPlayerId = /* GraphQL */ `query PlayerM
             tier
             lastPlayedDate
             targetingClassification
+            creditBalance
+            pointsBalance
             registrationVenueId
             createdAt
             updatedAt

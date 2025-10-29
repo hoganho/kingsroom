@@ -12,17 +12,22 @@ enum GameVariant { NLHE, PLO, PLO5, PLO6 }
 enum GameFrequency { DAILY, WEEKLY, FORTNIGHTLY, MONTHLY, QUARTERLY, YEARLY, UNKNOWN }
 enum RegistrationStatus { SCHEDULED, OPEN, FINAL, CLOSED, N_A }
 enum TournamentType { FREEZEOUT, REBUY, SATELLITE, DEEPSTACK }
-enum PaymentSourceType { CASH, SQUARE, CREDIT, UNKNOWN }
+enum PaymentSourceType { CASH, SQUARE, CREDIT_CARD, INTERNAL_CREDIT, UNKNOWN }
 enum PlayerAccountStatus { ACTIVE, SUSPENDED, PENDING_VERIFICATION }
 enum PlayerAccountCategory { NEW, RECREATIONAL, REGULAR, VIP, LAPSED }
 enum SeriesStatus { LIVE, SCHEDULED, COMPLETED }
 enum PlayerTargetingClassification { NotPlayed, Active_EL, Active, Retain_Inactive31_60d, Retain_Inactive61_90d, Churned_91_120d, Churned_121_180d, Churned_181_360d, Churned_361d }
-enum PlayerVenueTargetingClassification { Active_EL, Active, Retain_Inactive31_60d, Retain_Inactive61_90d, Churned_91_120d, Churned_121_180d, Churned_181_360d, Churned_361d }
+enum PlayerVenueTargetingClassification { Active_EL, Active, Retain_Inactive31_60d, Retain_Inactive61_90d, Churned_91_120d, Churned_121_180d, Churn_181_360d, Churn_361d }
 enum TransactionType { BUY_IN, DEPOSIT, TICKET_AWARD, TICKET_REDEMPTION, CASH_AWARD, QUALIFICATION, WITHDRAWAL }
 enum MessageStatus { SENT, DELIVERED, FAILED, READ }
 enum UserRole { SUPER_ADMIN, ADMIN, VENUE_MANAGER, TOURNAMENT_DIRECTOR, MARKETING }
 enum StaffRole { DEALER, FLOOR_MANAGER, SERVICE, TOURNAMENT_DIRECTOR }
 enum TicketStatus { ACTIVE, EXPIRED, USED }
+
+# ✅ NEW: Enums for the new ledger tables
+enum CreditTransactionType { AWARD_PROMOTION, AWARD_REFUND, AWARD_MANUAL, REDEEM_GAME_BUY_IN, EXPIRED }
+enum PointsTransactionType { EARN_FROM_PLAY, EARN_FROM_PROMOTION, REDEEM_FOR_BUY_IN, REDEEM_FOR_MERCH, ADJUSTMENT_MANUAL, EXPIRED }
+
 
 # ===================================================================
 # 2. SCRAPING & DATA MANAGEMENT
@@ -261,6 +266,10 @@ type Player @model @auth(rules: [{ allow: private }]) {
   lastPlayedDate: AWSDate
   targetingClassification: PlayerTargetingClassification!
   
+  # ✅ NEW: Denormalized balances for quick access
+  creditBalance: Float
+  pointsBalance: Float
+  
   # --- Relationships ---
   registrationVenueId: ID! @index(name: "byVenue")
   summary: PlayerSummary @hasOne
@@ -268,6 +277,8 @@ type Player @model @auth(rules: [{ allow: private }]) {
   results: [PlayerResult] @hasMany(indexName: "byPlayer", fields: ["id"])
   tickets: [PlayerTicket] @hasMany(indexName: "byPlayer", fields: ["id"])
   venueMemberships: [PlayerVenue] @hasMany(indexName: "byPlayer", fields: ["id"])
+  credits: [PlayerCredits] @hasMany(indexName: "byPlayer", fields: ["id"])
+  points: [PlayerPoints] @hasMany(indexName: "byPlayer", fields: ["id"])
   marketingPreferences: PlayerMarketingPreferences @hasOne
 }
 
@@ -309,6 +320,9 @@ type PlayerResult @model @auth(rules: [{ allow: private }]) {
   prizeWon: Boolean
   amountWon: Float
   totalRunners: Int
+  
+  # ✅ NEW: Field for loyalty points earned from this result
+  pointsEarned: Float
 
   # --- Relationships ---
   playerId: ID! @index(name: "byPlayer")
@@ -345,6 +359,48 @@ type PlayerTransaction @model @auth(rules: [{ allow: private }]) {
   playerId: ID! @index(name: "byPlayer", sortKeyFields: ["transactionDate"])
   player: Player @belongsTo(fields: ["playerId"])
   gameId: ID @index(name: "byGame") # Optional link to a game
+}
+
+# ✅ NEW: Table for tracking player tournament credits (1:1 with cash)
+type PlayerCredits @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  
+  # --- Core Ledger Details ---
+  type: CreditTransactionType!
+  changeAmount: Float!         # e.g., +50.00 for an award, -50.00 for a redemption
+  balanceAfter: Float!         # The player's new credit balance after this transaction
+  transactionDate: AWSDateTime!
+  
+  # --- Context & Metadata ---
+  reason: String               # e.g., "Refund for Game #1234", "Christmas Promotion"
+  expiryDate: AWSDate          # Optional: If credits can expire
+  
+  # --- Relationships ---
+  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["transactionDate"])
+  player: Player @belongsTo(fields: ["playerId"])
+  relatedGameId: ID @index(name: "byGame") # Game where credit was redeemed/earned
+  relatedTransactionId: ID # The PlayerTransaction record created upon redemption
+}
+
+# ✅ NEW: Table for tracking player loyalty points
+type PlayerPoints @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  
+  # --- Core Ledger Details ---
+  type: PointsTransactionType!
+  changeAmount: Float!       # e.g., +100 for playing, -500 for redeeming
+  balanceAfter: Float!       # The player's new points balance after this transaction
+  transactionDate: AWSDateTime!
+  
+  # --- Context & Metadata ---
+  reason: String             # e.g., "Tuesday Night Tournament Entry", "Admin Correction"
+  expiryDate: AWSDate        # For points that have a limited lifetime
+  
+  # --- Relationships ---
+  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["transactionDate"])
+  player: Player @belongsTo(fields: ["playerId"])
+  relatedGameId: ID @index(name: "byGame") # To link points earned/spent to a specific game
+  relatedTransactionId: ID # To link a points redemption to a specific monetary transaction
 }
 
 # ===================================================================
@@ -496,14 +552,10 @@ input SaveTournamentInput {
     existingGameId: ID
     doNotScrape: Boolean
     data: ScrapedGameDataInput!
-
-    # This is the critical field to pass the full scraped object
-    # through the API to the Lambda for SQS processing.
     originalScrapedData: AWSJSON
 }
 
 # This input remains clean for the database save operation.
-# It does NOT contain entries, seating, or results.
 input ScrapedGameDataInput {
     name: String!
     gameStartDateTime: String

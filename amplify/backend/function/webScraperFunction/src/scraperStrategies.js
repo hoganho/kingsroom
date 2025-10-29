@@ -634,8 +634,6 @@ const defaultStrategy = {
 
     getResults(ctx) {
         const results = [];
-        
-        // STRATEGY 1: Check for the "Result" table used in FINISHED games.
         const resultTable = ctx.$('h4.cw-text-center:contains("Result")').next('table').find('tbody tr');
 
         if (resultTable.length > 0) {
@@ -644,36 +642,44 @@ const defaultStrategy = {
                 const $row = ctx.$(el);
                 const rank = parseInt($row.find('td').eq(0).text().trim(), 10);
                 const name = $row.find('td').eq(2).text().trim();
-                const winningsStr = $row.find('td').eq(3).text().trim();
-                const winnings = winningsStr ? parseInt(winningsStr.replace(/[^0-9.-]+/g, ''), 10) : 0;
+                
+                const winningsCellHtml = $row.find('td').eq(3).html();
+                
+                let winnings = 0;
+                let points = 0;
+                let isQualification = false;
+
+                // ✅ UPDATED: Check for "QUALIFIED" text before parsing numbers
+                if (winningsCellHtml && winningsCellHtml.toUpperCase().includes('QUALIFIED')) {
+                    isQualification = true;
+                    winnings = 0; // Qualification has no immediate cash value
+                    points = 0; // Or parse points if they are still present
+                } else {
+                    let winningsStr = '';
+                    let pointsStr = '';
+                    if (winningsCellHtml && winningsCellHtml.includes('<br>')) {
+                        const parts = winningsCellHtml.split('<br>');
+                        winningsStr = parts[0] ? parts[0].trim() : '';
+                        pointsStr = parts[1] ? parts[1].trim() : '';
+                    } else {
+                        winningsStr = winningsCellHtml ? winningsCellHtml.trim() : '';
+                    }
+                    winnings = winningsStr ? parseInt(winningsStr.replace(/[^0-9.-]+/g, ''), 10) : 0;
+                    points = pointsStr ? parseInt(pointsStr.replace(/[^0-9.-]+/g, ''), 10) : 0;
+                }
 
                 if (name && !isNaN(rank)) {
                     results.push({
                         rank,
                         name,
                         winnings: isNaN(winnings) ? 0 : winnings,
+                        points: isNaN(points) ? 0 : points,
+                        isQualification: isQualification, // ✅ ADDED: Flag for qualifications
                     });
                 }
             });
         } else {
-            // STRATEGY 2 (FALLBACK): Check the "Entries" table for eliminated players in LIVE games.
-            console.log("[DEBUG-RESULTS] No 'Result' table found. Parsing 'Entries' table for live game knockouts.");
-            const entriesTable = ctx.$('h4.cw-text-center:contains("Entries")').next('table').find('tbody tr');
-            
-            entriesTable.each((i, el) => {
-                const $el = ctx.$(el);
-                const rankText = $el.find('td').eq(2).text().trim();
-                
-                // Look for players who have been marked as "Out".
-                if (rankText.toLowerCase().includes('out')) {
-                    const name = $el.find('td').eq(1).text().trim();
-                    const rank = parseInt(rankText.replace(/\D/g, ''), 10);
-                    
-                    if (name && !isNaN(rank)) {
-                        results.push({ rank, name, winnings: 0 }); // Winnings are 0 as they are just knocked out.
-                    }
-                }
-            });
+            console.log("[DEBUG-RESULTS] No 'Result' table found. Could not parse results.");
         }
 
         if (results.length > 0) {

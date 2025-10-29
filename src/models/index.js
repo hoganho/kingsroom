@@ -72,7 +72,8 @@ const TournamentType = {
 const PaymentSourceType = {
   "CASH": "CASH",
   "SQUARE": "SQUARE",
-  "CREDIT": "CREDIT",
+  "CREDIT_CARD": "CREDIT_CARD",
+  "INTERNAL_CREDIT": "INTERNAL_CREDIT",
   "UNKNOWN": "UNKNOWN"
 };
 
@@ -115,8 +116,8 @@ const PlayerVenueTargetingClassification = {
   "RETAIN_INACTIVE61_90D": "Retain_Inactive61_90d",
   "CHURNED_91_120D": "Churned_91_120d",
   "CHURNED_121_180D": "Churned_121_180d",
-  "CHURNED_181_360D": "Churned_181_360d",
-  "CHURNED_361D": "Churned_361d"
+  "CHURN_181_360D": "Churn_181_360d",
+  "CHURN_361D": "Churn_361d"
 };
 
 const TransactionType = {
@@ -157,7 +158,24 @@ const TicketStatus = {
   "USED": "USED"
 };
 
-const { ScrapeStructure, DataSync, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, CashStructure, RakeStructure, Player, PlayerSummary, PlayerResult, PlayerVenue, PlayerTransaction, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, TournamentLevelData, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails } = initSchema(schema);
+const CreditTransactionType = {
+  "AWARD_PROMOTION": "AWARD_PROMOTION",
+  "AWARD_REFUND": "AWARD_REFUND",
+  "AWARD_MANUAL": "AWARD_MANUAL",
+  "REDEEM_GAME_BUY_IN": "REDEEM_GAME_BUY_IN",
+  "EXPIRED": "EXPIRED"
+};
+
+const PointsTransactionType = {
+  "EARN_FROM_PLAY": "EARN_FROM_PLAY",
+  "EARN_FROM_PROMOTION": "EARN_FROM_PROMOTION",
+  "REDEEM_FOR_BUY_IN": "REDEEM_FOR_BUY_IN",
+  "REDEEM_FOR_MERCH": "REDEEM_FOR_MERCH",
+  "ADJUSTMENT_MANUAL": "ADJUSTMENT_MANUAL",
+  "EXPIRED": "EXPIRED"
+};
+
+const { ScrapeStructure, DataSync, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, CashStructure, RakeStructure, Player, PlayerSummary, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, TournamentLevelData, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails } = initSchema(schema);
 
 export {
   ScrapeStructure,
@@ -175,6 +193,8 @@ export {
   PlayerResult,
   PlayerVenue,
   PlayerTransaction,
+  PlayerCredits,
+  PlayerPoints,
   TicketTemplate,
   PlayerTicket,
   MarketingMessage,
@@ -206,6 +226,8 @@ export {
   UserRole,
   StaffRole,
   TicketStatus,
+  CreditTransactionType,
+  PointsTransactionType,
   TournamentLevelData,
   ScrapedGameSummary,
   ScrapedGameData,

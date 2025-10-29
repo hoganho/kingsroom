@@ -170,7 +170,8 @@ const extractPlayerDataForProcessing = (scrapedData) => {
                 finished: false,
                 rank: null,
                 winnings: 0,
-                points: 0
+                points: 0,
+                isQualification: false,
             });
         }
     });
@@ -188,7 +189,8 @@ const extractPlayerDataForProcessing = (scrapedData) => {
                 finished: true,
                 rank: result.rank,
                 winnings: result.winnings || 0,
-                points: result.points || 0
+                points: result.points || 0,
+                isQualification: result.isQualification || false,
             });
         }
     });
@@ -217,11 +219,13 @@ const extractPlayerDataForProcessing = (scrapedData) => {
     const finishedPlayers = allPlayers.filter(p => p.finished);
     const totalPrizesPaid = finishedPlayers.reduce((sum, p) => sum + (p.winnings || 0), 0);
     const playersInTheMoney = finishedPlayers.filter(p => p.winnings > 0);
-    
+    const qualifiedPlayers = finishedPlayers.filter(p => p.isQualification);
+
     return {
         allPlayers,
         finishedPlayers,
         playersInTheMoney,
+        qualifiedPlayers,
         totalPlayers: allPlayers.length,
         totalFinished: finishedPlayers.length,
         totalInTheMoney: playersInTheMoney.length,
@@ -236,43 +240,54 @@ const extractPlayerDataForProcessing = (scrapedData) => {
  * Creates specific processing instructions for the downstream Lambda
  */
 const createPlayerProcessingInstructions = (playerData, gameInfo) => {
-    return playerData.allPlayers.map(player => ({
-        playerName: player.name,
-        requiredActions: {
-            // Player record management
-            upsertPlayer: true,
-            
-            // Create result record for this game
-            createPlayerResult: {
-                finishingPlace: player.rank,
-                prizeWon: player.winnings > 0,
-                amountWon: player.winnings || 0,
-                totalRunners: gameInfo.totalEntries || playerData.totalPlayers
-            },
-            
-            // Create transaction for buy-in
-            createTransaction: {
-                type: 'BUY_IN',
-                amount: (gameInfo.buyIn || 0) + (gameInfo.rake || 0),
-                rake: gameInfo.rake || 0
-            },
-            
-            // Update aggregated statistics
-            updatePlayerSummary: {
-                incrementTournaments: 1,
-                addWinnings: player.winnings || 0,
-                addBuyIn: (gameInfo.buyIn || 0) + (gameInfo.rake || 0),
-                incrementITM: player.winnings > 0 ? 1 : 0,
-                incrementCashes: player.winnings > 0 ? 1 : 0
-            },
-            
-            // Update venue-specific stats
-            updatePlayerVenue: {
-                incrementGamesPlayed: 1,
-                lastPlayedDate: gameInfo.gameEndDateTime || new Date().toISOString()
-            }
+    return playerData.allPlayers.map(player => {
+        
+        // ✅ UPDATED: createTransactions is now an array to hold multiple transactions
+        const createTransactions = [];
+
+        // All players who entered the game get a BUY_IN transaction
+        createTransactions.push({
+            type: 'BUY_IN',
+            amount: (gameInfo.buyIn || 0) + (gameInfo.rake || 0),
+            rake: gameInfo.rake || 0
+        });
+
+        // ✅ NEW: If the player qualified, add a second transaction for the qualification prize
+        if (player.isQualification) {
+            createTransactions.push({
+                type: 'QUALIFICATION',
+                amount: 0, // A qualification is a non-monetary prize
+                rake: 0
+            });
         }
-    }));
+
+        return {
+            playerName: player.name,
+            requiredActions: {
+                upsertPlayer: true,
+                createPlayerResult: {
+                    finishingPlace: player.rank,
+                    prizeWon: player.winnings > 0 || player.isQualification,
+                    amountWon: player.winnings || 0,
+                    pointsEarned: player.points || 0, // Pass the points to be saved
+                    isMultiDayQualification: player.isQualification,
+                    totalRunners: gameInfo.totalEntries || playerData.totalPlayers
+                },
+                createTransactions: createTransactions, // ✅ UPDATED: Use the new transactions array
+                updatePlayerSummary: {
+                    incrementTournaments: 1,
+                    addWinnings: player.winnings || 0,
+                    addBuyIn: (gameInfo.buyIn || 0) + (gameInfo.rake || 0),
+                    incrementITM: player.winnings > 0 || player.isQualification ? 1 : 0,
+                    incrementCashes: player.winnings > 0 ? 1 : 0
+                },
+                updatePlayerVenue: {
+                    incrementGamesPlayed: 1,
+                    lastPlayedDate: gameInfo.gameEndDateTime || new Date().toISOString()
+                }
+            }
+        };
+    });
 };
 
 
