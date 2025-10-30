@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "api": {
+      "kingsroom": [
+        "Query",
+        "Mutation"
+      ]
+    },
+    "function": {
+      "playerDataProcessor": [
+        "create",
+        "read",
+        "update"
+      ],
+      "webScraperFunction": [
+        "create",
+        "read",
+        "update"
+      ]
+    },
+    "storage": {
+      "ScraperState:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "Game:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ]
+    }
+  },
+  "lambdaLayers": []
+}

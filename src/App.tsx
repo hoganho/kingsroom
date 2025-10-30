@@ -1,4 +1,4 @@
-// src/App.tsx
+// src/App.tsx - Updated version with Auto Scraper route
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
 import { Authenticator } from '@aws-amplify/ui-react';
@@ -20,6 +20,7 @@ import VenuesPage from './pages/VenuesPage.tsx';
 import { SeriesManagementPage } from './pages/SeriesManagementPage';
 import { PlayersPage } from './pages/Players.tsx';
 import { HomePage } from './pages/HomePage.tsx';
+import { AutoScraperPage } from './pages/AutoScraperPage.tsx'; // New import
 
 // Configure Amplify
 Amplify.configure(awsExports);
@@ -55,6 +56,7 @@ function App() {
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/scraper-dashboard" element={<ScraperDashboard />} />
                 <Route path="/bulk-scraper" element={<BulkScraperPage />} />
+                <Route path="/auto-scraper" element={<AutoScraperPage />} /> {/* New route */}
                 <Route path="/venues" element={<VenuesPage />} />
                 <Route path="/series-management" element={<SeriesManagementPage />} />
                 <Route path="/players" element={<PlayersPage />} />

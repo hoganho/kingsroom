@@ -137,6 +137,81 @@ export const onDeleteDataSync = /* GraphQL */ `subscription OnDeleteDataSync($fi
   APITypes.OnDeleteDataSyncSubscriptionVariables,
   APITypes.OnDeleteDataSyncSubscription
 >;
+export const onCreateScraperState = /* GraphQL */ `subscription OnCreateScraperState(
+  $filter: ModelSubscriptionScraperStateFilterInput
+) {
+  onCreateScraperState(filter: $filter) {
+    id
+    isRunning
+    lastScannedId
+    lastRunStartTime
+    lastRunEndTime
+    consecutiveBlankCount
+    totalScraped
+    totalErrors
+    enabled
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateScraperStateSubscriptionVariables,
+  APITypes.OnCreateScraperStateSubscription
+>;
+export const onUpdateScraperState = /* GraphQL */ `subscription OnUpdateScraperState(
+  $filter: ModelSubscriptionScraperStateFilterInput
+) {
+  onUpdateScraperState(filter: $filter) {
+    id
+    isRunning
+    lastScannedId
+    lastRunStartTime
+    lastRunEndTime
+    consecutiveBlankCount
+    totalScraped
+    totalErrors
+    enabled
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateScraperStateSubscriptionVariables,
+  APITypes.OnUpdateScraperStateSubscription
+>;
+export const onDeleteScraperState = /* GraphQL */ `subscription OnDeleteScraperState(
+  $filter: ModelSubscriptionScraperStateFilterInput
+) {
+  onDeleteScraperState(filter: $filter) {
+    id
+    isRunning
+    lastScannedId
+    lastRunStartTime
+    lastRunEndTime
+    consecutiveBlankCount
+    totalScraped
+    totalErrors
+    enabled
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteScraperStateSubscriptionVariables,
+  APITypes.OnDeleteScraperStateSubscription
+>;
 export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: ModelSubscriptionVenueFilterInput) {
   onCreateVenue(filter: $filter) {
     id

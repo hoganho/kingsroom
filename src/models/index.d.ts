@@ -183,6 +183,79 @@ export enum PointsTransactionType {
   EXPIRED = "EXPIRED"
 }
 
+export enum ScraperOperation {
+  START = "START",
+  STOP = "STOP",
+  ENABLE = "ENABLE",
+  DISABLE = "DISABLE",
+  STATUS = "STATUS",
+  RESET = "RESET"
+}
+
+type EagerScraperControlResponse = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly state?: ScraperStateData | null;
+  readonly results?: ScraperResults | null;
+}
+
+type LazyScraperControlResponse = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly state?: ScraperStateData | null;
+  readonly results?: ScraperResults | null;
+}
+
+export declare type ScraperControlResponse = LazyLoading extends LazyLoadingDisabled ? EagerScraperControlResponse : LazyScraperControlResponse
+
+export declare const ScraperControlResponse: (new (init: ModelInit<ScraperControlResponse>) => ScraperControlResponse)
+
+type EagerScraperStateData = {
+  readonly id: string;
+  readonly isRunning: boolean;
+  readonly lastScannedId: number;
+  readonly lastRunStartTime?: string | null;
+  readonly lastRunEndTime?: string | null;
+  readonly consecutiveBlankCount: number;
+  readonly totalScraped: number;
+  readonly totalErrors: number;
+  readonly enabled: boolean;
+}
+
+type LazyScraperStateData = {
+  readonly id: string;
+  readonly isRunning: boolean;
+  readonly lastScannedId: number;
+  readonly lastRunStartTime?: string | null;
+  readonly lastRunEndTime?: string | null;
+  readonly consecutiveBlankCount: number;
+  readonly totalScraped: number;
+  readonly totalErrors: number;
+  readonly enabled: boolean;
+}
+
+export declare type ScraperStateData = LazyLoading extends LazyLoadingDisabled ? EagerScraperStateData : LazyScraperStateData
+
+export declare const ScraperStateData: (new (init: ModelInit<ScraperStateData>) => ScraperStateData)
+
+type EagerScraperResults = {
+  readonly newGamesScraped: number;
+  readonly gamesUpdated: number;
+  readonly errors: number;
+  readonly blanks: number;
+}
+
+type LazyScraperResults = {
+  readonly newGamesScraped: number;
+  readonly gamesUpdated: number;
+  readonly errors: number;
+  readonly blanks: number;
+}
+
+export declare type ScraperResults = LazyLoading extends LazyLoadingDisabled ? EagerScraperResults : LazyScraperResults
+
+export declare const ScraperResults: (new (init: ModelInit<ScraperResults>) => ScraperResults)
+
 type EagerTournamentLevelData = {
   readonly levelNumber: number;
   readonly durationMinutes: number;
@@ -545,6 +618,48 @@ export declare type DataSync = LazyLoading extends LazyLoadingDisabled ? EagerDa
 
 export declare const DataSync: (new (init: ModelInit<DataSync>) => DataSync) & {
   copyOf(source: DataSync, mutator: (draft: MutableModel<DataSync>) => MutableModel<DataSync> | void): DataSync;
+}
+
+type EagerScraperState = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<ScraperState, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly isRunning: boolean;
+  readonly lastScannedId: number;
+  readonly lastRunStartTime?: string | null;
+  readonly lastRunEndTime?: string | null;
+  readonly consecutiveBlankCount: number;
+  readonly totalScraped: number;
+  readonly totalErrors: number;
+  readonly enabled: boolean;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyScraperState = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<ScraperState, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly isRunning: boolean;
+  readonly lastScannedId: number;
+  readonly lastRunStartTime?: string | null;
+  readonly lastRunEndTime?: string | null;
+  readonly consecutiveBlankCount: number;
+  readonly totalScraped: number;
+  readonly totalErrors: number;
+  readonly enabled: boolean;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type ScraperState = LazyLoading extends LazyLoadingDisabled ? EagerScraperState : LazyScraperState
+
+export declare const ScraperState: (new (init: ModelInit<ScraperState>) => ScraperState) & {
+  copyOf(source: ScraperState, mutator: (draft: MutableModel<ScraperState>) => MutableModel<ScraperState> | void): ScraperState;
 }
 
 type EagerVenue = {

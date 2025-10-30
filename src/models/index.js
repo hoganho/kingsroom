@@ -183,11 +183,21 @@ const PointsTransactionType = {
   "EXPIRED": "EXPIRED"
 };
 
-const { ScrapeStructure, DataSync, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, CashStructure, RakeStructure, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, TournamentLevelData, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails } = initSchema(schema);
+const ScraperOperation = {
+  "START": "START",
+  "STOP": "STOP",
+  "ENABLE": "ENABLE",
+  "DISABLE": "DISABLE",
+  "STATUS": "STATUS",
+  "RESET": "RESET"
+};
+
+const { ScrapeStructure, DataSync, ScraperState, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, CashStructure, RakeStructure, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, ScraperControlResponse, ScraperStateData, ScraperResults, TournamentLevelData, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails } = initSchema(schema);
 
 export {
   ScrapeStructure,
   DataSync,
+  ScraperState,
   Venue,
   VenueDetails,
   TournamentSeriesTitle,
@@ -238,6 +248,10 @@ export {
   PlayerEntryStatus,
   CreditTransactionType,
   PointsTransactionType,
+  ScraperOperation,
+  ScraperControlResponse,
+  ScraperStateData,
+  ScraperResults,
   TournamentLevelData,
   ScrapedGameSummary,
   ScrapedGameData,

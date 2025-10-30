@@ -184,6 +184,114 @@ export const schema = {
                 }
             ]
         },
+        "ScraperState": {
+            "name": "ScraperState",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "isRunning": {
+                    "name": "isRunning",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastScannedId": {
+                    "name": "lastScannedId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastRunStartTime": {
+                    "name": "lastRunStartTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastRunEndTime": {
+                    "name": "lastRunEndTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "consecutiveBlankCount": {
+                    "name": "consecutiveBlankCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalScraped": {
+                    "name": "totalScraped",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalErrors": {
+                    "name": "totalErrors",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "enabled": {
+                    "name": "enabled",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "ScraperStates",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
         "Venue": {
             "name": "Venue",
             "fields": {
@@ -4455,9 +4563,158 @@ export const schema = {
                 "ADJUSTMENT_MANUAL",
                 "EXPIRED"
             ]
+        },
+        "ScraperOperation": {
+            "name": "ScraperOperation",
+            "values": [
+                "START",
+                "STOP",
+                "ENABLE",
+                "DISABLE",
+                "STATUS",
+                "RESET"
+            ]
         }
     },
     "nonModels": {
+        "ScraperControlResponse": {
+            "name": "ScraperControlResponse",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "state": {
+                    "name": "state",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "ScraperStateData"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "results": {
+                    "name": "results",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "ScraperResults"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ScraperStateData": {
+            "name": "ScraperStateData",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "isRunning": {
+                    "name": "isRunning",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastScannedId": {
+                    "name": "lastScannedId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastRunStartTime": {
+                    "name": "lastRunStartTime",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastRunEndTime": {
+                    "name": "lastRunEndTime",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "consecutiveBlankCount": {
+                    "name": "consecutiveBlankCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalScraped": {
+                    "name": "totalScraped",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalErrors": {
+                    "name": "totalErrors",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "enabled": {
+                    "name": "enabled",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "ScraperResults": {
+            "name": "ScraperResults",
+            "fields": {
+                "newGamesScraped": {
+                    "name": "newGamesScraped",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gamesUpdated": {
+                    "name": "gamesUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "errors": {
+                    "name": "errors",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "blanks": {
+                    "name": "blanks",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
         "TournamentLevelData": {
             "name": "TournamentLevelData",
             "fields": {
@@ -5155,5 +5412,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "862dd77ccab439bce9a44b25f285ca9f"
+    "version": "8a49e6b297a07ee23cf6bb8bc94036f0"
 };

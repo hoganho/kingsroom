@@ -55,6 +55,61 @@ type DataSync @model @auth(rules: [{ allow: private }]) {
 }
 
 # ===================================================================
+# AUTOMATED SCRAPER STATE MANAGEMENT
+# ===================================================================
+
+type ScraperState @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  isRunning: Boolean!
+  lastScannedId: Int!
+  lastRunStartTime: AWSDateTime
+  lastRunEndTime: AWSDateTime
+  consecutiveBlankCount: Int!
+  totalScraped: Int!
+  totalErrors: Int!
+  enabled: Boolean!
+}
+
+# ===================================================================
+# SCRAPER CONTROL TYPES
+# ===================================================================
+
+enum ScraperOperation {
+  START
+  STOP
+  ENABLE
+  DISABLE
+  STATUS
+  RESET
+}
+
+type ScraperControlResponse {
+  success: Boolean!
+  message: String
+  state: ScraperStateData
+  results: ScraperResults
+}
+
+type ScraperStateData {
+  id: String!
+  isRunning: Boolean!
+  lastScannedId: Int!
+  lastRunStartTime: String
+  lastRunEndTime: String
+  consecutiveBlankCount: Int!
+  totalScraped: Int!
+  totalErrors: Int!
+  enabled: Boolean!
+}
+
+type ScraperResults {
+  newGamesScraped: Int!
+  gamesUpdated: Int!
+  errors: Int!
+  blanks: Int!
+}
+
+# ===================================================================
 # 3. VENUE & LOCATION MANAGEMENT
 # - Core models for physical locations where games are held.
 # ===================================================================
@@ -570,11 +625,16 @@ type SocialPost @model @auth(rules: [{ allow: private }]) {
 # --- Query & Mutation Definitions ---
 type Query {
     fetchTournamentDataRange(startId: Int!, endId: Int!): [ScrapedGameSummary!] @function(name: "webScraperFunction-${env}")
+    getScraperControlState: ScraperControlResponse @function(name: "autoScraper-${env}")
 }
 
 type Mutation {
     fetchTournamentData(url: AWSURL!): ScrapedGameData @function(name: "webScraperFunction-${env}")
     saveTournamentData(input: SaveTournamentInput!): Game @function(name: "webScraperFunction-${env}")
+    # Control the auto scraper
+    controlScraperOperation(operation: ScraperOperation!): ScraperControlResponse @function(name: "autoScraper-${env}")    
+    # Manually trigger scraping
+    triggerAutoScraping: ScraperControlResponse @function(name: "autoScraper-${env}")
 }
 
 # --- Operation Input Types ---

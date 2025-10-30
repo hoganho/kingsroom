@@ -1876,6 +1876,66 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
   APITypes.SaveTournamentDataMutationVariables,
   APITypes.SaveTournamentDataMutation
 >;
+export const controlScraperOperation = /* GraphQL */ `mutation ControlScraperOperation($operation: ScraperOperation!) {
+  controlScraperOperation(operation: $operation) {
+    success
+    message
+    state {
+      id
+      isRunning
+      lastScannedId
+      lastRunStartTime
+      lastRunEndTime
+      consecutiveBlankCount
+      totalScraped
+      totalErrors
+      enabled
+      __typename
+    }
+    results {
+      newGamesScraped
+      gamesUpdated
+      errors
+      blanks
+      __typename
+    }
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.ControlScraperOperationMutationVariables,
+  APITypes.ControlScraperOperationMutation
+>;
+export const triggerAutoScraping = /* GraphQL */ `mutation TriggerAutoScraping {
+  triggerAutoScraping {
+    success
+    message
+    state {
+      id
+      isRunning
+      lastScannedId
+      lastRunStartTime
+      lastRunEndTime
+      consecutiveBlankCount
+      totalScraped
+      totalErrors
+      enabled
+      __typename
+    }
+    results {
+      newGamesScraped
+      gamesUpdated
+      errors
+      blanks
+      __typename
+    }
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.TriggerAutoScrapingMutationVariables,
+  APITypes.TriggerAutoScrapingMutation
+>;
 export const createScrapeStructure = /* GraphQL */ `mutation CreateScrapeStructure(
   $input: CreateScrapeStructureInput!
   $condition: ModelScrapeStructureConditionInput
@@ -2016,6 +2076,84 @@ export const deleteDataSync = /* GraphQL */ `mutation DeleteDataSync(
 ` as GeneratedMutation<
   APITypes.DeleteDataSyncMutationVariables,
   APITypes.DeleteDataSyncMutation
+>;
+export const createScraperState = /* GraphQL */ `mutation CreateScraperState(
+  $input: CreateScraperStateInput!
+  $condition: ModelScraperStateConditionInput
+) {
+  createScraperState(input: $input, condition: $condition) {
+    id
+    isRunning
+    lastScannedId
+    lastRunStartTime
+    lastRunEndTime
+    consecutiveBlankCount
+    totalScraped
+    totalErrors
+    enabled
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateScraperStateMutationVariables,
+  APITypes.CreateScraperStateMutation
+>;
+export const updateScraperState = /* GraphQL */ `mutation UpdateScraperState(
+  $input: UpdateScraperStateInput!
+  $condition: ModelScraperStateConditionInput
+) {
+  updateScraperState(input: $input, condition: $condition) {
+    id
+    isRunning
+    lastScannedId
+    lastRunStartTime
+    lastRunEndTime
+    consecutiveBlankCount
+    totalScraped
+    totalErrors
+    enabled
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateScraperStateMutationVariables,
+  APITypes.UpdateScraperStateMutation
+>;
+export const deleteScraperState = /* GraphQL */ `mutation DeleteScraperState(
+  $input: DeleteScraperStateInput!
+  $condition: ModelScraperStateConditionInput
+) {
+  deleteScraperState(input: $input, condition: $condition) {
+    id
+    isRunning
+    lastScannedId
+    lastRunStartTime
+    lastRunEndTime
+    consecutiveBlankCount
+    totalScraped
+    totalErrors
+    enabled
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteScraperStateMutationVariables,
+  APITypes.DeleteScraperStateMutation
 >;
 export const createVenue = /* GraphQL */ `mutation CreateVenue(
   $input: CreateVenueInput!

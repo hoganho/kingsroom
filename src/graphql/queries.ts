@@ -25,6 +25,36 @@ export const fetchTournamentDataRange = /* GraphQL */ `query FetchTournamentData
   APITypes.FetchTournamentDataRangeQueryVariables,
   APITypes.FetchTournamentDataRangeQuery
 >;
+export const getScraperControlState = /* GraphQL */ `query GetScraperControlState {
+  getScraperControlState {
+    success
+    message
+    state {
+      id
+      isRunning
+      lastScannedId
+      lastRunStartTime
+      lastRunEndTime
+      consecutiveBlankCount
+      totalScraped
+      totalErrors
+      enabled
+      __typename
+    }
+    results {
+      newGamesScraped
+      gamesUpdated
+      errors
+      blanks
+      __typename
+    }
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetScraperControlStateQueryVariables,
+  APITypes.GetScraperControlStateQuery
+>;
 export const getScrapeStructure = /* GraphQL */ `query GetScrapeStructure($id: ID!) {
   getScrapeStructure(id: $id) {
     id
@@ -195,6 +225,99 @@ export const syncDataSyncs = /* GraphQL */ `query SyncDataSyncs(
 ` as GeneratedQuery<
   APITypes.SyncDataSyncsQueryVariables,
   APITypes.SyncDataSyncsQuery
+>;
+export const getScraperState = /* GraphQL */ `query GetScraperState($id: ID!) {
+  getScraperState(id: $id) {
+    id
+    isRunning
+    lastScannedId
+    lastRunStartTime
+    lastRunEndTime
+    consecutiveBlankCount
+    totalScraped
+    totalErrors
+    enabled
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetScraperStateQueryVariables,
+  APITypes.GetScraperStateQuery
+>;
+export const listScraperStates = /* GraphQL */ `query ListScraperStates(
+  $filter: ModelScraperStateFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listScraperStates(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      isRunning
+      lastScannedId
+      lastRunStartTime
+      lastRunEndTime
+      consecutiveBlankCount
+      totalScraped
+      totalErrors
+      enabled
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListScraperStatesQueryVariables,
+  APITypes.ListScraperStatesQuery
+>;
+export const syncScraperStates = /* GraphQL */ `query SyncScraperStates(
+  $filter: ModelScraperStateFilterInput
+  $limit: Int
+  $nextToken: String
+  $lastSync: AWSTimestamp
+) {
+  syncScraperStates(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+    lastSync: $lastSync
+  ) {
+    items {
+      id
+      isRunning
+      lastScannedId
+      lastRunStartTime
+      lastRunEndTime
+      consecutiveBlankCount
+      totalScraped
+      totalErrors
+      enabled
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.SyncScraperStatesQueryVariables,
+  APITypes.SyncScraperStatesQuery
 >;
 export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
   getVenue(id: $id) {
