@@ -17,7 +17,6 @@ import {
 // Define a type for a non-subscription GraphQL result
 type GraphQlQueryResponse<T> = { data: T };
 
-// ✅ UPDATED: Use the non-conflicting field name from schema.graphql
 const GET_SCRAPER_STATE = /* GraphQL */ `
   query GetScraperControlState {
     getScraperControlState {
