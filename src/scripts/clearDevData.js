@@ -24,6 +24,7 @@ const TABLES_TO_CLEAR = [
     'Game-oi5oitkajrgtzm7feellfluriy-dev',
     'Player-oi5oitkajrgtzm7feellfluriy-dev',
     'PlayerCredits-oi5oitkajrgtzm7feellfluriy-dev',
+    'PlayerEntry-oi5oitkajrgtzm7feellfluriy-dev',
     'PlayerPoints-oi5oitkajrgtzm7feellfluriy-dev',
     'PlayerResult-oi5oitkajrgtzm7feellfluriy-dev',
     'PlayerSummary-oi5oitkajrgtzm7feellfluriy-dev',

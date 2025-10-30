@@ -1,15 +1,29 @@
+// FieldManifestReport.tsx
+
 import { useMemo } from 'react';
 import type { GameData } from '../../types/game';
 import { fieldManifest, profileDescriptions } from '../../lib/fieldManifest';
 import { VenueMatchDisplay } from './VenueMatchDisplay';
 
-// (The getValidationStatus helper function remains the same as before)
+// Helper to determine if an expected field is missing.
+const isFieldMissing = (key: string, data: GameData, profile: string): boolean => {
+    const definition = fieldManifest[key];
+    const hasValue = data?.[key as keyof GameData] !== undefined && data?.[key as keyof GameData] !== null && data?.[key as keyof GameData] !== '';
+
+    if (definition.isBaselineExpected) {
+        return !hasValue;
+    }
+    if (definition.isProfileExpected?.includes(profile)) {
+        return !hasValue;
+    }
+    return false;
+};
+
 const getValidationStatus = (
     key: string,
     data: GameData | undefined,
     profile: string
 ) => {
-    // ... no changes needed in this helper function
     const definition = fieldManifest[key];
     const hasValue = data?.[key as keyof GameData] !== undefined && data?.[key as keyof GameData] !== null && data?.[key as keyof GameData] !== '';
 
@@ -36,14 +50,12 @@ const getValidationStatus = (
         : null;
 };
 
-
 export const FieldManifestReport: React.FC<{ data: GameData | undefined }> = ({ data }) => {
     if (!data) return null;
 
     const gameProfileKey = `STATUS: ${data.gameStatus || 'UNKNOWN'} | REG: ${data.registrationStatus || 'UNKNOWN'}`;
     const profileDescription = profileDescriptions[gameProfileKey];
 
-    // ✅ 1. Structure fields into the required sub-groups (Baseline/Profile, Expected/Optional)
     const structuredFields = useMemo(() => {
         const result: Record<string, {
             baseline: { expected: string[], optional: string[] },
@@ -68,12 +80,10 @@ export const FieldManifestReport: React.FC<{ data: GameData | undefined }> = ({ 
     }, []);
 
     const renderField = (key: string) => {
-        // ✅ NEW: Add special handling for the 'venueName' field
         if (key === 'venueName') {
             return <VenueMatchDisplay key={key} venueMatch={data.venueMatch} />;
         }
         
-        // --- Existing generic rendering logic for all other fields ---
         const validation = getValidationStatus(key, data, gameProfileKey);
         if (!validation) return null;
 
@@ -103,7 +113,6 @@ export const FieldManifestReport: React.FC<{ data: GameData | undefined }> = ({ 
             </>
         );
     };
-
     
     return (
         <div className="space-y-4">
@@ -114,18 +123,30 @@ export const FieldManifestReport: React.FC<{ data: GameData | undefined }> = ({ 
                 </div>
             )}
             
-            {/* ✅ 2. Render the fields using the new structured data */}
-            {Object.entries(structuredFields).map(([groupName, groupData]) => (
-                <div key={groupName} className="border rounded-lg bg-white">
-                    <h4 className="font-bold text-sm text-gray-700 p-3 border-b">{groupName}</h4>
-                    <div className="px-3">
-                        {renderSubGroup('Baseline Expected', groupData.baseline.expected)}
-                        {renderSubGroup('Baseline Optional', groupData.baseline.optional)}
-                        {renderSubGroup('Profile Expected', groupData.profile.expected)}
-                        {renderSubGroup('Profile Optional', groupData.profile.optional)}
-                    </div>
-                </div>
-            ))}
+            {/* ✅ UPDATED: Render groups as collapsible sections with status icons */}
+            {Object.entries(structuredFields).map(([groupName, groupData]) => {
+                const expectedFields = [...groupData.baseline.expected, ...groupData.profile.expected];
+                const hasMissingFields = expectedFields.some(key => isFieldMissing(key, data, gameProfileKey));
+                const statusIcon = hasMissingFields ? '✗' : '✓';
+                const iconColor = hasMissingFields ? 'text-red-600' : 'text-green-600';
+
+                return (
+                    <details key={groupName} className="border rounded-lg bg-white overflow-hidden">
+                        <summary className="cursor-pointer select-none p-3 font-bold text-sm text-gray-700 bg-gray-50 hover:bg-gray-100 flex items-center">
+                            <span>
+                                {groupName}
+                                <span className={`ml-2 font-bold ${iconColor}`}>{statusIcon}</span>
+                            </span>
+                        </summary>
+                        <div className="px-3 pb-2">
+                            {renderSubGroup('Baseline Expected', groupData.baseline.expected)}
+                            {renderSubGroup('Baseline Optional', groupData.baseline.optional)}
+                            {renderSubGroup('Profile Expected', groupData.profile.expected)}
+                            {renderSubGroup('Profile Optional', groupData.profile.optional)}
+                        </div>
+                    </details>
+                )
+            })}
         </div>
     );
 };

@@ -1,3 +1,5 @@
+// GameCard.tsx
+
 import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { listVenuesForDropdown } from '../../graphql/customQueries';
@@ -34,17 +36,13 @@ export const GameCard: React.FC<{
         const fetchVenues = async () => {
             setVenuesLoading(true);
             try {
-                // ✅ 2. Cast the result of the graphql call to the expected type.
-                // This tells TypeScript that we expect a 'data' property.
                 const response = (await client.graphql({ 
                     query: listVenuesForDropdown 
                 })) as GraphQLResult<{ listVenues: { items: Venue[] } }>;
 
-                // Use optional chaining (?.) for added safety
                 const venueItems = (response.data?.listVenues.items as Venue[])
                     .filter(Boolean)
                     .sort((a, b) => {
-                        // Your existing sorting logic...
                         if (a.venueNumber !== undefined && b.venueNumber !== undefined) {
                             return a.venueNumber - b.venueNumber;
                         }
@@ -59,6 +57,13 @@ export const GameCard: React.FC<{
         };
         fetchVenues();
     }, []);
+
+    // ✅ Auto-select venue if provided in game data and available in the list
+    useEffect(() => {
+        if (game.data?.venueId && venues.some(v => v.id === game.data.venueId)) {
+            setVenueId(game.data.venueId);
+        }
+    }, [game.data, venues]);
 
     useEffect(() => {
         setDoNotScrape(game.data?.doNotScrape ?? false);
@@ -128,7 +133,6 @@ export const GameCard: React.FC<{
         });
     };
 
-    // Format venue for display
     const formatVenueOption = (venue: Venue) => {
         return venue.venueNumber !== undefined 
             ? `${venue.venueNumber} - ${venue.name}`
@@ -145,6 +149,16 @@ export const GameCard: React.FC<{
                         <p className="text-sm font-mono truncate" title={game.id}>{getDisplayId(game.id)}</p>
                     </div>
                     <div className="flex items-center space-x-2 flex-shrink-0">
+                        {/* ✅ MOVED: View Raw HTML button is now smaller and in the header */}
+                        {rawHtml && (
+                            <button
+                                onClick={() => setShowHtmlModal(true)}
+                                className="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                                title={`View raw scraped HTML (${(rawHtml.length / 1024).toFixed(1)} KB)`}
+                            >
+                                🔍 HTML
+                            </button>
+                        )}
                         <a 
                             href={game.id} 
                             target="_blank" 
@@ -223,62 +237,62 @@ export const GameCard: React.FC<{
                     </div>
                 )}
                 
-                {(game.jobStatus === 'READY_TO_SAVE' || game.jobStatus === 'DONE' || game.jobStatus === 'SAVING') && (
-                    <ScraperReport data={game.data} />
-                )}
-                
-                {game.saveResult && <p className="text-xs text-green-600">Successfully saved! Game ID: {game.saveResult.id}</p>}
-                
-                {rawHtml && (
-                    <div className="pt-2">
-                         <button onClick={() => setShowHtmlModal(true)} className="w-full px-3 py-1 text-xs border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
-                            🔍 View Raw HTML {rawHtml ? `(${(rawHtml.length / 1024).toFixed(1)} KB)` : ''}
-                        </button>
+                {/* ✅ After save, show success message and hide the report/actions */}
+                {game.saveResult ? (
+                    <div className="p-4 my-2 text-center bg-green-50 border border-green-200 rounded-lg">
+                        <p className="font-semibold text-green-800">Successfully saved!</p>
+                        <p className="text-sm text-green-700 mt-1">Game ID: {game.saveResult.id}</p>
                     </div>
-                )}
-
-                <div className="flex space-x-2 pt-2 items-center">
-                    {venuesLoading ? (
-                        <div className="flex-grow text-center text-gray-500 text-sm">
-                            Loading venues...
+                ) : (
+                    <>
+                        {(game.jobStatus === 'READY_TO_SAVE' || game.jobStatus === 'DONE' || game.jobStatus === 'SAVING') && (
+                            <ScraperReport data={game.data} />
+                        )}
+                        
+                        <div className="flex space-x-2 pt-2 items-center">
+                            {venuesLoading ? (
+                                <div className="flex-grow text-center text-gray-500 text-sm">
+                                    Loading venues...
+                                </div>
+                            ) : (
+                                <select
+                                    value={venueId}
+                                    onChange={(e) => setVenueId(e.target.value)}
+                                    className="flex-grow mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm text-sm"
+                                    disabled={game.jobStatus === 'SAVING' || venues.length === 0}
+                                >
+                                    <option value="">
+                                        {venues.length === 0 ? 'No venues available - Add venues first' : 'Select Venue...'}
+                                    </option>
+                                    {venues.map(venue => (
+                                        <option key={venue.id} value={venue.id}>
+                                            {formatVenueOption(venue)}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+                            <button
+                                onClick={() => setIsConfirmModalOpen(true)}
+                                disabled={isSaveDisabled}
+                                className="px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400"
+                            >
+                                {game.jobStatus === 'SAVING' ? 'Saving...' : (game.existingGameId ? 'Update in DB' : 'Save to DB')}
+                            </button>
                         </div>
-                    ) : (
-                        <select
-                            value={venueId}
-                            onChange={(e) => setVenueId(e.target.value)}
-                            className="flex-grow mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm text-sm"
-                            disabled={game.jobStatus === 'SAVING' || venues.length === 0}
-                        >
-                            <option value="">
-                                {venues.length === 0 ? 'No venues available - Add venues first' : 'Select Venue...'}
-                            </option>
-                            {venues.map(venue => (
-                                <option key={venue.id} value={venue.id}>
-                                    {formatVenueOption(venue)}
-                                </option>
-                            ))}
-                        </select>
-                    )}
-                    <button
-                        onClick={() => setIsConfirmModalOpen(true)}
-                        disabled={isSaveDisabled}
-                        className="px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400"
-                    >
-                        {game.jobStatus === 'SAVING' ? 'Saving...' : (game.existingGameId ? 'Update in DB' : 'Save to DB')}
-                    </button>
-                </div>
 
-                <div className="pt-2 border-t border-gray-100 mt-3">
-                    <label className="flex items-center text-xs text-gray-700">
-                        <input
-                            type="checkbox"
-                            className="mr-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                            checked={doNotScrape}
-                            onChange={handleDoNotScrapeChange}
-                        />
-                        Do Not Scrape This URL Again (Flag will be saved when you click Save/Update)
-                    </label>
-                </div>
+                        <div className="pt-2 border-t border-gray-100 mt-3">
+                            <label className="flex items-center text-xs text-gray-700">
+                                <input
+                                    type="checkbox"
+                                    className="mr-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    checked={doNotScrape}
+                                    onChange={handleDoNotScrapeChange}
+                                />
+                                Do Not Scrape This URL Again (Flag will be saved when you click Save/Update)
+                            </label>
+                        </div>
+                    </>
+                )}
             </div>
 
             <HtmlModal isOpen={showHtmlModal} onClose={() => setShowHtmlModal(false)} html={rawHtml} gameId={game.id}/>

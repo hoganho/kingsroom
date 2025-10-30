@@ -36,8 +36,8 @@ export const PlayerSeating: React.FC<PlayerSeatingProps> = ({ seating }) => {
                             <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                                 {`Table ${player.table} / Seat ${player.seat}`}
                             </td>
+                            {/* ✅ UPDATED: Added font-mono to match Live Tables stack column */}
                             <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 text-right font-mono">
-                                {/* Format number with commas */}
                                 {player.playerStack ? player.playerStack.toLocaleString() : 'N/A'}
                             </td>
                         </tr>
