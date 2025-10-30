@@ -20,9 +20,6 @@ export const listVenuesForDropdown = /* GraphQL */ `
 /*
  * ===================================================================
  * DEBUG QUERIES FOR PlayersPage.tsx
- *
- * These queries fetch *all* fields for each model but do *not*
- * fetch nested relationships, keeping them fast and safe.
  * ===================================================================
  */
 
@@ -30,6 +27,7 @@ export const listPlayersForDebug = /* GraphQL */ `
   query ListPlayersForDebug {
     listPlayers {
       items {
+        id
         firstName
         lastName
         creationDate
@@ -52,6 +50,7 @@ export const listPlayerSummariesForDebug = /* GraphQL */ `
   query ListPlayerSummariesForDebug {
     listPlayerSummaries {
       items {
+        id
         playerId
         sessionsPlayed
         tournamentsPlayed
@@ -101,6 +100,7 @@ export const listPlayerResultsForDebug = /* GraphQL */ `
   query ListPlayerResultsForDebug {
     listPlayerResults {
       items {
+        id
         finishingPlace
         isMultiDayQualification
         prizeWon
@@ -110,6 +110,16 @@ export const listPlayerResultsForDebug = /* GraphQL */ `
         playerId
         gameId
         _version
+        player {
+          id
+          firstName
+          lastName
+        }
+        game {
+            id
+            name
+            buyIn
+        }
       }
     }
   }
@@ -119,6 +129,7 @@ export const listPlayerVenuesForDebug = /* GraphQL */ `
   query ListPlayerVenuesForDebug {
     listPlayerVenues {
       items {
+        id
         totalGamesPlayed
         averageBuyIn
         firstPlayedDate
@@ -127,6 +138,15 @@ export const listPlayerVenuesForDebug = /* GraphQL */ `
         playerId
         venueId
         _version
+        player {
+          id
+          firstName
+          lastName
+        }
+        venue {
+          id
+          name
+        }
       }
     }
   }
@@ -136,6 +156,7 @@ export const listPlayerTransactionsForDebug = /* GraphQL */ `
   query ListPlayerTransactionsForDebug {
     listPlayerTransactions {
       items {
+        id
         type
         amount
         rake
@@ -154,6 +175,7 @@ export const listPlayerCreditsForDebug = /* GraphQL */ `
   query ListPlayerCreditsForDebug {
     listPlayerCredits {
       items {
+        id
         type
         changeAmount
         balanceAfter
@@ -173,6 +195,7 @@ export const listPlayerPointsForDebug = /* GraphQL */ `
   query ListPlayerPointsForDebug {
     listPlayerPoints {
       items {
+        id
         type
         changeAmount
         balanceAfter
@@ -192,6 +215,7 @@ export const listPlayerTicketsForDebug = /* GraphQL */ `
   query ListPlayerTicketsForDebug {
     listPlayerTickets {
       items {
+        id
         assignedAt
         expiryDate
         status
@@ -208,6 +232,7 @@ export const listPlayerMarketingPreferencesForDebug = /* GraphQL */ `
   query ListPlayerMarketingPreferencesForDebug {
     listPlayerMarketingPreferences {
       items {
+        id
         optOutSms
         optOutEmail
         playerId
@@ -221,6 +246,7 @@ export const listPlayerMarketingMessagesForDebug = /* GraphQL */ `
   query ListPlayerMarketingMessagesForDebug {
     listPlayerMarketingMessages {
       items {
+        id
         status
         sentAt
         playerId
@@ -230,4 +256,3 @@ export const listPlayerMarketingMessagesForDebug = /* GraphQL */ `
     }
   }
 `;
-

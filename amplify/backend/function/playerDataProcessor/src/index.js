@@ -287,11 +287,18 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) =>
     }
 };
 
-const updatePlayerEntryStatus = async (playerId, gameId) => {
+/**
+ * ✅ NEW: Upserts a PlayerEntry record.
+ * It first tries to update an existing entry to 'COMPLETED'.
+ * If the entry doesn't exist, it creates a new one with 'COMPLETED' status.
+ */
+const upsertPlayerEntry = async (playerId, gameData) => {
     const playerEntryTable = getTableName('PlayerEntry');
-    const entryId = `${gameId}#${playerId}`;
+    const entryId = `${gameData.game.id}#${playerId}`;
+    const now = new Date().toISOString();
 
     try {
+        // First, try to update an existing record. This is the most common case for live games.
         await ddbDocClient.send(new UpdateCommand({
             TableName: playerEntryTable,
             Key: { id: entryId },
@@ -299,16 +306,43 @@ const updatePlayerEntryStatus = async (playerId, gameId) => {
             ExpressionAttributeNames: { '#status': 'status' },
             ExpressionAttributeValues: {
                 ':status': 'COMPLETED',
-                ':updatedAt': new Date().toISOString()
+                ':updatedAt': now
             },
-            ConditionExpression: 'attribute_exists(id)'
+            ConditionExpression: 'attribute_exists(id)' // Only update if it exists
         }));
-        console.log(`[updatePlayerEntryStatus] Marked entry for player ${playerId} in game ${gameId} as COMPLETED.`);
+        console.log(`[upsertPlayerEntry] Updated existing entry for player ${playerId} in game ${gameData.game.id} to COMPLETED.`);
     } catch (error) {
+        // If the update fails because the item doesn't exist, create it.
         if (error.name === 'ConditionalCheckFailedException') {
-            console.warn(`[updatePlayerEntryStatus] No PlayerEntry found for player ${playerId} in game ${gameId} to update.`);
+            console.log(`[upsertPlayerEntry] Entry not found for player ${playerId}, creating a new one.`);
+            const newEntry = {
+                id: entryId,
+                playerId: playerId,
+                gameId: gameData.game.id,
+                venueId: gameData.game.venueId,
+                status: 'COMPLETED',
+                registrationTime: gameData.game.gameStartDateTime || now,
+                createdAt: now,
+                updatedAt: now,
+                _version: 1,
+                _lastChangedAt: Date.now(),
+                __typename: 'PlayerEntry'
+            };
+            
+            try {
+                await ddbDocClient.send(new PutCommand({
+                    TableName: playerEntryTable,
+                    Item: newEntry
+                }));
+                console.log(`[upsertPlayerEntry] Created new COMPLETED entry for player ${playerId} in game ${gameData.game.id}.`);
+            } catch (putError) {
+                console.error(`[upsertPlayerEntry] Failed to create entry for player ${playerId} after update failed:`, putError);
+                throw putError;
+            }
         } else {
-            console.error(`[updatePlayerEntryStatus] Error updating entry for player ${playerId}:`, error);
+            // For any other error, re-throw it.
+            console.error(`[upsertPlayerEntry] An unexpected error occurred for player ${playerId}:`, error);
+            throw error;
         }
     }
 };
@@ -386,6 +420,7 @@ const upsertPlayerSummary = async (playerId, gameData, playerData) => {
                 Key: { id: summaryId },
                 UpdateExpression: `
                     SET #lastPlayed = :lastPlayed,
+                        sessionsPlayed = sessionsPlayed + :one,
                         tournamentsPlayed = tournamentsPlayed + :one,
                         tournamentWinnings = tournamentWinnings + :winnings,
                         tournamentBuyIns = tournamentBuyIns + :buyIn,
@@ -476,7 +511,7 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
         
         if (existingRecord.Item) {
             // ✅ CHANGE: Calculate new average buy-in for existing records.
-            const oldGamesPlayed = existingRecord.Item.gamesPlayed || 0;
+            const oldGamesPlayed = existingRecord.Item.totalGamesPlayed || 0;
             const oldAverageBuyIn = existingRecord.Item.averageBuyIn || 0;
             const newTotalGames = oldGamesPlayed + 1;
             const newAverageBuyIn = newTotalGames > 0
@@ -487,7 +522,7 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
                 TableName: playerVenueTable,
                 Key: { id: playerVenueId },
                 UpdateExpression: `
-                    SET gamesPlayed = gamesPlayed + :inc,
+                    SET totalGamesPlayed = totalGamesPlayed + :inc,
                         lastPlayedDate = :lastPlayedDate,
                         targetingClassification = :targetingClassification,
                         averageBuyIn = :newAverageBuyIn,
@@ -514,7 +549,7 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
                 membershipCreatedDate: gameDate,
                 firstPlayedDate: gameDate, // New field
                 lastPlayedDate: gameDate,
-                gamesPlayed: 1, // Correctly serves as total games for this new venue record
+                totalGamesPlayed: 1, // Correctly serves as total games for this new venue record
                 averageBuyIn: currentGameBuyIn, // New field
                 targetingClassification: targetingClassification,
                 createdAt: now,
@@ -613,7 +648,6 @@ const processPlayer = async (playerData, processingInstructions, gameData) => {
     const playerResultTable = getTableName('PlayerResult');
     
     try {
-        // ✅ CHANGE: The player ID is now global and no longer needs the venueId.
         const playerId = generatePlayerId(playerName);
         const resultId = `${playerId}#${gameData.game.id}`;
 
@@ -634,7 +668,9 @@ const processPlayer = async (playerData, processingInstructions, gameData) => {
         await upsertPlayerSummary(playerId, gameData, playerData);
         await upsertPlayerVenue(playerId, gameData, playerData);
         await createPlayerTransactions(playerId, gameData, playerData, processingInstructions);
-        await updatePlayerEntryStatus(playerId, gameData.game.id);
+        
+        // Always call the robust upsert function to handle the PlayerEntry
+        await upsertPlayerEntry(playerId, gameData);
 
         console.log(`[processPlayer] Successfully processed player: ${playerName}`);
         return { success: true, playerName, playerId, status: 'PROCESSED' };

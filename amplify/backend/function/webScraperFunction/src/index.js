@@ -46,6 +46,22 @@ const ddbDocClient = DynamoDBDocumentClient.from(client);
 // ✅ 2. Instantiate the SQS client
 const sqsClient = new SQSClient({});
 
+const parsePlayerName = (fullName) => {
+    if (!fullName) return { firstName: 'Unknown', lastName: '', givenName: 'Unknown' };
+    const trimmedName = fullName.trim();
+    if (trimmedName.includes(',')) {
+        const parts = trimmedName.split(',');
+        const lastName = parts[0] ? parts[0].trim() : 'Unknown';
+        const firstName = parts[1] ? parts[1].trim() : 'Unknown';
+        return { firstName, lastName, givenName: firstName };
+    } else {
+        const parts = trimmedName.split(/\s+/);
+        const firstName = parts[0] || 'Unknown';
+        const lastName = parts.slice(1).join(' ') || '';
+        return { firstName, lastName, givenName: firstName };
+    }
+};
+
 const generatePlayerId = (playerName) => {
     const normalized = playerName.toLowerCase().trim();
     const hash = crypto.createHash('sha256')
@@ -111,7 +127,6 @@ const upsertLeanPlayerRecord = async (playerId, playerName, gameData) => {
     const now = new Date().toISOString();
 
     try {
-        // Attempt to update the record only if it already exists.
         await ddbDocClient.send(new UpdateCommand({
             TableName: playerTable,
             Key: { id: playerId },
@@ -120,19 +135,17 @@ const upsertLeanPlayerRecord = async (playerId, playerName, gameData) => {
             ExpressionAttributeValues: { ':now': now }
         }));
     } catch (error) {
-        // If the condition fails, it means the player does not exist.
         if (error.name === 'ConditionalCheckFailedException') {
             console.log(`[upsertLeanPlayerRecord] Player ${playerId} not found, creating new record.`);
-            // A simple way to parse name. NOTE: Assumes "FirstName LastName" format from scraper.
-            const nameParts = { 
-                firstName: playerName.split(' ')[0] || 'Unknown', 
-                lastName: playerName.split(' ').slice(1).join(' ') || '' 
-            };
+            
+            // Use the robust name parsing logic
+            const nameParts = parsePlayerName(playerName);
+            
             const newPlayer = {
                 id: playerId,
                 firstName: nameParts.firstName,
                 lastName: nameParts.lastName,
-                givenName: nameParts.firstName,
+                givenName: nameParts.givenName,
                 creationDate: gameData.gameStartDateTime,
                 registrationVenueId: gameData.venueId,
                 status: 'ACTIVE',
@@ -146,14 +159,13 @@ const upsertLeanPlayerRecord = async (playerId, playerName, gameData) => {
                 _lastChangedAt: Date.now(),
                 __typename: 'Player'
             };
-            // Create the new player record.
             await ddbDocClient.send(new PutCommand({
                 TableName: playerTable,
                 Item: newPlayer
             }));
         } else {
             console.error(`[upsertLeanPlayerRecord] Error checking for player ${playerId}:`, error);
-            throw error; // Re-throw any other unexpected errors.
+            throw error;
         }
     }
 };

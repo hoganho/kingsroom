@@ -1,5 +1,3 @@
-// GameCard.tsx
-
 import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { listVenuesForDropdown } from '../../graphql/customQueries';
@@ -58,12 +56,23 @@ export const GameCard: React.FC<{
         fetchVenues();
     }, []);
 
-    // ✅ Auto-select venue if provided in game data and available in the list
+    /**
+     * ✅ FIX: This effect hook now listens for an auto-assigned venue from the scraper.
+     * It will automatically select the venue in the dropdown if a high-confidence match is found.
+     */
     useEffect(() => {
-        if (game.data?.venueId && venues.some(v => v.id === game.data?.venueId)) {
-            setVenueId(game.data.venueId);
+        // Safely access the nested auto-assigned venue ID
+        const autoAssignedId = game.data?.venueMatch?.autoAssignedVenue?.id;
+
+        // Check if an ID exists and if the venues list has been loaded
+        if (autoAssignedId && venues.length > 0) {
+            // Further check if this ID is a valid option in our venues list
+            if (venues.some(v => v.id === autoAssignedId)) {
+                setVenueId(autoAssignedId);
+                console.log(`[Auto-Assign] Automatically selected venue ID: ${autoAssignedId}`);
+            }
         }
-    }, [game.data, venues]);
+    }, [game.data, venues]); // Re-run when game data or the venues list changes
 
     useEffect(() => {
         setDoNotScrape(game.data?.doNotScrape ?? false);
@@ -149,7 +158,6 @@ export const GameCard: React.FC<{
                         <p className="text-sm font-mono truncate" title={game.id}>{getDisplayId(game.id)}</p>
                     </div>
                     <div className="flex items-center space-x-2 flex-shrink-0">
-                        {/* ✅ MOVED: View Raw HTML button is now smaller and in the header */}
                         {rawHtml && (
                             <button
                                 onClick={() => setShowHtmlModal(true)}
@@ -237,7 +245,6 @@ export const GameCard: React.FC<{
                     </div>
                 )}
                 
-                {/* ✅ After save, show success message and hide the report/actions */}
                 {game.saveResult ? (
                     <div className="p-4 my-2 text-center bg-green-50 border border-green-200 rounded-lg">
                         <p className="font-semibold text-green-800">Successfully saved!</p>

@@ -28,7 +28,7 @@ export const Sidebar = () => {
       {/* ✅ CHANGE: Replaced the logo with the build version text */}
       <div className="flex flex-shrink-0 items-center justify-center px-4 h-16 border-b bg-black">
         <span className="font-mono text-sm font-semibold text-gray-300 tracking-wider">
-          Prototype v.{buildVersion}
+          Prototype v{buildVersion}
         </span>
       </div>
 
