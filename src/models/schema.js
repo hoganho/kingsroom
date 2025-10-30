@@ -250,6 +250,26 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "currentLog": {
+                    "name": "currentLog",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "ScraperLogData"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "lastGamesProcessed": {
+                    "name": "lastGamesProcessed",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "ScrapedGameStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -4377,10 +4397,10 @@ export const schema = {
                 "SCHEDULED",
                 "REGISTERING",
                 "RUNNING",
-                "CLOCK_STOPPED",
                 "CANCELLED",
                 "FINISHED",
-                "NOT_IN_USE"
+                "NOT_IN_USE",
+                "CLOCK_STOPPED"
             ]
         },
         "GameVariant": {
@@ -4680,6 +4700,26 @@ export const schema = {
                     "type": "Boolean",
                     "isRequired": true,
                     "attributes": []
+                },
+                "currentLog": {
+                    "name": "currentLog",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "ScraperLogData"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "lastGamesProcessed": {
+                    "name": "lastGamesProcessed",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "ScrapedGameStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
                 }
             }
         },
@@ -4711,6 +4751,65 @@ export const schema = {
                     "name": "blanks",
                     "isArray": false,
                     "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "ScraperLogData": {
+            "name": "ScraperLogData",
+            "fields": {
+                "timestamp": {
+                    "name": "timestamp",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "level": {
+                    "name": "level",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "details": {
+                    "name": "details",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ScrapedGameStatus": {
+            "name": "ScrapedGameStatus",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": "String",
                     "isRequired": true,
                     "attributes": []
                 }
@@ -5413,5 +5512,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "8a49e6b297a07ee23cf6bb8bc94036f0"
+    "version": "7da0d7385a3968512c10dca6ee18428c"
 };

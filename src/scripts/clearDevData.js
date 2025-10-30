@@ -31,6 +31,7 @@ const TABLES_TO_CLEAR = [
     'PlayerTicket-oi5oitkajrgtzm7feellfluriy-dev',
     'PlayerTransaction-oi5oitkajrgtzm7feellfluriy-dev',
     'PlayerVenue-oi5oitkajrgtzm7feellfluriy-dev',
+    'ScraperState-oi5oitkajrgtzm7feellfluriy-dev',
 ];
 
 // --- Logger (copied from your script) ---

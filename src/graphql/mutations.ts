@@ -1890,6 +1890,19 @@ export const controlScraperOperation = /* GraphQL */ `mutation ControlScraperOpe
       totalScraped
       totalErrors
       enabled
+      currentLog {
+        timestamp
+        level
+        message
+        details
+        __typename
+      }
+      lastGamesProcessed {
+        id
+        name
+        status
+        __typename
+      }
       __typename
     }
     results {
@@ -1920,6 +1933,19 @@ export const triggerAutoScraping = /* GraphQL */ `mutation TriggerAutoScraping {
       totalScraped
       totalErrors
       enabled
+      currentLog {
+        timestamp
+        level
+        message
+        details
+        __typename
+      }
+      lastGamesProcessed {
+        id
+        name
+        status
+        __typename
+      }
       __typename
     }
     results {
@@ -2091,6 +2117,19 @@ export const createScraperState = /* GraphQL */ `mutation CreateScraperState(
     totalScraped
     totalErrors
     enabled
+    currentLog {
+      timestamp
+      level
+      message
+      details
+      __typename
+    }
+    lastGamesProcessed {
+      id
+      name
+      status
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -2117,6 +2156,19 @@ export const updateScraperState = /* GraphQL */ `mutation UpdateScraperState(
     totalScraped
     totalErrors
     enabled
+    currentLog {
+      timestamp
+      level
+      message
+      details
+      __typename
+    }
+    lastGamesProcessed {
+      id
+      name
+      status
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -2143,6 +2195,19 @@ export const deleteScraperState = /* GraphQL */ `mutation DeleteScraperState(
     totalScraped
     totalErrors
     enabled
+    currentLog {
+      timestamp
+      level
+      message
+      details
+      __typename
+    }
+    lastGamesProcessed {
+      id
+      name
+      status
+      __typename
+    }
     createdAt
     updatedAt
     _version

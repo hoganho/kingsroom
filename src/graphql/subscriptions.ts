@@ -150,6 +150,19 @@ export const onCreateScraperState = /* GraphQL */ `subscription OnCreateScraperS
     totalScraped
     totalErrors
     enabled
+    currentLog {
+      timestamp
+      level
+      message
+      details
+      __typename
+    }
+    lastGamesProcessed {
+      id
+      name
+      status
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -175,6 +188,19 @@ export const onUpdateScraperState = /* GraphQL */ `subscription OnUpdateScraperS
     totalScraped
     totalErrors
     enabled
+    currentLog {
+      timestamp
+      level
+      message
+      details
+      __typename
+    }
+    lastGamesProcessed {
+      id
+      name
+      status
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -200,6 +226,19 @@ export const onDeleteScraperState = /* GraphQL */ `subscription OnDeleteScraperS
     totalScraped
     totalErrors
     enabled
+    currentLog {
+      timestamp
+      level
+      message
+      details
+      __typename
+    }
+    lastGamesProcessed {
+      id
+      name
+      status
+      __typename
+    }
     createdAt
     updatedAt
     _version

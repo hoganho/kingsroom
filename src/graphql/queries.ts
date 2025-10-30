@@ -39,6 +39,19 @@ export const getScraperControlState = /* GraphQL */ `query GetScraperControlStat
       totalScraped
       totalErrors
       enabled
+      currentLog {
+        timestamp
+        level
+        message
+        details
+        __typename
+      }
+      lastGamesProcessed {
+        id
+        name
+        status
+        __typename
+      }
       __typename
     }
     results {
@@ -237,6 +250,19 @@ export const getScraperState = /* GraphQL */ `query GetScraperState($id: ID!) {
     totalScraped
     totalErrors
     enabled
+    currentLog {
+      timestamp
+      level
+      message
+      details
+      __typename
+    }
+    lastGamesProcessed {
+      id
+      name
+      status
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -265,6 +291,19 @@ export const listScraperStates = /* GraphQL */ `query ListScraperStates(
       totalScraped
       totalErrors
       enabled
+      currentLog {
+        timestamp
+        level
+        message
+        details
+        __typename
+      }
+      lastGamesProcessed {
+        id
+        name
+        status
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -303,6 +342,19 @@ export const syncScraperStates = /* GraphQL */ `query SyncScraperStates(
       totalScraped
       totalErrors
       enabled
+      currentLog {
+        timestamp
+        level
+        message
+        details
+        __typename
+      }
+      lastGamesProcessed {
+        id
+        name
+        status
+        __typename
+      }
       createdAt
       updatedAt
       _version

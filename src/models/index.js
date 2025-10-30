@@ -32,10 +32,10 @@ const GameStatus = {
   "SCHEDULED": "SCHEDULED",
   "REGISTERING": "REGISTERING",
   "RUNNING": "RUNNING",
-  "CLOCK_STOPPED": "CLOCK_STOPPED",
   "CANCELLED": "CANCELLED",
   "FINISHED": "FINISHED",
-  "NOT_IN_USE": "NOT_IN_USE"
+  "NOT_IN_USE": "NOT_IN_USE",
+  "CLOCK_STOPPED": "CLOCK_STOPPED"
 };
 
 const GameVariant = {
@@ -193,7 +193,7 @@ const ScraperOperation = {
   "RESET": "RESET"
 };
 
-const { ScrapeStructure, DataSync, ScraperState, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, CashStructure, RakeStructure, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, ScraperControlResponse, ScraperStateData, ScraperResults, TournamentLevelData, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails } = initSchema(schema);
+const { ScrapeStructure, DataSync, ScraperState, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, CashStructure, RakeStructure, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, ScraperControlResponse, ScraperStateData, ScraperResults, ScraperLogData, ScrapedGameStatus, TournamentLevelData, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails } = initSchema(schema);
 
 export {
   ScrapeStructure,
@@ -253,6 +253,8 @@ export {
   ScraperControlResponse,
   ScraperStateData,
   ScraperResults,
+  ScraperLogData,
+  ScrapedGameStatus,
   TournamentLevelData,
   ScrapedGameSummary,
   ScrapedGameData,

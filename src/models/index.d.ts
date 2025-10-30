@@ -32,10 +32,10 @@ export enum GameStatus {
   SCHEDULED = "SCHEDULED",
   REGISTERING = "REGISTERING",
   RUNNING = "RUNNING",
-  CLOCK_STOPPED = "CLOCK_STOPPED",
   CANCELLED = "CANCELLED",
   FINISHED = "FINISHED",
-  NOT_IN_USE = "NOT_IN_USE"
+  NOT_IN_USE = "NOT_IN_USE",
+  CLOCK_STOPPED = "CLOCK_STOPPED"
 }
 
 export enum GameVariant {
@@ -221,6 +221,8 @@ type EagerScraperStateData = {
   readonly totalScraped: number;
   readonly totalErrors: number;
   readonly enabled: boolean;
+  readonly currentLog?: (ScraperLogData | null)[] | null;
+  readonly lastGamesProcessed?: (ScrapedGameStatus | null)[] | null;
 }
 
 type LazyScraperStateData = {
@@ -233,6 +235,8 @@ type LazyScraperStateData = {
   readonly totalScraped: number;
   readonly totalErrors: number;
   readonly enabled: boolean;
+  readonly currentLog?: (ScraperLogData | null)[] | null;
+  readonly lastGamesProcessed?: (ScrapedGameStatus | null)[] | null;
 }
 
 export declare type ScraperStateData = LazyLoading extends LazyLoadingDisabled ? EagerScraperStateData : LazyScraperStateData
@@ -256,6 +260,40 @@ type LazyScraperResults = {
 export declare type ScraperResults = LazyLoading extends LazyLoadingDisabled ? EagerScraperResults : LazyScraperResults
 
 export declare const ScraperResults: (new (init: ModelInit<ScraperResults>) => ScraperResults)
+
+type EagerScraperLogData = {
+  readonly timestamp: string;
+  readonly level: string;
+  readonly message: string;
+  readonly details?: string | null;
+}
+
+type LazyScraperLogData = {
+  readonly timestamp: string;
+  readonly level: string;
+  readonly message: string;
+  readonly details?: string | null;
+}
+
+export declare type ScraperLogData = LazyLoading extends LazyLoadingDisabled ? EagerScraperLogData : LazyScraperLogData
+
+export declare const ScraperLogData: (new (init: ModelInit<ScraperLogData>) => ScraperLogData)
+
+type EagerScrapedGameStatus = {
+  readonly id: number;
+  readonly name: string;
+  readonly status: string;
+}
+
+type LazyScrapedGameStatus = {
+  readonly id: number;
+  readonly name: string;
+  readonly status: string;
+}
+
+export declare type ScrapedGameStatus = LazyLoading extends LazyLoadingDisabled ? EagerScrapedGameStatus : LazyScrapedGameStatus
+
+export declare const ScrapedGameStatus: (new (init: ModelInit<ScrapedGameStatus>) => ScrapedGameStatus)
 
 type EagerTournamentLevelData = {
   readonly levelNumber: number;
@@ -635,6 +673,8 @@ type EagerScraperState = {
   readonly totalScraped: number;
   readonly totalErrors: number;
   readonly enabled: boolean;
+  readonly currentLog?: (ScraperLogData | null)[] | null;
+  readonly lastGamesProcessed?: (ScrapedGameStatus | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -653,6 +693,8 @@ type LazyScraperState = {
   readonly totalScraped: number;
   readonly totalErrors: number;
   readonly enabled: boolean;
+  readonly currentLog?: (ScraperLogData | null)[] | null;
+  readonly lastGamesProcessed?: (ScrapedGameStatus | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }

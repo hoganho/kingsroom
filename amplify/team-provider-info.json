@@ -29,7 +29,7 @@
         },
         "webScraperFunction": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/webScraperFunction-78477378786e36483076-build.zip",
+          "s3Key": "amplify-builds/webScraperFunction-54464973457141416249-build.zip",
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue"
         },
         "playerDataProcessor": {
@@ -38,7 +38,7 @@
         },
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/autoScraper-6a47354c4b5858485348-build.zip"
+          "s3Key": "amplify-builds/autoScraper-6e64736756474243706b-build.zip"
         }
       }
     }
