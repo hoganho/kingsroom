@@ -66,6 +66,7 @@ export type GameData = {
     gameEndDateTime?: string;
     gameStatus: GameStatus;
     gameType?: GameType;
+    venueId?: string | null;
     gameVariant?: GameVariant;
     gameFrequency?: GameFrequency;
     isSeries?: boolean;
