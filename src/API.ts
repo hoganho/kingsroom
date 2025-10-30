@@ -554,8 +554,8 @@ export enum PlayerVenueTargetingClassification {
   Retain_Inactive61_90d = "Retain_Inactive61_90d",
   Churned_91_120d = "Churned_91_120d",
   Churned_121_180d = "Churned_121_180d",
-  Churn_181_360d = "Churn_181_360d",
-  Churn_361d = "Churn_361d",
+  Churned_181_360d = "Churned_181_360d",
+  Churned_361d = "Churned_361d",
 }
 
 
@@ -3660,7 +3660,6 @@ export type ListPlayersForDebugQuery = {
     __typename: "ModelPlayerConnection",
     items:  Array< {
       __typename: "Player",
-      id: string,
       firstName: string,
       givenName?: string | null,
       lastName?: string | null,
@@ -3688,7 +3687,6 @@ export type ListPlayerSummariesForDebugQuery = {
     __typename: "ModelPlayerSummaryConnection",
     items:  Array< {
       __typename: "PlayerSummary",
-      id: string,
       playerId: string,
       sessionsPlayed?: number | null,
       tournamentsPlayed?: number | null,
@@ -3717,7 +3715,6 @@ export type ListPlayerResultsForDebugQuery = {
     __typename: "ModelPlayerResultConnection",
     items:  Array< {
       __typename: "PlayerResult",
-      id: string,
       finishingPlace?: number | null,
       isMultiDayQualification?: boolean | null,
       prizeWon?: boolean | null,
@@ -3739,7 +3736,6 @@ export type ListPlayerVenuesForDebugQuery = {
     __typename: "ModelPlayerVenueConnection",
     items:  Array< {
       __typename: "PlayerVenue",
-      id: string,
       totalGamesPlayed?: number | null,
       averageBuyIn?: number | null,
       firstPlayedDate?: string | null,
@@ -3760,7 +3756,6 @@ export type ListPlayerTransactionsForDebugQuery = {
     __typename: "ModelPlayerTransactionConnection",
     items:  Array< {
       __typename: "PlayerTransaction",
-      id: string,
       type: TransactionType,
       amount: number,
       rake?: number | null,
@@ -3782,7 +3777,6 @@ export type ListPlayerCreditsForDebugQuery = {
     __typename: "ModelPlayerCreditsConnection",
     items:  Array< {
       __typename: "PlayerCredits",
-      id: string,
       type: CreditTransactionType,
       changeAmount: number,
       balanceAfter: number,
@@ -3805,7 +3799,6 @@ export type ListPlayerPointsForDebugQuery = {
     __typename: "ModelPlayerPointsConnection",
     items:  Array< {
       __typename: "PlayerPoints",
-      id: string,
       type: PointsTransactionType,
       changeAmount: number,
       balanceAfter: number,
@@ -3828,7 +3821,6 @@ export type ListPlayerTicketsForDebugQuery = {
     __typename: "ModelPlayerTicketConnection",
     items:  Array< {
       __typename: "PlayerTicket",
-      id: string,
       assignedAt: string,
       expiryDate: string,
       status: TicketStatus,
@@ -3848,7 +3840,6 @@ export type ListPlayerMarketingPreferencesForDebugQuery = {
     __typename: "ModelPlayerMarketingPreferencesConnection",
     items:  Array< {
       __typename: "PlayerMarketingPreferences",
-      id: string,
       optOutSms?: boolean | null,
       optOutEmail?: boolean | null,
       playerId: string,
@@ -3865,7 +3856,6 @@ export type ListPlayerMarketingMessagesForDebugQuery = {
     __typename: "ModelPlayerMarketingMessageConnection",
     items:  Array< {
       __typename: "PlayerMarketingMessage",
-      id: string,
       status: MessageStatus,
       sentAt: string,
       playerId: string,

@@ -116,8 +116,8 @@ const PlayerVenueTargetingClassification = {
   "RETAIN_INACTIVE61_90D": "Retain_Inactive61_90d",
   "CHURNED_91_120D": "Churned_91_120d",
   "CHURNED_121_180D": "Churned_121_180d",
-  "CHURN_181_360D": "Churn_181_360d",
-  "CHURN_361D": "Churn_361d"
+  "CHURNED_181_360D": "Churned_181_360d",
+  "CHURNED_361D": "Churned_361d"
 };
 
 const TransactionType = {

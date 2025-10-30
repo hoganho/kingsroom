@@ -17,7 +17,7 @@ enum PlayerAccountStatus { ACTIVE, SUSPENDED, PENDING_VERIFICATION }
 enum PlayerAccountCategory { NEW, RECREATIONAL, REGULAR, VIP, LAPSED }
 enum SeriesStatus { LIVE, SCHEDULED, COMPLETED }
 enum PlayerTargetingClassification { NotPlayed, Active_EL, Active, Retain_Inactive31_60d, Retain_Inactive61_90d, Churned_91_120d, Churned_121_180d, Churned_181_360d, Churned_361d }
-enum PlayerVenueTargetingClassification { Active_EL, Active, Retain_Inactive31_60d, Retain_Inactive61_90d, Churned_91_120d, Churned_121_180d, Churn_181_360d, Churn_361d }
+enum PlayerVenueTargetingClassification { Active_EL, Active, Retain_Inactive31_60d, Retain_Inactive61_90d, Churned_91_120d, Churned_121_180d, Churned_181_360d, Churned_361d }
 enum TransactionType { BUY_IN, DEPOSIT, TICKET_AWARD, TICKET_REDEMPTION, CASH_AWARD, QUALIFICATION, WITHDRAWAL }
 enum MessageStatus { SENT, DELIVERED, FAILED, READ }
 enum UserRole { SUPER_ADMIN, ADMIN, VENUE_MANAGER, TOURNAMENT_DIRECTOR, MARKETING }

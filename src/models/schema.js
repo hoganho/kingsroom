@@ -4114,8 +4114,8 @@ export const schema = {
                 "Retain_Inactive61_90d",
                 "Churned_91_120d",
                 "Churned_121_180d",
-                "Churn_181_360d",
-                "Churn_361d"
+                "Churned_181_360d",
+                "Churned_361d"
             ]
         },
         "TransactionType": {
