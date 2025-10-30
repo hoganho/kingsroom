@@ -60,7 +60,7 @@ export const GameCard: React.FC<{
 
     // ✅ Auto-select venue if provided in game data and available in the list
     useEffect(() => {
-        if (game.data?.venueId && venues.some(v => v.id === game.data.venueId)) {
+        if (game.data?.venueId && venues.some(v => v.id === game.data?.venueId)) {
             setVenueId(game.data.venueId);
         }
     }, [game.data, venues]);
