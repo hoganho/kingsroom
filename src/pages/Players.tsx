@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { generateClient } from '@aws-amplify/api';
+import { generateClient, type GraphQLResult } from '@aws-amplify/api';
 import { ArrowPathIcon } from '@heroicons/react/24/solid';
 import * as queries from '../graphql/customQueries';
 import * as APITypes from '../API';
@@ -19,60 +19,69 @@ type PlayerData = {
   messages: APITypes.PlayerMarketingMessage[];
 };
 
-// ... DataSection component remains the same ...
+// Helper component to render a data table
 const DataSection = ({ title, data }: { title: string; data: any[] }) => {
-    if (!data || data.length === 0) {
-      return (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">{title}</h2>
-          <p className="text-gray-500">No data found.</p>
-        </div>
-      );
-    }
-    const keys = Array.from(new Set(data.flatMap((item) => Object.keys(item))));
-    const displayKeys = keys.filter(
-      (key) =>
-        ![
-          '__typename',
-          '_version',
-          '_lastChangedAt',
-          '_deleted',
-          'player',
-          'venue',
-          'game',
-        ].includes(key)
-    );
+  if (!data || data.length === 0) {
     return (
-      <div className="mb-12 bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4">{title}</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                {displayKeys.map((key) => (
-                  <th key={key} scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {key}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {data.map((item, index) => (
-                <tr key={item.id || index}>
-                  {displayKeys.map((key) => (
-                    <td key={key} className="px-4 py-3 whitespace-nowrap text-xs text-gray-700 align-top">
-                      {typeof item[key] === 'object'
-                        ? JSON.stringify(item[key])
-                        : String(item[key])}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">{title}</h2>
+        <p className="text-gray-500">No data found.</p>
       </div>
     );
+  }
+
+  const keys = Array.from(new Set(data.flatMap((item) => Object.keys(item))));
+  const displayKeys = keys.filter(
+    (key) =>
+      ![
+        '__typename',
+        '_version',
+        '_lastChangedAt',
+        '_deleted',
+        'player',
+        'venue',
+        'game',
+      ].includes(key)
+  );
+
+  return (
+    <div className="mb-12 bg-white p-4 rounded-lg shadow-md">
+      <h2 className="text-2xl font-semibold text-gray-900 mb-4">{title}</h2>
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              {displayKeys.map((key) => (
+                <th
+                  key={key}
+                  scope="col"
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  {key}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {data.map((item, index) => (
+              <tr key={item.id || index}>
+                {displayKeys.map((key) => (
+                  <td
+                    key={key}
+                    className="px-4 py-3 whitespace-nowrap text-xs text-gray-700 align-top"
+                  >
+                    {typeof item[key] === 'object'
+                      ? JSON.stringify(item[key])
+                      : String(item[key])}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 };
 
 // Main page component
@@ -82,50 +91,38 @@ export const PlayersPage = () => {
   const [error, setError] = useState<string | null>(null);
   const client = generateClient();
 
-  // REFACTORED FUNCTION
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      // Use Promise.all to run all queries in parallel.
-      // The `client.graphql` call with a query returns a Promise, which is what `await` expects.
-      // We've removed the `as GraphQLResult<any>` cast as it's often not needed.
-      const [
-        playersResult,
-        summariesResult,
-        resultsResult,
-        venuesResult,
-        transactionsResult,
-        creditsResult,
-        pointsResult,
-        ticketsResult,
-        prefsResult,
-        messagesResult,
-      ] = await Promise.all([
-        client.graphql({ query: queries.listPlayersForDebug }),
-        client.graphql({ query: queries.listPlayerSummariesForDebug }),
-        client.graphql({ query: queries.listPlayerResultsForDebug }),
-        client.graphql({ query: queries.listPlayerVenuesForDebug }),
-        client.graphql({ query: queries.listPlayerTransactionsForDebug }),
-        client.graphql({ query: queries.listPlayerCreditsForDebug }),
-        client.graphql({ query: queries.listPlayerPointsForDebug }),
-        client.graphql({ query: queries.listPlayerTicketsForDebug }),
-        client.graphql({ query: queries.listPlayerMarketingPreferencesForDebug }),
-        client.graphql({ query: queries.listPlayerMarketingMessagesForDebug }),
+      // FIX: We must explicitly cast the result of each client.graphql call.
+      // This tells TypeScript to expect a GraphQLResult, which resolves the ambiguity.
+      const results = await Promise.all([
+        client.graphql({ query: queries.listPlayersForDebug }) as Promise<GraphQLResult<any>>,
+        client.graphql({ query: queries.listPlayerSummariesForDebug }) as Promise<GraphQLResult<any>>,
+        client.graphql({ query: queries.listPlayerResultsForDebug }) as Promise<GraphQLResult<any>>,
+        client.graphql({ query: queries.listPlayerVenuesForDebug }) as Promise<GraphQLResult<any>>,
+        client.graphql({ query: queries.listPlayerTransactionsForDebug }) as Promise<GraphQLResult<any>>,
+        client.graphql({ query: queries.listPlayerCreditsForDebug }) as Promise<GraphQLResult<any>>,
+        client.graphql({ query: queries.listPlayerPointsForDebug }) as Promise<GraphQLResult<any>>,
+        client.graphql({ query: queries.listPlayerTicketsForDebug }) as Promise<GraphQLResult<any>>,
+        client.graphql({ query: queries.listPlayerMarketingPreferencesForDebug }) as Promise<GraphQLResult<any>>,
+        client.graphql({ query: queries.listPlayerMarketingMessagesForDebug }) as Promise<GraphQLResult<any>>,
       ]);
 
-      // Safely access the 'data' property from each result.
+      // Now that each item in 'results' is guaranteed to have a .data property,
+      // this code will no longer cause an error.
       setData({
-        players: playersResult.data?.listPlayers?.items || [],
-        summaries: summariesResult.data?.listPlayerSummaries?.items || [],
-        results: resultsResult.data?.listPlayerResults?.items || [],
-        venues: venuesResult.data?.listPlayerVenues?.items || [],
-        transactions: transactionsResult.data?.listPlayerTransactions?.items || [],
-        credits: creditsResult.data?.listPlayerCredits?.items || [],
-        points: pointsResult.data?.listPlayerPoints?.items || [],
-        tickets: ticketsResult.data?.listPlayerTickets?.items || [],
-        prefs: prefsResult.data?.listPlayerMarketingPreferences?.items || [],
-        messages: messagesResult.data?.listPlayerMarketingMessages?.items || [],
+        players: results[0].data?.listPlayers?.items || [],
+        summaries: results[1].data?.listPlayerSummaries?.items || [],
+        results: results[2].data?.listPlayerResults?.items || [],
+        venues: results[3].data?.listPlayerVenues?.items || [],
+        transactions: results[4].data?.listPlayerTransactions?.items || [],
+        credits: results[5].data?.listPlayerCredits?.items || [],
+        points: results[6].data?.listPlayerPoints?.items || [],
+        tickets: results[7].data?.listPlayerTickets?.items || [],
+        prefs: results[8].data?.listPlayerMarketingPreferences?.items || [],
+        messages: results[9].data?.listPlayerMarketingMessages?.items || [],
       });
     } catch (err: any) {
       console.error('Error fetching player data:', err);
