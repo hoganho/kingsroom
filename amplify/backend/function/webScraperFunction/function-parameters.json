@@ -47,17 +47,22 @@
         "read",
         "update"
       ],
+      "PlayerEntry:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "PlayerResult:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
       "PlayerVenue:@model(appsync)": [
         "create",
         "read",
         "update"
       ],
       "PlayerTransaction:@model(appsync)": [
-        "create",
-        "read",
-        "update"
-      ],
-      "PlayerResult:@model(appsync)": [
         "create",
         "read",
         "update"

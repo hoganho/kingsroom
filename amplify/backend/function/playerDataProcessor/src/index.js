@@ -1,6 +1,8 @@
 /* Amplify Params - DO NOT EDIT
 	API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
 	API_KINGSROOM_GRAPHQLAPIIDOUTPUT
+	API_KINGSROOM_PLAYERENTRYTABLE_ARN
+	API_KINGSROOM_PLAYERENTRYTABLE_NAME
 	API_KINGSROOM_PLAYERRESULTTABLE_ARN
 	API_KINGSROOM_PLAYERRESULTTABLE_NAME
 	API_KINGSROOM_PLAYERSUMMARYTABLE_ARN
@@ -256,7 +258,7 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) =>
                 firstName: nameParts.firstName,
                 lastName: nameParts.lastName,
                 givenName: nameParts.givenName,
-                creationDate: gameDate,
+                creationDate: gameDateTime,
                 // This is now the venue where the player was FIRST ever seen.
                 registrationVenueId: gameData.game.venueId,
                 status: 'ACTIVE',

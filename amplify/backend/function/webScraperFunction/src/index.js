@@ -3,6 +3,8 @@
 	API_KINGSROOM_GAMETABLE_NAME
 	API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
 	API_KINGSROOM_GRAPHQLAPIIDOUTPUT
+	API_KINGSROOM_PLAYERENTRYTABLE_ARN
+	API_KINGSROOM_PLAYERENTRYTABLE_NAME
 	API_KINGSROOM_PLAYERRESULTTABLE_ARN
 	API_KINGSROOM_PLAYERRESULTTABLE_NAME
 	API_KINGSROOM_PLAYERSUMMARYTABLE_ARN
@@ -98,66 +100,68 @@ const getAllSeriesTitles = async () => {
     }
 };
 
-// --- OPTIMIZED SQS PAYLOAD CREATION ---
+// --- SQS & PLAYER ENTRY LOGIC ---
+
 /**
- * Creates an optimized SQS payload specifically structured for player processing
- * @param {Object} savedGameItem - The saved game record from DynamoDB
- * @param {Object} scrapedData - The raw scraped data from the page
- * @param {Object} metadata - Additional metadata (sourceUrl, venueId, etc.)
- * @returns {Object} Optimized payload for SQS with focus on player data
+ * ✅ Ensures a lean Player record exists before creating an entry.
+ * This function uses a conditional update to prevent creating duplicate players.
  */
-const createOptimizedPlayerPayload = (savedGameItem, scrapedData, metadata) => {
+const upsertLeanPlayerRecord = async (playerId, playerName, gameData) => {
+    const playerTable = getTableName('Player');
     const now = new Date().toISOString();
-    
-    // Extract and structure player-specific data
-    const playerData = extractPlayerDataForProcessing(scrapedData);
-    
-    return {
-        // Essential game information for context
-        game: {
-            id: savedGameItem.id,
-            name: savedGameItem.name,
-            venueId: savedGameItem.venueId,
-            gameStartDateTime: savedGameItem.gameStartDateTime,
-            gameEndDateTime: savedGameItem.gameEndDateTime,
-            gameType: savedGameItem.gameType,
-            gameVariant: savedGameItem.gameVariant,
-            
-            // Financial data needed for transaction records
-            buyIn: savedGameItem.buyIn || 0,
-            rake: savedGameItem.rake || 0,
-            totalRake: savedGameItem.totalRake || 0,
-            prizepool: savedGameItem.prizepool || 0,
-            totalEntries: savedGameItem.totalEntries || 0,
-            totalRebuys: savedGameItem.totalRebuys || 0,
-            totalAddons: savedGameItem.totalAddons || 0,
-            
-            // Game categorization for player analytics
-            isSeries: savedGameItem.isSeries || false,
-            seriesName: savedGameItem.seriesName || null,
-            gameFrequency: savedGameItem.gameFrequency || 'UNKNOWN',
-            isSatellite: savedGameItem.isSatellite || false
-        },
-        
-        // Structured player data ready for processing
-        players: playerData,
-        
-        // Processing instructions for each player
-        processingInstructions: createPlayerProcessingInstructions(playerData, savedGameItem),
-        
-        // Metadata for tracking and debugging
-        metadata: {
-            processedAt: now,
-            sourceUrl: metadata.sourceUrl,
-            venueId: metadata.venueId,
-            scrapedAt: scrapedData.fetchedAt || now,
-            hasCompleteResults: playerData.hasCompleteResults,
-            totalPlayersProcessed: playerData.allPlayers.length,
-            totalPrizesPaid: playerData.totalPrizesPaid
+
+    try {
+        // Attempt to update the record only if it already exists.
+        await ddbDocClient.send(new UpdateCommand({
+            TableName: playerTable,
+            Key: { id: playerId },
+            UpdateExpression: 'SET updatedAt = :now',
+            ConditionExpression: 'attribute_exists(id)',
+            ExpressionAttributeValues: { ':now': now }
+        }));
+    } catch (error) {
+        // If the condition fails, it means the player does not exist.
+        if (error.name === 'ConditionalCheckFailedException') {
+            console.log(`[upsertLeanPlayerRecord] Player ${playerId} not found, creating new record.`);
+            // A simple way to parse name. NOTE: Assumes "FirstName LastName" format from scraper.
+            const nameParts = { 
+                firstName: playerName.split(' ')[0] || 'Unknown', 
+                lastName: playerName.split(' ').slice(1).join(' ') || '' 
+            };
+            const newPlayer = {
+                id: playerId,
+                firstName: nameParts.firstName,
+                lastName: nameParts.lastName,
+                givenName: nameParts.firstName,
+                creationDate: gameData.gameStartDateTime,
+                registrationVenueId: gameData.venueId,
+                status: 'ACTIVE',
+                category: 'NEW',
+                targetingClassification: 'NotPlayed',
+                creditBalance: 0,
+                pointsBalance: 0,
+                createdAt: now,
+                updatedAt: now,
+                _version: 1,
+                _lastChangedAt: Date.now(),
+                __typename: 'Player'
+            };
+            // Create the new player record.
+            await ddbDocClient.send(new PutCommand({
+                TableName: playerTable,
+                Item: newPlayer
+            }));
+        } else {
+            console.error(`[upsertLeanPlayerRecord] Error checking for player ${playerId}:`, error);
+            throw error; // Re-throw any other unexpected errors.
         }
-    };
+    }
 };
 
+/**
+ * ✅ Creates or updates PlayerEntry records for a live/registering game.
+ * Using PutCommand with a deterministic ID acts as an "upsert".
+ */
 const upsertPlayerEntries = async (savedGameItem, scrapedData) => {
     const playerEntryTable = getTableName('PlayerEntry');
     const now = new Date().toISOString();
@@ -167,10 +171,14 @@ const upsertPlayerEntries = async (savedGameItem, scrapedData) => {
         return;
     }
 
-    const promises = allPlayers.map(playerData => {
-        // ✅ CHANGE: Generate the global player ID.
+    const promises = allPlayers.map(async (playerData) => {
         const playerId = generatePlayerId(playerData.name);
-        const entryId = `${savedGameItem.id}#${playerId}`; // Deterministic ID
+        
+        // Step 1: Ensure the player record exists before creating the entry.
+        await upsertLeanPlayerRecord(playerId, playerData.name, savedGameItem);
+
+        // Step 2: Create or replace the PlayerEntry record.
+        const entryId = `${savedGameItem.id}#${playerId}`;
         const status = playerData.rank ? 'ELIMINATED' : 'PLAYING';
 
         const playerEntry = {
@@ -201,59 +209,77 @@ const upsertPlayerEntries = async (savedGameItem, scrapedData) => {
 
     try {
         await Promise.all(promises);
-        console.log(`[upsertPlayerEntries] Successfully created/updated ${allPlayers.length} player entries for game ${savedGameItem.id}.`);
+        console.log(`[upsertPlayerEntries] Successfully processed ${allPlayers.length} players and their entries for game ${savedGameItem.id}.`);
     } catch (error) {
         console.error(`[upsertPlayerEntries] Error while processing player entries for game ${savedGameItem.id}:`, error);
     }
 };
 
-/**
- * Extracts player data from scraped results and structures it for processing
- */
+const createOptimizedPlayerPayload = (savedGameItem, scrapedData, metadata) => {
+    const now = new Date().toISOString();
+    const playerData = extractPlayerDataForProcessing(scrapedData);
+    return {
+        game: {
+            id: savedGameItem.id,
+            name: savedGameItem.name,
+            venueId: savedGameItem.venueId,
+            gameStartDateTime: savedGameItem.gameStartDateTime,
+            gameEndDateTime: savedGameItem.gameEndDateTime,
+            gameType: savedGameItem.gameType,
+            gameVariant: savedGameItem.gameVariant,
+            buyIn: savedGameItem.buyIn || 0,
+            rake: savedGameItem.rake || 0,
+            totalRake: savedGameItem.totalRake || 0,
+            prizepool: savedGameItem.prizepool || 0,
+            totalEntries: savedGameItem.totalEntries || 0,
+            totalRebuys: savedGameItem.totalRebuys || 0,
+            totalAddons: savedGameItem.totalAddons || 0,
+            isSeries: savedGameItem.isSeries || false,
+            seriesName: savedGameItem.seriesName || null,
+            gameFrequency: savedGameItem.gameFrequency || 'UNKNOWN',
+            isSatellite: savedGameItem.isSatellite || false
+        },
+        players: playerData,
+        processingInstructions: createPlayerProcessingInstructions(playerData, savedGameItem),
+        metadata: {
+            processedAt: now,
+            sourceUrl: metadata.sourceUrl,
+            venueId: metadata.venueId,
+            scrapedAt: scrapedData.fetchedAt || now,
+            hasCompleteResults: playerData.hasCompleteResults,
+            totalPlayersProcessed: playerData.allPlayers.length,
+            totalPrizesPaid: playerData.totalPrizesPaid
+        }
+    };
+};
+
 const extractPlayerDataForProcessing = (scrapedData) => {
     const results = scrapedData.results || [];
     const entries = scrapedData.entries || [];
     const seating = scrapedData.seating || [];
-    
-    // Build comprehensive player records
     const playerMap = new Map();
     
-    // ✅ START: REVISED LOGIC
-    // If we have a final results list, use it as the single source of truth.
-    // This is more reliable for finished games and avoids the bug.
     if (results.length > 0) {
         results.forEach(result => {
             if (result.name) {
                 playerMap.set(result.name, {
-                    name: result.name,
-                    entered: true,
-                    finished: true,
-                    rank: result.rank,
-                    winnings: result.winnings || 0,
-                    points: result.points || 0,
-                    isQualification: result.isQualification || false,
+                    name: result.name, entered: true, finished: true,
+                    rank: result.rank, winnings: result.winnings || 0,
+                    points: result.points || 0, isQualification: result.isQualification || false,
                 });
             }
         });
     } else {
-        // Fallback to the entries list ONLY if no results are present (e.g., for a live game).
         entries.forEach(entry => {
             if (entry.name) {
                 playerMap.set(entry.name, {
-                    name: entry.name,
-                    entered: true,
-                    finished: false, // Not finished yet if we're using the entries list
-                    rank: null,
-                    winnings: 0,
-                    points: 0,
-                    isQualification: false,
+                    name: entry.name, entered: true, finished: false,
+                    rank: null, winnings: 0, points: 0, isQualification: false,
                 });
             }
         });
     }
-    // ✅ END: REVISED LOGIC
     
-    // Add seating data if available (this logic remains the same)
     seating.forEach(seat => {
         if (seat.name) {
             const existing = playerMap.get(seat.name);
@@ -265,15 +291,12 @@ const extractPlayerDataForProcessing = (scrapedData) => {
         }
     });
     
-    // Convert to array and sort (this logic remains the same)
-    const allPlayers = Array.from(playerMap.values())
-        .sort((a, b) => {
-            if (a.rank === null) return 1;
-            if (b.rank === null) return -1;
-            return a.rank - b.rank;
-        });
+    const allPlayers = Array.from(playerMap.values()).sort((a, b) => {
+        if (a.rank === null) return 1;
+        if (b.rank === null) return -1;
+        return a.rank - b.rank;
+    });
     
-    // Calculate aggregates (this logic remains the same)
     const finishedPlayers = allPlayers.filter(p => p.finished);
     const totalPrizesPaid = finishedPlayers.reduce((sum, p) => sum + (p.winnings || 0), 0);
     const playersInTheMoney = finishedPlayers.filter(p => p.winnings > 0);
@@ -281,70 +304,42 @@ const extractPlayerDataForProcessing = (scrapedData) => {
     const qualifiedPlayers = finishedPlayers.filter(p => p.isQualification);
 
     return {
-        allPlayers,
-        finishedPlayers,
-        playersInTheMoney,
-        playersWithPoints,
-        qualifiedPlayers,
-        totalPlayers: allPlayers.length,
-        totalFinished: finishedPlayers.length,
-        totalInTheMoney: playersInTheMoney.length,
-        totalWithPoints: playersWithPoints.length,
-        totalPrizesPaid,
-        hasCompleteResults: finishedPlayers.length > 0,
+        allPlayers, finishedPlayers, playersInTheMoney, playersWithPoints, qualifiedPlayers,
+        totalPlayers: allPlayers.length, totalFinished: finishedPlayers.length,
+        totalInTheMoney: playersInTheMoney.length, totalWithPoints: playersWithPoints.length,
+        totalPrizesPaid, hasCompleteResults: finishedPlayers.length > 0,
         hasEntryList: entries.length > 0 || results.length > 0,
         hasSeatingData: seating.length > 0
     };
 };
 
-/**
- * Creates specific processing instructions for the downstream Lambda
- */
 const createPlayerProcessingInstructions = (playerData, gameInfo) => {
     const transactionTime = gameInfo.gameEndDateTime || gameInfo.gameStartDateTime;
-
     return playerData.allPlayers.map(player => {
-        
         const createTransactions = [];
-
-        // All players who entered the game get a BUY_IN transaction
         createTransactions.push({
-            type: 'BUY_IN',
-            amount: (gameInfo.buyIn || 0) + (gameInfo.rake || 0),
-            rake: gameInfo.rake || 0,
-            paymentSource: 'CASH', // Default to 'CASH'. Can be updated later.
-            transactionDate: transactionTime 
-            // --- End Fix ---
+            type: 'BUY_IN', amount: (gameInfo.buyIn || 0) + (gameInfo.rake || 0),
+            rake: gameInfo.rake || 0, paymentSource: 'CASH', transactionDate: transactionTime 
         });
-
-        // If the player qualified, add a second transaction for the qualification prize
         if (player.isQualification) {
             createTransactions.push({
-                type: 'QUALIFICATION',
-                amount: 0, // A qualification is a non-monetary prize
-                rake: 0,
-                paymentSource: 'UNKNOWN', // No payment source for a non-monetary prize
-                transactionDate: transactionTime
-                // --- End Fix ---
+                type: 'QUALIFICATION', amount: 0, rake: 0,
+                paymentSource: 'UNKNOWN', transactionDate: transactionTime
             });
         }
-
         return {
             playerName: player.name,
             requiredActions: {
                 upsertPlayer: true,
                 createPlayerResult: {
-                    finishingPlace: player.rank,
-                    prizeWon: player.winnings > 0 || player.isQualification,
-                    amountWon: player.winnings || 0,
-                    pointsEarned: player.points || 0, // Pass the points to be saved
+                    finishingPlace: player.rank, prizeWon: player.winnings > 0 || player.isQualification,
+                    amountWon: player.winnings || 0, pointsEarned: player.points || 0,
                     isMultiDayQualification: player.isQualification,
                     totalRunners: gameInfo.totalEntries || playerData.totalPlayers
                 },
                 createTransactions: createTransactions,
                 updatePlayerSummary: {
-                    incrementTournaments: 1,
-                    addWinnings: player.winnings || 0,
+                    incrementTournaments: 1, addWinnings: player.winnings || 0,
                     addBuyIn: (gameInfo.buyIn || 0) + (gameInfo.rake || 0),
                     incrementITM: player.winnings > 0 || player.isQualification ? 1 : 0,
                     incrementCashes: player.winnings > 0 ? 1 : 0
@@ -358,8 +353,8 @@ const createPlayerProcessingInstructions = (playerData, gameInfo) => {
     });
 };
 
+// --- SCRAPING & SAVING LOGIC ---
 
-// --- SCRAPING LOGIC ---
 const scrapeDataFromHtml = (html, venues, seriesTitles) => {
     const { gameStatus, registrationStatus } = getStatusAndReg(html);
     const structureLabel = `STATUS: ${gameStatus || 'UNKNOWN'} | REG: ${registrationStatus || 'UNKNOWN'}`;
@@ -400,36 +395,20 @@ const processStructureFingerprint = async (foundKeys, structureLabel, sourceUrl)
             await ddbDocClient.send(new PutCommand({
                 TableName: structureTable,
                 Item: {
-                    id: structureId,
-                    fields: foundKeys,
-                    structureLabel: structureLabel,
-                    occurrenceCount: 1,
-                    firstSeenAt: now,
-                    lastSeenAt: now,
-                    exampleUrl: sourceUrl,
-                    __typename: "ScrapeStructure",
-                    createdAt: now,
-                    updatedAt: now,
-                    _lastChangedAt: Date.now(),
-                    _version: 1,
+                    id: structureId, fields: foundKeys, structureLabel: structureLabel,
+                    occurrenceCount: 1, firstSeenAt: now, lastSeenAt: now, exampleUrl: sourceUrl,
+                    __typename: "ScrapeStructure", createdAt: now, updatedAt: now,
+                    _lastChangedAt: Date.now(), _version: 1,
                 }
             }));
             return { isNewStructure: true, structureLabel };
         } else {
             console.log(`Updated existing structure fingerprint with ID: ${structureId}`);
             await ddbDocClient.send(new UpdateCommand({
-                TableName: structureTable,
-                Key: { id: structureId },
+                TableName: structureTable, Key: { id: structureId },
                 UpdateExpression: 'SET #lastSeenAt = :now, #occurrenceCount = #occurrenceCount + :inc, #updatedAt = :now',
-                ExpressionAttributeNames: {
-                    '#lastSeenAt': 'lastSeenAt',
-                    '#occurrenceCount': 'occurrenceCount',
-                    '#updatedAt': 'updatedAt'
-                },
-                ExpressionAttributeValues: {
-                    ':now': now,
-                    ':inc': 1
-                }
+                ExpressionAttributeNames: { '#lastSeenAt': 'lastSeenAt', '#occurrenceCount': 'occurrenceCount', '#updatedAt': 'updatedAt' },
+                ExpressionAttributeValues: { ':now': now, ':inc': 1 }
             }));
             return { isNewStructure: false, structureLabel: structureLabel }; 
         }
@@ -444,20 +423,16 @@ const handleFetch = async (url) => {
     const gameTable = getTableName('Game');
     let existingGameId = null;
     let doNotScrape = false;
-    
-    // Store all scraped data for potential SQS message
     let scrapedData = null;
     let foundKeys = [];
     
     try {
-        const queryCommand = new QueryCommand({
-            TableName: gameTable,
-            IndexName: 'bySourceUrl',
+        const queryResult = await ddbDocClient.send(new QueryCommand({
+            TableName: gameTable, IndexName: 'bySourceUrl',
             KeyConditionExpression: 'sourceUrl = :sourceUrl',
             ExpressionAttributeValues: { ':sourceUrl': url },
             ProjectionExpression: 'id, doNotScrape' 
-        });
-        const queryResult = await ddbDocClient.send(queryCommand);
+        }));
         if (queryResult.Items && queryResult.Items.length > 0) {
             const game = queryResult.Items[0];
             existingGameId = game.id;
@@ -482,60 +457,28 @@ const handleFetch = async (url) => {
     try {
         const response = await axios.get(url, { timeout: 10000, headers: { 'User-Agent': 'KingsRoom-Scraper/1.0' } });
         const html = response.data;
-        
-        // Scrape the data
         const scrapingResult = scrapeDataFromHtml(html, venues, seriesTitles);
         scrapedData = scrapingResult.data;
         foundKeys = scrapingResult.foundKeys;
         
-        // ✅ ENHANCEMENT 1: Check if tournament ID is not in use (UNKNOWN_STATUS or empty name)
-        if (scrapedData.gameStatus === 'UNKNOWN_STATUS' || 
-            scrapedData.gameStatus === 'UNKNOWN' ||
-            !scrapedData.name || 
-            scrapedData.name.trim() === '') {
-            
+        if (scrapedData.gameStatus === 'UNKNOWN_STATUS' || scrapedData.gameStatus === 'UNKNOWN' || !scrapedData.name || scrapedData.name.trim() === '') {
             console.log(`[handleFetch] Tournament ID not in use for ${url}`);
-            
-            // Return a special response that indicates tournament ID is not in use
             return {
-                id: existingGameId,
-                name: 'Tournament ID Not In Use',
-                gameStatus: 'NOT_IN_USE',
-                registrationStatus: 'N/A',
-                gameStartDateTime: null,
-                gameEndDateTime: null,
-                gameVariant: 'UNKNOWN',
-                prizepool: 0,
-                totalEntries: 0,
-                tournamentType: 'UNKNOWN',
-                buyIn: 0,
-                rake: 0,
-                startingStack: 0,
-                hasGuarantee: false,
-                guaranteeAmount: 0,
-                gameTags: [],
-                levels: [],
-                isInactive: true,  // Special flag to indicate this tournament ID is not active
-                sourceUrl: url,
-                existingGameId: existingGameId
+                id: existingGameId, name: 'Tournament ID Not In Use', gameStatus: 'NOT_IN_USE',
+                registrationStatus: 'N/A', gameStartDateTime: null, gameEndDateTime: null,
+                gameVariant: 'UNKNOWN', prizepool: 0, totalEntries: 0, tournamentType: 'UNKNOWN',
+                buyIn: 0, rake: 0, startingStack: 0, hasGuarantee: false, guaranteeAmount: 0,
+                gameTags: [], levels: [], isInactive: true, sourceUrl: url, existingGameId: existingGameId
             };
         }
         
-        // Process structure fingerprint
         const fingerprint = await processStructureFingerprint(foundKeys, scrapedData.structureLabel, url);
-        
-        // Add metadata
         scrapedData.existingGameId = existingGameId;
         scrapedData.sourceUrl = url;
         scrapedData.fetchedAt = new Date().toISOString();
         
         console.log(`[handleFetch] Scraped data successfully for ${url}`);
-        return {
-            ...scrapedData,
-            existingGameId,
-            scrapedData: scrapedData,  // Include the full scraped data
-            foundKeys: foundKeys        // Include the found keys
-        };
+        return { ...scrapedData, existingGameId, scrapedData: scrapedData, foundKeys: foundKeys };
     } catch (error) {
         console.error(`[handleFetch] Error fetching or scraping ${url}: ${error.message}`);
         return { existingGameId, errorMessage: error.message };
@@ -549,20 +492,13 @@ const handleSave = async (input) => {
     const gameTable = getTableName('Game');
     const structureTable = getTableName('TournamentStructure');
     
-    // Store a reference to the saved game item
     let savedGameItem = null;
-    
-    // Store the original scraped data if available
     let originalScrapedData = input.originalScrapedData || null;
 
     const processedLevels = (data.levels || []).map(level => ({
-        levelNumber: level.levelNumber,
-        durationMinutes: level.durationMinutes || 0,
-        smallBlind: level.smallBlind || 0,
-        bigBlind: level.bigBlind || 0,
-        ante: level.ante || 0,
-        isBreak: level.breakMinutes > 0,
-        breakMinutes: level.breakMinutes || 0
+        levelNumber: level.levelNumber, durationMinutes: level.durationMinutes || 0,
+        smallBlind: level.smallBlind || 0, bigBlind: level.bigBlind || 0, ante: level.ante || 0,
+        isBreak: level.breakMinutes > 0, breakMinutes: level.breakMinutes || 0
     }));
     
     const doNotScrape = input.doNotScrape || false;
@@ -571,15 +507,11 @@ const handleSave = async (input) => {
         console.log('[handleSave] Updating existing game...');
         const getCommand = new GetCommand({ TableName: gameTable, Key: { id: existingGameId } });
         const existingGame = await ddbDocClient.send(getCommand);
-        
         if (!existingGame.Item) {
-            console.error(`[handleSave] No game found with ID: ${existingGameId}`);
             throw new Error(`No game found with ID: ${existingGameId}`);
         }
-        
         const updatedGameItem = {
-            ...existingGame.Item,
-            name: data.name,
+            ...existingGame.Item, name: data.name,
             gameType: data.gameType || existingGame.Item.gameType || 'TOURNAMENT',
             gameStatus: data.gameStatus || existingGame.Item.gameStatus || 'SCHEDULED',
             gameVariant: data.gameVariant || existingGame.Item.gameVariant || 'NLHE',
@@ -591,16 +523,10 @@ const handleSave = async (input) => {
             startingStack: data.startingStack !== undefined ? data.startingStack : existingGame.Item.startingStack,
             hasGuarantee: data.hasGuarantee !== undefined ? data.hasGuarantee : existingGame.Item.hasGuarantee,
             guaranteeAmount: data.guaranteeAmount !== undefined ? data.guaranteeAmount : existingGame.Item.guaranteeAmount,
-            revenueByBuyIns: data.revenueByBuyIns,
-            profitLoss: data.profitLoss,
-            guaranteeSurplus: data.guaranteeSurplus,
-            guaranteeOverlay: data.guaranteeOverlay,
-            totalRake: data.totalRake,
-            isSatellite: data.isSatellite,
-            isSeries: data.isSeries,
-            isRegular: data.isRegular,
-            gameFrequency: data.gameFrequency,
-            seriesName: data.seriesName,
+            revenueByBuyIns: data.revenueByBuyIns, profitLoss: data.profitLoss,
+            guaranteeSurplus: data.guaranteeSurplus, guaranteeOverlay: data.guaranteeOverlay,
+            totalRake: data.totalRake, isSatellite: data.isSatellite, isSeries: data.isSeries,
+            isRegular: data.isRegular, gameFrequency: data.gameFrequency, seriesName: data.seriesName,
             registrationStatus: data.registrationStatus || existingGame.Item.registrationStatus,
             prizepool: data.prizepool !== undefined ? data.prizepool : existingGame.Item.prizepool,
             totalEntries: data.totalEntries !== undefined ? data.totalEntries : existingGame.Item.totalEntries,
@@ -609,40 +535,26 @@ const handleSave = async (input) => {
             totalAddons: data.totalAddons !== undefined ? data.totalAddons : existingGame.Item.totalAddons,
             totalDuration: data.totalDuration !== undefined ? data.totalDuration : existingGame.Item.totalDuration,
             gameTags: data.gameTags || existingGame.Item.gameTags,
-            doNotScrape: doNotScrape,
-            sourceDataIssue: data.sourceDataIssue || false,
+            doNotScrape: doNotScrape, sourceDataIssue: data.sourceDataIssue || false,
             gameDataVerified: data.gameDataVerified || false,
-            updatedAt: now,
-            _lastChangedAt: Date.now(),
+            updatedAt: now, _lastChangedAt: Date.now(),
         };
         
         if (processedLevels.length > 0) {
-            let structureId = existingGame.Item.tournamentStructureId;
-            if (!structureId) {
-                structureId = crypto.randomUUID();
-            }
-            // ✅ CHANGE 1: Always assign the structureId to the item being saved
+            let structureId = existingGame.Item.tournamentStructureId || crypto.randomUUID();
             updatedGameItem.tournamentStructureId = structureId;
-            
             const structureItem = {
-                id: structureId,
-                name: `${data.name} - Blind Structure`,
-                description: `Blind structure for ${data.name}`,
-                levels: processedLevels,
-                createdAt: now,
-                updatedAt: now,
-                _lastChangedAt: Date.now(),
-                _version: 1,
-                __typename: "TournamentStructure",
+                id: structureId, name: `${data.name} - Blind Structure`,
+                description: `Blind structure for ${data.name}`, levels: processedLevels,
+                createdAt: now, updatedAt: now, _lastChangedAt: Date.now(),
+                _version: 1, __typename: "TournamentStructure",
             };
             await ddbDocClient.send(new PutCommand({ TableName: structureTable, Item: structureItem }));
         } else {
-            // If there are no levels, ensure we don't have a null ID
             delete updatedGameItem.tournamentStructureId;
         }
-
         await ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem }));
-        savedGameItem = updatedGameItem; // Assign the updated item
+        savedGameItem = updatedGameItem;
 
     } else {
         console.log('[handleSave] No existing game found. Creating new records...');
@@ -651,126 +563,68 @@ const handleSave = async (input) => {
         if (processedLevels.length > 0) {
             structureId = crypto.randomUUID();
             const structureItem = {
-                id: structureId,
-                name: `${data.name} - Blind Structure`,
-                description: `Blind structure for ${data.name}`,
-                levels: processedLevels,
-                createdAt: now,
-                updatedAt: now,
-                _lastChangedAt: Date.now(),
-                _version: 1,
-                __typename: "TournamentStructure",
+                id: structureId, name: `${data.name} - Blind Structure`,
+                description: `Blind structure for ${data.name}`, levels: processedLevels,
+                createdAt: now, updatedAt: now, _lastChangedAt: Date.now(),
+                _version: 1, __typename: "TournamentStructure",
             };
-            await ddbDocClient.send(new PutCommand({ 
-                TableName: structureTable, 
-                Item: structureItem 
-            }));
+            await ddbDocClient.send(new PutCommand({ TableName: structureTable, Item: structureItem }));
         }
         const gameItem = {
-            id: gameId,
-            name: data.name,
-            gameType: data.gameType || 'TOURNAMENT',
-            gameStatus: data.gameStatus || 'SCHEDULED',
+            id: gameId, name: data.name,
+            gameType: data.gameType || 'TOURNAMENT', gameStatus: data.gameStatus || 'SCHEDULED',
             gameVariant: data.gameVariant || 'NLHE',
             gameStartDateTime: data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : now,
-            gameEndDateTime: data.gameEndDateTime,
-            sourceUrl,
-            venueId,
-            tournamentType: data.tournamentType,
-            buyIn: data.buyIn,
-            rake: data.rake || 0,
-            startingStack: data.startingStack,
-            hasGuarantee: data.hasGuarantee,
-            guaranteeAmount: data.guaranteeAmount,
-            revenueByBuyIns: data.revenueByBuyIns,
-            profitLoss: data.profitLoss,
-            guaranteeSurplus: data.guaranteeSurplus,
-            guaranteeOverlay: data.guaranteeOverlay,
-            totalRake: data.totalRake,
-            isSatellite: data.isSatellite,
-            isSeries: data.isSeries,
-            isRegular: data.isRegular,
-            gameFrequency: data.gameFrequency,
-            seriesName: data.seriesName,
-            registrationStatus: data.registrationStatus,
-            prizepool: data.prizepool,
-            totalEntries: data.totalEntries,
-            playersRemaining: data.playersRemaining,
-            totalRebuys: data.totalRebuys,
-            totalAddons: data.totalAddons,
-            totalDuration: data.totalDuration,
-            gameTags: data.gameTags,
-            // tournamentStructureId is now handled below
-            doNotScrape: doNotScrape,
-            sourceDataIssue: data.sourceDataIssue || false,
+            gameEndDateTime: data.gameEndDateTime, sourceUrl, venueId,
+            tournamentType: data.tournamentType, buyIn: data.buyIn, rake: data.rake || 0,
+            startingStack: data.startingStack, hasGuarantee: data.hasGuarantee,
+            guaranteeAmount: data.guaranteeAmount, revenueByBuyIns: data.revenueByBuyIns,
+            profitLoss: data.profitLoss, guaranteeSurplus: data.guaranteeSurplus,
+            guaranteeOverlay: data.guaranteeOverlay, totalRake: data.totalRake,
+            isSatellite: data.isSatellite, isSeries: data.isSeries, isRegular: data.isRegular,
+            gameFrequency: data.gameFrequency, seriesName: data.seriesName,
+            registrationStatus: data.registrationStatus, prizepool: data.prizepool,
+            totalEntries: data.totalEntries, playersRemaining: data.playersRemaining,
+            totalRebuys: data.totalRebuys, totalAddons: data.totalAddons,
+            totalDuration: data.totalDuration, gameTags: data.gameTags,
+            doNotScrape: doNotScrape, sourceDataIssue: data.sourceDataIssue || false,
             gameDataVerified: data.gameDataVerified || false,
-            createdAt: now,
-            updatedAt: now,
-            _lastChangedAt: Date.now(),
-            _version: 1,
-            __typename: "Game",
+            createdAt: now, updatedAt: now, _lastChangedAt: Date.now(),
+            _version: 1, __typename: "Game",
         };
         
-        // ✅ CHANGE 2: Conditionally add the tournamentStructureId to the object.
-        // If structureId is null, the key will not be added to the object.
         if (structureId) {
             gameItem.tournamentStructureId = structureId;
         }
-
-        await ddbDocClient.send(new PutCommand({ 
-            TableName: gameTable, 
-            Item: gameItem 
-        }));
-        savedGameItem = gameItem; // Assign the new item
+        await ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: gameItem }));
+        savedGameItem = gameItem;
     }
 
-    // Send SQS message if game is FINISHED
+    const liveStatuses = ['RUNNING', 'REGISTERING'];
     if (savedGameItem && savedGameItem.gameStatus === 'FINISHED') {
         try {
-            // Create an optimized payload focused on player processing
-            const sqsPayload = createOptimizedPlayerPayload(
-                savedGameItem, 
-                originalScrapedData || data,
-                { sourceUrl, venueId }
-            );
-            
+            const sqsPayload = createOptimizedPlayerPayload(savedGameItem, originalScrapedData || data, { sourceUrl, venueId });
             const command = new SendMessageCommand({
-                // This environment variable MUST be configured on the function
                 QueueUrl: process.env.PLAYER_PROCESSOR_QUEUE_URL,
                 MessageBody: JSON.stringify(sqsPayload),
-                // Optional: Add message attributes for easier filtering/routing
                 MessageAttributes: {
-                    gameId: {
-                        DataType: 'String',
-                        StringValue: savedGameItem.id
-                    },
-                    gameStatus: {
-                        DataType: 'String',
-                        StringValue: 'FINISHED'
-                    },
-                    venueId: {
-                        DataType: 'String',
-                        StringValue: venueId
-                    },
-                    totalPlayers: {
-                        DataType: 'Number',
-                        StringValue: String(sqsPayload.players.totalPlayers || 0)
-                    }
+                    gameId: { DataType: 'String', StringValue: savedGameItem.id },
+                    gameStatus: { DataType: 'String', StringValue: 'FINISHED' },
+                    venueId: { DataType: 'String', StringValue: venueId },
+                    totalPlayers: { DataType: 'Number', StringValue: String(sqsPayload.players.totalPlayers || 0) }
                 }
             });
-
             await sqsClient.send(command);
-            console.log(`[handleSave] Successfully sent finished game ${savedGameItem.id} to SQS queue with optimized player data.`);
-            console.log(`[handleSave] Payload contains ${sqsPayload.players.totalPlayers} players, ${sqsPayload.players.totalInTheMoney} ITM.`);
-
+            console.log(`[handleSave] Successfully sent finished game ${savedGameItem.id} to SQS queue.`);
         } catch (error) {
             console.error('[handleSave] FAILED to send message to SQS:', error);
-            // We only log the error here; we don't throw it, because the primary
-            // goal (saving the game) was successful.
         }
+    } else if (savedGameItem && liveStatuses.includes(savedGameItem.gameStatus)) {
+        console.log(`[handleSave] Game ${savedGameItem.id} is live. Upserting players and entries...`);
+        await upsertPlayerEntries(savedGameItem, originalScrapedData || data);
     }
 
-    return savedGameItem; // Return the saved item
+    return savedGameItem;
 };
 
 const handleFetchRange = async (startId, endId) => {
@@ -854,33 +708,22 @@ const handleFetchRange = async (startId, endId) => {
 exports.handler = async (event) => {
     console.log('Event received:', JSON.stringify(event, null, 2));
     const { arguments, fieldName } = event;
-
     try {
         switch (fieldName) {
             case 'fetchTournamentData':
                 const result = await handleFetch(arguments.url);
-                
-                // ✅ ENHANCEMENT 1: Handle NOT_IN_USE tournaments gracefully
                 if (result.isInactive || result.gameStatus === 'NOT_IN_USE') {
                     console.log('[Handler] Tournament is not in use, returning placeholder data');
-                    return result; // Return the placeholder data directly
+                    return result;
                 }
-                
                 if (result.errorMessage) throw new Error(result.errorMessage);
                 return result;
-                
             case 'saveTournamentData':
-                // Pass the original scraped data along if available
-                if (arguments.input.originalScrapedData) {
-                    return await handleSave(arguments.input);
-                }
                 return await handleSave(arguments.input);
-                
             case 'fetchTournamentDataRange':
                 return await handleFetchRange(arguments.startId, arguments.endId);
-                
             default:
-                throw new Error(`Unknown operation: ${fieldName}. No 'input' or 'url' argument found.`);
+                throw new Error(`Unknown operation: ${fieldName}.`);
         }
     } catch (error) {
         console.error('Error during handler execution:', error);
