@@ -9,7 +9,7 @@ import {
   TrophyIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
-import logo from '../../assets/Kings-Room-Logo_web.png';
+// ✅ REMOVED: No longer importing the logo here.
 
 const getLinkClassName = ({ isActive }: { isActive: boolean }) =>
   `flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${
@@ -19,16 +19,21 @@ const getLinkClassName = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 export const Sidebar = () => {
+  // ✅ NEW: Access the build version from the environment variable.
+  // This will be automatically injected by the Vite build process.
+  const buildVersion = import.meta.env.VITE_BUILD_VERSION || 'dev';
+
   return (
-    // ✅ FIX: Added classes to make the sidebar fixed on desktop (md and up)
     <aside className="md:fixed md:inset-y-0 md:left-0 md:z-30 flex w-64 flex-col border-r bg-white">
+      {/* ✅ CHANGE: Replaced the logo with the build version text */}
       <div className="flex flex-shrink-0 items-center justify-center px-4 h-16 border-b bg-black">
-        <img src={logo} alt="Kings Room Logo" className="h-12 object-contain" />
+        <span className="font-mono text-sm font-semibold text-gray-300 tracking-wider">
+          Prototype v.{buildVersion}
+        </span>
       </div>
 
       <nav className="flex flex-1 flex-col overflow-y-auto">
         <div className="p-4 space-y-2">
-          {/* Link to "/home" which matches your HomePage component */}
           <NavLink to="/home" className={getLinkClassName}>
             <HomeIcon className="h-5 w-5 mr-3" />
             Home

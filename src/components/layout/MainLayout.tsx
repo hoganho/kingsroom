@@ -1,13 +1,12 @@
 // src/components/layout/MainLayout.tsx
-// No major changes needed here, the problem is primarily in the Sidebar component's styling.
-// The existing `md:pl-64` on `<main>` is correct and will work once the sidebar is fixed.
 
 import { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
-import { Sidebar } from './Sidebar'; // Corrected import path assuming it's in the same folder
+import { Sidebar } from './Sidebar';
 import { MobileBottomNav } from './MobileBottomNav';
 import { useAuth } from '../../contexts/AuthContext';
+import logo from '../../assets/Kings-Room-Logo_web.png';
 
 export const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -15,34 +14,33 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* --- Desktop Sidebar --- */}
-      {/* This will now be fixed on desktop and hidden on mobile */}
       <div className="hidden md:flex md:flex-shrink-0">
           <Sidebar />
       </div>
 
       {/* --- Mobile Top Bar --- */}
-      <div className="md:hidden sticky top-0 z-10 flex h-16 flex-shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4">
-        {/* ... (rest of mobile top bar is fine) ... */}
+      <div className="md:hidden sticky top-0 z-10 flex h-16 flex-shrink-0 items-center justify-between border-b border-gray-800 bg-black px-4">
         {/* Hamburger Button */}
         <button
           type="button"
-          className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+          className="rounded-md p-2 text-gray-300 hover:bg-gray-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
           onClick={() => setSidebarOpen(true)}
         >
           <span className="sr-only">Open sidebar</span>
           <Bars3Icon className="h-6 w-6" aria-hidden="true" />
         </button>
 
-        {/* Centered Title */}
-        <h1 className="text-lg font-bold text-gray-800 font-display">
-          Kings Room
-        </h1>
+        {/* ✅ CHANGE: Replaced the h1 text with the logo image */}
+        <img 
+          src={logo} 
+          alt="Kings Room Logo" 
+          className="h-12 object-contain" 
+        />
 
         {/* Sign Out Button */}
         <button
           onClick={signOut}
-          className="text-sm font-medium text-red-600 hover:text-red-800"
+          className="text-sm font-medium text-red-500 hover:text-red-400"
         >
           Sign Out
         </button>
@@ -55,8 +53,6 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
           className="relative z-40 md:hidden"
           onClose={setSidebarOpen}
         >
-          {/* ... (rest of mobile sidebar is fine) ... */}
-          {/* Overlay */}
           <Transition.Child
             as={Fragment}
             enter="transition-opacity ease-linear duration-300"
@@ -69,7 +65,6 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
             <div className="fixed inset-0 bg-gray-600 bg-opacity-75" />
           </Transition.Child>
 
-          {/* Panel */}
           <div className="fixed inset-0 z-40 flex">
             <Transition.Child
               as={Fragment}
@@ -104,7 +99,6 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
                     </button>
                   </div>
                 </Transition.Child>
-                {/* We render the Sidebar component inside the panel for mobile */}
                 <Sidebar /> 
               </Dialog.Panel>
             </Transition.Child>
@@ -114,24 +108,15 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
       </Transition.Root>
 
       {/* --- Main Content Area --- */}
-      {/* This `md:pl-64` correctly makes space for the now-fixed desktop sidebar */}
       <main className="flex-1 md:pl-64">
         {/* Desktop Top Bar */}
-        <header className="sticky top-0 z-10 hidden h-16 flex-shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 sm:px-6 lg:px-8 md:flex">
-          {/* ... (rest of desktop top bar is fine) ... */}
-           {/* Left spacer */}
-          <div className="flex-1"></div>
-
-          {/* Centered title */}
-          <div className="flex-1 text-center">
-            <h1 className="text-2xl font-bold text-gray-800 font-display">
-              Kings Room Concepts
-            </h1>
+        <header className="sticky top-0 z-10 hidden h-16 flex-shrink-0 items-center justify-between border-b border-gray-800 bg-black px-4 sm:px-6 lg:px-8 md:flex">
+           <div className="flex-1"></div>
+          <div className="flex flex-1 items-center justify-center">
+            <img src={logo} alt="Kings Room Logo" className="h-12 object-contain" />
           </div>
-
-          {/* Right side - user info and sign out */}
           <div className="flex flex-1 items-center justify-end space-x-4">
-            <span className="text-sm text-gray-600 hidden sm:inline">
+            <span className="text-sm text-gray-300 hidden sm:inline">
               Logged in as: <strong>{user?.email}</strong>
             </span>
             <button
@@ -143,11 +128,9 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </header>
 
-        {/* Page content with bottom padding for mobile nav */}
         <div className="pb-20 md:pb-6">{children}</div>
       </main>
 
-      {/* --- Mobile Bottom Nav --- */}
       <MobileBottomNav />
     </div>
   );

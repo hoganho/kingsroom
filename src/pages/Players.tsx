@@ -19,70 +19,170 @@ type PlayerData = {
   messages: APITypes.PlayerMarketingMessage[];
 };
 
-// Helper component to render a data table
-const DataSection = ({ title, data }: { title: string; data: any[] }) => {
-  if (!data || data.length === 0) {
-    return (
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">{title}</h2>
-        <p className="text-gray-500">No data found.</p>
-      </div>
+// Generic Section for tables that don't need special formatting
+const GenericDataSection = ({ title, data }: { title: string; data: any[] }) => {
+    if (!data || data.length === 0) {
+      return (
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">{title}</h2>
+          <p className="text-gray-500">No data found.</p>
+        </div>
+      );
+    }
+  
+    const keys = Array.from(new Set(data.flatMap((item) => Object.keys(item))));
+    const displayKeys = keys.filter(
+      (key) =>
+        ![
+          '__typename',
+          '_version',
+          '_lastChangedAt',
+          '_deleted',
+          'player',
+          'venue',
+          'game',
+          'registrationVenue' // Hide the nested object from the generic table
+        ].includes(key)
     );
-  }
-
-  const keys = Array.from(new Set(data.flatMap((item) => Object.keys(item))));
-  const displayKeys = keys.filter(
-    (key) =>
-      ![
-        '__typename',
-        '_version',
-        '_lastChangedAt',
-        '_deleted',
-        'player',
-        'venue',
-        'game',
-      ].includes(key)
-  );
-
-  return (
-    <div className="mb-12 bg-white p-4 rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold text-gray-900 mb-4">{title}</h2>
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              {displayKeys.map((key) => (
-                <th
-                  key={key}
-                  scope="col"
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  {key}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {data.map((item, index) => (
-              <tr key={item.id || index}>
+  
+    return (
+      <div className="mb-12 bg-white p-4 rounded-lg shadow-md">
+        <h2 className="text-2xl font-semibold text-gray-900 mb-4">{title}</h2>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
                 {displayKeys.map((key) => (
-                  <td
+                  <th
                     key={key}
-                    className="px-4 py-3 whitespace-nowrap text-xs text-gray-700 align-top"
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    {typeof item[key] === 'object'
-                      ? JSON.stringify(item[key])
-                      : String(item[key])}
-                  </td>
+                    {key}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {data.map((item, index) => (
+                <tr key={item.id || index}>
+                  {displayKeys.map((key) => (
+                    <td
+                      key={key}
+                      className="px-4 py-3 whitespace-nowrap text-xs text-gray-700 align-top"
+                    >
+                      {typeof item[key] === 'object'
+                        ? JSON.stringify(item[key])
+                        : String(item[key])}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
-  );
+    );
 };
+
+
+// --- Specialized Components for Readable Tables ---
+
+const PlayersSection = ({ data }: { data: APITypes.Player[] }) => {
+    return (
+      <div className="mb-12 bg-white p-4 rounded-lg shadow-md">
+        <h2 className="text-2xl font-semibold text-gray-900 mb-4">Players</h2>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Registration Venue</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Played</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Points</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {data.map((item) => (
+                <tr key={item.id}>
+                  <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">{item.firstName} {item.lastName}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-xs font-medium text-indigo-600">
+                    {/* Access the name directly from the nested object. */}
+                    {item.registrationVenue?.name ?? 'Unknown'}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{item.lastPlayedDate}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{item.pointsBalance}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+};
+
+const PlayerVenuesSection = ({ data }: { data: APITypes.PlayerVenue[] }) => {
+    return (
+        <div className="mb-12 bg-white p-4 rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Player Venues</h2>
+            <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                        <tr>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Player</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Venue</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Games Played</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Played</th>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                        {data.map((item) => (
+                            <tr key={item.id}>
+                                <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">{item.player?.firstName} {item.player?.lastName}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-xs font-medium text-indigo-600">{item.venue?.name}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{item.gamesPlayed}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{item.lastPlayedDate}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
+const PlayerResultsSection = ({ data }: { data: APITypes.PlayerResult[] }) => {
+    return (
+        <div className="mb-12 bg-white p-4 rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Player Results</h2>
+            <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                        <tr>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Player</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Game ID</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rank</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Winnings</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Points</th>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                        {data.map((item) => (
+                            <tr key={item.id}>
+                                <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">{item.player?.firstName} {item.player?.lastName}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{item.gameId}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{item.finishingPlace}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">${item.amountWon?.toFixed(2)}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{item.pointsEarned}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
 
 // Main page component
 export const PlayersPage = () => {
@@ -90,13 +190,14 @@ export const PlayersPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const client = generateClient();
+  
+  // The `venueMap` state is no longer needed.
 
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      // FIX: We must explicitly cast the result of each client.graphql call.
-      // This tells TypeScript to expect a GraphQLResult, which resolves the ambiguity.
+      // The separate venue query has been removed.
       const results = await Promise.all([
         client.graphql({ query: queries.listPlayersForDebug }) as Promise<GraphQLResult<any>>,
         client.graphql({ query: queries.listPlayerSummariesForDebug }) as Promise<GraphQLResult<any>>,
@@ -110,8 +211,7 @@ export const PlayersPage = () => {
         client.graphql({ query: queries.listPlayerMarketingMessagesForDebug }) as Promise<GraphQLResult<any>>,
       ]);
 
-      // Now that each item in 'results' is guaranteed to have a .data property,
-      // this code will no longer cause an error.
+      // No need to build the venueMap anymore.
       setData({
         players: results[0].data?.listPlayers?.items || [],
         summaries: results[1].data?.listPlayerSummaries?.items || [],
@@ -132,7 +232,6 @@ export const PlayersPage = () => {
     }
   };
 
-  // Fetch data on initial component mount
   useEffect(() => {
     fetchData();
   }, []);
@@ -156,9 +255,7 @@ export const PlayersPage = () => {
     >
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md mb-6">
-          <p>
-            <span className="font-bold">Error:</span> {error}
-          </p>
+          <p><span className="font-bold">Error:</span> {error}</p>
         </div>
       )}
 
@@ -170,16 +267,17 @@ export const PlayersPage = () => {
 
       {!loading && data && (
         <div>
-          <DataSection title="Players" data={data.players} />
-          <DataSection title="Player Summaries" data={data.summaries} />
-          <DataSection title="Player Results" data={data.results} />
-          <DataSection title="Player Venues" data={data.venues} />
-          <DataSection title="Player Transactions" data={data.transactions} />
-          <DataSection title="Player Credits" data={data.credits} />
-          <DataSection title="Player Points" data={data.points} />
-          <DataSection title="Player Tickets" data={data.tickets} />
-          <DataSection title="Player Marketing Preferences" data={data.prefs} />
-          <DataSection title="Player Marketing Messages" data={data.messages} />
+          <PlayersSection data={data.players} />
+          <PlayerVenuesSection data={data.venues} />
+          <PlayerResultsSection data={data.results} />
+          
+          <GenericDataSection title="Player Summaries" data={data.summaries} />
+          <GenericDataSection title="Player Transactions" data={data.transactions} />
+          <GenericDataSection title="Player Credits" data={data.credits} />
+          <GenericDataSection title="Player Points" data={data.points} />
+          <GenericDataSection title="Player Tickets" data={data.tickets} />
+          <GenericDataSection title="Player Marketing Preferences" data={data.prefs} />
+          <GenericDataSection title="Player Marketing Messages" data={data.messages} />
         </div>
       )}
     </PageWrapper>

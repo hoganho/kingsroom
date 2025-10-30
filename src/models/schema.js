@@ -319,6 +319,22 @@ export const schema = {
                         ]
                     }
                 },
+                "registeredPlayers": {
+                    "name": "registeredPlayers",
+                    "isArray": true,
+                    "type": {
+                        "model": "Player"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "registrationVenue"
+                        ]
+                    }
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -1687,6 +1703,21 @@ export const schema = {
                     "type": "ID",
                     "isRequired": true,
                     "attributes": []
+                },
+                "registrationVenue": {
+                    "name": "registrationVenue",
+                    "isArray": false,
+                    "type": {
+                        "model": "Venue"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "registrationVenueId"
+                        ]
+                    }
                 },
                 "summary": {
                     "name": "summary",
@@ -4886,5 +4917,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "35fd57f24630202294881c3858030356"
+    "version": "ef9e8b30ce2fa9274f9b197fc1441caf"
 };

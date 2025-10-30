@@ -38,6 +38,10 @@ export const listPlayersForDebug = /* GraphQL */ `
         creditBalance
         pointsBalance
         registrationVenueId
+        registrationVenue {
+          id
+          name
+        }
         _version
       }
     }

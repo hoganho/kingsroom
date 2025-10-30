@@ -556,6 +556,7 @@ type EagerVenue = {
   readonly games?: (Game | null)[] | null;
   readonly series?: (TournamentSeries | null)[] | null;
   readonly playerMemberships?: (PlayerVenue | null)[] | null;
+  readonly registeredPlayers?: (Player | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
   readonly venueDetailsId?: string | null;
@@ -578,6 +579,7 @@ type LazyVenue = {
   readonly games: AsyncCollection<Game>;
   readonly series: AsyncCollection<TournamentSeries>;
   readonly playerMemberships: AsyncCollection<PlayerVenue>;
+  readonly registeredPlayers: AsyncCollection<Player>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
   readonly venueDetailsId?: string | null;
@@ -965,6 +967,7 @@ type EagerPlayer = {
   readonly creditBalance?: number | null;
   readonly pointsBalance?: number | null;
   readonly registrationVenueId: string;
+  readonly registrationVenue?: Venue | null;
   readonly summary?: PlayerSummary | null;
   readonly transactions?: (PlayerTransaction | null)[] | null;
   readonly results?: (PlayerResult | null)[] | null;
@@ -999,6 +1002,7 @@ type LazyPlayer = {
   readonly creditBalance?: number | null;
   readonly pointsBalance?: number | null;
   readonly registrationVenueId: string;
+  readonly registrationVenue: AsyncItem<Venue | undefined>;
   readonly summary: AsyncItem<PlayerSummary | undefined>;
   readonly transactions: AsyncCollection<PlayerTransaction>;
   readonly results: AsyncCollection<PlayerResult>;

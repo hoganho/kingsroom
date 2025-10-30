@@ -74,6 +74,7 @@ type Venue @model @auth(rules: [{ allow: private }]) {
   games: [Game] @hasMany(indexName: "byVenue", fields: ["id"])
   series: [TournamentSeries] @hasMany(indexName: "byVenue", fields: ["id"])
   playerMemberships: [PlayerVenue] @hasMany(indexName: "byVenue", fields: ["id"])
+  registeredPlayers: [Player] @hasMany(indexName: "byRegistrationVenue", fields: ["id"])
 }
 
 type VenueDetails @model @auth(rules: [{ allow: private }]) {
@@ -272,6 +273,7 @@ type Player @model @auth(rules: [{ allow: private }]) {
 
   # --- Relationships ---
   registrationVenueId: ID! @index(name: "byRegistrationVenue")
+  registrationVenue: Venue @belongsTo(fields: ["registrationVenueId"])
   summary: PlayerSummary @hasOne
   transactions: [PlayerTransaction] @hasMany(indexName: "byPlayer", fields: ["id"])
   results: [PlayerResult] @hasMany(indexName: "byPlayer", fields: ["id"])
