@@ -31,14 +31,8 @@ export const listPlayersForDebug = /* GraphQL */ `
     listPlayers {
       items {
         firstName
-        givenName
         lastName
-        email
-        phone
         creationDate
-        status
-        category
-        tier
         lastPlayedDate
         targetingClassification
         creditBalance

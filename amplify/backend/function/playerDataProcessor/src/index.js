@@ -123,97 +123,72 @@ const calculatePlayerVenueTargetingClassification = (lastActivityDate, membershi
 const calculatePlayerTargetingClassification = async (playerId, lastPlayedDate, creationDate, isNewPlayer = false) => {
     const now = new Date();
 
-    // --- Path for a NEW player ---
-    // This logic runs if the player record does not exist in the database yet.
-    // It correctly uses the supplied game date (`lastPlayedDate`) to determine classification.
-    if (isNewPlayer) { //
+    if (isNewPlayer) {
         console.log(`[calculatePlayerTargetingClassification] New player ${playerId}. Classifying based on game date: ${lastPlayedDate}`);
-        
-        if (!lastPlayedDate) { //
+        if (!lastPlayedDate) {
             return 'NotPlayed'; 
         }
-        
-        // The classification is based on the time between their first game and today.
-        const daysSinceLastPlayed = daysBetween(lastPlayedDate, now); //
-        
-        if (daysSinceLastPlayed <= 30) return 'Active_EL'; //
-        if (daysSinceLastPlayed <= 60) return 'Active'; //
-        if (daysSinceLastPlayed <= 90) return 'Retain_Inactive31_60d'; //
-        if (daysSinceLastPlayed <= 120) return 'Retain_Inactive61_90d'; //
-        if (daysSinceLastPlayed <= 180) return 'Churned_91_120d'; //
-        if (daysSinceLastPlayed <= 360) return 'Churned_121_180d'; //
-        if (daysSinceLastPlayed <= 720) return 'Churned_181_360d'; //
-        return 'Churned_361d'; //
+        const daysSinceLastPlayed = daysBetween(lastPlayedDate, now);
+        if (daysSinceLastPlayed <= 30) return 'Active_EL';
+        if (daysSinceLastPlayed <= 60) return 'Active';
+        if (daysSinceLastPlayed <= 90) return 'Retain_Inactive31_60d';
+        if (daysSinceLastPlayed <= 120) return 'Retain_Inactive61_90d';
+        if (daysSinceLastPlayed <= 180) return 'Churned_91_120d';
+        if (daysSinceLastPlayed <= 360) return 'Churned_121_180d';
+        if (daysSinceLastPlayed <= 720) return 'Churned_181_360d';
+        return 'Churned_361d';
     }
 
-    // --- Path for an EXISTING player ---
-    // This logic runs if the player already has a record in the database.
     try {
-        const playerVenueTable = getTableName('PlayerVenue'); //
-        const queryResponse = await ddbDocClient.send(new QueryCommand({ //
-            TableName: playerVenueTable, //
-            IndexName: 'byPlayer', //
-            KeyConditionExpression: 'playerId = :playerId', //
-            ExpressionAttributeValues: { //
-                ':playerId': playerId //
-            }
+        const playerVenueTable = getTableName('PlayerVenue');
+        const queryResponse = await ddbDocClient.send(new QueryCommand({
+            TableName: playerVenueTable,
+            IndexName: 'byPlayer',
+            KeyConditionExpression: 'playerId = :playerId',
+            ExpressionAttributeValues: { ':playerId': playerId }
         }));
         
-        const venues = queryResponse.Items || []; //
-        
-        if (venues.length < 2) { //
-            return 'NotPlayed'; //
+        const venues = queryResponse.Items || [];
+        if (venues.length < 2) {
+            return 'NotPlayed';
         }
         
-        let mostRecentVenue = null; //
-        let mostRecentDate = null; //
-        
-        for (const venue of venues) { //
-            if (venue.lastPlayedDate) { //
-                const venueDate = new Date(venue.lastPlayedDate); //
-                if (!mostRecentDate || venueDate > mostRecentDate) { //
-                    mostRecentDate = venueDate; //
-                    mostRecentVenue = venue; //
+        let mostRecentVenue = null;
+        let mostRecentDate = null;
+        for (const venue of venues) {
+            if (venue.lastPlayedDate) {
+                const venueDate = new Date(venue.lastPlayedDate);
+                if (!mostRecentDate || venueDate > mostRecentDate) {
+                    mostRecentDate = venueDate;
+                    mostRecentVenue = venue;
                 }
             }
         }
         
-        const daysSinceCreation = daysBetween(creationDate, now); //
-        
-        if (daysSinceCreation <= 30 && mostRecentVenue) { //
-            const venueClassification = mostRecentVenue.targetingClassification; //
-            
-            const newPlayerClassifications = [ //
-                'Active_EL', //
-                'Active', //
-                'Retain_Inactive31_60d', //
-                'Retain_Inactive61_90d' //
-            ];
-            
-            if (newPlayerClassifications.includes(venueClassification)) { //
-                return venueClassification; //
+        const daysSinceCreation = daysBetween(creationDate, now);
+        if (daysSinceCreation <= 30 && mostRecentVenue) {
+            const venueClassification = mostRecentVenue.targetingClassification;
+            const newPlayerClassifications = ['Active_EL', 'Active', 'Retain_Inactive31_60d', 'Retain_Inactive61_90d'];
+            if (newPlayerClassifications.includes(venueClassification)) {
+                return venueClassification;
             }
         }
         
-        if (!lastPlayedDate) return 'NotPlayed'; //
-        
-        const daysSinceLastPlayed = daysBetween(lastPlayedDate, now); //
-        
-        if (daysSinceLastPlayed <= 30) return 'Active_EL'; //
-        if (daysSinceLastPlayed <= 60) return 'Active'; //
-        if (daysSinceLastPlayed <= 90) return 'Retain_Inactive31_60d'; //
-        if (daysSinceLastPlayed <= 120) return 'Retain_Inactive61_90d'; //
-        if (daysSinceLastPlayed <= 180) return 'Churned_91_120d'; //
-        if (daysSinceLastPlayed <= 360) return 'Churned_121_180d'; //
-        if (daysSinceLastPlayed <= 720) return 'Churned_181_360d'; //
-        return 'Churned_361d'; //
-        
+        if (!lastPlayedDate) return 'NotPlayed';
+        const daysSinceLastPlayed = daysBetween(lastPlayedDate, now);
+        if (daysSinceLastPlayed <= 30) return 'Active_EL';
+        if (daysSinceLastPlayed <= 60) return 'Active';
+        if (daysSinceLastPlayed <= 90) return 'Retain_Inactive31_60d';
+        if (daysSinceLastPlayed <= 120) return 'Retain_Inactive61_90d';
+        if (daysSinceLastPlayed <= 180) return 'Churned_91_120d';
+        if (daysSinceLastPlayed <= 360) return 'Churned_121_180d';
+        if (daysSinceLastPlayed <= 720) return 'Churned_181_360d';
+        return 'Churned_361d';
     } catch (error) {
         console.error('[calculatePlayerTargetingClassification] Error:', error);
-        return 'NotPlayed'; //
+        return 'NotPlayed';
     }
 };
-
 
 /**
  * Generate a deterministic player ID based on name and venue
@@ -232,45 +207,48 @@ const generatePlayerId = (playerName, venueId) => {
 
 /**
  * Create or update a Player record
+ * ✅ REFACTORED: Now accepts `playerData` to initialize points balance.
  */
-const upsertPlayerRecord = async (playerId, playerName, gameData) => {
-    const playerTable = getTableName('Player'); //
-    const now = new Date().toISOString(); //
-    const nameParts = parsePlayerName(playerName); //
+const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) => {
+    const playerTable = getTableName('Player');
+    const now = new Date().toISOString();
+    const nameParts = parsePlayerName(playerName);
 
-    const gameDateTime = gameData.game.gameEndDateTime || gameData.game.gameStartDateTime; //
-    const gameDate = gameDateTime.split('T')[0]; //
+    const gameDateTime = gameData.game.gameEndDateTime || gameData.game.gameStartDateTime;
+    const gameDate = gameDateTime.split('T')[0];
 
     try {
-        const existingPlayer = await ddbDocClient.send(new GetCommand({ //
-            TableName: playerTable, //
-            Key: { id: playerId } //
+        const existingPlayer = await ddbDocClient.send(new GetCommand({
+            TableName: playerTable,
+            Key: { id: playerId }
         }));
 
-        if (existingPlayer.Item) { //
+        if (existingPlayer.Item) {
             // Player exists, so `isNewPlayer` is false.
-            const targetingClassification = await calculatePlayerTargetingClassification( //
-                playerId, //
-                gameDateTime, //
-                existingPlayer.Item.creationDate, //
-                false //
+            const targetingClassification = await calculatePlayerTargetingClassification(
+                playerId,
+                gameDateTime,
+                existingPlayer.Item.creationDate,
+                false
             );
 
-            await ddbDocClient.send(new UpdateCommand({ //
-                TableName: playerTable, //
-                Key: { id: playerId }, //
+            await ddbDocClient.send(new UpdateCommand({
+                TableName: playerTable,
+                Key: { id: playerId },
                 UpdateExpression: `
                     SET lastPlayedDate = :lastPlayedDate,
                         targetingClassification = :targetingClassification,
+                        pointsBalance = pointsBalance + :points,
                         #version = #version + :inc
-                `, //
-                ExpressionAttributeNames: { //
-                    '#version': '_version' //
+                `,
+                ExpressionAttributeNames: {
+                    '#version': '_version'
                 },
-                ExpressionAttributeValues: { //
-                    ':lastPlayedDate': gameDate, //
-                    ':targetingClassification': targetingClassification, //
-                    ':inc': 1 //
+                ExpressionAttributeValues: {
+                    ':lastPlayedDate': gameDate,
+                    ':targetingClassification': targetingClassification,
+                    ':points': playerData.points || 0,
+                    ':inc': 1
                 }
             }));
 
@@ -278,37 +256,38 @@ const upsertPlayerRecord = async (playerId, playerName, gameData) => {
             return playerId;
         } else {
             // Player does NOT exist, so `isNewPlayer` is true.
-            const targetingClassification = await calculatePlayerTargetingClassification( //
-                playerId, //
-                gameDateTime, //
-                now, //
-                true //
+            const targetingClassification = await calculatePlayerTargetingClassification(
+                playerId,
+                gameDateTime,
+                now,
+                true
             );
 
-            const newPlayer = { //
-                id: playerId, //
-                firstName: nameParts.firstName, //
-                lastName: nameParts.lastName, //
-                givenName: nameParts.givenName, //
-                creationDate: now, //
-                registrationVenueId: gameData.game.venueId, //
-                status: 'ACTIVE', //
-                category: 'NEW', //
-                lastPlayedDate: gameDate, //
-                targetingClassification: targetingClassification, //
-                creditBalance: 0, //
-                pointsBalance: 0, //
-                createdAt: now, //
-                updatedAt: now, //
-                _version: 1, //
-                _lastChangedAt: Date.now(), //
-                __typename: 'Player' //
+            const newPlayer = {
+                id: playerId,
+                firstName: nameParts.firstName,
+                lastName: nameParts.lastName,
+                givenName: nameParts.givenName,
+                creationDate: gameDate,
+                registrationVenueId: gameData.game.venueId,
+                status: 'ACTIVE',
+                category: 'NEW',
+                lastPlayedDate: gameDate,
+                targetingClassification: targetingClassification,
+                creditBalance: 0,
+                // ✅ CHANGE: Initialize pointsBalance with points from the current game.
+                pointsBalance: playerData.points || 0,
+                createdAt: now,
+                updatedAt: now,
+                _version: 1,
+                _lastChangedAt: Date.now(),
+                __typename: 'Player'
             };
 
-            await ddbDocClient.send(new PutCommand({ //
-                TableName: playerTable, //
-                Item: newPlayer, //
-                ConditionExpression: 'attribute_not_exists(id)' //
+            await ddbDocClient.send(new PutCommand({
+                TableName: playerTable,
+                Item: newPlayer,
+                ConditionExpression: 'attribute_not_exists(id)'
             }));
 
             console.log(`[upsertPlayerRecord] Created new player ${playerId} - ${playerName}`);
@@ -324,6 +303,7 @@ const upsertPlayerRecord = async (playerId, playerName, gameData) => {
  * Create PlayerResult record
  */
 const createPlayerResult = async (playerId, gameData, playerData) => {
+    // ... (no changes in this function)
     const playerResultTable = getTableName('PlayerResult');
     const resultId = `${playerId}#${gameData.game.id}`;
     const now = new Date().toISOString();
@@ -368,6 +348,7 @@ const createPlayerResult = async (playerId, gameData, playerData) => {
  * Update or create PlayerSummary record
  */
 const upsertPlayerSummary = async (playerId, gameData, playerData) => {
+    // ... (no changes in this function)
     const playerSummaryTable = getTableName('PlayerSummary');
     const summaryId = `${playerId}`;
     const now = new Date().toISOString();
@@ -457,12 +438,14 @@ const upsertPlayerSummary = async (playerId, gameData, playerData) => {
 
 /**
  * Update or create PlayerVenue record
+ * ✅ REFACTORED: Adds firstPlayedDate and averageBuyIn, and recalculates average on update.
  */
 const upsertPlayerVenue = async (playerId, gameData, playerData) => {
     const playerVenueTable = getTableName('PlayerVenue');
     const playerVenueId = `${playerId}#${gameData.game.venueId}`;
     const now = new Date().toISOString();
     const gameDate = (gameData.game.gameEndDateTime || gameData.game.gameStartDateTime).split('T')[0];
+    const currentGameBuyIn = (gameData.game.buyIn || 0) + (gameData.game.rake || 0);
     
     try {
         const existingRecord = await ddbDocClient.send(new GetCommand({
@@ -470,7 +453,7 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
             Key: { id: playerVenueId }
         }));
         
-        let membershipCreatedDate = existingRecord.Item?.membershipCreatedDate || gameDate;
+        const membershipCreatedDate = existingRecord.Item?.membershipCreatedDate || gameDate;
         
         const targetingClassification = calculatePlayerVenueTargetingClassification(
             gameDate,
@@ -478,6 +461,14 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
         );
         
         if (existingRecord.Item) {
+            // ✅ CHANGE: Calculate new average buy-in for existing records.
+            const oldGamesPlayed = existingRecord.Item.gamesPlayed || 0;
+            const oldAverageBuyIn = existingRecord.Item.averageBuyIn || 0;
+            const newTotalGames = oldGamesPlayed + 1;
+            const newAverageBuyIn = newTotalGames > 0
+                ? ((oldAverageBuyIn * oldGamesPlayed) + currentGameBuyIn) / newTotalGames
+                : currentGameBuyIn;
+
             await ddbDocClient.send(new UpdateCommand({
                 TableName: playerVenueTable,
                 Key: { id: playerVenueId },
@@ -485,6 +476,7 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
                     SET gamesPlayed = gamesPlayed + :inc,
                         lastPlayedDate = :lastPlayedDate,
                         targetingClassification = :targetingClassification,
+                        averageBuyIn = :newAverageBuyIn,
                         updatedAt = :updatedAt,
                         #version = #version + :inc
                 `,
@@ -495,17 +487,21 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
                     ':inc': 1,
                     ':lastPlayedDate': gameDate,
                     ':targetingClassification': targetingClassification,
+                    ':newAverageBuyIn': newAverageBuyIn, // Add new average to the update
                     ':updatedAt': now
                 }
             }));
         } else {
+            // ✅ CHANGE: Add new fields for new records.
             const newPlayerVenue = {
                 id: playerVenueId,
                 playerId: playerId,
                 venueId: gameData.game.venueId,
                 membershipCreatedDate: gameDate,
+                firstPlayedDate: gameDate, // New field
                 lastPlayedDate: gameDate,
-                gamesPlayed: 1,
+                gamesPlayed: 1, // Correctly serves as total games for this new venue record
+                averageBuyIn: currentGameBuyIn, // New field
                 targetingClassification: targetingClassification,
                 createdAt: now,
                 updatedAt: now,
@@ -527,10 +523,12 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
     }
 };
 
+
 /**
  * Create PlayerTransaction records
  */
 const createPlayerTransactions = async (playerId, gameData, playerData, processingInstructions) => {
+    // ... (no changes in this function)
     const playerTransactionTable = getTableName('PlayerTransaction');
     const transactions = [];
     const now = new Date().toISOString();
@@ -616,7 +614,9 @@ const processPlayer = async (playerData, processingInstructions, gameData) => {
         
         console.log(`[processPlayer] Processing player: ${playerName}`);
         
-        await upsertPlayerRecord(playerId, playerName, gameData);
+        // ✅ REFACTORED: Pass `playerData` to `upsertPlayerRecord`.
+        await upsertPlayerRecord(playerId, playerName, gameData, playerData);
+        
         await createPlayerResult(playerId, gameData, playerData);
         await upsertPlayerSummary(playerId, gameData, playerData);
         await upsertPlayerVenue(playerId, gameData, playerData);
@@ -639,7 +639,7 @@ const processPlayer = async (playerData, processingInstructions, gameData) => {
  * Main Lambda handler
  */
 exports.handler = async (event) => {
-    console.log('Received SQS event:', JSON.stringify(event, null, 2));
+    console.log('Received SQS event wrapper:', JSON.stringify(event, null, 2));
     console.log(`[playerDataProcessor] Function triggered with ${event.Records.length} message(s).`);
 
     const results = {
@@ -651,9 +651,11 @@ exports.handler = async (event) => {
     for (const record of event.Records) {
         try {
             const messageBody = record.body;
-            console.log('[playerDataProcessor] Processing message:', record.messageId);
+            console.log('[playerDataProcessor] Processing message ID:', record.messageId);
             
             const gameData = JSON.parse(messageBody);
+
+            console.log('Parsed SQS Message Body:', JSON.stringify(gameData, null, 2));
             
             console.log('--- Processing Game Data ---');
             console.log(`Game ID: ${gameData.game.id}`);
