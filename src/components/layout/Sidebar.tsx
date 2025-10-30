@@ -8,7 +8,9 @@ import {
   BuildingOffice2Icon,
   TrophyIcon,
   UserGroupIcon,
-  CpuChipIcon,  // ✅ NEW: Added icon for Auto Scraper
+  //CpuChipIcon,
+  ClockIcon
+
 } from '@heroicons/react/24/outline';
 // ✅ REMOVED: No longer importing the logo here.
 
@@ -49,7 +51,7 @@ export const Sidebar = () => {
           </NavLink>
           {/* ✅ NEW: Added Auto Scraper link */}
           <NavLink to="/auto-scraper" className={getLinkClassName}>
-            <CpuChipIcon className="h-5 w-5 mr-3" />
+            <ClockIcon className="h-5 w-5 mr-3" />
             Auto Scraper
           </NavLink>
           <NavLink to="/venues" className={getLinkClassName}>

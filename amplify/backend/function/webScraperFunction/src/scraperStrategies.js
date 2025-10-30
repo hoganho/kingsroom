@@ -7,7 +7,6 @@ const stringSimilarity = require('string-similarity');
  * Parses duration strings (e.g., "1h 30m") into milliseconds.
  */
 const parseDurationToMilliseconds = (durationStr) => {
-    // ... (no changes in this function)
     if (!durationStr) return 0;
     
     let totalMilliseconds = 0;
@@ -29,7 +28,6 @@ const SUGGEST_THRESHOLD = 0.60;     // 60% similarity - medium confidence, sugge
 const SERIES_MATCH_THRESHOLD = 0.80; // 80% similarity
 
 const cleanupNameForMatching = (name, context, options = {}) => {
-    // ... (no changes in this function)
     if (!name) return '';
     let cleanedName = ` ${name.replace(/[^a-zA-Z0-9\s]/g, '')} `;
     const jargonRegexes = [
@@ -61,7 +59,6 @@ const cleanupNameForMatching = (name, context, options = {}) => {
 };
 
 class ScrapeContext {
-    // ... (no changes in this class)
     constructor(html) {
         this.$ = cheerio.load(html);
         this.data = {};
@@ -212,7 +209,6 @@ const defaultStrategy = {
         // ✅ REMOVED: No need for a final 'else' block, as defaults are already set.
     },
     
-    // ... (other functions like getGameTags, getTournamentType remain the same) ...
     getGameTags(ctx) {
         const tags = [];
         const selector = '.cw-game-buyins .cw-badge';
@@ -267,24 +263,31 @@ const defaultStrategy = {
             gameStatus = 'UNKNOWN_STATUS';
         }
         
-        if (gameStatus === 'UNKNOWN_STATUS') {
-            ctx.add('gameStatus', 'UNKNOWN_STATUS');
+        let mappedStatus = gameStatus;
+
+        if (gameStatus.includes('CLOCK STOPPED')) {
+            mappedStatus = 'CLOCK_STOPPED';
+        } else if (mappedStatus === 'UNKNOWN_STATUS') {
             ctx.add('isInactive', true);
-        } else {
-            const mappedStatus = gameStatus === 'RUNNING' ? 'RUNNING' : gameStatus;
-            ctx.add('gameStatus', mappedStatus);
         }
         
-        return gameStatus;
+        ctx.add('gameStatus', mappedStatus);
+        return mappedStatus;
     },
     
     getRegistrationStatus(ctx) {
         const registrationDiv = ctx.$('label:contains("Registration")').parent();
-        const registrationStatus = registrationDiv.text().replace(/Registration/gi, '').trim() || 'UNKNOWN_REG_STATUS';
-        if (registrationStatus !== 'UNKNOWN_REG_STATUS') {
-             ctx.add('registrationStatus', registrationStatus);
+        let registrationStatus = registrationDiv.text().replace(/Registration/gi, '').trim() || 'UNKNOWN_REG_STATUS';
+        
+        if (registrationStatus.toUpperCase().startsWith('OPEN')) {
+            registrationStatus = registrationStatus.replace(/\s*\(.*\)/, '').trim();
+            registrationStatus = 'OPEN'; // Force to exact enum value
         }
-        return registrationStatus;
+        
+        if (registrationStatus !== 'UNKNOWN_REG_STATUS') {
+             ctx.add('registrationStatus', registrationStatus.toUpperCase());
+        }
+        return registrationStatus.toUpperCase();
     },
     
     getGameVariant(ctx) {

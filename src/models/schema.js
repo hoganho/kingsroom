@@ -4377,6 +4377,7 @@ export const schema = {
                 "SCHEDULED",
                 "REGISTERING",
                 "RUNNING",
+                "CLOCK_STOPPED",
                 "CANCELLED",
                 "FINISHED",
                 "NOT_IN_USE"

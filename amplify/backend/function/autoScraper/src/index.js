@@ -1,3 +1,4 @@
+/* OPTIMIZED VERSION - Handles timeouts better */
 /* Amplify Params - DO NOT EDIT
 	API_KINGSROOM_GAMETABLE_ARN
 	API_KINGSROOM_GAMETABLE_NAME
@@ -12,12 +13,18 @@
 Amplify Params - DO NOT EDIT */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, GetCommand, PutCommand, ScanCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, GetCommand, PutCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
 const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');
 
 const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
 const lambdaClient = new LambdaClient({});
+
+// ⚡ OPTIMIZED SETTINGS - Reduce these to avoid timeouts
+const MAX_NON_COMPLETE_GAMES_PER_RUN = 5;  // Process only 5 non-complete games at a time
+const MAX_NEW_GAMES_PER_RUN = 10;          // Scan only 10 new games per run
+const LAMBDA_TIMEOUT_BUFFER = 30000;       // Leave 30 seconds buffer before timeout
+const MAX_CONSECUTIVE_BLANKS = 2;
 
 /**
  * Get table name using Amplify naming convention
@@ -37,24 +44,10 @@ const getTableName = (modelName) => {
  * Get or create the scraper state record
  */
 const getScraperState = async () => {
-    const scraperStateTable = getTableName('ScraperState');
     const stateId = 'AUTO_SCRAPER_STATE';
     
-    try {
-        const response = await ddbDocClient.send(new GetCommand({
-            TableName: scraperStateTable,
-            Key: { id: stateId }
-        }));
-        
-        if (response.Item) {
-            return response.Item;
-        }
-    } catch (error) {
-        console.log('ScraperState table might not exist, will use default state');
-    }
-    
-    // Default state if no record exists
-    return {
+    // Default state
+    const defaultState = {
         id: stateId,
         isRunning: false,
         lastScannedId: 0,
@@ -65,22 +58,53 @@ const getScraperState = async () => {
         totalErrors: 0,
         enabled: true
     };
+    
+    try {
+        const scraperStateTable = getTableName('ScraperState');
+        const response = await ddbDocClient.send(new GetCommand({
+            TableName: scraperStateTable,
+            Key: { id: stateId }
+        }));
+        
+        if (response.Item) {
+            return response.Item;
+        }
+        
+        // Create initial record if it doesn't exist
+        await ddbDocClient.send(new PutCommand({
+            TableName: scraperStateTable,
+            Item: {
+                ...defaultState,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                _lastChangedAt: Date.now(),
+                _version: 1,
+                __typename: 'ScraperState'
+            }
+        }));
+        
+        return defaultState;
+    } catch (error) {
+        console.log('ScraperState table might not exist yet, using default state:', error.message);
+        return defaultState;
+    }
 };
 
 /**
  * Update the scraper state
  */
 const updateScraperState = async (updates) => {
-    const scraperStateTable = getTableName('ScraperState');
     const stateId = 'AUTO_SCRAPER_STATE';
     const now = new Date().toISOString();
     
     try {
+        const scraperStateTable = getTableName('ScraperState');
         const item = {
             id: stateId,
             ...updates,
             updatedAt: now,
-            _lastChangedAt: Date.now()
+            _lastChangedAt: Date.now(),
+            __typename: 'ScraperState'
         };
         
         await ddbDocClient.send(new PutCommand({
@@ -90,8 +114,8 @@ const updateScraperState = async (updates) => {
         
         return item;
     } catch (error) {
-        console.error('Error updating scraper state:', error);
-        // Continue execution even if state update fails
+        console.error('Error updating scraper state (table may not exist):', error.message);
+        return { id: stateId, ...updates, updatedAt: now };
     }
 };
 
@@ -102,7 +126,6 @@ const getHighestGameId = async () => {
     const gameTable = getTableName('Game');
     
     try {
-        // Scan all games and extract IDs from sourceUrl
         const response = await ddbDocClient.send(new ScanCommand({
             TableName: gameTable,
             ProjectionExpression: 'sourceUrl',
@@ -133,9 +156,9 @@ const getHighestGameId = async () => {
 };
 
 /**
- * Get all non-complete games that need rescanning
+ * Get limited non-complete games that need rescanning
  */
-const getNonCompleteGames = async () => {
+const getNonCompleteGames = async (limit = MAX_NON_COMPLETE_GAMES_PER_RUN) => {
     const gameTable = getTableName('Game');
     
     try {
@@ -150,7 +173,8 @@ const getNonCompleteGames = async () => {
             ProjectionExpression: 'id, sourceUrl, gameStatus, #name',
             ExpressionAttributeNames: {
                 '#name': 'name'
-            }
+            },
+            Limit: limit  // ⚡ LIMIT the results
         }));
         
         return response.Items || [];
@@ -161,173 +185,164 @@ const getNonCompleteGames = async () => {
 };
 
 /**
- * ✅ NEW: Invokes the webScraperFunction to first scrape, then save the data.
- * This is the full scrape-and-save pipeline for a single URL.
+ * Simple fetch operation - just scrapes without saving
+ * This is faster and used for checking game status
  */
-const scrapeAndSaveTournament = async (url) => {
+const fetchTournamentData = async (url) => {
     const functionName = process.env.FUNCTION_WEBSCRAPERFUNCTION_NAME;
     if (!functionName) {
         throw new Error('webScraperFunction name not found in environment variables.');
     }
 
-    // --- Step 1: Scrape the data (FETCH operation) ---
-    console.log(`[scrapeAndSaveTournament] Step 1: Scraping data from ${url}`);
-    let scrapedData;
     try {
-        const fetchPayload = {
-            arguments: {
-                operation: 'FETCH',
-                url: url
-            }
+        const payload = {
+            fieldName: 'fetchTournamentData',
+            arguments: { url }
         };
 
         const response = await lambdaClient.send(new InvokeCommand({
             FunctionName: functionName,
             InvocationType: 'RequestResponse',
-            Payload: JSON.stringify(fetchPayload)
+            Payload: JSON.stringify(payload)
         }));
 
         const result = JSON.parse(new TextDecoder().decode(response.Payload));
         if (result.errorMessage) throw new Error(result.errorMessage);
-
-        scrapedData = result.data; // The scraped data object
-        console.log(`[scrapeAndSaveTournament] Successfully scraped data for ${url}`);
-    } catch (error) {
-        console.error(`[scrapeAndSaveTournament] Error during scraping step for ${url}:`, error);
-        throw error;
-    }
-    
-    // Check for an auto-assigned venue before saving
-    const autoAssignedVenueId = scrapedData?.venueMatch?.autoAssignedVenue?.id;
-
-    if (!autoAssignedVenueId) {
-        console.warn(`[scrapeAndSaveTournament] No auto-assigned venue found for ${url}. Skipping save.`);
-        return { scrapedData, status: 'SKIPPED_SAVE' };
-    }
-
-    // --- Step 2: Save the data (SAVE operation) ---
-    console.log(`[scrapeAndSaveTournament] Step 2: Saving data for ${url} with venue ID ${autoAssignedVenueId}`);
-    try {
-        const savePayload = {
-            arguments: {
-                operation: 'SAVE',
-                url: url,
-                venueId: autoAssignedVenueId,
-                scrapedData: scrapedData // Pass the already scraped data
-            }
-        };
         
-        // Invoke the save operation (which triggers SQS and playerDataProcessor)
-        await lambdaClient.send(new InvokeCommand({
-            FunctionName: functionName,
-            InvocationType: 'RequestResponse', 
-            Payload: JSON.stringify(savePayload)
-        }));
-
-        console.log(`[scrapeAndSaveTournament] Successfully saved game for ${url}. SQS message triggered.`);
-        return { scrapedData, status: 'SAVED' };
-
+        return result;
     } catch (error) {
-        console.error(`[scrapeAndSaveTournament] Error during save step for ${url}:`, error);
+        console.error(`Error fetching tournament data for ${url}:`, error);
         throw error;
     }
 };
 
-
 /**
- * Main scraping logic
+ * ⚡ OPTIMIZED: Lighter-weight main scraping logic
  */
 const performScraping = async () => {
-    console.log('[AutoScraper] Starting automated scraping process...');
+    console.log('[AutoScraper] Starting optimized scraping process...');
+    const startTime = Date.now();
     
     const state = await getScraperState();
     
     // Check if already running or disabled
-    if (state.isRunning) return { success: false, message: 'Scraper is already in progress' };
-    if (!state.enabled) return { success: false, message: 'Auto scraping is disabled' };
+    if (state.isRunning) {
+        console.log('[AutoScraper] Already running, skipping...');
+        return { success: false, message: 'Scraper is already in progress' };
+    }
+    if (!state.enabled) {
+        console.log('[AutoScraper] Auto scraping is disabled');
+        return { success: false, message: 'Auto scraping is disabled' };
+    }
     
     // Mark as running
     await updateScraperState({
         ...state,
         isRunning: true,
-        lastRunStartTime: new Date().toISOString(),
-        consecutiveBlankCount: 0
+        lastRunStartTime: new Date().toISOString()
     });
     
-    const results = { newGamesScraped: 0, gamesUpdated: 0, errors: 0, blanks: 0 };
+    const results = { 
+        newGamesScraped: 0, 
+        gamesUpdated: 0, 
+        errors: 0, 
+        blanks: 0,
+        timeElapsed: 0
+    };
     
     try {
-        // Step 1: Rescrape non-complete games
-        console.log('[AutoScraper] Step 1: Rescanning and saving non-complete games...');
-        const nonCompleteGames = await getNonCompleteGames();
+        // Step 1: Process LIMITED non-complete games
+        console.log(`[AutoScraper] Step 1: Checking ${MAX_NON_COMPLETE_GAMES_PER_RUN} non-complete games...`);
+        const nonCompleteGames = await getNonCompleteGames(MAX_NON_COMPLETE_GAMES_PER_RUN);
+        console.log(`[AutoScraper] Found ${nonCompleteGames.length} non-complete games to check`);
         
         for (const game of nonCompleteGames) {
+            // Check if we're approaching timeout
+            if (Date.now() - startTime > LAMBDA_TIMEOUT_BUFFER) {
+                console.log('[AutoScraper] Approaching timeout, stopping early...');
+                break;
+            }
+            
             try {
-                await scrapeAndSaveTournament(game.sourceUrl); // Scrape and Save
+                console.log(`[AutoScraper] Checking game: ${game.name}`);
+                await fetchTournamentData(game.sourceUrl);
                 results.gamesUpdated++;
             } catch (error) {
-                console.error(`[AutoScraper] Error rescanning game ${game.id}:`, error);
+                console.error(`[AutoScraper] Error checking game ${game.id}:`, error.message);
                 results.errors++;
             }
         }
         
-        // Step 2: Find and save new games
-        console.log('[AutoScraper] Step 2: Finding and saving new games...');
+        // Step 2: Find LIMITED new games
+        console.log(`[AutoScraper] Step 2: Scanning for up to ${MAX_NEW_GAMES_PER_RUN} new games...`);
         
         const highestDbId = await getHighestGameId();
-        const startId = Math.max(state.lastScannedId, highestDbId) + 1;
+        const startId = Math.max(state.lastScannedId || 0, highestDbId) + 1;
+        console.log(`[AutoScraper] Starting from ID: ${startId}`);
         
         let currentId = startId;
         let consecutiveBlanks = 0;
-        const maxConsecutiveBlanks = 2;
-        const maxNewGames = 50;
         
-        while (consecutiveBlanks < maxConsecutiveBlanks && results.newGamesScraped < maxNewGames) {
+        while (
+            consecutiveBlanks < MAX_CONSECUTIVE_BLANKS && 
+            results.newGamesScraped < MAX_NEW_GAMES_PER_RUN &&
+            (Date.now() - startTime) < LAMBDA_TIMEOUT_BUFFER
+        ) {
             const url = `https://kingsroom.com.au/tournament/?id=${currentId}`;
             
             try {
-                const { scrapedData } = await scrapeAndSaveTournament(url); // Scrape and Save
+                console.log(`[AutoScraper] Checking tournament ID ${currentId}...`);
+                const data = await fetchTournamentData(url);
                 
-                if (scrapedData.isInactive) {
+                if (data.gameStatus === 'NOT_IN_USE' || data.isInactive) {
+                    console.log(`[AutoScraper] Tournament ID ${currentId} is blank/inactive`);
                     consecutiveBlanks++;
                     results.blanks++;
                 } else {
+                    console.log(`[AutoScraper] Found active tournament ID ${currentId}: ${data.name}`);
                     consecutiveBlanks = 0;
                     results.newGamesScraped++;
                 }
                 
-                // Update last scanned ID
-                await updateScraperState({
-                    ...state,
-                    lastScannedId: currentId,
-                    totalScraped: state.totalScraped + 1
-                });
-                
             } catch (error) {
-                // Only count as an error if it's not a SKIPPED_SAVE, which is a successful scrape but no venue
-                if (!error.message || !error.message.includes('SKIPPED_SAVE')) {
-                     results.errors++;
-                }
-                consecutiveBlanks = 0; // Reset on true error to continue trying
+                console.error(`[AutoScraper] Error scraping ID ${currentId}:`, error.message);
+                results.errors++;
+                consecutiveBlanks = 0; // Don't count errors as blanks
             }
             
+            // Update state with progress
+            await updateScraperState({
+                ...state,
+                lastScannedId: currentId,
+                totalScraped: (state.totalScraped || 0) + 1
+            });
+            
             currentId++;
+        }
+        
+        if (consecutiveBlanks >= MAX_CONSECUTIVE_BLANKS) {
+            console.log(`[AutoScraper] Stopped after ${MAX_CONSECUTIVE_BLANKS} consecutive blank tournaments`);
         }
         
     } catch (error) {
         console.error('[AutoScraper] Error during scraping process:', error);
         throw error;
     } finally {
+        // Calculate time elapsed
+        results.timeElapsed = Math.round((Date.now() - startTime) / 1000);
+        console.log(`[AutoScraper] Completed in ${results.timeElapsed} seconds`);
+        
         // Mark as not running
         const finalState = await getScraperState();
         await updateScraperState({
             ...finalState,
             isRunning: false,
             lastRunEndTime: new Date().toISOString(),
-            totalErrors: finalState.totalErrors + results.errors
+            totalErrors: (finalState.totalErrors || 0) + results.errors
         });
     }
     
+    console.log('[AutoScraper] Results:', results);
     return { success: true, results };
 };
 
@@ -335,16 +350,25 @@ const performScraping = async () => {
  * Control operations for the scraper
  */
 const controlScraper = async (operation) => {
+    console.log(`[controlScraper] Operation: ${operation}`);
     const state = await getScraperState();
     
     switch (operation) {
         case 'START':
-            if (state.isRunning) return { success: false, message: 'Scraper is already running', state };
+            if (state.isRunning) {
+                return { success: false, message: 'Scraper is already running', state };
+            }
             return await performScraping();
             
         case 'STOP':
-            if (!state.isRunning) return { success: false, message: 'Scraper is not running', state };
-            const stoppedState = await updateScraperState({ ...state, isRunning: false, lastRunEndTime: new Date().toISOString() });
+            if (!state.isRunning) {
+                return { success: false, message: 'Scraper is not running', state };
+            }
+            const stoppedState = await updateScraperState({ 
+                ...state, 
+                isRunning: false, 
+                lastRunEndTime: new Date().toISOString() 
+            });
             return { success: true, message: 'Scraper stopped', state: stoppedState };
             
         case 'ENABLE':
@@ -387,17 +411,17 @@ exports.handler = async (event) => {
         // Handle GraphQL resolver calls
         if (event.fieldName) {
             switch (event.fieldName) {
-                // ✅ UPDATED: Renamed field to triggerAutoScraping
                 case 'triggerAutoScraping':
+                case 'performAutoScraping':  // Support both field names
                     return await performScraping();
                     
-                // ✅ UPDATED: Renamed field to controlScraperOperation
                 case 'controlScraperOperation':
+                case 'controlAutoScraper':   // Support both field names
                     const { operation } = event.arguments;
                     return await controlScraper(operation);
                     
-                // ✅ NEW: Handle the specific STATUS query for the client page load
                 case 'getScraperControlState':
+                case 'getScraperState':      // Support both field names
                     return await controlScraper('STATUS');
                     
                 default:
@@ -411,7 +435,7 @@ exports.handler = async (event) => {
             return await performScraping();
         }
         
-        // Handle direct invocations (for testing)
+        // Handle direct invocations
         if (event.operation) {
             return await controlScraper(event.operation);
         }
@@ -421,6 +445,10 @@ exports.handler = async (event) => {
         
     } catch (error) {
         console.error('Error in handler:', error);
-        return { success: false, error: error.message };
+        return { 
+            success: false, 
+            message: error.message,
+            error: error.message 
+        };
     }
 };

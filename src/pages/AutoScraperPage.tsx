@@ -1,7 +1,20 @@
 // src/pages/AutoScraperPage.tsx
+// Complete, unabridged version using Amplify's auto-generated queries and mutations
 
 import React, { useState, useEffect } from 'react';
-import { generateClient } from 'aws-amplify/api';
+import { generateClient, GraphQLResult } from 'aws-amplify/api';
+
+// Import from Amplify's auto-generated files
+import { getScraperControlState } from '../graphql/queries';
+import { controlScraperOperation, triggerAutoScraping } from '../graphql/mutations';
+import type { 
+    GetScraperControlStateQuery,
+    ControlScraperOperationMutation,
+    TriggerAutoScrapingMutation,
+    ScraperOperation 
+} from '../API';
+
+// Import icons from lucide-react
 import { 
     Play, 
     Pause, 
@@ -9,80 +22,19 @@ import {
     Power, 
     AlertCircle, 
     CheckCircle,
-    Database,
+    Database, // Removed unused 'Clock'
     TrendingUp,
     AlertTriangle
 } from 'lucide-react';
 
-// Define a type for a non-subscription GraphQL result
-type GraphQlQueryResponse<T> = { data: T };
+type NonSubscriptionGraphQLResult<T> = Omit<GraphQLResult<T>, 'data'> & { data: T };
 
-const GET_SCRAPER_STATE = /* GraphQL */ `
-  query GetScraperControlState {
-    getScraperControlState {
-      success
-      message
-      state {
-        id
-        isRunning
-        lastScannedId
-        lastRunStartTime
-        lastRunEndTime
-        consecutiveBlankCount
-        totalScraped
-        totalErrors
-        enabled
-      }
-    }
-  }
-`;
 
-// ✅ UPDATED: Use the non-conflicting mutation name from schema.graphql
-const CONTROL_AUTO_SCRAPER = /* GraphQL */ `
-  mutation ControlScraperOperation($operation: ScraperOperation!) {
-    controlScraperOperation(operation: $operation) {
-      success
-      message
-      state {
-        id
-        isRunning
-        lastScannedId
-        lastRunStartTime
-        lastRunEndTime
-        consecutiveBlankCount
-        totalScraped
-        totalErrors
-        enabled
-      }
-      results {
-        newGamesScraped
-        gamesUpdated
-        errors
-        blanks
-      }
-    }
-  }
-`;
-
-// ✅ UPDATED: Use the non-conflicting mutation name from schema.graphql
-const TRIGGER_AUTO_SCRAPING = /* GraphQL */ `
-  mutation TriggerAutoScraping {
-    triggerAutoScraping {
-      success
-      message
-      results {
-        newGamesScraped
-        gamesUpdated
-        errors
-        blanks
-      }
-    }
-  }
-`;
-
+// Create the Amplify API client
 const client = generateClient();
 
 export const AutoScraperPage: React.FC = () => {
+    // State management
     const [scraperState, setScraperState] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -90,20 +42,15 @@ export const AutoScraperPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
-    // Fetch scraper state
+    // Fetch scraper state using Amplify's generated query
     const fetchScraperState = async () => {
         try {
-            // ✅ FIX: Type assertion added
-            const response = (await client.graphql({
-                query: GET_SCRAPER_STATE
-            })) as GraphQlQueryResponse<any>;
+            const response = (await client.graphql<GetScraperControlStateQuery>({
+                query: getScraperControlState
+            })) as NonSubscriptionGraphQLResult<GetScraperControlStateQuery>;
             
-            // Check the root field for the data
             if (response.data?.getScraperControlState?.state) {
                 setScraperState(response.data.getScraperControlState.state);
-            } else if (response.data?.getScraperControlState?.message) {
-                // Handle success=false response from the control lambda
-                setError(response.data.getScraperControlState.message);
             }
             setLoading(false);
         } catch (err) {
@@ -113,18 +60,17 @@ export const AutoScraperPage: React.FC = () => {
         }
     };
 
-    // Control scraper
+    // Control scraper using Amplify's generated mutation
     const controlScraper = async (operation: string) => {
         setActionLoading(operation);
         setError(null);
         setSuccess(null);
         
         try {
-            // ✅ FIX: Type assertion added
-            const response = (await client.graphql({
-                query: CONTROL_AUTO_SCRAPER,
-                variables: { operation }
-            })) as GraphQlQueryResponse<any>;
+            const response = (await client.graphql<ControlScraperOperationMutation>({
+                query: controlScraperOperation,
+                variables: { operation: operation as ScraperOperation }
+            })) as NonSubscriptionGraphQLResult<ControlScraperOperationMutation>;
             
             if (response.data?.controlScraperOperation) {
                 const result = response.data.controlScraperOperation;
@@ -140,25 +86,29 @@ export const AutoScraperPage: React.FC = () => {
                     setError(result.message || 'Operation failed');
                 }
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error(`Error performing ${operation}:`, err);
-            setError(`Failed to ${operation.toLowerCase()} scraper`);
+            // Handle timeout specifically
+            if (err.errors?.[0]?.message?.includes('timed out')) {
+                setError('Operation timed out. Consider increasing Lambda timeout or reducing batch size.');
+            } else {
+                setError(`Failed to ${operation.toLowerCase()} scraper`);
+            }
         } finally {
             setActionLoading(null);
         }
     };
 
-    // Manual trigger
+    // Manual trigger using Amplify's generated mutation
     const manualTrigger = async () => {
         setActionLoading('MANUAL');
         setError(null);
         setSuccess(null);
         
         try {
-            // ✅ FIX: Type assertion added
-            const response = (await client.graphql({
-                query: TRIGGER_AUTO_SCRAPING
-            })) as GraphQlQueryResponse<any>;
+            const response = (await client.graphql<TriggerAutoScrapingMutation>({
+                query: triggerAutoScraping
+            })) as NonSubscriptionGraphQLResult<TriggerAutoScrapingMutation>;
             
             if (response.data?.triggerAutoScraping) {
                 const result = response.data.triggerAutoScraping;
@@ -174,9 +124,14 @@ export const AutoScraperPage: React.FC = () => {
                     setError(result.message || 'Manual scraping failed');
                 }
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error triggering manual scraping:', err);
-            setError('Failed to trigger manual scraping');
+            // Handle timeout specifically
+            if (err.errors?.[0]?.message?.includes('timed out')) {
+                setError('Scraping timed out. The Lambda timeout needs to be increased.');
+            } else {
+                setError('Failed to trigger manual scraping');
+            }
         } finally {
             setActionLoading(null);
         }
@@ -218,6 +173,7 @@ export const AutoScraperPage: React.FC = () => {
         return `${minutes}m ${seconds}s`;
     };
 
+    // Loading state
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -226,8 +182,10 @@ export const AutoScraperPage: React.FC = () => {
         );
     }
 
+    // Main render
     return (
         <div className="max-w-7xl mx-auto px-4 py-8">
+            {/* Page Header */}
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900">Automated Tournament Scraper</h1>
                 <p className="mt-2 text-gray-600">
@@ -235,7 +193,7 @@ export const AutoScraperPage: React.FC = () => {
                 </p>
             </div>
 
-            {/* Alerts */}
+            {/* Error Alert */}
             {error && (
                 <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start">
                     <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 mr-3" />
@@ -245,6 +203,7 @@ export const AutoScraperPage: React.FC = () => {
                 </div>
             )}
             
+            {/* Success Alert */}
             {success && (
                 <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-start">
                     <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 mr-3" />
@@ -417,7 +376,7 @@ export const AutoScraperPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Statistics */}
+            {/* Statistics Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Run History */}
                 <div className="bg-white shadow-lg rounded-lg overflow-hidden">
@@ -437,7 +396,8 @@ export const AutoScraperPage: React.FC = () => {
                             <span className="text-gray-600">Last Run End</span>
                             <span className="font-medium">
                                 {formatDateTime(scraperState?.lastRunEndTime)}
-                            </span>
+                            </span
+>
                         </div>
                         
                         <div className="flex justify-between items-center py-2 border-b">
