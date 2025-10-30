@@ -158,6 +158,14 @@ const TicketStatus = {
   "USED": "USED"
 };
 
+const PlayerEntryStatus = {
+  "REGISTERED": "REGISTERED",
+  "VOIDED": "VOIDED",
+  "PLAYING": "PLAYING",
+  "ELIMINATED": "ELIMINATED",
+  "COMPLETED": "COMPLETED"
+};
+
 const CreditTransactionType = {
   "AWARD_PROMOTION": "AWARD_PROMOTION",
   "AWARD_REFUND": "AWARD_REFUND",
@@ -175,7 +183,7 @@ const PointsTransactionType = {
   "EXPIRED": "EXPIRED"
 };
 
-const { ScrapeStructure, DataSync, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, CashStructure, RakeStructure, Player, PlayerSummary, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, TournamentLevelData, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails } = initSchema(schema);
+const { ScrapeStructure, DataSync, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, CashStructure, RakeStructure, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, TournamentLevelData, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails } = initSchema(schema);
 
 export {
   ScrapeStructure,
@@ -190,6 +198,7 @@ export {
   RakeStructure,
   Player,
   PlayerSummary,
+  PlayerEntry,
   PlayerResult,
   PlayerVenue,
   PlayerTransaction,
@@ -226,6 +235,7 @@ export {
   UserRole,
   StaffRole,
   TicketStatus,
+  PlayerEntryStatus,
   CreditTransactionType,
   PointsTransactionType,
   TournamentLevelData,

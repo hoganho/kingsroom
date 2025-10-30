@@ -1170,6 +1170,22 @@ export const schema = {
                         ]
                     }
                 },
+                "playerEntries": {
+                    "name": "playerEntries",
+                    "isArray": true,
+                    "type": {
+                        "model": "PlayerEntry"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "game"
+                        ]
+                    }
+                },
                 "playerResults": {
                     "name": "playerResults",
                     "isArray": true,
@@ -1753,6 +1769,22 @@ export const schema = {
                         ]
                     }
                 },
+                "playerEntries": {
+                    "name": "playerEntries",
+                    "isArray": true,
+                    "type": {
+                        "model": "PlayerEntry"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "player"
+                        ]
+                    }
+                },
                 "results": {
                     "name": "results",
                     "isArray": true,
@@ -2087,6 +2119,202 @@ export const schema = {
                         "name": "byPlayer",
                         "fields": [
                             "playerId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "PlayerEntry": {
+            "name": "PlayerEntry",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playerId": {
+                    "name": "playerId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "PlayerEntryStatus"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "registrationTime": {
+                    "name": "registrationTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "eliminationTime": {
+                    "name": "eliminationTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameStartDateTime": {
+                    "name": "gameStartDateTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastKnownStackSize": {
+                    "name": "lastKnownStackSize",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tableNumber": {
+                    "name": "tableNumber",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seatNumber": {
+                    "name": "seatNumber",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "numberOfReEntries": {
+                    "name": "numberOfReEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isMultiDayTournament": {
+                    "name": "isMultiDayTournament",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "player": {
+                    "name": "player",
+                    "isArray": false,
+                    "type": {
+                        "model": "Player"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "playerId"
+                        ]
+                    }
+                },
+                "game": {
+                    "name": "game",
+                    "isArray": false,
+                    "type": {
+                        "model": "Game"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "gameId"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "PlayerEntries",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byPlayer",
+                        "fields": [
+                            "playerId",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byGame",
+                        "fields": [
+                            "gameId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byVenue",
+                        "fields": [
+                            "venueId"
                         ]
                     }
                 },
@@ -4197,6 +4425,16 @@ export const schema = {
                 "USED"
             ]
         },
+        "PlayerEntryStatus": {
+            "name": "PlayerEntryStatus",
+            "values": [
+                "REGISTERED",
+                "VOIDED",
+                "PLAYING",
+                "ELIMINATED",
+                "COMPLETED"
+            ]
+        },
         "CreditTransactionType": {
             "name": "CreditTransactionType",
             "values": [
@@ -4917,5 +5155,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "ef9e8b30ce2fa9274f9b197fc1441caf"
+    "version": "862dd77ccab439bce9a44b25f285ca9f"
 };

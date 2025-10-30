@@ -158,6 +158,14 @@ export enum TicketStatus {
   USED = "USED"
 }
 
+export enum PlayerEntryStatus {
+  REGISTERED = "REGISTERED",
+  VOIDED = "VOIDED",
+  PLAYING = "PLAYING",
+  ELIMINATED = "ELIMINATED",
+  COMPLETED = "COMPLETED"
+}
+
 export enum CreditTransactionType {
   AWARD_PROMOTION = "AWARD_PROMOTION",
   AWARD_REFUND = "AWARD_REFUND",
@@ -771,6 +779,7 @@ type EagerGame = {
   readonly tournamentStructure?: TournamentStructure | null;
   readonly cashStructureId?: string | null;
   readonly cashStructure?: CashStructure | null;
+  readonly playerEntries?: (PlayerEntry | null)[] | null;
   readonly playerResults?: (PlayerResult | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
@@ -826,6 +835,7 @@ type LazyGame = {
   readonly tournamentStructure: AsyncItem<TournamentStructure | undefined>;
   readonly cashStructureId?: string | null;
   readonly cashStructure: AsyncItem<CashStructure | undefined>;
+  readonly playerEntries: AsyncCollection<PlayerEntry>;
   readonly playerResults: AsyncCollection<PlayerResult>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
@@ -970,6 +980,7 @@ type EagerPlayer = {
   readonly registrationVenue?: Venue | null;
   readonly summary?: PlayerSummary | null;
   readonly transactions?: (PlayerTransaction | null)[] | null;
+  readonly playerEntries?: (PlayerEntry | null)[] | null;
   readonly results?: (PlayerResult | null)[] | null;
   readonly tickets?: (PlayerTicket | null)[] | null;
   readonly venueMemberships?: (PlayerVenue | null)[] | null;
@@ -1005,6 +1016,7 @@ type LazyPlayer = {
   readonly registrationVenue: AsyncItem<Venue | undefined>;
   readonly summary: AsyncItem<PlayerSummary | undefined>;
   readonly transactions: AsyncCollection<PlayerTransaction>;
+  readonly playerEntries: AsyncCollection<PlayerEntry>;
   readonly results: AsyncCollection<PlayerResult>;
   readonly tickets: AsyncCollection<PlayerTicket>;
   readonly venueMemberships: AsyncCollection<PlayerVenue>;
@@ -1079,6 +1091,60 @@ export declare type PlayerSummary = LazyLoading extends LazyLoadingDisabled ? Ea
 
 export declare const PlayerSummary: (new (init: ModelInit<PlayerSummary>) => PlayerSummary) & {
   copyOf(source: PlayerSummary, mutator: (draft: MutableModel<PlayerSummary>) => MutableModel<PlayerSummary> | void): PlayerSummary;
+}
+
+type EagerPlayerEntry = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<PlayerEntry, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly playerId: string;
+  readonly gameId: string;
+  readonly venueId: string;
+  readonly status: PlayerEntryStatus | keyof typeof PlayerEntryStatus;
+  readonly registrationTime: string;
+  readonly eliminationTime?: string | null;
+  readonly gameStartDateTime: string;
+  readonly lastKnownStackSize?: number | null;
+  readonly tableNumber?: number | null;
+  readonly seatNumber?: number | null;
+  readonly numberOfReEntries?: number | null;
+  readonly isMultiDayTournament?: boolean | null;
+  readonly player?: Player | null;
+  readonly game?: Game | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyPlayerEntry = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<PlayerEntry, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly playerId: string;
+  readonly gameId: string;
+  readonly venueId: string;
+  readonly status: PlayerEntryStatus | keyof typeof PlayerEntryStatus;
+  readonly registrationTime: string;
+  readonly eliminationTime?: string | null;
+  readonly gameStartDateTime: string;
+  readonly lastKnownStackSize?: number | null;
+  readonly tableNumber?: number | null;
+  readonly seatNumber?: number | null;
+  readonly numberOfReEntries?: number | null;
+  readonly isMultiDayTournament?: boolean | null;
+  readonly player: AsyncItem<Player | undefined>;
+  readonly game: AsyncItem<Game | undefined>;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type PlayerEntry = LazyLoading extends LazyLoadingDisabled ? EagerPlayerEntry : LazyPlayerEntry
+
+export declare const PlayerEntry: (new (init: ModelInit<PlayerEntry>) => PlayerEntry) & {
+  copyOf(source: PlayerEntry, mutator: (draft: MutableModel<PlayerEntry>) => MutableModel<PlayerEntry> | void): PlayerEntry;
 }
 
 type EagerPlayerResult = {

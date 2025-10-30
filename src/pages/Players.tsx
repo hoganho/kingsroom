@@ -140,7 +140,7 @@ const PlayerVenuesSection = ({ data }: { data: APITypes.PlayerVenue[] }) => {
                             <tr key={item.id}>
                                 <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">{item.player?.firstName} {item.player?.lastName}</td>
                                 <td className="px-4 py-3 whitespace-nowrap text-xs font-medium text-indigo-600">{item.venue?.name}</td>
-                                <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{item.gamesPlayed}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{item.totalGamesPlayed}</td>
                                 <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{item.lastPlayedDate}</td>
                             </tr>
                         ))}

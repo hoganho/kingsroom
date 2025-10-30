@@ -23,6 +23,7 @@ enum MessageStatus { SENT, DELIVERED, FAILED, READ }
 enum UserRole { SUPER_ADMIN, ADMIN, VENUE_MANAGER, TOURNAMENT_DIRECTOR, MARKETING }
 enum StaffRole { DEALER, FLOOR_MANAGER, SERVICE, TOURNAMENT_DIRECTOR }
 enum TicketStatus { ACTIVE, EXPIRED, USED }
+enum PlayerEntryStatus { REGISTERED, VOIDED, PLAYING, ELIMINATED, COMPLETED }
 
 # ✅ NEW: Enums for the new ledger tables
 enum CreditTransactionType { AWARD_PROMOTION, AWARD_REFUND, AWARD_MANUAL, REDEEM_GAME_BUY_IN, EXPIRED }
@@ -201,6 +202,7 @@ type Game @model @auth(rules: [{ allow: private }]) {
   tournamentStructure: TournamentStructure @belongsTo(fields: ["tournamentStructureId"])
   cashStructureId: ID @index(name: "byCashStructure")
   cashStructure: CashStructure @belongsTo(fields: ["cashStructureId"])
+  playerEntries: [PlayerEntry] @hasMany(indexName: "byGame", fields: ["id"])
   playerResults: [PlayerResult] @hasMany(indexName: "byGame", fields: ["id"])
 }
 
@@ -276,6 +278,7 @@ type Player @model @auth(rules: [{ allow: private }]) {
   registrationVenue: Venue @belongsTo(fields: ["registrationVenueId"])
   summary: PlayerSummary @hasOne
   transactions: [PlayerTransaction] @hasMany(indexName: "byPlayer", fields: ["id"])
+  playerEntries: [PlayerEntry] @hasMany(indexName: "byPlayer", fields: ["id"])
   results: [PlayerResult] @hasMany(indexName: "byPlayer", fields: ["id"])
   tickets: [PlayerTicket] @hasMany(indexName: "byPlayer", fields: ["id"])
   venueMemberships: [PlayerVenue] @hasMany(indexName: "byPlayer", fields: ["id"])
@@ -313,6 +316,29 @@ type PlayerSummary @model @auth(rules: [{ allow: private }]) {
   # --- Metadata & Relationships ---
   lastPlayed: AWSDateTime!
   player: Player @belongsTo(fields: ["playerId"])
+}
+
+type PlayerEntry @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["gameStartDateTime"])
+  gameId: ID! @index(name: "byGame")
+  venueId: ID! @index(name: "byVenue")
+
+  status: PlayerEntryStatus!
+  registrationTime: AWSDateTime!
+  eliminationTime: AWSDateTime
+  gameStartDateTime: AWSDateTime!
+
+  lastKnownStackSize: Int
+  tableNumber: Int
+  seatNumber: Int
+  
+  numberOfReEntries: Int
+
+  isMultiDayTournament: Boolean
+  
+  player: Player @belongsTo(fields: ["playerId"])
+  game: Game @belongsTo(fields: ["gameId"])
 }
 
 type PlayerResult @model @auth(rules: [{ allow: private }]) {
