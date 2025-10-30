@@ -30,7 +30,6 @@ export const listPlayersForDebug = /* GraphQL */ `
   query ListPlayersForDebug {
     listPlayers {
       items {
-        id
         firstName
         givenName
         lastName
@@ -55,7 +54,6 @@ export const listPlayerSummariesForDebug = /* GraphQL */ `
   query ListPlayerSummariesForDebug {
     listPlayerSummaries {
       items {
-        id
         playerId
         sessionsPlayed
         tournamentsPlayed
@@ -70,7 +68,7 @@ export const listPlayerSummariesForDebug = /* GraphQL */ `
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         _version
       }
     }
@@ -81,7 +79,6 @@ export const listPlayerResultsForDebug = /* GraphQL */ `
   query ListPlayerResultsForDebug {
     listPlayerResults {
       items {
-        id
         finishingPlace
         isMultiDayQualification
         prizeWon
@@ -100,7 +97,6 @@ export const listPlayerVenuesForDebug = /* GraphQL */ `
   query ListPlayerVenuesForDebug {
     listPlayerVenues {
       items {
-        id
         totalGamesPlayed
         averageBuyIn
         firstPlayedDate
@@ -118,7 +114,6 @@ export const listPlayerTransactionsForDebug = /* GraphQL */ `
   query ListPlayerTransactionsForDebug {
     listPlayerTransactions {
       items {
-        id
         type
         amount
         rake
@@ -137,7 +132,6 @@ export const listPlayerCreditsForDebug = /* GraphQL */ `
   query ListPlayerCreditsForDebug {
     listPlayerCredits {
       items {
-        id
         type
         changeAmount
         balanceAfter
@@ -157,7 +151,6 @@ export const listPlayerPointsForDebug = /* GraphQL */ `
   query ListPlayerPointsForDebug {
     listPlayerPoints {
       items {
-        id
         type
         changeAmount
         balanceAfter
@@ -177,7 +170,6 @@ export const listPlayerTicketsForDebug = /* GraphQL */ `
   query ListPlayerTicketsForDebug {
     listPlayerTickets {
       items {
-        id
         assignedAt
         expiryDate
         status
@@ -194,7 +186,6 @@ export const listPlayerMarketingPreferencesForDebug = /* GraphQL */ `
   query ListPlayerMarketingPreferencesForDebug {
     listPlayerMarketingPreferences {
       items {
-        id
         optOutSms
         optOutEmail
         playerId
@@ -208,7 +199,6 @@ export const listPlayerMarketingMessagesForDebug = /* GraphQL */ `
   query ListPlayerMarketingMessagesForDebug {
     listPlayerMarketingMessages {
       items {
-        id
         status
         sentAt
         playerId

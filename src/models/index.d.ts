@@ -1039,7 +1039,7 @@ type EagerPlayerSummary = {
   readonly totalWinnings?: number | null;
   readonly totalBuyIns?: number | null;
   readonly netBalance?: number | null;
-  readonly lastUpdated: string;
+  readonly lastPlayed: string;
   readonly player?: Player | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
@@ -1065,7 +1065,7 @@ type LazyPlayerSummary = {
   readonly totalWinnings?: number | null;
   readonly totalBuyIns?: number | null;
   readonly netBalance?: number | null;
-  readonly lastUpdated: string;
+  readonly lastPlayed: string;
   readonly player: AsyncItem<Player | undefined>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;

@@ -271,7 +271,7 @@ type Player @model @auth(rules: [{ allow: private }]) {
   pointsBalance: Float
 
   # --- Relationships ---
-  registrationVenueId: ID! @index(name: "byVenue")
+  registrationVenueId: ID! @index(name: "byRegistrationVenue")
   summary: PlayerSummary @hasOne
   transactions: [PlayerTransaction] @hasMany(indexName: "byPlayer", fields: ["id"])
   results: [PlayerResult] @hasMany(indexName: "byPlayer", fields: ["id"])
@@ -309,7 +309,7 @@ type PlayerSummary @model @auth(rules: [{ allow: private }]) {
   netBalance: Float
 
   # --- Metadata & Relationships ---
-  lastUpdated: AWSDateTime!
+  lastPlayed: AWSDateTime!
   player: Player @belongsTo(fields: ["playerId"])
 }
 

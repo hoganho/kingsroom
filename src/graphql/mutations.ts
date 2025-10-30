@@ -1218,7 +1218,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -2255,7 +2255,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -3087,7 +3087,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -3919,7 +3919,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -8927,7 +8927,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -10237,7 +10237,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -11547,7 +11547,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -13853,7 +13853,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
       totalWinnings
       totalBuyIns
       netBalance
-      lastUpdated
+      lastPlayed
       player {
         id
         firstName
@@ -13886,7 +13886,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -14145,7 +14145,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -14258,7 +14258,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -14486,7 +14486,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -14618,7 +14618,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -14783,7 +14783,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -14897,7 +14897,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -15006,7 +15006,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -15273,7 +15273,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
       totalWinnings
       totalBuyIns
       netBalance
-      lastUpdated
+      lastPlayed
       player {
         id
         firstName
@@ -15306,7 +15306,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -15565,7 +15565,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -15678,7 +15678,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -15906,7 +15906,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -16038,7 +16038,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -16203,7 +16203,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -16317,7 +16317,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -16426,7 +16426,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -16693,7 +16693,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
       totalWinnings
       totalBuyIns
       netBalance
-      lastUpdated
+      lastPlayed
       player {
         id
         firstName
@@ -16726,7 +16726,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -16985,7 +16985,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -17098,7 +17098,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -17326,7 +17326,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -17458,7 +17458,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -17623,7 +17623,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -17737,7 +17737,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -17846,7 +17846,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -18097,7 +18097,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
     totalWinnings
     totalBuyIns
     netBalance
-    lastUpdated
+    lastPlayed
     player {
       id
       firstName
@@ -18130,7 +18130,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -18163,7 +18163,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -18627,7 +18627,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -18734,7 +18734,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
     totalWinnings
     totalBuyIns
     netBalance
-    lastUpdated
+    lastPlayed
     player {
       id
       firstName
@@ -18767,7 +18767,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -18800,7 +18800,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -19264,7 +19264,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -19371,7 +19371,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
     totalWinnings
     totalBuyIns
     netBalance
-    lastUpdated
+    lastPlayed
     player {
       id
       firstName
@@ -19404,7 +19404,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -19437,7 +19437,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -19901,7 +19901,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -20033,7 +20033,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -20066,7 +20066,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -20530,7 +20530,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -21280,7 +21280,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -21313,7 +21313,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -21777,7 +21777,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -22527,7 +22527,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -22560,7 +22560,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -23024,7 +23024,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -23773,7 +23773,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -23806,7 +23806,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -24270,7 +24270,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -24764,7 +24764,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -24797,7 +24797,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -25261,7 +25261,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -25755,7 +25755,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -25788,7 +25788,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -26252,7 +26252,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -26747,7 +26747,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -26780,7 +26780,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -27244,7 +27244,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -27377,7 +27377,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -27410,7 +27410,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -27874,7 +27874,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -28007,7 +28007,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -28040,7 +28040,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -28504,7 +28504,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -28637,7 +28637,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -28670,7 +28670,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -29134,7 +29134,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -29268,7 +29268,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -29301,7 +29301,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -29765,7 +29765,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -29899,7 +29899,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -29932,7 +29932,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -30396,7 +30396,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -30530,7 +30530,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -30563,7 +30563,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -31027,7 +31027,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -31161,7 +31161,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -31194,7 +31194,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -31658,7 +31658,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -31792,7 +31792,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -31825,7 +31825,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -32289,7 +32289,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -32430,7 +32430,7 @@ export const createTicketTemplate = /* GraphQL */ `mutation CreateTicketTemplate
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -32585,7 +32585,7 @@ export const updateTicketTemplate = /* GraphQL */ `mutation UpdateTicketTemplate
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -32740,7 +32740,7 @@ export const deleteTicketTemplate = /* GraphQL */ `mutation DeleteTicketTemplate
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -32886,7 +32886,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -32919,7 +32919,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -33383,7 +33383,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -33589,7 +33589,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -33622,7 +33622,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -34086,7 +34086,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -34292,7 +34292,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -34325,7 +34325,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -34789,7 +34789,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -35179,7 +35179,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -35212,7 +35212,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -35676,7 +35676,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -35804,7 +35804,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -35837,7 +35837,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -36301,7 +36301,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -36429,7 +36429,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -36462,7 +36462,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -36926,7 +36926,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version

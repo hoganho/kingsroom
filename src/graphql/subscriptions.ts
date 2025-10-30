@@ -830,7 +830,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -1659,7 +1659,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -2488,7 +2488,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -7484,7 +7484,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -8791,7 +8791,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -10098,7 +10098,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -12392,7 +12392,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
       totalWinnings
       totalBuyIns
       netBalance
-      lastUpdated
+      lastPlayed
       player {
         id
         firstName
@@ -12425,7 +12425,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -12684,7 +12684,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -12797,7 +12797,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -13025,7 +13025,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -13157,7 +13157,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -13322,7 +13322,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -13436,7 +13436,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -13545,7 +13545,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -13809,7 +13809,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
       totalWinnings
       totalBuyIns
       netBalance
-      lastUpdated
+      lastPlayed
       player {
         id
         firstName
@@ -13842,7 +13842,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -14101,7 +14101,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -14214,7 +14214,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -14442,7 +14442,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -14574,7 +14574,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -14739,7 +14739,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -14853,7 +14853,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -14962,7 +14962,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -15226,7 +15226,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
       totalWinnings
       totalBuyIns
       netBalance
-      lastUpdated
+      lastPlayed
       player {
         id
         firstName
@@ -15259,7 +15259,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -15518,7 +15518,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -15631,7 +15631,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -15859,7 +15859,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -15991,7 +15991,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -16156,7 +16156,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -16270,7 +16270,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -16379,7 +16379,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -16629,7 +16629,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
     totalWinnings
     totalBuyIns
     netBalance
-    lastUpdated
+    lastPlayed
     player {
       id
       firstName
@@ -16662,7 +16662,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -16695,7 +16695,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -17159,7 +17159,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -17265,7 +17265,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
     totalWinnings
     totalBuyIns
     netBalance
-    lastUpdated
+    lastPlayed
     player {
       id
       firstName
@@ -17298,7 +17298,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -17331,7 +17331,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -17795,7 +17795,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -17901,7 +17901,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
     totalWinnings
     totalBuyIns
     netBalance
-    lastUpdated
+    lastPlayed
     player {
       id
       firstName
@@ -17934,7 +17934,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -17967,7 +17967,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -18431,7 +18431,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -18562,7 +18562,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -18595,7 +18595,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -19059,7 +19059,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -19808,7 +19808,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -19841,7 +19841,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -20305,7 +20305,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -21054,7 +21054,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -21087,7 +21087,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -21551,7 +21551,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -22299,7 +22299,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -22332,7 +22332,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -22796,7 +22796,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -23289,7 +23289,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -23322,7 +23322,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -23786,7 +23786,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -24279,7 +24279,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -24312,7 +24312,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -24776,7 +24776,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -25270,7 +25270,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -25303,7 +25303,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -25767,7 +25767,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -25899,7 +25899,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -25932,7 +25932,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -26396,7 +26396,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -26528,7 +26528,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -26561,7 +26561,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -27025,7 +27025,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -27157,7 +27157,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -27190,7 +27190,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -27654,7 +27654,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -27787,7 +27787,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -27820,7 +27820,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -28284,7 +28284,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -28417,7 +28417,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -28450,7 +28450,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -28914,7 +28914,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -29047,7 +29047,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -29080,7 +29080,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -29544,7 +29544,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -29677,7 +29677,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -29710,7 +29710,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -30174,7 +30174,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -30307,7 +30307,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -30340,7 +30340,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -30804,7 +30804,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -30944,7 +30944,7 @@ export const onCreateTicketTemplate = /* GraphQL */ `subscription OnCreateTicket
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -31098,7 +31098,7 @@ export const onUpdateTicketTemplate = /* GraphQL */ `subscription OnUpdateTicket
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -31252,7 +31252,7 @@ export const onDeleteTicketTemplate = /* GraphQL */ `subscription OnDeleteTicket
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -31397,7 +31397,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -31430,7 +31430,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -31894,7 +31894,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -32099,7 +32099,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -32132,7 +32132,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -32596,7 +32596,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -32801,7 +32801,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -32834,7 +32834,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -33298,7 +33298,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -33681,7 +33681,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -33714,7 +33714,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -34178,7 +34178,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -34305,7 +34305,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -34338,7 +34338,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -34802,7 +34802,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -34929,7 +34929,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -34962,7 +34962,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -35426,7 +35426,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version

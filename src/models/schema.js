@@ -1871,7 +1871,7 @@ export const schema = {
                 {
                     "type": "key",
                     "properties": {
-                        "name": "byVenue",
+                        "name": "byRegistrationVenue",
                         "fields": [
                             "registrationVenueId"
                         ]
@@ -2004,8 +2004,8 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "lastUpdated": {
-                    "name": "lastUpdated",
+                "lastPlayed": {
+                    "name": "lastPlayed",
                     "isArray": false,
                     "type": "AWSDateTime",
                     "isRequired": true,
@@ -4886,5 +4886,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "4b95cfbb38af9a85d1ce9ebd6f84ccbc"
+    "version": "35fd57f24630202294881c3858030356"
 };

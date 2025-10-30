@@ -889,7 +889,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -5452,7 +5452,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -8459,7 +8459,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
       totalWinnings
       totalBuyIns
       netBalance
-      lastUpdated
+      lastPlayed
       player {
         id
         firstName
@@ -8492,7 +8492,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -8751,7 +8751,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -8864,7 +8864,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -9092,7 +9092,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -9224,7 +9224,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -9389,7 +9389,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -9503,7 +9503,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -9612,7 +9612,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -9878,7 +9878,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -9911,7 +9911,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -10375,7 +10375,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -10503,7 +10503,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -10536,7 +10536,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -11000,7 +11000,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -11101,7 +11101,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
     totalWinnings
     totalBuyIns
     netBalance
-    lastUpdated
+    lastPlayed
     player {
       id
       firstName
@@ -11134,7 +11134,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -11167,7 +11167,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -11631,7 +11631,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -11740,7 +11740,7 @@ export const listPlayerSummaries = /* GraphQL */ `query ListPlayerSummaries(
       totalWinnings
       totalBuyIns
       netBalance
-      lastUpdated
+      lastPlayed
       player {
         id
         firstName
@@ -11773,7 +11773,7 @@ export const listPlayerSummaries = /* GraphQL */ `query ListPlayerSummaries(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -12027,7 +12027,7 @@ export const syncPlayerSummaries = /* GraphQL */ `query SyncPlayerSummaries(
       totalWinnings
       totalBuyIns
       netBalance
-      lastUpdated
+      lastPlayed
       player {
         id
         firstName
@@ -12060,7 +12060,7 @@ export const syncPlayerSummaries = /* GraphQL */ `query SyncPlayerSummaries(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -12328,7 +12328,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -12361,7 +12361,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -12825,7 +12825,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -13577,7 +13577,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -14090,7 +14090,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -14591,7 +14591,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -14624,7 +14624,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -15088,7 +15088,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -15584,7 +15584,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -16032,7 +16032,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -16470,7 +16470,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -16503,7 +16503,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -16967,7 +16967,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -17106,7 +17106,7 @@ export const listPlayerTransactions = /* GraphQL */ `query ListPlayerTransaction
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -17386,7 +17386,7 @@ export const syncPlayerTransactions = /* GraphQL */ `query SyncPlayerTransaction
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -17655,7 +17655,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -17688,7 +17688,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -18152,7 +18152,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -18288,7 +18288,7 @@ export const listPlayerCredits = /* GraphQL */ `query ListPlayerCredits(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -18569,7 +18569,7 @@ export const syncPlayerCredits = /* GraphQL */ `query SyncPlayerCredits(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -18839,7 +18839,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -18872,7 +18872,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -19336,7 +19336,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -19472,7 +19472,7 @@ export const listPlayerPoints = /* GraphQL */ `query ListPlayerPoints(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -19753,7 +19753,7 @@ export const syncPlayerPoints = /* GraphQL */ `query SyncPlayerPoints(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -20030,7 +20030,7 @@ export const getTicketTemplate = /* GraphQL */ `query GetTicketTemplate($id: ID!
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -20359,7 +20359,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -20392,7 +20392,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -20856,7 +20856,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -21064,7 +21064,7 @@ export const listPlayerTickets = /* GraphQL */ `query ListPlayerTickets(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -21377,7 +21377,7 @@ export const syncPlayerTickets = /* GraphQL */ `query SyncPlayerTickets(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -21897,7 +21897,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -21930,7 +21930,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -22394,7 +22394,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -22528,7 +22528,7 @@ export const listPlayerMarketingPreferences = /* GraphQL */ `query ListPlayerMar
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -22803,7 +22803,7 @@ export const syncPlayerMarketingPreferences = /* GraphQL */ `query SyncPlayerMar
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -29032,7 +29032,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -29065,7 +29065,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -29529,7 +29529,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -29659,7 +29659,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
         totalWinnings
         totalBuyIns
         netBalance
-        lastUpdated
+        lastPlayed
         player {
           id
           firstName
@@ -29692,7 +29692,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -30156,7 +30156,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             totalWinnings
             totalBuyIns
             netBalance
-            lastUpdated
+            lastPlayed
             createdAt
             updatedAt
             _version
@@ -30270,7 +30270,7 @@ export const playerSummariesByPlayerId = /* GraphQL */ `query PlayerSummariesByP
       totalWinnings
       totalBuyIns
       netBalance
-      lastUpdated
+      lastPlayed
       player {
         id
         firstName
@@ -30303,7 +30303,7 @@ export const playerSummariesByPlayerId = /* GraphQL */ `query PlayerSummariesByP
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -30584,7 +30584,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -31099,7 +31099,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -31615,7 +31615,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -32067,7 +32067,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -32520,7 +32520,7 @@ export const playerTransactionsByPlayerIdAndTransactionDate = /* GraphQL */ `que
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -32802,7 +32802,7 @@ export const playerTransactionsByGameId = /* GraphQL */ `query PlayerTransaction
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -33086,7 +33086,7 @@ export const playerCreditsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pl
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -33369,7 +33369,7 @@ export const playerCreditsByRelatedGameId = /* GraphQL */ `query PlayerCreditsBy
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -33654,7 +33654,7 @@ export const playerPointsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pla
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -33937,7 +33937,7 @@ export const playerPointsByRelatedGameId = /* GraphQL */ `query PlayerPointsByRe
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -34218,7 +34218,7 @@ export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlaye
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -34533,7 +34533,7 @@ export const playerTicketsByTicketTemplateId = /* GraphQL */ `query PlayerTicket
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName
@@ -34920,7 +34920,7 @@ export const playerMarketingPreferencesByPlayerId = /* GraphQL */ `query PlayerM
           totalWinnings
           totalBuyIns
           netBalance
-          lastUpdated
+          lastPlayed
           player {
             id
             firstName

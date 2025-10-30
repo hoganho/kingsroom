@@ -111,7 +111,7 @@ const createOptimizedPlayerPayload = (savedGameItem, scrapedData, metadata) => {
             name: savedGameItem.name,
             venueId: savedGameItem.venueId,
             gameStartDateTime: savedGameItem.gameStartDateTime,
-            gameEndDateTime: savedGameItem.gameEndDateTime,
+            gameEndDateTime: savedGameItem.gameEndDateTime || now,
             gameType: savedGameItem.gameType,
             gameVariant: savedGameItem.gameVariant,
             
@@ -244,7 +244,8 @@ const extractPlayerDataForProcessing = (scrapedData) => {
  * Creates specific processing instructions for the downstream Lambda
  */
 const createPlayerProcessingInstructions = (playerData, gameInfo) => {
-    const transactionTime = gameInfo.gameEndDateTime || gameInfo.gameStartDateTime;
+    // Use the game's end time as the transaction time, or 'now' if it's missing
+    const transactionTime = gameInfo.gameEndDateTime || new Date().toISOString();
 
     return playerData.allPlayers.map(player => {
         
@@ -255,6 +256,7 @@ const createPlayerProcessingInstructions = (playerData, gameInfo) => {
             type: 'BUY_IN',
             amount: (gameInfo.buyIn || 0) + (gameInfo.rake || 0),
             rake: gameInfo.rake || 0,
+            // --- ✅ FIX: Add missing non-nullable fields ---
             paymentSource: 'CASH', // Default to 'CASH'. Can be updated later.
             transactionDate: transactionTime 
             // --- End Fix ---
@@ -266,6 +268,7 @@ const createPlayerProcessingInstructions = (playerData, gameInfo) => {
                 type: 'QUALIFICATION',
                 amount: 0, // A qualification is a non-monetary prize
                 rake: 0,
+                // --- ✅ FIX: Add missing non-nullable fields ---
                 paymentSource: 'UNKNOWN', // No payment source for a non-monetary prize
                 transactionDate: transactionTime
                 // --- End Fix ---
@@ -294,7 +297,7 @@ const createPlayerProcessingInstructions = (playerData, gameInfo) => {
                 },
                 updatePlayerVenue: {
                     incrementGamesPlayed: 1,
-                    lastPlayedDate: gameInfo.gameEndDateTime || gameInfo.gameStartDateTime
+                    lastPlayedDate: gameInfo.gameEndDateTime || new Date().toISOString()
                 }
             }
         };
@@ -527,7 +530,7 @@ const handleSave = async (input) => {
             gameStatus: data.gameStatus || existingGame.Item.gameStatus || 'SCHEDULED',
             gameVariant: data.gameVariant || existingGame.Item.gameVariant || 'NLHE',
             gameStartDateTime: data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : existingGame.Item.gameStartDateTime,
-            gameEndDateTime: data.gameEndDateTime,
+            gameEndDateTime: data.gameEndDateTime ? new Date(data.gameEndDateTime).toISOString() : existingGame.Item.gameEndDateTime,
             tournamentType: data.tournamentType || existingGame.Item.tournamentType,
             buyIn: data.buyIn !== undefined ? data.buyIn : existingGame.Item.buyIn,
             rake: data.rake !== undefined ? data.rake : existingGame.Item.rake,
@@ -616,7 +619,7 @@ const handleSave = async (input) => {
             gameStatus: data.gameStatus || 'SCHEDULED',
             gameVariant: data.gameVariant || 'NLHE',
             gameStartDateTime: data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : now,
-            gameEndDateTime: data.gameEndDateTime,
+            gameEndDateTime: data.gameEndDateTime ? new Date(data.gameEndDateTime).toISOString() : null,
             sourceUrl,
             venueId,
             tournamentType: data.tournamentType,
