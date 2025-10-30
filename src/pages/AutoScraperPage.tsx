@@ -14,6 +14,9 @@ import {
     AlertTriangle
 } from 'lucide-react';
 
+// Define a type for a non-subscription GraphQL result
+type GraphQlQueryResponse<T> = { data: T };
+
 // ✅ UPDATED: Use the non-conflicting field name from schema.graphql
 const GET_SCRAPER_STATE = /* GraphQL */ `
   query GetScraperControlState {
@@ -91,10 +94,10 @@ export const AutoScraperPage: React.FC = () => {
     // Fetch scraper state
     const fetchScraperState = async () => {
         try {
-            // ✅ UPDATED: Call the new query name
-            const response = await client.graphql({
+            // ✅ FIX: Type assertion added
+            const response = (await client.graphql({
                 query: GET_SCRAPER_STATE
-            });
+            })) as GraphQlQueryResponse<any>;
             
             // Check the root field for the data
             if (response.data?.getScraperControlState?.state) {
@@ -118,11 +121,11 @@ export const AutoScraperPage: React.FC = () => {
         setSuccess(null);
         
         try {
-            // ✅ UPDATED: Call the new mutation name
-            const response = await client.graphql({
+            // ✅ FIX: Type assertion added
+            const response = (await client.graphql({
                 query: CONTROL_AUTO_SCRAPER,
                 variables: { operation }
-            });
+            })) as GraphQlQueryResponse<any>;
             
             if (response.data?.controlScraperOperation) {
                 const result = response.data.controlScraperOperation;
@@ -153,10 +156,10 @@ export const AutoScraperPage: React.FC = () => {
         setSuccess(null);
         
         try {
-            // ✅ UPDATED: Call the new mutation name
-            const response = await client.graphql({
+            // ✅ FIX: Type assertion added
+            const response = (await client.graphql({
                 query: TRIGGER_AUTO_SCRAPING
-            });
+            })) as GraphQlQueryResponse<any>;
             
             if (response.data?.triggerAutoScraping) {
                 const result = response.data.triggerAutoScraping;
