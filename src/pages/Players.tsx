@@ -12,6 +12,7 @@ type PlayerData = {
   results: APITypes.PlayerResult[];
   venues: APITypes.PlayerVenue[];
   transactions: APITypes.PlayerTransaction[];
+  entries: APITypes.PlayerEntry[];
   credits: APITypes.PlayerCredits[];
   points: APITypes.PlayerPoints[];
   tickets: APITypes.PlayerTicket[];
@@ -151,6 +152,38 @@ const PlayerVenuesSection = ({ data }: { data: APITypes.PlayerVenue[] }) => {
     );
 };
 
+const PlayerEntriesSection = ({ data }: { data: APITypes.PlayerEntry[] }) => {
+    return (
+        <div className="mb-12 bg-white p-4 rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Player Entries (Live Games)</h2>
+            <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                        <tr>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Player</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Game</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Table/Seat</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stack</th>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                        {data.map((item) => (
+                            <tr key={item.id}>
+                                <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">{item.player?.firstName} {item.player?.lastName}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{item.game?.name}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-xs font-semibold">{item.status}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{item.tableNumber && item.seatNumber ? `T${item.tableNumber} / S${item.seatNumber}` : 'N/A'}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{item.lastKnownStackSize?.toLocaleString() ?? 'N/A'}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
 const PlayerResultsSection = ({ data }: { data: APITypes.PlayerResult[] }) => {
     return (
         <div className="mb-12 bg-white p-4 rounded-lg shadow-md">
@@ -204,6 +237,7 @@ export const PlayersPage = () => {
         client.graphql({ query: queries.listPlayerResultsForDebug }) as Promise<GraphQLResult<any>>,
         client.graphql({ query: queries.listPlayerVenuesForDebug }) as Promise<GraphQLResult<any>>,
         client.graphql({ query: queries.listPlayerTransactionsForDebug }) as Promise<GraphQLResult<any>>,
+        client.graphql({ query: queries.listPlayerEntriesForDebug }) as Promise<GraphQLResult<any>>,
         client.graphql({ query: queries.listPlayerCreditsForDebug }) as Promise<GraphQLResult<any>>,
         client.graphql({ query: queries.listPlayerPointsForDebug }) as Promise<GraphQLResult<any>>,
         client.graphql({ query: queries.listPlayerTicketsForDebug }) as Promise<GraphQLResult<any>>,
@@ -218,6 +252,7 @@ export const PlayersPage = () => {
         results: results[2].data?.listPlayerResults?.items || [],
         venues: results[3].data?.listPlayerVenues?.items || [],
         transactions: results[4].data?.listPlayerTransactions?.items || [],
+        entries: results[5].data?.listPlayerEntries?.items || [],
         credits: results[5].data?.listPlayerCredits?.items || [],
         points: results[6].data?.listPlayerPoints?.items || [],
         tickets: results[7].data?.listPlayerTickets?.items || [],
@@ -268,6 +303,7 @@ export const PlayersPage = () => {
       {!loading && data && (
         <div>
           <PlayersSection data={data.players} />
+          <PlayerEntriesSection data={data.entries} />
           <PlayerVenuesSection data={data.venues} />
           <PlayerResultsSection data={data.results} />
           

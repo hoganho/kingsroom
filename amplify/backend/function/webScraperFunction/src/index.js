@@ -44,6 +44,14 @@ const ddbDocClient = DynamoDBDocumentClient.from(client);
 // ✅ 2. Instantiate the SQS client
 const sqsClient = new SQSClient({});
 
+const generatePlayerId = (playerName) => {
+    const normalized = playerName.toLowerCase().trim();
+    const hash = crypto.createHash('sha256')
+        .update(normalized) // The venueId has been removed
+        .digest('hex');
+    return hash.substring(0, 32);
+};
+
 const getTableName = (modelName) => {
     const apiId = process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT;
     const env = process.env.ENV;
@@ -148,6 +156,55 @@ const createOptimizedPlayerPayload = (savedGameItem, scrapedData, metadata) => {
             totalPrizesPaid: playerData.totalPrizesPaid
         }
     };
+};
+
+const upsertPlayerEntries = async (savedGameItem, scrapedData) => {
+    const playerEntryTable = getTableName('PlayerEntry');
+    const now = new Date().toISOString();
+    const { allPlayers } = extractPlayerDataForProcessing(scrapedData);
+    if (allPlayers.length === 0) {
+        console.log(`[upsertPlayerEntries] No player entries to process for game ${savedGameItem.id}.`);
+        return;
+    }
+
+    const promises = allPlayers.map(playerData => {
+        // ✅ CHANGE: Generate the global player ID.
+        const playerId = generatePlayerId(playerData.name);
+        const entryId = `${savedGameItem.id}#${playerId}`; // Deterministic ID
+        const status = playerData.rank ? 'ELIMINATED' : 'PLAYING';
+
+        const playerEntry = {
+            id: entryId,
+            playerId: playerId,
+            gameId: savedGameItem.id,
+            venueId: savedGameItem.venueId,
+            status: status,
+            registrationTime: now,
+            gameStartDateTime: savedGameItem.gameStartDateTime,
+            lastKnownStackSize: playerData.lastKnownStack || null,
+            tableNumber: playerData.lastKnownTable || null,
+            seatNumber: playerData.lastKnownSeat || null,
+            numberOfReEntries: 0,
+            isMultiDayTournament: savedGameItem.isSeries || false,
+            _version: 1,
+            _lastChangedAt: Date.now(),
+            createdAt: now,
+            updatedAt: now,
+            __typename: 'PlayerEntry'
+        };
+
+        return ddbDocClient.send(new PutCommand({
+            TableName: playerEntryTable,
+            Item: playerEntry
+        }));
+    });
+
+    try {
+        await Promise.all(promises);
+        console.log(`[upsertPlayerEntries] Successfully created/updated ${allPlayers.length} player entries for game ${savedGameItem.id}.`);
+    } catch (error) {
+        console.error(`[upsertPlayerEntries] Error while processing player entries for game ${savedGameItem.id}:`, error);
+    }
 };
 
 /**

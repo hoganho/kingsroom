@@ -193,10 +193,10 @@ const calculatePlayerTargetingClassification = async (playerId, lastPlayedDate, 
 /**
  * Generate a deterministic player ID based on name and venue
  */
-const generatePlayerId = (playerName, venueId) => {
+const generatePlayerId = (playerName) => {
     const normalized = playerName.toLowerCase().trim();
     const hash = crypto.createHash('sha256')
-        .update(`${normalized}#${venueId}`)
+        .update(normalized)
         .digest('hex');
     return hash.substring(0, 32);
 };
@@ -213,7 +213,6 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) =>
     const playerTable = getTableName('Player');
     const now = new Date().toISOString();
     const nameParts = parsePlayerName(playerName);
-
     const gameDateTime = gameData.game.gameEndDateTime || gameData.game.gameStartDateTime;
     const gameDate = gameDateTime.split('T')[0];
 
@@ -224,14 +223,10 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) =>
         }));
 
         if (existingPlayer.Item) {
-            // Player exists, so `isNewPlayer` is false.
+            // Player exists globally. Update their record.
             const targetingClassification = await calculatePlayerTargetingClassification(
-                playerId,
-                gameDateTime,
-                existingPlayer.Item.creationDate,
-                false
+                playerId, gameDateTime, existingPlayer.Item.creationDate, false
             );
-
             await ddbDocClient.send(new UpdateCommand({
                 TableName: playerTable,
                 Key: { id: playerId },
@@ -241,9 +236,7 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) =>
                         pointsBalance = pointsBalance + :points,
                         #version = #version + :inc
                 `,
-                ExpressionAttributeNames: {
-                    '#version': '_version'
-                },
+                ExpressionAttributeNames: { '#version': '_version' },
                 ExpressionAttributeValues: {
                     ':lastPlayedDate': gameDate,
                     ':targetingClassification': targetingClassification,
@@ -251,31 +244,26 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) =>
                     ':inc': 1
                 }
             }));
-
-            console.log(`[upsertPlayerRecord] Updated player ${playerId} - ${playerName}`);
+            console.log(`[upsertPlayerRecord] Updated global player ${playerId} - ${playerName}`);
             return playerId;
         } else {
-            // Player does NOT exist, so `isNewPlayer` is true.
+            // Player does NOT exist globally. Create a new record.
             const targetingClassification = await calculatePlayerTargetingClassification(
-                playerId,
-                gameDateTime,
-                now,
-                true
+                playerId, gameDateTime, now, true
             );
-
             const newPlayer = {
                 id: playerId,
                 firstName: nameParts.firstName,
                 lastName: nameParts.lastName,
                 givenName: nameParts.givenName,
                 creationDate: gameDate,
+                // This is now the venue where the player was FIRST ever seen.
                 registrationVenueId: gameData.game.venueId,
                 status: 'ACTIVE',
                 category: 'NEW',
                 lastPlayedDate: gameDate,
                 targetingClassification: targetingClassification,
                 creditBalance: 0,
-                // ✅ CHANGE: Initialize pointsBalance with points from the current game.
                 pointsBalance: playerData.points || 0,
                 createdAt: now,
                 updatedAt: now,
@@ -283,19 +271,43 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) =>
                 _lastChangedAt: Date.now(),
                 __typename: 'Player'
             };
-
             await ddbDocClient.send(new PutCommand({
                 TableName: playerTable,
                 Item: newPlayer,
                 ConditionExpression: 'attribute_not_exists(id)'
             }));
-
-            console.log(`[upsertPlayerRecord] Created new player ${playerId} - ${playerName}`);
+            console.log(`[upsertPlayerRecord] Created new global player ${playerId} - ${playerName}`);
             return playerId;
         }
     } catch (error) {
         console.error(`[upsertPlayerRecord] Error processing player ${playerName}:`, error);
         throw error;
+    }
+};
+
+const updatePlayerEntryStatus = async (playerId, gameId) => {
+    const playerEntryTable = getTableName('PlayerEntry');
+    const entryId = `${gameId}#${playerId}`;
+
+    try {
+        await ddbDocClient.send(new UpdateCommand({
+            TableName: playerEntryTable,
+            Key: { id: entryId },
+            UpdateExpression: 'SET #status = :status, updatedAt = :updatedAt',
+            ExpressionAttributeNames: { '#status': 'status' },
+            ExpressionAttributeValues: {
+                ':status': 'COMPLETED',
+                ':updatedAt': new Date().toISOString()
+            },
+            ConditionExpression: 'attribute_exists(id)'
+        }));
+        console.log(`[updatePlayerEntryStatus] Marked entry for player ${playerId} in game ${gameId} as COMPLETED.`);
+    } catch (error) {
+        if (error.name === 'ConditionalCheckFailedException') {
+            console.warn(`[updatePlayerEntryStatus] No PlayerEntry found for player ${playerId} in game ${gameId} to update.`);
+        } else {
+            console.error(`[updatePlayerEntryStatus] Error updating entry for player ${playerId}:`, error);
+        }
     }
 };
 
@@ -599,7 +611,8 @@ const processPlayer = async (playerData, processingInstructions, gameData) => {
     const playerResultTable = getTableName('PlayerResult');
     
     try {
-        const playerId = generatePlayerId(playerName, gameData.game.venueId);
+        // ✅ CHANGE: The player ID is now global and no longer needs the venueId.
+        const playerId = generatePlayerId(playerName);
         const resultId = `${playerId}#${gameData.game.id}`;
 
         const existingResult = await ddbDocClient.send(new GetCommand({
@@ -614,24 +627,19 @@ const processPlayer = async (playerData, processingInstructions, gameData) => {
         
         console.log(`[processPlayer] Processing player: ${playerName}`);
         
-        // ✅ REFACTORED: Pass `playerData` to `upsertPlayerRecord`.
         await upsertPlayerRecord(playerId, playerName, gameData, playerData);
-        
         await createPlayerResult(playerId, gameData, playerData);
         await upsertPlayerSummary(playerId, gameData, playerData);
         await upsertPlayerVenue(playerId, gameData, playerData);
         await createPlayerTransactions(playerId, gameData, playerData, processingInstructions);
-        
+        await updatePlayerEntryStatus(playerId, gameData.game.id);
+
         console.log(`[processPlayer] Successfully processed player: ${playerName}`);
         return { success: true, playerName, playerId, status: 'PROCESSED' };
         
     } catch (error) {
         console.error(`[processPlayer] Error processing player ${playerName}:`, error);
-        return { 
-            success: false, 
-            playerName, 
-            error: error.message 
-        };
+        return { success: false, playerName, error: error.message };
     }
 };
 

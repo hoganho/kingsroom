@@ -73,6 +73,30 @@ export const listPlayerSummariesForDebug = /* GraphQL */ `
   }
 `;
 
+export const listPlayerEntriesForDebug = /* GraphQL */ `
+  query ListPlayerEntriesForDebug {
+    listPlayerEntries(limit: 100) {
+      items {
+        id
+        status
+        registrationTime
+        lastKnownStackSize
+        tableNumber
+        seatNumber
+        player {
+          id
+          firstName
+          lastName
+        }
+        game {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+
 export const listPlayerResultsForDebug = /* GraphQL */ `
   query ListPlayerResultsForDebug {
     listPlayerResults {
