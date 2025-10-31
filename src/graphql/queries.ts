@@ -68,6 +68,13 @@ export const getScraperControlState = /* GraphQL */ `query GetScraperControlStat
   APITypes.GetScraperControlStateQueryVariables,
   APITypes.GetScraperControlStateQuery
 >;
+export const fetchUpdateCandidates = /* GraphQL */ `query FetchUpdateCandidates {
+  fetchUpdateCandidates
+}
+` as GeneratedQuery<
+  APITypes.FetchUpdateCandidatesQueryVariables,
+  APITypes.FetchUpdateCandidatesQuery
+>;
 export const getScrapeStructure = /* GraphQL */ `query GetScrapeStructure($id: ID!) {
   getScrapeStructure(id: $id) {
     id
@@ -485,9 +492,11 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -708,9 +717,11 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -1065,9 +1076,11 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -1783,9 +1796,11 @@ export const listVenues = /* GraphQL */ `query ListVenues(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -2293,9 +2308,11 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -2801,9 +2818,11 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -3260,9 +3279,11 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -3496,9 +3517,11 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -3744,9 +3767,11 @@ export const getTournamentSeriesTitle = /* GraphQL */ `query GetTournamentSeries
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -4200,9 +4225,11 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -4572,9 +4599,11 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -4970,9 +4999,11 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -5109,9 +5140,11 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -5375,9 +5408,11 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -5514,9 +5549,11 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -5657,9 +5694,11 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
     seriesName
     gameTags
     sourceUrl
+    sourceSystem
     doNotScrape
     sourceDataIssue
     gameDataVerified
+    missingKeysFromScrape
     venueId
     venue {
       id
@@ -5814,9 +5853,11 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -6298,9 +6339,11 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -6437,9 +6480,11 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -6585,9 +6630,11 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -6760,9 +6807,11 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -7020,9 +7069,11 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -7276,9 +7327,11 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -7424,9 +7477,11 @@ export const listGames = /* GraphQL */ `query ListGames(
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -7524,9 +7579,11 @@ export const listGames = /* GraphQL */ `query ListGames(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -7751,9 +7808,11 @@ export const listGames = /* GraphQL */ `query ListGames(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -7826,9 +7885,11 @@ export const listGames = /* GraphQL */ `query ListGames(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -7913,9 +7974,11 @@ export const listGames = /* GraphQL */ `query ListGames(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -8013,9 +8076,11 @@ export const listGames = /* GraphQL */ `query ListGames(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -8109,9 +8174,11 @@ export const listGames = /* GraphQL */ `query ListGames(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -8194,9 +8261,11 @@ export const syncGames = /* GraphQL */ `query SyncGames(
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -8294,9 +8363,11 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -8521,9 +8592,11 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -8596,9 +8669,11 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -8683,9 +8758,11 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -8783,9 +8860,11 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -8879,9 +8958,11 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -8967,9 +9048,11 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -9271,9 +9354,11 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -9439,9 +9524,11 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -9640,9 +9727,11 @@ export const getCashStructure = /* GraphQL */ `query GetCashStructure($id: ID!) 
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -9967,9 +10056,11 @@ export const listCashStructures = /* GraphQL */ `query ListCashStructures(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -10162,9 +10253,11 @@ export const syncCashStructures = /* GraphQL */ `query SyncCashStructures(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -10337,9 +10430,11 @@ export const getRakeStructure = /* GraphQL */ `query GetRakeStructure($id: ID!) 
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -10682,9 +10777,11 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -11663,9 +11760,11 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -11919,9 +12018,11 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -13095,9 +13196,11 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -13456,9 +13559,11 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -13552,9 +13657,11 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -14061,9 +14168,11 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -14422,9 +14531,11 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -14518,9 +14629,11 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -15033,9 +15146,11 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -15394,9 +15509,11 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -15490,9 +15607,11 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -16739,9 +16858,11 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -17100,9 +17221,11 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -17196,9 +17319,11 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -17607,9 +17732,11 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -17707,9 +17834,11 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -17934,9 +18063,11 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -18009,9 +18140,11 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -18096,9 +18229,11 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -18196,9 +18331,11 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -18292,9 +18429,11 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -18716,9 +18855,11 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -19347,9 +19488,11 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -19714,9 +19857,11 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -20075,9 +20220,11 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -20171,9 +20318,11 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -20583,9 +20732,11 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -20683,9 +20834,11 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -20910,9 +21063,11 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -20985,9 +21140,11 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -21072,9 +21229,11 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -21172,9 +21331,11 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -21268,9 +21429,11 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -21688,9 +21851,11 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -22315,9 +22480,11 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -22681,9 +22848,11 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -23042,9 +23211,11 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -23138,9 +23309,11 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -23668,9 +23841,11 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -24452,9 +24627,11 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -25013,9 +25190,11 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -25254,9 +25433,11 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -25615,9 +25796,11 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -25711,9 +25894,11 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -26946,9 +27131,11 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -27307,9 +27494,11 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -27403,9 +27592,11 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -28637,9 +28828,11 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -28998,9 +29191,11 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -29094,9 +29289,11 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -30685,9 +30882,11 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -31046,9 +31245,11 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -31142,9 +31343,11 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -32730,9 +32933,11 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -33091,9 +33296,11 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -33187,9 +33394,11 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -34727,9 +34936,11 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -35182,9 +35393,11 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -35417,9 +35630,11 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -35867,9 +36082,11 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -36331,9 +36548,11 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -36613,9 +36832,11 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -36752,9 +36973,11 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -37020,9 +37243,11 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -37159,9 +37384,11 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -37266,15 +37493,17 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
   APITypes.TournamentSeriesByVenueIdQueryVariables,
   APITypes.TournamentSeriesByVenueIdQuery
 >;
-export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
-  $sourceUrl: AWSURL!
+export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
+  $gameStatus: GameStatus!
+  $gameStartDateTime: ModelStringKeyConditionInput
   $sortDirection: ModelSortDirection
   $filter: ModelGameFilterInput
   $limit: Int
   $nextToken: String
 ) {
-  gameBySourceUrl(
-    sourceUrl: $sourceUrl
+  gamesByStatus(
+    gameStatus: $gameStatus
+    gameStartDateTime: $gameStartDateTime
     sortDirection: $sortDirection
     filter: $filter
     limit: $limit
@@ -37315,9 +37544,11 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -37415,9 +37646,11 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -37642,9 +37875,11 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -37717,9 +37952,11 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -37804,9 +38041,11 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -37904,9 +38143,11 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -38000,9 +38241,800 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GamesByStatusQueryVariables,
+  APITypes.GamesByStatusQuery
+>;
+export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
+  $sourceUrl: AWSURL!
+  $sortDirection: ModelSortDirection
+  $filter: ModelGameFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  gameBySourceUrl(
+    sourceUrl: $sourceUrl
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      name
+      gameType
+      gameVariant
+      gameStatus
+      gameStartDateTime
+      gameEndDateTime
+      registrationStatus
+      totalDuration
+      gameFrequency
+      buyIn
+      rake
+      startingStack
+      hasGuarantee
+      guaranteeAmount
+      prizepool
+      totalEntries
+      totalRebuys
+      totalAddons
+      revenueByBuyIns
+      totalRake
+      profitLoss
+      guaranteeOverlay
+      guaranteeSurplus
+      playersRemaining
+      totalChipsInPlay
+      averagePlayerStack
+      tournamentType
+      isRegular
+      isSeries
+      isSatellite
+      seriesName
+      gameTags
+      sourceUrl
+      sourceSystem
+      doNotScrape
+      sourceDataIssue
+      gameDataVerified
+      missingKeysFromScrape
+      venueId
+      venue {
+        id
+        venueNumber
+        name
+        aliases
+        address
+        city
+        country
+        details {
+          id
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            sourceSystem
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        series {
+          items {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        registeredPlayers {
+          items {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
+      tournamentSeriesId
+      tournamentSeries {
+        id
+        name
+        year
+        status
+        startDate
+        endDate
+        events
+        numberOfEvents
+        guaranteedPrizepool
+        estimatedPrizepool
+        actualPrizepool
+        tournamentSeriesTitleId
+        title {
+          id
+          title
+          aliases
+          seriesInstances {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        venueId
+        venue {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            sourceSystem
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      tournamentStructureId
+      tournamentStructure {
+        id
+        name
+        description
+        levels {
+          levelNumber
+          durationMinutes
+          smallBlind
+          bigBlind
+          ante
+          breakMinutes
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            sourceSystem
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      cashStructureId
+      cashStructure {
+        id
+        name
+        smallBlind
+        bigBlind
+        minBuyIn
+        maxBuyIn
+        rakeStructureId
+        rakeStructure {
+          id
+          name
+          rakePercentage
+          maxRake
+          cashStructures {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            sourceSystem
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      playerEntries {
+        items {
+          id
+          playerId
+          gameId
+          venueId
+          status
+          registrationTime
+          eliminationTime
+          gameStartDateTime
+          lastKnownStackSize
+          tableNumber
+          seatNumber
+          numberOfReEntries
+          isMultiDayTournament
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            sourceSystem
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerResults {
+        items {
+          id
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          pointsEarned
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            sourceSystem
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -38040,6 +39072,797 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
 ` as GeneratedQuery<
   APITypes.GameBySourceUrlQueryVariables,
   APITypes.GameBySourceUrlQuery
+>;
+export const gamesBySourceSystem = /* GraphQL */ `query GamesBySourceSystem(
+  $sourceSystem: String!
+  $sourceUrl: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelGameFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  gamesBySourceSystem(
+    sourceSystem: $sourceSystem
+    sourceUrl: $sourceUrl
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      name
+      gameType
+      gameVariant
+      gameStatus
+      gameStartDateTime
+      gameEndDateTime
+      registrationStatus
+      totalDuration
+      gameFrequency
+      buyIn
+      rake
+      startingStack
+      hasGuarantee
+      guaranteeAmount
+      prizepool
+      totalEntries
+      totalRebuys
+      totalAddons
+      revenueByBuyIns
+      totalRake
+      profitLoss
+      guaranteeOverlay
+      guaranteeSurplus
+      playersRemaining
+      totalChipsInPlay
+      averagePlayerStack
+      tournamentType
+      isRegular
+      isSeries
+      isSatellite
+      seriesName
+      gameTags
+      sourceUrl
+      sourceSystem
+      doNotScrape
+      sourceDataIssue
+      gameDataVerified
+      missingKeysFromScrape
+      venueId
+      venue {
+        id
+        venueNumber
+        name
+        aliases
+        address
+        city
+        country
+        details {
+          id
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            sourceSystem
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        series {
+          items {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        registeredPlayers {
+          items {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
+      tournamentSeriesId
+      tournamentSeries {
+        id
+        name
+        year
+        status
+        startDate
+        endDate
+        events
+        numberOfEvents
+        guaranteedPrizepool
+        estimatedPrizepool
+        actualPrizepool
+        tournamentSeriesTitleId
+        title {
+          id
+          title
+          aliases
+          seriesInstances {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        venueId
+        venue {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            sourceSystem
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      tournamentStructureId
+      tournamentStructure {
+        id
+        name
+        description
+        levels {
+          levelNumber
+          durationMinutes
+          smallBlind
+          bigBlind
+          ante
+          breakMinutes
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            sourceSystem
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      cashStructureId
+      cashStructure {
+        id
+        name
+        smallBlind
+        bigBlind
+        minBuyIn
+        maxBuyIn
+        rakeStructureId
+        rakeStructure {
+          id
+          name
+          rakePercentage
+          maxRake
+          cashStructures {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            sourceSystem
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      playerEntries {
+        items {
+          id
+          playerId
+          gameId
+          venueId
+          status
+          registrationTime
+          eliminationTime
+          gameStartDateTime
+          lastKnownStackSize
+          tableNumber
+          seatNumber
+          numberOfReEntries
+          isMultiDayTournament
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            sourceSystem
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerResults {
+        items {
+          id
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          pointsEarned
+          playerId
+          player {
+            id
+            firstName
+            givenName
+            lastName
+            email
+            phone
+            creationDate
+            status
+            category
+            tier
+            lastPlayedDate
+            targetingClassification
+            creditBalance
+            pointsBalance
+            registrationVenueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            playerSummaryId
+            playerMarketingPreferencesId
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            sourceSystem
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            venueId
+            tournamentSeriesId
+            tournamentStructureId
+            cashStructureId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GamesBySourceSystemQueryVariables,
+  APITypes.GamesBySourceSystemQuery
 >;
 export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVenueIdAndGameStartDateTime(
   $venueId: ID!
@@ -38092,9 +39915,11 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -38192,9 +40017,11 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -38419,9 +40246,11 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -38494,9 +40323,11 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -38581,9 +40412,11 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -38681,9 +40514,11 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -38777,9 +40612,11 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -38867,9 +40704,11 @@ export const gamesByTournamentSeriesId = /* GraphQL */ `query GamesByTournamentS
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -38967,9 +40806,11 @@ export const gamesByTournamentSeriesId = /* GraphQL */ `query GamesByTournamentS
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -39194,9 +41035,11 @@ export const gamesByTournamentSeriesId = /* GraphQL */ `query GamesByTournamentS
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -39269,9 +41112,11 @@ export const gamesByTournamentSeriesId = /* GraphQL */ `query GamesByTournamentS
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -39356,9 +41201,11 @@ export const gamesByTournamentSeriesId = /* GraphQL */ `query GamesByTournamentS
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -39456,9 +41303,11 @@ export const gamesByTournamentSeriesId = /* GraphQL */ `query GamesByTournamentS
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -39552,9 +41401,11 @@ export const gamesByTournamentSeriesId = /* GraphQL */ `query GamesByTournamentS
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -39642,9 +41493,11 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -39742,9 +41595,11 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -39969,9 +41824,11 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -40044,9 +41901,11 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -40131,9 +41990,11 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -40231,9 +42092,11 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -40327,9 +42190,11 @@ export const gamesByTournamentStructureId = /* GraphQL */ `query GamesByTourname
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -40417,9 +42282,11 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -40517,9 +42384,11 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -40744,9 +42613,11 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -40819,9 +42690,11 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -40906,9 +42779,11 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -41006,9 +42881,11 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -41102,9 +42979,11 @@ export const gamesByCashStructureId = /* GraphQL */ `query GamesByCashStructureI
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -41233,9 +43112,11 @@ export const cashStructuresByRakeStructureId = /* GraphQL */ `query CashStructur
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -41466,9 +43347,11 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -41827,9 +43710,11 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -41923,9 +43808,11 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -42434,9 +44321,11 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -42795,9 +44684,11 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -42891,9 +44782,11 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -44038,9 +45931,11 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -44671,9 +46566,11 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -45304,9 +47201,11 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -45933,9 +47832,11 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -46562,9 +48463,11 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -47253,9 +49156,11 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -47818,9 +49723,11 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -51557,9 +53464,11 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId

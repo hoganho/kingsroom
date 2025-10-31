@@ -1,39 +1,39 @@
 /* Amplify Params - DO NOT EDIT
-	API_KINGSROOM_GAMETABLE_ARN
-	API_KINGSROOM_GAMETABLE_NAME
-	API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
-	API_KINGSROOM_GRAPHQLAPIIDOUTPUT
-	API_KINGSROOM_PLAYERENTRYTABLE_ARN
-	API_KINGSROOM_PLAYERENTRYTABLE_NAME
-	API_KINGSROOM_PLAYERRESULTTABLE_ARN
-	API_KINGSROOM_PLAYERRESULTTABLE_NAME
-	API_KINGSROOM_PLAYERSUMMARYTABLE_ARN
-	API_KINGSROOM_PLAYERSUMMARYTABLE_NAME
-	API_KINGSROOM_PLAYERTABLE_ARN
-	API_KINGSROOM_PLAYERTABLE_NAME
-	API_KINGSROOM_PLAYERTRANSACTIONTABLE_ARN
-	API_KINGSROOM_PLAYERTRANSACTIONTABLE_NAME
-	API_KINGSROOM_PLAYERVENUETABLE_ARN
-	API_KINGSROOM_PLAYERVENUETABLE_NAME
-	API_KINGSROOM_SCRAPESTRUCTURETABLE_ARN
-	API_KINGSROOM_SCRAPESTRUCTURETABLE_NAME
-	API_KINGSROOM_TOURNAMENTSERIESTABLE_ARN
-	API_KINGSROOM_TOURNAMENTSERIESTABLE_NAME
-	API_KINGSROOM_TOURNAMENTSERIESTITLETABLE_ARN
-	API_KINGSROOM_TOURNAMENTSERIESTITLETABLE_NAME
-	API_KINGSROOM_TOURNAMENTSTRUCTURETABLE_ARN
-	API_KINGSROOM_TOURNAMENTSTRUCTURETABLE_NAME
-	API_KINGSROOM_VENUETABLE_ARN
-	API_KINGSROOM_VENUETABLE_NAME
-	ENV
-	REGION
+    API_KINGSROOM_GAMETABLE_ARN
+    API_KINGSROOM_GAMETABLE_NAME
+    API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
+    API_KINGSROOM_GRAPHQLAPIIDOUTPUT
+    API_KINGSROOM_PLAYERENTRYTABLE_ARN
+    API_KINGSROOM_PLAYERENTRYTABLE_NAME
+    API_KINGSROOM_PLAYERRESULTTABLE_ARN
+    API_KINGSROOM_PLAYERRESULTTABLE_NAME
+    API_KINGSROOM_PLAYERSUMMARYTABLE_ARN
+    API_KINGSROOM_PLAYERSUMMARYTABLE_NAME
+    API_KINGSROOM_PLAYERTABLE_ARN
+    API_KINGSROOM_PLAYERTABLE_NAME
+    API_KINGSROOM_PLAYERTRANSACTIONTABLE_ARN
+    API_KINGSROOM_PLAYERTRANSACTIONTABLE_NAME
+    API_KINGSROOM_PLAYERVENUETABLE_ARN
+    API_KINGSROOM_PLAYERVENUETABLE_NAME
+    API_KINGSROOM_SCRAPESTRUCTURETABLE_ARN
+    API_KINGSROOM_SCRAPESTRUCTURETABLE_NAME
+    API_KINGSROOM_TOURNAMENTSERIESTABLE_ARN
+    API_KINGSROOM_TOURNAMENTSERIESTABLE_NAME
+    API_KINGSROOM_TOURNAMENTSERIESTITLETABLE_ARN
+    API_KINGSROOM_TOURNAMENTSERIESTITLETABLE_NAME
+    API_KINGSROOM_TOURNAMENTSTRUCTURETABLE_ARN
+    API_KINGSROOM_TOURNAMENTSTRUCTURETABLE_NAME
+    API_KINGSROOM_VENUETABLE_ARN
+    API_KINGSROOM_VENUETABLE_NAME
+    ENV
+    REGION
 Amplify Params - DO NOT EDIT */
 
 const axios = require('axios');
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand, GetCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand, GetCommand, ScanCommand, BatchWriteCommand } = require('@aws-sdk/lib-dynamodb');
 const crypto = require('crypto');
-// ✅ 1. Import the SQS client and command
+const { v4: uuidv4 } = require('uuid');
 const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
 
 const {
@@ -43,8 +43,10 @@ const {
 
 const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
-// ✅ 2. Instantiate the SQS client
 const sqsClient = new SQSClient({});
+
+// --- Configuration (Assumed from environment) ---
+// Note: PLAYER_PROCESSOR_QUEUE_URL must be configured as the FIFO queue URL
 
 const parsePlayerName = (fullName) => {
     if (!fullName) return { firstName: 'Unknown', lastName: '', givenName: 'Unknown' };
@@ -58,14 +60,14 @@ const parsePlayerName = (fullName) => {
         const parts = trimmedName.split(/\s+/);
         const firstName = parts[0] || 'Unknown';
         const lastName = parts.slice(1).join(' ') || '';
-        return { firstName, lastName, givenName: firstName };
+        return { firstName: firstName, lastName: lastName, givenName: firstName };
     }
 };
 
 const generatePlayerId = (playerName) => {
     const normalized = playerName.toLowerCase().trim();
     const hash = crypto.createHash('sha256')
-        .update(normalized) // The venueId has been removed
+        .update(normalized)
         .digest('hex');
     return hash.substring(0, 32);
 };
@@ -78,7 +80,6 @@ const getTableName = (modelName) => {
         throw new Error(`API ID or environment name not found in environment variables. Amplify push may have failed.`);
     }
 
-    // The pattern is always: ModelName-ApiId-Env
     const tableName = `${modelName}-${apiId}-${env}`;
     return tableName;
 };
@@ -95,17 +96,15 @@ const getAllVenues = async () => {
         return response.Items || [];
     } catch (error) {
         console.error('Error fetching venues from DynamoDB:', error);
-        return []; // Return empty array on error
+        return [];
     }
 };
 
 const getAllSeriesTitles = async () => {
-    // Note: The model name is 'TournamentSeriesTitle'
     const seriesTitleTable = getTableName('TournamentSeriesTitle');
     try {
         const command = new ScanCommand({
             TableName: seriesTitleTable,
-            // Fetch the fields needed for matching
             ProjectionExpression: 'id, title, aliases'
         });
         const response = await ddbDocClient.send(command);
@@ -118,10 +117,6 @@ const getAllSeriesTitles = async () => {
 
 // --- SQS & PLAYER ENTRY LOGIC ---
 
-/**
- * ✅ Ensures a lean Player record exists before creating an entry.
- * This function uses a conditional update to prevent creating duplicate players.
- */
 const upsertLeanPlayerRecord = async (playerId, playerName, gameData) => {
     const playerTable = getTableName('Player');
     const now = new Date().toISOString();
@@ -138,7 +133,6 @@ const upsertLeanPlayerRecord = async (playerId, playerName, gameData) => {
         if (error.name === 'ConditionalCheckFailedException') {
             console.log(`[upsertLeanPlayerRecord] Player ${playerId} not found, creating new record.`);
             
-            // Use the robust name parsing logic
             const nameParts = parsePlayerName(playerName);
             
             const newPlayer = {
@@ -170,14 +164,14 @@ const upsertLeanPlayerRecord = async (playerId, playerName, gameData) => {
     }
 };
 
-/**
- * ✅ Creates or updates PlayerEntry records for a live/registering game.
- * Using PutCommand with a deterministic ID acts as an "upsert".
- */
 const upsertPlayerEntries = async (savedGameItem, scrapedData) => {
+    console.log(`[upsertPlayerEntries] Starting player entry upsert for game ${savedGameItem.id}.`);
     const playerEntryTable = getTableName('PlayerEntry');
     const now = new Date().toISOString();
+    
+    // Use the helper function to get player data
     const { allPlayers } = extractPlayerDataForProcessing(scrapedData);
+    
     if (allPlayers.length === 0) {
         console.log(`[upsertPlayerEntries] No player entries to process for game ${savedGameItem.id}.`);
         return;
@@ -186,10 +180,8 @@ const upsertPlayerEntries = async (savedGameItem, scrapedData) => {
     const promises = allPlayers.map(async (playerData) => {
         const playerId = generatePlayerId(playerData.name);
         
-        // Step 1: Ensure the player record exists before creating the entry.
         await upsertLeanPlayerRecord(playerId, playerData.name, savedGameItem);
 
-        // Step 2: Create or replace the PlayerEntry record.
         const entryId = `${savedGameItem.id}#${playerId}`;
         const status = playerData.rank ? 'ELIMINATED' : 'PLAYING';
 
@@ -266,6 +258,11 @@ const createOptimizedPlayerPayload = (savedGameItem, scrapedData, metadata) => {
 };
 
 const extractPlayerDataForProcessing = (scrapedData) => {
+    // Failsafe: If scrapedData is null or undefined, return empty structure
+    if (!scrapedData) {
+        return { allPlayers: [], finishedPlayers: [], playersInTheMoney: [], playersWithPoints: [], qualifiedPlayers: [], totalPlayers: 0, totalFinished: 0, totalInTheMoney: 0, totalWithPoints: 0, totalPrizesPaid: 0, hasCompleteResults: false, hasEntryList: false, hasSeatingData: false };
+    }
+    
     const results = scrapedData.results || [];
     const entries = scrapedData.entries || [];
     const seating = scrapedData.seating || [];
@@ -430,8 +427,8 @@ const processStructureFingerprint = async (foundKeys, structureLabel, sourceUrl)
     }
 };
 
-const handleFetch = async (url) => {
-    console.log(`[handleFetch] Processing URL: ${url}`);
+const handleFetch = async (url, jobId = null, triggerSource = null) => {
+    console.log(`[handleFetch] Processing URL: ${url}. Job ID: ${jobId || 'N/A'}, Source: ${triggerSource || 'N/A'}`);
     const gameTable = getTableName('Game');
     let existingGameId = null;
     let doNotScrape = false;
@@ -439,6 +436,7 @@ const handleFetch = async (url) => {
     let foundKeys = [];
     
     try {
+        console.log('[handleFetch] Checking for existing game.');
         const queryResult = await ddbDocClient.send(new QueryCommand({
             TableName: gameTable, IndexName: 'bySourceUrl',
             KeyConditionExpression: 'sourceUrl = :sourceUrl',
@@ -467,8 +465,11 @@ const handleFetch = async (url) => {
     const seriesTitles = await getAllSeriesTitles();
     
     try {
+        console.log('[handleFetch] Starting HTTP request for HTML content.');
         const response = await axios.get(url, { timeout: 10000, headers: { 'User-Agent': 'KingsRoom-Scraper/1.0' } });
         const html = response.data;
+        console.log('[handleFetch] HTTP request successful. Starting scrape logic.');
+        
         const scrapingResult = scrapeDataFromHtml(html, venues, seriesTitles);
         scrapedData = scrapingResult.data;
         foundKeys = scrapingResult.foundKeys;
@@ -477,7 +478,7 @@ const handleFetch = async (url) => {
             console.log(`[handleFetch] Tournament ID not in use for ${url}`);
             return {
                 id: existingGameId, name: 'Tournament ID Not In Use', gameStatus: 'NOT_IN_USE',
-                registrationStatus: 'N/A', gameStartDateTime: null, gameEndDateTime: null,
+                registrationStatus: 'N_A', gameStartDateTime: null, gameEndDateTime: null,
                 gameVariant: 'UNKNOWN', prizepool: 0, totalEntries: 0, tournamentType: 'UNKNOWN',
                 buyIn: 0, rake: 0, startingStack: 0, hasGuarantee: false, guaranteeAmount: 0,
                 gameTags: [], levels: [], isInactive: true, sourceUrl: url, existingGameId: existingGameId
@@ -489,23 +490,56 @@ const handleFetch = async (url) => {
         scrapedData.sourceUrl = url;
         scrapedData.fetchedAt = new Date().toISOString();
         
-        console.log(`[handleFetch] Scraped data successfully for ${url}`);
+        console.log(`[handleFetch] Scraped data successfully for ${url}. END handleFetch.`);
         return { ...scrapedData, existingGameId, scrapedData: scrapedData, foundKeys: foundKeys };
     } catch (error) {
-        console.error(`[handleFetch] Error fetching or scraping ${url}: ${error.message}`);
+        console.error(`[handleFetch] ERROR fetching or scraping ${url}: ${error.message}`);
         return { existingGameId, errorMessage: error.message };
     }
 };
 
 const handleSave = async (input) => {
-    console.log('[handleSave] Processing save request...');
+    const PLAYER_PROCESSOR_QUEUE_URL = process.env.PLAYER_PROCESSOR_QUEUE_URL;
+    
+    const jobId = input.jobId || null;
+    const triggerSource = input.triggerSource || null;
+    
+    console.log(`[handleSave] START processing save request. Job ID: ${jobId || 'N/A'}, Source: ${triggerSource || 'N/A'}`);
+    
     const { sourceUrl, venueId, existingGameId, data } = input;
     const now = new Date().toISOString();
     const gameTable = getTableName('Game');
     const structureTable = getTableName('TournamentStructure');
     
     let savedGameItem = null;
-    let originalScrapedData = input.originalScrapedData || null;
+
+    // --- ⚡️ START: ROBUST AWSJSON PARSING FIX ⚡️ ---
+    // This handles both the pre-parsed object from AppSync (manual) 
+    // and the raw string from Lambda.invoke (automated).
+    
+    let originalScrapedData = {}; // Default to empty object
+    const rawOriginalData = input.originalScrapedData || null;
+
+    if (rawOriginalData) {
+        if (typeof rawOriginalData === 'string') {
+            try {
+                // This is the missing step for the automated flow
+                originalScrapedData = JSON.parse(rawOriginalData);
+                console.log(`[HANDLE-SAVE-DEBUG] Successfully parsed stringified originalScrapedData. Entries found: ${originalScrapedData.entries?.length || 0}`);
+            } catch (e) {
+                console.error('[HANDLE-SAVE-DEBUG] CRITICAL: Failed to parse originalScrapedData JSON string. Player data will be lost.', e);
+            }
+        } else if (typeof rawOriginalData === 'object') {
+            // This handles the "magic" pre-parsed object from the manual flow
+            originalScrapedData = rawOriginalData;
+            console.log(`[HANDLE-SAVE-DEBUG] Received pre-parsed object for originalScrapedData. Entries found: ${originalScrapedData.entries?.length || 0}`);
+        } else {
+             console.warn(`[HANDLE-SAVE-DEBUG] originalScrapedData was of an unexpected type: ${typeof rawOriginalData}`);
+        }
+    } else {
+        console.warn('[HANDLE-SAVE-DEBUG] WARNING: originalScrapedData field was missing from the input. No player data can be processed.');
+    }
+    // --- ⚡️ END: ROBUST AWSJSON PARSING FIX ⚡️ ---
 
     const processedLevels = (data.levels || []).map(level => ({
         levelNumber: level.levelNumber, durationMinutes: level.durationMinutes || 0,
@@ -515,8 +549,9 @@ const handleSave = async (input) => {
     
     const doNotScrape = input.doNotScrape || false;
 
+    // --- 1. UPSERT GAME RECORD (Original working logic) ---
     if (existingGameId) {
-        console.log('[handleSave] Updating existing game...');
+        console.log('[handleSave] Updating existing game record.');
         const getCommand = new GetCommand({ TableName: gameTable, Key: { id: existingGameId } });
         const existingGame = await ddbDocClient.send(getCommand);
         if (!existingGame.Item) {
@@ -562,14 +597,16 @@ const handleSave = async (input) => {
                 _version: 1, __typename: "TournamentStructure",
             };
             await ddbDocClient.send(new PutCommand({ TableName: structureTable, Item: structureItem }));
+            console.log('[handleSave] Blind structure (re)saved.');
         } else {
             delete updatedGameItem.tournamentStructureId;
+            console.log('[handleSave] No blind structure data to save.');
         }
         await ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem }));
         savedGameItem = updatedGameItem;
 
     } else {
-        console.log('[handleSave] No existing game found. Creating new records...');
+        console.log('[handleSave] Creating new game record.');
         const gameId = crypto.randomUUID();
         let structureId = null;
         if (processedLevels.length > 0) {
@@ -610,32 +647,56 @@ const handleSave = async (input) => {
         }
         await ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: gameItem }));
         savedGameItem = gameItem;
+        console.log(`[handleSave] New game record ${gameId} created successfully.`);
     }
-
+    
+    // --- 2. PLAYER PROCESSING LOGIC (Business Rule Enforcement) ---
+    
     const liveStatuses = ['RUNNING', 'REGISTERING'];
+    
     if (savedGameItem && savedGameItem.gameStatus === 'FINISHED') {
+        console.log(`[handleSave] DIAGNOSTIC: Status is FINISHED. Triggering full processing via SQS.`);
         try {
-            const sqsPayload = createOptimizedPlayerPayload(savedGameItem, originalScrapedData || data, { sourceUrl, venueId });
+            if (!PLAYER_PROCESSOR_QUEUE_URL) {
+                 throw new Error("PLAYER_PROCESSOR_QUEUE_URL environment variable is missing.");
+            }
+            
+            // ⚡️ FIX: Pass the newly parsed 'originalScrapedData' object, not the 'data' fallback.
+            const sqsPayload = createOptimizedPlayerPayload(savedGameItem, originalScrapedData, { sourceUrl, venueId });
+            
+            const idMatch = sourceUrl.match(/id=(\d+)/);
+            const tournamentId = idMatch ? idMatch[1] : savedGameItem.id;
+
+            console.log(`[handleSave] DIAGNOSTIC: FIFO Group ID: ${tournamentId}. Total Players: ${sqsPayload.players.allPlayers.length}`);
+
             const command = new SendMessageCommand({
-                QueueUrl: process.env.PLAYER_PROCESSOR_QUEUE_URL,
+                QueueUrl: process.env.PLAYER_PROCESSOR_QUEUE_URL, 
                 MessageBody: JSON.stringify(sqsPayload),
+                MessageGroupId: String(tournamentId),
+                MessageDeduplicationId: String(tournamentId),
                 MessageAttributes: {
                     gameId: { DataType: 'String', StringValue: savedGameItem.id },
-                    gameStatus: { DataType: 'String', StringValue: 'FINISHED' },
+                    gameStatus: { DataType: 'String', StringValue: savedGameItem.gameStatus },
                     venueId: { DataType: 'String', StringValue: venueId },
-                    totalPlayers: { DataType: 'Number', StringValue: String(sqsPayload.players.totalPlayers || 0) }
+                    totalPlayers: { DataType: 'Number', StringValue: String(sqsPayload.players.allPlayers.length || 0) },
+                    jobId: { DataType: 'String', StringValue: jobId || 'N/A' },
+                    triggerSource: { DataType: 'String', StringValue: triggerSource || 'N/A' }
                 }
             });
+            
             await sqsClient.send(command);
-            console.log(`[handleSave] Successfully sent finished game ${savedGameItem.id} to SQS queue.`);
+            
+            console.log(`[handleSave] DIAGNOSTIC: SUCCESS - Message sent to SQS for ID: ${tournamentId}.`);
         } catch (error) {
-            console.error('[handleSave] FAILED to send message to SQS:', error);
+            console.error(`[handleSave] DIAGNOSTIC: FAILED - Error sending SQS message for ID ${tournamentId}: ${error.message}`);
         }
     } else if (savedGameItem && liveStatuses.includes(savedGameItem.gameStatus)) {
-        console.log(`[handleSave] Game ${savedGameItem.id} is live. Upserting players and entries...`);
-        await upsertPlayerEntries(savedGameItem, originalScrapedData || data);
+        console.log(`[handleSave] DIAGNOSTIC: Status is LIVE. Updating PlayerEntries only.`);
+        // ⚡️ FIX: Pass the newly parsed 'originalScrapedData' object, not the 'data' fallback.
+        await upsertPlayerEntries(savedGameItem, originalScrapedData);
     }
 
+    console.log('[handleSave] END processing save request.');
     return savedGameItem;
 };
 
@@ -674,13 +735,12 @@ const handleFetchRange = async (startId, endId) => {
     return allResults.map(res => {
         if (res.status === 'fulfilled' && !res.value.error) {
             const data = res.value;
-            // Handle the special case where tournament ID is not in use
             if (data.isInactive || data.gameStatus === 'NOT_IN_USE') {
                 return {
                     id: data.id,
                     name: 'Tournament ID Not In Use',
                     gameStatus: 'NOT_IN_USE',
-                    registrationStatus: 'N/A',
+                    registrationStatus: 'N_A',
                     gameStartDateTime: null,
                     inDatabase: !!data.existingGameId,
                     doNotScrape: false,
@@ -719,26 +779,49 @@ const handleFetchRange = async (startId, endId) => {
 // --- MAIN LAMBDA HANDLER ---
 exports.handler = async (event) => {
     console.log('Event received:', JSON.stringify(event, null, 2));
-    const { arguments, fieldName } = event;
+    
+    const operationName = event.fieldName || event.arguments?.operation;
+    
+    const jobId = event.arguments?.jobId || null;
+    const triggerSource = event.arguments?.triggerSource || null;
+    
+    const args = event.arguments || event; 
+
+    console.log(`[HANDLER] Operation detected: ${operationName}. Job ID: ${jobId || 'N/A'}`);
+    
     try {
-        switch (fieldName) {
+        switch (operationName) {
+            
             case 'fetchTournamentData':
-                const result = await handleFetch(arguments.url);
-                if (result.isInactive || result.gameStatus === 'NOT_IN_USE') {
-                    console.log('[Handler] Tournament is not in use, returning placeholder data');
-                    return result;
+            case 'FETCH':
+                const fetchResult = await handleFetch(args.url, jobId, triggerSource);
+                if (fetchResult.errorMessage) {
+                    throw new Error(fetchResult.errorMessage);
                 }
-                if (result.errorMessage) throw new Error(result.errorMessage);
-                return result;
+                return fetchResult;
+
             case 'saveTournamentData':
-                return await handleSave(arguments.input);
+            case 'SAVE':
+                const saveInput = args.input || { 
+                    sourceUrl: args.sourceUrl, 
+                    venueId: args.venueId,
+                    existingGameId: args.existingGameId,
+                    doNotScrape: args.doNotScrape,
+                    data: args.scrapedData,
+                    originalScrapedData: args.originalScrapedData,
+                    jobId: jobId, 
+                    triggerSource: triggerSource
+                };
+                return await handleSave(saveInput);
+                
             case 'fetchTournamentDataRange':
-                return await handleFetchRange(arguments.startId, arguments.endId);
+                return await handleFetchRange(args.startId, args.endId);
+                
             default:
-                throw new Error(`Unknown operation: ${fieldName}.`);
+                throw new Error(`Unknown operation: ${operationName}.`);
         }
     } catch (error) {
-        console.error('Error during handler execution:', error);
-        throw new Error(error.message);
+        console.error('[HANDLER] CRITICAL Error:', error);
+        return { errorMessage: error.message || 'Internal Lambda Error' }; 
     }
 };

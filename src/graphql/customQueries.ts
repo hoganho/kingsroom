@@ -23,9 +23,10 @@ export const listVenuesForDropdown = /* GraphQL */ `
  * ===================================================================
  */
 
+// --- 1. Players ---
 export const listPlayersForDebug = /* GraphQL */ `
-  query ListPlayersForDebug {
-    listPlayers {
+  query ListPlayersForDebug($limit: Int, $nextToken: String) {
+    listPlayers(limit: $limit, nextToken: $nextToken) {
       items {
         id
         firstName
@@ -42,13 +43,15 @@ export const listPlayersForDebug = /* GraphQL */ `
         }
         _version
       }
+      nextToken
     }
   }
 `;
 
+// --- 2. Summaries ---
 export const listPlayerSummariesForDebug = /* GraphQL */ `
-  query ListPlayerSummariesForDebug {
-    listPlayerSummaries {
+  query ListPlayerSummariesForDebug($limit: Int, $nextToken: String) {
+    listPlayerSummaries(limit: $limit, nextToken: $nextToken) {
       items {
         id
         playerId
@@ -68,13 +71,15 @@ export const listPlayerSummariesForDebug = /* GraphQL */ `
         lastPlayed
         _version
       }
+      nextToken
     }
   }
 `;
 
+// --- 3. Entries ---
 export const listPlayerEntriesForDebug = /* GraphQL */ `
-  query ListPlayerEntriesForDebug {
-    listPlayerEntries(limit: 100) {
+  query ListPlayerEntriesForDebug($limit: Int, $nextToken: String) {
+    listPlayerEntries(limit: $limit, nextToken: $nextToken) {
       items {
         id
         status
@@ -92,13 +97,15 @@ export const listPlayerEntriesForDebug = /* GraphQL */ `
           name
         }
       }
+      nextToken
     }
   }
 `;
 
+// --- 4. Results ---
 export const listPlayerResultsForDebug = /* GraphQL */ `
-  query ListPlayerResultsForDebug {
-    listPlayerResults {
+  query ListPlayerResultsForDebug($limit: Int, $nextToken: String) {
+    listPlayerResults(limit: $limit, nextToken: $nextToken) {
       items {
         id
         finishingPlace
@@ -121,13 +128,15 @@ export const listPlayerResultsForDebug = /* GraphQL */ `
             buyIn
         }
       }
+      nextToken
     }
   }
 `;
 
+// --- 5. Venues ---
 export const listPlayerVenuesForDebug = /* GraphQL */ `
-  query ListPlayerVenuesForDebug {
-    listPlayerVenues {
+  query ListPlayerVenuesForDebug($limit: Int, $nextToken: String) {
+    listPlayerVenues(limit: $limit, nextToken: $nextToken) {
       items {
         id
         totalGamesPlayed
@@ -148,13 +157,15 @@ export const listPlayerVenuesForDebug = /* GraphQL */ `
           name
         }
       }
+      nextToken
     }
   }
 `;
 
+// --- 6. Transactions ---
 export const listPlayerTransactionsForDebug = /* GraphQL */ `
-  query ListPlayerTransactionsForDebug {
-    listPlayerTransactions {
+  query ListPlayerTransactionsForDebug($limit: Int, $nextToken: String) {
+    listPlayerTransactions(limit: $limit, nextToken: $nextToken) {
       items {
         id
         type
@@ -166,14 +177,21 @@ export const listPlayerTransactionsForDebug = /* GraphQL */ `
         playerId
         gameId
         _version
+        player {
+          id
+          firstName
+          lastName
+        }
       }
+      nextToken
     }
   }
 `;
 
+// --- 7. Credits ---
 export const listPlayerCreditsForDebug = /* GraphQL */ `
-  query ListPlayerCreditsForDebug {
-    listPlayerCredits {
+  query ListPlayerCreditsForDebug($limit: Int, $nextToken: String) {
+    listPlayerCredits(limit: $limit, nextToken: $nextToken) {
       items {
         id
         type
@@ -187,13 +205,15 @@ export const listPlayerCreditsForDebug = /* GraphQL */ `
         relatedTransactionId
         _version
       }
+      nextToken
     }
   }
 `;
 
+// --- 8. Points ---
 export const listPlayerPointsForDebug = /* GraphQL */ `
-  query ListPlayerPointsForDebug {
-    listPlayerPoints {
+  query ListPlayerPointsForDebug($limit: Int, $nextToken: String) {
+    listPlayerPoints(limit: $limit, nextToken: $nextToken) {
       items {
         id
         type
@@ -207,13 +227,15 @@ export const listPlayerPointsForDebug = /* GraphQL */ `
         relatedTransactionId
         _version
       }
+      nextToken
     }
   }
 `;
 
+// --- 9. Tickets ---
 export const listPlayerTicketsForDebug = /* GraphQL */ `
-  query ListPlayerTicketsForDebug {
-    listPlayerTickets {
+  query ListPlayerTicketsForDebug($limit: Int, $nextToken: String) {
+    listPlayerTickets(limit: $limit, nextToken: $nextToken) {
       items {
         id
         assignedAt
@@ -224,13 +246,15 @@ export const listPlayerTicketsForDebug = /* GraphQL */ `
         ticketTemplateId
         _version
       }
+      nextToken
     }
   }
 `;
 
+// --- 10. Preferences ---
 export const listPlayerMarketingPreferencesForDebug = /* GraphQL */ `
-  query ListPlayerMarketingPreferencesForDebug {
-    listPlayerMarketingPreferences {
+  query ListPlayerMarketingPreferencesForDebug($limit: Int, $nextToken: String) {
+    listPlayerMarketingPreferences(limit: $limit, nextToken: $nextToken) {
       items {
         id
         optOutSms
@@ -238,13 +262,15 @@ export const listPlayerMarketingPreferencesForDebug = /* GraphQL */ `
         playerId
         _version
       }
+      nextToken
     }
   }
 `;
 
+// --- 11. Messages ---
 export const listPlayerMarketingMessagesForDebug = /* GraphQL */ `
-  query ListPlayerMarketingMessagesForDebug {
-    listPlayerMarketingMessages {
+  query ListPlayerMarketingMessagesForDebug($limit: Int, $nextToken: String) {
+    listPlayerMarketingMessages(limit: $limit, nextToken: $nextToken) {
       items {
         id
         status
@@ -253,6 +279,8 @@ export const listPlayerMarketingMessagesForDebug = /* GraphQL */ `
         marketingMessageId
         _version
       }
+      nextToken
     }
   }
 `;
+

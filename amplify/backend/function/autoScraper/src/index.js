@@ -6,564 +6,296 @@
 	API_KINGSROOM_SCRAPERSTATETABLE_ARN
 	API_KINGSROOM_SCRAPERSTATETABLE_NAME
 	ENV
-	FUNCTION_PLAYERDATAPROCESSOR_NAME
 	FUNCTION_WEBSCRAPERFUNCTION_NAME
 	REGION
 Amplify Params - DO NOT EDIT */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, GetCommand, PutCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
-const { LambdaClient, InvokeCommand, InvokeCommandInput } = require('@aws-sdk/client-lambda');
+const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');
+const crypto = require('crypto');
+const { TextDecoder } = require('util'); 
 
+// --- Configuration & Clients ---
 const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
 const lambdaClient = new LambdaClient({});
 
-// ⚡ OPTIMIZED SETTINGS - For worker mode
-const MAX_NON_COMPLETE_GAMES_PER_RUN = 5; 
-const MAX_NEW_GAMES_PER_RUN = 10;          
-const LAMBDA_TIMEOUT_BUFFER = 30000;       // Leave 30 seconds buffer for graceful shutdown
-const MAX_CONSECUTIVE_BLANKS = 2;
-
-// Log and Game List Configuration
+const MAX_NEW_GAMES_PER_RUN = 10; 
+const LAMBDA_TIMEOUT_BUFFER = (5 * 60 * 1000) - 30000; 
+const MAX_CONSECUTIVE_BLANKS = 2; 
 const MAX_LOG_SIZE = 25; 
 const MAX_GAME_LIST_SIZE = 5; 
 
-/**
- * Get table name using Amplify naming convention
- */
+// --- Utility Functions ---
 const getTableName = (modelName) => {
-    const apiId = process.env.API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT;
+    if (modelName === 'ScraperState') return process.env.API_KINGSROOM_SCRAPERSTATETABLE_NAME;
+    if (modelName === 'Game') return process.env.API_KINGSROOM_GAMETABLE_NAME;
+    const apiId = process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT;
     const env = process.env.ENV;
-    
-    if (!apiId || !env) {
-        throw new Error(`API ID or environment name not found in environment variables.`);
-    }
-    
+    if (!apiId || !env) throw new Error(`API ID or environment name not found.`);
     return `${modelName}-${apiId}-${env}`;
 };
 
-/**
- * Update the scraper state.
- * This is a simple PUT operation, relying on the calling function to manage versioning and fields.
- */
 const updateScraperState = async (updates) => {
     const stateId = 'AUTO_SCRAPER_STATE';
     const now = new Date().toISOString();
-    
     try {
         const scraperStateTable = getTableName('ScraperState');
-        const item = {
-            id: stateId,
-            ...updates,
-            updatedAt: now,
-            _lastChangedAt: Date.now(),
-            __typename: 'ScraperState'
+        const currentState = await getScraperState(true); // Pass flag to avoid recursive logging
+        const mergedItem = {
+            ...currentState, ...updates, id: stateId, updatedAt: now,
+            _lastChangedAt: Date.now(), __typename: 'ScraperState',
+            currentLog: updates.currentLog !== undefined ? updates.currentLog : currentState.currentLog,
+            lastGamesProcessed: updates.lastGamesProcessed !== undefined ? updates.lastGamesProcessed : currentState.lastGamesProcessed,
         };
-        
-        await ddbDocClient.send(new PutCommand({
-            TableName: scraperStateTable,
-            Item: item
-        }));
-        
-        return item;
+        await ddbDocClient.send(new PutCommand({ TableName: scraperStateTable, Item: mergedItem }));
+        return mergedItem;
     } catch (error) {
-        console.error('Error updating scraper state (table may not exist):', error.message);
-        return { id: stateId, ...updates, updatedAt: now };
+        console.error(`[STATE-UPDATE] ERROR: ${error.message}`);
+        return { id: stateId, ...updates, updatedAt: now }; 
     }
 };
 
-
-/**
- * Get or create the scraper state record
- */
-const getScraperState = async () => {
+const getScraperState = async (isInternalCall = false) => {
     const stateId = 'AUTO_SCRAPER_STATE';
-    
-    // Default state with new log fields initialized
-    const defaultState = {
-        id: stateId,
-        isRunning: false,
-        lastScannedId: 0,
-        lastRunStartTime: null,
-        lastRunEndTime: null,
-        consecutiveBlankCount: 0,
-        totalScraped: 0,
-        totalErrors: 0,
-        enabled: true,
-        currentLog: [], // New logging field
-        lastGamesProcessed: [] // New game list field
-    };
+    const scraperStateTable = getTableName('ScraperState');
+    if (!isInternalCall) {
+        console.log(`[DEBUG-DDB] Preparing to fetch state from table: ${scraperStateTable}`);
+    }
+
+    const defaultState = { id: stateId, isRunning: false, lastScannedId: 0, lastRunStartTime: null, lastRunEndTime: null, consecutiveBlankCount: 0, totalScraped: 0, totalErrors: 0, enabled: true, currentLog: [], lastGamesProcessed: [] };
     
     try {
-        const scraperStateTable = getTableName('ScraperState');
-        const response = await ddbDocClient.send(new GetCommand({
-            TableName: scraperStateTable,
-            Key: { id: stateId }
-        }));
+        const command = new GetCommand({ TableName: scraperStateTable, Key: { id: stateId }, ConsistentRead: true });
+        
+        // --- TIMED LOGGING START ---
+        if (!isInternalCall) console.time('DDB_GetScraperState_Duration');
+        if (!isInternalCall) console.log('[DEBUG-DDB] Initiating GetCommand...');
+        
+        const response = await ddbDocClient.send(command);
+        
+        if (!isInternalCall) console.log('[DEBUG-DDB] GetCommand successful.');
+        if (!isInternalCall) console.timeEnd('DDB_GetScraperState_Duration');
+        // --- TIMED LOGGING END ---
         
         if (response.Item) {
-            // Ensure new fields exist for backward compatibility with old records
-            return {
-                ...defaultState,
-                ...response.Item,
-                currentLog: response.Item.currentLog || [],
-                lastGamesProcessed: response.Item.lastGamesProcessed || []
-            };
+            if (!isInternalCall) console.log('[DEBUG-DDB] Item found.');
+            return { ...defaultState, ...response.Item };
         }
         
-        // Create initial record if it doesn't exist
-        await updateScraperState(defaultState);
+        if (!isInternalCall) console.log('[DEBUG-DDB] Item not found, returning default.');
         return defaultState;
-        
+
     } catch (error) {
-        console.log('ScraperState table might not exist yet, using default state:', error.message);
-        return defaultState;
+        // --- ERROR LOGGING ---
+        console.error(`[DEBUG-DDB] CRITICAL ERROR during GetCommand: ${error.message}`);
+        if (!isInternalCall) console.timeEnd('DDB_GetScraperState_Duration'); // End timer on error
+        throw error; // Re-throw to be caught by the handler
     }
 };
 
-
-/**
- * NEW HELPER: Pushes a new log entry to the database and trims the log size.
- */
 const logStatus = async (level, message, details = '') => {
-    const state = await getScraperState();
-    
-    const newEntry = {
-        timestamp: new Date().toISOString(),
-        level: level,
-        message: message,
-        details: details
-    };
-
-    // Use unshift to add to the front (making it a circular buffer/queue when trimmed)
-    const newLog = [newEntry, ...(state.currentLog || [])];
-    
-    // Trim to maintain max size
-    if (newLog.length > MAX_LOG_SIZE) {
-        newLog.splice(MAX_LOG_SIZE);
-    }
-    
-    await updateScraperState({
-        ...state,
-        currentLog: newLog
-    });
+    const state = await getScraperState(true);
+    const newEntry = { timestamp: new Date().toISOString(), level, message, details };
+    const newLog = [newEntry, ...(state.currentLog || [])].slice(0, MAX_LOG_SIZE);
+    await updateScraperState({ currentLog: newLog });
 };
 
-/**
- * NEW HELPER: Pushes a new game status to the dashboard list and trims the size.
- */
 const updateGameList = async (id, name, status) => {
-    const state = await getScraperState();
-    
-    const newGameEntry = {
-        id: id,
-        name: name,
-        status: status
-    };
-
-    // Add to the start of the list
-    const newList = [newGameEntry, ...(state.lastGamesProcessed || [])];
-
-    // Trim to maintain max size
-    if (newList.length > MAX_GAME_LIST_SIZE) {
-        newList.splice(MAX_GAME_LIST_SIZE);
-    }
-    
-    await updateScraperState({
-        ...state,
-        lastGamesProcessed: newList
-    });
+    const state = await getScraperState(true);
+    const newGameEntry = { id: id.toString(), name, status };
+    const newList = [newGameEntry, ...(state.lastGamesProcessed || [])].slice(0, MAX_GAME_LIST_SIZE);
+    await updateScraperState({ lastGamesProcessed: newList });
 };
 
-/**
- * Get the highest game ID from the Game table
- */
-const getHighestGameId = async () => {
-    const gameTable = getTableName('Game');
-    
-    try {
-        const response = await ddbDocClient.send(new ScanCommand({
-            TableName: gameTable,
-            ProjectionExpression: 'sourceUrl',
-            FilterExpression: 'attribute_exists(sourceUrl)'
-        }));
-        
-        let highestId = 0;
-        
-        if (response.Items && response.Items.length > 0) {
-            response.Items.forEach(item => {
-                if (item.sourceUrl) {
-                    const match = item.sourceUrl.match(/id=(\d+)/);
-                    if (match) {
-                        const id = parseInt(match[1]);
-                        if (id > highestId) {
-                            highestId = id;
-                        }
-                    }
-                }
-            });
-        }
-        
-        return highestId;
-    } catch (error) {
-        console.error('Error getting highest game ID:', error);
-        return 0;
-    }
-};
+// --- DEBUG: Temporarily commenting out the slow ScanCommand functions ---
+/*
+const getHighestGameId = async () => { ... };
+const getNonCompleteGames = async (limit = MAX_NON_COMPLETE_GAMES_PER_RUN) => { ... };
+*/
+// --- END DEBUG SECTION ---
 
-/**
- * Get limited non-complete games that need rescanning
- */
-const getNonCompleteGames = async (limit = MAX_NON_COMPLETE_GAMES_PER_RUN) => {
-    const gameTable = getTableName('Game');
-    
-    try {
-        const response = await ddbDocClient.send(new ScanCommand({
-            TableName: gameTable,
-            FilterExpression: 'gameStatus <> :finished AND gameStatus <> :cancelled AND doNotScrape <> :true AND attribute_exists(sourceUrl)',
-            ExpressionAttributeValues: {
-                ':finished': 'FINISHED',
-                ':cancelled': 'CANCELLED',
-                ':true': true
-            },
-            ProjectionExpression: 'id, sourceUrl, gameStatus, #name',
-            ExpressionAttributeNames: {
-                '#name': 'name'
-            },
-            Limit: limit 
-        }));
-        
-        return response.Items || [];
-    } catch (error) {
-        console.error('Error getting non-complete games:', error);
-        return [];
-    }
-};
+const createCleanDataForSave = (scraped) => ({
+    name: scraped.name, gameStartDateTime: scraped.gameStartDateTime || undefined, gameEndDateTime: scraped.gameEndDateTime || undefined,
+    gameStatus: scraped.gameStatus || undefined, registrationStatus: scraped.registrationStatus || undefined, gameVariant: scraped.gameVariant || 'NLHE', 
+    gameType: scraped.gameType || undefined, prizepool: scraped.prizepool || undefined, totalEntries: scraped.totalEntries || undefined,
+    totalRebuys: scraped.totalRebuys || undefined, totalAddons: scraped.totalAddons || undefined, totalDuration: scraped.totalDuration || undefined,
+    gameTags: scraped.gameTags ? scraped.gameTags.filter(tag => tag !== null) : [], tournamentType: scraped.tournamentType || undefined,
+    buyIn: scraped.buyIn || undefined, rake: scraped.rake || undefined, startingStack: scraped.startingStack || undefined,
+    hasGuarantee: scraped.hasGuarantee || false, guaranteeAmount: scraped.guaranteeAmount || undefined,
+    levels: scraped.levels ? scraped.levels.map(l => ({ levelNumber: l.levelNumber, durationMinutes: l.durationMinutes || undefined, smallBlind: l.smallBlind || undefined, bigBlind: l.bigBlind || undefined, ante: l.ante || undefined, breakMinutes: l.breakMinutes || undefined })) : []
+});
 
-/**
- * CORE WORKER: Invokes the webScraperFunction to first scrape (FETCH), then save (SAVE).
- */
-const scrapeAndSaveTournament = async (url) => {
+const scrapeAndProcessTournament = async (url, existingGameData, jobId, triggerSource) => {
     const functionName = process.env.FUNCTION_WEBSCRAPERFUNCTION_NAME;
+    const idMatch = url.match(/id=(\d+)/);
+    const tournamentId = idMatch ? parseInt(idMatch[1], 10) : (existingGameData ? existingGameData.id : null);
+    if (!tournamentId) throw new Error(`Could not determine tournament ID from URL: ${url}`);
     
-    // --- Step 1: Scrape the data (FETCH operation) ---
-    const fetchPayload = { arguments: { operation: 'FETCH', url: url } };
-    let scrapedData;
+    const existingGameId = existingGameData?.id || undefined;
+    const fetchPayload = { fieldName: 'fetchTournamentData', arguments: { url, existingGameId }, identity: { claims: { jobId, triggerSource }}};
+    let scrapedData, scrapeError = null;
     
     try {
-        await logStatus('INFO', `Fetching HTML for ${url}`);
-        
-        const response = await lambdaClient.send(new InvokeCommand({
-            FunctionName: functionName,
-            InvocationType: 'RequestResponse',
-            Payload: JSON.stringify(fetchPayload)
-        }));
-
+        await logStatus('INFO', `Fetching/Scraping ID #${tournamentId}`);
+        const response = await lambdaClient.send(new InvokeCommand({ FunctionName: functionName, InvocationType: 'RequestResponse', Payload: JSON.stringify(fetchPayload)}));
         const result = JSON.parse(new TextDecoder().decode(response.Payload));
-        if (result.errorMessage) throw new Error(result.errorMessage);
-
-        scrapedData = result.data; 
         
-        // Log basic info
-        const gameName = scrapedData.name || 'Unnamed Game';
-        
-        if (scrapedData.isInactive) {
-            await logStatus('WARN', `Inactive ID detected: ${url}`, gameName);
-            return { scrapedData, status: 'INACTIVE' };
+        let scrapedDataCandidate = result.data || result;
+        if (result.errorMessage) {
+            scrapeError = result.errorMessage;
+        } else if (scrapedDataCandidate && scrapedDataCandidate.name) {
+            scrapedData = scrapedDataCandidate;
+        } else {
+             scrapeError = 'webScraper returned no usable data payload.';
         }
         
-        await logStatus('INFO', `Scrape SUCCESS: ${gameName} (${scrapedData.gameStatus})`);
-        
-        // Check for an auto-assigned venue before saving
-        const autoAssignedVenueId = scrapedData?.venueMatch?.autoAssignedVenue?.id;
-
-        if (!autoAssignedVenueId) {
-            await logStatus('WARN', `Venue match failed for ${gameName}. Skipping save.`, 'No high-confidence venue found.');
-            return { scrapedData, status: 'SKIPPED_VENUE' };
+        if (scrapeError) {
+             if (scrapeError.includes('Scraping is disabled')) return { status: 'SKIPPED_DONOTSCRAPE' };
+             throw new Error(scrapeError);
         }
-
-        // --- Step 2: Save the data (SAVE operation) ---
-        await logStatus('INFO', `Saving game data: ${gameName}`, `Auto-matched venue: ${autoAssignedVenueId}`);
         
+        if (scrapedData && scrapedData.isInactive) return { scrapedData, status: 'INACTIVE' }; 
+        
+        const autoAssignedVenueId = scrapedData?.venueMatch?.autoAssignedVenue?.id || existingGameData?.venueId;
+        if (!autoAssignedVenueId) return { scrapedData, status: 'SKIPPED_VENUE' };
+
         const savePayload = {
-            arguments: {
-                operation: 'SAVE',
-                url: url,
-                venueId: autoAssignedVenueId,
-                scrapedData: scrapedData // Pass the already scraped data
-            }
+            fieldName: 'saveTournamentData', 
+            arguments: { input: { sourceUrl: url, venueId: autoAssignedVenueId, existingGameId, doNotScrape: scrapedData.doNotScrape || false, originalScrapedData: JSON.stringify(scrapedData), data: createCleanDataForSave(scrapedData) }},
+            identity: { claims: { jobId, triggerSource } }
         };
         
-        // Invoke the save operation (which triggers SQS and playerDataProcessor)
-        await lambdaClient.send(new InvokeCommand({
-            FunctionName: functionName,
-            InvocationType: 'RequestResponse', 
-            Payload: JSON.stringify(savePayload)
-        }));
+        const saveResponse = await lambdaClient.send(new InvokeCommand({ FunctionName: functionName, InvocationType: 'RequestResponse', Payload: JSON.stringify(savePayload) }));
+        const saveResult = JSON.parse(new TextDecoder().decode(saveResponse.Payload));
+        if (saveResult.errorMessage) throw new Error(`SAVE failed for ID #${tournamentId}: ${saveResult.errorMessage}`);
 
-        await logStatus('INFO', `SAVE COMPLETE: ${gameName}`, 'SQS message sent to process player data.');
-        return { scrapedData, status: 'SAVED' };
-
+        return { scrapedData, status: existingGameId ? 'UPDATED' : 'SAVED' }; 
     } catch (error) {
-        const errorMsg = error.message || 'Lambda execution error';
-        await logStatus('ERROR', `Scrape/Save failed for ${url}`, errorMsg);
-        throw error;
+        await logStatus('ERROR', `Scrape/Process failed for ID #${tournamentId}`, error.message);
+        return { status: 'ERROR' };
     }
 };
 
-
-/**
- * Main scraping logic
- */
-const performScraping = async () => {
-    console.log('[AutoScraper] Starting automated scraping process...');
+const performScraping = async (maxNewGamesOverride = null, triggerSource = 'SCHEDULED') => {
     const startTime = Date.now();
+    let state = await getScraperState();
+    if (state.isRunning || !state.enabled) return { success: false, message: state.isRunning ? 'Already running' : 'Disabled' };
     
-    const state = await getScraperState();
-    
-    // Check if already running or disabled
-    if (state.isRunning) return { success: false, message: 'Scraper is already in progress' };
-    if (!state.enabled) return { success: false, message: 'Auto scraping is disabled' };
-    
-    // Mark as running and clear logs/game list
-    await updateScraperState({
-        ...state,
-        isRunning: true,
-        lastRunStartTime: new Date().toISOString(),
-        currentLog: [], // Clear logs
-        lastGamesProcessed: [], // Clear game list
-        consecutiveBlankCount: 0
-    });
-    
-    await logStatus('INFO', 'Worker initialized.', `Max runtime: ${LAMBDA_TIMEOUT_BUFFER / 1000}s`);
+    const maxNewGames = maxNewGamesOverride !== null ? maxNewGamesOverride : MAX_NEW_GAMES_PER_RUN;
+    const jobId = crypto.randomBytes(16).toString('hex');
+
+    await updateScraperState({ isRunning: true, lastRunStartTime: new Date().toISOString(), currentLog: [], lastGamesProcessed: [], consecutiveBlankCount: 0, jobId, triggerSource });
+    await logStatus('INFO', `Worker initialized. Job ID: ${jobId}`);
 
     const results = { newGamesScraped: 0, gamesUpdated: 0, errors: 0, blanks: 0 };
     
     try {
-        // Step 1: Rescrape non-complete games
-        await logStatus('INFO', `Step 1: Rescanning up to ${MAX_NON_COMPLETE_GAMES_PER_RUN} non-complete games.`);
-        const nonCompleteGames = await getNonCompleteGames(MAX_NON_COMPLETE_GAMES_PER_RUN);
+        await logStatus('WARN', 'PHASE 1 (Targeted Scan) is temporarily disabled for debugging.');
         
-        for (const game of nonCompleteGames) {
-            if (Date.now() - startTime > LAMBDA_TIMEOUT_BUFFER) break;
-            
-            let status = 'ERROR';
-            try {
-                const response = await scrapeAndSaveTournament(game.sourceUrl);
-                status = response.status;
-            } catch (error) {
-                status = 'ERROR';
-                results.errors++;
-            }
-            
-            await updateGameList(game.id, game.name, status);
-            if (status === 'SAVED') results.gamesUpdated++;
-        }
+        const startId = state.lastScannedId + 1;
+        await logStatus('INFO', `Starting new ID scan from ScraperState ID: ${startId}`);
         
-        // Step 2: Find and save new games
-        await logStatus('INFO', `Step 2: Scanning for up to ${MAX_NEW_GAMES_PER_RUN} new games.`);
-        
-        const highestDbId = await getHighestGameId();
-        const startId = Math.max(state.lastScannedId || 0, highestDbId) + 1;
-        await logStatus('INFO', `Starting new ID scan from: ${startId}`);
-        
-        let currentId = startId;
-        let consecutiveBlanks = 0;
-        
-        while (
-            consecutiveBlanks < MAX_CONSECUTIVE_BLANKS && 
-            results.newGamesScraped < MAX_NEW_GAMES_PER_RUN &&
-            (Date.now() - startTime) < LAMBDA_TIMEOUT_BUFFER
-        ) {
+        let currentId = startId, consecutiveBlanks = 0;
+        while (results.newGamesScraped < maxNewGames && consecutiveBlanks < MAX_CONSECUTIVE_BLANKS && (Date.now() - startTime < LAMBDA_TIMEOUT_BUFFER)) {
             const url = `https://kingsroom.com.au/tournament/?id=${currentId}`;
+            const res = await scrapeAndProcessTournament(url, null, jobId, triggerSource);
             
-            let status = 'ERROR';
-            try {
-                const response = await scrapeAndSaveTournament(url);
-                status = response.status;
-            } catch (error) {
-                status = 'ERROR';
-                results.errors++;
-            }
+            if (res.status === 'INACTIVE') consecutiveBlanks++; else consecutiveBlanks = 0;
+            if (res.status === 'SAVED') results.newGamesScraped++;
+            if (res.status === 'ERROR') results.errors++;
             
-            if (status === 'INACTIVE') {
-                consecutiveBlanks++;
-                results.blanks++;
-                await updateGameList(currentId, 'Inactive/Blank', 'BLANK');
-            } else if (status === 'SAVED') {
-                consecutiveBlanks = 0;
-                results.newGamesScraped++;
-                await updateGameList(currentId, 'New Game', 'SAVED'); // Name updated inside scrapeAndSave
-            } else if (status === 'SKIPPED_VENUE') {
-                consecutiveBlanks = 0; // Skip saves are not true blanks
-                await updateGameList(currentId, 'New Game (Skipped)', 'SKIPPED');
-            } else if (status === 'ERROR') {
-                consecutiveBlanks = 0; // Skip saves are not true blanks
-                await updateGameList(currentId, 'Failed ID', 'FAILED');
-            }
-            
-            // Update last scanned ID, total scraped count, and log status
-            const newState = await getScraperState();
-            await updateScraperState({
-                ...newState,
-                lastScannedId: currentId,
-                totalScraped: (newState.totalScraped || 0) + 1
-            });
-            
+            await updateGameList(currentId, `ID ${currentId}`, res.status);
+            await updateScraperState({ lastScannedId: currentId, consecutiveBlankCount: consecutiveBlanks });
             currentId++;
         }
         
-        if (consecutiveBlanks >= MAX_CONSECUTIVE_BLANKS) {
-            await logStatus('INFO', `Stopped scan after ${MAX_CONSECUTIVE_BLANKS} consecutive blank IDs.`);
-        }
-        
     } catch (error) {
-        await logStatus('ERROR', 'A fatal, unhandled error occurred during the run.', error.message);
-        throw error;
+        await logStatus('ERROR', 'Fatal error during run.', error.message);
     } finally {
-        // Finalize state
         const finalState = await getScraperState();
         const runDuration = Math.round((Date.now() - startTime) / 1000);
-
-        await logStatus('INFO', 'Worker run complete. Finalizing state.', `Duration: ${runDuration}s`);
-
-        await updateScraperState({
-            ...finalState,
-            isRunning: false,
-            lastRunEndTime: new Date().toISOString(),
-            totalErrors: (finalState.totalErrors || 0) + results.errors
-        });
-        
-        // Return results for GraphQL mutation response
-        return { 
-            success: true, 
-            message: `Scraping completed in ${runDuration}s.`,
-            results: results
-        };
+        await logStatus('INFO', `Worker run complete.`, `Duration: ${runDuration}s`);
+        await updateScraperState({ ...finalState, isRunning: false, lastRunEndTime: new Date().toISOString(), totalErrors: (finalState.totalErrors || 0) + results.errors });
+        return { success: true, message: `Scraping completed.`, results };
     }
 };
 
-/**
- * Control operations for the scraper
- */
-const controlScraper = async (operation) => {
-    const state = await getScraperState();
+const controlScraper = async (operation, maxGames = null) => {
+    console.log(`[DEBUG-CONTROL] controlScraper called with operation: ${operation}`);
+
+    if (operation === 'STATUS') {
+        try {
+            console.log('[DEBUG-CONTROL] Entering STATUS fast path.');
+            const state = await getScraperState();
+            console.log('[DEBUG-CONTROL] STATUS fast path successful. Returning state.');
+            return { success: true, state };
+        } catch (error) {
+            console.error(`[DEBUG-CONTROL] Error in STATUS fast path: ${error.message}`);
+            throw new Error(`Failed to get scraper state: ${error.message}`);
+        }
+    }
+    
+    const state = await getScraperState(true);
     
     switch (operation) {
         case 'START':
-            if (state.isRunning) {
-                return { success: false, message: 'Scraper is already running', state };
-            }
-            // Invoke Lambda asynchronously to prevent GraphQL timeout
-            const params = {
-                FunctionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
-                InvocationType: 'Event', // Asynchronous invocation
-                Payload: JSON.stringify({ operation: 'START_WORKER' }) // Trigger internal worker
-            };
-            await lambdaClient.send(new InvokeCommand(params));
-            
-            // Return status immediately
+        case 'MANUAL':
+            if (state.isRunning || !state.enabled) return { success: false, message: state.isRunning ? 'Already running' : 'Disabled', state };
+            const triggerSource = operation === 'MANUAL' ? 'MANUAL' : 'CONTROL';
+            await lambdaClient.send(new InvokeCommand({ FunctionName: process.env.AWS_LAMBDA_FUNCTION_NAME, InvocationType: 'Event', Payload: JSON.stringify({ operation: 'START_WORKER', maxGames, triggerSource }) }));
             return { success: true, message: 'Scraper worker started asynchronously.', state };
             
         case 'STOP':
-            // Logic handled by the worker itself checking isRunning=false on the next iteration
-            const stoppedState = await updateScraperState({ 
-                ...state, 
-                isRunning: false, 
-                lastRunEndTime: new Date().toISOString() 
-            });
-            return { success: true, message: 'Scraper stop requested. Worker will exit soon.', state: stoppedState };
-            
+            return { success: true, message: 'Scraper stop requested.', state: await updateScraperState({ ...state, isRunning: false }) };
         case 'ENABLE':
-            const enabledState = await updateScraperState({ ...state, enabled: true });
-            return { success: true, message: 'Auto scraping enabled', state: enabledState };
-            
+            return { success: true, message: 'Auto scraping enabled', state: await updateScraperState({ ...state, enabled: true }) };
         case 'DISABLE':
-            const disabledState = await updateScraperState({ ...state, enabled: false });
-            return { success: true, message: 'Auto scraping disabled', state: disabledState };
-            
-        case 'STATUS':
-            return { success: true, state };
-            
+            return { success: true, message: 'Auto scraping disabled', state: await updateScraperState({ ...state, enabled: false }) };
         case 'RESET':
-            const resetState = {
-                id: 'AUTO_SCRAPER_STATE',
-                isRunning: false,
-                lastScannedId: 0,
-                lastRunStartTime: null,
-                lastRunEndTime: null,
-                consecutiveBlankCount: 0,
-                totalScraped: 0,
-                totalErrors: 0,
-                enabled: true,
-                currentLog: [],
-                lastGamesProcessed: []
-            };
-            await updateScraperState(resetState);
-            return { success: true, message: 'Scraper state reset', state: resetState };
-            
+            if (state.isRunning) return { success: false, message: 'Cannot reset while running.', state };
+            return { success: true, message: 'Scraper state reset', state: await updateScraperState({ isRunning: false, lastScannedId: 0, lastRunStartTime: null, lastRunEndTime: null, consecutiveBlankCount: 0, totalScraped: 0, totalErrors: 0, enabled: true, currentLog: [], lastGamesProcessed: [] }) };
         default:
             return { success: false, message: `Unknown operation: ${operation}` };
     }
 };
 
-/**
- * Lambda handler
- */
 exports.handler = async (event) => {
+    console.log(`[DEBUG-HANDLER] Lambda handler invoked at ${new Date().toISOString()}`);
+    console.log(`[DEBUG-HANDLER] Event received: ${JSON.stringify(event, null, 2)}`);
+    
+    const { fieldName, operation, arguments: args, source, ['detail-type']: detailType } = event;
     
     try {
-        // Handle GraphQL resolver calls
-        if (event.fieldName) {
-            // GraphQL mutations that trigger a background worker (START, MANUAL)
-            if (event.fieldName === 'triggerAutoScraping' || event.fieldName === 'performAutoScraping') {
-                 // Use the same logic as START, but invoke the Lambda itself
-                const params = {
-                    FunctionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
-                    InvocationType: 'Event', // Asynchronous invocation
-                    Payload: JSON.stringify({ operation: 'START_WORKER' }) // Trigger internal worker
-                };
-                await lambdaClient.send(new InvokeCommand(params));
-                
-                const state = await getScraperState();
-                return { success: true, message: 'Manual scrape started asynchronously.', state };
+        let route;
+        if (fieldName) {
+            switch (fieldName) {
+                case 'triggerAutoScraping': route = 'MANUAL'; break;
+                case 'controlScraperOperation': route = args?.operation; break;
+                case 'getScraperControlState': route = 'STATUS'; break;
+                default: throw new Error(`Unknown fieldName: ${fieldName}`);
             }
-            
-            // GraphQL queries/mutations that control/read status
-            if (event.fieldName === 'controlScraperOperation' || event.fieldName === 'controlAutoScraper') {
-                const { operation } = event.arguments;
-                return await controlScraper(operation);
-            }
-            
-            if (event.fieldName === 'getScraperControlState' || event.fieldName === 'getScraperState') {
-                return await controlScraper('STATUS');
-            }
-            
-            throw new Error(`Unknown fieldName: ${event.fieldName}`);
+            console.log(`[DEBUG-HANDLER] Routing GraphQL request to controlScraper("${route}").`);
+            return await controlScraper(route, args?.maxGames);
         }
         
-        // Handle EventBridge scheduled events
-        if (event.source === 'aws.scheduler' || event['detail-type'] === 'Scheduled Event') {
-            await logStatus('INFO', 'Scheduled run received from EventBridge. Starting worker.');
-            return await performScraping();
+        if (source === 'aws.scheduler' || detailType === 'Scheduled Event') {
+            console.log('[DEBUG-HANDLER] Routing scheduled event to performScraping.');
+            return await performScraping(null, 'SCHEDULED');
         }
         
-        // Handle ASYNCHRONOUS worker invocation
-        if (event.operation === 'START_WORKER') {
-            await logStatus('INFO', 'Asynchronous worker signal received. Starting core process.');
-            return await performScraping();
+        if (operation === 'START_WORKER') {
+            console.log('[DEBUG-HANDLER] Routing async worker signal to performScraping.');
+            return await performScraping(event.maxGames, event.triggerSource);
         }
         
-        // Default to returning status if no fieldName or scheduled event is present
+        console.log(`[DEBUG-HANDLER] No specific route matched. Defaulting to STATUS check.`);
         return await controlScraper('STATUS');
-        
+
     } catch (error) {
-        console.error('Error in handler:', error);
-        return { 
-            success: false, 
-            message: error.message,
-            error: error.message 
-        };
+        console.error(`[DEBUG-HANDLER] FATAL ERROR caught in handler: ${error.message}`);
+        // This re-throws the error so AppSync can format it correctly for the client
+        throw error; 
     }
 };

@@ -365,9 +365,11 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -588,9 +590,11 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -945,9 +949,11 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -1621,9 +1627,11 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -1844,9 +1852,11 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -2201,9 +2211,11 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -2877,9 +2889,11 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -3100,9 +3114,11 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -3457,9 +3473,11 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -4184,9 +4202,11 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -4697,9 +4717,11 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -5210,9 +5232,11 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -5689,9 +5713,11 @@ export const onCreateTournamentSeriesTitle = /* GraphQL */ `subscription OnCreat
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -5861,9 +5887,11 @@ export const onUpdateTournamentSeriesTitle = /* GraphQL */ `subscription OnUpdat
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -6033,9 +6061,11 @@ export const onDeleteTournamentSeriesTitle = /* GraphQL */ `subscription OnDelet
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -6313,9 +6343,11 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -6685,9 +6717,11 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -7169,9 +7203,11 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -7541,9 +7577,11 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -8025,9 +8063,11 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -8397,9 +8437,11 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -8678,9 +8720,11 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
     seriesName
     gameTags
     sourceUrl
+    sourceSystem
     doNotScrape
     sourceDataIssue
     gameDataVerified
+    missingKeysFromScrape
     venueId
     venue {
       id
@@ -8835,9 +8879,11 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -9319,9 +9365,11 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -9458,9 +9506,11 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -9606,9 +9656,11 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -9781,9 +9833,11 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -10041,9 +10095,11 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -10297,9 +10353,11 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -10443,9 +10501,11 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
     seriesName
     gameTags
     sourceUrl
+    sourceSystem
     doNotScrape
     sourceDataIssue
     gameDataVerified
+    missingKeysFromScrape
     venueId
     venue {
       id
@@ -10600,9 +10660,11 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -11084,9 +11146,11 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -11223,9 +11287,11 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -11371,9 +11437,11 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -11546,9 +11614,11 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -11806,9 +11876,11 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -12062,9 +12134,11 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -12208,9 +12282,11 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
     seriesName
     gameTags
     sourceUrl
+    sourceSystem
     doNotScrape
     sourceDataIssue
     gameDataVerified
+    missingKeysFromScrape
     venueId
     venue {
       id
@@ -12365,9 +12441,11 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -12849,9 +12927,11 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -12988,9 +13068,11 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -13136,9 +13218,11 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -13311,9 +13395,11 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -13571,9 +13657,11 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -13827,9 +13915,11 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -13989,9 +14079,11 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -14286,9 +14378,11 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -14583,9 +14677,11 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -14924,9 +15020,11 @@ export const onCreateCashStructure = /* GraphQL */ `subscription OnCreateCashStr
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -15265,9 +15363,11 @@ export const onUpdateCashStructure = /* GraphQL */ `subscription OnUpdateCashStr
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -15606,9 +15706,11 @@ export const onDeleteCashStructure = /* GraphQL */ `subscription OnDeleteCashStr
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -15921,9 +16023,11 @@ export const onCreateRakeStructure = /* GraphQL */ `subscription OnCreateRakeStr
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -16032,9 +16136,11 @@ export const onUpdateRakeStructure = /* GraphQL */ `subscription OnUpdateRakeStr
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -16143,9 +16249,11 @@ export const onDeleteRakeStructure = /* GraphQL */ `subscription OnDeleteRakeStr
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -16354,9 +16462,11 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -17335,9 +17445,11 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -17591,9 +17703,11 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -18822,9 +18936,11 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -19803,9 +19919,11 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -20059,9 +20177,11 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -21290,9 +21410,11 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -22271,9 +22393,11 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -22527,9 +22651,11 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -23720,9 +23846,11 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -24081,9 +24209,11 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -24177,9 +24307,11 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -24697,9 +24829,11 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -25058,9 +25192,11 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -25154,9 +25290,11 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -25674,9 +25812,11 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -26035,9 +26175,11 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -26131,9 +26273,11 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -26648,9 +26792,11 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -27009,9 +27155,11 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -27105,9 +27253,11 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -27516,9 +27666,11 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -27616,9 +27768,11 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -27843,9 +27997,11 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -27918,9 +28074,11 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -28005,9 +28163,11 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -28105,9 +28265,11 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -28201,9 +28363,11 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -28374,9 +28538,11 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -28735,9 +28901,11 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -28831,9 +28999,11 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -29242,9 +29412,11 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -29342,9 +29514,11 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -29569,9 +29743,11 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -29644,9 +29820,11 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -29731,9 +29909,11 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -29831,9 +30011,11 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -29927,9 +30109,11 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -30100,9 +30284,11 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -30461,9 +30647,11 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -30557,9 +30745,11 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -30968,9 +31158,11 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -31068,9 +31260,11 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -31295,9 +31489,11 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -31370,9 +31566,11 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -31457,9 +31655,11 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -31557,9 +31757,11 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -31653,9 +31855,11 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -31821,9 +32025,11 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -32182,9 +32388,11 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -32278,9 +32486,11 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -32690,9 +32900,11 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -32790,9 +33002,11 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -33017,9 +33231,11 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -33092,9 +33308,11 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -33179,9 +33397,11 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -33279,9 +33499,11 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -33375,9 +33597,11 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -33543,9 +33767,11 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -33904,9 +34130,11 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -34000,9 +34228,11 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -34412,9 +34642,11 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -34512,9 +34744,11 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -34739,9 +34973,11 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -34814,9 +35050,11 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -34901,9 +35139,11 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -35001,9 +35241,11 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -35097,9 +35339,11 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -35265,9 +35509,11 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -35626,9 +35872,11 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -35722,9 +35970,11 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -36134,9 +36384,11 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -36234,9 +36486,11 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -36461,9 +36715,11 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -36536,9 +36792,11 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -36623,9 +36881,11 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -36723,9 +36983,11 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -36819,9 +37081,11 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -36986,9 +37250,11 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -37347,9 +37613,11 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -37443,9 +37711,11 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -37973,9 +38243,11 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -38444,9 +38716,11 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -38805,9 +39079,11 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -38901,9 +39177,11 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -39431,9 +39709,11 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -39902,9 +40182,11 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -40263,9 +40545,11 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -40359,9 +40643,11 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -40889,9 +41175,11 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -41361,9 +41649,11 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -41722,9 +42012,11 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -41818,9 +42110,11 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -42331,9 +42625,11 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -42692,9 +42988,11 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -42788,9 +43086,11 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -43301,9 +43601,11 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -43662,9 +43964,11 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -43758,9 +44062,11 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -44271,9 +44577,11 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -44632,9 +44940,11 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -44728,9 +45038,11 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -45242,9 +45554,11 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -45603,9 +45917,11 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -45699,9 +46015,11 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -46213,9 +46531,11 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -46574,9 +46894,11 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -46670,9 +46992,11 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -47184,9 +47508,11 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -47545,9 +47871,11 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -47641,9 +47969,11 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -48155,9 +48485,11 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -48516,9 +48848,11 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -48612,9 +48946,11 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -49126,9 +49462,11 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -49487,9 +49825,11 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -49583,9 +49923,11 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -50620,9 +50962,11 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -50981,9 +51325,11 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -51077,9 +51423,11 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -51663,9 +52011,11 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -52024,9 +52374,11 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -52120,9 +52472,11 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -52706,9 +53060,11 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -53067,9 +53423,11 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -53163,9 +53521,11 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -53927,9 +54287,11 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -54288,9 +54650,11 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -54384,9 +54748,11 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -54892,9 +55258,11 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -55253,9 +55621,11 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -55349,9 +55719,11 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -55857,9 +56229,11 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -56218,9 +56592,11 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -56314,9 +56690,11 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -57104,9 +57482,11 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -57614,9 +57994,11 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -58124,9 +58506,11 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id

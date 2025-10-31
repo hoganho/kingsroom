@@ -147,9 +147,11 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
     seriesName
     gameTags
     sourceUrl
+    sourceSystem
     doNotScrape
     sourceDataIssue
     gameDataVerified
+    missingKeysFromScrape
     venueId
     venue {
       id
@@ -304,9 +306,11 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -788,9 +792,11 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -927,9 +933,11 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -1075,9 +1083,11 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -1250,9 +1260,11 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -1510,9 +1522,11 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -1766,9 +1780,11 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -1919,8 +1935,8 @@ export const controlScraperOperation = /* GraphQL */ `mutation ControlScraperOpe
   APITypes.ControlScraperOperationMutationVariables,
   APITypes.ControlScraperOperationMutation
 >;
-export const triggerAutoScraping = /* GraphQL */ `mutation TriggerAutoScraping {
-  triggerAutoScraping {
+export const triggerAutoScraping = /* GraphQL */ `mutation TriggerAutoScraping($maxGames: Int) {
+  triggerAutoScraping(maxGames: $maxGames) {
     success
     message
     state {
@@ -2337,9 +2353,11 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -2560,9 +2578,11 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -2917,9 +2937,11 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -3596,9 +3618,11 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -3819,9 +3843,11 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -4176,9 +4202,11 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -4855,9 +4883,11 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -5078,9 +5108,11 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -5435,9 +5467,11 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -6163,9 +6197,11 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -6677,9 +6713,11 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -7191,9 +7229,11 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -7671,9 +7711,11 @@ export const createTournamentSeriesTitle = /* GraphQL */ `mutation CreateTournam
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -7844,9 +7886,11 @@ export const updateTournamentSeriesTitle = /* GraphQL */ `mutation UpdateTournam
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -8017,9 +8061,11 @@ export const deleteTournamentSeriesTitle = /* GraphQL */ `mutation DeleteTournam
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -8298,9 +8344,11 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -8670,9 +8718,11 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -9155,9 +9205,11 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -9527,9 +9579,11 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -10012,9 +10066,11 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -10384,9 +10440,11 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -10668,9 +10726,11 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
     seriesName
     gameTags
     sourceUrl
+    sourceSystem
     doNotScrape
     sourceDataIssue
     gameDataVerified
+    missingKeysFromScrape
     venueId
     venue {
       id
@@ -10825,9 +10885,11 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -11309,9 +11371,11 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -11448,9 +11512,11 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -11596,9 +11662,11 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -11771,9 +11839,11 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -12031,9 +12101,11 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -12287,9 +12359,11 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -12436,9 +12510,11 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
     seriesName
     gameTags
     sourceUrl
+    sourceSystem
     doNotScrape
     sourceDataIssue
     gameDataVerified
+    missingKeysFromScrape
     venueId
     venue {
       id
@@ -12593,9 +12669,11 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -13077,9 +13155,11 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -13216,9 +13296,11 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -13364,9 +13446,11 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -13539,9 +13623,11 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -13799,9 +13885,11 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -14055,9 +14143,11 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -14204,9 +14294,11 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
     seriesName
     gameTags
     sourceUrl
+    sourceSystem
     doNotScrape
     sourceDataIssue
     gameDataVerified
+    missingKeysFromScrape
     venueId
     venue {
       id
@@ -14361,9 +14453,11 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -14845,9 +14939,11 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -14984,9 +15080,11 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -15132,9 +15230,11 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -15307,9 +15407,11 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -15567,9 +15669,11 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -15823,9 +15927,11 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -15986,9 +16092,11 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -16284,9 +16392,11 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -16582,9 +16692,11 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -16924,9 +17036,11 @@ export const createCashStructure = /* GraphQL */ `mutation CreateCashStructure(
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -17266,9 +17380,11 @@ export const updateCashStructure = /* GraphQL */ `mutation UpdateCashStructure(
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -17608,9 +17724,11 @@ export const deleteCashStructure = /* GraphQL */ `mutation DeleteCashStructure(
         seriesName
         gameTags
         sourceUrl
+        sourceSystem
         doNotScrape
         sourceDataIssue
         gameDataVerified
+        missingKeysFromScrape
         venueId
         venue {
           id
@@ -17924,9 +18042,11 @@ export const createRakeStructure = /* GraphQL */ `mutation CreateRakeStructure(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -18036,9 +18156,11 @@ export const updateRakeStructure = /* GraphQL */ `mutation UpdateRakeStructure(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -18148,9 +18270,11 @@ export const deleteRakeStructure = /* GraphQL */ `mutation DeleteRakeStructure(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -18362,9 +18486,11 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -19343,9 +19469,11 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -19599,9 +19727,11 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -20833,9 +20963,11 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -21814,9 +21946,11 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -22070,9 +22204,11 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -23304,9 +23440,11 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -24285,9 +24423,11 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -24541,9 +24681,11 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -25735,9 +25877,11 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -26096,9 +26240,11 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -26192,9 +26338,11 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -26713,9 +26861,11 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -27074,9 +27224,11 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -27170,9 +27322,11 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -27691,9 +27845,11 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -28052,9 +28208,11 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -28148,9 +28306,11 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -28666,9 +28826,11 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -29027,9 +29189,11 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -29123,9 +29287,11 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -29534,9 +29700,11 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -29634,9 +29802,11 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -29861,9 +30031,11 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -29936,9 +30108,11 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -30023,9 +30197,11 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -30123,9 +30299,11 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -30219,9 +30397,11 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -30393,9 +30573,11 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -30754,9 +30936,11 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -30850,9 +31034,11 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -31261,9 +31447,11 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -31361,9 +31549,11 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -31588,9 +31778,11 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -31663,9 +31855,11 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -31750,9 +31944,11 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -31850,9 +32046,11 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -31946,9 +32144,11 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -32120,9 +32320,11 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -32481,9 +32683,11 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -32577,9 +32781,11 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -32988,9 +33194,11 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -33088,9 +33296,11 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -33315,9 +33525,11 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -33390,9 +33602,11 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -33477,9 +33691,11 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -33577,9 +33793,11 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -33673,9 +33891,11 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -33842,9 +34062,11 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -34203,9 +34425,11 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -34299,9 +34523,11 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -34711,9 +34937,11 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -34811,9 +35039,11 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -35038,9 +35268,11 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -35113,9 +35345,11 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -35200,9 +35434,11 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -35300,9 +35536,11 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -35396,9 +35634,11 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -35565,9 +35805,11 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -35926,9 +36168,11 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -36022,9 +36266,11 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -36434,9 +36680,11 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -36534,9 +36782,11 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -36761,9 +37011,11 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -36836,9 +37088,11 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -36923,9 +37177,11 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -37023,9 +37279,11 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -37119,9 +37377,11 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -37288,9 +37548,11 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -37649,9 +37911,11 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -37745,9 +38009,11 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -38157,9 +38423,11 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
       seriesName
       gameTags
       sourceUrl
+      sourceSystem
       doNotScrape
       sourceDataIssue
       gameDataVerified
+      missingKeysFromScrape
       venueId
       venue {
         id
@@ -38257,9 +38525,11 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -38484,9 +38754,11 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -38559,9 +38831,11 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -38646,9 +38920,11 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -38746,9 +39022,11 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -38842,9 +39120,11 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -39010,9 +39290,11 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -39371,9 +39653,11 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -39467,9 +39751,11 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -39997,9 +40283,11 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -40469,9 +40757,11 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -40830,9 +41120,11 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -40926,9 +41218,11 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -41456,9 +41750,11 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -41928,9 +42224,11 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -42289,9 +42587,11 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -42385,9 +42685,11 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -42915,9 +43217,11 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -43388,9 +43692,11 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -43749,9 +44055,11 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -43845,9 +44153,11 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -44359,9 +44669,11 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -44720,9 +45032,11 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -44816,9 +45130,11 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -45330,9 +45646,11 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -45691,9 +46009,11 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -45787,9 +46107,11 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -46301,9 +46623,11 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -46662,9 +46986,11 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -46758,9 +47084,11 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -47273,9 +47601,11 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -47634,9 +47964,11 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -47730,9 +48062,11 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -48245,9 +48579,11 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -48606,9 +48942,11 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -48702,9 +49040,11 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -49217,9 +49557,11 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -49578,9 +49920,11 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -49674,9 +50018,11 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -50189,9 +50535,11 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -50550,9 +50898,11 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -50646,9 +50996,11 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -51161,9 +51513,11 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -51522,9 +51876,11 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -51618,9 +51974,11 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -52659,9 +53017,11 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -53020,9 +53380,11 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -53116,9 +53478,11 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -53703,9 +54067,11 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -54064,9 +54430,11 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -54160,9 +54528,11 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -54747,9 +55117,11 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -55108,9 +55480,11 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -55204,9 +55578,11 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -55975,9 +56351,11 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -56336,9 +56714,11 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -56432,9 +56812,11 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -56941,9 +57323,11 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -57302,9 +57686,11 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -57398,9 +57784,11 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -57907,9 +58295,11 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -58268,9 +58658,11 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -58364,9 +58756,11 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             seriesName
             gameTags
             sourceUrl
+            sourceSystem
             doNotScrape
             sourceDataIssue
             gameDataVerified
+            missingKeysFromScrape
             venueId
             tournamentSeriesId
             tournamentStructureId
@@ -59166,9 +59560,11 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -59679,9 +60075,11 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id
@@ -60192,9 +60590,11 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
           seriesName
           gameTags
           sourceUrl
+          sourceSystem
           doNotScrape
           sourceDataIssue
           gameDataVerified
+          missingKeysFromScrape
           venueId
           venue {
             id

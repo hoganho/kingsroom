@@ -126,7 +126,7 @@ const calculatePlayerTargetingClassification = async (playerId, lastPlayedDate, 
     const now = new Date();
 
     if (isNewPlayer) {
-        console.log(`[calculatePlayerTargetingClassification] New player ${playerId}. Classifying based on game date: ${lastPlayedDate}`);
+        console.log(`[TARGETING] New player ${playerId}. Classifying based on game date: ${lastPlayedDate}`);
         if (!lastPlayedDate) {
             return 'NotPlayed'; 
         }
@@ -187,7 +187,7 @@ const calculatePlayerTargetingClassification = async (playerId, lastPlayedDate, 
         if (daysSinceLastPlayed <= 720) return 'Churned_181_360d';
         return 'Churned_361d';
     } catch (error) {
-        console.error('[calculatePlayerTargetingClassification] Error:', error);
+        console.error('[TARGETING] Error fetching PlayerVenue data:', error);
         return 'NotPlayed';
     }
 };
@@ -209,9 +209,9 @@ const generatePlayerId = (playerName) => {
 
 /**
  * Create or update a Player record
- * ✅ REFACTORED: Now accepts `playerData` to initialize points balance.
  */
 const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) => {
+    console.log(`[PLAYER-UPSERT] Starting upsert for player ${playerName} (${playerId})`);
     const playerTable = getTableName('Player');
     const now = new Date().toISOString();
     const nameParts = parsePlayerName(playerName);
@@ -246,7 +246,7 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) =>
                     ':inc': 1
                 }
             }));
-            console.log(`[upsertPlayerRecord] Updated global player ${playerId} - ${playerName}`);
+            console.log(`[PLAYER-UPSERT] Updated existing player ${playerId}`);
             return playerId;
         } else {
             // Player does NOT exist globally. Create a new record.
@@ -259,7 +259,6 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) =>
                 lastName: nameParts.lastName,
                 givenName: nameParts.givenName,
                 creationDate: gameDateTime,
-                // This is now the venue where the player was FIRST ever seen.
                 registrationVenueId: gameData.game.venueId,
                 status: 'ACTIVE',
                 category: 'NEW',
@@ -278,27 +277,26 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) =>
                 Item: newPlayer,
                 ConditionExpression: 'attribute_not_exists(id)'
             }));
-            console.log(`[upsertPlayerRecord] Created new global player ${playerId} - ${playerName}`);
+            console.log(`[PLAYER-UPSERT] Created new player ${playerId}`);
             return playerId;
         }
     } catch (error) {
-        console.error(`[upsertPlayerRecord] Error processing player ${playerName}:`, error);
+        console.error(`[PLAYER-UPSERT] CRITICAL ERROR for ${playerName}:`, error);
         throw error;
     }
 };
 
 /**
- * ✅ NEW: Upserts a PlayerEntry record.
- * It first tries to update an existing entry to 'COMPLETED'.
- * If the entry doesn't exist, it creates a new one with 'COMPLETED' status.
+ * Upserts a PlayerEntry record
  */
 const upsertPlayerEntry = async (playerId, gameData) => {
+    console.log(`[ENTRY-UPSERT] Starting upsert for game ${gameData.game.id}.`);
     const playerEntryTable = getTableName('PlayerEntry');
     const entryId = `${gameData.game.id}#${playerId}`;
     const now = new Date().toISOString();
 
     try {
-        // First, try to update an existing record. This is the most common case for live games.
+        // Try to update existing record to 'COMPLETED'
         await ddbDocClient.send(new UpdateCommand({
             TableName: playerEntryTable,
             Key: { id: entryId },
@@ -308,13 +306,13 @@ const upsertPlayerEntry = async (playerId, gameData) => {
                 ':status': 'COMPLETED',
                 ':updatedAt': now
             },
-            ConditionExpression: 'attribute_exists(id)' // Only update if it exists
+            ConditionExpression: 'attribute_exists(id)'
         }));
-        console.log(`[upsertPlayerEntry] Updated existing entry for player ${playerId} in game ${gameData.game.id} to COMPLETED.`);
+        console.log(`[ENTRY-UPSERT] Updated existing entry for ${playerId}.`);
     } catch (error) {
-        // If the update fails because the item doesn't exist, create it.
+        // If update fails, item does not exist, so create it
         if (error.name === 'ConditionalCheckFailedException') {
-            console.log(`[upsertPlayerEntry] Entry not found for player ${playerId}, creating a new one.`);
+            console.log(`[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.`);
             const newEntry = {
                 id: entryId,
                 playerId: playerId,
@@ -334,14 +332,13 @@ const upsertPlayerEntry = async (playerId, gameData) => {
                     TableName: playerEntryTable,
                     Item: newEntry
                 }));
-                console.log(`[upsertPlayerEntry] Created new COMPLETED entry for player ${playerId} in game ${gameData.game.id}.`);
+                console.log(`[ENTRY-UPSERT] Created new COMPLETED entry for ${playerId}.`);
             } catch (putError) {
-                console.error(`[upsertPlayerEntry] Failed to create entry for player ${playerId} after update failed:`, putError);
+                console.error(`[ENTRY-UPSERT] CRITICAL ERROR creating entry:`, putError);
                 throw putError;
             }
         } else {
-            // For any other error, re-throw it.
-            console.error(`[upsertPlayerEntry] An unexpected error occurred for player ${playerId}:`, error);
+            console.error(`[ENTRY-UPSERT] Unexpected error:`, error);
             throw error;
         }
     }
@@ -351,7 +348,7 @@ const upsertPlayerEntry = async (playerId, gameData) => {
  * Create PlayerResult record
  */
 const createPlayerResult = async (playerId, gameData, playerData) => {
-    // ... (no changes in this function)
+    console.log(`[RESULT-CREATE] Attempting result creation for ${playerId}.`);
     const playerResultTable = getTableName('PlayerResult');
     const resultId = `${playerId}#${gameData.game.id}`;
     const now = new Date().toISOString();
@@ -381,13 +378,14 @@ const createPlayerResult = async (playerId, gameData, playerData) => {
             ConditionExpression: 'attribute_not_exists(id)'
         }));
         
-        console.log(`[createPlayerResult] Created result for player ${playerId} in game ${gameData.game.id}`);
+        console.log(`[RESULT-CREATE] Created result successfully.`);
         return resultId;
     } catch (error) {
         if (error.name === 'ConditionalCheckFailedException') {
-            console.log(`[createPlayerResult] Result already exists for player ${playerId} in game ${gameData.game.id}`);
+            console.log(`[RESULT-CREATE] Result already exists, skipping.`);
             return resultId;
         }
+        console.error(`[RESULT-CREATE] CRITICAL ERROR creating result:`, error);
         throw error;
     }
 };
@@ -396,7 +394,7 @@ const createPlayerResult = async (playerId, gameData, playerData) => {
  * Update or create PlayerSummary record
  */
 const upsertPlayerSummary = async (playerId, gameData, playerData) => {
-    // ... (no changes in this function)
+    console.log(`[SUMMARY-UPSERT] Starting upsert for player ${playerId}.`);
     const playerSummaryTable = getTableName('PlayerSummary');
     const summaryId = `${playerId}`;
     const now = new Date().toISOString();
@@ -447,7 +445,7 @@ const upsertPlayerSummary = async (playerId, gameData, playerData) => {
                     ':updatedAt': now
                 }
             }));
-            console.log(`[upsertPlayerSummary] Updated summary for player ${playerId}`);
+            console.log(`[SUMMARY-UPSERT] Updated existing summary.`);
         } else {
             const newSummary = {
                 id: summaryId,
@@ -477,19 +475,19 @@ const upsertPlayerSummary = async (playerId, gameData, playerData) => {
                 TableName: playerSummaryTable,
                 Item: newSummary
             }));
-            console.log(`[upsertPlayerSummary] Created new summary for player ${playerId}`);
+            console.log(`[SUMMARY-UPSERT] Created new summary.`);
         }
     } catch (error) {
-        console.error(`[upsertPlayerSummary] Error processing summary for player ${playerId}:`, error);
+        console.error(`[SUMMARY-UPSERT] CRITICAL ERROR processing summary:`, error);
         throw error;
     }
 };
 
 /**
  * Update or create PlayerVenue record
- * ✅ REFACTORED: Adds firstPlayedDate and averageBuyIn, and recalculates average on update.
  */
 const upsertPlayerVenue = async (playerId, gameData, playerData) => {
+    console.log(`[VENUE-UPSERT] Starting upsert for player ${playerId} at venue ${gameData.game.venueId}.`);
     const playerVenueTable = getTableName('PlayerVenue');
     const playerVenueId = `${playerId}#${gameData.game.venueId}`;
     const now = new Date().toISOString();
@@ -510,7 +508,6 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
         );
         
         if (existingRecord.Item) {
-            // ✅ CHANGE: Calculate new average buy-in for existing records.
             const oldGamesPlayed = existingRecord.Item.totalGamesPlayed || 0;
             const oldAverageBuyIn = existingRecord.Item.averageBuyIn || 0;
             const newTotalGames = oldGamesPlayed + 1;
@@ -536,21 +533,21 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
                     ':inc': 1,
                     ':lastPlayedDate': gameDate,
                     ':targetingClassification': targetingClassification,
-                    ':newAverageBuyIn': newAverageBuyIn, // Add new average to the update
+                    ':newAverageBuyIn': newAverageBuyIn,
                     ':updatedAt': now
                 }
             }));
+            console.log(`[VENUE-UPSERT] Updated existing PlayerVenue record.`);
         } else {
-            // ✅ CHANGE: Add new fields for new records.
             const newPlayerVenue = {
                 id: playerVenueId,
                 playerId: playerId,
                 venueId: gameData.game.venueId,
                 membershipCreatedDate: gameDate,
-                firstPlayedDate: gameDate, // New field
+                firstPlayedDate: gameDate,
                 lastPlayedDate: gameDate,
-                totalGamesPlayed: 1, // Correctly serves as total games for this new venue record
-                averageBuyIn: currentGameBuyIn, // New field
+                totalGamesPlayed: 1,
+                averageBuyIn: currentGameBuyIn,
                 targetingClassification: targetingClassification,
                 createdAt: now,
                 updatedAt: now,
@@ -563,11 +560,11 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
                 TableName: playerVenueTable,
                 Item: newPlayerVenue
             }));
+            console.log(`[VENUE-UPSERT] Created new PlayerVenue record.`);
         }
         
-        console.log(`[upsertPlayerVenue] Updated PlayerVenue for ${playerId} at venue ${gameData.game.venueId}`);
     } catch (error) {
-        console.error(`[upsertPlayerVenue] Error:`, error);
+        console.error(`[VENUE-UPSERT] CRITICAL ERROR:`, error);
         throw error;
     }
 };
@@ -577,7 +574,7 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
  * Create PlayerTransaction records
  */
 const createPlayerTransactions = async (playerId, gameData, playerData, processingInstructions) => {
-    // ... (no changes in this function)
+    console.log(`[TRANSACTION-CREATE] Starting creation for player ${playerId}.`);
     const playerTransactionTable = getTableName('PlayerTransaction');
     const transactions = [];
     const now = new Date().toISOString();
@@ -630,12 +627,12 @@ const createPlayerTransactions = async (playerId, gameData, playerData, processi
                 }));
             }
             
-            console.log(`[createPlayerTransactions] Created ${transactions.length} transactions for player ${playerId}`);
+            console.log(`[TRANSACTION-CREATE] Created ${transactions.length} transactions.`);
         } else {
-            console.log(`[createPlayerTransactions] No transactions to create for player ${playerId}`);
+            console.log(`[TRANSACTION-CREATE] No transactions to create.`);
         }
     } catch (error) {
-        console.error(`[createPlayerTransactions] Error creating transactions:`, error);
+        console.error(`[TRANSACTION-CREATE] CRITICAL ERROR creating transactions:`, error);
         throw error;
     }
 };
@@ -651,32 +648,41 @@ const processPlayer = async (playerData, processingInstructions, gameData) => {
         const playerId = generatePlayerId(playerName);
         const resultId = `${playerId}#${gameData.game.id}`;
 
+        console.log(`[PROCESS-PLAYER] Starting processing for player: ${playerName} (ID: ${playerId})`);
+
         const existingResult = await ddbDocClient.send(new GetCommand({
             TableName: playerResultTable,
             Key: { id: resultId }
         }));
 
         if (existingResult.Item) {
-            console.log(`[processPlayer] Skipping already processed player: ${playerName} for game ${gameData.game.id}`);
+            console.log(`[PROCESS-PLAYER] SKIPPING: Result already exists for game ${gameData.game.id}`);
             return { success: true, playerName, playerId, status: 'SKIPPED' };
         }
         
-        console.log(`[processPlayer] Processing player: ${playerName}`);
-        
+        console.log(`[PROCESS-PLAYER] Step 1: upsertPlayerRecord...`);
         await upsertPlayerRecord(playerId, playerName, gameData, playerData);
+        
+        console.log(`[PROCESS-PLAYER] Step 2: createPlayerResult...`);
         await createPlayerResult(playerId, gameData, playerData);
+        
+        console.log(`[PROCESS-PLAYER] Step 3: upsertPlayerSummary...`);
         await upsertPlayerSummary(playerId, gameData, playerData);
+        
+        console.log(`[PROCESS-PLAYER] Step 4: upsertPlayerVenue...`);
         await upsertPlayerVenue(playerId, gameData, playerData);
+        
+        console.log(`[PROCESS-PLAYER] Step 5: createPlayerTransactions...`);
         await createPlayerTransactions(playerId, gameData, playerData, processingInstructions);
         
-        // Always call the robust upsert function to handle the PlayerEntry
+        console.log(`[PROCESS-PLAYER] Step 6: upsertPlayerEntry...`);
         await upsertPlayerEntry(playerId, gameData);
 
-        console.log(`[processPlayer] Successfully processed player: ${playerName}`);
+        console.log(`[PROCESS-PLAYER] SUCCESS: Player ${playerName} completely processed.`);
         return { success: true, playerName, playerId, status: 'PROCESSED' };
         
     } catch (error) {
-        console.error(`[processPlayer] Error processing player ${playerName}:`, error);
+        console.error(`[PROCESS-PLAYER] CRITICAL FAILURE for player ${playerName}:`, error);
         return { success: false, playerName, error: error.message };
     }
 };
@@ -685,8 +691,11 @@ const processPlayer = async (playerData, processingInstructions, gameData) => {
  * Main Lambda handler
  */
 exports.handler = async (event) => {
-    console.log('Received SQS event wrapper:', JSON.stringify(event, null, 2));
-    console.log(`[playerDataProcessor] Function triggered with ${event.Records.length} message(s).`);
+    console.log('[HANDLER] START: Player Data Processor invoked.');
+
+    // ✅ DIAGNOSTIC: Log the entire event structure
+    // NOTE: SQS events wrap the actual message body inside event.Records[i].body
+    console.log('Received Lambda Event (Raw):', JSON.stringify(event, null, 2));
 
     const results = {
         successful: [],
@@ -694,22 +703,30 @@ exports.handler = async (event) => {
         totalProcessed: 0
     };
     
-    for (const record of event.Records) {
-        try {
-            const messageBody = record.body;
-            console.log('[playerDataProcessor] Processing message ID:', record.messageId);
-            
-            const gameData = JSON.parse(messageBody);
+    if (!event.Records || event.Records.length === 0) {
+        console.warn('[HANDLER] WARNING: No records found in event payload.');
+        return { statusCode: 204, body: JSON.stringify({ message: 'No records to process.' }) };
+    }
 
-            console.log('Parsed SQS Message Body:', JSON.stringify(gameData, null, 2));
+    console.log(`[HANDLER] Processing ${event.Records.length} SQS message(s).`);
+
+    for (const record of event.Records) {
+        let gameData = null;
+        try {
+            console.log(`[HANDLER] Processing message ID: ${record.messageId}`);
             
-            console.log('--- Processing Game Data ---');
-            console.log(`Game ID: ${gameData.game.id}`);
-            console.log(`Game Name: ${gameData.game.name}`);
-            console.log(`Venue ID: ${gameData.game.venueId}`);
-            console.log(`Total Players to Process: ${gameData.players.totalPlayers}`);
-            console.log(`Players In The Money: ${gameData.players.totalInTheMoney}`);
+            // 1. Parse the SQS message body
+            const messageBody = record.body;
+            gameData = JSON.parse(messageBody);
             
+            console.log(`[HANDLER] SUCCESS: Message body parsed.`);
+            console.log(`[HANDLER] Game ID from SQS: ${gameData.game.id}`);
+            
+            if (!gameData.players || !gameData.processingInstructions) {
+                console.error('[HANDLER] CRITICAL ERROR: SQS Payload missing required fields (players/instructions).');
+                throw new Error('SQS Payload validation failed.');
+            }
+
             const playerPromises = [];
             
             for (let i = 0; i < gameData.players.allPlayers.length; i++) {
@@ -721,6 +738,7 @@ exports.handler = async (event) => {
                 );
             }
             
+            // 2. Batch Processing for Concurrency
             const batchSize = 10;
             for (let i = 0; i < playerPromises.length; i += batchSize) {
                 const batch = playerPromises.slice(i, i + batchSize);
@@ -730,34 +748,39 @@ exports.handler = async (event) => {
                     if (result.status === 'fulfilled' && result.value.success) {
                         results.successful.push(result.value);
                     } else {
-                        results.failed.push(result.reason || result.value);
+                        // Log reason for failure (rejected promise or processPlayer failure)
+                        const failureReason = result.reason || result.value;
+                        console.error('[HANDLER] Player Processing Failed:', JSON.stringify(failureReason));
+                        results.failed.push(failureReason);
                     }
                     results.totalProcessed++;
                 });
             }
             
-            console.log(`[playerDataProcessor] Game ${gameData.game.id} processing complete.`);
-            console.log(`Successful: ${results.successful.length}, Failed: ${results.failed.length}`);
+            console.log(`[HANDLER] Game ${gameData.game.id} batch processing completed.`);
             
         } catch (error) {
-            console.error('[playerDataProcessor] Error processing message:', error);
-            throw error;
+            console.error('[HANDLER] CRITICAL FAILURE: Unhandled error processing SQS message record:', error);
+            // Re-throw the error so SQS knows to redeliver the message (or move to DLQ)
+            throw error; 
         }
     }
     
-    console.log('--- Processing Complete ---');
+    console.log('--- FINAL SUMMARY ---');
     console.log(`Total Players Processed: ${results.totalProcessed}`);
     console.log(`Successful: ${results.successful.length}`);
     console.log(`Failed: ${results.failed.length}`);
     
+    // If any failures occurred, throw an error to trigger SQS redelivery mechanism
     if (results.failed.length > 0) {
-        console.error('Failed player processing details:', JSON.stringify(results.failed, null, 2));
+        console.error('Final result contains failures. Triggering SQS redelivery.');
+        throw new Error(`Failed to process ${results.failed.length} players. Check logs for details.`);
     }
     
     return {
         statusCode: 200,
         body: JSON.stringify({
-            message: 'Successfully processed messages.',
+            message: 'Successfully processed all messages.',
             results: {
                 totalProcessed: results.totalProcessed,
                 successful: results.successful.length,

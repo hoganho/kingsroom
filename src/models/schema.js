@@ -1189,6 +1189,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "sourceSystem": {
+                    "name": "sourceSystem",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "doNotScrape": {
                     "name": "doNotScrape",
                     "isArray": false,
@@ -1209,6 +1216,14 @@ export const schema = {
                     "type": "Boolean",
                     "isRequired": false,
                     "attributes": []
+                },
+                "missingKeysFromScrape": {
+                    "name": "missingKeysFromScrape",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
                 },
                 "venueId": {
                     "name": "venueId",
@@ -1357,9 +1372,31 @@ export const schema = {
                 {
                     "type": "key",
                     "properties": {
+                        "name": "byStatus",
+                        "queryField": "gamesByStatus",
+                        "fields": [
+                            "gameStatus",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
                         "name": "bySourceUrl",
                         "queryField": "gameBySourceUrl",
                         "fields": [
+                            "sourceUrl"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "bySourceSystem",
+                        "queryField": "gamesBySourceSystem",
+                        "fields": [
+                            "sourceSystem",
                             "sourceUrl"
                         ]
                     }
@@ -5512,5 +5549,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "7da0d7385a3968512c10dca6ee18428c"
+    "version": "98557798895e6d54e71b0bd371df7722"
 };

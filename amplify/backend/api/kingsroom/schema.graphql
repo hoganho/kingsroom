@@ -223,14 +223,17 @@ name: String! # e.g., "Sydney Millions 2025"
 type Game @model @auth(rules: [{ allow: private }]) {
   # --- Core Identification ---
   id: ID!
-name: String!
+  name: String!
   gameType: GameType!
   gameVariant: GameVariant!
-  gameStatus: GameStatus!
+  # ✅ NEW GSI for finding games that need updates
+  # This GSI uses the game status as the key, allowing us to directly query
+  # for all games that are 'RUNNING', 'SCHEDULED', etc.
+  gameStatus: GameStatus! @index(name: "byStatus", queryField: "gamesByStatus", sortKeyFields: ["gameStartDateTime"])
 
   # --- Scheduling & Timestamps ---
   gameStartDateTime: AWSDateTime!
-gameEndDateTime: AWSDateTime
+  gameEndDateTime: AWSDateTime
   registrationStatus: String
   totalDuration: String
   gameFrequency: GameFrequency
@@ -263,7 +266,7 @@ gameEndDateTime: AWSDateTime
   # --- Categorization & Metadata ---
   tournamentType: TournamentType
  
- isRegular: Boolean
+   isRegular: Boolean
   isSeries: Boolean
   isSatellite: Boolean
   seriesName: String # Denormalized for faster access
@@ -271,13 +274,18 @@ gameEndDateTime: AWSDateTime
 
   # --- Data Source & Verification ---
   sourceUrl: AWSURL @index(name: "bySourceUrl", queryField: "gameBySourceUrl")
+  # ✅ NEW GSI for finding the highest ID
+  # This GSI uses a static partition key to gather all games into one "bucket"
+  # and sorts them by their source URL, allowing us to quickly find the highest one.
+  sourceSystem: String @index(name: "bySourceSystem", queryField: "gamesBySourceSystem", sortKeyFields: ["sourceUrl"])
   doNotScrape: Boolean
   sourceDataIssue: Boolean
   gameDataVerified: Boolean
+  missingKeysFromScrape: [String]
 
   # --- Relationships ---
   venueId: ID!
-@index(name: "byVenue", sortKeyFields: ["gameStartDateTime"])
+  @index(name: "byVenue", sortKeyFields: ["gameStartDateTime"])
   venue: Venue @belongsTo(fields: ["venueId"])
   tournamentSeriesId: ID @index(name: "byTournamentSeries")
   tournamentSeries: TournamentSeries @belongsTo(fields: ["tournamentSeriesId"])
@@ -669,6 +677,7 @@ type Query {
     fetchTournamentDataRange(startId: Int!, endId: Int!): [ScrapedGameSummary!] @function(name: "webScraperFunction-${env}")
     # ✅ RENAMED TO AVOID CONFLICT with auto-generated getScraperState
     getScraperControlState: ScraperControlResponse @function(name: "autoScraper-${env}")
+    fetchUpdateCandidates: [String!] @function(name: "webScraperFunction-${env}")
 }
 
 type Mutation {
@@ -677,8 +686,7 @@ type Mutation {
     # ✅ RENAMED TO AVOID CONFLICT
     controlScraperOperation(operation: ScraperOperation!): ScraperControlResponse @function(name: "autoScraper-${env}")    
     # ✅ RENAMED TO AVOID CONFLICT
-    triggerAutoScraping: ScraperControlResponse @function(name: "autoScraper-${env}")
-}
+    triggerAutoScraping(maxGames: Int): ScraperControlResponse @function(name: "autoScraper-${env}")}
 
 # --- Operation Input Types ---
 input SaveTournamentInput {

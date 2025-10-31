@@ -926,9 +926,11 @@ type EagerGame = {
   readonly seriesName?: string | null;
   readonly gameTags?: (string | null)[] | null;
   readonly sourceUrl?: string | null;
+  readonly sourceSystem?: string | null;
   readonly doNotScrape?: boolean | null;
   readonly sourceDataIssue?: boolean | null;
   readonly gameDataVerified?: boolean | null;
+  readonly missingKeysFromScrape?: (string | null)[] | null;
   readonly venueId: string;
   readonly venue?: Venue | null;
   readonly tournamentSeriesId?: string | null;
@@ -982,9 +984,11 @@ type LazyGame = {
   readonly seriesName?: string | null;
   readonly gameTags?: (string | null)[] | null;
   readonly sourceUrl?: string | null;
+  readonly sourceSystem?: string | null;
   readonly doNotScrape?: boolean | null;
   readonly sourceDataIssue?: boolean | null;
   readonly gameDataVerified?: boolean | null;
+  readonly missingKeysFromScrape?: (string | null)[] | null;
   readonly venueId: string;
   readonly venue: AsyncItem<Venue | undefined>;
   readonly tournamentSeriesId?: string | null;

@@ -24,7 +24,8 @@ type PlayerData = {
 type PlayerMap = Map<string, Pick<APITypes.Player, 'firstName' | 'lastName'>>;
 
 // --- Specialized Components for Readable Tables ---
-
+// (All components: PlayersSection, PlayerSummariesSection, etc. remain unchanged)
+// ... (components omitted for brevity) ...
 const PlayersSection = ({ data }: { data: APITypes.Player[] }) => (
     <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
@@ -172,7 +173,7 @@ const PlayerTransactionsSection = ({ data, playerMap }: { data: APITypes.PlayerT
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
                 {data.map((item) => {
-                    const player = playerMap.get(item.playerId);
+                    const player = item.player;
                      return (
                         <tr key={item.id}>
                             <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">{player ? `${player.firstName} ${player.lastName}` : item.playerId}</td>
@@ -205,7 +206,7 @@ const PlayerCreditsSection = ({ data, playerMap }: { data: APITypes.PlayerCredit
                     const player = playerMap.get(item.playerId);
                      return (
                         <tr key={item.id}>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">{player ? `${player.firstName} ${player.lastName}` : item.playerId}</td>
+                            <td className="px-4 py-3 whitespace-nowrowrap text-xs font-medium">{player ? `${player.firstName} ${player.lastName}` : item.playerId}</td>
                             <td className="px-4 py-3 whitespace-nowrap text-xs">{item.type}</td>
                             <td className="px-4 py-3 whitespace-nowrap text-xs">{item.changeAmount}</td>
                             <td className="px-4 py-3 whitespace-nowrap text-xs">{item.balanceAfter}</td>
@@ -344,37 +345,93 @@ export const PlayersPage = () => {
   const [activeTab, setActiveTab] = useState('Players');
   const client = generateClient();
 
+  // --- START PAGINATION MODIFICATION ---
+
+  /**
+   * A generic helper function to fetch all pages for a given list query.
+   * @param query The GraphQL query string (from customQueries.ts)
+   * @param queryName The name of the list operation (e.g., "listPlayers")
+   * @param variables Optional variables to pass (e.g., filter)
+   */
+  const fetchAllPages = async (query: string, queryName: string, variables: object = {}) => {
+    let allItems: any[] = [];
+    let nextToken: string | null = null;
+    const limit = 1000; // Fetch 1000 items per page
+
+    do {
+      try {
+        const response = await client.graphql({
+          query: query,
+          variables: {
+            ...variables,
+            limit: limit,
+            nextToken: nextToken,
+          },
+        }) as GraphQLResult<any>; // Use 'any' for this generic helper
+
+        const operation = response.data?.[queryName];
+        if (operation?.items) {
+          allItems = allItems.concat(operation.items.filter((item: any) => item !== null));
+        }
+        nextToken = operation?.nextToken || null;
+
+      } catch (err: any) {
+        console.error(`Error fetching paginated data for ${queryName}:`, err);
+        // Stop fetching this query if an error occurs
+        nextToken = null; 
+        // Re-throw the error to be caught by Promise.all
+        throw new Error(`Failed to fetch ${queryName}: ${err.message || 'Unknown error'}`);
+      }
+    } while (nextToken);
+
+    return allItems;
+  };
+
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const results = await Promise.all([
-        client.graphql({ query: queries.listPlayersForDebug }) as Promise<GraphQLResult<any>>,
-        client.graphql({ query: queries.listPlayerSummariesForDebug }) as Promise<GraphQLResult<any>>,
-        client.graphql({ query: queries.listPlayerResultsForDebug }) as Promise<GraphQLResult<any>>,
-        client.graphql({ query: queries.listPlayerVenuesForDebug }) as Promise<GraphQLResult<any>>,
-        client.graphql({ query: queries.listPlayerTransactionsForDebug }) as Promise<GraphQLResult<any>>,
-        client.graphql({ query: queries.listPlayerEntriesForDebug }) as Promise<GraphQLResult<any>>,
-        client.graphql({ query: queries.listPlayerCreditsForDebug }) as Promise<GraphQLResult<any>>,
-        client.graphql({ query: queries.listPlayerPointsForDebug }) as Promise<GraphQLResult<any>>,
-        client.graphql({ query: queries.listPlayerTicketsForDebug }) as Promise<GraphQLResult<any>>,
-        client.graphql({ query: queries.listPlayerMarketingPreferencesForDebug }) as Promise<GraphQLResult<any>>,
-        client.graphql({ query: queries.listPlayerMarketingMessagesForDebug }) as Promise<GraphQLResult<any>>,
+      // Use the paginated fetch helper for all queries
+      const [
+        players,
+        summaries,
+        results,
+        venues,
+        transactions,
+        entries,
+        credits,
+        points,
+        tickets,
+        prefs,
+        messages,
+      ] = await Promise.all([
+        fetchAllPages(queries.listPlayersForDebug, 'listPlayers'),
+        fetchAllPages(queries.listPlayerSummariesForDebug, 'listPlayerSummaries'),
+        fetchAllPages(queries.listPlayerResultsForDebug, 'listPlayerResults'),
+        fetchAllPages(queries.listPlayerVenuesForDebug, 'listPlayerVenues'),
+        fetchAllPages(queries.listPlayerTransactionsForDebug, 'listPlayerTransactions'),
+        fetchAllPages(queries.listPlayerEntriesForDebug, 'listPlayerEntries'),
+        fetchAllPages(queries.listPlayerCreditsForDebug, 'listPlayerCredits'),
+        fetchAllPages(queries.listPlayerPointsForDebug, 'listPlayerPoints'),
+        fetchAllPages(queries.listPlayerTicketsForDebug, 'listPlayerTickets'),
+        fetchAllPages(queries.listPlayerMarketingPreferencesForDebug, 'listPlayerMarketingPreferences'),
+        fetchAllPages(queries.listPlayerMarketingMessagesForDebug, 'listPlayerMarketingMessages'),
       ]);
 
       setData({
-        players: results[0].data?.listPlayers?.items || [],
-        summaries: results[1].data?.listPlayerSummaries?.items || [],
-        results: results[2].data?.listPlayerResults?.items || [],
-        venues: results[3].data?.listPlayerVenues?.items || [],
-        transactions: results[4].data?.listPlayerTransactions?.items || [],
-        entries: results[5].data?.listPlayerEntries?.items || [],
-        credits: results[6].data?.listPlayerCredits?.items || [],
-        points: results[7].data?.listPlayerPoints?.items || [],
-        tickets: results[8].data?.listPlayerTickets?.items || [],
-        prefs: results[9].data?.listPlayerMarketingPreferences?.items || [],
-        messages: results[10].data?.listPlayerMarketingMessages?.items || [],
+        players: players as APITypes.Player[],
+        summaries: summaries as APITypes.PlayerSummary[],
+        results: results as APITypes.PlayerResult[],
+        venues: venues as APITypes.PlayerVenue[],
+        transactions: transactions as APITypes.PlayerTransaction[],
+        entries: entries as APITypes.PlayerEntry[],
+        credits: credits as APITypes.PlayerCredits[],
+        points: points as APITypes.PlayerPoints[],
+        tickets: tickets as APITypes.PlayerTicket[],
+        prefs: prefs as APITypes.PlayerMarketingPreferences[],
+        messages: messages as APITypes.PlayerMarketingMessage[],
       });
+
     } catch (err: any) {
       console.error('Error fetching player data:', err);
       setError(err.message || 'Failed to fetch data. Check console.');
@@ -382,6 +439,7 @@ export const PlayersPage = () => {
       setLoading(false);
     }
   };
+  // --- END PAGINATION MODIFICATION ---
 
   useEffect(() => {
     fetchData();
