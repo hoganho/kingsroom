@@ -1,504 +1,358 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient, type GraphQLResult } from '@aws-amplify/api';
-import { ArrowPathIcon } from '@heroicons/react/24/solid';
+import { ArrowPathIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import * as queries from '../graphql/customQueries';
 import * as APITypes from '../API';
 import { PageWrapper } from '../components/layout/PageWrapper';
 
-// Define a type for our combined data state
-type PlayerData = {
-  players: APITypes.Player[];
-  summaries: APITypes.PlayerSummary[];
-  results: APITypes.PlayerResult[];
-  venues: APITypes.PlayerVenue[];
-  transactions: APITypes.PlayerTransaction[];
-  entries: APITypes.PlayerEntry[];
-  credits: APITypes.PlayerCredits[];
-  points: APITypes.PlayerPoints[];
-  tickets: APITypes.PlayerTicket[];
-  prefs: APITypes.PlayerMarketingPreferences[];
-  messages: APITypes.PlayerMarketingMessage[];
-};
+const client = generateClient();
 
-// Define a map type for easy player lookup
+// ===================================================================
+// TYPES
+// ===================================================================
+
 type PlayerMap = Map<string, Pick<APITypes.Player, 'firstName' | 'lastName'>>;
 
-// --- Specialized Components for Readable Tables ---
-// (All components: PlayersSection, PlayerSummariesSection, etc. remain unchanged)
-// ... (components omitted for brevity) ...
-const PlayersSection = ({ data }: { data: APITypes.Player[] }) => (
-    <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-                <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Registration Venue</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Played</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Points</th>
-                </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-                {data.map((item) => (
-                    <tr key={item.id}>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">{item.firstName} {item.lastName}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs font-medium text-indigo-600">{item.registrationVenue?.name ?? 'Unknown'}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{item.lastPlayedDate}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{item.pointsBalance}</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-    </div>
-);
+type SortConfig = {
+  key: string;
+  direction: 'asc' | 'desc';
+};
 
-const PlayerSummariesSection = ({ data, playerMap }: { data: APITypes.PlayerSummary[], playerMap: PlayerMap }) => (
-    <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-                <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Player</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sessions</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tournaments</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tournament Winnings</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Net Balance</th>
-                </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-                {data.map((item) => {
-                    const player = playerMap.get(item.playerId);
-                    return (
-                        <tr key={item.id}>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">{player ? `${player.firstName} ${player.lastName}` : item.playerId}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.sessionsPlayed}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.tournamentsPlayed}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">${item.tournamentWinnings?.toFixed(2)}</td>
-                            <td className={`px-4 py-3 whitespace-nowrap text-xs font-semibold ${item.netBalance && item.netBalance < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                                ${item.netBalance?.toFixed(2)}
-                            </td>
-                        </tr>
-                    )
-                })}
-            </tbody>
-        </table>
-    </div>
-);
+// Defines how a table column should be rendered and sorted
+type ColumnDefinition<T> = {
+  key: string; // Corresponds to the object key
+  header: string; // Text for the <th>
+  render: (item: T) => React.ReactNode; // How to render the cell
+  sortable?: boolean; // Whether the column is sortable
+};
 
-const PlayerEntriesSection = ({ data }: { data: APITypes.PlayerEntry[] }) => (
-     <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-                <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Player</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Game</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-                {data.map((item) => (
-                    <tr key={item.id}>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">{item.player?.firstName} {item.player?.lastName}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs">{item.game?.name}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs font-semibold">{item.status}</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-    </div>
-);
+// ===================================================================
+// HELPER HOOK: Client-Side Sorting
+// ===================================================================
 
-const PlayerVenuesSection = ({ data }: { data: APITypes.PlayerVenue[] }) => (
-    <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-                <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Player</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Venue</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Games Played</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Played</th>
-                </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-                {data.map((item) => (
-                    <tr key={item.id}>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">{item.player?.firstName} {item.player?.lastName}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs font-medium text-indigo-600">{item.venue?.name}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs">{item.totalGamesPlayed}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs">{item.lastPlayedDate}</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-    </div>
-);
+/**
+ * A custom hook to sort data on the client.
+ */
+const useClientSideSorting = <T,>(data: T[], initialConfig: SortConfig) => {
+  const [sortConfig, setSortConfig] = useState<SortConfig>(initialConfig);
 
-const PlayerResultsSection = ({ data }: { data: APITypes.PlayerResult[] }) => (
-    <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-                <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Player</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Game</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">BuyIn</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rank</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Winnings</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Points</th>
-                </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-                {data.map((item) => (
-                    <tr key={item.id}>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">{item.player?.firstName} {item.player?.lastName}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs">{item.game?.name ?? item.gameId}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs">{item.game?.buyIn}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs">{item.finishingPlace}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs">${item.amountWon?.toFixed(2)}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs">{item.pointsEarned}</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-    </div>
-);
+  const sortedData = useMemo(() => {
+    if (!data) return [];
+    const sortableData = [...data];
+    
+    sortableData.sort((a, b) => {
+      // Helper to get nested values (e.g., 'player.firstName')
+      const getDeepValue = (obj: any, path: string) => path.split('.').reduce((p, c) => (p && p[c] !== null && p[c] !== undefined) ? p[c] : null, obj);
 
-const PlayerTransactionsSection = ({ data, playerMap }: { data: APITypes.PlayerTransaction[], playerMap: PlayerMap }) => (
-    <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-                <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Player</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-                {data.map((item) => {
-                    const player = item.player;
-                     return (
-                        <tr key={item.id}>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">{player ? `${player.firstName} ${player.lastName}` : item.playerId}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.type}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">${item.amount?.toFixed(2)}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{new Date(item.transactionDate).toLocaleString()}</td>
-                        </tr>
-                    )
-                })}
-            </tbody>
-        </table>
-    </div>
-);
-
-const PlayerCreditsSection = ({ data, playerMap }: { data: APITypes.PlayerCredits[], playerMap: PlayerMap }) => (
-    <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-                <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Player</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Change</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Balance After</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reason</th>
-                </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-                {data.map((item) => {
-                    const player = playerMap.get(item.playerId);
-                     return (
-                        <tr key={item.id}>
-                            <td className="px-4 py-3 whitespace-nowrowrap text-xs font-medium">{player ? `${player.firstName} ${player.lastName}` : item.playerId}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.type}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.changeAmount}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.balanceAfter}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{new Date(item.transactionDate).toLocaleDateString()}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.reason}</td>
-                        </tr>
-                    )
-                })}
-            </tbody>
-        </table>
-    </div>
-);
-
-const PlayerPointsSection = ({ data, playerMap }: { data: APITypes.PlayerPoints[], playerMap: PlayerMap }) => (
-    <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-                <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Player</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Change</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Balance After</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reason</th>
-                </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-                {data.map((item) => {
-                    const player = playerMap.get(item.playerId);
-                     return (
-                        <tr key={item.id}>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">{player ? `${player.firstName} ${player.lastName}` : item.playerId}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.type}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.changeAmount}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.balanceAfter}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{new Date(item.transactionDate).toLocaleDateString()}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.reason}</td>
-                        </tr>
-                    )
-                })}
-            </tbody>
-        </table>
-    </div>
-);
-
-const PlayerTicketsSection = ({ data, playerMap }: { data: APITypes.PlayerTicket[], playerMap: PlayerMap }) => (
-    <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-                <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Player</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Assigned</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expires</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Template ID</th>
-                </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-                {data.map((item) => {
-                    const player = playerMap.get(item.playerId);
-                     return (
-                        <tr key={item.id}>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">{player ? `${player.firstName} ${player.lastName}` : item.playerId}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.status}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{new Date(item.assignedAt).toLocaleDateString()}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : 'N/A'}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.ticketTemplateId}</td>
-                        </tr>
-                    )
-                })}
-            </tbody>
-        </table>
-    </div>
-);
-
-const PlayerPrefsSection = ({ data, playerMap }: { data: APITypes.PlayerMarketingPreferences[], playerMap: PlayerMap }) => (
-    <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-                <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Player</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">SMS Opt-Out</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email Opt-Out</th>
-                </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-                {data.map((item) => {
-                    const player = playerMap.get(item.playerId);
-                     return (
-                        <tr key={item.id}>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">{player ? `${player.firstName} ${player.lastName}` : item.playerId}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.optOutSms ? 'Yes' : 'No'}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.optOutEmail ? 'Yes' : 'No'}</td>
-                        </tr>
-                    )
-                })}
-            </tbody>
-        </table>
-    </div>
-);
-
-const PlayerMessagesSection = ({ data, playerMap }: { data: APITypes.PlayerMarketingMessage[], playerMap: PlayerMap }) => (
-    <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-                <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Player</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sent At</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Message ID</th>
-                </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-                {data.map((item) => {
-                    const player = playerMap.get(item.playerId);
-                     return (
-                        <tr key={item.id}>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs font-medium">{player ? `${player.firstName} ${player.lastName}` : item.playerId}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.status}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.sentAt ? new Date(item.sentAt).toLocaleString() : 'N/A'}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-xs">{item.marketingMessageId}</td>
-                        </tr>
-                    )
-                })}
-            </tbody>
-        </table>
-    </div>
-);
-
-
-// Main page component
-export const PlayersPage = () => {
-  const [data, setData] = useState<PlayerData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('Players');
-  const client = generateClient();
-
-  // --- START PAGINATION MODIFICATION ---
-
-  /**
-   * A generic helper function to fetch all pages for a given list query.
-   * @param query The GraphQL query string (from customQueries.ts)
-   * @param queryName The name of the list operation (e.g., "listPlayers")
-   * @param variables Optional variables to pass (e.g., filter)
-   */
-  const fetchAllPages = async (query: string, queryName: string, variables: object = {}) => {
-    let allItems: any[] = [];
-    let nextToken: string | null = null;
-    const limit = 1000; // Fetch 1000 items per page
-
-    do {
-      try {
-        const response = await client.graphql({
-          query: query,
-          variables: {
-            ...variables,
-            limit: limit,
-            nextToken: nextToken,
-          },
-        }) as GraphQLResult<any>; // Use 'any' for this generic helper
-
-        const operation = response.data?.[queryName];
-        if (operation?.items) {
-          allItems = allItems.concat(operation.items.filter((item: any) => item !== null));
-        }
-        nextToken = operation?.nextToken || null;
-
-      } catch (err: any) {
-        console.error(`Error fetching paginated data for ${queryName}:`, err);
-        // Stop fetching this query if an error occurs
-        nextToken = null; 
-        // Re-throw the error to be caught by Promise.all
-        throw new Error(`Failed to fetch ${queryName}: ${err.message || 'Unknown error'}`);
+      let aValue = getDeepValue(a, sortConfig.key);
+      let bValue = getDeepValue(b, sortConfig.key);
+      
+      // Special case for player name sorting
+      if (sortConfig.key === 'player.name') {
+          aValue = (a as any).player ? `${(a as any).player.firstName} ${(a as any).player.lastName}` : '';
+          bValue = (b as any).player ? `${(b as any).player.firstName} ${(b as any).player.lastName}` : '';
       }
-    } while (nextToken);
 
-    return allItems;
+      if (aValue === null || aValue === undefined) return 1;
+      if (bValue === null || bValue === undefined) return -1;
+
+      // Type-safe comparison
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return (aValue - bValue) * (sortConfig.direction === 'asc' ? 1 : -1);
+      }
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return aValue.localeCompare(bValue) * (sortConfig.direction === 'asc' ? 1 : -1);
+      }
+      
+      // Fallback for dates or other types
+      return String(aValue).localeCompare(String(bValue)) * (sortConfig.direction === 'asc' ? 1 : -1);
+    });
+
+    return sortableData;
+  }, [data, sortConfig]);
+
+  const requestSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
   };
 
-  const fetchData = async () => {
+  return { sortedData, sortConfig, requestSort };
+};
+
+
+// ===================================================================
+// HELPER HOOK: Fetch All Records
+// ===================================================================
+
+/**
+ * A custom hook to fetch ALL records from the API, handling pagination internally.
+ */
+const useAllData = <T,>(query: string, queryName: string) => {
+    const [data, setData] = useState<T[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        setData([]);
+
+        let allItems: T[] = [];
+        let nextToken: string | null = null;
+        const limit = 1000; // Fetch in large chunks for efficiency
+
+        try {
+            do {
+                const response = await client.graphql({
+                    query: query,
+                    variables: { limit, nextToken },
+                }) as GraphQLResult<any>;
+
+                const operation = response.data?.[queryName];
+                if (operation?.items) {
+                    const validItems = operation.items.filter((item: any) => item !== null);
+                    allItems = allItems.concat(validItems);
+                }
+                nextToken = operation?.nextToken || null;
+
+                if (response.errors) {
+                    throw new Error(response.errors[0].message);
+                }
+            } while (nextToken);
+
+            setData(allItems);
+        } catch (err: any) {
+            console.error(`Error fetching all data for ${queryName}:`, err);
+            setError(err.message || 'Failed to fetch data');
+        } finally {
+            setLoading(false);
+        }
+    }, [query, queryName]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    return { data, loading, error, count: data.length };
+};
+
+
+// ===================================================================
+// Reusable UI Components
+// ===================================================================
+
+interface SortableTableHeaderProps<T> {
+  columns: ColumnDefinition<T>[];
+  sortConfig: SortConfig;
+  onRequestSort: (key: string) => void;
+}
+
+/**
+ * Renders the <thead> section with clickable sort headers.
+ */
+const SortableTableHeader = <T,>({ columns, sortConfig, onRequestSort }: SortableTableHeaderProps<T>) => (
+  <thead className="bg-gray-50">
+    <tr>
+      {columns.map((col) => (
+        <th
+          key={col.key}
+          className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+        >
+          {col.sortable ? (
+            <button
+              onClick={() => onRequestSort(col.key)}
+              className="flex items-center space-x-1 group"
+            >
+              <span>{col.header}</span>
+              {sortConfig.key === col.key ? (
+                sortConfig.direction === 'asc' ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />
+              ) : (
+                <ChevronUpIcon className="h-4 w-4 text-gray-300 group-hover:text-gray-500" />
+              )}
+            </button>
+          ) : (
+            col.header
+          )}
+        </th>
+      ))}
+    </tr>
+  </thead>
+);
+
+// ===================================================================
+// Generic Table Component (No Pagination)
+// ===================================================================
+interface SortableTableProps<T> {
+  query: string;
+  queryName: string;
+  columns: ColumnDefinition<T>[];
+  initialSort: SortConfig;
+  playerMap?: PlayerMap; // Optional: for tables that need the playerMap
+}
+
+/**
+ * A generic component that fetches all data and provides sorting.
+ */
+const SortableTable = <T,>({ query, queryName, columns, initialSort, playerMap }: SortableTableProps<T>) => {
+  
+  // 1. Get ALL data from the server
+  const { data, loading, error, count } = useAllData<T>(query, queryName);
+
+  // 2. Sort the data on the client
+  const { sortedData, sortConfig, requestSort } = useClientSideSorting(data, initialSort);
+
+  if (error) {
+    return <div className="text-red-600">Error: {error}</div>;
+  }
+
+  // Inject playerMap if provided (for tables like Summaries, Credits, etc.)
+  const dataToRender = useMemo(() => sortedData.map(item => ({
+    ...item,
+    player: (item as any).player || playerMap?.get((item as any).playerId)
+  })), [sortedData, playerMap]);
+
+  return (
+    <div>
+      <div className="px-4 py-2 text-sm text-gray-600 bg-gray-50 border-t border-l border-r border-gray-200 rounded-t-lg">
+          Total Records: <strong>{loading ? 'Loading...' : count}</strong>
+      </div>
+      <div className="overflow-hidden shadow-sm border border-gray-200 rounded-b-lg">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <SortableTableHeader columns={columns} sortConfig={sortConfig} onRequestSort={requestSort} />
+            <tbody className="bg-white divide-y divide-gray-200">
+              {loading && (
+                <tr>
+                  <td colSpan={columns.length} className="text-center p-8 text-gray-500">
+                    <ArrowPathIcon className="h-6 w-6 animate-spin inline-block" />
+                  </td>
+                </tr>
+              )}
+              {!loading && dataToRender.length === 0 && (
+                <tr>
+                  <td colSpan={columns.length} className="text-center p-8 text-gray-500">
+                    No data found.
+                  </td>
+                </tr>
+              )}
+              {!loading && dataToRender.map((item: any) => (
+                <tr key={item.id}>
+                  {columns.map(col => (
+                    <td key={col.key} className="px-4 py-3 whitespace-nowrap text-xs">
+                      {col.render(item)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ===================================================================
+// Player Data Fetching (for PlayerMap)
+// ===================================================================
+
+/**
+ * Fetches ALL players using pagination to build the name map.
+ */
+const fetchAllPlayers = async () => {
+  let allItems: APITypes.Player[] = [];
+  let nextToken: string | null = null;
+  const limit = 1000; // Fetch in chunks of 1000
+
+  do {
+    try {
+      const response = await client.graphql({
+        query: queries.listPlayersForDebug,
+        variables: { limit, nextToken },
+      }) as GraphQLResult<any>;
+
+      const operation = response.data?.listPlayers;
+      if (operation?.items) {
+        allItems = allItems.concat(operation.items.filter((item: any) => item !== null));
+      }
+      nextToken = operation?.nextToken || null;
+
+    } catch (err: any) {
+      console.error(`Error fetching paginated players:`, err);
+      nextToken = null; // Stop looping on error
+      throw new Error(`Failed to fetch players: ${err.message || 'Unknown error'}`);
+    }
+  } while (nextToken);
+
+  return allItems;
+};
+
+
+// ===================================================================
+// Main Page Component
+// ===================================================================
+
+export const PlayersPage = () => {
+  const [playerMap, setPlayerMap] = useState<PlayerMap>(new Map());
+  const [playerMapLoading, setPlayerMapLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Main page loading (for playerMap)
+  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('Players');
+
+  // --- Fetch ALL players on mount to build the PlayerMap ---
+  const loadPlayerMap = useCallback(async () => {
+    setPlayerMapLoading(true);
     setLoading(true);
     setError(null);
     try {
-      // Use the paginated fetch helper for all queries
-      const [
-        players,
-        summaries,
-        results,
-        venues,
-        transactions,
-        entries,
-        credits,
-        points,
-        tickets,
-        prefs,
-        messages,
-      ] = await Promise.all([
-        fetchAllPages(queries.listPlayersForDebug, 'listPlayers'),
-        fetchAllPages(queries.listPlayerSummariesForDebug, 'listPlayerSummaries'),
-        fetchAllPages(queries.listPlayerResultsForDebug, 'listPlayerResults'),
-        fetchAllPages(queries.listPlayerVenuesForDebug, 'listPlayerVenues'),
-        fetchAllPages(queries.listPlayerTransactionsForDebug, 'listPlayerTransactions'),
-        fetchAllPages(queries.listPlayerEntriesForDebug, 'listPlayerEntries'),
-        fetchAllPages(queries.listPlayerCreditsForDebug, 'listPlayerCredits'),
-        fetchAllPages(queries.listPlayerPointsForDebug, 'listPlayerPoints'),
-        fetchAllPages(queries.listPlayerTicketsForDebug, 'listPlayerTickets'),
-        fetchAllPages(queries.listPlayerMarketingPreferencesForDebug, 'listPlayerMarketingPreferences'),
-        fetchAllPages(queries.listPlayerMarketingMessagesForDebug, 'listPlayerMarketingMessages'),
-      ]);
-
-      setData({
-        players: players as APITypes.Player[],
-        summaries: summaries as APITypes.PlayerSummary[],
-        results: results as APITypes.PlayerResult[],
-        venues: venues as APITypes.PlayerVenue[],
-        transactions: transactions as APITypes.PlayerTransaction[],
-        entries: entries as APITypes.PlayerEntry[],
-        credits: credits as APITypes.PlayerCredits[],
-        points: points as APITypes.PlayerPoints[],
-        tickets: tickets as APITypes.PlayerTicket[],
-        prefs: prefs as APITypes.PlayerMarketingPreferences[],
-        messages: messages as APITypes.PlayerMarketingMessage[],
-      });
-
+      const players = await fetchAllPlayers();
+      setPlayerMap(new Map(players.map(p => [p.id, { firstName: p.firstName, lastName: p.lastName }])));
     } catch (err: any) {
-      console.error('Error fetching player data:', err);
-      setError(err.message || 'Failed to fetch data. Check console.');
+      console.error('Error fetching player map:', err);
+      setError(err.message || 'Failed to fetch critical player data.');
     } finally {
-      setLoading(false);
+      setPlayerMapLoading(false);
+      setLoading(false); // Main page loading is complete
     }
-  };
-  // --- END PAGINATION MODIFICATION ---
-
-  useEffect(() => {
-    fetchData();
   }, []);
+  
+  useEffect(() => {
+    loadPlayerMap();
+  }, [loadPlayerMap]);
 
-  const playerMap = useMemo(() => {
-    if (!data?.players) return new Map();
-    return new Map(data.players.map(p => [p.id, { firstName: p.firstName, lastName: p.lastName }]));
-  }, [data?.players]);
-
-  const sortedData = useMemo(() => {
-    if (!data) return null;
-
-    // Helper function for sorting, using the playerMap for lookup
-    const sortByName = (a: any, b: any) => {
-        const playerA = a.player || playerMap.get(a.playerId);
-        const playerB = b.player || playerMap.get(b.playerId);
-        const nameA = playerA ? `${playerA.firstName} ${playerA.lastName}` : '';
-        const nameB = playerB ? `${playerB.firstName} ${playerB.lastName}` : '';
-        return nameA.localeCompare(nameB);
-    };
-
-    const sortPlayers = (a: APITypes.Player, b: APITypes.Player) => `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
-
-    return {
-        ...data,
-        players: [...data.players].sort(sortPlayers),
-        summaries: [...data.summaries].sort(sortByName),
-        results: [...data.results].sort(sortByName),
-        venues: [...data.venues].sort(sortByName),
-        transactions: [...data.transactions].sort(sortByName),
-        entries: [...data.entries].sort(sortByName),
-        credits: [...data.credits].sort(sortByName),
-        points: [...data.points].sort(sortByName),
-        tickets: [...data.tickets].sort(sortByName),
-        prefs: [...data.prefs].sort(sortByName),
-        messages: [...data.messages].sort(sortByName),
-    };
-  }, [data, playerMap]);
   
   const tabs = [
     'Players', 'Summaries', 'Entries', 'Venues', 'Results', 'Transactions', 
     'Credits', 'Points', 'Tickets', 'Preferences', 'Messages'
   ];
 
+  // This function now just renders the correct "smart" component for the tab
   const renderContent = () => {
-    if (!sortedData) return null;
+    if (playerMapLoading) {
+      return (
+        <div className="text-center py-12">
+          <ArrowPathIcon className="h-6 w-6 animate-spin inline-block text-gray-500" />
+          <p className="text-lg text-gray-600 mt-2">Loading player lookup table...</p>
+        </div>
+      );
+    }
+    
+    // Pass the playerMap to components that need it
     switch (activeTab) {
-        case 'Players': return <PlayersSection data={sortedData.players} />;
-        case 'Summaries': return <PlayerSummariesSection data={sortedData.summaries} playerMap={playerMap} />;
-        case 'Entries': return <PlayerEntriesSection data={sortedData.entries} />;
-        case 'Venues': return <PlayerVenuesSection data={sortedData.venues} />;
-        case 'Results': return <PlayerResultsSection data={sortedData.results} />;
-        case 'Transactions': return <PlayerTransactionsSection data={sortedData.transactions} playerMap={playerMap} />;
-        case 'Credits': return <PlayerCreditsSection data={sortedData.credits} playerMap={playerMap} />;
-        case 'Points': return <PlayerPointsSection data={sortedData.points} playerMap={playerMap} />;
-        case 'Tickets': return <PlayerTicketsSection data={sortedData.tickets} playerMap={playerMap} />;
-        case 'Preferences': return <PlayerPrefsSection data={sortedData.prefs} playerMap={playerMap} />;
-        case 'Messages': return <PlayerMessagesSection data={sortedData.messages} playerMap={playerMap} />;
+        case 'Players': return <PlayersSection />;
+        case 'Summaries': return <PlayerSummariesSection playerMap={playerMap} />;
+        case 'Entries': return <PlayerEntriesSection />;
+        case 'Venues': return <PlayerVenuesSection />;
+        case 'Results': return <PlayerResultsSection />;
+        case 'Transactions': return <PlayerTransactionsSection playerMap={playerMap} />;
+        case 'Credits': return <PlayerCreditsSection playerMap={playerMap} />;
+        case 'Points': return <PlayerPointsSection playerMap={playerMap} />;
+        case 'Tickets': return <PlayerTicketsSection playerMap={playerMap} />;
+        case 'Preferences': return <PlayerPrefsSection playerMap={playerMap} />;
+        case 'Messages': return <PlayerMessagesSection playerMap={playerMap} />;
         default: return <p className="text-gray-500">No specialized view for this data yet.</p>;
     }
   };
@@ -509,14 +363,23 @@ export const PlayersPage = () => {
       maxWidth="7xl"
       actions={
         <button
-          onClick={fetchData}
+          onClick={() => {
+            // Re-fetch the player map on manual refresh
+            loadPlayerMap().then(() => {
+              // Force the active tab to re-render by briefly switching away and back
+              // This causes the SortableTable component to unmount and remount, triggering a fresh data fetch.
+              const currentTab = activeTab;
+              setActiveTab('');
+              setTimeout(() => setActiveTab(currentTab), 0);
+            });
+          }}
           disabled={loading}
           className="flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 w-full md:w-auto"
         >
           <ArrowPathIcon
             className={`h-5 w-5 mr-2 ${loading ? 'animate-spin' : ''}`}
           />
-          {loading ? 'Refreshing...' : 'Refresh Data'}
+          {loading ? 'Refreshing...' : 'Refresh All Data'}
         </button>
       }
     >
@@ -526,13 +389,13 @@ export const PlayersPage = () => {
         </div>
       )}
 
-      {loading && !data && (
+      {loading && (
         <div className="text-center py-12">
           <p className="text-lg text-gray-600">Loading all player data...</p>
         </div>
       )}
 
-      {!loading && sortedData && (
+      {!loading && (
         <div className="w-full">
             <div className="border-b border-gray-200">
                 <nav className="-mb-px flex space-x-4 overflow-x-auto" aria-label="Tabs">
@@ -558,6 +421,127 @@ export const PlayersPage = () => {
       )}
     </PageWrapper>
   );
+};
+
+// ===================================================================
+// TAB-SPECIFIC SMART COMPONENTS
+// Each component now fetches its own data and handles sorting.
+// ===================================================================
+
+const PlayersSection = () => {
+  const columns: ColumnDefinition<APITypes.Player>[] = [
+    { key: 'firstName', header: 'Name', sortable: true, render: item => <strong>{item.firstName} {item.lastName}</strong> },
+    { key: 'registrationVenue.name', header: 'Reg. Venue', sortable: true, render: item => <span className="text-indigo-600">{item.registrationVenue?.name ?? 'N/A'}</span> },
+    { key: 'lastPlayedDate', header: 'Last Played', sortable: true, render: item => item.lastPlayedDate },
+    { key: 'pointsBalance', header: 'Points', sortable: true, render: item => item.pointsBalance },
+    { key: 'creditBalance', header: 'Credits', sortable: true, render: item => item.creditBalance },
+    { key: 'id', header: 'Player ID', sortable: false, render: item => <span className="font-mono text-gray-500 text-xs">{item.id}</span> },
+  ];
+  return <SortableTable query={queries.listPlayersForDebug} queryName="listPlayers" columns={columns} initialSort={{ key: 'firstName', direction: 'asc' }} />;
+};
+
+const PlayerSummariesSection = ({ playerMap }: { playerMap: PlayerMap }) => {
+  const columns: ColumnDefinition<APITypes.PlayerSummary>[] = [
+    { key: 'player.name', header: 'Player', sortable: true, render: item => <strong>{(item as any).player ? `${(item as any).player.firstName} ${(item as any).player.lastName}` : item.playerId}</strong> },
+    { key: 'sessionsPlayed', header: 'Sessions', sortable: true, render: item => item.sessionsPlayed },
+    { key: 'tournamentsPlayed', header: 'Tourneys', sortable: true, render: item => item.tournamentsPlayed },
+    { key: 'tournamentWinnings', header: 'Winnings', sortable: true, render: item => `$${item.tournamentWinnings?.toFixed(2)}` },
+    { key: 'netBalance', header: 'Net', sortable: true, render: item => <span className={item.netBalance && item.netBalance < 0 ? 'text-red-600' : 'text-green-600'}>${item.netBalance?.toFixed(2)}</span> },
+  ];
+  return <SortableTable query={queries.listPlayerSummariesForDebug} queryName="listPlayerSummaries" columns={columns} initialSort={{ key: 'player.name', direction: 'asc' }} playerMap={playerMap} />;
+};
+
+const PlayerEntriesSection = () => {
+  const columns: ColumnDefinition<APITypes.PlayerEntry>[] = [
+    { key: 'player.name', header: 'Player', sortable: true, render: item => <strong>{item.player?.firstName} {item.player?.lastName}</strong> },
+    { key: 'game.name', header: 'Game', sortable: true, render: item => item.game?.name },
+    { key: 'status', header: 'Status', sortable: true, render: item => item.status },
+    { key: 'registrationTime', header: 'Reg. Time', sortable: true, render: item => new Date(item.registrationTime).toLocaleString() },
+  ];
+  return <SortableTable query={queries.listPlayerEntriesForDebug} queryName="listPlayerEntries" columns={columns} initialSort={{ key: 'registrationTime', direction: 'desc' }} />;
+};
+
+const PlayerVenuesSection = () => {
+  const columns: ColumnDefinition<APITypes.PlayerVenue>[] = [
+    { key: 'player.name', header: 'Player', sortable: true, render: item => <strong>{item.player?.firstName} {item.player?.lastName}</strong> },
+    { key: 'venue.name', header: 'Venue', sortable: true, render: item => <span className="text-indigo-600">{item.venue?.name}</span> },
+    { key: 'totalGamesPlayed', header: 'Games Played', sortable: true, render: item => item.totalGamesPlayed },
+    { key: 'lastPlayedDate', header: 'Last Played', sortable: true, render: item => item.lastPlayedDate },
+  ];
+  return <SortableTable query={queries.listPlayerVenuesForDebug} queryName="listPlayerVenues" columns={columns} initialSort={{ key: 'player.name', direction: 'asc' }} />;
+};
+
+const PlayerResultsSection = () => {
+  const columns: ColumnDefinition<APITypes.PlayerResult>[] = [
+    { key: 'player.name', header: 'Player', sortable: true, render: item => <strong>{item.player?.firstName} {item.player?.lastName}</strong> },
+    { key: 'game.name', header: 'Game', sortable: true, render: item => item.game?.name ?? item.gameId },
+    { key: 'finishingPlace', header: 'Rank', sortable: true, render: item => <strong>{item.finishingPlace}</strong> },
+    { key: 'amountWon', header: 'Winnings', sortable: true, render: item => `$${item.amountWon?.toFixed(2)}` },
+    { key: 'pointsEarned', header: 'Points', sortable: true, render: item => item.pointsEarned },
+  ];
+  return <SortableTable query={queries.listPlayerResultsForDebug} queryName="listPlayerResults" columns={columns} initialSort={{ key: 'game.name', direction: 'desc' }} />;
+};
+
+const PlayerTransactionsSection = ({ playerMap }: { playerMap: PlayerMap }) => {
+  const columns: ColumnDefinition<APITypes.PlayerTransaction>[] = [
+    { key: 'player.name', header: 'Player', sortable: true, render: item => <strong>{(item as any).player ? `${(item as any).player.firstName} ${(item as any).player.lastName}` : item.playerId}</strong> },
+    { key: 'type', header: 'Type', sortable: true, render: item => item.type },
+    { key: 'amount', header: 'Amount', sortable: true, render: item => `$${item.amount?.toFixed(2)}` },
+    { key: 'transactionDate', header: 'Date', sortable: true, render: item => new Date(item.transactionDate).toLocaleString() },
+  ];
+  return <SortableTable query={queries.listPlayerTransactionsForDebug} queryName="listPlayerTransactions" columns={columns} initialSort={{ key: 'transactionDate', direction: 'desc' }} playerMap={playerMap} />;
+};
+
+const PlayerCreditsSection = ({ playerMap }: { playerMap: PlayerMap }) => {
+  const columns: ColumnDefinition<APITypes.PlayerCredits>[] = [
+    { key: 'player.name', header: 'Player', sortable: true, render: item => <strong>{(item as any).player ? `${(item as any).player.firstName} ${(item as any).player.lastName}` : item.playerId}</strong> },
+    { key: 'type', header: 'Type', sortable: true, render: item => item.type },
+    { key: 'changeAmount', header: 'Change', sortable: true, render: item => item.changeAmount },
+    { key: 'balanceAfter', header: 'Balance', sortable: true, render: item => item.balanceAfter },
+    { key: 'transactionDate', header: 'Date', sortable: true, render: item => new Date(item.transactionDate).toLocaleDateString() },
+    { key: 'reason', header: 'Reason', sortable: true, render: item => item.reason },
+  ];
+  return <SortableTable query={queries.listPlayerCreditsForDebug} queryName="listPlayerCredits" columns={columns} initialSort={{ key: 'transactionDate', direction: 'desc' }} playerMap={playerMap} />;
+};
+
+const PlayerPointsSection = ({ playerMap }: { playerMap: PlayerMap }) => {
+  const columns: ColumnDefinition<APITypes.PlayerPoints>[] = [
+    { key: 'player.name', header: 'Player', sortable: true, render: item => <strong>{(item as any).player ? `${(item as any).player.firstName} ${(item as any).player.lastName}` : item.playerId}</strong> },
+    { key: 'type', header: 'Type', sortable: true, render: item => item.type },
+    { key: 'changeAmount', header: 'Change', sortable: true, render: item => item.changeAmount },
+    { key: 'balanceAfter', header: 'Balance', sortable: true, render: item => item.balanceAfter },
+    { key: 'transactionDate', header: 'Date', sortable: true, render: item => new Date(item.transactionDate).toLocaleDateString() },
+    { key: 'reason', header: 'Reason', sortable: true, render: item => item.reason },
+  ];
+  return <SortableTable query={queries.listPlayerPointsForDebug} queryName="listPlayerPoints" columns={columns} initialSort={{ key: 'transactionDate', direction: 'desc' }} playerMap={playerMap} />;
+};
+
+const PlayerTicketsSection = ({ playerMap }: { playerMap: PlayerMap }) => {
+  const columns: ColumnDefinition<APITypes.PlayerTicket>[] = [
+    { key: 'player.name', header: 'Player', sortable: true, render: item => <strong>{(item as any).player ? `${(item as any).player.firstName} ${(item as any).player.lastName}` : item.playerId}</strong> },
+    { key: 'status', header: 'Status', sortable: true, render: item => item.status },
+    { key: 'assignedAt', header: 'Assigned', sortable: true, render: item => new Date(item.assignedAt).toLocaleDateString() },
+    { key: 'expiryDate', header: 'Expires', sortable: true, render: item => item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : 'N/A' },
+  ];
+  return <SortableTable query={queries.listPlayerTicketsForDebug} queryName="listPlayerTickets" columns={columns} initialSort={{ key: 'assignedAt', direction: 'desc' }} playerMap={playerMap} />;
+};
+
+const PlayerPrefsSection = ({ playerMap }: { playerMap: PlayerMap }) => {
+  const columns: ColumnDefinition<APITypes.PlayerMarketingPreferences>[] = [
+    { key: 'player.name', header: 'Player', sortable: true, render: item => <strong>{(item as any).player ? `${(item as any).player.firstName} ${(item as any).player.lastName}` : item.playerId}</strong> },
+    { key: 'optOutSms', header: 'SMS Opt-Out', sortable: true, render: item => item.optOutSms ? 'Yes' : 'No' },
+    { key: 'optOutEmail', header: 'Email Opt-Out', sortable: true, render: item => item.optOutEmail ? 'Yes' : 'No' },
+  ];
+  return <SortableTable query={queries.listPlayerMarketingPreferencesForDebug} queryName="listPlayerMarketingPreferences" columns={columns} initialSort={{ key: 'player.name', direction: 'asc' }} playerMap={playerMap} />;
+};
+
+const PlayerMessagesSection = ({ playerMap }: { playerMap: PlayerMap }) => {
+  const columns: ColumnDefinition<APITypes.PlayerMarketingMessage>[] = [
+    { key: 'player.name', header: 'Player', sortable: true, render: item => <strong>{(item as any).player ? `${(item as any).player.firstName} ${(item as any).player.lastName}` : item.playerId}</strong> },
+    { key: 'status', header: 'Status', sortable: true, render: item => item.status },
+    { key: 'sentAt', header: 'Sent At', sortable: true, render: item => item.sentAt ? new Date(item.sentAt).toLocaleString() : 'N/A' },
+  ];
+  return <SortableTable query={queries.listPlayerMarketingMessagesForDebug} queryName="listPlayerMarketingMessages" columns={columns} initialSort={{ key: 'sentAt', direction: 'desc' }} playerMap={playerMap} />;
 };
 
 export default PlayersPage;
