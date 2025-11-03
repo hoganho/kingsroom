@@ -25,6 +25,7 @@ import { JobStatusBadge } from '../../components/scraper/admin/ScraperAdminShare
 import { JobDetailsModal } from '../../components/scraper/admin/JobDetailsModal.tsx';
 import { GameListItem } from '../../components/scraper/GameListItem.tsx';
 import type { GameState } from '../../types/game.ts';
+import { InitialScanPanel } from '../../components/scraper/InitialScanPanel';
 
 interface RecentGame {
     id: string;
@@ -258,10 +259,13 @@ export const AutoScraperTab: React.FC = () => {
     };
     
     // 🚀 DELETED: The getNextRunTime function is no longer needed
+    const showInitialScan = true;
 
     return (
         <div className="space-y-6">
             {/* Control Panel */}
+            {showInitialScan && <InitialScanPanel />}
+
             <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold">Auto Scraper Control</h3>
