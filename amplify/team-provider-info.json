@@ -38,7 +38,7 @@
         },
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/autoScraper-3967554d4948534b3446-build.zip"
+          "s3Key": "amplify-builds/autoScraper-484f2f335a6c75624c63-build.zip"
         },
         "scraperManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",

@@ -182,6 +182,7 @@ const getOrCreateScrapeURL = async (url, tournamentId) => {
         timesSuccessful: 0,
         timesFailed: 0,
         consecutiveFailures: 0,
+        sourceSystem: "KINGSROOM_WEB",
         createdAt: now,
         updatedAt: now,
         __typename: 'ScrapeURL',
@@ -388,7 +389,8 @@ const scrapeAndProcessTournament = async (url, existingGameData, jobId, triggerS
         
         const scraperResult = JSON.parse(new TextDecoder().decode(response.Payload));
         let scrapedData = scraperResult.data || scraperResult;
-        
+        const gameIdFromFetch = scraperResult.existingGameId || existingGameData?.id;
+
         if (scraperResult.errorMessage) {
             result.error = scraperResult.errorMessage;
             if (result.error.includes('Scraping is disabled')) {
@@ -416,7 +418,7 @@ const scrapeAndProcessTournament = async (url, existingGameData, jobId, triggerS
                             input: {
                                 sourceUrl: url,
                                 venueId: autoAssignedVenueId,
-                                existingGameId: existingGameData?.id,
+                                existingGameId: gameIdFromFetch,
                                 doNotScrape: scrapedData.doNotScrape || false,
                                 originalScrapedData: JSON.stringify(scrapedData),
                                 data: createCleanDataForSave(scrapedData)
