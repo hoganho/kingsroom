@@ -354,3 +354,65 @@ export const listPlayerMarketingMessagesForDebug = /* GraphQL */ `
   }
 `;
 
+
+/*
+ * ===================================================================
+ * NEW: DEBUG QUERIES FOR GamesPage.tsx
+ * ===================================================================
+ */
+
+export const listGamesForDebug = /* GraphQL */ `
+  query ListGamesForDebug(
+    $filter: ModelGameFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listGames(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        name
+        gameType
+        gameStatus
+        gameStartDateTime
+        venueId
+        venue {
+          id
+          name
+        }
+        _version
+      }
+      nextToken
+    }
+  }
+`;
+
+export const listTournamentStructuresForDebug = /* GraphQL */ `
+  query ListTournamentStructuresForDebug(
+    $filter: ModelTournamentStructureFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listTournamentStructures(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        gameId
+        levels {
+          levelNumber
+        }
+        breaks {
+          levelNumberBeforeBreak
+        }
+        game {
+          id
+          name
+        }
+        _version
+      }
+      nextToken
+    }
+  }
+`;

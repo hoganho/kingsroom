@@ -7,6 +7,7 @@ import {
   TrophyIcon,
   UserGroupIcon,
   CogIcon,
+  BeakerIcon, // Added for Games (Debug)
 } from '@heroicons/react/24/outline';
 
 const getLinkClassName = ({ isActive }: { isActive: boolean }) =>
@@ -63,6 +64,12 @@ export const Sidebar = () => {
             Series Management
           </NavLink>
           
+          {/* New link for Games (Debug) */}
+          <NavLink to="/games" className={getLinkClassName}>
+            <BeakerIcon className="h-5 w-5 mr-3" />
+            Games (Debug)
+          </NavLink>
+          
           {/* Player Management Section */}
           <div className="mt-6 mb-2">
             <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
@@ -85,4 +92,3 @@ export const Sidebar = () => {
     </aside>
   );
 };
-

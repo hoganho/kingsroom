@@ -24,6 +24,7 @@ import { SeriesManagementPage } from './pages/SeriesManagementPage';
 import { PlayersPage } from './pages/Players';
 import { HomePage } from './pages/HomePage';
 import { ScraperAdminPage } from './pages/ScraperAdminPage';
+import { GamesPage } from './pages/Games';
 
 // Error Boundary for CloudWatch error tracking
 import React from 'react';
@@ -342,6 +343,7 @@ function App() {
                                         <Route path="/venues" element={<VenuesPage />} />
                                         <Route path="/series-management" element={<SeriesManagementPage />} />
                                         <Route path="/players" element={<PlayersPage />} />
+                                        <Route path="/games" element={<GamesPage />} />
                                     </Route>
                                     
                                     {/* 404 handler */}
