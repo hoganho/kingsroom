@@ -165,6 +165,7 @@ const upsertLeanPlayerRecord = async (playerId, playerName, gameData) => {
 };
 
 const upsertPlayerEntries = async (savedGameItem, scrapedData) => {
+    console.log(`[WEB-SCRAPER-TRACE] upsertPlayerEntries received. Player entries:`, scrapedData?.entries?.length, 'Player results:', scrapedData?.results?.length);
     console.log(`[upsertPlayerEntries] Starting player entry upsert for game ${savedGameItem.id}.`);
     const playerEntryTable = getTableName('PlayerEntry');
     const now = new Date().toISOString();
@@ -503,7 +504,9 @@ const handleSave = async (input) => {
     
     const jobId = input.jobId || null;
     const triggerSource = input.triggerSource || null;
-    
+    console.log(`[WEB-SCRAPER-TRACE] handleSave received. Type of input.originalScrapedData:`, typeof input.originalScrapedData);
+    console.log(`[WEB-SCRAPER-TRACE] input.originalScrapedData (first 200 chars):`, String(input.originalScrapedData).substring(0, 200));
+
     console.log(`[handleSave] START processing save request. Job ID: ${jobId || 'N/A'}, Source: ${triggerSource || 'N/A'}`);
     
     const { sourceUrl, venueId, existingGameId, data } = input;
@@ -540,6 +543,9 @@ const handleSave = async (input) => {
         console.warn('[HANDLE-SAVE-DEBUG] WARNING: originalScrapedData field was missing from the input. No player data can be processed.');
     }
     // --- ⚡️ END: ROBUST AWSJSON PARSING FIX ⚡️ ---
+
+    console.log(`[WEB-SCRAPER-TRACE] Parsed originalScrapedData. Is now object:`, typeof originalScrapedData === 'object');
+    console.log(`[WEB-SCRAPER-TRACE] Parsed player entries:`, originalScrapedData?.entries?.length, 'Parsed player results:', originalScrapedData?.results?.length);
 
     const processedLevels = (data.levels || []).map(level => ({
         levelNumber: level.levelNumber, durationMinutes: level.durationMinutes || 0,
@@ -692,6 +698,7 @@ const handleSave = async (input) => {
         }
     } else if (savedGameItem && liveStatuses.includes(savedGameItem.gameStatus)) {
         console.log(`[handleSave] DIAGNOSTIC: Status is LIVE. Updating PlayerEntries only.`);
+        console.log(`[WEB-SCRAPER-TRACE] Passing to upsertPlayerEntries. Player entries:`, originalScrapedData?.entries?.length);
         // ⚡️ FIX: Pass the newly parsed 'originalScrapedData' object, not the 'data' fallback.
         await upsertPlayerEntries(savedGameItem, originalScrapedData);
     }

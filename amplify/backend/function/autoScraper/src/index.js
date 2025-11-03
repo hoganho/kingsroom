@@ -390,6 +390,7 @@ const scrapeAndProcessTournament = async (url, existingGameData, jobId, triggerS
         const scraperResult = JSON.parse(new TextDecoder().decode(response.Payload));
         let scrapedData = scraperResult.data || scraperResult;
         const gameIdFromFetch = scraperResult.existingGameId || existingGameData?.id;
+        console.log(`[AUTO-SCRAPER-TRACE] Fetched data for ${url}. Player entries:`, scrapedData?.entries?.length, 'Player results:', scrapedData?.results?.length);
 
         if (scraperResult.errorMessage) {
             result.error = scraperResult.errorMessage;
@@ -426,7 +427,10 @@ const scrapeAndProcessTournament = async (url, existingGameData, jobId, triggerS
                         },
                         identity: { claims: { jobId, triggerSource }}
                     };
-                    
+                    console.log(`[AUTO-SCRAPER-TRACE] Building savePayload for ${url}.`);
+                    console.log(`[AUTO-SCRAPER-TRACE] Type of originalScrapedData being sent:`, typeof savePayload.arguments.input.originalScrapedData);
+                    console.log(`[AUTO-SCRAPER-TRACE] Length of originalScrapedData string:`, savePayload.arguments.input.originalScrapedData?.length);
+
                     const saveResponse = await lambdaClient.send(new InvokeCommand({
                         FunctionName: functionName,
                         InvocationType: 'RequestResponse',

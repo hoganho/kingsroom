@@ -1,6 +1,6 @@
 // src/pages/scraper-admin-tabs/AutoScraperTab.tsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react'; // 🚀 Added useCallback
 // import { generateClient } from 'aws-amplify/api'; // FIX: This client is unused
 import { useNavigate } from 'react-router-dom';
 import {
@@ -57,6 +57,10 @@ export const AutoScraperTab: React.FC = () => {
     const [isAutoMode, setIsAutoMode] = useState(false);
     const [autoInterval, setAutoInterval] = useState('3600'); // Default 1 hour in seconds
     
+    // 🚀 NEW: State for countdown timer
+    const [nextRunTime, setNextRunTime] = useState<number | null>(null);
+    const [countdown, setCountdown] = useState<string>('');
+
     // Find current running job from jobs list
     const currentJob = jobs.find(job => job.status === 'RUNNING');
     const isJobRunning = !!currentJob;
@@ -101,27 +105,8 @@ export const AutoScraperTab: React.FC = () => {
         setRecentGames(games.slice(0, 10)); // Show last 10 games
     }, [jobs]);
 
-    // Auto-scraping interval
-    useEffect(() => {
-        if (isAutoMode && !isJobRunning) {
-            const intervalMs = parseInt(autoInterval) * 1000;
-            const timer = setTimeout(() => {
-                handleStartJob();
-            }, intervalMs);
-            
-            return () => clearTimeout(timer);
-        }
-    }, [isAutoMode, isJobRunning, autoInterval]);
-
-    // Clear success message after 5 seconds
-    useEffect(() => {
-        if (success) {
-            const timer = setTimeout(() => setSuccess(null), 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [success]);
-
-    const handleStartJob = async () => {
+    // 🚀 MODIFIED: Wrapped handleStartJob in useCallback
+    const handleStartJob = useCallback(async () => {
         try {
             const job = await startJob({
                 triggerSource: ScraperJobTriggerSource.MANUAL,
@@ -136,7 +121,68 @@ export const AutoScraperTab: React.FC = () => {
             console.error('Error starting job:', err);
             setIsAutoMode(false); // Stop auto mode on error
         }
-    };
+    }, [startJob, maxGames, isAutoMode, setSuccess, fetchJobs, setIsAutoMode]);
+
+    // 🚀 MODIFIED: Auto-scraping interval logic
+    useEffect(() => {
+        let timer: NodeJS.Timeout | null = null;
+        
+        if (isAutoMode && !isJobRunning) {
+            const intervalMs = parseInt(autoInterval) * 1000;
+            timer = setTimeout(() => {
+                handleStartJob();
+                setNextRunTime(null); // Job is starting, clear the timer
+            }, intervalMs);
+            
+            // Set the target time for the countdown
+            setNextRunTime(Date.now() + intervalMs);
+            
+            return () => {
+                if (timer) clearTimeout(timer);
+                setNextRunTime(null);
+            };
+        } else {
+            // Not in auto mode or job is running, clear any pending timer
+            setNextRunTime(null);
+        }
+    }, [isAutoMode, isJobRunning, autoInterval, handleStartJob]);
+
+    // 🚀 NEW: Countdown timer effect
+    useEffect(() => {
+        if (!nextRunTime || !isAutoMode || isJobRunning) {
+            setCountdown(''); // Clear countdown if not applicable
+            return;
+        }
+
+        const intervalId = setInterval(() => {
+            const remainingMs = Math.max(0, nextRunTime - Date.now());
+            
+            if (remainingMs === 0) {
+                setCountdown('00:00');
+                clearInterval(intervalId); // Stop timer when it hits 0
+                return;
+            }
+            
+            const totalSeconds = Math.floor(remainingMs / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            
+            // Set the mm:ss format
+            setCountdown(
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+            );
+        }, 1000); // Update every second
+
+        return () => clearInterval(intervalId); // Cleanup interval on unmount or re-run
+    }, [nextRunTime, isAutoMode, isJobRunning]);
+
+    // Clear success message after 5 seconds
+    useEffect(() => {
+        if (success) {
+            const timer = setTimeout(() => setSuccess(null), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [success]);
 
     const handleCancelJob = async () => {
         if (currentJob?.jobId) {
@@ -210,12 +256,8 @@ export const AutoScraperTab: React.FC = () => {
             default: return <Clock className="h-4 w-4 text-gray-600" />;
         }
     };
-
-    const getNextRunTime = () => {
-        if (!isAutoMode || isJobRunning) return null;
-        const nextRun = new Date(Date.now() + parseInt(autoInterval) * 1000);
-        return nextRun.toLocaleTimeString();
-    };
+    
+    // 🚀 DELETED: The getNextRunTime function is no longer needed
 
     return (
         <div className="space-y-6">
@@ -280,8 +322,9 @@ export const AutoScraperTab: React.FC = () => {
                                     Job Running
                                 </span>
                             ) : isAutoMode ? (
+                                // 🚀 MODIFIED: Use the countdown state
                                 <span className="text-green-600 font-medium">
-                                    Next run: {getNextRunTime()}
+                                    Next run in: {countdown || '...'}
                                 </span>
                             ) : (
                                 <span className="text-gray-500">Idle</span>
@@ -495,5 +538,3 @@ export const AutoScraperTab: React.FC = () => {
         </div>
     );
 };
-
-
