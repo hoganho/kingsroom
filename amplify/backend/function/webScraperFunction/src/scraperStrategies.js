@@ -251,7 +251,18 @@ const defaultStrategy = {
         if (ctx.gameData && ctx.gameData.start_local) {
             ctx.add('gameStartDateTime', new Date(ctx.gameData.start_local).toISOString());
         } else {
-            ctx.getText('gameStartDateTime', '#cw_clock_start_date_time_local');
+            const dateText = ctx.getText('gameStartDateTime', '#cw_clock_start_date_time_local');
+            if (dateText) {
+                // Ensure the scraped date is in ISO format
+                try {
+                    const date = new Date(dateText);
+                    if (!isNaN(date.getTime())) {
+                        ctx.data.gameStartDateTime = date.toISOString();
+                    }
+                } catch (e) {
+                    console.warn('Could not parse gameStartDateTime:', dateText);
+                }
+            }
         }
     },
     

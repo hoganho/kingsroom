@@ -45,6 +45,34 @@ const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
 const sqsClient = new SQSClient({});
 
+// --- Date Helper Functions ---
+const ensureISODate = (dateValue, fallback = null) => {
+    if (!dateValue) return fallback || new Date().toISOString();
+    
+    // If already in ISO format with 'T', return as is
+    if (typeof dateValue === 'string' && dateValue.includes('T')) {
+        try {
+            const testDate = new Date(dateValue);
+            if (!isNaN(testDate.getTime())) return dateValue;
+        } catch (e) {}
+    }
+    
+    // Handle date-only strings (YYYY-MM-DD)
+    if (typeof dateValue === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+        return `${dateValue}T00:00:00.000Z`;
+    }
+    
+    // Try to parse as date
+    try {
+        const date = new Date(dateValue);
+        if (!isNaN(date.getTime())) return date.toISOString();
+    } catch (error) {
+        console.error(`Failed to parse date: ${dateValue}`, error);
+    }
+    
+    return fallback || new Date().toISOString();
+};
+
 // --- Configuration (Assumed from environment) ---
 // Note: PLAYER_PROCESSOR_QUEUE_URL must be configured as the FIFO queue URL
 
@@ -125,9 +153,12 @@ const upsertLeanPlayerRecord = async (playerId, playerName, gameData) => {
         await ddbDocClient.send(new UpdateCommand({
             TableName: playerTable,
             Key: { id: playerId },
-            UpdateExpression: 'SET updatedAt = :now',
+            UpdateExpression: 'SET updatedAt = :now, lastPlayedDate = :lastPlayed',
             ConditionExpression: 'attribute_exists(id)',
-            ExpressionAttributeValues: { ':now': now }
+            ExpressionAttributeValues: { 
+                ':now': now,
+                ':lastPlayed': ensureISODate(gameData.gameStartDateTime)
+            }
         }));
     } catch (error) {
         if (error.name === 'ConditionalCheckFailedException') {
@@ -140,7 +171,9 @@ const upsertLeanPlayerRecord = async (playerId, playerName, gameData) => {
                 firstName: nameParts.firstName,
                 lastName: nameParts.lastName,
                 givenName: nameParts.givenName,
-                registrationDate: gameData.gameStartDateTime,
+                registrationDate: ensureISODate(gameData.gameStartDateTime),
+                firstGamePlayed: ensureISODate(gameData.gameStartDateTime),
+                lastPlayedDate: ensureISODate(gameData.gameStartDateTime),
                 registrationVenueId: gameData.venueId,
                 creditBalance: 0,
                 pointsBalance: 0,
@@ -630,7 +663,7 @@ const handleSave = async (input) => {
             gameType: data.gameType || 'TOURNAMENT', gameStatus: data.gameStatus || 'SCHEDULED',
             gameVariant: data.gameVariant || 'NLHE',
             gameStartDateTime: data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : now,
-            gameEndDateTime: data.gameEndDateTime, sourceUrl, venueId,
+            gameEndDateTime: ensureISODate(data.gameEndDateTime), sourceUrl, venueId,
             tournamentType: data.tournamentType, buyIn: data.buyIn, rake: data.rake || 0,
             startingStack: data.startingStack, hasGuarantee: data.hasGuarantee,
             guaranteeAmount: data.guaranteeAmount, revenueByBuyIns: data.revenueByBuyIns,

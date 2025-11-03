@@ -222,7 +222,8 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) =>
     const now = new Date().toISOString();
     const nameParts = parsePlayerName(playerName);
     const gameDateTime = gameData.game.gameEndDateTime || gameData.game.gameStartDateTime;
-    const gameDate = gameDateTime.split('T')[0];
+    // FIXED: Keep full ISO date instead of extracting date-only part
+    const gameDate = gameDateTime ? (gameDateTime.includes('T') ? gameDateTime : `${gameDateTime}T00:00:00.000Z`) : now;
 
     try {
         const existingPlayer = await ddbDocClient.send(new GetCommand({
@@ -497,7 +498,9 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
     const playerVenueTable = getTableName('PlayerVenue');
     const playerVenueId = `${playerId}#${gameData.game.venueId}`;
     const now = new Date().toISOString();
-    const gameDate = (gameData.game.gameEndDateTime || gameData.game.gameStartDateTime).split('T')[0];
+    // FIXED: Keep full ISO date instead of extracting date-only part
+    const gameDateTime = gameData.game.gameEndDateTime || gameData.game.gameStartDateTime;
+    const gameDate = gameDateTime ? (gameDateTime.includes('T') ? gameDateTime : `${gameDateTime}T00:00:00.000Z`) : now;
     const currentGameBuyIn = (gameData.game.buyIn || 0) + (gameData.game.rake || 0);
     
     try {
