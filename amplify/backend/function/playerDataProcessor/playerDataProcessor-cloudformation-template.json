@@ -136,6 +136,58 @@
                 ]
               ]
             },
+            "API_KINGSROOM_PLAYERENTRYTABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerEntryTable:Name"
+              }
+            },
+            "API_KINGSROOM_PLAYERENTRYTABLE_ARN": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:dynamodb:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":table/",
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerEntryTable:Name"
+                    }
+                  }
+                ]
+              ]
+            },
+            "API_KINGSROOM_PLAYERRESULTTABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerResultTable:Name"
+              }
+            },
+            "API_KINGSROOM_PLAYERRESULTTABLE_ARN": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:dynamodb:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":table/",
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerResultTable:Name"
+                    }
+                  }
+                ]
+              ]
+            },
             "API_KINGSROOM_PLAYERVENUETABLE_NAME": {
               "Fn::ImportValue": {
                 "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerVenueTable:Name"
@@ -188,12 +240,12 @@
                 ]
               ]
             },
-            "API_KINGSROOM_PLAYERRESULTTABLE_NAME": {
+            "API_KINGSROOM_PLAYERCREDITSTABLE_NAME": {
               "Fn::ImportValue": {
-                "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerResultTable:Name"
+                "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerCreditsTable:Name"
               }
             },
-            "API_KINGSROOM_PLAYERRESULTTABLE_ARN": {
+            "API_KINGSROOM_PLAYERCREDITSTABLE_ARN": {
               "Fn::Join": [
                 "",
                 [
@@ -208,7 +260,59 @@
                   ":table/",
                   {
                     "Fn::ImportValue": {
-                      "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerResultTable:Name"
+                      "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerCreditsTable:Name"
+                    }
+                  }
+                ]
+              ]
+            },
+            "API_KINGSROOM_PLAYERPOINTSTABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerPointsTable:Name"
+              }
+            },
+            "API_KINGSROOM_PLAYERPOINTSTABLE_ARN": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:dynamodb:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":table/",
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerPointsTable:Name"
+                    }
+                  }
+                ]
+              ]
+            },
+            "API_KINGSROOM_TICKETTEMPLATETABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:TicketTemplateTable:Name"
+              }
+            },
+            "API_KINGSROOM_TICKETTEMPLATETABLE_ARN": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:dynamodb:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":table/",
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:TicketTemplateTable:Name"
                     }
                   }
                 ]
@@ -235,32 +339,6 @@
                   {
                     "Fn::ImportValue": {
                       "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerTicketTable:Name"
-                    }
-                  }
-                ]
-              ]
-            },
-            "API_KINGSROOM_PLAYERENTRYTABLE_NAME": {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerEntryTable:Name"
-              }
-            },
-            "API_KINGSROOM_PLAYERENTRYTABLE_ARN": {
-              "Fn::Join": [
-                "",
-                [
-                  "arn:aws:dynamodb:",
-                  {
-                    "Ref": "AWS::Region"
-                  },
-                  ":",
-                  {
-                    "Ref": "AWS::AccountId"
-                  },
-                  ":table/",
-                  {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerEntryTable:Name"
                     }
                   }
                 ]
@@ -800,6 +878,198 @@
                       {
                         "Fn::ImportValue": {
                           "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerTransactionTable:Name"
+                        }
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:Put*",
+                "dynamodb:Create*",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PartiQLInsert",
+                "dynamodb:Get*",
+                "dynamodb:BatchGetItem",
+                "dynamodb:List*",
+                "dynamodb:Describe*",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:PartiQLSelect",
+                "dynamodb:Update*",
+                "dynamodb:RestoreTable*",
+                "dynamodb:PartiQLUpdate"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":table/",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerCreditsTable:Name"
+                        }
+                      }
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":table/",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerCreditsTable:Name"
+                        }
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:Put*",
+                "dynamodb:Create*",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PartiQLInsert",
+                "dynamodb:Get*",
+                "dynamodb:BatchGetItem",
+                "dynamodb:List*",
+                "dynamodb:Describe*",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:PartiQLSelect",
+                "dynamodb:Update*",
+                "dynamodb:RestoreTable*",
+                "dynamodb:PartiQLUpdate"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":table/",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerPointsTable:Name"
+                        }
+                      }
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":table/",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:PlayerPointsTable:Name"
+                        }
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:Put*",
+                "dynamodb:Create*",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PartiQLInsert",
+                "dynamodb:Get*",
+                "dynamodb:BatchGetItem",
+                "dynamodb:List*",
+                "dynamodb:Describe*",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:PartiQLSelect",
+                "dynamodb:Update*",
+                "dynamodb:RestoreTable*",
+                "dynamodb:PartiQLUpdate"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":table/",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:TicketTemplateTable:Name"
+                        }
+                      }
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":table/",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:TicketTemplateTable:Name"
                         }
                       },
                       "/index/*"

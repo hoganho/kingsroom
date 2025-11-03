@@ -35,7 +35,8 @@ export enum GameStatus {
   CANCELLED = "CANCELLED",
   FINISHED = "FINISHED",
   NOT_IN_USE = "NOT_IN_USE",
-  CLOCK_STOPPED = "CLOCK_STOPPED"
+  CLOCK_STOPPED = "CLOCK_STOPPED",
+  UNKNOWN = "UNKNOWN"
 }
 
 export enum GameVariant {
@@ -184,6 +185,51 @@ export enum PointsTransactionType {
   EXPIRED = "EXPIRED"
 }
 
+export enum ScraperJobTriggerSource {
+  SCHEDULED = "SCHEDULED",
+  MANUAL = "MANUAL",
+  API = "API",
+  CONTROL = "CONTROL",
+  BULK = "BULK",
+  ADMIN = "ADMIN"
+}
+
+export enum ScraperJobStatus {
+  QUEUED = "QUEUED",
+  RUNNING = "RUNNING",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
+  CANCELLED = "CANCELLED",
+  TIMEOUT = "TIMEOUT"
+}
+
+export enum ScrapeUrlStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  DO_NOT_SCRAPE = "DO_NOT_SCRAPE",
+  ERROR = "ERROR",
+  ARCHIVED = "ARCHIVED"
+}
+
+export enum ScrapeAttemptStatus {
+  SUCCESS = "SUCCESS",
+  FAILED = "FAILED",
+  SKIPPED_DONOTSCRAPE = "SKIPPED_DONOTSCRAPE",
+  SKIPPED_VENUE = "SKIPPED_VENUE",
+  BLANK = "BLANK",
+  NO_CHANGES = "NO_CHANGES",
+  UPDATED = "UPDATED",
+  SAVED = "SAVED"
+}
+
+export enum TimeRange {
+  LAST_HOUR = "LAST_HOUR",
+  LAST_24_HOURS = "LAST_24_HOURS",
+  LAST_7_DAYS = "LAST_7_DAYS",
+  LAST_30_DAYS = "LAST_30_DAYS",
+  CUSTOM = "CUSTOM"
+}
+
 export enum ScraperOperation {
   START = "START",
   STOP = "STOP",
@@ -295,27 +341,189 @@ export declare type ScrapedGameStatus = LazyLoading extends LazyLoadingDisabled 
 
 export declare const ScrapedGameStatus: (new (init: ModelInit<ScrapedGameStatus>) => ScrapedGameStatus)
 
-type EagerTournamentLevelData = {
+type EagerTournamentLevel = {
   readonly levelNumber: number;
-  readonly durationMinutes: number;
-  readonly smallBlind: number;
-  readonly bigBlind: number;
+  readonly durationMinutes?: number | null;
+  readonly smallBlind?: number | null;
+  readonly bigBlind?: number | null;
   readonly ante?: number | null;
-  readonly breakMinutes?: number | null;
 }
 
-type LazyTournamentLevelData = {
+type LazyTournamentLevel = {
   readonly levelNumber: number;
-  readonly durationMinutes: number;
-  readonly smallBlind: number;
-  readonly bigBlind: number;
+  readonly durationMinutes?: number | null;
+  readonly smallBlind?: number | null;
+  readonly bigBlind?: number | null;
   readonly ante?: number | null;
-  readonly breakMinutes?: number | null;
 }
 
-export declare type TournamentLevelData = LazyLoading extends LazyLoadingDisabled ? EagerTournamentLevelData : LazyTournamentLevelData
+export declare type TournamentLevel = LazyLoading extends LazyLoadingDisabled ? EagerTournamentLevel : LazyTournamentLevel
 
-export declare const TournamentLevelData: (new (init: ModelInit<TournamentLevelData>) => TournamentLevelData)
+export declare const TournamentLevel: (new (init: ModelInit<TournamentLevel>) => TournamentLevel)
+
+type EagerBreak = {
+  readonly levelNumberBeforeBreak: number;
+  readonly durationMinutes?: number | null;
+}
+
+type LazyBreak = {
+  readonly levelNumberBeforeBreak: number;
+  readonly durationMinutes?: number | null;
+}
+
+export declare type Break = LazyLoading extends LazyLoadingDisabled ? EagerBreak : LazyBreak
+
+export declare const Break: (new (init: ModelInit<Break>) => Break)
+
+type EagerClientMetricResponse = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly userId?: string | null;
+}
+
+type LazyClientMetricResponse = {
+  readonly success: boolean;
+  readonly message?: string | null;
+  readonly userId?: string | null;
+}
+
+export declare type ClientMetricResponse = LazyLoading extends LazyLoadingDisabled ? EagerClientMetricResponse : LazyClientMetricResponse
+
+export declare const ClientMetricResponse: (new (init: ModelInit<ClientMetricResponse>) => ClientMetricResponse)
+
+type EagerUserMetricsSummary = {
+  readonly userId: string;
+  readonly userName?: string | null;
+  readonly totalActions?: number | null;
+  readonly totalPageViews?: number | null;
+  readonly totalErrors?: number | null;
+  readonly lastActive?: string | null;
+  readonly mostUsedFeature?: string | null;
+}
+
+type LazyUserMetricsSummary = {
+  readonly userId: string;
+  readonly userName?: string | null;
+  readonly totalActions?: number | null;
+  readonly totalPageViews?: number | null;
+  readonly totalErrors?: number | null;
+  readonly lastActive?: string | null;
+  readonly mostUsedFeature?: string | null;
+}
+
+export declare type UserMetricsSummary = LazyLoading extends LazyLoadingDisabled ? EagerUserMetricsSummary : LazyUserMetricsSummary
+
+export declare const UserMetricsSummary: (new (init: ModelInit<UserMetricsSummary>) => UserMetricsSummary)
+
+type EagerScraperJobURLResult = {
+  readonly url: string;
+  readonly tournamentId: number;
+  readonly status: ScrapeAttemptStatus | keyof typeof ScrapeAttemptStatus;
+  readonly gameName?: string | null;
+  readonly processingTime?: number | null;
+  readonly error?: string | null;
+}
+
+type LazyScraperJobURLResult = {
+  readonly url: string;
+  readonly tournamentId: number;
+  readonly status: ScrapeAttemptStatus | keyof typeof ScrapeAttemptStatus;
+  readonly gameName?: string | null;
+  readonly processingTime?: number | null;
+  readonly error?: string | null;
+}
+
+export declare type ScraperJobURLResult = LazyLoading extends LazyLoadingDisabled ? EagerScraperJobURLResult : LazyScraperJobURLResult
+
+export declare const ScraperJobURLResult: (new (init: ModelInit<ScraperJobURLResult>) => ScraperJobURLResult)
+
+type EagerScraperMetrics = {
+  readonly totalJobs: number;
+  readonly successfulJobs: number;
+  readonly failedJobs: number;
+  readonly averageJobDuration: number;
+  readonly totalURLsScraped: number;
+  readonly successRate: number;
+  readonly topErrors?: ErrorMetric[] | null;
+  readonly hourlyActivity?: HourlyMetric[] | null;
+}
+
+type LazyScraperMetrics = {
+  readonly totalJobs: number;
+  readonly successfulJobs: number;
+  readonly failedJobs: number;
+  readonly averageJobDuration: number;
+  readonly totalURLsScraped: number;
+  readonly successRate: number;
+  readonly topErrors?: ErrorMetric[] | null;
+  readonly hourlyActivity?: HourlyMetric[] | null;
+}
+
+export declare type ScraperMetrics = LazyLoading extends LazyLoadingDisabled ? EagerScraperMetrics : LazyScraperMetrics
+
+export declare const ScraperMetrics: (new (init: ModelInit<ScraperMetrics>) => ScraperMetrics)
+
+type EagerErrorMetric = {
+  readonly errorType: string;
+  readonly count: number;
+  readonly urls?: string[] | null;
+}
+
+type LazyErrorMetric = {
+  readonly errorType: string;
+  readonly count: number;
+  readonly urls?: string[] | null;
+}
+
+export declare type ErrorMetric = LazyLoading extends LazyLoadingDisabled ? EagerErrorMetric : LazyErrorMetric
+
+export declare const ErrorMetric: (new (init: ModelInit<ErrorMetric>) => ErrorMetric)
+
+type EagerHourlyMetric = {
+  readonly hour: string;
+  readonly jobCount: number;
+  readonly urlsScraped: number;
+  readonly successRate: number;
+}
+
+type LazyHourlyMetric = {
+  readonly hour: string;
+  readonly jobCount: number;
+  readonly urlsScraped: number;
+  readonly successRate: number;
+}
+
+export declare type HourlyMetric = LazyLoading extends LazyLoadingDisabled ? EagerHourlyMetric : LazyHourlyMetric
+
+export declare const HourlyMetric: (new (init: ModelInit<HourlyMetric>) => HourlyMetric)
+
+type EagerScraperJobConnection = {
+  readonly items?: ScraperJob[] | null;
+  readonly nextToken?: string | null;
+}
+
+type LazyScraperJobConnection = {
+  readonly items: AsyncCollection<ScraperJob>;
+  readonly nextToken?: string | null;
+}
+
+export declare type ScraperJobConnection = LazyLoading extends LazyLoadingDisabled ? EagerScraperJobConnection : LazyScraperJobConnection
+
+export declare const ScraperJobConnection: (new (init: ModelInit<ScraperJobConnection>) => ScraperJobConnection)
+
+type EagerScrapeURLConnection = {
+  readonly items?: ScrapeURL[] | null;
+  readonly nextToken?: string | null;
+}
+
+type LazyScrapeURLConnection = {
+  readonly items: AsyncCollection<ScrapeURL>;
+  readonly nextToken?: string | null;
+}
+
+export declare type ScrapeURLConnection = LazyLoading extends LazyLoadingDisabled ? EagerScrapeURLConnection : LazyScrapeURLConnection
+
+export declare const ScrapeURLConnection: (new (init: ModelInit<ScrapeURLConnection>) => ScrapeURLConnection)
 
 type EagerScrapedGameSummary = {
   readonly id: string;
@@ -387,6 +595,8 @@ type EagerScrapedGameData = {
   readonly structureLabel?: string | null;
   readonly foundKeys?: (string | null)[] | null;
   readonly venueMatch?: ScrapedVenueMatch | null;
+  readonly existingGameId?: string | null;
+  readonly doNotScrape?: boolean | null;
 }
 
 type LazyScrapedGameData = {
@@ -433,6 +643,8 @@ type LazyScrapedGameData = {
   readonly structureLabel?: string | null;
   readonly foundKeys?: (string | null)[] | null;
   readonly venueMatch?: ScrapedVenueMatch | null;
+  readonly existingGameId?: string | null;
+  readonly doNotScrape?: boolean | null;
 }
 
 export declare type ScrapedGameData = LazyLoading extends LazyLoadingDisabled ? EagerScrapedGameData : LazyScrapedGameData
@@ -890,7 +1102,6 @@ export declare const TournamentSeries: (new (init: ModelInit<TournamentSeries>) 
 type EagerGame = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<Game, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
   readonly name: string;
@@ -926,29 +1137,24 @@ type EagerGame = {
   readonly seriesName?: string | null;
   readonly gameTags?: (string | null)[] | null;
   readonly sourceUrl?: string | null;
-  readonly sourceSystem?: string | null;
-  readonly doNotScrape?: boolean | null;
-  readonly sourceDataIssue?: boolean | null;
-  readonly gameDataVerified?: boolean | null;
-  readonly missingKeysFromScrape?: (string | null)[] | null;
+  readonly tournamentId?: number | null;
+  readonly dataSource?: DataSource | keyof typeof DataSource | null;
+  readonly originalScrapedData?: string | null;
   readonly venueId: string;
   readonly venue?: Venue | null;
   readonly tournamentSeriesId?: string | null;
   readonly tournamentSeries?: TournamentSeries | null;
-  readonly tournamentStructureId?: string | null;
-  readonly tournamentStructure?: TournamentStructure | null;
-  readonly cashStructureId?: string | null;
-  readonly cashStructure?: CashStructure | null;
+  readonly structure?: TournamentStructure | null;
   readonly playerEntries?: (PlayerEntry | null)[] | null;
   readonly playerResults?: (PlayerResult | null)[] | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly gameStructureId?: string | null;
 }
 
 type LazyGame = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<Game, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
   readonly name: string;
@@ -984,23 +1190,19 @@ type LazyGame = {
   readonly seriesName?: string | null;
   readonly gameTags?: (string | null)[] | null;
   readonly sourceUrl?: string | null;
-  readonly sourceSystem?: string | null;
-  readonly doNotScrape?: boolean | null;
-  readonly sourceDataIssue?: boolean | null;
-  readonly gameDataVerified?: boolean | null;
-  readonly missingKeysFromScrape?: (string | null)[] | null;
+  readonly tournamentId?: number | null;
+  readonly dataSource?: DataSource | keyof typeof DataSource | null;
+  readonly originalScrapedData?: string | null;
   readonly venueId: string;
   readonly venue: AsyncItem<Venue | undefined>;
   readonly tournamentSeriesId?: string | null;
   readonly tournamentSeries: AsyncItem<TournamentSeries | undefined>;
-  readonly tournamentStructureId?: string | null;
-  readonly tournamentStructure: AsyncItem<TournamentStructure | undefined>;
-  readonly cashStructureId?: string | null;
-  readonly cashStructure: AsyncItem<CashStructure | undefined>;
+  readonly structure: AsyncItem<TournamentStructure | undefined>;
   readonly playerEntries: AsyncCollection<PlayerEntry>;
   readonly playerResults: AsyncCollection<PlayerResult>;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly gameStructureId?: string | null;
 }
 
 export declare type Game = LazyLoading extends LazyLoadingDisabled ? EagerGame : LazyGame
@@ -1015,10 +1217,10 @@ type EagerTournamentStructure = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly name: string;
-  readonly description?: string | null;
-  readonly levels?: (TournamentLevelData | null)[] | null;
-  readonly games?: (Game | null)[] | null;
+  readonly levels?: TournamentLevel[] | null;
+  readonly breaks?: Break[] | null;
+  readonly gameId: string;
+  readonly game?: Game | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -1029,10 +1231,10 @@ type LazyTournamentStructure = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly name: string;
-  readonly description?: string | null;
-  readonly levels?: (TournamentLevelData | null)[] | null;
-  readonly games: AsyncCollection<Game>;
+  readonly levels?: TournamentLevel[] | null;
+  readonly breaks?: Break[] | null;
+  readonly gameId: string;
+  readonly game: AsyncItem<Game | undefined>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -1043,20 +1245,46 @@ export declare const TournamentStructure: (new (init: ModelInit<TournamentStruct
   copyOf(source: TournamentStructure, mutator: (draft: MutableModel<TournamentStructure>) => MutableModel<TournamentStructure> | void): TournamentStructure;
 }
 
+type EagerTournamentLevelData = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<TournamentLevelData, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly levels?: TournamentLevel[] | null;
+  readonly gameId: string;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyTournamentLevelData = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<TournamentLevelData, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly levels?: TournamentLevel[] | null;
+  readonly gameId: string;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type TournamentLevelData = LazyLoading extends LazyLoadingDisabled ? EagerTournamentLevelData : LazyTournamentLevelData
+
+export declare const TournamentLevelData: (new (init: ModelInit<TournamentLevelData>) => TournamentLevelData) & {
+  copyOf(source: TournamentLevelData, mutator: (draft: MutableModel<TournamentLevelData>) => MutableModel<TournamentLevelData> | void): TournamentLevelData;
+}
+
 type EagerCashStructure = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<CashStructure, 'id'>;
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly name: string;
-  readonly smallBlind: number;
-  readonly bigBlind: number;
-  readonly minBuyIn: number;
-  readonly maxBuyIn: number;
-  readonly rakeStructureId: string;
-  readonly rakeStructure?: RakeStructure | null;
-  readonly games?: (Game | null)[] | null;
+  readonly stakes: string;
+  readonly minBuyIn?: number | null;
+  readonly maxBuyIn?: number | null;
+  readonly gameId: string;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -1067,14 +1295,10 @@ type LazyCashStructure = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly name: string;
-  readonly smallBlind: number;
-  readonly bigBlind: number;
-  readonly minBuyIn: number;
-  readonly maxBuyIn: number;
-  readonly rakeStructureId: string;
-  readonly rakeStructure: AsyncItem<RakeStructure | undefined>;
-  readonly games: AsyncCollection<Game>;
+  readonly stakes: string;
+  readonly minBuyIn?: number | null;
+  readonly maxBuyIn?: number | null;
+  readonly gameId: string;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -1091,10 +1315,9 @@ type EagerRakeStructure = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly name: string;
-  readonly rakePercentage: number;
-  readonly maxRake: number;
-  readonly cashStructures?: (CashStructure | null)[] | null;
+  readonly rakePercentage?: number | null;
+  readonly rakeCap?: number | null;
+  readonly gameId: string;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -1105,10 +1328,9 @@ type LazyRakeStructure = {
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly name: string;
-  readonly rakePercentage: number;
-  readonly maxRake: number;
-  readonly cashStructures: AsyncCollection<CashStructure>;
+  readonly rakePercentage?: number | null;
+  readonly rakeCap?: number | null;
+  readonly gameId: string;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -1122,73 +1344,71 @@ export declare const RakeStructure: (new (init: ModelInit<RakeStructure>) => Rak
 type EagerPlayer = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<Player, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
+    readOnlyFields: 'createdAt';
   };
   readonly id: string;
   readonly firstName: string;
-  readonly givenName?: string | null;
-  readonly lastName?: string | null;
-  readonly email?: string | null;
+  readonly lastName: string;
   readonly phone?: string | null;
-  readonly creationDate: string;
+  readonly email?: string | null;
   readonly status: PlayerAccountStatus | keyof typeof PlayerAccountStatus;
   readonly category: PlayerAccountCategory | keyof typeof PlayerAccountCategory;
-  readonly tier?: string | null;
-  readonly lastPlayedDate?: string | null;
   readonly targetingClassification: PlayerTargetingClassification | keyof typeof PlayerTargetingClassification;
+  readonly registrationDate: string;
+  readonly firstGamePlayed?: string | null;
+  readonly lastPlayedDate?: string | null;
   readonly creditBalance?: number | null;
   readonly pointsBalance?: number | null;
+  readonly playerSummary?: PlayerSummary | null;
+  readonly knownIdentities?: (KnownPlayerIdentity | null)[] | null;
+  readonly marketingPreferences?: PlayerMarketingPreferences | null;
+  readonly marketingMessages?: (PlayerMarketingMessage | null)[] | null;
+  readonly playerVenues?: (PlayerVenue | null)[] | null;
+  readonly playerEntries?: (PlayerEntry | null)[] | null;
+  readonly playerResults?: (PlayerResult | null)[] | null;
+  readonly playerTickets?: (PlayerTicket | null)[] | null;
+  readonly playerTransactions?: (PlayerTransaction | null)[] | null;
+  readonly playerCredits?: (PlayerCredits | null)[] | null;
+  readonly playerPoints?: (PlayerPoints | null)[] | null;
   readonly registrationVenueId: string;
   readonly registrationVenue?: Venue | null;
-  readonly summary?: PlayerSummary | null;
-  readonly transactions?: (PlayerTransaction | null)[] | null;
-  readonly playerEntries?: (PlayerEntry | null)[] | null;
-  readonly results?: (PlayerResult | null)[] | null;
-  readonly tickets?: (PlayerTicket | null)[] | null;
-  readonly venueMemberships?: (PlayerVenue | null)[] | null;
-  readonly credits?: (PlayerCredits | null)[] | null;
-  readonly points?: (PlayerPoints | null)[] | null;
-  readonly marketingPreferences?: PlayerMarketingPreferences | null;
+  readonly updatedAt: string;
   readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-  readonly playerSummaryId?: string | null;
-  readonly playerMarketingPreferencesId?: string | null;
 }
 
 type LazyPlayer = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<Player, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
+    readOnlyFields: 'createdAt';
   };
   readonly id: string;
   readonly firstName: string;
-  readonly givenName?: string | null;
-  readonly lastName?: string | null;
-  readonly email?: string | null;
+  readonly lastName: string;
   readonly phone?: string | null;
-  readonly creationDate: string;
+  readonly email?: string | null;
   readonly status: PlayerAccountStatus | keyof typeof PlayerAccountStatus;
   readonly category: PlayerAccountCategory | keyof typeof PlayerAccountCategory;
-  readonly tier?: string | null;
-  readonly lastPlayedDate?: string | null;
   readonly targetingClassification: PlayerTargetingClassification | keyof typeof PlayerTargetingClassification;
+  readonly registrationDate: string;
+  readonly firstGamePlayed?: string | null;
+  readonly lastPlayedDate?: string | null;
   readonly creditBalance?: number | null;
   readonly pointsBalance?: number | null;
+  readonly playerSummary: AsyncItem<PlayerSummary | undefined>;
+  readonly knownIdentities: AsyncCollection<KnownPlayerIdentity>;
+  readonly marketingPreferences: AsyncItem<PlayerMarketingPreferences | undefined>;
+  readonly marketingMessages: AsyncCollection<PlayerMarketingMessage>;
+  readonly playerVenues: AsyncCollection<PlayerVenue>;
+  readonly playerEntries: AsyncCollection<PlayerEntry>;
+  readonly playerResults: AsyncCollection<PlayerResult>;
+  readonly playerTickets: AsyncCollection<PlayerTicket>;
+  readonly playerTransactions: AsyncCollection<PlayerTransaction>;
+  readonly playerCredits: AsyncCollection<PlayerCredits>;
+  readonly playerPoints: AsyncCollection<PlayerPoints>;
   readonly registrationVenueId: string;
   readonly registrationVenue: AsyncItem<Venue | undefined>;
-  readonly summary: AsyncItem<PlayerSummary | undefined>;
-  readonly transactions: AsyncCollection<PlayerTransaction>;
-  readonly playerEntries: AsyncCollection<PlayerEntry>;
-  readonly results: AsyncCollection<PlayerResult>;
-  readonly tickets: AsyncCollection<PlayerTicket>;
-  readonly venueMemberships: AsyncCollection<PlayerVenue>;
-  readonly credits: AsyncCollection<PlayerCredits>;
-  readonly points: AsyncCollection<PlayerPoints>;
-  readonly marketingPreferences: AsyncItem<PlayerMarketingPreferences | undefined>;
+  readonly updatedAt: string;
   readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-  readonly playerSummaryId?: string | null;
-  readonly playerMarketingPreferencesId?: string | null;
 }
 
 export declare type Player = LazyLoading extends LazyLoadingDisabled ? EagerPlayer : LazyPlayer
@@ -1204,10 +1424,16 @@ type EagerPlayerSummary = {
   };
   readonly id: string;
   readonly playerId: string;
+  readonly gamesPlayedLast30Days?: number | null;
+  readonly gamesPlayedLast90Days?: number | null;
+  readonly gamesPlayedAllTime?: number | null;
+  readonly averageFinishPosition?: number | null;
+  readonly netBalance?: number | null;
+  readonly player?: Player | null;
   readonly sessionsPlayed?: number | null;
   readonly tournamentsPlayed?: number | null;
   readonly cashGamesPlayed?: number | null;
-  readonly venuesVisited?: (string | null)[] | null;
+  readonly venuesVisited?: number | null;
   readonly tournamentWinnings?: number | null;
   readonly tournamentBuyIns?: number | null;
   readonly tournamentITM?: number | null;
@@ -1216,9 +1442,7 @@ type EagerPlayerSummary = {
   readonly cashGameBuyIns?: number | null;
   readonly totalWinnings?: number | null;
   readonly totalBuyIns?: number | null;
-  readonly netBalance?: number | null;
   readonly lastPlayed: string;
-  readonly player?: Player | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -1230,10 +1454,16 @@ type LazyPlayerSummary = {
   };
   readonly id: string;
   readonly playerId: string;
+  readonly gamesPlayedLast30Days?: number | null;
+  readonly gamesPlayedLast90Days?: number | null;
+  readonly gamesPlayedAllTime?: number | null;
+  readonly averageFinishPosition?: number | null;
+  readonly netBalance?: number | null;
+  readonly player: AsyncItem<Player | undefined>;
   readonly sessionsPlayed?: number | null;
   readonly tournamentsPlayed?: number | null;
   readonly cashGamesPlayed?: number | null;
-  readonly venuesVisited?: (string | null)[] | null;
+  readonly venuesVisited?: number | null;
   readonly tournamentWinnings?: number | null;
   readonly tournamentBuyIns?: number | null;
   readonly tournamentITM?: number | null;
@@ -1242,9 +1472,7 @@ type LazyPlayerSummary = {
   readonly cashGameBuyIns?: number | null;
   readonly totalWinnings?: number | null;
   readonly totalBuyIns?: number | null;
-  readonly netBalance?: number | null;
   readonly lastPlayed: string;
-  readonly player: AsyncItem<Player | undefined>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -1533,6 +1761,42 @@ export declare type PlayerPoints = LazyLoading extends LazyLoadingDisabled ? Eag
 
 export declare const PlayerPoints: (new (init: ModelInit<PlayerPoints>) => PlayerPoints) & {
   copyOf(source: PlayerPoints, mutator: (draft: MutableModel<PlayerPoints>) => MutableModel<PlayerPoints> | void): PlayerPoints;
+}
+
+type EagerKnownPlayerIdentity = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<KnownPlayerIdentity, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly sourceSystem: string;
+  readonly identityValue: string;
+  readonly identityType: string;
+  readonly playerId: string;
+  readonly player?: Player | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyKnownPlayerIdentity = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<KnownPlayerIdentity, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly sourceSystem: string;
+  readonly identityValue: string;
+  readonly identityType: string;
+  readonly playerId: string;
+  readonly player: AsyncItem<Player | undefined>;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type KnownPlayerIdentity = LazyLoading extends LazyLoadingDisabled ? EagerKnownPlayerIdentity : LazyKnownPlayerIdentity
+
+export declare const KnownPlayerIdentity: (new (init: ModelInit<KnownPlayerIdentity>) => KnownPlayerIdentity) & {
+  copyOf(source: KnownPlayerIdentity, mutator: (draft: MutableModel<KnownPlayerIdentity>) => MutableModel<KnownPlayerIdentity> | void): KnownPlayerIdentity;
 }
 
 type EagerTicketTemplate = {
@@ -1929,4 +2193,228 @@ export declare type SocialPost = LazyLoading extends LazyLoadingDisabled ? Eager
 
 export declare const SocialPost: (new (init: ModelInit<SocialPost>) => SocialPost) & {
   copyOf(source: SocialPost, mutator: (draft: MutableModel<SocialPost>) => MutableModel<SocialPost> | void): SocialPost;
+}
+
+type EagerScraperJob = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<ScraperJob, 'id'>;
+  };
+  readonly id: string;
+  readonly jobId: string;
+  readonly triggerSource: ScraperJobTriggerSource | keyof typeof ScraperJobTriggerSource;
+  readonly triggeredBy?: string | null;
+  readonly startTime: string;
+  readonly endTime?: string | null;
+  readonly durationSeconds?: number | null;
+  readonly maxGames?: number | null;
+  readonly targetURLs?: (string | null)[] | null;
+  readonly isFullScan?: boolean | null;
+  readonly startId?: number | null;
+  readonly endId?: number | null;
+  readonly status: ScraperJobStatus | keyof typeof ScraperJobStatus;
+  readonly totalURLsProcessed?: number | null;
+  readonly newGamesScraped?: number | null;
+  readonly gamesUpdated?: number | null;
+  readonly gamesSkipped?: number | null;
+  readonly errors?: number | null;
+  readonly blanks?: number | null;
+  readonly averageScrapingTime?: number | null;
+  readonly successRate?: number | null;
+  readonly errorMessages?: (string | null)[] | null;
+  readonly failedURLs?: (string | null)[] | null;
+  readonly urlResults?: (ScraperJobURLResult | null)[] | null;
+  readonly scrapeAttempts?: (ScrapeAttempt | null)[] | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyScraperJob = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<ScraperJob, 'id'>;
+  };
+  readonly id: string;
+  readonly jobId: string;
+  readonly triggerSource: ScraperJobTriggerSource | keyof typeof ScraperJobTriggerSource;
+  readonly triggeredBy?: string | null;
+  readonly startTime: string;
+  readonly endTime?: string | null;
+  readonly durationSeconds?: number | null;
+  readonly maxGames?: number | null;
+  readonly targetURLs?: (string | null)[] | null;
+  readonly isFullScan?: boolean | null;
+  readonly startId?: number | null;
+  readonly endId?: number | null;
+  readonly status: ScraperJobStatus | keyof typeof ScraperJobStatus;
+  readonly totalURLsProcessed?: number | null;
+  readonly newGamesScraped?: number | null;
+  readonly gamesUpdated?: number | null;
+  readonly gamesSkipped?: number | null;
+  readonly errors?: number | null;
+  readonly blanks?: number | null;
+  readonly averageScrapingTime?: number | null;
+  readonly successRate?: number | null;
+  readonly errorMessages?: (string | null)[] | null;
+  readonly failedURLs?: (string | null)[] | null;
+  readonly urlResults?: (ScraperJobURLResult | null)[] | null;
+  readonly scrapeAttempts: AsyncCollection<ScrapeAttempt>;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type ScraperJob = LazyLoading extends LazyLoadingDisabled ? EagerScraperJob : LazyScraperJob
+
+export declare const ScraperJob: (new (init: ModelInit<ScraperJob>) => ScraperJob) & {
+  copyOf(source: ScraperJob, mutator: (draft: MutableModel<ScraperJob>) => MutableModel<ScraperJob> | void): ScraperJob;
+}
+
+type EagerScrapeURL = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<ScrapeURL, 'id'>;
+  };
+  readonly id: string;
+  readonly url: string;
+  readonly tournamentId: number;
+  readonly doNotScrape: boolean;
+  readonly sourceDataIssue?: boolean | null;
+  readonly gameDataVerified?: boolean | null;
+  readonly missingKeysFromScrape?: (string | null)[] | null;
+  readonly sourceSystem: string;
+  readonly status: ScrapeURLStatus | keyof typeof ScrapeURLStatus;
+  readonly placedIntoDatabase: boolean;
+  readonly firstScrapedAt: string;
+  readonly lastScrapedAt: string;
+  readonly lastSuccessfulScrapeAt?: string | null;
+  readonly timesScraped: number;
+  readonly timesSuccessful: number;
+  readonly timesFailed: number;
+  readonly consecutiveFailures: number;
+  readonly lastScrapeStatus?: ScrapeAttemptStatus | keyof typeof ScrapeAttemptStatus | null;
+  readonly lastScrapeMessage?: string | null;
+  readonly lastScrapeJobId?: string | null;
+  readonly gameId?: string | null;
+  readonly gameName?: string | null;
+  readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
+  readonly venueId?: string | null;
+  readonly venueName?: string | null;
+  readonly lastDataHash?: string | null;
+  readonly hasDataChanges?: boolean | null;
+  readonly lastFoundKeys?: (string | null)[] | null;
+  readonly lastStructureLabel?: string | null;
+  readonly averageScrapingTime?: number | null;
+  readonly lastScrapingTime?: number | null;
+  readonly attempts?: (ScrapeAttempt | null)[] | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyScrapeURL = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<ScrapeURL, 'id'>;
+  };
+  readonly id: string;
+  readonly url: string;
+  readonly tournamentId: number;
+  readonly doNotScrape: boolean;
+  readonly sourceDataIssue?: boolean | null;
+  readonly gameDataVerified?: boolean | null;
+  readonly missingKeysFromScrape?: (string | null)[] | null;
+  readonly sourceSystem: string;
+  readonly status: ScrapeURLStatus | keyof typeof ScrapeURLStatus;
+  readonly placedIntoDatabase: boolean;
+  readonly firstScrapedAt: string;
+  readonly lastScrapedAt: string;
+  readonly lastSuccessfulScrapeAt?: string | null;
+  readonly timesScraped: number;
+  readonly timesSuccessful: number;
+  readonly timesFailed: number;
+  readonly consecutiveFailures: number;
+  readonly lastScrapeStatus?: ScrapeAttemptStatus | keyof typeof ScrapeAttemptStatus | null;
+  readonly lastScrapeMessage?: string | null;
+  readonly lastScrapeJobId?: string | null;
+  readonly gameId?: string | null;
+  readonly gameName?: string | null;
+  readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
+  readonly venueId?: string | null;
+  readonly venueName?: string | null;
+  readonly lastDataHash?: string | null;
+  readonly hasDataChanges?: boolean | null;
+  readonly lastFoundKeys?: (string | null)[] | null;
+  readonly lastStructureLabel?: string | null;
+  readonly averageScrapingTime?: number | null;
+  readonly lastScrapingTime?: number | null;
+  readonly attempts: AsyncCollection<ScrapeAttempt>;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type ScrapeURL = LazyLoading extends LazyLoadingDisabled ? EagerScrapeURL : LazyScrapeURL
+
+export declare const ScrapeURL: (new (init: ModelInit<ScrapeURL>) => ScrapeURL) & {
+  copyOf(source: ScrapeURL, mutator: (draft: MutableModel<ScrapeURL>) => MutableModel<ScrapeURL> | void): ScrapeURL;
+}
+
+type EagerScrapeAttempt = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<ScrapeAttempt, 'id'>;
+  };
+  readonly id: string;
+  readonly url: string;
+  readonly tournamentId: number;
+  readonly attemptTime: string;
+  readonly scraperJobId: string;
+  readonly scraperJob?: ScraperJob | null;
+  readonly scrapeURLId: string;
+  readonly scrapeURL?: ScrapeURL | null;
+  readonly status: ScrapeAttemptStatus | keyof typeof ScrapeAttemptStatus;
+  readonly processingTime?: number | null;
+  readonly gameName?: string | null;
+  readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
+  readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
+  readonly dataHash?: string | null;
+  readonly hasChanges?: boolean | null;
+  readonly errorMessage?: string | null;
+  readonly errorType?: string | null;
+  readonly gameId?: string | null;
+  readonly wasNewGame?: boolean | null;
+  readonly fieldsUpdated?: (string | null)[] | null;
+  readonly foundKeys?: (string | null)[] | null;
+  readonly structureLabel?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyScrapeAttempt = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<ScrapeAttempt, 'id'>;
+  };
+  readonly id: string;
+  readonly url: string;
+  readonly tournamentId: number;
+  readonly attemptTime: string;
+  readonly scraperJobId: string;
+  readonly scraperJob: AsyncItem<ScraperJob | undefined>;
+  readonly scrapeURLId: string;
+  readonly scrapeURL: AsyncItem<ScrapeURL | undefined>;
+  readonly status: ScrapeAttemptStatus | keyof typeof ScrapeAttemptStatus;
+  readonly processingTime?: number | null;
+  readonly gameName?: string | null;
+  readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
+  readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
+  readonly dataHash?: string | null;
+  readonly hasChanges?: boolean | null;
+  readonly errorMessage?: string | null;
+  readonly errorType?: string | null;
+  readonly gameId?: string | null;
+  readonly wasNewGame?: boolean | null;
+  readonly fieldsUpdated?: (string | null)[] | null;
+  readonly foundKeys?: (string | null)[] | null;
+  readonly structureLabel?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type ScrapeAttempt = LazyLoading extends LazyLoadingDisabled ? EagerScrapeAttempt : LazyScrapeAttempt
+
+export declare const ScrapeAttempt: (new (init: ModelInit<ScrapeAttempt>) => ScrapeAttempt) & {
+  copyOf(source: ScrapeAttempt, mutator: (draft: MutableModel<ScrapeAttempt>) => MutableModel<ScrapeAttempt> | void): ScrapeAttempt;
 }

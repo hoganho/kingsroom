@@ -17,6 +17,33 @@ export const listVenuesForDropdown = /* GraphQL */ `
   }
 `;
 
+export const listVenuesShallow = /* GraphQL */ `
+  query ListVenuesShallow(
+    $filter: ModelVenueFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listVenues(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        venueNumber
+        name
+        aliases
+        address
+        city
+        country
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+      }
+      nextToken
+      startedAt
+    }
+  }
+`;
+
 /*
  * ===================================================================
  * DEBUG QUERIES FOR PlayersPage.tsx
@@ -36,7 +63,7 @@ export const listPlayersForDebug = /* GraphQL */ `
         id
         firstName
         lastName
-        creationDate
+        registrationDate
         lastPlayedDate
         targetingClassification
         creditBalance

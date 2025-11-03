@@ -1,8 +1,12 @@
 /* Amplify Params - DO NOT EDIT
 	API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
 	API_KINGSROOM_GRAPHQLAPIIDOUTPUT
+	API_KINGSROOM_PLAYERCREDITSTABLE_ARN
+	API_KINGSROOM_PLAYERCREDITSTABLE_NAME
 	API_KINGSROOM_PLAYERENTRYTABLE_ARN
 	API_KINGSROOM_PLAYERENTRYTABLE_NAME
+	API_KINGSROOM_PLAYERPOINTSTABLE_ARN
+	API_KINGSROOM_PLAYERPOINTSTABLE_NAME
 	API_KINGSROOM_PLAYERRESULTTABLE_ARN
 	API_KINGSROOM_PLAYERRESULTTABLE_NAME
 	API_KINGSROOM_PLAYERSUMMARYTABLE_ARN
@@ -15,6 +19,8 @@
 	API_KINGSROOM_PLAYERTRANSACTIONTABLE_NAME
 	API_KINGSROOM_PLAYERVENUETABLE_ARN
 	API_KINGSROOM_PLAYERVENUETABLE_NAME
+	API_KINGSROOM_TICKETTEMPLATETABLE_ARN
+	API_KINGSROOM_TICKETTEMPLATETABLE_NAME
 	ENV
 	REGION
 Amplify Params - DO NOT EDIT */
@@ -122,7 +128,7 @@ const calculatePlayerVenueTargetingClassification = (lastActivityDate, membershi
 /**
  * Calculate Player targeting classification based on flowchart logic
  */
-const calculatePlayerTargetingClassification = async (playerId, lastPlayedDate, creationDate, isNewPlayer = false) => {
+const calculatePlayerTargetingClassification = async (playerId, lastPlayedDate, registrationDate, isNewPlayer = false) => {
     const now = new Date();
 
     if (isNewPlayer) {
@@ -167,7 +173,7 @@ const calculatePlayerTargetingClassification = async (playerId, lastPlayedDate, 
             }
         }
         
-        const daysSinceCreation = daysBetween(creationDate, now);
+        const daysSinceCreation = daysBetween(registrationDate, now);
         if (daysSinceCreation <= 30 && mostRecentVenue) {
             const venueClassification = mostRecentVenue.targetingClassification;
             const newPlayerClassifications = ['Active_EL', 'Active', 'Retain_Inactive31_60d', 'Retain_Inactive61_90d'];
@@ -227,7 +233,7 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) =>
         if (existingPlayer.Item) {
             // Player exists globally. Update their record.
             const targetingClassification = await calculatePlayerTargetingClassification(
-                playerId, gameDateTime, existingPlayer.Item.creationDate, false
+                playerId, gameDateTime, existingPlayer.Item.registrationDate, false
             );
             await ddbDocClient.send(new UpdateCommand({
                 TableName: playerTable,
@@ -258,7 +264,7 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) =>
                 firstName: nameParts.firstName,
                 lastName: nameParts.lastName,
                 givenName: nameParts.givenName,
-                creationDate: gameDateTime,
+                registrationDate: gameDateTime,
                 registrationVenueId: gameData.game.venueId,
                 status: 'ACTIVE',
                 category: 'NEW',

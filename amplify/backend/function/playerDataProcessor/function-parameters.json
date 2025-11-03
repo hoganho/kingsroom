@@ -37,6 +37,21 @@
         "read",
         "update"
       ],
+      "PlayerCredits:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "PlayerPoints:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "TicketTemplate:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
       "PlayerTicket:@model(appsync)": [
         "create",
         "read",

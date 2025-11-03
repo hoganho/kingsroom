@@ -3,7 +3,8 @@
     "api": {
       "kingsroom": [
         "Query",
-        "Mutation"
+        "Mutation",
+        "Subscription"
       ]
     },
     "function": {
@@ -24,7 +25,17 @@
         "read",
         "update"
       ],
-      "Game:@model(appsync)": [
+      "ScraperJob:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "ScrapeURL:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "ScrapeAttempt:@model(appsync)": [
         "create",
         "read",
         "update"

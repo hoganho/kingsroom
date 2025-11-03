@@ -98,32 +98,6 @@
             "FUNCTION_PLAYERDATAPROCESSOR_NAME": {
               "Ref": "functionplayerDataProcessorName"
             },
-            "API_KINGSROOM_GAMETABLE_NAME": {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:GameTable:Name"
-              }
-            },
-            "API_KINGSROOM_GAMETABLE_ARN": {
-              "Fn::Join": [
-                "",
-                [
-                  "arn:aws:dynamodb:",
-                  {
-                    "Ref": "AWS::Region"
-                  },
-                  ":",
-                  {
-                    "Ref": "AWS::AccountId"
-                  },
-                  ":table/",
-                  {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:GameTable:Name"
-                    }
-                  }
-                ]
-              ]
-            },
             "API_KINGSROOM_SCRAPERSTATETABLE_NAME": {
               "Fn::ImportValue": {
                 "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:ScraperStateTable:Name"
@@ -145,6 +119,84 @@
                   {
                     "Fn::ImportValue": {
                       "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:ScraperStateTable:Name"
+                    }
+                  }
+                ]
+              ]
+            },
+            "API_KINGSROOM_SCRAPERJOBTABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:ScraperJobTable:Name"
+              }
+            },
+            "API_KINGSROOM_SCRAPERJOBTABLE_ARN": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:dynamodb:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":table/",
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:ScraperJobTable:Name"
+                    }
+                  }
+                ]
+              ]
+            },
+            "API_KINGSROOM_SCRAPEURLTABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:ScrapeURLTable:Name"
+              }
+            },
+            "API_KINGSROOM_SCRAPEURLTABLE_ARN": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:dynamodb:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":table/",
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:ScrapeURLTable:Name"
+                    }
+                  }
+                ]
+              ]
+            },
+            "API_KINGSROOM_SCRAPEATTEMPTTABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:ScrapeAttemptTable:Name"
+              }
+            },
+            "API_KINGSROOM_SCRAPEATTEMPTTABLE_ARN": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:dynamodb:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":table/",
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:ScrapeAttemptTable:Name"
                     }
                   }
                 ]
@@ -303,6 +355,26 @@
                         "Ref": "apikingsroomGraphQLAPIIdOutput"
                       },
                       "/types/Mutation/*"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:appsync:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":apis/",
+                      {
+                        "Ref": "apikingsroomGraphQLAPIIdOutput"
+                      },
+                      "/types/Subscription/*"
                     ]
                   ]
                 }
@@ -472,7 +544,7 @@
                       ":table/",
                       {
                         "Fn::ImportValue": {
-                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:GameTable:Name"
+                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:ScraperJobTable:Name"
                         }
                       }
                     ]
@@ -493,7 +565,135 @@
                       ":table/",
                       {
                         "Fn::ImportValue": {
-                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:GameTable:Name"
+                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:ScraperJobTable:Name"
+                        }
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:Put*",
+                "dynamodb:Create*",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PartiQLInsert",
+                "dynamodb:Get*",
+                "dynamodb:BatchGetItem",
+                "dynamodb:List*",
+                "dynamodb:Describe*",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:PartiQLSelect",
+                "dynamodb:Update*",
+                "dynamodb:RestoreTable*",
+                "dynamodb:PartiQLUpdate"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":table/",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:ScrapeURLTable:Name"
+                        }
+                      }
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":table/",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:ScrapeURLTable:Name"
+                        }
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:Put*",
+                "dynamodb:Create*",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PartiQLInsert",
+                "dynamodb:Get*",
+                "dynamodb:BatchGetItem",
+                "dynamodb:List*",
+                "dynamodb:Describe*",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:PartiQLSelect",
+                "dynamodb:Update*",
+                "dynamodb:RestoreTable*",
+                "dynamodb:PartiQLUpdate"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":table/",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:ScrapeAttemptTable:Name"
+                        }
+                      }
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":table/",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:ScrapeAttemptTable:Name"
                         }
                       },
                       "/index/*"

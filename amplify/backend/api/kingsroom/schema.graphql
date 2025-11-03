@@ -1,13 +1,17 @@
 # ===================================================================
-# 1. CORE ENUMS
-# - Defines the constant values used across the entire schema.
+# KINGSROOM SCHEMA - WITH SCRAPER ENHANCEMENTS
+# Version: 5.0.0
+# ===================================================================
+
+# ===================================================================
+# 1. CORE ENUMS (ALL ORIGINAL)
 # ===================================================================
 
 enum DataSource { SCRAPE, API, MANUAL }
 enum AssetCondition { NEW, GOOD, FAIR, POOR, RETIRED }
 enum VenueStatus { ACTIVE, INACTIVE, PENDING }
 enum GameType { TOURNAMENT, CASH_GAME }
-enum GameStatus { INITIATING, SCHEDULED, REGISTERING, RUNNING, CANCELLED, FINISHED, NOT_IN_USE, CLOCK_STOPPED } # ✅ ADDED: CLOCK_STOPPED
+enum GameStatus { INITIATING, SCHEDULED, REGISTERING, RUNNING, CANCELLED, FINISHED, NOT_IN_USE, CLOCK_STOPPED, UNKNOWN }
 enum GameVariant { NLHE, PLO, PLO5, PLO6 }
 enum GameFrequency { DAILY, WEEKLY, FORTNIGHTLY, MONTHLY, QUARTERLY, YEARLY, UNKNOWN }
 enum RegistrationStatus { SCHEDULED, OPEN, FINAL, CLOSED, N_A }
@@ -16,8 +20,7 @@ enum PaymentSourceType { CASH, SQUARE, CREDIT_CARD, INTERNAL_CREDIT, UNKNOWN }
 enum PlayerAccountStatus { ACTIVE, SUSPENDED, PENDING_VERIFICATION }
 enum PlayerAccountCategory { NEW, RECREATIONAL, REGULAR, VIP, LAPSED }
 enum SeriesStatus { LIVE, SCHEDULED, COMPLETED }
-enum PlayerTargetingClassification { NotPlayed, 
-Active_EL, Active, Retain_Inactive31_60d, Retain_Inactive61_90d, Churned_91_120d, Churned_121_180d, Churned_181_360d, Churned_361d }
+enum PlayerTargetingClassification { NotPlayed, Active_EL, Active, Retain_Inactive31_60d, Retain_Inactive61_90d, Churned_91_120d, Churned_121_180d, Churned_181_360d, Churned_361d }
 enum PlayerVenueTargetingClassification { Active_EL, Active, Retain_Inactive31_60d, Retain_Inactive61_90d, Churned_91_120d, Churned_121_180d, Churned_181_360d, Churned_361d }
 enum TransactionType { BUY_IN, DEPOSIT, TICKET_AWARD, TICKET_REDEMPTION, CASH_AWARD, QUALIFICATION, WITHDRAWAL }
 enum MessageStatus { SENT, DELIVERED, FAILED, READ }
@@ -25,45 +28,49 @@ enum UserRole { SUPER_ADMIN, ADMIN, VENUE_MANAGER, TOURNAMENT_DIRECTOR, MARKETIN
 enum StaffRole { DEALER, FLOOR_MANAGER, SERVICE, TOURNAMENT_DIRECTOR }
 enum TicketStatus { ACTIVE, EXPIRED, USED }
 enum PlayerEntryStatus { REGISTERED, VOIDED, PLAYING, ELIMINATED, COMPLETED }
-
-# ✅ NEW: Enums for the new ledger tables
 enum CreditTransactionType { AWARD_PROMOTION, AWARD_REFUND, AWARD_MANUAL, REDEEM_GAME_BUY_IN, EXPIRED }
 enum PointsTransactionType { EARN_FROM_PLAY, EARN_FROM_PROMOTION, REDEEM_FOR_BUY_IN, REDEEM_FOR_MERCH, ADJUSTMENT_MANUAL, EXPIRED }
 
+# ===================================================================
+# 1A. NEW ENUMS FOR SCRAPER MANAGEMENT (ADDITIONS ONLY)
+# ===================================================================
+
+enum ScraperJobTriggerSource { SCHEDULED, MANUAL, API, CONTROL, BULK, ADMIN }
+enum ScraperJobStatus { QUEUED, RUNNING, COMPLETED, FAILED, CANCELLED, TIMEOUT }
+enum ScrapeURLStatus { ACTIVE, INACTIVE, DO_NOT_SCRAPE, ERROR, ARCHIVED }
+enum ScrapeAttemptStatus { SUCCESS, FAILED, SKIPPED_DONOTSCRAPE, SKIPPED_VENUE, BLANK, NO_CHANGES, UPDATED, SAVED }
+enum TimeRange { LAST_HOUR, LAST_24_HOURS, LAST_7_DAYS, LAST_30_DAYS, CUSTOM }
 
 # ===================================================================
-# 2. SCRAPING & DATA MANAGEMENT
-# - Models for managing the data ingestion and scraping process.
+# 2. SCRAPING & DATA MANAGEMENT (ORIGINAL)
 # ===================================================================
 
 type ScrapeStructure @model @auth(rules: [{ allow: private }]) {
   id: ID!
-# SHA-256 hash of the sorted fields array
   fields: [String]!
   structureLabel: String!
-# Combo of gameStatus and registrationStatus
   occurrenceCount: Int!
   firstSeenAt: AWSDateTime!
   lastSeenAt: AWSDateTime!
-exampleUrl: AWSURL
+  exampleUrl: AWSURL
 }
 
 type DataSync @model @auth(rules: [{ allow: private }]) {
   id: ID!
   syncedAt: AWSDateTime!
   method: DataSource!
-sourceUrl: AWSURL
+  sourceUrl: AWSURL
   title: String
   content: String
 }
 
 # ===================================================================
-# AUTOMATED SCRAPER STATE MANAGEMENT
+# AUTOMATED SCRAPER STATE MANAGEMENT (ORIGINAL)
 # ===================================================================
 
 type ScraperState @model @auth(rules: [{ allow: private }]) {
   id: ID!
-isRunning: Boolean!
+  isRunning: Boolean!
   lastScannedId: Int!
   lastRunStartTime: AWSDateTime
   lastRunEndTime: AWSDateTime
@@ -71,27 +78,19 @@ isRunning: Boolean!
   totalScraped: Int!
   totalErrors: Int!
   enabled: Boolean!
-  # ✅ NEW: Fields for live status logging
   currentLog: [ScraperLogData]
   lastGamesProcessed: [ScrapedGameStatus]
 }
 
 # ===================================================================
-# SCRAPER CONTROL TYPES
+# SCRAPER CONTROL TYPES (ORIGINAL)
 # ===================================================================
 
-enum ScraperOperation {
-  START
-  STOP
-  ENABLE
-  DISABLE
-  STATUS
-  RESET
-}
+enum ScraperOperation { START, STOP, ENABLE, DISABLE, STATUS, RESET }
 
 type ScraperControlResponse {
   success: Boolean!
-message: String
+  message: String
   state: ScraperStateData
   results: ScraperResults
 }
@@ -100,55 +99,48 @@ type ScraperStateData {
   id: String!
   isRunning: Boolean!
   lastScannedId: Int!
-lastRunStartTime: String
+  lastRunStartTime: String
   lastRunEndTime: String
   consecutiveBlankCount: Int!
   totalScraped: Int!
   totalErrors: Int!
   enabled: Boolean!
-  # ✅ NEW: Fields for live status logging (Denormalized)
   currentLog: [ScraperLogData]
   lastGamesProcessed: [ScrapedGameStatus]
 }
 
 type ScraperResults {
   newGamesScraped: Int!
-gamesUpdated: Int!
+  gamesUpdated: Int!
   errors: Int!
   blanks: Int!
 }
 
-# ✅ NEW: Embedded Type for Log Data
 type ScraperLogData {
-    timestamp: AWSDateTime!
-    level: String! # INFO, WARN, ERROR
-    message: String!
-    details: String
+  timestamp: AWSDateTime!
+  level: String!
+  message: String!
+  details: String
 }
 
-# ✅ NEW: Embedded Type for Last Games Processed
 type ScrapedGameStatus {
-    id: Int!
-    name: String!
-    status: String! # SAVED, BLANK, SKIPPED, FAILED
+  id: Int!
+  name: String!
+  status: String!
 }
 
 # ===================================================================
-# 3. VENUE & LOCATION MANAGEMENT
-# - Core models for physical locations where games are held.
+# 3. VENUE & LOCATION MANAGEMENT (ORIGINAL)
 # ===================================================================
 
 type Venue @model @auth(rules: [{ allow: private }]) {
-  # --- Identification & Core Details ---
   id: ID!
-venueNumber: Int! @index(name: "byVenueNumber", sortKeyFields: ["name"])
+  venueNumber: Int! @index(name: "byVenueNumber", sortKeyFields: ["name"])
   name: String!
   aliases: [String]
   address: String
   city: String
   country: String
-
-  # --- Relationships ---
   details: VenueDetails @hasOne
   assets: [Asset] @hasMany(indexName: "byVenue", fields: ["id"])
   games: [Game] @hasMany(indexName: "byVenue", fields: ["id"])
@@ -158,66 +150,49 @@ venueNumber: Int! @index(name: "byVenueNumber", sortKeyFields: ["name"])
 }
 
 type VenueDetails @model @auth(rules: [{ allow: private }]) {
-  # --- Core Details & Status ---
   id: ID!
-startDate: AWSDate!
+  startDate: AWSDateTime!
   status: VenueStatus!
-  lastCustomerSuccessVisit: AWSDate
-
-  # --- Aggregated Metrics ---
+  lastCustomerSuccessVisit: AWSDateTime
   totalGamesHeld: Int
   averagePlayersPerGame: Float
-  gameNights: [String] # e.g., ["Monday", "Friday"]
-
-  # --- Relationships ---
-  venueId: ID!
-@index(name: "byVenue")
+  gameNights: [String]
+  venueId: ID! @index(name: "byVenue")
   venue: Venue @belongsTo(fields: ["venueId"])
 }
 
 # ===================================================================
-# 4. TOURNAMENT SERIES MANAGEMENT
-# - Models for organizing multi-day or themed tournament events.
+# 4. TOURNAMENT SERIES MANAGEMENT (ORIGINAL)
 # ===================================================================
 
 type TournamentSeriesTitle @model @auth(rules: [{ allow: private }]) {
   id: ID!
   title: String!
-aliases: [String]
-  # --- Relationships ---
+  aliases: [String]
   seriesInstances: [TournamentSeries] @hasMany(indexName: "byTournamentSeriesTitle", fields: ["id"])
 }
 
 type TournamentSeries @model @auth(rules: [{ allow: private }]) {
-  # --- Identification & Core Details ---
   id: ID!
-name: String! # e.g., "Sydney Millions 2025"
+  name: String!
   year: Int!
   status: SeriesStatus!
-# --- Scheduling & Content ---
-  startDate: AWSDate
-  endDate: AWSDate
+  startDate: AWSDateTime
+  endDate: AWSDateTime
   events: [String]
   numberOfEvents: Int
-
-  # --- Financials ---
   guaranteedPrizepool: Float
   estimatedPrizepool: Float
   actualPrizepool: Float
-
-  # --- Relationships ---
-  tournamentSeriesTitleId: ID!
-@index(name: "byTournamentSeriesTitle", sortKeyFields: ["year"])
+  tournamentSeriesTitleId: ID! @index(name: "byTournamentSeriesTitle", sortKeyFields: ["year"])
   title: TournamentSeriesTitle @belongsTo(fields: ["tournamentSeriesTitleId"])
-  venueId: ID!
-@index(name: "byVenue")
+  venueId: ID! @index(name: "byVenue")
   venue: Venue @belongsTo(fields: ["venueId"])
   games: [Game] @hasMany(indexName: "byTournamentSeries", fields: ["id"])
 }
 
 # ===================================================================
-# 5. GAME & STRUCTURE MANAGEMENT
-# - The central models for individual games and their structures.
+# 5. GAME & STRUCTURE MANAGEMENT (MODIFIED - 5 FIELDS MOVED TO SCRAPEURL)
 # ===================================================================
 
 type Game @model @auth(rules: [{ allow: private }]) {
@@ -226,9 +201,6 @@ type Game @model @auth(rules: [{ allow: private }]) {
   name: String!
   gameType: GameType!
   gameVariant: GameVariant!
-  # ✅ NEW GSI for finding games that need updates
-  # This GSI uses the game status as the key, allowing us to directly query
-  # for all games that are 'RUNNING', 'SCHEDULED', etc.
   gameStatus: GameStatus! @index(name: "byStatus", queryField: "gamesByStatus", sortKeyFields: ["gameStartDateTime"])
 
   # --- Scheduling & Timestamps ---
@@ -266,270 +238,241 @@ type Game @model @auth(rules: [{ allow: private }]) {
   # --- Categorization & Metadata ---
   tournamentType: TournamentType
  
-   isRegular: Boolean
+  isRegular: Boolean
   isSeries: Boolean
   isSatellite: Boolean
-  seriesName: String # Denormalized for faster access
+  seriesName: String
   gameTags: [String]
 
-  # --- Data Source & Verification ---
+  # --- Data Source (SIMPLE REFERENCE ONLY - NO SCRAPER FIELDS) ---
   sourceUrl: AWSURL @index(name: "bySourceUrl", queryField: "gameBySourceUrl")
-  # ✅ NEW GSI for finding the highest ID
-  # This GSI uses a static partition key to gather all games into one "bucket"
-  # and sorts them by their source URL, allowing us to quickly find the highest one.
-  sourceSystem: String @index(name: "bySourceSystem", queryField: "gamesBySourceSystem", sortKeyFields: ["sourceUrl"])
-  doNotScrape: Boolean
-  sourceDataIssue: Boolean
-  gameDataVerified: Boolean
-  missingKeysFromScrape: [String]
+  # REMOVED: sourceSystem (moved to ScrapeURL)
+  tournamentId: Int
+  dataSource: DataSource
+  # REMOVED: doNotScrape (moved to ScrapeURL)
+  # REMOVED: sourceDataIssue (moved to ScrapeURL)
+  # REMOVED: gameDataVerified (moved to ScrapeURL)
+  # REMOVED: missingKeysFromScrape (moved to ScrapeURL)
+  originalScrapedData: AWSJSON
 
   # --- Relationships ---
-  venueId: ID!
-  @index(name: "byVenue", sortKeyFields: ["gameStartDateTime"])
+  venueId: ID! @index(name: "byVenue", sortKeyFields: ["gameStartDateTime"])
   venue: Venue @belongsTo(fields: ["venueId"])
-  tournamentSeriesId: ID @index(name: "byTournamentSeries")
+  tournamentSeriesId: ID @index(name: "byTournamentSeries", sortKeyFields: ["gameStartDateTime"])
   tournamentSeries: TournamentSeries @belongsTo(fields: ["tournamentSeriesId"])
-  tournamentStructureId: ID @index(name: "byTournamentStructure")
-  tournamentStructure: TournamentStructure @belongsTo(fields: ["tournamentStructureId"])
-  cashStructureId: ID @index(name: "byCashStructure")
-  cashStructure: CashStructure @belongsTo(fields: ["cashStructureId"])
+  structure: TournamentStructure @hasOne
   playerEntries: [PlayerEntry] @hasMany(indexName: "byGame", fields: ["id"])
   playerResults: [PlayerResult] @hasMany(indexName: "byGame", fields: ["id"])
+  
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
 }
 
 type TournamentStructure @model @auth(rules: [{ allow: private }]) {
   id: ID!
-name: String! # e.g., "Standard Daily Structure"
-  description: String
-  levels: [TournamentLevelData] # Embedded array of levels
-  games: [Game] @hasMany(indexName: "byTournamentStructure", fields: ["id"])
+  levels: [TournamentLevel!]
+  breaks: [Break!]
+  gameId: ID! @index(name: "byGame")
+  game: Game @belongsTo(fields: ["gameId"])
 }
 
-type TournamentLevelData { # Not a @model, embedded type
+type TournamentLevel {
   levelNumber: Int!
-durationMinutes: Int!
-  smallBlind: Int!
-  bigBlind: Int!
+  durationMinutes: Int
+  smallBlind: Int
+  bigBlind: Int
   ante: Int
-  breakMinutes: Int
+}
+
+type Break {
+  levelNumberBeforeBreak: Int!
+  durationMinutes: Int
+}
+
+# These models were in original but not being used - keeping for completeness
+type TournamentLevelData @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  levels: [TournamentLevel!]
+  gameId: ID! @index(name: "byGame")
 }
 
 type CashStructure @model @auth(rules: [{ allow: private }]) {
   id: ID!
-name: String! # e.g., "$1/$2 NLHE"
-  smallBlind: Float!
-  bigBlind: Float!
-  minBuyIn: Float!
-  maxBuyIn: Float!
-# --- Relationships ---
-  rakeStructureId: ID! @index(name: "byRakeStructure")
-  rakeStructure: RakeStructure @belongsTo(fields: ["rakeStructureId"])
-  games: [Game] @hasMany(indexName: "byCashStructure", fields: ["id"])
+  stakes: String!
+  minBuyIn: Float
+  maxBuyIn: Float
+  gameId: ID! @index(name: "byGame")
 }
 
 type RakeStructure @model @auth(rules: [{ allow: private }]) {
   id: ID!
-name: String!
-  rakePercentage: Float!
-  maxRake: Float!
-  cashStructures: [CashStructure] @hasMany(indexName: "byRakeStructure", fields: ["id"])
+  rakePercentage: Float
+  rakeCap: Float
+  gameId: ID! @index(name: "byGame")
 }
 
 # ===================================================================
-# 6. PLAYER & PROFILE MANAGEMENT
-# - Models for player information, stats, and engagement.
+# 6. PLAYER MANAGEMENT (ALL ORIGINAL MODEL NAMES PRESERVED)
 # ===================================================================
 
 type Player @model @auth(rules: [{ allow: private }]) {
-  # --- Personal Information ---
   id: ID!
-firstName: String!
-  givenName: String
-  lastName: String
+  firstName: String!
+  lastName: String!
+  phone: String @index(name: "byPhone", queryField: "playerByPhone")
   email: String @index(name: "byEmail", queryField: "playerByEmail")
-  phone: String
-
-  # --- Account Management & Status ---
-  creationDate: AWSDateTime!
-status: PlayerAccountStatus!
+  status: PlayerAccountStatus!
   category: PlayerAccountCategory!
-  tier: String # e.g., "Bronze", "Silver", "Gold"
-
-  # --- Engagement Metrics ---
-  lastPlayedDate: AWSDate
   targetingClassification: PlayerTargetingClassification!
-# ✅ NEW: Denormalized balances for quick access
-  creditBalance: Float
-  pointsBalance: Float
+  registrationDate: AWSDateTime!
+  firstGamePlayed: AWSDateTime
+  lastPlayedDate: AWSDateTime
+  creditBalance: Int
+  pointsBalance: Int
+  
+  # --- ADDED RELATIONSHIP FIELDS ---
+  playerSummary: PlayerSummary @hasOne(fields: ["id"])
+  knownIdentities: [KnownPlayerIdentity] @hasMany(indexName: "byPlayer", fields: ["id"])
+  marketingPreferences: PlayerMarketingPreferences @hasOne(fields: ["id"])
+  marketingMessages: [PlayerMarketingMessage] @hasMany(indexName: "byPlayer", fields: ["id"])
+  # --- END ADDED FIELDS ---
 
-  # --- Relationships ---
-  registrationVenueId: ID!
-@index(name: "byRegistrationVenue")
+  playerVenues: [PlayerVenue] @hasMany(indexName: "byVenue", fields: ["id"]) 
+  playerEntries: [PlayerEntry] @hasMany(indexName: "byPlayer", fields: ["id"]) 
+  playerResults: [PlayerResult] @hasMany(indexName: "byPlayer", fields: ["id"]) 
+  playerTickets: [PlayerTicket] @hasMany(indexName: "byPlayer", fields: ["id"]) 
+  playerTransactions: [PlayerTransaction] @hasMany(indexName: "byPlayer", fields: ["id"]) 
+  playerCredits: [PlayerCredits] @hasMany(indexName: "byPlayer", fields: ["id"]) 
+  playerPoints: [PlayerPoints] @hasMany(indexName: "byPlayer", fields: ["id"]) 
+  
+  registrationVenueId: ID!  @index(name: "byRegistrationVenue")
   registrationVenue: Venue @belongsTo(fields: ["registrationVenueId"])
-  summary: PlayerSummary @hasOne
-  transactions: [PlayerTransaction] @hasMany(indexName: "byPlayer", fields: ["id"])
-  playerEntries: [PlayerEntry] @hasMany(indexName: "byPlayer", fields: ["id"])
-  results: [PlayerResult] @hasMany(indexName: "byPlayer", fields: ["id"])
-  tickets: [PlayerTicket] @hasMany(indexName: "byPlayer", fields: ["id"])
-  venueMemberships: [PlayerVenue] @hasMany(indexName: "byPlayer", fields: ["id"])
-  credits: [PlayerCredits] @hasMany(indexName: "byPlayer", fields: ["id"])
-  points: [PlayerPoints] @hasMany(indexName: "byPlayer", fields: ["id"])
-  marketingPreferences: PlayerMarketingPreferences @hasOne
+  updatedAt: AWSDateTime!
 }
 
 type PlayerSummary @model @auth(rules: [{ allow: private }]) {
-  # --- Identification ---
   id: ID!
-playerId: ID! @index(name: "byPlayer")
+  playerId: ID! @index(name: "byPlayer")
+  gamesPlayedLast30Days: Int
+  gamesPlayedLast90Days: Int
+  gamesPlayedAllTime: Int
+  averageFinishPosition: Float
+  netBalance: Float
+  player: Player @belongsTo(fields: ["playerId"])
 
-  # --- High-Level Stats ---
+  # --- FIELDS ADDED TO MATCH QUERIES ----
   sessionsPlayed: Int
   tournamentsPlayed: Int
   cashGamesPlayed: Int
-  venuesVisited: [ID]
-
-  # --- Tournament Financials ---
+  venuesVisited: Int
   tournamentWinnings: Float
   tournamentBuyIns: Float
   tournamentITM: Int
   tournamentsCashed: Int
-
-  # --- Cash Game Financials ---
   cashGameWinnings: Float
   cashGameBuyIns: Float
-
-  # --- Overall Financials ---
   totalWinnings: Float
   totalBuyIns: Float
-  netBalance: Float
-
-  # --- Metadata & Relationships ---
   lastPlayed: AWSDateTime!
-player: Player @belongsTo(fields: ["playerId"])
 }
 
 type PlayerEntry @model @auth(rules: [{ allow: private }]) {
   id: ID!
-  playerId: ID!
-@index(name: "byPlayer", sortKeyFields: ["gameStartDateTime"])
+  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["gameStartDateTime"])
   gameId: ID! @index(name: "byGame")
   venueId: ID! @index(name: "byVenue")
-
   status: PlayerEntryStatus!
   registrationTime: AWSDateTime!
-eliminationTime: AWSDateTime
+  eliminationTime: AWSDateTime
   gameStartDateTime: AWSDateTime!
-
   lastKnownStackSize: Int
   tableNumber: Int
   seatNumber: Int
-  
   numberOfReEntries: Int
-
   isMultiDayTournament: Boolean
-  
   player: Player @belongsTo(fields: ["playerId"])
   game: Game @belongsTo(fields: ["gameId"])
 }
 
 type PlayerResult @model @auth(rules: [{ allow: private }]) {
   id: ID!
-finishingPlace: Int
+  finishingPlace: Int
   isMultiDayQualification: Boolean
   prizeWon: Boolean
   amountWon: Float
   totalRunners: Int
-
-  # ✅ NEW: Field for loyalty points earned from this result
   pointsEarned: Float
-
-  # --- Relationships ---
-  playerId: ID!
-@index(name: "byPlayer")
+  playerId: ID! @index(name: "byPlayer")
   player: Player @belongsTo(fields: ["playerId"])
-  gameId: ID!
-@index(name: "byGame")
+  gameId: ID! @index(name: "byGame")
   game: Game @belongsTo(fields: ["gameId"])
 }
 
 type PlayerVenue @model @auth(rules: [{ allow: private }]) {
   id: ID!
-totalGamesPlayed: Int
+  totalGamesPlayed: Int
   averageBuyIn: Float
-  firstPlayedDate: AWSDate
-  lastPlayedDate: AWSDate
+  firstPlayedDate: AWSDateTime
+  lastPlayedDate: AWSDateTime
   targetingClassification: PlayerVenueTargetingClassification!
-# --- Relationships ---
   playerId: ID! @index(name: "byPlayer", sortKeyFields: ["venueId"])
   player: Player @belongsTo(fields: ["playerId"])
-  venueId: ID!
-@index(name: "byVenue", sortKeyFields: ["playerId"])
+  venueId: ID! @index(name: "byVenue", sortKeyFields: ["playerId"])
   venue: Venue @belongsTo(fields: ["venueId"])
 }
 
 type PlayerTransaction @model @auth(rules: [{ allow: private }]) {
   id: ID!
-type: TransactionType!
+  type: TransactionType!
   amount: Float!
-  rake: Float # Rake component of a buy-in
+  rake: Float
   paymentSource: PaymentSourceType!
   transactionDate: AWSDateTime!
-notes: String
-
-  # --- Relationships ---
-  playerId: ID!
-@index(name: "byPlayer", sortKeyFields: ["transactionDate"])
+  notes: String
+  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["transactionDate"])
   player: Player @belongsTo(fields: ["playerId"])
-  gameId: ID @index(name: "byGame") # Optional link to a game
+  gameId: ID @index(name: "byGame")
 }
 
-# ✅ NEW: Table for tracking player tournament credits (1:1 with cash)
 type PlayerCredits @model @auth(rules: [{ allow: private }]) {
   id: ID!
-# --- Core Ledger Details ---
   type: CreditTransactionType!
   changeAmount: Float!
-# e.g., +50.00 for an award, -50.00 for a redemption
   balanceAfter: Float!
-# The player's new credit balance after this transaction
   transactionDate: AWSDateTime!
-# --- Context & Metadata ---
-  reason: String               # e.g., "Refund for Game #1234", "Christmas Promotion"
-  expiryDate: AWSDate          # Optional: If credits can expire
-
-  # --- Relationships ---
-  playerId: ID!
-@index(name: "byPlayer", sortKeyFields: ["transactionDate"])
+  reason: String
+  expiryDate: AWSDateTime
+  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["transactionDate"])
   player: Player @belongsTo(fields: ["playerId"])
-  relatedGameId: ID @index(name: "byGame") # Game where credit was redeemed/earned
-  relatedTransactionId: ID # The PlayerTransaction record created upon redemption
+  relatedGameId: ID @index(name: "byGame")
+  relatedTransactionId: ID
 }
 
-# ✅ NEW: Table for tracking player loyalty points
 type PlayerPoints @model @auth(rules: [{ allow: private }]) {
   id: ID!
-# --- Core Ledger Details ---
   type: PointsTransactionType!
   changeAmount: Float!
-# e.g., +100 for playing, -500 for redeeming
   balanceAfter: Float!
-# The player's new points balance after this transaction
   transactionDate: AWSDateTime!
-# --- Context & Metadata ---
-  reason: String             # e.g., "Tuesday Night Tournament Entry", "Admin Correction"
-  expiryDate: AWSDate        # For points that have a limited lifetime
-
-  # --- Relationships ---
-  playerId: ID!
-@index(name: "byPlayer", sortKeyFields: ["transactionDate"])
+  reason: String
+  expiryDate: AWSDateTime
+  playerId: ID! @index(name: "byPlayer", sortKeyFields: ["transactionDate"])
   player: Player @belongsTo(fields: ["playerId"])
-  relatedGameId: ID @index(name: "byGame") # To link points earned/spent to a specific game
-  relatedTransactionId: ID # To link a points redemption to a specific monetary transaction
+  relatedGameId: ID @index(name: "byGame")
+  relatedTransactionId: ID
+}
+
+type KnownPlayerIdentity @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  sourceSystem: String!
+  identityValue: String!
+  identityType: String!
+  playerId: ID! @index(name: "byPlayer")
+  player: Player @belongsTo(fields: ["playerId"])
 }
 
 # ===================================================================
-# 7. TICKETS & MARKETING
-# - Models for player rewards and communication.
+# 7. TICKETS & MARKETING (ALL ORIGINAL MODELS)
 # ===================================================================
 
 type TicketTemplate @model @auth(rules: [{ allow: private }]) {
@@ -537,7 +480,7 @@ type TicketTemplate @model @auth(rules: [{ allow: private }]) {
   name: String!
   description: String
   value: Float!
-validityDays: Int!
+  validityDays: Int!
   originGameId: ID
   targetGameId: ID
   playerTickets: [PlayerTicket] @hasMany(indexName: "byTicketTemplate", fields: ["id"])
@@ -545,24 +488,19 @@ validityDays: Int!
 
 type PlayerTicket @model @auth(rules: [{ allow: private }]) {
   id: ID!
-assignedAt: AWSDateTime!
+  assignedAt: AWSDateTime!
   expiryDate: AWSDateTime!
   status: TicketStatus!
   usedInGameId: ID
-
-  # --- Relationships ---
-  playerId: ID!
-@index(name: "byPlayer")
+  playerId: ID! @index(name: "byPlayer")
   player: Player @belongsTo(fields: ["playerId"])
-  ticketTemplateId: ID!
-@index(name: "byTicketTemplate")
+  ticketTemplateId: ID! @index(name: "byTicketTemplate")
   ticketTemplate: TicketTemplate @belongsTo(fields: ["ticketTemplateId"])
 }
 
 type MarketingMessage @model @auth(rules: [{ allow: private }]) {
   id: ID!
   name: String!
-# Internal campaign name
   subject: String
   emailBody: String
   smsBody: String
@@ -571,51 +509,39 @@ type MarketingMessage @model @auth(rules: [{ allow: private }]) {
 
 type PlayerMarketingMessage @model @auth(rules: [{ allow: private }]) {
   id: ID!
-status: MessageStatus!
+  status: MessageStatus!
   sentAt: AWSDateTime!
-
-  # --- Relationships ---
   playerId: ID! @index(name: "byPlayer", sortKeyFields: ["sentAt"])
-  marketingMessageId: ID!
-@index(name: "byMarketingMessage")
+  marketingMessageId: ID! @index(name: "byMarketingMessage")
 }
 
 type PlayerMarketingPreferences @model @auth(rules: [{ allow: private }]) {
   id: ID!
-optOutSms: Boolean
+  optOutSms: Boolean
   optOutEmail: Boolean
-
-  # --- Relationships ---
-  playerId: ID!
-@index(name: "byPlayer")
+  playerId: ID! @index(name: "byPlayer")
   player: Player @belongsTo(fields: ["playerId"])
 }
 
 # ===================================================================
-# 8. STAFF, USER & ADMIN
-# - Models for internal users and system administration.
+# 8. STAFF, USER & ADMIN (ORIGINAL)
 # ===================================================================
 
-# --- UPDATED User @auth rules ---
 type User @model @auth(rules: [
   { allow: owner, ownerField: "id", operations: [read, update] },
-  # ✅ CHANGED: Allow authenticated users (private) to create and read User records.
-  # Since the API default is User Pools, 'private' effectively means any logged-in Cognito user.
   { allow: private, operations: [create, read] },
-  # Keep the admin rule for full control
   { allow: groups, groups: ["SUPER_ADMIN"], operations: [create, read, update, delete] }
 ]) {
   id: ID!
-# Uses Cognito username (sub)
   username: String!
   email: String!
   role: UserRole!
-preferences: [UserPreference] @hasMany(indexName: "byUser", fields: ["id"])
+  preferences: [UserPreference] @hasMany(indexName: "byUser", fields: ["id"])
 }
 
 type UserPreference @model @auth(rules: [{ allow: owner, ownerField: "userId" }]) {
   id: ID!
-page: String!
+  page: String!
   widget: String!
   preference: AWSJSON
   userId: ID! @index(name: "byUser")
@@ -623,36 +549,30 @@ page: String!
 
 type Staff @model @auth(rules: [{ allow: private }]) {
   id: ID!
-firstName: String!
+  firstName: String!
   lastName: String
   role: StaffRole!
   assignedVenueId: ID @index(name: "byVenue")
 }
 
 # ===================================================================
-# 9. ANCILLARY MODELS
-# - Other supporting models for assets and social media.
+# 9. ANCILLARY MODELS (ORIGINAL)
 # ===================================================================
 
 type Asset @model @auth(rules: [{ allow: private }]) {
   id: ID!
   name: String!
   type: String!
-# e.g., "Playing Cards", "Poker Table"
   condition: AssetCondition!
-  acquiredDate: AWSDate!
-  lastCheckedDate: AWSDate!
-
-  # --- Relationships ---
-  venueId: ID!
-@index(name: "byVenue")
+  acquiredDate: AWSDateTime!
+  lastCheckedDate: AWSDateTime!
+  venueId: ID! @index(name: "byVenue")
   venue: Venue @belongsTo(fields: ["venueId"])
 }
 
 type SocialAccount @model @auth(rules: [{ allow: private }]) {
   id: ID!
   platform: String!
-# e.g., "Facebook", "Instagram"
   accountName: String!
   apiKey: String
   apiSecret: String
@@ -660,204 +580,414 @@ type SocialAccount @model @auth(rules: [{ allow: private }]) {
 
 type SocialPost @model @auth(rules: [{ allow: private }]) {
   id: ID!
-content: String!
+  content: String!
   imageUrl: AWSURL
   postedAt: AWSDateTime!
   socialAccountId: ID! @index(name: "bySocialAccount", sortKeyFields: ["postedAt"])
 }
 
-
 # ===================================================================
-# 10. CUSTOM OPERATIONS & NON-MODEL TYPES
-# - Definitions for Lambda resolvers, inputs, and return types.
+# 10. NEW SCRAPER MANAGEMENT MODELS (3 NEW TABLES ONLY)
 # ===================================================================
 
-# --- Query & Mutation Definitions ---
+type ScraperJob @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  jobId: String! @index(name: "byJobId")
+  triggerSource: ScraperJobTriggerSource!
+  triggeredBy: String
+  startTime: AWSDateTime!
+  endTime: AWSDateTime
+  durationSeconds: Int
+  maxGames: Int
+  targetURLs: [String]
+  isFullScan: Boolean
+  startId: Int
+  endId: Int
+  status: ScraperJobStatus! @index(name: "byStatus", sortKeyFields: ["startTime"])
+  totalURLsProcessed: Int
+  newGamesScraped: Int
+  gamesUpdated: Int
+  gamesSkipped: Int
+  errors: Int
+  blanks: Int
+  averageScrapingTime: Float
+  successRate: Float
+  errorMessages: [String]
+  failedURLs: [String]
+  urlResults: [ScraperJobURLResult]
+  scrapeAttempts: [ScrapeAttempt] @hasMany(indexName: "byScraperJob", fields: ["id"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type ScrapeURL @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  url: AWSURL! @index(name: "byURL", queryField: "scrapeURLByURL")
+  tournamentId: Int! @index(name: "byTournamentId")
+  
+  # === FIELDS MOVED FROM GAME TABLE ===
+  doNotScrape: Boolean!
+  sourceDataIssue: Boolean
+  gameDataVerified: Boolean
+  missingKeysFromScrape: [String]
+  sourceSystem: String! @index(name: "bySourceSystem", queryField: "scrapeURLsBySourceSystem", sortKeyFields: ["tournamentId"])
+  
+  # === ORIGINAL SCRAPEURL FIELDS ===
+  status: ScrapeURLStatus!
+  placedIntoDatabase: Boolean!
+  firstScrapedAt: AWSDateTime!
+  lastScrapedAt: AWSDateTime!
+  lastSuccessfulScrapeAt: AWSDateTime
+  timesScraped: Int!
+  timesSuccessful: Int!
+  timesFailed: Int!
+  consecutiveFailures: Int!
+  lastScrapeStatus: ScrapeAttemptStatus
+  lastScrapeMessage: String
+  lastScrapeJobId: String
+  gameId: ID @index(name: "byGameId")
+  gameName: String
+  gameStatus: GameStatus
+  venueId: ID
+  venueName: String
+  lastDataHash: String
+  hasDataChanges: Boolean
+  lastFoundKeys: [String]
+  lastStructureLabel: String
+  averageScrapingTime: Float
+  lastScrapingTime: Float
+  attempts: [ScrapeAttempt] @hasMany(indexName: "byScrapeURL", fields: ["id"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type ScrapeAttempt @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  url: AWSURL!
+  tournamentId: Int!
+  attemptTime: AWSDateTime!
+  scraperJobId: ID! @index(name: "byScraperJob", sortKeyFields: ["attemptTime"])
+  scraperJob: ScraperJob @belongsTo(fields: ["scraperJobId"])
+  scrapeURLId: ID! @index(name: "byScrapeURL", sortKeyFields: ["attemptTime"])
+  scrapeURL: ScrapeURL @belongsTo(fields: ["scrapeURLId"])
+  status: ScrapeAttemptStatus!
+  processingTime: Float
+  gameName: String
+  gameStatus: GameStatus
+  registrationStatus: RegistrationStatus
+  dataHash: String
+  hasChanges: Boolean
+  errorMessage: String
+  errorType: String
+  gameId: ID
+  wasNewGame: Boolean
+  fieldsUpdated: [String]
+  foundKeys: [String]
+  structureLabel: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# =================================================================
+# 11. Cloudwatch Services
+# =================================================================
+
+input ClientMetricInput {
+    metricName: String!
+    value: Float!
+    unit: String!
+    dimensions: String
+    timestamp: String
+    metadata: String
+}
+
+type ClientMetricResponse {
+    success: Boolean!
+    message: String
+    userId: String
+}
+
+type UserMetricsSummary {
+    userId: String!
+    userName: String
+    totalActions: Int
+    totalPageViews: Int
+    totalErrors: Int
+    lastActive: String
+    mostUsedFeature: String
+}
+
+# =================================================================
+# 12. CUSTOM OPERATIONS & NON-MODEL TYPES (ORIGINAL + ENHANCED)
+# =================================================================
+
 type Query {
-    fetchTournamentDataRange(startId: Int!, endId: Int!): [ScrapedGameSummary!] @function(name: "webScraperFunction-${env}")
-    # ✅ RENAMED TO AVOID CONFLICT with auto-generated getScraperState
-    getScraperControlState: ScraperControlResponse @function(name: "autoScraper-${env}")
-    fetchUpdateCandidates: [String!] @function(name: "webScraperFunction-${env}")
+  fetchTournamentDataRange(startId: Int!, endId: Int!): [ScrapedGameSummary!] @function(name: "webScraperFunction-${env}")
+  getScraperControlState: ScraperControlResponse @function(name: "autoScraper-${env}")
+  fetchUpdateCandidates: [String!] @function(name: "webScraperFunction-${env}")
+  
+  # NEW ENHANCED SCRAPER QUERIES
+  getScraperJobsReport(status: ScraperJobStatus, limit: Int, nextToken: String): ScraperJobConnection @function(name: "scraperManagement-${env}")
+  fetchScrapeURLDetails(url: AWSURL!): ScrapeURL @function(name: "scraperManagement-${env}")
+  searchScrapeURLs(status: ScrapeURLStatus, limit: Int, nextToken: String): ScrapeURLConnection @function(name: "scraperManagement-${env}")
+  getScraperMetrics(timeRange: TimeRange!): ScraperMetrics @function(name: "scraperManagement-${env}")
+  getUpdateCandidateURLs(limit: Int): [ScrapeURL!] @function(name: "scraperManagement-${env}")
+
+  # NEW CLOUDWATCH MUTATIONS
+  # Get current user's metrics summary
+  getMyMetrics(timeRange: String): UserMetricsSummary
+    @function(name: "getUserMetrics")
+    @auth(rules: [
+      { allow: owner }  # Users can only see their own metrics
+    ])
+  
+  # Admin-only: Get any user's metrics  
+  getUserMetrics(userId: String!, timeRange: String): UserMetricsSummary
+    @function(name: "getUserMetrics")
+    @auth(rules: [
+      { allow: groups, groups: ["Admin"] }
+    ])
+        
 }
 
 type Mutation {
-    fetchTournamentData(url: AWSURL!): ScrapedGameData @function(name: "webScraperFunction-${env}")
-    saveTournamentData(input: SaveTournamentInput!): Game @function(name: "webScraperFunction-${env}")
-    # ✅ RENAMED TO AVOID CONFLICT
-    controlScraperOperation(operation: ScraperOperation!): ScraperControlResponse @function(name: "autoScraper-${env}")    
-    # ✅ RENAMED TO AVOID CONFLICT
-    triggerAutoScraping(maxGames: Int): ScraperControlResponse @function(name: "autoScraper-${env}")}
+  fetchTournamentData(url: AWSURL!): ScrapedGameData @function(name: "webScraperFunction-${env}")
+  saveTournamentData(input: SaveTournamentInput!): Game @function(name: "webScraperFunction-${env}")
+  controlScraperOperation(operation: ScraperOperation!): ScraperControlResponse @function(name: "autoScraper-${env}")
+ 
+  triggerAutoScraping(maxGames: Int): ScraperControlResponse @function(name: "autoScraper-${env}")
+  
+  # NEW ENHANCED SCRAPER MUTATIONS
+  startScraperJob(input: StartScraperJobInput!): ScraperJob @function(name: "scraperManagement-${env}")
+  cancelScraperJob(jobId: String!): ScraperJob @function(name: "scraperManagement-${env}")
+  modifyScrapeURLStatus(url: AWSURL!, status: ScrapeURLStatus, doNotScrape: Boolean): ScrapeURL @function(name: "scraperManagement-${env}")
+  bulkModifyScrapeURLs(urls: [AWSURL!]!, status: ScrapeURLStatus, doNotScrape: Boolean): [ScrapeURL!] @function(name: "scraperManagement-${env}")
 
-# --- Operation Input Types ---
-input SaveTournamentInput {
-    sourceUrl: AWSURL!
-venueId: ID!
-    existingGameId: ID
-    doNotScrape: Boolean
-    data: ScrapedGameDataInput!
-originalScrapedData: AWSJSON
+  # NEW CLOUDWATCH MUTATIONS (FIXED - NO operations argument)
+  publishClientMetrics(metrics: [ClientMetricInput!]!): ClientMetricResponse
+    @function(name: "publishClientMetrics")
+    @auth(rules: [
+      { allow: private }  # Only authenticated users
+    ])
 }
 
-# This input remains clean for the database save operation.
+type Subscription {
+  onScraperJobUpdate(jobId: String): ScraperJob @aws_subscribe(mutations: ["startScraperJob", "cancelScraperJob"])
+  onScrapeURLStatusChange(url: AWSURL): ScrapeURL @aws_subscribe(mutations: ["modifyScrapeURLStatus", "bulkModifyScrapeURLs"])
+}
+
+# NON-MODEL TYPES FOR SCRAPER OPERATIONS
+
+type ScraperJobURLResult {
+  url: String!
+  tournamentId: Int!
+  status: ScrapeAttemptStatus!
+  gameName: String
+  processingTime: Float
+  error: String
+}
+
+type ScraperMetrics {
+  totalJobs: Int!
+  successfulJobs: Int!
+  failedJobs: Int!
+  averageJobDuration: Float!
+  totalURLsScraped: Int!
+  successRate: Float!
+  topErrors: [ErrorMetric!]
+  hourlyActivity: [HourlyMetric!]
+}
+
+type ErrorMetric {
+  errorType: String!
+  count: Int!
+  urls: [String!]
+}
+
+type HourlyMetric {
+  hour: String!
+  jobCount: Int!
+  urlsScraped: Int!
+  successRate: Float!
+}
+
+type ScraperJobConnection {
+  items: [ScraperJob!]
+  nextToken: String
+}
+
+type ScrapeURLConnection {
+  items: [ScrapeURL!]
+  nextToken: String
+}
+
+# ORIGINAL INPUT AND RETURN TYPES
+
+input SaveTournamentInput {
+  sourceUrl: AWSURL!
+  venueId: ID!
+  existingGameId: ID
+  doNotScrape: Boolean
+  data: ScrapedGameDataInput!
+  originalScrapedData: AWSJSON
+}
+
 input ScrapedGameDataInput {
-    name: String!
-gameStartDateTime: String
-    gameEndDateTime: String
-    gameStatus: GameStatus
-    registrationStatus: RegistrationStatus
-    gameVariant: GameVariant
-    gameType: GameType
-    prizepool: Float
-    totalEntries: Int
-    totalRebuys: Int
-    totalAddons: Int
-    totalDuration: String
-    gameTags: [String]
-    tournamentType: TournamentType
-    buyIn: Float
-    rake: Float
-    startingStack: Int
-    hasGuarantee: Boolean
-    guaranteeAmount: Float
-    levels: [ScrapedTournamentLevelInput!]
+  name: String!
+  gameStartDateTime: String
+  gameEndDateTime: String
+  gameStatus: GameStatus
+  registrationStatus: RegistrationStatus
+  gameVariant: GameVariant
+  gameType: GameType
+  prizepool: Float
+  totalEntries: Int
+  totalRebuys: Int
+  totalAddons: Int
+  totalDuration: String
+  gameTags: [String]
+  tournamentType: TournamentType
+  buyIn: Float
+  rake: Float
+  startingStack: Int
+  hasGuarantee: Boolean
+  guaranteeAmount: Float
+  levels: [ScrapedTournamentLevelInput!]
 }
 
 input ScrapedTournamentLevelInput {
-    levelNumber: Int!
-durationMinutes: Int
-    smallBlind: Int
-    bigBlind: Int
-    ante: Int
-    breakMinutes: Int
+  levelNumber: Int!
+  durationMinutes: Int
+  smallBlind: Int
+  bigBlind: Int
+  ante: Int
+  breakMinutes: Int
 }
 
-# --- Operation Return Types (Not @model) ---
+input StartScraperJobInput {
+  triggerSource: ScraperJobTriggerSource!
+  maxGames: Int
+  targetURLs: [String]
+  startId: Int
+  endId: Int
+  isFullScan: Boolean
+  triggeredBy: String
+}
+
 type ScrapedGameSummary {
-    id: String!
-name: String
-    gameStatus: String
-    registrationStatus: String
-    gameStartDateTime: String
-    inDatabase: Boolean
-    doNotScrape: Boolean
-    error: String
+  id: String!
+  name: String
+  gameStatus: String
+  registrationStatus: String
+  gameStartDateTime: String
+  inDatabase: Boolean
+  doNotScrape: Boolean
+  error: String
 }
 
 type ScrapedGameData {
-    # Core Details
-    name: String!
-gameStartDateTime: String
-    gameEndDateTime: String
-    gameStatus: GameStatus
-    registrationStatus: String
-    gameType: GameType
-    gameVariant: GameVariant
-    tournamentType: TournamentType
-
-    # Financials
-    prizepool: Float
-    revenueByBuyIns: Float
-    profitLoss: Float
-    buyIn: Float
-    rake: Float
-    totalRake: Float
-    startingStack: Int
-
-    # Guarantee
-    hasGuarantee: Boolean
-    guaranteeAmount: Float
-    guaranteeOverlay: Float
-    guaranteeSurplus: Float
-
-    
-# Aggregates
-    totalEntries: Int
-    totalRebuys: Int
-    totalAddons: Int
-    totalDuration: String
-
-    # Live Data
-    playersRemaining: Int
-    totalChipsInPlay: Float
-    averagePlayerStack: Float
-
-    # Categorization
-    seriesName: String
-    isRegular: Boolean
-    isSeries: Boolean
-    isSatellite: Boolean
-    gameFrequency: GameFrequency
-    gameTags: [String]
-
-    # Complex Structures
-    levels: [ScrapedTournamentLevel!]
-    breaks: [ScrapedBreak!]
-    entries: [ScrapedPlayerEntry!]
-  
+  name: String!
+  gameStartDateTime: String
+  gameEndDateTime: String
+  gameStatus: GameStatus
+  registrationStatus: String
+  gameType: GameType
+  gameVariant: GameVariant
+  tournamentType: TournamentType
+  prizepool: Float
+  revenueByBuyIns: Float
+  profitLoss: Float
+  buyIn: Float
+  rake: Float
+  totalRake: Float
+  startingStack: Int
+  hasGuarantee: Boolean
+  guaranteeAmount: Float
+  guaranteeOverlay: Float
+  guaranteeSurplus: Float
+  totalEntries: Int
+  totalRebuys: Int
+  totalAddons: Int
+  totalDuration: String
+  playersRemaining: Int
+  totalChipsInPlay: Float
+  averagePlayerStack: Float
+  seriesName: String
+  isRegular: Boolean
+  isSeries: Boolean
+  isSatellite: Boolean
+  gameFrequency: GameFrequency
+  gameTags: [String]
+  levels: [ScrapedTournamentLevel!]
+  breaks: [ScrapedBreak!]
+  entries: [ScrapedPlayerEntry!]
   seating: [ScrapedPlayerSeating!]
-    results: [ScrapedPlayerResult!]
-    tables: [ScrapedTable!]
-
-    # Scraper Metadata
-    rawHtml: String
-    isNewStructure: Boolean
-    structureLabel: String
-    foundKeys: [String]
-    venueMatch: ScrapedVenueMatch
+  results: [ScrapedPlayerResult!]
+  tables: [ScrapedTable!]
+  rawHtml: String
+  isNewStructure: Boolean
+  structureLabel: String
+  foundKeys: [String]
+  venueMatch: ScrapedVenueMatch
+  existingGameId: String
+  doNotScrape: Boolean
 }
 
-# --- Nested Scraped Data Types ---
 type ScrapedTournamentLevel {
-    levelNumber: Int!
-durationMinutes: Int
-    smallBlind: Int
-    bigBlind: Int
-    ante: Int
+  levelNumber: Int!
+  durationMinutes: Int
+  smallBlind: Int
+  bigBlind: Int
+  ante: Int
 }
 
 type ScrapedBreak {
-    levelNumberBeforeBreak: Int!
-durationMinutes: Int
+  levelNumberBeforeBreak: Int!
+  durationMinutes: Int
 }
 
 type ScrapedPlayerEntry {
-    name: String!
+  name: String!
 }
 
 type ScrapedPlayerSeating {
-    name: String!
-table: Int
-    seat: Int
-    playerStack: Int
+  name: String!
+  table: Int
+  seat: Int
+  playerStack: Int
 }
 
 type ScrapedPlayerResult {
-    rank: Int!
-name: String!
-    winnings: Float
-    points: Float
-    isQualification: Boolean
+  rank: Int!
+  name: String!
+  winnings: Float
+  points: Float
+  isQualification: Boolean
 }
 
 type ScrapedTable {
-    tableName: String!
-seats: [ScrapedTableSeatData!]
+  tableName: String!
+  seats: [ScrapedTableSeatData!]
 }
 
 type ScrapedTableSeatData {
-    seat: Int!
-    isOccupied: Boolean!
-playerName: String
-    playerStack: Int
+  seat: Int!
+  isOccupied: Boolean!
+  playerName: String
+  playerStack: Int
 }
 
 type ScrapedVenueMatch {
-    autoAssignedVenue: ScrapedVenueMatchDetails
-    suggestions: [ScrapedVenueMatchDetails!]
+  autoAssignedVenue: ScrapedVenueMatchDetails
+  suggestions: [ScrapedVenueMatchDetails!]
 }
 
 type ScrapedVenueMatchDetails {
-    id: ID!
-name: String!
-    score: Float!
+  id: ID!
+  name: String!
+  score: Float!
 }
+
+# ===================================================================
+# END OF SCHEMA - ALL ORIGINAL MODEL NAMES PRESERVED
+# ===================================================================

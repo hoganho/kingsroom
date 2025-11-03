@@ -32,6 +32,9 @@ const TABLES_TO_CLEAR = [
     'PlayerTransaction-oi5oitkajrgtzm7feellfluriy-dev',
     'PlayerVenue-oi5oitkajrgtzm7feellfluriy-dev',
     'ScraperState-oi5oitkajrgtzm7feellfluriy-dev',
+    'ScrapeAttempt-oi5oitkajrgtzm7feellfluriy-dev',
+    'ScraperJob-oi5oitkajrgtzm7feellfluriy-dev',
+    'ScrapeURL-oi5oitkajrgtzm7feellfluriy-dev',
 ];
 
 // --- Logger (copied from your script) ---

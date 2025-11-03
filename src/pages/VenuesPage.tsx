@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import { listVenues } from '../graphql/queries';
+import { GraphQLResult } from '@aws-amplify/api';
+import { listVenuesShallow } from '../graphql/customQueries';
 import { createVenue, updateVenue, deleteVenue } from '../graphql/mutations';
 import { VenueTable } from '../components/venues/VenueTable';
 import { VenueModal } from '../components/venues/VenueModal';
@@ -26,36 +27,49 @@ const VenuesPage = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingVenueId, setDeletingVenueId] = useState<string | null>(null);
 
-  const fetchVenues = async () => {
+
+    const fetchVenues = async () => {
     setLoading(true);
     setError(null);
+
     try {
-      const response = await client.graphql({ query: listVenues });
-      const venueItems = (response.data.listVenues.items as Venue[])
-        .filter(Boolean)
-        .sort((a, b) => {
-          // Sort by venueNumber first, then by name
-          if (a.venueNumber !== undefined && b.venueNumber !== undefined) {
-            return a.venueNumber - b.venueNumber;
-          }
-          return a.name.localeCompare(b.name);
+        const response = await client.graphql<GraphQLResult<APITypes.ListVenuesShallowQuery>>({
+        query: listVenuesShallow,
         });
-      
-      setVenues(venueItems);
-      
-      // Calculate the next venue number
-      const maxVenueNumber = venueItems.reduce((max, venue) => {
-        return venue.venueNumber !== undefined && venue.venueNumber > max ? venue.venueNumber : max;
-      }, 0);
-      setNextVenueNumber(maxVenueNumber + 1);
-      
+
+        // ✅ Safe type narrowing for response.data
+        if ('data' in response && response.data) {
+        const venueItems = (response.data.listVenues.items as Venue[])
+            .filter(Boolean)
+            .sort((a, b) => {
+            // Sort by venueNumber first, then by name
+            if (a.venueNumber !== undefined && b.venueNumber !== undefined) {
+                return a.venueNumber - b.venueNumber;
+            }
+            return a.name.localeCompare(b.name);
+            });
+
+        setVenues(venueItems);
+
+        // ✅ Calculate next available venue number
+        const maxVenueNumber = venueItems.reduce((max, venue) => {
+            return venue.venueNumber !== undefined && venue.venueNumber > max
+            ? venue.venueNumber
+            : max;
+        }, 0);
+
+        setNextVenueNumber(maxVenueNumber + 1);
+        } else {
+        console.error('No data returned from listVenuesShallow');
+        setError('Failed to fetch venues: No data received.');
+        }
     } catch (err) {
-      console.error('Error fetching venues:', err);
-      setError('Failed to fetch venues. Please try again.');
+        console.error('Error fetching venues:', err);
+        setError('Failed to fetch venues. Please try again.');
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+    };
 
   useEffect(() => {
     fetchVenues();
@@ -84,7 +98,7 @@ const VenuesPage = () => {
       if (editingVenue) {
         // When editing, keep the existing venueNumber
         await client.graphql({
-          query: updateVenue,
+          query: updateVenue, // <-- Uses imported variable
           variables: { 
             input: { 
               _version: editingVenue._version,
@@ -101,7 +115,7 @@ const VenuesPage = () => {
       } else {
         // When creating new venue, use the next available number
         await client.graphql({
-          query: createVenue,
+          query: createVenue, // <-- Uses imported variable
           variables: { 
             input: { 
               name, 
@@ -125,17 +139,33 @@ const VenuesPage = () => {
   
   const confirmDelete = async () => {
       if (!deletingVenueId) return;
+
+      // --- FIX: Need to get the _version for deletion ---
+      const venueToDelete = venues.find(v => v.id === deletingVenueId);
+      if (!venueToDelete) {
+        setError("Could not find venue to delete.");
+        return;
+      }
+      // -------------------------------------------------
+
       try {
           await client.graphql({
-              query: deleteVenue,
-              variables: { input: { id: deletingVenueId } }
+              query: deleteVenue, // <-- Uses imported variable
+              // --- FIX: Pass the _version with the ID ---
+              variables: { 
+                input: { 
+                  id: deletingVenueId,
+                  _version: venueToDelete._version 
+                } 
+              }
+              // ------------------------------------------
           });
           setIsDeleteModalOpen(false);
           setDeletingVenueId(null);
           fetchVenues();
       } catch (err) {
           console.error('Error deleting venue:', err);
-setError('Failed to delete venue.');
+          setError('Failed to delete venue.');
       }
   };
 
@@ -202,4 +232,3 @@ setError('Failed to delete venue.');
 };
 
 export default VenuesPage;
-

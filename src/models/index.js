@@ -35,7 +35,8 @@ const GameStatus = {
   "CANCELLED": "CANCELLED",
   "FINISHED": "FINISHED",
   "NOT_IN_USE": "NOT_IN_USE",
-  "CLOCK_STOPPED": "CLOCK_STOPPED"
+  "CLOCK_STOPPED": "CLOCK_STOPPED",
+  "UNKNOWN": "UNKNOWN"
 };
 
 const GameVariant = {
@@ -184,6 +185,51 @@ const PointsTransactionType = {
   "EXPIRED": "EXPIRED"
 };
 
+const ScraperJobTriggerSource = {
+  "SCHEDULED": "SCHEDULED",
+  "MANUAL": "MANUAL",
+  "API": "API",
+  "CONTROL": "CONTROL",
+  "BULK": "BULK",
+  "ADMIN": "ADMIN"
+};
+
+const ScraperJobStatus = {
+  "QUEUED": "QUEUED",
+  "RUNNING": "RUNNING",
+  "COMPLETED": "COMPLETED",
+  "FAILED": "FAILED",
+  "CANCELLED": "CANCELLED",
+  "TIMEOUT": "TIMEOUT"
+};
+
+const ScrapeUrlStatus = {
+  "ACTIVE": "ACTIVE",
+  "INACTIVE": "INACTIVE",
+  "DO_NOT_SCRAPE": "DO_NOT_SCRAPE",
+  "ERROR": "ERROR",
+  "ARCHIVED": "ARCHIVED"
+};
+
+const ScrapeAttemptStatus = {
+  "SUCCESS": "SUCCESS",
+  "FAILED": "FAILED",
+  "SKIPPED_DONOTSCRAPE": "SKIPPED_DONOTSCRAPE",
+  "SKIPPED_VENUE": "SKIPPED_VENUE",
+  "BLANK": "BLANK",
+  "NO_CHANGES": "NO_CHANGES",
+  "UPDATED": "UPDATED",
+  "SAVED": "SAVED"
+};
+
+const TimeRange = {
+  "LAST_HOUR": "LAST_HOUR",
+  "LAST_24_HOURS": "LAST_24_HOURS",
+  "LAST_7_DAYS": "LAST_7_DAYS",
+  "LAST_30_DAYS": "LAST_30_DAYS",
+  "CUSTOM": "CUSTOM"
+};
+
 const ScraperOperation = {
   "START": "START",
   "STOP": "STOP",
@@ -193,7 +239,7 @@ const ScraperOperation = {
   "RESET": "RESET"
 };
 
-const { ScrapeStructure, DataSync, ScraperState, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, CashStructure, RakeStructure, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, ScraperControlResponse, ScraperStateData, ScraperResults, ScraperLogData, ScrapedGameStatus, TournamentLevelData, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails } = initSchema(schema);
+const { ScrapeStructure, DataSync, ScraperState, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, TournamentLevelData, CashStructure, RakeStructure, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, KnownPlayerIdentity, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, ScraperJob, ScrapeURL, ScrapeAttempt, ScraperControlResponse, ScraperStateData, ScraperResults, ScraperLogData, ScrapedGameStatus, TournamentLevel, Break, ClientMetricResponse, UserMetricsSummary, ScraperJobURLResult, ScraperMetrics, ErrorMetric, HourlyMetric, ScraperJobConnection, ScrapeURLConnection, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails } = initSchema(schema);
 
 export {
   ScrapeStructure,
@@ -205,6 +251,7 @@ export {
   TournamentSeries,
   Game,
   TournamentStructure,
+  TournamentLevelData,
   CashStructure,
   RakeStructure,
   Player,
@@ -215,6 +262,7 @@ export {
   PlayerTransaction,
   PlayerCredits,
   PlayerPoints,
+  KnownPlayerIdentity,
   TicketTemplate,
   PlayerTicket,
   MarketingMessage,
@@ -226,6 +274,9 @@ export {
   Asset,
   SocialAccount,
   SocialPost,
+  ScraperJob,
+  ScrapeURL,
+  ScrapeAttempt,
   DataSource,
   AssetCondition,
   VenueStatus,
@@ -249,13 +300,27 @@ export {
   PlayerEntryStatus,
   CreditTransactionType,
   PointsTransactionType,
+  ScraperJobTriggerSource,
+  ScraperJobStatus,
+  ScrapeURLStatus,
+  ScrapeAttemptStatus,
+  TimeRange,
   ScraperOperation,
   ScraperControlResponse,
   ScraperStateData,
   ScraperResults,
   ScraperLogData,
   ScrapedGameStatus,
-  TournamentLevelData,
+  TournamentLevel,
+  Break,
+  ClientMetricResponse,
+  UserMetricsSummary,
+  ScraperJobURLResult,
+  ScraperMetrics,
+  ErrorMetric,
+  HourlyMetric,
+  ScraperJobConnection,
+  ScrapeURLConnection,
   ScrapedGameSummary,
   ScrapedGameData,
   ScrapedTournamentLevel,

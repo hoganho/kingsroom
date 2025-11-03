@@ -1,18 +1,13 @@
-// src/components/layout/Sidebar.tsx
+// src/components/layout/Sidebar.tsx - Legacy routes removed
 
 import { NavLink } from 'react-router-dom';
 import {
   HomeIcon,
-  DocumentMagnifyingGlassIcon,
-  QueueListIcon,
   BuildingOffice2Icon,
   TrophyIcon,
   UserGroupIcon,
-  //CpuChipIcon,
-  ClockIcon
-
+  CogIcon,
 } from '@heroicons/react/24/outline';
-// ✅ REMOVED: No longer importing the logo here.
 
 const getLinkClassName = ({ isActive }: { isActive: boolean }) =>
   `flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${
@@ -22,13 +17,10 @@ const getLinkClassName = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 export const Sidebar = () => {
-  // ✅ NEW: Access the build version from the environment variable.
-  // This will be automatically injected by the Vite build process.
   const buildVersion = import.meta.env.VITE_BUILD_VERSION || 'dev';
 
   return (
     <aside className="md:fixed md:inset-y-0 md:left-0 md:z-30 flex w-64 flex-col border-r bg-white">
-      {/* ✅ CHANGE: Replaced the logo with the build version text */}
       <div className="flex flex-shrink-0 items-center justify-center px-4 h-16 border-b bg-black">
         <span className="font-mono text-sm font-semibold text-gray-300 tracking-wider">
           Prototype v{buildVersion}
@@ -41,19 +33,27 @@ export const Sidebar = () => {
             <HomeIcon className="h-5 w-5 mr-3" />
             Home
           </NavLink>
-          <NavLink to="/scraper-dashboard" className={getLinkClassName}>
-            <QueueListIcon className="h-5 w-5 mr-3" />
-            Tracker Dashboard
+          
+          {/* Enhanced Scraper Management Section */}
+          <div className="mt-6 mb-2">
+            <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              Scraper Management
+            </p>
+          </div>
+          
+          {/* Primary scraper admin interface */}
+          <NavLink to="/scraper-admin" className={getLinkClassName}>
+            <CogIcon className="h-5 w-5 mr-3" />
+            Scraper Admin
           </NavLink>
-          <NavLink to="/bulk-scraper" className={getLinkClassName}>
-            <DocumentMagnifyingGlassIcon className="h-5 w-5 mr-3" />
-            Bulk Fetcher
-          </NavLink>
-          {/* ✅ NEW: Added Auto Scraper link */}
-          <NavLink to="/auto-scraper" className={getLinkClassName}>
-            <ClockIcon className="h-5 w-5 mr-3" />
-            Auto Scraper
-          </NavLink>
+          
+          {/* Game Management Section */}
+          <div className="mt-6 mb-2">
+            <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              Game Management
+            </p>
+          </div>
+          
           <NavLink to="/venues" className={getLinkClassName}>
             <BuildingOffice2Icon className="h-5 w-5 mr-3" />
             Venues
@@ -62,15 +62,27 @@ export const Sidebar = () => {
             <TrophyIcon className="h-5 w-5 mr-3" />
             Series Management
           </NavLink>
+          
+          {/* Player Management Section */}
+          <div className="mt-6 mb-2">
+            <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              Players
+            </p>
+          </div>
+          
           <NavLink to="/players" className={getLinkClassName}>
             <UserGroupIcon className="h-5 w-5 mr-3" />
             Players (Debug)
           </NavLink>
         </div>
       </nav>
+      
       <div className="p-4 border-t">
+        {/* Migration Notice (Removed) */}
+        {/* <div className="mb-2 p-2 bg-yellow-50 rounded-lg"> ... </div> */}
         <p className="text-xs text-gray-500">© 2025 Top Set Ventures</p>
       </div>
     </aside>
   );
 };
+

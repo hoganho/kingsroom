@@ -114,6 +114,57 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "publishClientMetrics": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        },
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "kingsroomc05d6627"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "scraperManagement": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "autoScraper"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "webScraperFunction"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "webScraperFunction": {
       "build": true,
       "dependsOn": [
@@ -200,6 +251,38 @@
         {
           "category": "function",
           "resourceName": "playerDataProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_publishClientMetrics_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "publishClientMetrics"
+        }
+      ]
+    },
+    "AMPLIFY_function_publishClientMetrics_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "publishClientMetrics"
+        }
+      ]
+    },
+    "AMPLIFY_function_scraperManagement_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "scraperManagement"
+        }
+      ]
+    },
+    "AMPLIFY_function_scraperManagement_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "scraperManagement"
         }
       ]
     },
