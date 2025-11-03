@@ -5,8 +5,6 @@ import * as queries from '../graphql/customQueries';
 import * as APITypes from '../API';
 import { PageWrapper } from '../components/layout/PageWrapper';
 
-const client = generateClient();
-
 // ===================================================================
 // TYPES
 // ===================================================================
@@ -94,6 +92,7 @@ const useAllData = <T,>(query: string, queryName: string) => {
     const [data, setData] = useState<T[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const client = useMemo(() => generateClient(), []);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -130,7 +129,7 @@ const useAllData = <T,>(query: string, queryName: string) => {
         } finally {
             setLoading(false);
         }
-    }, [query, queryName]);
+    }, [query, queryName, client]);
 
     useEffect(() => {
         fetchData();
@@ -263,6 +262,7 @@ const SortableTable = <T,>({ query, queryName, columns, initialSort, playerMap }
  * Fetches ALL players using pagination to build the name map.
  */
 const fetchAllPlayers = async () => {
+  const client = generateClient();
   let allItems: APITypes.Player[] = [];
   let nextToken: string | null = null;
   const limit = 1000; // Fetch in chunks of 1000

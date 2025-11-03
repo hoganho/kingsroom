@@ -1,7 +1,7 @@
 
 // src/pages/scraper-admin-tabs/URLManagementTab.tsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import {
     RefreshCw, 
@@ -11,19 +11,14 @@ import { scraperManagementQueries, scraperManagementMutations } from '../../grap
 import type { ScrapeURL, ScrapeURLStatus } from '../../API';
 import { URLStatusBadge } from '../../components/scraper/admin/ScraperAdminShared';
 
-const client = generateClient();
-
 export const URLManagementTab: React.FC = () => {
+    const client = useMemo(() => generateClient(), []);
     const [urls, setURLs] = useState<ScrapeURL[]>([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState<ScrapeURLStatus | 'ALL'>('ALL');
     const [selectedURLs, setSelectedURLs] = useState<Set<string>>(new Set());
 
-    useEffect(() => {
-        loadURLs();
-    }, [statusFilter]);
-
-    const loadURLs = async () => {
+    const loadURLs = useCallback(async () => {
         try {
             setLoading(true);
             const response = await client.graphql({
@@ -32,21 +27,25 @@ export const URLManagementTab: React.FC = () => {
                     status: statusFilter === 'ALL' ? null : statusFilter,
                     limit: 100 
                 }
-            }) as any; // Using any here to simplify response handling
+            }) as any;
             
             if (response.data && response.data.searchScrapeURLs) {
                 setURLs(response.data.searchScrapeURLs.items as ScrapeURL[]);
             } else {
                 console.error('Error loading URLs:', response.errors);
-                setURLs([]); // Clear URLs on error
+                setURLs([]);
             }
         } catch (error) {
             console.error('Error loading URLs:', error);
-            setURLs([]); // Clear URLs on catch
+            setURLs([]);
         } finally {
             setLoading(false);
         }
-    };
+    }, [client, statusFilter]);
+
+    useEffect(() => {
+        loadURLs();
+    }, [loadURLs]);
 
     const handleToggleURL = (url: string) => {
         const newSelection = new Set(selectedURLs);
@@ -66,7 +65,7 @@ export const URLManagementTab: React.FC = () => {
         }
     };
 
-    const handleBulkUpdate = async (status: ScrapeURLStatus, doNotScrape?: boolean) => {
+    const handleBulkUpdate = useCallback(async (status: ScrapeURLStatus, doNotScrape?: boolean) => {
         if (selectedURLs.size === 0) {
             alert('Please select URLs to update');
             return;
@@ -87,7 +86,7 @@ export const URLManagementTab: React.FC = () => {
             console.error('Error updating URLs:', error);
             alert('Failed to update URLs. See console for details.');
         }
-    };
+    }, [client, selectedURLs, loadURLs]);
 
     return (
         <div className="space-y-6">
@@ -244,4 +243,3 @@ export const URLManagementTab: React.FC = () => {
         </div>
     );
 };
-

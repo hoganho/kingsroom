@@ -25,31 +25,78 @@ interface PerformanceMark {
     name: string;
 }
 
+// Define the correct UserMetricsSummary type based on your schema
+interface UserMetricsSummary {
+    userId: string;
+    userName?: string;
+    totalActions?: number;
+    totalPageViews?: number;
+    totalErrors?: number;
+    lastActive?: string;
+    mostUsedFeature?: string;
+}
+
+// Extended ScraperJob interface to include requester if needed
+interface ExtendedScraperJob extends Omit<ScraperJob, 'requester'> {
+    requester?: string;
+}
+
 // ===================================================================
 // Enhanced CloudWatch Client Service with User Context
 // ===================================================================
 
 export class ClientCloudWatchService {
     private static instance: ClientCloudWatchService;
-    private client = generateClient();
+    private client: any = null;  // Initialize as null, will be set after Amplify is configured
     private performanceMarks = new Map<string, PerformanceMark>();
     private metricsBuffer: MetricData[] = [];
     private flushTimer: NodeJS.Timeout | null = null;
     private userId: string | null = null;
     private userName: string | null = null;
-    private userEmail: string | null = null;
+    // userEmail is kept for future use but marked as potentially unused
+    private _userEmail: string | null = null;
     private sessionId: string;
+    private sessionStartTime: number;
     private isAuthenticated: boolean = false;
+    private isInitialized: boolean = false;
     
     private constructor() {
         this.sessionId = this.generateSessionId();
-        this.startPeriodicFlush();
-        this.initializeUserContext();
-        
-        if (typeof window !== 'undefined') {
-            window.addEventListener('beforeunload', () => {
-                this.flush();
-            });
+        this.sessionStartTime = Date.now();
+        // Don't start services until Amplify is configured
+    }
+    
+    /**
+     * Initialize the CloudWatch service after Amplify has been configured
+     * This should be called from your App component after Amplify.configure()
+     */
+    public async initialize(): Promise<void> {
+        if (this.isInitialized) {
+            return;
+        }
+
+        try {
+            // Now it's safe to generate the client
+            this.client = generateClient();
+            
+            // Start periodic flush
+            this.startPeriodicFlush();
+            
+            // Initialize user context
+            await this.initializeUserContext();
+            
+            // Add beforeunload listener
+            if (typeof window !== 'undefined') {
+                window.addEventListener('beforeunload', () => {
+                    this.flush();
+                });
+            }
+            
+            this.isInitialized = true;
+            console.log('ClientCloudWatchService initialized successfully');
+        } catch (error) {
+            console.error('Failed to initialize ClientCloudWatchService:', error);
+            // Don't throw - allow the app to continue working
         }
     }
     
@@ -101,22 +148,12 @@ export class ClientCloudWatchService {
                     this.userName = (payload.name || 
                                    payload['cognito:username'] || 
                                    payload.email) as string;
-                    this.userEmail = payload.email as string;
+                    this._userEmail = payload.email as string;
                     this.isAuthenticated = true;
                     
                     console.log('User context initialized:', {
                         userId: this.userId,
                         userName: this.userName
-                    });
-                    
-                    // Track user login
-                    this.recordMetric({
-                        metricName: MetricType.USER_LOGIN,
-                        value: 1,
-                        dimensions: {
-                            UserId: this.userId,
-                            UserName: this.userName
-                        }
                     });
                 }
             }
@@ -130,6 +167,9 @@ export class ClientCloudWatchService {
      * Update user context (call when auth state changes)
      */
     public async updateUserContext(): Promise<void> {
+        if (!this.isInitialized) {
+            await this.initialize();
+        }
         await this.initializeUserContext();
     }
     
@@ -151,7 +191,7 @@ export class ClientCloudWatchService {
         
         this.userId = null;
         this.userName = null;
-        this.userEmail = null;
+        this._userEmail = null;
         this.isAuthenticated = false;
         
         // Flush any remaining metrics
@@ -165,6 +205,13 @@ export class ClientCloudWatchService {
         this.userId = userId;
     }
     
+    /**
+     * Get user email (for future use)
+     */
+    public getUserEmail(): string | null {
+        return this._userEmail;
+    }
+    
     // ===================================================================
     // Enhanced Metrics Recording with User Context
     // ===================================================================
@@ -173,6 +220,11 @@ export class ClientCloudWatchService {
      * Record a metric with automatic user context
      */
     public recordMetric(metric: MetricData): void {
+        if (!this.isInitialized) {
+            console.warn('ClientCloudWatchService not initialized. Call initialize() first.');
+            return;
+        }
+
         const enrichedMetric: MetricData = {
             ...metric,
             timestamp: metric.timestamp || new Date(),
@@ -202,6 +254,10 @@ export class ClientCloudWatchService {
      * Send buffered metrics to CloudWatch via Lambda (with auth context)
      */
     public async flush(): Promise<void> {
+        if (!this.isInitialized || !this.client) {
+            return;
+        }
+
         if (this.metricsBuffer.length === 0) return;
         
         const metricsToSend = [...this.metricsBuffer];
@@ -215,6 +271,7 @@ export class ClientCloudWatchService {
                         publishClientMetrics(metrics: $metrics) {
                             success
                             message
+                            userId
                         }
                     }
                 `,
@@ -228,20 +285,16 @@ export class ClientCloudWatchService {
                         metadata: m.metadata ? JSON.stringify(m.metadata) : null
                     }))
                 },
-                authMode: 'userPool' // Use correct GraphQLAuthMode
+                authMode: 'userPool' // Use Cognito User Pool authentication
             }) as GraphQLResult<any>;
             
-            if (response.data?.publishClientMetrics?.success) {
-                console.log('Metrics published for user:', this.userId);
+            if (response.errors) {
+                console.error('Failed to publish client metrics:', response);
+            } else {
+                console.log('Metrics published successfully');
             }
-        } catch (error: any) {
+        } catch (error) {
             console.error('Failed to publish client metrics:', error);
-            
-            // If auth error, try to refresh context
-            if (error?.errors?.[0]?.message?.includes('Unauthorized')) {
-                await this.updateUserContext();
-            }
-            
             // Re-add metrics to buffer for retry
             this.metricsBuffer = [...metricsToSend, ...this.metricsBuffer];
         }
@@ -258,10 +311,10 @@ export class ClientCloudWatchService {
         });
     }
     
-    public endPerformanceMark(name: string): number {
+    public endPerformanceMark(name: string, category?: string): number {
         const mark = this.performanceMarks.get(name);
         if (!mark) {
-            console.warn(`No performance mark found for: ${name}`);
+            console.warn(`Performance mark ${name} not found`);
             return 0;
         }
         
@@ -269,11 +322,12 @@ export class ClientCloudWatchService {
         this.performanceMarks.delete(name);
         
         this.recordMetric({
-            metricName: MetricType.RENDER_TIME,
+            metricName: `${category || 'Performance'}.${name}`,
             value: duration,
             unit: 'Milliseconds',
             dimensions: {
-                MarkName: name
+                MarkName: name,
+                Category: category || 'General'
             }
         });
         
@@ -281,27 +335,27 @@ export class ClientCloudWatchService {
     }
     
     // ===================================================================
-    // User-Specific Tracking Methods
+    // User Interaction Tracking
     // ===================================================================
     
     /**
-     * Track page views
+     * Track page view with optional metadata
+     * @param pageName The name of the page
+     * @param metadata Optional metadata object
      */
-    public trackPageView(page: string, metadata?: Record<string, any>): void {
+    public trackPageView(pageName: string, metadata?: Record<string, any>): void {
         this.recordMetric({
             metricName: MetricType.PAGE_VIEW,
             value: 1,
             dimensions: {
-                Page: page,
-                ...metadata
+                PageName: pageName,
+                Path: window.location.pathname,
+                UserTier: this.getUserTier()
             },
             metadata
         });
     }
     
-    /**
-     * Track tab switches in the scraper admin
-     */
     public trackTabSwitch(fromTab: string, toTab: string): void {
         this.recordMetric({
             metricName: MetricType.TAB_SWITCH,
@@ -313,9 +367,6 @@ export class ClientCloudWatchService {
         });
     }
     
-    /**
-     * Track user-specific actions
-     */
     public trackUserAction(action: string, category: string, metadata?: Record<string, any>): void {
         this.recordMetric({
             metricName: MetricType.USER_ACTION,
@@ -323,45 +374,41 @@ export class ClientCloudWatchService {
             dimensions: {
                 Action: action,
                 Category: category,
-                UserRole: metadata?.userRole || 'user',
-                ...metadata
+                UserSegment: this.getUserSegment()
             },
-            metadata: {
-                ...metadata,
-                userEmail: this.userEmail,
-                timestamp: new Date().toISOString()
-            }
+            metadata
         });
     }
     
     /**
-     * Track feature usage per user
+     * Track feature usage
+     * @param featureName Name of the feature
+     * @param action Action performed (string)
+     * @param metadata Optional metadata
      */
-    public trackFeatureUsage(featureName: string, duration?: number): void {
+    public trackFeatureUsage(featureName: string, action: string, metadata?: Record<string, any>): void {
         this.recordMetric({
             metricName: MetricType.FEATURE_USAGE,
             value: 1,
             dimensions: {
                 FeatureName: featureName,
+                Action: action,
                 UserTier: this.getUserTier()
             },
             metadata: {
-                duration,
-                userId: this.userId
+                ...metadata,
+                timestamp: new Date().toISOString()
             }
         });
     }
     
-    /**
-     * Track user engagement score
-     */
-    public trackEngagement(score: number, activity: string): void {
+    public trackEngagement(engagementType: string, duration?: number): void {
         this.recordMetric({
             metricName: MetricType.USER_ENGAGEMENT,
-            value: score,
-            unit: 'Percent',
+            value: duration || 1,
+            unit: duration ? 'Milliseconds' : 'Count',
             dimensions: {
-                Activity: activity,
+                EngagementType: engagementType,
                 UserSegment: this.getUserSegment()
             }
         });
@@ -371,14 +418,21 @@ export class ClientCloudWatchService {
     // Scraper-Specific Tracking
     // ===================================================================
     
-    public trackJobStarted(job: Partial<ScraperJob>): void {
+    /**
+     * Track job started - handles both ScraperJob and extended types
+     */
+    public trackJobStarted(job: ScraperJob | ExtendedScraperJob | undefined | null): void {
+        if (!job) return;
+        
+        const extendedJob = job as ExtendedScraperJob;
+        
         this.recordMetric({
             metricName: MetricType.JOB_STARTED,
             value: 1,
             dimensions: {
-                JobId: job.id || 'unknown',
-                TriggerSource: job.triggerSource || 'MANUAL',
-                MaxGames: job.maxGames || 0
+                JobId: job.id,
+                TriggerSource: job.triggerSource || 'UNKNOWN',
+                Requester: extendedJob.requester || 'UNKNOWN'
             }
         });
     }
@@ -393,20 +447,23 @@ export class ClientCloudWatchService {
         });
     }
     
-    public trackURLAdded(url: Partial<ScrapeURL>): void {
+    public trackURLAdded(url: ScrapeURL | undefined | null): void {
+        if (!url) return;
+        
         this.recordMetric({
             metricName: MetricType.URL_TRACKED,
             value: 1,
             dimensions: {
-                Status: url.status || 'ACTIVE'
+                URL: url.url,
+                Status: url.status || 'UNKNOWN'
             }
         });
     }
     
-    public trackBulkOperation(operation: string, itemCount: number, success: boolean): void {
+    public trackBulkOperation(operation: string, count: number, success: boolean): void {
         this.recordMetric({
             metricName: MetricType.BULK_OPERATION,
-            value: itemCount,
+            value: count,
             dimensions: {
                 Operation: operation,
                 Success: success ? 'true' : 'false'
@@ -446,7 +503,7 @@ export class ClientCloudWatchService {
     public async trackAPICall<T>(
         operationName: string,
         apiCall: () => Promise<T>
-    ): Promise<T | null> {
+    ): Promise<T> {
         const startTime = performance.now();
         
         try {
@@ -508,6 +565,13 @@ export class ClientCloudWatchService {
     }
     
     /**
+     * Get current session duration in milliseconds
+     */
+    public getSessionDuration(): number {
+        return Date.now() - this.sessionStartTime;
+    }
+    
+    /**
      * Get session summary
      */
     public getSessionSummary(): Record<string, any> {
@@ -516,15 +580,21 @@ export class ClientCloudWatchService {
             userId: this.userId,
             userName: this.userName,
             isAuthenticated: this.isAuthenticated,
-            sessionDuration: Date.now() - parseInt(this.sessionId.split('-')[1]),
+            sessionDuration: this.getSessionDuration(),
             metricsBuffered: this.metricsBuffer.length
         };
     }
     
     /**
      * Get current user metrics summary
+     * FIXED: Using correct fields from GraphQL schema
      */
-    public async getUserMetricsSummary(): Promise<any> {
+    public async getUserMetricsSummary(): Promise<UserMetricsSummary | null> {
+        if (!this.isInitialized || !this.client) {
+            console.warn('ClientCloudWatchService not initialized');
+            return null;
+        }
+
         if (!this.isAuthenticated) {
             return null;
         }
@@ -536,24 +606,24 @@ export class ClientCloudWatchService {
                         getMyMetrics(timeRange: $timeRange) {
                             userId
                             userName
-                            timeRange
-                            metrics
-                            topActions {
-                                action
-                                category
-                                count
-                                lastPerformed
-                            }
-                            sessionCount
-                            averageSessionDuration
+                            totalActions
+                            totalPageViews
+                            totalErrors
+                            lastActive
+                            mostUsedFeature
                         }
                     }
                 `,
                 variables: {
                     timeRange: 'LAST_24_HOURS'
                 },
-                authMode: 'userPool' // Use correct GraphQLAuthMode
-            }) as GraphQLResult<any>;
+                authMode: 'userPool' // Use Cognito User Pool authentication
+            }) as GraphQLResult<{ getMyMetrics: UserMetricsSummary }>;
+            
+            if (response.errors) {
+                console.error('GraphQL errors getting user metrics:', response.errors);
+                return null;
+            }
             
             return response.data?.getMyMetrics || null;
         } catch (error) {
@@ -593,48 +663,60 @@ export enum MetricType {
 }
 
 // ===================================================================
+// Extended UserMetricsSummary with session info
+// ===================================================================
+
+export interface ExtendedUserMetrics extends UserMetricsSummary {
+    sessionDuration?: number;
+}
+
+// ===================================================================
 // React Hook with User Context
 // ===================================================================
 
 export function useCloudWatchMetrics() {
-    const cloudWatch = ClientCloudWatchService.getInstance();
-    const [userMetrics, setUserMetrics] = useState<any>(null);
+    const cloudWatch = ClientCloudWatchService.getInstance(); // This is a STABLE singleton
+    const [userMetrics, setUserMetrics] = useState<ExtendedUserMetrics | null>(null);
+    const [isInitialized, setIsInitialized] = useState(false);
     
     useEffect(() => {
-        // Update user context when component mounts
-        cloudWatch.updateUserContext();
+        const initializeService = async () => {
+            // Initialize the CloudWatch service
+            await cloudWatch.initialize();
+            setIsInitialized(true);
+            
+            // Update user context when component mounts
+            await cloudWatch.updateUserContext();
+            
+            // Load user metrics summary
+            const metrics = await cloudWatch.getUserMetricsSummary();
+            if (metrics) {
+                // Add session duration to the metrics
+                setUserMetrics({
+                    ...metrics,
+                    sessionDuration: cloudWatch.getSessionDuration()
+                });
+            }
+        };
         
-        // Load user metrics summary
-        cloudWatch.getUserMetricsSummary().then(setUserMetrics);
-    }, []);
-    
+        initializeService();
+        
+        // Update session duration periodically
+        const interval = setInterval(() => {
+            setUserMetrics(prev => prev ? {
+                ...prev,
+                sessionDuration: cloudWatch.getSessionDuration()
+            } : null);
+        }, 60000); // Update every minute
+        
+        return () => clearInterval(interval);
+    }, [cloudWatch]); // Add stable cloudWatch dependency
+
+    // Return the stable instance AND the reactive state separately
     return {
-        // All original methods
-        recordMetric: cloudWatch.recordMetric.bind(cloudWatch),
-        flush: cloudWatch.flush.bind(cloudWatch),
-        startMark: cloudWatch.startPerformanceMark.bind(cloudWatch),
-        endMark: cloudWatch.endPerformanceMark.bind(cloudWatch),
-        trackPageView: cloudWatch.trackPageView.bind(cloudWatch),
-        trackTabSwitch: cloudWatch.trackTabSwitch.bind(cloudWatch),
-        trackUserAction: cloudWatch.trackUserAction.bind(cloudWatch),
-        trackJobStarted: cloudWatch.trackJobStarted.bind(cloudWatch),
-        trackJobCancelled: cloudWatch.trackJobCancelled.bind(cloudWatch),
-        trackURLAdded: cloudWatch.trackURLAdded.bind(cloudWatch),
-        trackBulkOperation: cloudWatch.trackBulkOperation.bind(cloudWatch),
-        trackError: cloudWatch.trackError.bind(cloudWatch),
-        trackAPICall: cloudWatch.trackAPICall.bind(cloudWatch),
-        
-        // New user-specific methods
-        trackFeatureUsage: cloudWatch.trackFeatureUsage.bind(cloudWatch),
-        trackEngagement: cloudWatch.trackEngagement.bind(cloudWatch),
-        updateUserContext: cloudWatch.updateUserContext.bind(cloudWatch),
-        clearUserContext: cloudWatch.clearUserContext.bind(cloudWatch),
-        
-        // User metrics data
-        userMetrics,
-        
-        // Session info
-        getSessionSummary: cloudWatch.getSessionSummary.bind(cloudWatch)
+        cloudWatch,
+        isInitialized,
+        userMetrics
     };
 }
 

@@ -25,7 +25,7 @@
           "EMAILSUBJECT": "Your Kings Room Poker Verification Code",
           "EMAILMESSAGE": "Welcome to Kings Room Poker! Please use the following code to verify your email address:",
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/kingsroomc05d6627CustomMessage-424d4c496846614f3754-build.zip"
+          "s3Key": "amplify-builds/kingsroomc05d6627CustomMessage-36486f3077736c795639-build.zip"
         },
         "webScraperFunction": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
@@ -46,7 +46,11 @@
         },
         "publishClientMetrics": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/publishClientMetrics-41757666716e6b63366a-build.zip"
+          "s3Key": "amplify-builds/publishClientMetrics-6a7878436c5733786466-build.zip"
+        },
+        "getUserMetrics": {
+          "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+          "s3Key": "amplify-builds/getUserMetrics-7658727039624278726c-build.zip"
         }
       }
     }

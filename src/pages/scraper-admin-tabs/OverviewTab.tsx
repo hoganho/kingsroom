@@ -1,6 +1,7 @@
 // src/pages/scraper-admin-tabs/OverviewTab.tsx
 
-import React, { useState, useEffect } from 'react';
+// ✅ FIX 1: Import useMemo and useCallback
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { 
     RefreshCw, 
@@ -34,21 +35,20 @@ interface ScraperMetrics {
     }>;
 }
 
-const client = generateClient();
+// ❌ FIX 2: Remove the top-level client
+// const client = generateClient();
 
 export const OverviewTab: React.FC = () => {
+    // ✅ FIX 3: Generate the client *inside* the component and memoize it.
+    const client = useMemo(() => generateClient(), []);
+
     const [metrics, setMetrics] = useState<ScraperMetrics | null>(null);
     const [recentJobs, setRecentJobs] = useState<ScraperJob[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        loadMetrics();
-        const interval = setInterval(loadMetrics, 30000); // Refresh every 30 seconds
-        return () => clearInterval(interval);
-    }, []);
-
-    const loadMetrics = async () => {
+    // ✅ FIX 4: Wrap in useCallback and add 'client' as a dependency
+    const loadMetrics = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -86,7 +86,13 @@ export const OverviewTab: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [client]); // <-- Dependency added
+
+    useEffect(() => {
+        loadMetrics();
+        const interval = setInterval(loadMetrics, 30000); // Refresh every 30 seconds
+        return () => clearInterval(interval);
+    }, [loadMetrics]); // ✅ FIX 5: Add loadMetrics dependency
 
     if (loading && !metrics && !error) {
         return (
@@ -206,4 +212,3 @@ export const OverviewTab: React.FC = () => {
         </div>
     );
 };
-

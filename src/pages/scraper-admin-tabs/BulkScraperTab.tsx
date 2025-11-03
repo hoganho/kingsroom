@@ -1,6 +1,6 @@
 // src/pages/scraper-admin-tabs/BulkScraperTab.tsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -17,8 +17,6 @@ import { GameListItem } from '../../components/scraper/GameListItem';
 import type { GameState, BulkGameSummary } from '../../types/game';
 import type { ScraperJob } from '../../API';
 import { ScraperJobTriggerSource, DataSource, GameStatus, RegistrationStatus } from '../../API';
-
-const client = generateClient();
 
 interface BulkJobResult {
     jobId: string;
@@ -39,6 +37,7 @@ interface BulkJobResult {
 }
 
 export const BulkScraperTab: React.FC = () => {
+    const client = useMemo(() => generateClient(), []);
     const navigate = useNavigate();
     const [startId, setStartId] = useState('');
     const [endId, setEndId] = useState('');
@@ -55,11 +54,29 @@ export const BulkScraperTab: React.FC = () => {
     const [showResults, setShowResults] = useState(false);
     const [recentJobs, setRecentJobs] = useState<ScraperJob[]>([]);
     const [showRecentJobs, setShowRecentJobs] = useState(false);
-    
-    // Load recent jobs on mount
-    useEffect(() => {
-        fetchRecentJobs();
-    }, []);
+
+    const fetchRecentJobs = useCallback(async () => {
+        try {
+            const response = await client.graphql({
+                query: listScraperJobs,
+                variables: {
+                    filter: { 
+                        triggerSource: { 
+                            eq: 'BULK' as ScraperJobTriggerSource
+                        } 
+                    },
+                    limit: 10
+                }
+            }) as any;
+            
+            const jobs = response.data?.listScraperJobs?.items || [];
+            setRecentJobs(jobs.sort((a: ScraperJob, b: ScraperJob) => 
+                new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+            ));
+        } catch (err) {
+            console.error('Error fetching recent jobs:', err);
+        }
+    }, [client]);
 
     // Poll for job status updates
     useEffect(() => {
@@ -87,31 +104,12 @@ export const BulkScraperTab: React.FC = () => {
 
             return () => clearInterval(interval);
         }
-    }, [currentJobId, isPolling]);
+    }, [currentJobId, isPolling, client, fetchRecentJobs]);
 
-    // FIXED: Cast 'BULK' to ScraperJobTriggerSource in filter
-    const fetchRecentJobs = async () => {
-        try {
-            const response = await client.graphql({
-                query: listScraperJobs,
-                variables: {
-                    filter: { 
-                        triggerSource: { 
-                            eq: 'BULK' as ScraperJobTriggerSource  // ✅ FIXED: Cast to enum type
-                        } 
-                    },
-                    limit: 10
-                }
-            }) as any;
-            
-            const jobs = response.data?.listScraperJobs?.items || [];
-            setRecentJobs(jobs.sort((a: ScraperJob, b: ScraperJob) => 
-                new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
-            ));
-        } catch (err) {
-            console.error('Error fetching recent jobs:', err);
-        }
-    };
+    // Load recent jobs on mount
+    useEffect(() => {
+        fetchRecentJobs();
+    }, [fetchRecentJobs]);
 
     const updateJobResult = (job: ScraperJob) => {
         // Parse the URL results to get game summaries
@@ -163,7 +161,7 @@ export const BulkScraperTab: React.FC = () => {
         });
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         setSuccess(null);
@@ -208,14 +206,14 @@ export const BulkScraperTab: React.FC = () => {
         } else {
             setError('Please enter valid start and end IDs where start ≤ end');
         }
-    };
+    }, [client, startId, endId]);
 
     const handleGameClick = (gameId: string) => {
         const trackUrl = `https://kingsroom.com.au/tournament/?id=${gameId}`;
         navigate(`/scraper-dashboard?trackUrl=${encodeURIComponent(trackUrl)}`);
     };
 
-    const handleViewHistoricalJob = async (jobId: string) => {
+    const handleViewHistoricalJob = useCallback(async (jobId: string) => {
         try {
             const response = await client.graphql({
                 query: getScraperJob,
@@ -230,7 +228,7 @@ export const BulkScraperTab: React.FC = () => {
         } catch (err) {
             console.error('Error fetching historical job:', err);
         }
-    };
+    }, [client]);
 
     const convertBulkGameToGameState = (game: BulkGameSummary): GameState => {
         // Handle special status values and null conversions

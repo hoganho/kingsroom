@@ -2,7 +2,7 @@
 // React hooks for enhanced scraper management
 // Updated to match correct field names from deployed schema
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { 
     scraperManagementQueries, 
@@ -19,8 +19,6 @@ import {
     type StartScraperJobInput
 } from '../API';
 
-const client = generateClient();
-
 // Define the shape of GraphQL responses we expect
 interface GraphQLResponseData<T> {
     data: T;
@@ -35,6 +33,7 @@ function hasGraphQLData<T>(response: any): response is GraphQLResponseData<T> {
 // useScraperJobs - Manage scraper jobs
 // ===================================================================
 export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
+    const client = useMemo(() => generateClient(), []);
     const [jobs, setJobs] = useState<ScraperJob[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -75,7 +74,7 @@ export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
         } finally {
             setLoading(false);
         }
-    }, [statusFilter, nextToken]);
+    }, [client, statusFilter, nextToken]);
 
     // Start a new job
     const startJob = useCallback(async (input: StartScraperJobInput) => {
@@ -103,7 +102,7 @@ export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [client]);
 
     // Cancel a job
     const cancelJob = useCallback(async (jobId: string) => {
@@ -135,7 +134,7 @@ export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [client]);
 
     // Subscribe to job updates
     const subscribeToJob = useCallback((jobId: string, onUpdate: (job: ScraperJob) => void) => {
@@ -162,12 +161,12 @@ export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
         });
 
         return () => sub.unsubscribe();
-    }, []);
+    }, [client]);
 
     // Load initial data
     useEffect(() => {
         fetchJobs(true);
-    }, [statusFilter]);
+    }, [fetchJobs, statusFilter]);
 
     return {
         jobs,
@@ -188,6 +187,7 @@ export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
 // useScrapeURLs - Manage scraped URLs
 // ===================================================================
 export const useScrapeURLs = (initialStatus?: ScrapeURLStatus) => {
+    const client = useMemo(() => generateClient(), []);
     const [urls, setUrls] = useState<ScrapeURL[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -228,7 +228,7 @@ export const useScrapeURLs = (initialStatus?: ScrapeURLStatus) => {
         } finally {
             setLoading(false);
         }
-    }, [statusFilter, nextToken]);
+    }, [client, statusFilter, nextToken]);
 
     // Get single URL details using auto-generated query
     const getURL = useCallback(async (url: string) => {
@@ -248,7 +248,7 @@ export const useScrapeURLs = (initialStatus?: ScrapeURLStatus) => {
             console.error('Error fetching URL:', err);
             throw err;
         }
-    }, []);
+    }, [client]);
 
     // Update single URL using custom Lambda mutation
     const updateURL = useCallback(async (
@@ -285,7 +285,7 @@ export const useScrapeURLs = (initialStatus?: ScrapeURLStatus) => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [client]);
 
     // Bulk update URLs using custom Lambda mutation
     const bulkUpdateURLs = useCallback(async (
@@ -323,7 +323,7 @@ export const useScrapeURLs = (initialStatus?: ScrapeURLStatus) => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [client]);
 
     // Get update candidates
     const getUpdateCandidates = useCallback(async (limit = 10) => {
@@ -342,12 +342,12 @@ export const useScrapeURLs = (initialStatus?: ScrapeURLStatus) => {
             console.error('Error fetching update candidates:', err);
             throw err;
         }
-    }, []);
+    }, [client]);
 
     // Load initial data
     useEffect(() => {
         fetchURLs(true);
-    }, [statusFilter]);
+    }, [fetchURLs, statusFilter]);
 
     return {
         urls,
@@ -369,6 +369,7 @@ export const useScrapeURLs = (initialStatus?: ScrapeURLStatus) => {
 // useScraperMetrics - Get system metrics
 // ===================================================================
 export const useScraperMetrics = (timeRange: TimeRange = TimeRange.LAST_24_HOURS) => {
+    const client = useMemo(() => generateClient(), []);
     const [metrics, setMetrics] = useState<ScraperMetrics | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -396,11 +397,11 @@ export const useScraperMetrics = (timeRange: TimeRange = TimeRange.LAST_24_HOURS
         } finally {
             setLoading(false);
         }
-    }, [timeRange]);
+    }, [client, timeRange]);
 
     useEffect(() => {
         fetchMetrics();
-    }, [timeRange]);
+    }, [fetchMetrics]);
 
     // Auto-refresh metrics every 5 minutes
     useEffect(() => {
@@ -423,6 +424,7 @@ export const useScraperMetrics = (timeRange: TimeRange = TimeRange.LAST_24_HOURS
 // useScraperJobMonitor - Monitor a specific job
 // ===================================================================
 export const useScraperJobMonitor = (jobId: string) => {
+    const client = useMemo(() => generateClient(), []);
     const [job, setJob] = useState<ScraperJob | null>(null);
     const [attempts, setAttempts] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -474,7 +476,7 @@ export const useScraperJobMonitor = (jobId: string) => {
         } finally {
             setLoading(false);
         }
-    }, [jobId]);
+    }, [client, jobId]);
 
     // Subscribe to updates
     useEffect(() => {
@@ -499,7 +501,7 @@ export const useScraperJobMonitor = (jobId: string) => {
         });
 
         return () => sub.unsubscribe();
-    }, [jobId, fetchJobDetails]);
+    }, [client, jobId, fetchJobDetails]);
 
     return {
         job,
@@ -514,6 +516,7 @@ export const useScraperJobMonitor = (jobId: string) => {
 // useURLHistory - Get history for a specific URL
 // ===================================================================
 export const useURLHistory = (url: string) => {
+    const client = useMemo(() => generateClient(), []);
     const [urlData, setUrlData] = useState<ScrapeURL | null>(null);
     const [attempts, setAttempts] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -559,11 +562,11 @@ export const useURLHistory = (url: string) => {
         } finally {
             setLoading(false);
         }
-    }, [url]);
+    }, [client, url]);
 
     useEffect(() => {
         fetchURLHistory();
-    }, [url, fetchURLHistory]);
+    }, [fetchURLHistory]);
 
     return {
         urlData,

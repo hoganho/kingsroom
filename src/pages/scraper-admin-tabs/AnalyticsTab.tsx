@@ -1,8 +1,7 @@
 // src/pages/scraper-admin-tabs/AnalyticsTab.tsx
 // Analytics and Monitoring Tab for CloudWatch metrics and performance analysis
 
-import React, { useState, useEffect } from 'react';
-// FIX: Split Amplify imports to match V6 modularity
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import type { GraphQLResult } from '@aws-amplify/api-graphql';
 import {
@@ -10,26 +9,22 @@ import {
     Clock, CheckCircle, XCircle, BarChart,
     Eye, RefreshCw, Download
 } from 'lucide-react';
-// FIX: Add .ts extensions to relative paths for build system
 import { useCloudWatchMetrics } from '../../infrastructure/client-cloudwatch.ts';
-// Import the all-in-one analyzer function
 import {
     analyzeScraperPerformance,
     ErrorAnalyzer,
-    ScraperAnalytics // Import ScraperAnalytics class as well
+    ScraperAnalytics
 } from '../../utils/scraperAnalytics.ts';
 import { scraperManagementQueries } from '../../graphql/scraperManagement.ts';
-// Import types to fix implicit 'any' errors
 import type { ScraperJob, ScrapeURL } from '../../API';
-
-const client = generateClient();
 
 // ===================================================================
 // Analytics Tab Component
 // ===================================================================
 
 export const AnalyticsTab: React.FC = () => {
-    const cloudWatch = useCloudWatchMetrics();
+    const client = useMemo(() => generateClient(), []);
+    const { cloudWatch, isInitialized, userMetrics: hookUserMetrics } = useCloudWatchMetrics();
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [timeRange, setTimeRange] = useState<'1h' | '24h' | '7d' | '30d'>('24h');
@@ -45,13 +40,12 @@ export const AnalyticsTab: React.FC = () => {
     // Load Analytics Data
     // ===================================================================
     
-    const loadAnalytics = async () => {
+    const loadAnalytics = useCallback(async () => {
         setLoading(true);
         cloudWatch.trackPageView('AnalyticsTab');
         
         try {
             // Load recent jobs for analysis
-            // FIX 1: Use correct query 'getScraperJobsReport'
             const jobsResponse = await client.graphql({
                 query: scraperManagementQueries.getScraperJobsReport,
                 variables: {
@@ -60,7 +54,6 @@ export const AnalyticsTab: React.FC = () => {
                 }
             });
             
-            // FIX 2: Cast response to access 'data' property
             const jobs = (jobsResponse as GraphQLResult<any>).data.getScraperJobsReport.items;
             
             // Load problematic URLs
@@ -74,10 +67,8 @@ export const AnalyticsTab: React.FC = () => {
                 }
             });
             
-            // FIX 3: Cast response to access 'data' property
             const problematicUrls = (urlsResponse as GraphQLResult<any>).data.searchScrapeURLs?.items || [];
             
-            // FIX 4: Use the exported 'analyzeScraperPerformance' function
             // This replaces the 'new ScraperAnalytics()' and subsequent broken method calls
             const analysis = analyzeScraperPerformance(jobs, problematicUrls);
             
@@ -89,20 +80,16 @@ export const AnalyticsTab: React.FC = () => {
                 // Use ErrorAnalyzer directly for failure rate
                 failureRate: ErrorAnalyzer.generateErrorReport(jobs).errorRate,
                 // Use URLHealthChecker for active URL count (from problematic ones)
-                // FIX 1: Add type to 'u' parameter
                 activeURLs: problematicUrls.filter((u: ScrapeURL) => u.status === 'ACTIVE').length,
                 // Get metrics from the trend analysis
                 successRate: analysis.trends.successRateTrend, // Note: This is a trend, not a snapshot
-                // FIX 2: Add types to 'acc' and 'j' parameters
                 averageProcessingTime: jobs.length > 0 ? jobs.reduce((acc: number, j: ScraperJob) => acc + (j.averageScrapingTime || 0), 0) / jobs.length : 0,
-                // FIX 3: 'identifyPeakTimes' is on ScraperAnalytics, not TrendAnalyzer
                 peakHour: ScraperAnalytics.identifyPeakTimes(jobs).peakHour,
             };
             
             setSystemMetrics(metrics);
             
             // Get performance trends
-            // FIX 5: Adapt to the TrendAnalyzer output
             const trends = analysis.trends;
             const performance = [
                 { label: 'Job Volume Trend', value: trends.volumeTrend, trend: 'stable', change: 0 },
@@ -112,7 +99,6 @@ export const AnalyticsTab: React.FC = () => {
             setPerformanceData(performance);
             
             // Identify issues
-            // FIX 6: Use the urlHealth report to find issues
             const issues = Object.entries(analysis.urlHealth.recommendations).map(([url, recs]) => ({
                 title: `Issue with ${url.substring(0, 50)}...`,
                 description: recs.join(', '),
@@ -122,7 +108,6 @@ export const AnalyticsTab: React.FC = () => {
             setIssuesList(issues);
             
             // Generate recommendations
-            // FIX 7: Combine recommendations from different analyzers
             const recs = [
                 ...analysis.jobMetrics.recommendations,
                 ...analysis.errorAnalysis.recommendations,
@@ -131,12 +116,14 @@ export const AnalyticsTab: React.FC = () => {
             setRecommendations([...new Set(recs)]);
             
             // Load user metrics if available
-            if (cloudWatch.userMetrics) {
-                setUserMetrics(cloudWatch.userMetrics);
+            if (hookUserMetrics) {
+                setUserMetrics(hookUserMetrics);
             }
             
             // Track analytics view
-            cloudWatch.trackFeatureUsage('analytics_dashboard', Date.now());
+            cloudWatch.trackFeatureUsage('analytics_dashboard', 'view', {
+                timestamp: Date.now()
+            });
             
         } catch (error) {
             console.error('Failed to load analytics:', error);
@@ -144,7 +131,7 @@ export const AnalyticsTab: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [client, cloudWatch, hookUserMetrics]);
     
     // ===================================================================
     // Refresh Analytics
@@ -191,9 +178,12 @@ export const AnalyticsTab: React.FC = () => {
     // ===================================================================
     
     useEffect(() => {
-        loadAnalytics();
-    }, [timeRange]); // Note: cloudWatch.userMetrics removed as dependency to avoid re-fetch
-    
+        // Wait for the cloudWatch service to be initialized before loading
+        if (isInitialized) {
+            loadAnalytics();
+        }
+    }, [loadAnalytics, timeRange, isInitialized]);
+
     // ===================================================================
     // Render
     // ===================================================================
@@ -444,6 +434,3 @@ export const AnalyticsTab: React.FC = () => {
         </div>
     );
 };
-
-
-

@@ -1,6 +1,6 @@
 // src/pages/scraper-admin-tabs/JobHistoryTab.tsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import {
     RefreshCw, 
@@ -11,19 +11,14 @@ import type { ScraperJob, ScraperJobStatus } from '../../API'; // Removed .ts
 import { JobStatusBadge } from '../../components/scraper/admin/ScraperAdminShared'; // Removed .tsx
 import { JobDetailsModal } from '../../components/scraper/admin/JobDetailsModal'; // Removed .tsx
 
-const client = generateClient();
-
 export const JobHistoryTab: React.FC = () => {
+    const client = useMemo(() => generateClient(), []);
     const [jobs, setJobs] = useState<ScraperJob[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedJob, setSelectedJob] = useState<ScraperJob | null>(null);
     const [statusFilter, setStatusFilter] = useState<ScraperJobStatus | 'ALL'>('ALL');
 
-    useEffect(() => {
-        loadJobs();
-    }, [statusFilter]);
-
-    const loadJobs = async () => {
+    const loadJobs = useCallback(async () => {
         try {
             setLoading(true);
             const response = await client.graphql({
@@ -42,7 +37,11 @@ export const JobHistoryTab: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [client, statusFilter]);
+
+    useEffect(() => {
+        loadJobs();
+    }, [loadJobs]);
 
     return (
         <div className="space-y-6">

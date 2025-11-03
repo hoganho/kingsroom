@@ -1,6 +1,6 @@
 // src/pages/scraper-admin-tabs/ManualTrackerTab_v2.tsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { Target } from 'lucide-react';
 import { useGameTracker } from '../../hooks/useGameTracker';
@@ -10,9 +10,8 @@ import { GameDetailsModal } from '../../components/scraper/admin/GameDetailsModa
 import { SaveConfirmationModal } from '../../components/scraper/SaveConfirmationModal';
 import { GameListItem } from '../../components/scraper/GameListItem';
 
-const client = generateClient();
-
 export const ManualTrackerTab: React.FC = () => {
+    const client = useMemo(() => generateClient(), []);
     const [inputId, setInputId] = useState('');
     const { games, trackGame, saveGame, removeGame, refreshGame } = useGameTracker();
     const [selectedGame, setSelectedGame] = useState<any>(null);
@@ -55,8 +54,8 @@ export const ManualTrackerTab: React.FC = () => {
             }
         };
         fetchVenues();
-    }, []);
-
+    }, [client]);
+    
     // Effect to auto-select venue
     useEffect(() => {
         if (venues.length === 0) return;

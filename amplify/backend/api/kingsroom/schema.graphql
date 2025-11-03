@@ -735,15 +735,15 @@ type Query {
 
   # NEW CLOUDWATCH MUTATIONS
   # Get current user's metrics summary
-  getMyMetrics(timeRange: String): UserMetricsSummary
-    @function(name: "getUserMetrics")
+    getMyMetrics(timeRange: String): UserMetricsSummary
+    @function(name: "getUserMetrics-${env}")
     @auth(rules: [
-      { allow: owner }  # Users can only see their own metrics
+        { allow: private }  # Users can only see their own metrics
     ])
   
   # Admin-only: Get any user's metrics  
   getUserMetrics(userId: String!, timeRange: String): UserMetricsSummary
-    @function(name: "getUserMetrics")
+    @function(name: "getUserMetrics-${env}")
     @auth(rules: [
       { allow: groups, groups: ["Admin"] }
     ])
@@ -765,7 +765,7 @@ type Mutation {
 
   # NEW CLOUDWATCH MUTATIONS (FIXED - NO operations argument)
   publishClientMetrics(metrics: [ClientMetricInput!]!): ClientMetricResponse
-    @function(name: "publishClientMetrics")
+    @function(name: "publishClientMetrics-${env}")
     @auth(rules: [
       { allow: private }  # Only authenticated users
     ])

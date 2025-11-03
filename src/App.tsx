@@ -1,11 +1,11 @@
-// src/App.tsx - Enhanced with CloudWatch monitoring (Fixed)
+// src/App.tsx - FIXED VERSION with proper CloudWatch initialization
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
 import { Hub } from 'aws-amplify/utils';
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import awsExports from './aws-exports.js';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 // CloudWatch monitoring
 import { cloudWatchClient } from './infrastructure/client-cloudwatch';
@@ -28,8 +28,24 @@ import { ScraperAdminPage } from './pages/ScraperAdminPage';
 // Error Boundary for CloudWatch error tracking
 import React from 'react';
 
-// Configure Amplify
+// ===================================================================
+// CRITICAL: Configure Amplify BEFORE any components render
+// ===================================================================
 Amplify.configure(awsExports);
+
+// Initialize CloudWatch immediately after Amplify config
+// This ensures it's ready before components try to use it
+const initializeCloudWatch = async () => {
+    try {
+        await cloudWatchClient.initialize();
+        console.log('CloudWatch initialized successfully');
+    } catch (error) {
+        console.error('Failed to initialize CloudWatch:', error);
+    }
+};
+
+// Start initialization immediately
+initializeCloudWatch();
 
 // ===================================================================
 // CloudWatch Error Boundary
@@ -48,15 +64,19 @@ class CloudWatchErrorBoundary extends React.Component<
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-        // Track error to CloudWatch
-        cloudWatchClient.trackError(error, 'CLIENT', {
-            componentStack: errorInfo.componentStack,
-            errorBoundary: true,
-            timestamp: new Date().toISOString()
-        });
-        
-        // Immediately flush critical errors
-        cloudWatchClient.flush();
+        // Track error to CloudWatch (check if initialized first)
+        try {
+            cloudWatchClient.trackError(error, 'CLIENT', {
+                componentStack: errorInfo.componentStack,
+                errorBoundary: true,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Immediately flush critical errors
+            cloudWatchClient.flush();
+        } catch (e) {
+            console.error('Failed to track error to CloudWatch:', e);
+        }
         
         console.error('Error caught by boundary:', error, errorInfo);
     }
@@ -106,106 +126,154 @@ const ProtectedLayout = () => {
 // Main App Component with CloudWatch Integration
 // ===================================================================
 function App() {
+    const [cloudWatchReady, setCloudWatchReady] = useState(false);
+    
     // Initialize CloudWatch monitoring
     useEffect(() => {
+        const setupCloudWatch = async () => {
+            try {
+                // Ensure CloudWatch is initialized
+                await cloudWatchClient.initialize();
+                setCloudWatchReady(true);
+                
+                // NOW it's safe to update user context
+                await cloudWatchClient.updateUserContext();
+                
+                // Track app initialization
+                cloudWatchClient.trackPageView('App', {
+                    version: import.meta.env.VITE_BUILD_VERSION || 'dev',
+                    environment: import.meta.env.MODE,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Track performance metrics if available
+                if (window.performance?.timing) {
+                    const perfData = window.performance.timing;
+                    const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+                    
+                    if (pageLoadTime > 0) {
+                        cloudWatchClient.recordMetric({
+                            metricName: 'PageLoadTime',
+                            value: pageLoadTime,
+                            unit: 'Milliseconds',
+                            dimensions: {
+                                Page: 'InitialLoad'
+                            }
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('CloudWatch setup error:', error);
+                setCloudWatchReady(true); // Set to true anyway to not block the app
+            }
+        };
+        
+        setupCloudWatch();
+    }, []);
+    
+    // Setup auth listeners and error handlers
+    useEffect(() => {
+        if (!cloudWatchReady) return;
+        
         // Listen for auth events
         const authListener = (data: any) => {
+            // Ensure CloudWatch is ready before using it
+            if (!cloudWatchReady) return;
+            
             switch (data.payload.event) {
                 case 'signIn':
                     console.log('User signed in, updating CloudWatch context');
-                    cloudWatchClient.updateUserContext();
-                    cloudWatchClient.recordMetric({
-                        metricName: 'UserLogin',
-                        value: 1,
-                        dimensions: { 
-                            LoginMethod: data.payload.data?.signInUserSession?.idToken?.payload?.identities?.[0]?.providerName || 'Cognito'
+                    // Add a delay to let auth stabilize
+                    setTimeout(async () => {
+                        try {
+                            await cloudWatchClient.updateUserContext();
+                            cloudWatchClient.recordMetric({
+                                metricName: 'UserLogin',
+                                value: 1,
+                                dimensions: { 
+                                    LoginMethod: data.payload.data?.signInUserSession?.idToken?.payload?.identities?.[0]?.providerName || 'Cognito'
+                                }
+                            });
+                        } catch (error) {
+                            console.error('Failed to update context after sign in:', error);
                         }
-                    });
+                    }, 1000);
                     break;
                     
                 case 'signOut':
                     console.log('User signed out, clearing CloudWatch context');
-                    cloudWatchClient.clearUserContext();
-                    cloudWatchClient.recordMetric({
-                        metricName: 'UserLogout',
-                        value: 1
-                    });
+                    try {
+                        cloudWatchClient.clearUserContext();
+                        cloudWatchClient.recordMetric({
+                            metricName: 'UserLogout',
+                            value: 1
+                        });
+                    } catch (error) {
+                        console.error('Failed to clear context after sign out:', error);
+                    }
                     break;
                     
                 case 'tokenRefresh':
                     console.log('Token refreshed, updating CloudWatch context');
-                    cloudWatchClient.updateUserContext();
+                    cloudWatchClient.updateUserContext().catch(console.error);
                     break;
                     
                 case 'signIn_failure':
-                    cloudWatchClient.trackError(
-                        new Error('Sign in failed'),
-                        'AUTH',
-                        { reason: data.payload.data?.message }
-                    );
+                    try {
+                        cloudWatchClient.trackError(
+                            new Error('Sign in failed'),
+                            'AUTH',
+                            { reason: data.payload.data?.message }
+                        );
+                    } catch (error) {
+                        console.error('Failed to track auth error:', error);
+                    }
                     break;
             }
         };
         
-        // Hub.listen returns an unsubscribe function in modern versions
         const hubListenerUnsubscribe = Hub.listen('auth', authListener);
-        
-        // Initialize user context if already authenticated
-        cloudWatchClient.updateUserContext();
-        
-        // Track app initialization
-        cloudWatchClient.trackPageView('App', {
-            version: import.meta.env.VITE_BUILD_VERSION || 'dev',
-            environment: import.meta.env.MODE,
-            timestamp: new Date().toISOString()
-        });
         
         // Setup global error handlers
         const errorHandler = (event: ErrorEvent) => {
-            cloudWatchClient.trackError(event.error || new Error(event.message), 'CLIENT', {
-                message: event.message,
-                filename: event.filename,
-                lineno: event.lineno,
-                colno: event.colno,
-                timestamp: new Date().toISOString()
-            });
+            if (!cloudWatchReady) return;
+            
+            try {
+                cloudWatchClient.trackError(event.error || new Error(event.message), 'CLIENT', {
+                    message: event.message,
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno,
+                    timestamp: new Date().toISOString()
+                });
+            } catch (error) {
+                console.error('Failed to track error:', error);
+            }
         };
         
         const unhandledRejectionHandler = (event: PromiseRejectionEvent) => {
-            cloudWatchClient.trackError(
-                new Error(event.reason?.message || String(event.reason)),
-                'CLIENT',
-                { 
-                    type: 'unhandledRejection',
-                    reason: event.reason,
-                    timestamp: new Date().toISOString()
-                }
-            );
+            if (!cloudWatchReady) return;
+            
+            try {
+                cloudWatchClient.trackError(
+                    new Error(event.reason?.message || String(event.reason)),
+                    'CLIENT',
+                    { 
+                        type: 'unhandledRejection',
+                        reason: event.reason,
+                        timestamp: new Date().toISOString()
+                    }
+                );
+            } catch (error) {
+                console.error('Failed to track unhandled rejection:', error);
+            }
         };
         
         window.addEventListener('error', errorHandler);
         window.addEventListener('unhandledrejection', unhandledRejectionHandler);
         
-        // Track performance metrics
-        if (window.performance && window.performance.timing) {
-            const perfData = window.performance.timing;
-            const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
-            
-            if (pageLoadTime > 0) {
-                cloudWatchClient.recordMetric({
-                    metricName: 'PageLoadTime',
-                    value: pageLoadTime,
-                    unit: 'Milliseconds',
-                    dimensions: {
-                        Page: 'InitialLoad'
-                    }
-                });
-            }
-        }
-        
         // Cleanup
         return () => {
-            // Modern Hub cleanup - call the unsubscribe function
             if (typeof hubListenerUnsubscribe === 'function') {
                 hubListenerUnsubscribe();
             }
@@ -213,34 +281,45 @@ function App() {
             window.removeEventListener('unhandledrejection', unhandledRejectionHandler);
             
             // Flush any remaining metrics before unmount
-            cloudWatchClient.flush();
+            if (cloudWatchReady) {
+                cloudWatchClient.flush().catch(console.error);
+            }
         };
-    }, []);
+    }, [cloudWatchReady]);
     
     // Track route changes
     useEffect(() => {
+        if (!cloudWatchReady) return;
+        
         const handleRouteChange = () => {
-            const path = window.location.pathname;
-            cloudWatchClient.trackPageView(path, {
-                referrer: document.referrer,
-                timestamp: new Date().toISOString()
-            });
+            try {
+                const path = window.location.pathname;
+                cloudWatchClient.trackPageView(path, {
+                    referrer: document.referrer,
+                    timestamp: new Date().toISOString()
+                });
+            } catch (error) {
+                console.error('Failed to track route change:', error);
+            }
         };
         
-        // Listen for browser navigation
         window.addEventListener('popstate', handleRouteChange);
         
         return () => {
             window.removeEventListener('popstate', handleRouteChange);
         };
-    }, []);
+    }, [cloudWatchReady]);
 
     return (
         <Authenticator>
             {({ user }) => {
-                // Track authenticated user
-                if (user) {
-                    cloudWatchClient.setUserId(user.username);
+                // Track authenticated user (only if CloudWatch is ready)
+                if (user && cloudWatchReady) {
+                    try {
+                        cloudWatchClient.setUserId(user.username);
+                    } catch (error) {
+                        console.error('Failed to set user ID:', error);
+                    }
                 }
                 
                 return (

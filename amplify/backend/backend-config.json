@@ -94,6 +94,28 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "getUserMetrics": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        },
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "kingsroomc05d6627"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "kingsroomc05d6627CustomMessage": {
       "build": true,
       "providerPlugin": "awscloudformation",
@@ -195,6 +217,22 @@
         {
           "category": "function",
           "resourceName": "autoScraper"
+        }
+      ]
+    },
+    "AMPLIFY_function_getUserMetrics_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getUserMetrics"
+        }
+      ]
+    },
+    "AMPLIFY_function_getUserMetrics_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getUserMetrics"
         }
       ]
     },

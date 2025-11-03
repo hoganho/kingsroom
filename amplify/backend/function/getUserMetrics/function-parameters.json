@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "api": {
+      "kingsroom": [
+        "Query"
+      ]
+    },
+    "auth": {
+      "kingsroomc05d6627": [
+        "read"
+      ]
+    }
+  },
+  "lambdaLayers": []
+}

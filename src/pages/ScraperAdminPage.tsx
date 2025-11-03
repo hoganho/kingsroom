@@ -52,25 +52,38 @@ const tabs: Tab[] = [
 // ===================================================================
 export const ScraperAdminPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabKey>('overview');
-    const cloudWatch = useCloudWatchMetrics();
+    const { cloudWatch, userMetrics, isInitialized } = useCloudWatchMetrics();
+
+    // Helper function to format duration
+    const formatDuration = (ms: number): string => {
+        if (ms < 60000) return '< 1 min';
+        const minutes = Math.floor(ms / 60000);
+        const hours = Math.floor(minutes / 60);
+        return hours > 0 ? `${hours}h ${minutes % 60}m` : `${minutes} min`;
+    };
 
     // Track page view and initialize CloudWatch
     useEffect(() => {
-        // Track initial page view
-        cloudWatch.trackPageView('ScraperAdminPage', {
-            initialTab: activeTab,
-            timestamp: new Date().toISOString()
-        });
+        // Wait for the service to be initialized
+        if (isInitialized) {
+            // Track initial page view
+            cloudWatch.trackPageView('ScraperAdminPage', {
+                initialTab: activeTab,
+                timestamp: new Date().toISOString()
+            });
 
-        // Track render performance
-        cloudWatch.startMark('ScraperAdminPageRender');
+            // Track render performance
+            cloudWatch.startPerformanceMark('ScraperAdminPageRender');
+    }
 
-        return () => {
-            // Track how long the page was open
-            const duration = cloudWatch.endMark('ScraperAdminPageRender');
+    return () => {
+        // Track how long the page was open
+        if (isInitialized) { // Only run if it was started
+            const duration = cloudWatch.endPerformanceMark('ScraperAdminPageRender');
             console.log(`User spent ${duration}ms on ScraperAdminPage`);
-        };
-    }, []);
+        }
+    };
+}, [isInitialized, cloudWatch, activeTab]);
 
     // Track tab switches with CloudWatch
     const handleTabSwitch = (newTab: TabKey) => {
@@ -85,14 +98,16 @@ export const ScraperAdminPage: React.FC = () => {
         });
 
         // Track feature usage
-        cloudWatch.trackFeatureUsage(`ScraperAdmin_${newTab}`, Date.now());
+        cloudWatch.trackFeatureUsage(`ScraperAdmin_${newTab}`, 'switch_tab', {
+            timestamp: Date.now()
+        });
         
         setActiveTab(newTab);
     };
 
     const renderTabContent = () => {
         // Track tab view duration
-        cloudWatch.startMark(`TabView_${activeTab}`);
+        cloudWatch.startPerformanceMark(`TabView_${activeTab}`);
 
         switch (activeTab) {
             case 'overview':
@@ -127,10 +142,10 @@ export const ScraperAdminPage: React.FC = () => {
                             <p className="text-gray-600 mt-2">Manage and monitor tournament scraping operations</p>
                         </div>
                         {/* User Metrics Summary (if available) */}
-                        {cloudWatch.userMetrics && (
+                        {userMetrics && (
                             <div className="text-right text-sm text-gray-500">
-                                <p>Your session: {cloudWatch.userMetrics.totalActions || 0} actions</p>
-                                <p>Active for: {cloudWatch.userMetrics.sessionDuration || '< 1 min'}</p>
+                                <p>Your session: {userMetrics.totalActions || 0} actions</p>
+                                <p>Active for: {formatDuration(userMetrics.sessionDuration || 0)}</p>
                             </div>
                         )}
                     </div>
