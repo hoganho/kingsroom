@@ -315,7 +315,6 @@ const defaultStrategy = {
         }
     },
 
-    // ... (all other scraping functions from getPrizepool to getMatchingVenue remain unchanged) ...
     getPrizepool(ctx) {
         ctx.parseNumeric('prizepool', '#cw_clock_prizepool');
     },

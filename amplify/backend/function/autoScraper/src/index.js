@@ -10,7 +10,13 @@ const { TextDecoder } = require('util');
 
 // --- Configuration & Clients ---
 const client = new DynamoDBClient({});
-const ddbDocClient = DynamoDBDocumentClient.from(client);
+const marshallOptions = {
+    // Instructs the client to remove undefined values
+    removeUndefinedValues: true 
+};
+const translateConfig = { marshallOptions };
+const ddbDocClient = DynamoDBDocumentClient.from(client, translateConfig);
+
 const lambdaClient = new LambdaClient({});
 
 const MAX_NEW_GAMES_PER_RUN = 10;

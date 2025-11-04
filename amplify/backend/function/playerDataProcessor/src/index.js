@@ -117,9 +117,9 @@ const calculatePlayerVenueTargetingClassification = (lastActivityDate, membershi
         if (daysSinceLastActivity <= 30) return 'Active_EL';
         if (daysSinceLastActivity <= 60) return 'Active';
         if (daysSinceLastActivity <= 90) return 'Retain_Inactive31_60d';
-        if (daysSinceLastActivity <= 120) return 'Retain_Inactive61_90d';
+        if (daysSinceLastActivity <= 120) return 'Retain_Inactive61-90d';
         if (daysSinceLastActivity <= 180) return 'Churned_91_120d';
-        if (daysSinceLastActivity <= 360) return 'Churned_121_180d';
+        if (daysSinceLastActivity <= 360) return 'Churned_121-180d';
         if (daysSinceLastActivity <= 720) return 'Churned_181_360d';
         return 'Churned_361d';
     }
@@ -400,8 +400,10 @@ const createPlayerResult = async (playerId, gameData, playerData) => {
 /**
  * Update or create PlayerSummary record
  */
-const upsertPlayerSummary = async (playerId, gameData, playerData) => {
-    console.log(`[SUMMARY-UPSERT] Starting upsert for player ${playerId}.`);
+// *** MODIFIED FUNCTION SIGNATURE ***
+const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue) => {
+    // *** MODIFIED LOG ***
+    console.log(`[SUMMARY-UPSERT] Starting upsert for player ${playerId}. (NewVenue: ${wasNewVenue})`);
     const playerSummaryTable = getTableName('PlayerSummary');
     const summaryId = `${playerId}`;
     const now = new Date().toISOString();
@@ -423,6 +425,7 @@ const upsertPlayerSummary = async (playerId, gameData, playerData) => {
             await ddbDocClient.send(new UpdateCommand({
                 TableName: playerSummaryTable,
                 Key: { id: summaryId },
+                // *** MODIFIED UpdateExpression ***
                 UpdateExpression: `
                     SET #lastPlayed = :lastPlayed,
                         sessionsPlayed = sessionsPlayed + :one,
@@ -434,6 +437,7 @@ const upsertPlayerSummary = async (playerId, gameData, playerData) => {
                         totalWinnings = totalWinnings + :winnings,
                         totalBuyIns = totalBuyIns + :buyIn,
                         netBalance = netBalance + :profitLoss,
+                        venuesVisited = venuesVisited + :venueInc,
                         updatedAt = :updatedAt,
                         #version = #version + :one
                 `,
@@ -441,6 +445,7 @@ const upsertPlayerSummary = async (playerId, gameData, playerData) => {
                     '#version': '_version',
                     '#lastPlayed': 'lastPlayed'
                 },
+                // *** MODIFIED ExpressionAttributeValues ***
                 ExpressionAttributeValues: {
                     ':lastPlayed': gameDateTime,
                     ':one': 1,
@@ -449,6 +454,7 @@ const upsertPlayerSummary = async (playerId, gameData, playerData) => {
                     ':itm': isITM ? 1 : 0,
                     ':cash': isCash ? 1 : 0,
                     ':profitLoss': winningsAmount - buyInAmount,
+                    ':venueInc': wasNewVenue ? 1 : 0, // Increment by 1 if new venue, 0 if not
                     ':updatedAt': now
                 }
             }));
@@ -460,7 +466,7 @@ const upsertPlayerSummary = async (playerId, gameData, playerData) => {
                 sessionsPlayed: 1,
                 tournamentsPlayed: 1,
                 cashGamesPlayed: 0,
-                venuesVisited: [gameData.game.venueId],
+                venuesVisited: 1, // Correct: first summary means first venue
                 tournamentWinnings: winningsAmount,
                 tournamentBuyIns: buyInAmount,
                 tournamentITM: isITM ? 1 : 0,
@@ -493,6 +499,7 @@ const upsertPlayerSummary = async (playerId, gameData, playerData) => {
 /**
  * Update or create PlayerVenue record
  */
+// *** MODIFIED FUNCTION (ADDED RETURN VALUES) ***
 const upsertPlayerVenue = async (playerId, gameData, playerData) => {
     console.log(`[VENUE-UPSERT] Starting upsert for player ${playerId} at venue ${gameData.game.venueId}.`);
     const playerVenueTable = getTableName('PlayerVenue');
@@ -547,6 +554,8 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
                 }
             }));
             console.log(`[VENUE-UPSERT] Updated existing PlayerVenue record.`);
+            return { wasNewVenue: false }; // <-- MODIFIED: Return false
+
         } else {
             const newPlayerVenue = {
                 id: playerVenueId,
@@ -570,6 +579,7 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
                 Item: newPlayerVenue
             }));
             console.log(`[VENUE-UPSERT] Created new PlayerVenue record.`);
+            return { wasNewVenue: true }; // <-- MODIFIED: Return true
         }
         
     } catch (error) {
@@ -649,6 +659,7 @@ const createPlayerTransactions = async (playerId, gameData, playerData, processi
 /**
  * Process a single player
  */
+// *** MODIFIED FUNCTION (RE-ORDERED CALLS) ***
 const processPlayer = async (playerData, processingInstructions, gameData) => {
     const playerName = playerData.name;
     const playerResultTable = getTableName('PlayerResult');
@@ -675,12 +686,18 @@ const processPlayer = async (playerData, processingInstructions, gameData) => {
         console.log(`[PROCESS-PLAYER] Step 2: createPlayerResult...`);
         await createPlayerResult(playerId, gameData, playerData);
         
-        console.log(`[PROCESS-PLAYER] Step 3: upsertPlayerSummary...`);
-        await upsertPlayerSummary(playerId, gameData, playerData);
+        // --- LOGIC RE-ORDERED ---
         
-        console.log(`[PROCESS-PLAYER] Step 4: upsertPlayerVenue...`);
-        await upsertPlayerVenue(playerId, gameData, playerData);
+        console.log(`[PROCESS-PLAYER] Step 3: upsertPlayerVenue...`);
+        // Capture the return value
+        const { wasNewVenue } = await upsertPlayerVenue(playerId, gameData, playerData);
         
+        console.log(`[PROCESS-PLAYER] Step 4: upsertPlayerSummary...`);
+        // Pass the value to the summary function
+        await upsertPlayerSummary(playerId, gameData, playerData, wasNewVenue);
+        
+        // --- END RE-ORDER ---
+
         console.log(`[PROCESS-PLAYER] Step 5: createPlayerTransactions...`);
         await createPlayerTransactions(playerId, gameData, playerData, processingInstructions);
         

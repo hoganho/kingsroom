@@ -1,4 +1,6 @@
 // src/pages/scraper-admin-tabs/BulkScraperTab.tsx
+// FIXED: Using custom scraperManagement operations instead of auto-generated ones
+// All existing functionality preserved
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
@@ -11,8 +13,8 @@ import {
     ChevronDown,
     ChevronUp
 } from 'lucide-react';
-import { startScraperJob } from '../../graphql/mutations';
-import { getScraperJob, listScraperJobs } from '../../graphql/queries';
+// FIX: Import from custom scraperManagement instead of auto-generated mutations/queries
+import { scraperManagementMutations, scraperManagementQueries } from '../../graphql/scraperManagement';
 import { GameListItem } from '../../components/scraper/GameListItem';
 import type { GameState, BulkGameSummary } from '../../types/game';
 import type { ScraperJob } from '../../API';
@@ -57,20 +59,22 @@ export const BulkScraperTab: React.FC = () => {
 
     const fetchRecentJobs = useCallback(async () => {
         try {
+            // FIX: Use custom query instead of auto-generated listScraperJobs
             const response = await client.graphql({
-                query: listScraperJobs,
+                query: scraperManagementQueries.getScraperJobsReport,
                 variables: {
-                    filter: { 
-                        triggerSource: { 
-                            eq: 'BULK' as ScraperJobTriggerSource
-                        } 
-                    },
-                    limit: 10
+                    status: null, // Get all statuses
+                    limit: 50
                 }
             }) as any;
             
-            const jobs = response.data?.listScraperJobs?.items || [];
-            setRecentJobs(jobs.sort((a: ScraperJob, b: ScraperJob) => 
+            const jobs = response.data?.getScraperJobsReport?.items || [];
+            // Filter for BULK jobs in the frontend
+            const bulkJobs = jobs.filter((job: ScraperJob) => 
+                job.triggerSource === 'BULK'
+            );
+            
+            setRecentJobs(bulkJobs.slice(0, 10).sort((a: ScraperJob, b: ScraperJob) => 
                 new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
             ));
         } catch (err) {
@@ -83,12 +87,17 @@ export const BulkScraperTab: React.FC = () => {
         if (currentJobId && isPolling) {
             const interval = setInterval(async () => {
                 try {
+                    // FIX: Use custom query to get jobs and find the current one
                     const response = await client.graphql({
-                        query: getScraperJob,
-                        variables: { id: currentJobId }
+                        query: scraperManagementQueries.getScraperJobsReport,
+                        variables: { 
+                            limit: 50 
+                        }
                     }) as any;
                     
-                    const job = response.data?.getScraperJob;
+                    const jobs = response.data?.getScraperJobsReport?.items || [];
+                    const job = jobs.find((j: ScraperJob) => j.id === currentJobId);
+                    
                     if (job) {
                         updateJobResult(job);
                         
@@ -172,8 +181,9 @@ export const BulkScraperTab: React.FC = () => {
         if (!isNaN(start) && !isNaN(end) && start <= end) {
             setIsStartingJob(true);
             try {
+                // FIX: Use custom mutation instead of auto-generated startScraperJob
                 const response = await client.graphql({
-                    query: startScraperJob,
+                    query: scraperManagementMutations.startScraperJob,
                     variables: {
                         input: {
                             // Cast to proper type
@@ -215,12 +225,17 @@ export const BulkScraperTab: React.FC = () => {
 
     const handleViewHistoricalJob = useCallback(async (jobId: string) => {
         try {
+            // FIX: Use custom query to get jobs and find the specific one
             const response = await client.graphql({
-                query: getScraperJob,
-                variables: { id: jobId }
+                query: scraperManagementQueries.getScraperJobsReport,
+                variables: { 
+                    limit: 50 
+                }
             }) as any;
             
-            const job = response.data?.getScraperJob;
+            const jobs = response.data?.getScraperJobsReport?.items || [];
+            const job = jobs.find((j: ScraperJob) => j.id === jobId);
+            
             if (job) {
                 updateJobResult(job);
                 setShowResults(true);
