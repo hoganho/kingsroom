@@ -515,6 +515,14 @@ const handleFetch = async (url, jobId = null, triggerSource = null) => {
         scrapedData = scrapingResult.data;
         foundKeys = scrapingResult.foundKeys;
         
+        const urlIdMatch = url.match(/id=(\d+)/);
+        if (urlIdMatch && urlIdMatch[1]) {
+            scrapedData.tournamentId = parseInt(urlIdMatch[1], 10);
+            if (!foundKeys.includes('tournamentId')) {
+                foundKeys.push('tournamentId');
+            }
+        }
+        
         if (scrapedData.gameStatus === 'UNKNOWN_STATUS' || scrapedData.gameStatus === 'UNKNOWN' || !scrapedData.name || scrapedData.name.trim() === '') {
             console.log(`[handleFetch] Tournament ID not in use for ${url}`);
             return {

@@ -1,4 +1,4 @@
-// src/context/AuthContext.tsx
+// src/contexts/AuthContext.tsx - Updated to support new sidebar while maintaining all existing functionality
 import React, {
   createContext,
   useState,
@@ -11,37 +11,39 @@ import {
   getCurrentUser,
   signOut as amplifySignOut,
   fetchUserAttributes,
-  type AuthUser, // Use 'type' import for types
+  type AuthUser,
 } from '@aws-amplify/auth';
 import { generateClient } from '@aws-amplify/api';
-// Import GQL operations normally - ensure `amplify codegen` has run
+// Import GQL operations
 import { getUser } from '../graphql/queries';
 import { createUser as createUserMutation } from '../graphql/mutations';
-// Import UserRole from your generated API file (assuming API.ts is in src/)
+// Import UserRole from your generated API file
 import { UserRole } from '../API';
 
-// Export UserRole so ProtectedRoute can grab it
+// Export UserRole so components can use it
 export { UserRole };
 
 /**
- * Simple user type for the Kings Room app - aligning more closely with User model
+ * Simple user type for the Kings Room app
  */
 export interface AppUser {
   id: string; // Cognito sub / User ID
   email: string;
-  username: string; // Matches schema and Cognito data
+  username: string;
   role: UserRole;
   isAuthenticated: boolean;
 }
 
 /**
- * AuthContext type definition
+ * AuthContext type definition - Enhanced for new sidebar
  */
 export interface AuthContextType {
   user: AppUser | null;
   loading: boolean;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  // Add convenient role checking for the new sidebar
+  userRole: 'SuperAdmin' | 'Admin' | 'User' | null;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -60,18 +62,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(null); // Clear user state immediately
       console.log('[AuthContext] handleSignOut: Sign out successful.');
       // Clear non-essential localStorage items
-      const keysToPreserve = ['theme', 'language']; // Example: preserve theme setting
+      const keysToPreserve = ['theme', 'language'];
       Object.keys(localStorage).forEach((key) => {
         if (!keysToPreserve.includes(key)) {
           localStorage.removeItem(key);
         }
       });
-      // Optionally redirect here, e.g., navigate('/login');
     } catch (error) {
       console.error('[AuthContext] handleSignOut: Sign out error:', error);
       setUser(null); // Ensure user is null even on error
     }
-  }, []); // Empty dependency array
+  }, []);
 
   /**
    * Fetch or create user in DynamoDB
@@ -96,19 +97,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           console.log(`[AuthContext] Found existing user:`, existingUser);
           if (existingUser._deleted) {
             console.warn(`[AuthContext] User ${userId} is marked as deleted.`);
-            return null; // Treat deleted user as non-existent
+            return null;
           } else {
-            return existingUser; // Return valid existing user
+            return existingUser;
           }
         } else {
           console.log(`[AuthContext] User ${userId} not found in DynamoDB (expected for new user).`);
         }
       } catch (getError: any) {
-        const isNotFoundError = getError?.errors?.some((e: any) => e.message?.includes('Cannot return null') || e.errorType?.includes('NotFound'));
+        const isNotFoundError = getError?.errors?.some((e: any) => 
+          e.message?.includes('Cannot return null') || e.errorType?.includes('NotFound')
+        );
         if (!isNotFoundError) {
           console.error(`[AuthContext] Unexpected error fetching user ${userId}:`, JSON.stringify(getError, null, 2));
-          // If fetch fails unexpectedly (not just 'not found'), maybe stop here?
-          // return null; // Or rethrow, depending on desired behavior
         } else {
           console.warn(`[AuthContext] User ${userId} not found (expected).`);
         }
@@ -121,7 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           id: userId,
           username: username,
           email: email,
-          role: UserRole.VENUE_MANAGER, // Default role - VERIFY THIS IS CORRECT
+          role: UserRole.VENUE_MANAGER, // Default role
         };
 
         console.log('[AuthContext] Sending createUser input:', JSON.stringify(newUserInput, null, 2));
@@ -135,18 +136,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           console.log(`[AuthContext] Successfully created user:`, createResult.data.createUser);
           return createResult.data.createUser;
         } else {
-          // *** THIS IS LIKELY WHERE YOUR ERROR IS BEING LOGGED ***
           console.error('[AuthContext] Create user mutation failed. Response:', JSON.stringify(createResult, null, 2));
-          // Log the specific GraphQL errors if available
           if (createResult.errors) {
-            createResult.errors.forEach((err: any) => console.error(`[AuthContext] GraphQL Error: ${err.message}`, err));
+            createResult.errors.forEach((err: any) => 
+              console.error(`[AuthContext] GraphQL Error: ${err.message}`, err)
+            );
           }
-          return null; // Indicate creation failed
+          return null;
         }
       } catch (mutationError: any) {
-        // Catch network errors or unexpected exceptions during the GraphQL call itself
         console.error('[AuthContext] Exception during createUser mutation call:', JSON.stringify(mutationError, null, 2));
-        return null; // Indicate creation failed
+        return null;
       }
     },
     []
@@ -159,7 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setLoading(true);
     try {
       console.log('[AuthContext] checkUser: Checking Cognito session...');
-      const cognitoUser = await getCurrentUser(); // Throws if no session
+      const cognitoUser = await getCurrentUser();
       console.log('[AuthContext] checkUser: Cognito session active:', cognitoUser);
 
       console.log('[AuthContext] checkUser: Fetching Cognito attributes...');
@@ -168,16 +168,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         attributes = await fetchUserAttributes();
         console.log('[AuthContext] checkUser: Cognito attributes fetched:', attributes);
       } catch (attrError: any) {
-         // ✅ Handle the specific "Invalid login token" error
-         console.error('[AuthContext] checkUser: Failed to fetch Cognito attributes:', attrError);
-         // If it's a NotAuthorizedException, the session is truly invalid.
-         if (attrError.name === 'NotAuthorizedException' || attrError.message.includes('token')) {
-            console.log('[AuthContext] checkUser: Invalid session detected. Signing out.');
-            await handleSignOut(); // Force sign out
-         }
-         // For other errors, maybe just prevent further processing
-         setUser(null); // Ensure user state is cleared on attribute error
-         return; // Stop processing this checkUser call
+        console.error('[AuthContext] checkUser: Failed to fetch Cognito attributes:', attrError);
+        if (attrError.name === 'NotAuthorizedException' || attrError.message.includes('token')) {
+          console.log('[AuthContext] checkUser: Invalid session detected. Signing out.');
+          await handleSignOut();
+        }
+        setUser(null);
+        return;
       }
 
       console.log('[AuthContext] checkUser: Fetching/Creating DynamoDB user...');
@@ -189,34 +186,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           id: dynamoDbUserObject.id,
           email: dynamoDbUserObject.email || '',
           username: dynamoDbUserObject.username || cognitoUser.username,
-          // Ensure role comes from DB object, falling back to default ONLY if missing
           role: dynamoDbUserObject.role || UserRole.VENUE_MANAGER,
           isAuthenticated: true,
         });
         console.log('[AuthContext] checkUser: User state set successfully.');
       } else {
-         console.error('[AuthContext] checkUser: Failed to get/create valid user in DynamoDB. User state NOT set.');
-         setUser(null); // Critical: Ensure user is null if DB sync fails
-         // Optional: Sign out if DB record is mandatory for app functionality
-         // console.log('[AuthContext] checkUser: Signing out because DynamoDB user sync failed.');
-         // await handleSignOut();
+        console.error('[AuthContext] checkUser: Failed to get/create valid user in DynamoDB. User state NOT set.');
+        setUser(null);
       }
 
     } catch (error) {
-      // Catch errors from getCurrentUser (no active Cognito session)
       console.warn('[AuthContext] checkUser: Auth check failed (likely no active Cognito session).');
-      setUser(null); // No session, so no user
+      setUser(null);
     } finally {
       setLoading(false);
-       console.log('[AuthContext] checkUser: Loading finished.');
+      console.log('[AuthContext] checkUser: Loading finished.');
     }
-  }, [fetchOrCreateDynamoUser, handleSignOut]); // Dependencies
+  }, [fetchOrCreateDynamoUser, handleSignOut]);
 
   /** Initial auth check */
   useEffect(() => {
     console.log('[AuthContext] Initial mount: Triggering checkUser.');
     checkUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /** Re-check on tab visibility */
@@ -234,7 +225,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, [checkUser, loading, user]);
 
-  const value: AuthContextType = { user, loading, signOut: handleSignOut, refreshUser: checkUser };
+  // Map UserRole enum to simplified role for sidebar
+  const mapUserRoleForSidebar = (role?: UserRole): 'SuperAdmin' | 'Admin' | 'User' | null => {
+    if (!role) return null;
+    
+    switch (role) {
+      case UserRole.SUPER_ADMIN:
+        return 'SuperAdmin';
+      case UserRole.ADMIN:
+        return 'Admin';
+      case UserRole.VENUE_MANAGER:
+      case UserRole.TOURNAMENT_DIRECTOR:
+      case UserRole.MARKETING:
+      default:
+        return 'User';
+    }
+  };
+
+  const value: AuthContextType = { 
+    user, 
+    loading, 
+    signOut: handleSignOut, 
+    refreshUser: checkUser,
+    // Add simplified role for sidebar
+    userRole: mapUserRoleForSidebar(user?.role)
+  };
+
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
@@ -259,4 +275,3 @@ export const useRole = () => {
 };
 
 export { AuthContext };
-

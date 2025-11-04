@@ -1,4 +1,4 @@
-// src/App.tsx - FIXED VERSION with proper CloudWatch initialization
+// src/App.tsx - UPDATED WITH NEW PAGE STRUCTURE
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
 import { Hub } from 'aws-amplify/utils';
@@ -18,24 +18,44 @@ import { GameProvider } from './contexts/GameContext';
 import { MainLayout } from './components/layout/MainLayout';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
-// Pages
-import VenuesPage from './pages/VenuesPage';
-import { SeriesManagementPage } from './pages/SeriesManagementPage';
-import { PlayersPage } from './pages/Players';
+// Main Pages
 import { HomePage } from './pages/HomePage';
-import { ScraperAdminPage } from './pages/ScraperAdminPage';
-import { GamesPage } from './pages/Games';
+
+// Players Pages
+import { PlayersDashboard } from './pages/players/PlayersDashboard';
+import { PlayerSearch } from './pages/players/PlayerSearch';
+import { PlayerProfile } from './pages/players/PlayerProfile';
+
+// Series Pages
+import { SeriesDashboard } from './pages/series/SeriesDashboard';
+
+// Games Pages
+import { GamesDashboard } from './pages/games/GamesDashboard';
+import { GameSearch } from './pages/games/GameSearch';
+import { GameDetails } from './pages/games/GameDetails';
+
+// Venues Pages
+import { VenuesDashboard } from './pages/venues/VenuesDashboard';
+import { VenueDetails } from './pages/venues/VenueDetails';
+
+// Settings Pages (Admin/SuperAdmin)
+import VenueManagement from './pages/settings/VenueManagement';
+import { SeriesManagementPage } from './pages/settings/SeriesManagement';
+
+// Scraper Pages (SuperAdmin)
+import { ScraperAdminPage } from './pages/scraper/ScraperAdmin';
+
+// Debug Pages (SuperAdmin)
+import { GamesDebug } from './pages/debug/GamesDebug';
+import { PlayersDebug } from './pages/debug/PlayersDebug';
 
 // Error Boundary for CloudWatch error tracking
 import React from 'react';
 
-// ===================================================================
-// CRITICAL: Configure Amplify BEFORE any components render
-// ===================================================================
+// Configure Amplify
 Amplify.configure(awsExports);
 
-// Initialize CloudWatch immediately after Amplify config
-// This ensures it's ready before components try to use it
+// Initialize CloudWatch
 const initializeCloudWatch = async () => {
     try {
         await cloudWatchClient.initialize();
@@ -45,12 +65,9 @@ const initializeCloudWatch = async () => {
     }
 };
 
-// Start initialization immediately
 initializeCloudWatch();
 
-// ===================================================================
 // CloudWatch Error Boundary
-// ===================================================================
 class CloudWatchErrorBoundary extends React.Component<
     { children: React.ReactNode },
     { hasError: boolean; error: Error | null }
@@ -65,20 +82,16 @@ class CloudWatchErrorBoundary extends React.Component<
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-        // Track error to CloudWatch (check if initialized first)
         try {
             cloudWatchClient.trackError(error, 'CLIENT', {
                 componentStack: errorInfo.componentStack,
                 errorBoundary: true,
                 timestamp: new Date().toISOString()
             });
-            
-            // Immediately flush critical errors
             cloudWatchClient.flush();
         } catch (e) {
             console.error('Failed to track error to CloudWatch:', e);
         }
-        
         console.error('Error caught by boundary:', error, errorInfo);
     }
 
@@ -103,14 +116,11 @@ class CloudWatchErrorBoundary extends React.Component<
                 </div>
             );
         }
-
         return this.props.children;
     }
 }
 
-// ===================================================================
-// Protected Layout with CloudWatch tracking
-// ===================================================================
+// Protected Layout
 const ProtectedLayout = () => {
     return (
         <ProtectedRoute>
@@ -123,31 +133,23 @@ const ProtectedLayout = () => {
     );
 };
 
-// ===================================================================
-// Main App Component with CloudWatch Integration
-// ===================================================================
+// Main App Component
 function App() {
     const [cloudWatchReady, setCloudWatchReady] = useState(false);
     
-    // Initialize CloudWatch monitoring
     useEffect(() => {
         const setupCloudWatch = async () => {
             try {
-                // Ensure CloudWatch is initialized
                 await cloudWatchClient.initialize();
                 setCloudWatchReady(true);
-                
-                // NOW it's safe to update user context
                 await cloudWatchClient.updateUserContext();
                 
-                // Track app initialization
                 cloudWatchClient.trackPageView('App', {
                     version: import.meta.env.VITE_BUILD_VERSION || 'dev',
                     environment: import.meta.env.MODE,
                     timestamp: new Date().toISOString()
                 });
                 
-                // Track performance metrics if available
                 if (window.performance?.timing) {
                     const perfData = window.performance.timing;
                     const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
@@ -157,34 +159,28 @@ function App() {
                             metricName: 'PageLoadTime',
                             value: pageLoadTime,
                             unit: 'Milliseconds',
-                            dimensions: {
-                                Page: 'InitialLoad'
-                            }
+                            dimensions: { Page: 'InitialLoad' }
                         });
                     }
                 }
             } catch (error) {
                 console.error('CloudWatch setup error:', error);
-                setCloudWatchReady(true); // Set to true anyway to not block the app
+                setCloudWatchReady(true);
             }
         };
         
         setupCloudWatch();
     }, []);
     
-    // Setup auth listeners and error handlers
     useEffect(() => {
         if (!cloudWatchReady) return;
         
-        // Listen for auth events
         const authListener = (data: any) => {
-            // Ensure CloudWatch is ready before using it
             if (!cloudWatchReady) return;
             
             switch (data.payload.event) {
                 case 'signIn':
                     console.log('User signed in, updating CloudWatch context');
-                    // Add a delay to let auth stabilize
                     setTimeout(async () => {
                         try {
                             await cloudWatchClient.updateUserContext();
@@ -235,10 +231,8 @@ function App() {
         
         const hubListenerUnsubscribe = Hub.listen('auth', authListener);
         
-        // Setup global error handlers
         const errorHandler = (event: ErrorEvent) => {
             if (!cloudWatchReady) return;
-            
             try {
                 cloudWatchClient.trackError(event.error || new Error(event.message), 'CLIENT', {
                     message: event.message,
@@ -254,7 +248,6 @@ function App() {
         
         const unhandledRejectionHandler = (event: PromiseRejectionEvent) => {
             if (!cloudWatchReady) return;
-            
             try {
                 cloudWatchClient.trackError(
                     new Error(event.reason?.message || String(event.reason)),
@@ -273,7 +266,6 @@ function App() {
         window.addEventListener('error', errorHandler);
         window.addEventListener('unhandledrejection', unhandledRejectionHandler);
         
-        // Cleanup
         return () => {
             if (typeof hubListenerUnsubscribe === 'function') {
                 hubListenerUnsubscribe();
@@ -281,14 +273,12 @@ function App() {
             window.removeEventListener('error', errorHandler);
             window.removeEventListener('unhandledrejection', unhandledRejectionHandler);
             
-            // Flush any remaining metrics before unmount
             if (cloudWatchReady) {
                 cloudWatchClient.flush().catch(console.error);
             }
         };
     }, [cloudWatchReady]);
     
-    // Track route changes
     useEffect(() => {
         if (!cloudWatchReady) return;
         
@@ -314,7 +304,6 @@ function App() {
     return (
         <Authenticator>
             {({ user }) => {
-                // Track authenticated user (only if CloudWatch is ready)
                 if (user && cloudWatchReady) {
                     try {
                         cloudWatchClient.setUserId(user.username);
@@ -334,16 +323,36 @@ function App() {
 
                                     {/* Protected routes */}
                                     <Route element={<ProtectedLayout />}>
+                                        {/* Home */}
                                         <Route path="/home" element={<HomePage />} />
                                         
-                                        {/* Enhanced Scraper Management with Analytics */}
-                                        <Route path="/scraper-admin" element={<ScraperAdminPage />} />
+                                        {/* Players */}
+                                        <Route path="/players/dashboard" element={<PlayersDashboard />} />
+                                        <Route path="/players/search" element={<PlayerSearch />} />
+                                        <Route path="/players/profile/:playerId" element={<PlayerProfile />} />
                                         
-                                        {/* Other Management Pages */}
-                                        <Route path="/venues" element={<VenuesPage />} />
-                                        <Route path="/series-management" element={<SeriesManagementPage />} />
-                                        <Route path="/players" element={<PlayersPage />} />
-                                        <Route path="/games" element={<GamesPage />} />
+                                        {/* Series */}
+                                        <Route path="/series/dashboard" element={<SeriesDashboard />} />
+                                        
+                                        {/* Games */}
+                                        <Route path="/games/dashboard" element={<GamesDashboard />} />
+                                        <Route path="/games/search" element={<GameSearch />} />
+                                        <Route path="/games/details/:gameId" element={<GameDetails />} />
+                                        
+                                        {/* Venues */}
+                                        <Route path="/venues/dashboard" element={<VenuesDashboard />} />
+                                        <Route path="/venues/details" element={<VenueDetails />} />
+                                        
+                                        {/* Settings (Admin/SuperAdmin) */}
+                                        <Route path="/settings/venue-management" element={<VenueManagement />} />
+                                        <Route path="/settings/series-management" element={<SeriesManagementPage />} />
+                                        
+                                        {/* Scraper Management (SuperAdmin) */}
+                                        <Route path="/scraper/admin" element={<ScraperAdminPage />} />
+                                        
+                                        {/* Debug (SuperAdmin) */}
+                                        <Route path="/debug/games" element={<GamesDebug />} />
+                                        <Route path="/debug/players" element={<PlayersDebug />} />
                                     </Route>
                                     
                                     {/* 404 handler */}
