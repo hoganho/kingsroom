@@ -595,6 +595,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
     address
     city
     country
+    isSpecial
     details {
       id
       startDate
@@ -612,6 +613,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -629,6 +631,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -703,6 +706,10 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -779,6 +786,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -823,6 +831,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -922,6 +931,10 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -931,6 +944,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -1014,6 +1028,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -1088,6 +1103,10 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -1204,6 +1223,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -1292,6 +1312,10 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -1425,6 +1449,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -1434,6 +1459,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -1458,6 +1484,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -1555,6 +1582,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -1620,6 +1648,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -1810,6 +1839,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -1819,6 +1849,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -1901,6 +1932,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
     address
     city
     country
+    isSpecial
     details {
       id
       startDate
@@ -1918,6 +1950,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -1935,6 +1968,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -2009,6 +2043,10 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -2085,6 +2123,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -2129,6 +2168,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -2228,6 +2268,10 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -2237,6 +2281,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -2320,6 +2365,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -2394,6 +2440,10 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -2510,6 +2560,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -2598,6 +2649,10 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -2731,6 +2786,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -2740,6 +2796,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -2764,6 +2821,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -2861,6 +2919,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -2926,6 +2985,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -3116,6 +3176,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -3125,6 +3186,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -3207,6 +3269,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
     address
     city
     country
+    isSpecial
     details {
       id
       startDate
@@ -3224,6 +3287,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -3241,6 +3305,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -3315,6 +3380,10 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -3391,6 +3460,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -3435,6 +3505,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -3534,6 +3605,10 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -3543,6 +3618,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -3626,6 +3702,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -3700,6 +3777,10 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -3816,6 +3897,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -3904,6 +3986,10 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -4037,6 +4123,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -4046,6 +4133,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -4070,6 +4158,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -4167,6 +4256,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -4232,6 +4322,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -4422,6 +4513,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -4431,6 +4523,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -4524,6 +4617,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -4541,6 +4635,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -4614,6 +4709,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -4672,6 +4768,10 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -4681,6 +4781,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -4777,6 +4878,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -4824,6 +4926,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -4841,6 +4944,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -4960,6 +5064,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -4969,6 +5074,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5028,6 +5134,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -5045,6 +5152,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -5118,6 +5226,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5176,6 +5285,10 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -5185,6 +5298,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5281,6 +5395,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5328,6 +5443,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -5345,6 +5461,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5464,6 +5581,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -5473,6 +5591,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5532,6 +5651,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -5549,6 +5669,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -5622,6 +5743,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5680,6 +5802,10 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -5689,6 +5815,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5785,6 +5912,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5832,6 +5960,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -5849,6 +5978,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5968,6 +6098,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -5977,6 +6108,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -6062,6 +6194,7 @@ export const onCreateTournamentSeriesTitle = /* GraphQL */ `subscription OnCreat
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -6150,6 +6283,10 @@ export const onCreateTournamentSeriesTitle = /* GraphQL */ `subscription OnCreat
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -6233,6 +6370,7 @@ export const onUpdateTournamentSeriesTitle = /* GraphQL */ `subscription OnUpdat
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -6321,6 +6459,10 @@ export const onUpdateTournamentSeriesTitle = /* GraphQL */ `subscription OnUpdat
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -6404,6 +6546,7 @@ export const onDeleteTournamentSeriesTitle = /* GraphQL */ `subscription OnDelet
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -6492,6 +6635,10 @@ export const onDeleteTournamentSeriesTitle = /* GraphQL */ `subscription OnDelet
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -6583,6 +6730,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -6623,6 +6771,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -6640,6 +6789,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -6713,6 +6863,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -6771,6 +6922,10 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -6780,6 +6935,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -6876,6 +7032,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -6923,6 +7080,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -6940,6 +7098,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7059,6 +7218,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -7068,6 +7228,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7134,6 +7295,10 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -7143,6 +7308,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -7226,6 +7392,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7300,6 +7467,10 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -7443,6 +7614,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7483,6 +7655,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -7500,6 +7673,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -7573,6 +7747,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7631,6 +7806,10 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -7640,6 +7819,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7736,6 +7916,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7783,6 +7964,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -7800,6 +7982,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7919,6 +8102,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -7928,6 +8112,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7994,6 +8179,10 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -8003,6 +8192,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -8086,6 +8276,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -8160,6 +8351,10 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -8303,6 +8498,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -8343,6 +8539,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -8360,6 +8557,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -8433,6 +8631,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -8491,6 +8690,10 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -8500,6 +8703,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -8596,6 +8800,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -8643,6 +8848,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -8660,6 +8866,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -8779,6 +8986,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -8788,6 +8996,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -8854,6 +9063,10 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -8863,6 +9076,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -8946,6 +9160,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -9020,6 +9235,10 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -9148,6 +9367,10 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
     tournamentId
     dataSource
     originalScrapedData
+    venueAssignmentStatus
+    requiresVenueAssignment
+    suggestedVenueName
+    venueAssignmentConfidence
     venueId
     venue {
       id
@@ -9157,6 +9380,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -9174,6 +9398,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -9247,6 +9472,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -9305,6 +9531,10 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -9314,6 +9544,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -9410,6 +9641,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -9457,6 +9689,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -9474,6 +9707,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -9593,6 +9827,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -9602,6 +9837,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -9689,6 +9925,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -9706,6 +9943,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -9780,6 +10018,10 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -9856,6 +10098,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -9915,6 +10158,10 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -9924,6 +10171,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -10047,6 +10295,10 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -10056,6 +10308,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -10139,6 +10392,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -10213,6 +10467,10 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -10407,6 +10665,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -10416,6 +10675,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -10469,6 +10729,10 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -10478,6 +10742,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -10656,6 +10921,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -10665,6 +10931,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -10719,6 +10986,10 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -10728,6 +10999,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -10849,6 +11121,10 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
     tournamentId
     dataSource
     originalScrapedData
+    venueAssignmentStatus
+    requiresVenueAssignment
+    suggestedVenueName
+    venueAssignmentConfidence
     venueId
     venue {
       id
@@ -10858,6 +11134,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -10875,6 +11152,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -10948,6 +11226,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -11006,6 +11285,10 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -11015,6 +11298,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -11111,6 +11395,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -11158,6 +11443,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -11175,6 +11461,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -11294,6 +11581,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -11303,6 +11591,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -11390,6 +11679,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -11407,6 +11697,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -11481,6 +11772,10 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -11557,6 +11852,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -11616,6 +11912,10 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -11625,6 +11925,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -11748,6 +12049,10 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -11757,6 +12062,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -11840,6 +12146,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -11914,6 +12221,10 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -12108,6 +12419,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -12117,6 +12429,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12170,6 +12483,10 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -12179,6 +12496,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12357,6 +12675,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -12366,6 +12685,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12420,6 +12740,10 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -12429,6 +12753,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12550,6 +12875,10 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
     tournamentId
     dataSource
     originalScrapedData
+    venueAssignmentStatus
+    requiresVenueAssignment
+    suggestedVenueName
+    venueAssignmentConfidence
     venueId
     venue {
       id
@@ -12559,6 +12888,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -12576,6 +12906,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -12649,6 +12980,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12707,6 +13039,10 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -12716,6 +13052,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12812,6 +13149,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12859,6 +13197,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -12876,6 +13215,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12995,6 +13335,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -13004,6 +13345,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13091,6 +13433,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -13108,6 +13451,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13182,6 +13526,10 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -13258,6 +13606,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -13317,6 +13666,10 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -13326,6 +13679,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13449,6 +13803,10 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -13458,6 +13816,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -13541,6 +13900,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13615,6 +13975,10 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -13809,6 +14173,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -13818,6 +14183,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13871,6 +14237,10 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -13880,6 +14250,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -14058,6 +14429,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -14067,6 +14439,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -14121,6 +14494,10 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -14130,6 +14507,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -14269,6 +14647,10 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -14278,6 +14660,7 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -14295,6 +14678,7 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -14369,6 +14753,10 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -14445,6 +14833,7 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -14504,6 +14893,7 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -14592,6 +14982,10 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -14667,6 +15061,10 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -14676,6 +15074,7 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -14770,6 +15169,7 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -14816,6 +15216,10 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -14861,6 +15265,7 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -14908,6 +15313,10 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -15006,6 +15415,10 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -15015,6 +15428,7 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -15032,6 +15446,7 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -15106,6 +15521,10 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -15182,6 +15601,7 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -15241,6 +15661,7 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -15329,6 +15750,10 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -15404,6 +15829,10 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -15413,6 +15842,7 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -15507,6 +15937,7 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -15553,6 +15984,10 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -15598,6 +16033,7 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -15645,6 +16081,10 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -15743,6 +16183,10 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -15752,6 +16196,7 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -15769,6 +16214,7 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -15843,6 +16289,10 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -15919,6 +16369,7 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -15978,6 +16429,7 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -16066,6 +16518,10 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -16141,6 +16597,10 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -16150,6 +16610,7 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -16244,6 +16705,7 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -16290,6 +16752,10 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -16335,6 +16801,7 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -16382,6 +16849,10 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -16683,6 +17154,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -16748,6 +17220,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -16938,6 +17411,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -16947,6 +17421,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -17129,6 +17604,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -17138,6 +17614,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -17205,6 +17682,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -17270,6 +17748,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -17460,6 +17939,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -17469,6 +17949,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -17658,6 +18139,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -17667,6 +18149,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -17691,6 +18174,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -17865,6 +18349,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -17874,6 +18359,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -17927,6 +18413,10 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -17936,6 +18426,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -18114,6 +18605,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -18123,6 +18615,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -18177,6 +18670,10 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -18186,6 +18683,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -18362,6 +18860,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -18371,6 +18870,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -18527,6 +19027,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -18536,6 +19037,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -18672,6 +19174,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -18681,6 +19184,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -18818,6 +19322,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -18827,6 +19332,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -18855,6 +19361,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
       startedAt
       __typename
     }
+    venueAssignmentStatus
     registrationVenueId
     registrationVenue {
       id
@@ -18864,6 +19371,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -18881,6 +19389,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -18954,6 +19463,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -19012,6 +19522,10 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -19021,6 +19535,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -19117,6 +19632,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -19164,6 +19680,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -19181,6 +19698,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -19300,6 +19818,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -19309,6 +19828,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -19407,6 +19927,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -19472,6 +19993,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -19662,6 +20184,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -19671,6 +20194,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -19853,6 +20377,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -19862,6 +20387,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -19929,6 +20455,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -19994,6 +20521,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -20184,6 +20712,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -20193,6 +20722,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -20382,6 +20912,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -20391,6 +20922,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -20415,6 +20947,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -20589,6 +21122,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -20598,6 +21132,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -20651,6 +21186,10 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -20660,6 +21199,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -20838,6 +21378,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -20847,6 +21388,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -20901,6 +21443,10 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -20910,6 +21456,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21086,6 +21633,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -21095,6 +21643,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21251,6 +21800,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -21260,6 +21810,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21396,6 +21947,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -21405,6 +21957,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21542,6 +22095,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -21551,6 +22105,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21579,6 +22134,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
       startedAt
       __typename
     }
+    venueAssignmentStatus
     registrationVenueId
     registrationVenue {
       id
@@ -21588,6 +22144,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -21605,6 +22162,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -21678,6 +22236,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21736,6 +22295,10 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -21745,6 +22308,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21841,6 +22405,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21888,6 +22453,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -21905,6 +22471,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -22024,6 +22591,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -22033,6 +22601,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -22131,6 +22700,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -22196,6 +22766,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -22386,6 +22957,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -22395,6 +22967,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -22577,6 +23150,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -22586,6 +23160,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -22653,6 +23228,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -22718,6 +23294,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -22908,6 +23485,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -22917,6 +23495,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -23106,6 +23685,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -23115,6 +23695,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -23139,6 +23720,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -23313,6 +23895,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -23322,6 +23905,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -23375,6 +23959,10 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -23384,6 +23972,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -23562,6 +24151,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -23571,6 +24161,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -23625,6 +24216,10 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -23634,6 +24229,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -23810,6 +24406,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -23819,6 +24416,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -23975,6 +24573,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -23984,6 +24583,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24120,6 +24720,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -24129,6 +24730,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24266,6 +24868,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -24275,6 +24878,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24303,6 +24907,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
       startedAt
       __typename
     }
+    venueAssignmentStatus
     registrationVenueId
     registrationVenue {
       id
@@ -24312,6 +24917,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -24329,6 +24935,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -24402,6 +25009,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24460,6 +25068,10 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -24469,6 +25081,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24565,6 +25178,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24612,6 +25226,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -24629,6 +25244,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24748,6 +25364,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -24757,6 +25374,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24928,6 +25546,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -24937,6 +25556,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24993,6 +25613,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -25116,6 +25737,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -25125,6 +25747,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -25188,6 +25811,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -25205,6 +25829,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -25253,6 +25878,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -25299,6 +25925,10 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -25344,6 +25974,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -25391,6 +26022,10 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -25434,6 +26069,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -25493,6 +26129,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -25537,6 +26174,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -25582,6 +26220,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -25603,6 +26242,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -25612,6 +26252,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -25629,6 +26270,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -25703,6 +26345,10 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -25779,6 +26425,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -25963,6 +26610,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -25972,6 +26620,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -26028,6 +26677,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -26151,6 +26801,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -26160,6 +26811,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -26223,6 +26875,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -26240,6 +26893,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -26288,6 +26942,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -26334,6 +26989,10 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -26379,6 +27038,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -26426,6 +27086,10 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -26469,6 +27133,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -26528,6 +27193,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -26572,6 +27238,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -26617,6 +27284,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -26638,6 +27306,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -26647,6 +27316,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -26664,6 +27334,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -26738,6 +27409,10 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -26814,6 +27489,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -26998,6 +27674,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -27007,6 +27684,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -27063,6 +27741,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27186,6 +27865,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -27195,6 +27875,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -27258,6 +27939,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27275,6 +27957,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -27323,6 +28006,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27369,6 +28053,10 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -27414,6 +28102,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27461,6 +28150,10 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -27504,6 +28197,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27563,6 +28257,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27607,6 +28302,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27652,6 +28348,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27673,6 +28370,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -27682,6 +28380,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -27699,6 +28398,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -27773,6 +28473,10 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -27849,6 +28553,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28039,6 +28744,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -28048,6 +28754,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -28104,6 +28811,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28227,6 +28935,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -28236,6 +28945,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -28299,6 +29009,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28316,6 +29027,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -28364,6 +29076,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28410,6 +29123,10 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -28455,6 +29172,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28502,6 +29220,10 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -28545,6 +29267,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28604,6 +29327,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28648,6 +29372,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28693,6 +29418,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28714,6 +29440,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -28723,6 +29450,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -28740,6 +29468,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -28814,6 +29543,10 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -28890,6 +29623,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28955,6 +29689,10 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -28964,6 +29702,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -28981,6 +29720,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -29055,6 +29795,10 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -29131,6 +29875,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29190,6 +29935,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -29278,6 +30024,10 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -29353,6 +30103,10 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -29362,6 +30116,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -29456,6 +30211,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29502,6 +30258,10 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -29547,6 +30307,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29594,6 +30355,10 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -29773,6 +30538,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -29782,6 +30548,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -29838,6 +30605,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29961,6 +30729,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -29970,6 +30739,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -30033,6 +30803,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30050,6 +30821,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -30098,6 +30870,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30144,6 +30917,10 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -30189,6 +30966,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30236,6 +31014,10 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -30279,6 +31061,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30338,6 +31121,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30382,6 +31166,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30427,6 +31212,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30448,6 +31234,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -30457,6 +31244,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -30474,6 +31262,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -30548,6 +31337,10 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -30624,6 +31417,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30689,6 +31483,10 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -30698,6 +31496,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -30715,6 +31514,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -30789,6 +31589,10 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -30865,6 +31669,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30924,6 +31729,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -31012,6 +31818,10 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -31087,6 +31897,10 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -31096,6 +31910,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -31190,6 +32005,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -31236,6 +32052,10 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -31281,6 +32101,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -31328,6 +32149,10 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -31507,6 +32332,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -31516,6 +32342,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -31572,6 +32399,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -31695,6 +32523,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -31704,6 +32533,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -31767,6 +32597,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -31784,6 +32615,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -31832,6 +32664,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -31878,6 +32711,10 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -31923,6 +32760,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -31970,6 +32808,10 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -32013,6 +32855,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32072,6 +32915,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32116,6 +32960,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32161,6 +33006,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32182,6 +33028,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -32191,6 +33038,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -32208,6 +33056,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -32282,6 +33131,10 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -32358,6 +33211,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32423,6 +33277,10 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -32432,6 +33290,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -32449,6 +33308,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -32523,6 +33383,10 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -32599,6 +33463,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32658,6 +33523,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -32746,6 +33612,10 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -32821,6 +33691,10 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -32830,6 +33704,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -32924,6 +33799,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32970,6 +33846,10 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -33015,6 +33895,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -33062,6 +33943,10 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -33236,6 +34121,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -33245,6 +34131,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -33301,6 +34188,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -33424,6 +34312,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -33433,6 +34322,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -33496,6 +34386,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -33513,6 +34404,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -33561,6 +34453,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -33607,6 +34500,10 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -33652,6 +34549,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -33699,6 +34597,10 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -33742,6 +34644,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -33801,6 +34704,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -33845,6 +34749,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -33890,6 +34795,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -33911,6 +34817,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -33920,6 +34827,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -33937,6 +34845,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -34011,6 +34920,10 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -34087,6 +35000,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34153,6 +35067,10 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -34162,6 +35080,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -34179,6 +35098,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -34253,6 +35173,10 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -34329,6 +35253,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34388,6 +35313,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -34476,6 +35402,10 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -34551,6 +35481,10 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -34560,6 +35494,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -34654,6 +35589,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34700,6 +35636,10 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -34745,6 +35685,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34792,6 +35733,10 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -34966,6 +35911,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -34975,6 +35921,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -35031,6 +35978,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35154,6 +36102,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -35163,6 +36112,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -35226,6 +36176,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35243,6 +36194,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -35291,6 +36243,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35337,6 +36290,10 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -35382,6 +36339,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35429,6 +36387,10 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -35472,6 +36434,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35531,6 +36494,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35575,6 +36539,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35620,6 +36585,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35641,6 +36607,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -35650,6 +36617,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -35667,6 +36635,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -35741,6 +36710,10 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -35817,6 +36790,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35883,6 +36857,10 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -35892,6 +36870,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -35909,6 +36888,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -35983,6 +36963,10 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -36059,6 +37043,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -36118,6 +37103,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -36206,6 +37192,10 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -36281,6 +37271,10 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -36290,6 +37284,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -36384,6 +37379,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -36430,6 +37426,10 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -36475,6 +37475,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -36522,6 +37523,10 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -36696,6 +37701,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -36705,6 +37711,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -36761,6 +37768,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -36884,6 +37892,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -36893,6 +37902,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -36956,6 +37966,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -36973,6 +37984,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -37021,6 +38033,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37067,6 +38080,10 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -37112,6 +38129,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37159,6 +38177,10 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -37202,6 +38224,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37261,6 +38284,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37305,6 +38329,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37350,6 +38375,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37371,6 +38397,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -37380,6 +38407,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -37397,6 +38425,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -37471,6 +38500,10 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -37547,6 +38580,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37613,6 +38647,10 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -37622,6 +38660,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -37639,6 +38678,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -37713,6 +38753,10 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -37789,6 +38833,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37848,6 +38893,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -37936,6 +38982,10 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -38011,6 +39061,10 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -38020,6 +39074,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -38114,6 +39169,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -38160,6 +39216,10 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -38205,6 +39265,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -38252,6 +39313,10 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -38425,6 +39490,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -38434,6 +39500,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -38490,6 +39557,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -38613,6 +39681,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -38622,6 +39691,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -38685,6 +39755,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -38702,6 +39773,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -38750,6 +39822,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -38796,6 +39869,10 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -38841,6 +39918,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -38888,6 +39966,10 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -38931,6 +40013,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -38990,6 +40073,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -39034,6 +40118,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -39079,6 +40164,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -39100,6 +40186,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -39109,6 +40196,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -39126,6 +40214,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -39200,6 +40289,10 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -39276,6 +40369,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -39312,6 +40406,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -39329,6 +40424,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -39402,6 +40498,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -39460,6 +40557,10 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -39469,6 +40570,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -39565,6 +40667,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -39612,6 +40715,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -39629,6 +40733,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -39748,6 +40853,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -39757,6 +40863,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -39928,6 +41035,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -39937,6 +41045,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -39993,6 +41102,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -40116,6 +41226,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -40125,6 +41236,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -40188,6 +41300,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -40205,6 +41318,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -40253,6 +41367,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -40299,6 +41414,10 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -40344,6 +41463,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -40391,6 +41511,10 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -40434,6 +41558,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -40493,6 +41618,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -40537,6 +41663,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -40582,6 +41709,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -40603,6 +41731,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -40612,6 +41741,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -40629,6 +41759,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -40703,6 +41834,10 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -40779,6 +41914,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -40815,6 +41951,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -40832,6 +41969,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -40905,6 +42043,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -40963,6 +42102,10 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -40972,6 +42115,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41068,6 +42212,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41115,6 +42260,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -41132,6 +42278,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41251,6 +42398,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -41260,6 +42408,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41431,6 +42580,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -41440,6 +42590,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41496,6 +42647,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -41619,6 +42771,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -41628,6 +42781,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41691,6 +42845,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -41708,6 +42863,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41756,6 +42912,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -41802,6 +42959,10 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -41847,6 +43008,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -41894,6 +43056,10 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -41937,6 +43103,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -41996,6 +43163,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -42040,6 +43208,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -42085,6 +43254,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -42106,6 +43276,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -42115,6 +43286,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -42132,6 +43304,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -42206,6 +43379,10 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -42282,6 +43459,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -42318,6 +43496,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -42335,6 +43514,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -42408,6 +43588,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -42466,6 +43647,10 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -42475,6 +43660,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -42571,6 +43757,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -42618,6 +43805,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -42635,6 +43823,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -42754,6 +43943,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -42763,6 +43953,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -42935,6 +44126,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -42944,6 +44136,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -43000,6 +44193,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -43123,6 +44317,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -43132,6 +44327,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -43195,6 +44391,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -43212,6 +44409,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -43260,6 +44458,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -43306,6 +44505,10 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -43351,6 +44554,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -43398,6 +44602,10 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -43441,6 +44649,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -43500,6 +44709,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -43544,6 +44754,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -43589,6 +44800,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -43610,6 +44822,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -43619,6 +44832,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -43636,6 +44850,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -43710,6 +44925,10 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -43786,6 +45005,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -43959,6 +45179,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -43968,6 +45189,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -44024,6 +45246,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44147,6 +45370,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -44156,6 +45380,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -44219,6 +45444,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44236,6 +45462,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -44284,6 +45511,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44330,6 +45558,10 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -44375,6 +45607,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44422,6 +45655,10 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -44465,6 +45702,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44524,6 +45762,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44568,6 +45807,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44613,6 +45853,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44634,6 +45875,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -44643,6 +45885,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -44660,6 +45903,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -44734,6 +45978,10 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -44810,6 +46058,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44983,6 +46232,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -44992,6 +46242,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -45048,6 +46299,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45171,6 +46423,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -45180,6 +46433,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -45243,6 +46497,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45260,6 +46515,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -45308,6 +46564,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45354,6 +46611,10 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -45399,6 +46660,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45446,6 +46708,10 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -45489,6 +46755,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45548,6 +46815,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45592,6 +46860,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45637,6 +46906,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45658,6 +46928,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -45667,6 +46938,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -45684,6 +46956,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -45758,6 +47031,10 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -45834,6 +47111,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46007,6 +47285,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -46016,6 +47295,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -46072,6 +47352,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46195,6 +47476,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -46204,6 +47486,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -46267,6 +47550,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46284,6 +47568,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -46332,6 +47617,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46378,6 +47664,10 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -46423,6 +47713,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46470,6 +47761,10 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -46513,6 +47808,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46572,6 +47868,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46616,6 +47913,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46661,6 +47959,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46682,6 +47981,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -46691,6 +47991,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -46708,6 +48009,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -46782,6 +48084,10 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -46858,6 +48164,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47032,6 +48339,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -47041,6 +48349,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -47097,6 +48406,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47220,6 +48530,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -47229,6 +48540,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -47292,6 +48604,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47309,6 +48622,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -47357,6 +48671,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47403,6 +48718,10 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -47448,6 +48767,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47495,6 +48815,10 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -47538,6 +48862,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47597,6 +48922,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47641,6 +48967,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47686,6 +49013,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47707,6 +49035,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -47716,6 +49045,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -47733,6 +49063,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -47807,6 +49138,10 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -47883,6 +49218,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48057,6 +49393,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -48066,6 +49403,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -48122,6 +49460,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48245,6 +49584,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -48254,6 +49594,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -48317,6 +49658,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48334,6 +49676,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -48382,6 +49725,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48428,6 +49772,10 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -48473,6 +49821,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48520,6 +49869,10 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -48563,6 +49916,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48622,6 +49976,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48666,6 +50021,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48711,6 +50067,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48732,6 +50089,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -48741,6 +50099,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -48758,6 +50117,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -48832,6 +50192,10 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -48908,6 +50272,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49082,6 +50447,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -49091,6 +50457,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -49147,6 +50514,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49270,6 +50638,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -49279,6 +50648,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -49342,6 +50712,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49359,6 +50730,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -49407,6 +50779,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49453,6 +50826,10 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -49498,6 +50875,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49545,6 +50923,10 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -49588,6 +50970,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49647,6 +51030,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49691,6 +51075,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49736,6 +51121,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49757,6 +51143,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -49766,6 +51153,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -49783,6 +51171,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -49857,6 +51246,10 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -49933,6 +51326,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50107,6 +51501,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -50116,6 +51511,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -50172,6 +51568,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50295,6 +51692,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -50304,6 +51702,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -50367,6 +51766,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50384,6 +51784,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -50432,6 +51833,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50478,6 +51880,10 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -50523,6 +51929,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50570,6 +51977,10 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -50613,6 +52024,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50672,6 +52084,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50716,6 +52129,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50761,6 +52175,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50782,6 +52197,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -50791,6 +52207,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -50808,6 +52225,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -50882,6 +52300,10 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -50958,6 +52380,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51132,6 +52555,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -51141,6 +52565,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -51197,6 +52622,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51320,6 +52746,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -51329,6 +52756,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -51392,6 +52820,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51409,6 +52838,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -51457,6 +52887,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51503,6 +52934,10 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -51548,6 +52983,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51595,6 +53031,10 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -51638,6 +53078,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51697,6 +53138,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51741,6 +53183,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51786,6 +53229,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51807,6 +53251,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -51816,6 +53261,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -51833,6 +53279,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -51907,6 +53354,10 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -51983,6 +53434,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52154,6 +53606,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -52163,6 +53616,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -52219,6 +53673,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52342,6 +53797,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -52351,6 +53807,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -52414,6 +53871,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52431,6 +53889,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -52479,6 +53938,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52525,6 +53985,10 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -52570,6 +54034,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52617,6 +54082,10 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -52660,6 +54129,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52719,6 +54189,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52763,6 +54234,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52808,6 +54280,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52829,6 +54302,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -52838,6 +54312,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -52855,6 +54330,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -52929,6 +54405,10 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -53005,6 +54485,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53174,6 +54655,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -53183,6 +54665,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -53239,6 +54722,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53362,6 +54846,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -53371,6 +54856,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -53434,6 +54920,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53451,6 +54938,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -53499,6 +54987,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53545,6 +55034,10 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -53590,6 +55083,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53637,6 +55131,10 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -53680,6 +55178,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53739,6 +55238,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53783,6 +55283,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53828,6 +55329,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53849,6 +55351,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -53858,6 +55361,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -53875,6 +55379,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -53949,6 +55454,10 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -54025,6 +55534,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54194,6 +55704,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -54203,6 +55714,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -54259,6 +55771,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54382,6 +55895,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -54391,6 +55905,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -54454,6 +55969,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54471,6 +55987,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -54519,6 +56036,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54565,6 +56083,10 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -54610,6 +56132,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54657,6 +56180,10 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -54700,6 +56227,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54759,6 +56287,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54803,6 +56332,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54848,6 +56378,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54869,6 +56400,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -54878,6 +56410,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -54895,6 +56428,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -54969,6 +56503,10 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -55045,6 +56583,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -55202,6 +56741,7 @@ export const onCreateTicketTemplate = /* GraphQL */ `subscription OnCreateTicket
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -55211,6 +56751,7 @@ export const onCreateTicketTemplate = /* GraphQL */ `subscription OnCreateTicket
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -55388,6 +56929,7 @@ export const onUpdateTicketTemplate = /* GraphQL */ `subscription OnUpdateTicket
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -55397,6 +56939,7 @@ export const onUpdateTicketTemplate = /* GraphQL */ `subscription OnUpdateTicket
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -55574,6 +57117,7 @@ export const onDeleteTicketTemplate = /* GraphQL */ `subscription OnDeleteTicket
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -55583,6 +57127,7 @@ export const onDeleteTicketTemplate = /* GraphQL */ `subscription OnDeleteTicket
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -55773,6 +57318,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -55782,6 +57328,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -55838,6 +57385,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -55961,6 +57509,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -55970,6 +57519,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -56033,6 +57583,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56050,6 +57601,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -56098,6 +57650,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56144,6 +57697,10 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -56189,6 +57746,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56236,6 +57794,10 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -56279,6 +57841,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56338,6 +57901,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56382,6 +57946,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56427,6 +57992,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56448,6 +58014,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -56457,6 +58024,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -56474,6 +58042,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -56548,6 +58117,10 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -56624,6 +58197,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56682,6 +58256,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56867,6 +58442,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -56876,6 +58452,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -56932,6 +58509,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57055,6 +58633,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -57064,6 +58643,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -57127,6 +58707,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57144,6 +58725,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -57192,6 +58774,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57238,6 +58821,10 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -57283,6 +58870,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57330,6 +58918,10 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -57373,6 +58965,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57432,6 +59025,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57476,6 +59070,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57521,6 +59116,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57542,6 +59138,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -57551,6 +59148,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -57568,6 +59166,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -57642,6 +59241,10 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -57718,6 +59321,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57776,6 +59380,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57961,6 +59566,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -57970,6 +59576,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -58026,6 +59633,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -58149,6 +59757,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -58158,6 +59767,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -58221,6 +59831,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -58238,6 +59849,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -58286,6 +59898,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -58332,6 +59945,10 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -58377,6 +59994,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -58424,6 +60042,10 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -58467,6 +60089,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -58526,6 +60149,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -58570,6 +60194,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -58615,6 +60240,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -58636,6 +60262,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -58645,6 +60272,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -58662,6 +60290,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -58736,6 +60365,10 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -58812,6 +60445,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -58870,6 +60504,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59233,6 +60868,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -59242,6 +60878,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -59298,6 +60935,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59421,6 +61059,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -59430,6 +61069,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -59493,6 +61133,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59510,6 +61151,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -59558,6 +61200,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59604,6 +61247,10 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -59649,6 +61296,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59696,6 +61344,10 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -59739,6 +61391,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59798,6 +61451,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59842,6 +61496,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59887,6 +61542,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59908,6 +61564,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -59917,6 +61574,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -59934,6 +61592,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -60008,6 +61667,10 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -60084,6 +61747,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60252,6 +61916,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -60261,6 +61926,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -60317,6 +61983,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60440,6 +62107,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -60449,6 +62117,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -60512,6 +62181,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60529,6 +62199,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -60577,6 +62248,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60623,6 +62295,10 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -60668,6 +62344,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60715,6 +62392,10 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -60758,6 +62439,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60817,6 +62499,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60861,6 +62544,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60906,6 +62590,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60927,6 +62612,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -60936,6 +62622,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -60953,6 +62640,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -61027,6 +62715,10 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -61103,6 +62795,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -61271,6 +62964,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -61280,6 +62974,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -61336,6 +63031,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -61459,6 +63155,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -61468,6 +63165,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -61531,6 +63229,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -61548,6 +63247,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -61596,6 +63296,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -61642,6 +63343,10 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -61687,6 +63392,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -61734,6 +63440,10 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -61777,6 +63487,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -61836,6 +63547,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -61880,6 +63592,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -61925,6 +63638,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -61946,6 +63660,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -61955,6 +63670,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -61972,6 +63688,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -62046,6 +63763,10 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -62122,6 +63843,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -62418,6 +64140,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -62435,6 +64158,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -62508,6 +64232,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -62566,6 +64291,10 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -62575,6 +64304,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -62671,6 +64401,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -62718,6 +64449,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -62735,6 +64467,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -62854,6 +64587,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -62863,6 +64597,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -62919,6 +64654,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -62936,6 +64672,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -63009,6 +64746,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -63067,6 +64805,10 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -63076,6 +64818,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -63172,6 +64915,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -63219,6 +64963,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -63236,6 +64981,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -63355,6 +65101,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -63364,6 +65111,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -63420,6 +65168,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -63437,6 +65186,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -63510,6 +65260,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -63568,6 +65319,10 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -63577,6 +65332,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -63673,6 +65429,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -63720,6 +65477,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -63737,6 +65495,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -63856,6 +65615,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -63865,6 +65625,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version

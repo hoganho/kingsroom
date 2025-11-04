@@ -416,3 +416,78 @@ export const listTournamentStructuresForDebug = /* GraphQL */ `
     }
   }
 `;
+
+/*
+ * ===================================================================
+ * NEW: VENUE ASSIGNMENT QUERIES
+ * ===================================================================
+ */
+
+export const listGamesNeedingVenue = /* GraphQL */ `
+  query ListGamesNeedingVenue($limit: Int, $nextToken: String) {
+    listGamesNeedingVenue(limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        name
+        gameStartDateTime
+        sourceUrl
+        suggestedVenueName
+        venueAssignmentConfidence
+      }
+      nextToken
+      totalCount
+    }
+  }
+`;
+
+export const getVenueAssignmentSummary = /* GraphQL */ `
+  query GetVenueAssignmentSummary {
+    getVenueAssignmentSummary {
+      totalGames
+      gamesWithVenue
+      gamesNeedingVenue
+      pendingAssignments
+    }
+  }
+`;
+
+/*
+ * ===================================================================
+ * NEW: VENUE ASSIGNMENT MUTATIONS
+ * ===================================================================
+ */
+
+export const assignVenueToGame = /* GraphQL */ `
+  mutation AssignVenueToGame($gameId: ID!, $venueId: ID!) {
+    assignVenueToGame(gameId: $gameId, venueId: $venueId) {
+      success
+      gameId
+      venueId
+      error
+      affectedRecords {
+        gameUpdated
+        playerEntriesUpdated
+        playerVenueRecordsCreated
+        playersWithRegistrationUpdated
+        playerSummariesUpdated
+      }
+    }
+  }
+`;
+
+export const batchAssignVenues = /* GraphQL */ `
+  mutation BatchAssignVenues($assignments: [VenueAssignment!]!) {
+    batchAssignVenues(assignments: $assignments) {
+      totalProcessed
+      successful {
+        gameId
+        venueId
+      }
+      failed {
+        gameId
+        venueId
+        error
+      }
+    }
+  }
+`;

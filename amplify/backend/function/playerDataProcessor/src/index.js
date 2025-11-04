@@ -30,6 +30,10 @@ const { DynamoDBDocumentClient, PutCommand, UpdateCommand, GetCommand, QueryComm
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 
+// VENUE ASSIGNMENT CONSTANTS  
+const UNASSIGNED_VENUE_ID = "00000000-0000-0000-0000-000000000000";
+const UNASSIGNED_VENUE_NAME = "Unassigned";
+
 const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
 
@@ -260,17 +264,22 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) =>
             const targetingClassification = await calculatePlayerTargetingClassification(
                 playerId, gameDateTime, now, true
             );
+            
+            // Only set registrationVenueId if venue is assigned
+            const isUnassignedVenue = !gameData.game.venueId || gameData.game.venueId === UNASSIGNED_VENUE_ID;
+            
             const newPlayer = {
                 id: playerId,
                 firstName: nameParts.firstName,
                 lastName: nameParts.lastName,
                 givenName: nameParts.givenName,
                 registrationDate: gameDateTime,
-                registrationVenueId: gameData.game.venueId,
+                registrationVenueId: isUnassignedVenue ? null : gameData.game.venueId,
                 status: 'ACTIVE',
                 category: 'NEW',
                 lastPlayedDate: gameDate,
                 targetingClassification: targetingClassification,
+                venueAssignmentStatus: isUnassignedVenue ? 'PENDING_ASSIGNMENT' : 'AUTO_ASSIGNED',
                 creditBalance: 0,
                 pointsBalance: playerData.points || 0,
                 createdAt: now,
@@ -326,7 +335,8 @@ const upsertPlayerEntry = async (playerId, gameData) => {
                 gameId: gameData.game.id,
                 venueId: gameData.game.venueId,
                 status: 'COMPLETED',
-                registrationTime: gameData.game.gameStartDateTime || now,
+                registrationTime: gameData.game.gameStartDateTime,
+                gameStartDateTime: gameData.game.gameStartDateTime,
                 createdAt: now,
                 updatedAt: now,
                 _version: 1,
@@ -502,6 +512,13 @@ const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue) 
 // *** MODIFIED FUNCTION (ADDED RETURN VALUES) ***
 const upsertPlayerVenue = async (playerId, gameData, playerData) => {
     console.log(`[VENUE-UPSERT] Starting upsert for player ${playerId} at venue ${gameData.game.venueId}.`);
+    
+    // Skip PlayerVenue creation for unassigned venues
+    if (!gameData.game.venueId || gameData.game.venueId === UNASSIGNED_VENUE_ID) {
+        console.log(`[VENUE-UPSERT] Skipping - venue is unassigned for game ${gameData.game.id}`);
+        return { success: true, skipped: true, wasNewVenue: false };
+    }
+    
     const playerVenueTable = getTableName('PlayerVenue');
     const playerVenueId = `${playerId}#${gameData.game.venueId}`;
     const now = new Date().toISOString();

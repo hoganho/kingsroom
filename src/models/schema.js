@@ -365,6 +365,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "isSpecial": {
+                    "name": "isSpecial",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "details": {
                     "name": "details",
                     "isArray": false,
@@ -842,7 +849,7 @@ export const schema = {
                     "name": "venueId",
                     "isArray": false,
                     "type": "ID",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "venue": {
@@ -1212,11 +1219,41 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "venueAssignmentStatus": {
+                    "name": "venueAssignmentStatus",
+                    "isArray": false,
+                    "type": {
+                        "enum": "VenueAssignmentStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "requiresVenueAssignment": {
+                    "name": "requiresVenueAssignment",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "suggestedVenueName": {
+                    "name": "suggestedVenueName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueAssignmentConfidence": {
+                    "name": "venueAssignmentConfidence",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "venueId": {
                     "name": "venueId",
                     "isArray": false,
                     "type": "ID",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "venue": {
@@ -2026,11 +2063,20 @@ export const schema = {
                         ]
                     }
                 },
+                "venueAssignmentStatus": {
+                    "name": "venueAssignmentStatus",
+                    "isArray": false,
+                    "type": {
+                        "enum": "VenueAssignmentStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "registrationVenueId": {
                     "name": "registrationVenueId",
                     "isArray": false,
                     "type": "ID",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "registrationVenue": {
@@ -2355,7 +2401,7 @@ export const schema = {
                     "name": "venueId",
                     "isArray": false,
                     "type": "ID",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "status": {
@@ -5569,6 +5615,16 @@ export const schema = {
                 "EXPIRED"
             ]
         },
+        "VenueAssignmentStatus": {
+            "name": "VenueAssignmentStatus",
+            "values": [
+                "AUTO_ASSIGNED",
+                "MANUALLY_ASSIGNED",
+                "PENDING_ASSIGNMENT",
+                "UNASSIGNED",
+                "RETROACTIVE_ASSIGNED"
+            ]
+        },
         "ScraperJobTriggerSource": {
             "name": "ScraperJobTriggerSource",
             "values": [
@@ -5988,6 +6044,182 @@ export const schema = {
                     "name": "mostUsedFeature",
                     "isArray": false,
                     "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "GamesNeedingVenueResponse": {
+            "name": "GamesNeedingVenueResponse",
+            "fields": {
+                "items": {
+                    "name": "items",
+                    "isArray": true,
+                    "type": {
+                        "model": "Game"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "nextToken": {
+                    "name": "nextToken",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCount": {
+                    "name": "totalCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "VenueAssignmentSummary": {
+            "name": "VenueAssignmentSummary",
+            "fields": {
+                "totalGames": {
+                    "name": "totalGames",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gamesWithVenue": {
+                    "name": "gamesWithVenue",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gamesNeedingVenue": {
+                    "name": "gamesNeedingVenue",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "pendingAssignments": {
+                    "name": "pendingAssignments",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "VenueAssignmentResult": {
+            "name": "VenueAssignmentResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "affectedRecords": {
+                    "name": "affectedRecords",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "AffectedRecords"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "AffectedRecords": {
+            "name": "AffectedRecords",
+            "fields": {
+                "gameUpdated": {
+                    "name": "gameUpdated",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerEntriesUpdated": {
+                    "name": "playerEntriesUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerVenueRecordsCreated": {
+                    "name": "playerVenueRecordsCreated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playersWithRegistrationUpdated": {
+                    "name": "playersWithRegistrationUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerSummariesUpdated": {
+                    "name": "playerSummariesUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "BatchVenueAssignmentResult": {
+            "name": "BatchVenueAssignmentResult",
+            "fields": {
+                "successful": {
+                    "name": "successful",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "VenueAssignmentResult"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "failed": {
+                    "name": "failed",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "VenueAssignmentResult"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "totalProcessed": {
+                    "name": "totalProcessed",
+                    "isArray": false,
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 }
@@ -6877,5 +7109,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "eff6bb007ae0af00712927cc116c0bdf"
+    "version": "2809568a3af2916f3a300a3f48816468"
 };

@@ -1,7 +1,7 @@
 // types/game.ts
 
 // Updated type definitions to match the refactored schema
-import type { DataSource, GameType, GameStatus, RegistrationStatus, TournamentType, GameVariant, GameFrequency } from '../API';
+import type { DataSource, GameType, GameStatus, RegistrationStatus, TournamentType, GameVariant, GameFrequency, VenueAssignmentStatus } from '../API';
 
 export type TournamentLevelData = {
     levelNumber: number;
@@ -158,11 +158,15 @@ export interface GameState {
 export interface SaveTournamentInput {
     id?: string;
     sourceUrl: string;
-    venueId: string;
+    venueId?: string | null;
     data: GameDataInput;
     existingGameId?: string | null;
     doNotScrape?: boolean;
     originalScrapedData?: GameData;
+    venueAssignmentStatus?: VenueAssignmentStatus | null;
+    requiresVenueAssignment?: boolean | null;
+    suggestedVenueName?: string | null;
+    venueAssignmentConfidence?: number | null;
 }
 
 export interface GameDataInput {

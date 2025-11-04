@@ -35,6 +35,11 @@ const VenuesPage = () => {
     try {
         const response = await client.graphql<GraphQLResult<APITypes.ListVenuesShallowQuery>>({
         query: listVenuesShallow,
+            variables: {
+                filter: {
+                    isSpecial: { ne: true }
+                }
+            }
         });
 
         // ✅ Safe type narrowing for response.data

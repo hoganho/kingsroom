@@ -185,6 +185,14 @@ const PointsTransactionType = {
   "EXPIRED": "EXPIRED"
 };
 
+const VenueAssignmentStatus = {
+  "AUTO_ASSIGNED": "AUTO_ASSIGNED",
+  "MANUALLY_ASSIGNED": "MANUALLY_ASSIGNED",
+  "PENDING_ASSIGNMENT": "PENDING_ASSIGNMENT",
+  "UNASSIGNED": "UNASSIGNED",
+  "RETROACTIVE_ASSIGNED": "RETROACTIVE_ASSIGNED"
+};
+
 const ScraperJobTriggerSource = {
   "SCHEDULED": "SCHEDULED",
   "MANUAL": "MANUAL",
@@ -239,7 +247,7 @@ const ScraperOperation = {
   "RESET": "RESET"
 };
 
-const { ScrapeStructure, DataSync, ScraperState, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, TournamentLevelData, CashStructure, RakeStructure, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, KnownPlayerIdentity, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, ScraperJob, ScrapeURL, ScrapeAttempt, ScraperControlResponse, ScraperStateData, ScraperResults, ScraperLogData, ScrapedGameStatus, TournamentLevel, Break, ClientMetricResponse, UserMetricsSummary, ScraperJobURLResult, ScraperMetrics, ErrorMetric, HourlyMetric, ScraperJobConnection, ScrapeURLConnection, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails } = initSchema(schema);
+const { ScrapeStructure, DataSync, ScraperState, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, TournamentLevelData, CashStructure, RakeStructure, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, KnownPlayerIdentity, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, ScraperJob, ScrapeURL, ScrapeAttempt, ScraperControlResponse, ScraperStateData, ScraperResults, ScraperLogData, ScrapedGameStatus, TournamentLevel, Break, ClientMetricResponse, UserMetricsSummary, GamesNeedingVenueResponse, VenueAssignmentSummary, VenueAssignmentResult, AffectedRecords, BatchVenueAssignmentResult, ScraperJobURLResult, ScraperMetrics, ErrorMetric, HourlyMetric, ScraperJobConnection, ScrapeURLConnection, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails } = initSchema(schema);
 
 export {
   ScrapeStructure,
@@ -300,6 +308,7 @@ export {
   PlayerEntryStatus,
   CreditTransactionType,
   PointsTransactionType,
+  VenueAssignmentStatus,
   ScraperJobTriggerSource,
   ScraperJobStatus,
   ScrapeURLStatus,
@@ -315,6 +324,11 @@ export {
   Break,
   ClientMetricResponse,
   UserMetricsSummary,
+  GamesNeedingVenueResponse,
+  VenueAssignmentSummary,
+  VenueAssignmentResult,
+  AffectedRecords,
+  BatchVenueAssignmentResult,
   ScraperJobURLResult,
   ScraperMetrics,
   ErrorMetric,

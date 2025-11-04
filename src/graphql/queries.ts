@@ -750,6 +750,767 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
   APITypes.GetUpdateCandidateURLsQueryVariables,
   APITypes.GetUpdateCandidateURLsQuery
 >;
+export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue($limit: Int, $nextToken: String) {
+  listGamesNeedingVenue(limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      name
+      gameType
+      gameVariant
+      gameStatus
+      gameStartDateTime
+      gameEndDateTime
+      registrationStatus
+      totalDuration
+      gameFrequency
+      buyIn
+      rake
+      startingStack
+      hasGuarantee
+      guaranteeAmount
+      prizepool
+      totalEntries
+      totalRebuys
+      totalAddons
+      revenueByBuyIns
+      totalRake
+      profitLoss
+      guaranteeOverlay
+      guaranteeSurplus
+      playersRemaining
+      totalChipsInPlay
+      averagePlayerStack
+      tournamentType
+      isRegular
+      isSeries
+      isSatellite
+      seriesName
+      gameTags
+      sourceUrl
+      tournamentId
+      dataSource
+      originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
+      venueId
+      venue {
+        id
+        venueNumber
+        name
+        aliases
+        address
+        city
+        country
+        isSpecial
+        details {
+          id
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        series {
+          items {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        registeredPlayers {
+          items {
+            id
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
+      tournamentSeriesId
+      tournamentSeries {
+        id
+        name
+        year
+        status
+        startDate
+        endDate
+        events
+        numberOfEvents
+        guaranteedPrizepool
+        estimatedPrizepool
+        actualPrizepool
+        tournamentSeriesTitleId
+        title {
+          id
+          title
+          aliases
+          seriesInstances {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        venueId
+        venue {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      structure {
+        id
+        levels {
+          levelNumber
+          durationMinutes
+          smallBlind
+          bigBlind
+          ante
+          __typename
+        }
+        breaks {
+          levelNumberBeforeBreak
+          durationMinutes
+          __typename
+        }
+        gameId
+        game {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          tournamentId
+          dataSource
+          originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          structure {
+            id
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          gameStructureId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      playerEntries {
+        items {
+          id
+          playerId
+          gameId
+          venueId
+          status
+          registrationTime
+          eliminationTime
+          gameStartDateTime
+          lastKnownStackSize
+          tableNumber
+          seatNumber
+          numberOfReEntries
+          isMultiDayTournament
+          player {
+            id
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerResults {
+        items {
+          id
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          pointsEarned
+          playerId
+          player {
+            id
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      gameStructureId
+      __typename
+    }
+    nextToken
+    totalCount
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListGamesNeedingVenueQueryVariables,
+  APITypes.ListGamesNeedingVenueQuery
+>;
+export const getVenueAssignmentSummary = /* GraphQL */ `query GetVenueAssignmentSummary {
+  getVenueAssignmentSummary {
+    totalGames
+    gamesWithVenue
+    gamesNeedingVenue
+    pendingAssignments
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetVenueAssignmentSummaryQueryVariables,
+  APITypes.GetVenueAssignmentSummaryQuery
+>;
 export const getMyMetrics = /* GraphQL */ `query GetMyMetrics($timeRange: String) {
   getMyMetrics(timeRange: $timeRange) {
     userId
@@ -1094,6 +1855,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
     address
     city
     country
+    isSpecial
     details {
       id
       startDate
@@ -1111,6 +1873,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -1128,6 +1891,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -1202,6 +1966,10 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -1278,6 +2046,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -1322,6 +2091,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -1421,6 +2191,10 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -1430,6 +2204,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -1513,6 +2288,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -1587,6 +2363,10 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -1703,6 +2483,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -1791,6 +2572,10 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -1924,6 +2709,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -1933,6 +2719,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -1957,6 +2744,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -2054,6 +2842,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -2119,6 +2908,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -2309,6 +3099,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -2318,6 +3109,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -2402,6 +3194,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -2419,6 +3212,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -2492,6 +3286,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -2550,6 +3345,10 @@ export const listVenues = /* GraphQL */ `query ListVenues(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -2559,6 +3358,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -2655,6 +3455,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -2702,6 +3503,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -2719,6 +3521,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -2838,6 +3641,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -2847,6 +3651,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -2903,6 +3708,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -2920,6 +3726,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -2993,6 +3800,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -3051,6 +3859,10 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -3060,6 +3872,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -3156,6 +3969,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -3203,6 +4017,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -3220,6 +4035,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -3339,6 +4155,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -3348,6 +4165,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -3402,6 +4220,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -3419,6 +4238,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -3492,6 +4312,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -3550,6 +4371,10 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -3559,6 +4384,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -3655,6 +4481,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -3702,6 +4529,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -3719,6 +4547,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -3838,6 +4667,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -3847,6 +4677,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -3909,6 +4740,7 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -3926,6 +4758,7 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -4000,6 +4833,10 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -4076,6 +4913,7 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -4141,6 +4979,7 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -4158,6 +4997,7 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -4232,6 +5072,10 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -4308,6 +5152,7 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -4388,6 +5233,7 @@ export const getTournamentSeriesTitle = /* GraphQL */ `query GetTournamentSeries
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -4476,6 +5322,10 @@ export const getTournamentSeriesTitle = /* GraphQL */ `query GetTournamentSeries
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -4561,6 +5411,7 @@ export const listTournamentSeriesTitles = /* GraphQL */ `query ListTournamentSer
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -4651,6 +5502,7 @@ export const syncTournamentSeriesTitles = /* GraphQL */ `query SyncTournamentSer
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -4743,6 +5595,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -4783,6 +5636,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -4800,6 +5654,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -4873,6 +5728,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -4931,6 +5787,10 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -4940,6 +5800,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5036,6 +5897,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5083,6 +5945,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -5100,6 +5963,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5219,6 +6083,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -5228,6 +6093,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5294,6 +6160,10 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -5303,6 +6173,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -5386,6 +6257,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5460,6 +6332,10 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -5614,6 +6490,7 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -5631,6 +6508,7 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5705,6 +6583,10 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -5781,6 +6663,7 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -5840,6 +6723,10 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -5849,6 +6736,7 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5998,6 +6886,7 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -6015,6 +6904,7 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -6089,6 +6979,10 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -6165,6 +7059,7 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -6224,6 +7119,10 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -6233,6 +7132,7 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -6350,6 +7250,10 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
     tournamentId
     dataSource
     originalScrapedData
+    venueAssignmentStatus
+    requiresVenueAssignment
+    suggestedVenueName
+    venueAssignmentConfidence
     venueId
     venue {
       id
@@ -6359,6 +7263,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -6376,6 +7281,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -6449,6 +7355,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -6507,6 +7414,10 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -6516,6 +7427,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -6612,6 +7524,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -6659,6 +7572,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -6676,6 +7590,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -6795,6 +7710,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -6804,6 +7720,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -6891,6 +7808,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -6908,6 +7826,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -6982,6 +7901,10 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -7058,6 +7981,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -7117,6 +8041,10 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -7126,6 +8054,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7249,6 +8178,10 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -7258,6 +8191,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -7341,6 +8275,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7415,6 +8350,10 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -7609,6 +8548,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -7618,6 +8558,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7671,6 +8612,10 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -7680,6 +8625,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7858,6 +8804,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -7867,6 +8814,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7921,6 +8869,10 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -7930,6 +8882,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -8053,6 +9006,10 @@ export const listGames = /* GraphQL */ `query ListGames(
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -8062,6 +9019,7 @@ export const listGames = /* GraphQL */ `query ListGames(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -8079,6 +9037,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -8153,6 +9112,10 @@ export const listGames = /* GraphQL */ `query ListGames(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -8229,6 +9192,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -8288,6 +9252,7 @@ export const listGames = /* GraphQL */ `query ListGames(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -8376,6 +9341,10 @@ export const listGames = /* GraphQL */ `query ListGames(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -8451,6 +9420,10 @@ export const listGames = /* GraphQL */ `query ListGames(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -8460,6 +9433,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -8554,6 +9528,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -8600,6 +9575,10 @@ export const listGames = /* GraphQL */ `query ListGames(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -8645,6 +9624,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -8692,6 +9672,10 @@ export const listGames = /* GraphQL */ `query ListGames(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -8777,6 +9761,10 @@ export const syncGames = /* GraphQL */ `query SyncGames(
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -8786,6 +9774,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -8803,6 +9792,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -8877,6 +9867,10 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -8953,6 +9947,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -9012,6 +10007,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -9100,6 +10096,10 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -9175,6 +10175,10 @@ export const syncGames = /* GraphQL */ `query SyncGames(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -9184,6 +10188,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -9278,6 +10283,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -9324,6 +10330,10 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -9369,6 +10379,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -9416,6 +10427,10 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -9506,6 +10521,10 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -9515,6 +10534,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -9532,6 +10552,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -9606,6 +10627,10 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -9682,6 +10707,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -9741,6 +10767,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -9829,6 +10856,10 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -9904,6 +10935,10 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -9913,6 +10948,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -10007,6 +11043,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -10053,6 +11090,10 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -10098,6 +11139,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -10145,6 +11187,10 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -10250,6 +11296,10 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -10259,6 +11309,7 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -10342,6 +11393,7 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -10416,6 +11468,10 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -10571,6 +11627,10 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -10580,6 +11640,7 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -10663,6 +11724,7 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -10737,6 +11799,10 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -11144,6 +12210,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -11209,6 +12276,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -11399,6 +12467,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -11408,6 +12477,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -11590,6 +12660,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -11599,6 +12670,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -11666,6 +12738,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -11731,6 +12804,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -11921,6 +12995,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -11930,6 +13005,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -12119,6 +13195,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -12128,6 +13205,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12152,6 +13230,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -12326,6 +13405,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -12335,6 +13415,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12388,6 +13469,10 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -12397,6 +13482,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12575,6 +13661,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -12584,6 +13671,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12638,6 +13726,10 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -12647,6 +13739,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12823,6 +13916,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -12832,6 +13926,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12988,6 +14083,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -12997,6 +14093,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13133,6 +14230,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -13142,6 +14240,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13279,6 +14378,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -13288,6 +14388,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13316,6 +14417,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
       startedAt
       __typename
     }
+    venueAssignmentStatus
     registrationVenueId
     registrationVenue {
       id
@@ -13325,6 +14427,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -13342,6 +14445,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -13415,6 +14519,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13473,6 +14578,10 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -13482,6 +14591,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13578,6 +14688,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13625,6 +14736,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -13642,6 +14754,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13761,6 +14874,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -13770,6 +14884,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13933,6 +15048,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -13942,6 +15058,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13998,6 +15115,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -14121,6 +15239,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -14130,6 +15249,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -14193,6 +15313,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -14210,6 +15331,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -14258,6 +15380,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -14304,6 +15427,10 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -14349,6 +15476,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -14396,6 +15524,10 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -14439,6 +15571,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -14498,6 +15631,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -14542,6 +15676,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -14587,6 +15722,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -14608,6 +15744,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -14617,6 +15754,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -14634,6 +15772,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -14708,6 +15847,10 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -14784,6 +15927,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -14953,6 +16097,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -14962,6 +16107,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -15018,6 +16164,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -15141,6 +16288,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -15150,6 +16298,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -15213,6 +16362,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -15230,6 +16380,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -15278,6 +16429,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -15324,6 +16476,10 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -15369,6 +16525,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -15416,6 +16573,10 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -15459,6 +16620,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -15518,6 +16680,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -15562,6 +16725,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -15607,6 +16771,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -15628,6 +16793,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -15637,6 +16803,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -15654,6 +16821,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -15728,6 +16896,10 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -15804,6 +16976,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -15970,6 +17143,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -15979,6 +17153,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -16035,6 +17210,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -16158,6 +17334,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -16167,6 +17344,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -16230,6 +17408,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -16247,6 +17426,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -16295,6 +17475,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -16341,6 +17522,10 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -16386,6 +17571,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -16433,6 +17619,10 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -16476,6 +17666,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -16535,6 +17726,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -16579,6 +17771,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -16624,6 +17817,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -16645,6 +17839,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -16654,6 +17849,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -16671,6 +17867,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -16745,6 +17942,10 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -16821,6 +18022,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -16923,6 +18125,7 @@ export const listPlayerSummaries = /* GraphQL */ `query ListPlayerSummaries(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -16988,6 +18191,7 @@ export const listPlayerSummaries = /* GraphQL */ `query ListPlayerSummaries(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -17178,6 +18382,7 @@ export const listPlayerSummaries = /* GraphQL */ `query ListPlayerSummaries(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -17187,6 +18392,7 @@ export const listPlayerSummaries = /* GraphQL */ `query ListPlayerSummaries(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -17328,6 +18534,7 @@ export const syncPlayerSummaries = /* GraphQL */ `query SyncPlayerSummaries(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -17393,6 +18600,7 @@ export const syncPlayerSummaries = /* GraphQL */ `query SyncPlayerSummaries(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -17583,6 +18791,7 @@ export const syncPlayerSummaries = /* GraphQL */ `query SyncPlayerSummaries(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -17592,6 +18801,7 @@ export const syncPlayerSummaries = /* GraphQL */ `query SyncPlayerSummaries(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -17813,6 +19023,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -17822,6 +19033,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -17878,6 +19090,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -18001,6 +19214,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -18010,6 +19224,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -18073,6 +19288,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -18090,6 +19306,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -18138,6 +19355,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -18184,6 +19402,10 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -18229,6 +19451,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -18276,6 +19499,10 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -18319,6 +19546,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -18378,6 +19606,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -18422,6 +19651,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -18467,6 +19697,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -18488,6 +19719,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -18497,6 +19729,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -18514,6 +19747,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -18588,6 +19822,10 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -18664,6 +19902,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -18729,6 +19968,10 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -18738,6 +19981,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -18755,6 +19999,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -18829,6 +20074,10 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -18905,6 +20154,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -18964,6 +20214,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -19052,6 +20303,10 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -19127,6 +20382,10 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -19136,6 +20395,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -19230,6 +20490,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -19276,6 +20537,10 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -19321,6 +20586,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -19368,6 +20634,10 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -19465,6 +20735,7 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -19530,6 +20801,7 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -19720,6 +20992,7 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -19729,6 +21002,7 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -19823,6 +21097,10 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -19832,6 +21110,7 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -19915,6 +21194,7 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -19989,6 +21269,10 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -20140,6 +21424,7 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -20205,6 +21490,7 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -20395,6 +21681,7 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -20404,6 +21691,7 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -20498,6 +21786,10 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -20507,6 +21799,7 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -20590,6 +21883,7 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -20664,6 +21958,10 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -20884,6 +22182,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -20893,6 +22192,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -20949,6 +22249,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -21072,6 +22373,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -21081,6 +22383,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21144,6 +22447,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -21161,6 +22465,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21209,6 +22514,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -21255,6 +22561,10 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -21300,6 +22610,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -21347,6 +22658,10 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -21390,6 +22705,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -21449,6 +22765,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -21493,6 +22810,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -21538,6 +22856,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -21559,6 +22878,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -21568,6 +22888,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -21585,6 +22906,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21659,6 +22981,10 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -21735,6 +23061,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -21801,6 +23128,10 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -21810,6 +23141,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -21827,6 +23159,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21901,6 +23234,10 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -21977,6 +23314,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -22036,6 +23374,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -22124,6 +23463,10 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -22199,6 +23542,10 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -22208,6 +23555,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -22302,6 +23650,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -22348,6 +23697,10 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -22393,6 +23746,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -22440,6 +23794,10 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -22532,6 +23890,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -22597,6 +23956,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -22787,6 +24147,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -22796,6 +24157,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -22891,6 +24253,10 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -22900,6 +24266,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -22983,6 +24350,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -23057,6 +24425,10 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -23203,6 +24575,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -23268,6 +24641,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -23458,6 +24832,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -23467,6 +24842,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -23562,6 +24938,10 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -23571,6 +24951,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -23654,6 +25035,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -23728,6 +25110,10 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -23947,6 +25333,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -23956,6 +25343,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24012,6 +25400,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -24135,6 +25524,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -24144,6 +25534,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24207,6 +25598,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -24224,6 +25616,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24272,6 +25665,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -24318,6 +25712,10 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -24363,6 +25761,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -24410,6 +25809,10 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -24453,6 +25856,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -24512,6 +25916,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -24556,6 +25961,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -24601,6 +26007,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -24622,6 +26029,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -24631,6 +26039,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -24648,6 +26057,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24722,6 +26132,10 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -24798,6 +26212,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -24834,6 +26249,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -24851,6 +26267,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -24924,6 +26341,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24982,6 +26400,10 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -24991,6 +26413,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -25087,6 +26510,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -25134,6 +26558,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -25151,6 +26576,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -25270,6 +26696,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -25279,6 +26706,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -25368,6 +26796,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -25433,6 +26862,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -25623,6 +27053,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -25632,6 +27063,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -25697,6 +27129,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -25714,6 +27147,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -25788,6 +27222,10 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -25864,6 +27302,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -25956,6 +27395,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -26021,6 +27461,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -26211,6 +27652,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -26220,6 +27662,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -26285,6 +27728,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -26302,6 +27746,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -26376,6 +27821,10 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -26452,6 +27901,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -26619,6 +28069,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -26628,6 +28079,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -26684,6 +28136,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -26807,6 +28260,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -26816,6 +28270,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -26879,6 +28334,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -26896,6 +28352,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -26944,6 +28401,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -26990,6 +28448,10 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -27035,6 +28497,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27082,6 +28545,10 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -27125,6 +28592,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27184,6 +28652,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27228,6 +28697,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27273,6 +28743,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27294,6 +28765,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -27303,6 +28775,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -27320,6 +28793,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -27394,6 +28868,10 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -27470,6 +28948,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27565,6 +29044,7 @@ export const listPlayerTransactions = /* GraphQL */ `query ListPlayerTransaction
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27630,6 +29110,7 @@ export const listPlayerTransactions = /* GraphQL */ `query ListPlayerTransaction
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27820,6 +29301,7 @@ export const listPlayerTransactions = /* GraphQL */ `query ListPlayerTransaction
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -27829,6 +29311,7 @@ export const listPlayerTransactions = /* GraphQL */ `query ListPlayerTransaction
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -27959,6 +29442,7 @@ export const syncPlayerTransactions = /* GraphQL */ `query SyncPlayerTransaction
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28024,6 +29508,7 @@ export const syncPlayerTransactions = /* GraphQL */ `query SyncPlayerTransaction
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28214,6 +29699,7 @@ export const syncPlayerTransactions = /* GraphQL */ `query SyncPlayerTransaction
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -28223,6 +29709,7 @@ export const syncPlayerTransactions = /* GraphQL */ `query SyncPlayerTransaction
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -28427,6 +29914,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -28436,6 +29924,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -28492,6 +29981,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28615,6 +30105,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -28624,6 +30115,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -28687,6 +30179,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28704,6 +30197,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -28752,6 +30246,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28798,6 +30293,10 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -28843,6 +30342,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28890,6 +30390,10 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -28933,6 +30437,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28992,6 +30497,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29036,6 +30542,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29081,6 +30588,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29102,6 +30610,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -29111,6 +30620,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -29128,6 +30638,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -29202,6 +30713,10 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -29278,6 +30793,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29370,6 +30886,7 @@ export const listPlayerCredits = /* GraphQL */ `query ListPlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29435,6 +30952,7 @@ export const listPlayerCredits = /* GraphQL */ `query ListPlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29625,6 +31143,7 @@ export const listPlayerCredits = /* GraphQL */ `query ListPlayerCredits(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -29634,6 +31153,7 @@ export const listPlayerCredits = /* GraphQL */ `query ListPlayerCredits(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -29765,6 +31285,7 @@ export const syncPlayerCredits = /* GraphQL */ `query SyncPlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29830,6 +31351,7 @@ export const syncPlayerCredits = /* GraphQL */ `query SyncPlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30020,6 +31542,7 @@ export const syncPlayerCredits = /* GraphQL */ `query SyncPlayerCredits(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -30029,6 +31552,7 @@ export const syncPlayerCredits = /* GraphQL */ `query SyncPlayerCredits(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -30234,6 +31758,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -30243,6 +31768,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -30299,6 +31825,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30422,6 +31949,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -30431,6 +31959,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -30494,6 +32023,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30511,6 +32041,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -30559,6 +32090,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30605,6 +32137,10 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -30650,6 +32186,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30697,6 +32234,10 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -30740,6 +32281,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30799,6 +32341,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30843,6 +32386,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30888,6 +32432,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30909,6 +32454,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -30918,6 +32464,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -30935,6 +32482,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -31009,6 +32557,10 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -31085,6 +32637,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -31177,6 +32730,7 @@ export const listPlayerPoints = /* GraphQL */ `query ListPlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -31242,6 +32796,7 @@ export const listPlayerPoints = /* GraphQL */ `query ListPlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -31432,6 +32987,7 @@ export const listPlayerPoints = /* GraphQL */ `query ListPlayerPoints(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -31441,6 +32997,7 @@ export const listPlayerPoints = /* GraphQL */ `query ListPlayerPoints(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -31572,6 +33129,7 @@ export const syncPlayerPoints = /* GraphQL */ `query SyncPlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -31637,6 +33195,7 @@ export const syncPlayerPoints = /* GraphQL */ `query SyncPlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -31827,6 +33386,7 @@ export const syncPlayerPoints = /* GraphQL */ `query SyncPlayerPoints(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -31836,6 +33396,7 @@ export const syncPlayerPoints = /* GraphQL */ `query SyncPlayerPoints(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -32038,6 +33599,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -32047,6 +33609,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -32103,6 +33666,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32226,6 +33790,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -32235,6 +33800,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -32298,6 +33864,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32315,6 +33882,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -32363,6 +33931,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32409,6 +33978,10 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -32454,6 +34027,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32501,6 +34075,10 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -32544,6 +34122,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32603,6 +34182,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32647,6 +34227,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32692,6 +34273,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32713,6 +34295,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -32722,6 +34305,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -32739,6 +34323,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -32813,6 +34398,10 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -32889,6 +34478,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32980,6 +34570,7 @@ export const listKnownPlayerIdentities = /* GraphQL */ `query ListKnownPlayerIde
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -33045,6 +34636,7 @@ export const listKnownPlayerIdentities = /* GraphQL */ `query ListKnownPlayerIde
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -33235,6 +34827,7 @@ export const listKnownPlayerIdentities = /* GraphQL */ `query ListKnownPlayerIde
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -33244,6 +34837,7 @@ export const listKnownPlayerIdentities = /* GraphQL */ `query ListKnownPlayerIde
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -33370,6 +34964,7 @@ export const syncKnownPlayerIdentities = /* GraphQL */ `query SyncKnownPlayerIde
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -33435,6 +35030,7 @@ export const syncKnownPlayerIdentities = /* GraphQL */ `query SyncKnownPlayerIde
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -33625,6 +35221,7 @@ export const syncKnownPlayerIdentities = /* GraphQL */ `query SyncKnownPlayerIde
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -33634,6 +35231,7 @@ export const syncKnownPlayerIdentities = /* GraphQL */ `query SyncKnownPlayerIde
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -33822,6 +35420,7 @@ export const getTicketTemplate = /* GraphQL */ `query GetTicketTemplate($id: ID!
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -33831,6 +35430,7 @@ export const getTicketTemplate = /* GraphQL */ `query GetTicketTemplate($id: ID!
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -33926,6 +35526,7 @@ export const listTicketTemplates = /* GraphQL */ `query ListTicketTemplates(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34019,6 +35620,7 @@ export const syncTicketTemplates = /* GraphQL */ `query SyncTicketTemplates(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34199,6 +35801,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -34208,6 +35811,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -34264,6 +35868,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34387,6 +35992,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -34396,6 +36002,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -34459,6 +36066,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34476,6 +36084,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -34524,6 +36133,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34570,6 +36180,10 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -34615,6 +36229,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34662,6 +36277,10 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -34705,6 +36324,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34764,6 +36384,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34808,6 +36429,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34853,6 +36475,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34874,6 +36497,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -34883,6 +36507,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -34900,6 +36525,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -34974,6 +36600,10 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -35050,6 +36680,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35108,6 +36739,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35211,6 +36843,7 @@ export const listPlayerTickets = /* GraphQL */ `query ListPlayerTickets(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35276,6 +36909,7 @@ export const listPlayerTickets = /* GraphQL */ `query ListPlayerTickets(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35466,6 +37100,7 @@ export const listPlayerTickets = /* GraphQL */ `query ListPlayerTickets(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -35475,6 +37110,7 @@ export const listPlayerTickets = /* GraphQL */ `query ListPlayerTickets(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -35638,6 +37274,7 @@ export const syncPlayerTickets = /* GraphQL */ `query SyncPlayerTickets(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35703,6 +37340,7 @@ export const syncPlayerTickets = /* GraphQL */ `query SyncPlayerTickets(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35893,6 +37531,7 @@ export const syncPlayerTickets = /* GraphQL */ `query SyncPlayerTickets(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -35902,6 +37541,7 @@ export const syncPlayerTickets = /* GraphQL */ `query SyncPlayerTickets(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -36357,6 +37997,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -36366,6 +38007,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -36422,6 +38064,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -36545,6 +38188,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -36554,6 +38198,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -36617,6 +38262,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -36634,6 +38280,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -36682,6 +38329,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -36728,6 +38376,10 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -36773,6 +38425,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -36820,6 +38473,10 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -36863,6 +38520,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -36922,6 +38580,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -36966,6 +38625,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37011,6 +38671,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37032,6 +38693,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -37041,6 +38703,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -37058,6 +38721,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -37132,6 +38796,10 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -37208,6 +38876,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37298,6 +38967,7 @@ export const listPlayerMarketingPreferences = /* GraphQL */ `query ListPlayerMar
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37363,6 +39033,7 @@ export const listPlayerMarketingPreferences = /* GraphQL */ `query ListPlayerMar
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37553,6 +39224,7 @@ export const listPlayerMarketingPreferences = /* GraphQL */ `query ListPlayerMar
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -37562,6 +39234,7 @@ export const listPlayerMarketingPreferences = /* GraphQL */ `query ListPlayerMar
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -37687,6 +39360,7 @@ export const syncPlayerMarketingPreferences = /* GraphQL */ `query SyncPlayerMar
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37752,6 +39426,7 @@ export const syncPlayerMarketingPreferences = /* GraphQL */ `query SyncPlayerMar
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37942,6 +39617,7 @@ export const syncPlayerMarketingPreferences = /* GraphQL */ `query SyncPlayerMar
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -37951,6 +39627,7 @@ export const syncPlayerMarketingPreferences = /* GraphQL */ `query SyncPlayerMar
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -38316,6 +39993,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -38333,6 +40011,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -38406,6 +40085,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -38464,6 +40144,10 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -38473,6 +40157,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -38569,6 +40254,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -38616,6 +40302,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -38633,6 +40320,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -38752,6 +40440,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -38761,6 +40450,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -38819,6 +40509,7 @@ export const listAssets = /* GraphQL */ `query ListAssets(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -38836,6 +40527,7 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -38910,6 +40602,10 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -38986,6 +40682,7 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -39050,6 +40747,7 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -39067,6 +40765,7 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -39141,6 +40840,10 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -39217,6 +40920,7 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -41117,6 +42821,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -41134,6 +42839,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -41207,6 +42913,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41265,6 +42972,10 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -41274,6 +42985,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41370,6 +43082,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41417,6 +43130,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -41434,6 +43148,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41553,6 +43268,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -41562,6 +43278,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41629,6 +43346,7 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -41646,6 +43364,7 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41720,6 +43439,10 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -41796,6 +43519,7 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -41907,6 +43631,7 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -41924,6 +43649,7 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41998,6 +43724,10 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -42074,6 +43804,7 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -42133,6 +43864,10 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -42142,6 +43877,7 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -42293,6 +44029,7 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -42310,6 +44047,7 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -42384,6 +44122,10 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -42460,6 +44202,7 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -42519,6 +44262,10 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -42528,6 +44275,7 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -42660,6 +44408,10 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -42669,6 +44421,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -42686,6 +44439,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -42760,6 +44514,10 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -42836,6 +44594,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -42895,6 +44654,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -42983,6 +44743,10 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -43058,6 +44822,10 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -43067,6 +44835,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -43161,6 +44930,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -43207,6 +44977,10 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -43252,6 +45026,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -43299,6 +45074,10 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -43389,6 +45168,10 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -43398,6 +45181,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -43415,6 +45199,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -43489,6 +45274,10 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -43565,6 +45354,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -43624,6 +45414,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -43712,6 +45503,10 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -43787,6 +45582,10 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -43796,6 +45595,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -43890,6 +45690,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -43936,6 +45737,10 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -43981,6 +45786,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44028,6 +45834,10 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -44120,6 +45930,10 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -44129,6 +45943,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -44146,6 +45961,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -44220,6 +46036,10 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -44296,6 +46116,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44355,6 +46176,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -44443,6 +46265,10 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -44518,6 +46344,10 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -44527,6 +46357,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -44621,6 +46452,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44667,6 +46499,10 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -44712,6 +46548,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44759,6 +46596,10 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -44851,6 +46692,10 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -44860,6 +46705,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -44877,6 +46723,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -44951,6 +46798,10 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -45027,6 +46878,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45086,6 +46938,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -45174,6 +47027,10 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -45249,6 +47106,10 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -45258,6 +47119,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -45352,6 +47214,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45398,6 +47261,10 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -45443,6 +47310,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45490,6 +47358,10 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -45596,6 +47468,10 @@ export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStruc
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -45605,6 +47481,7 @@ export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStruc
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -45688,6 +47565,7 @@ export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStruc
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -45762,6 +47640,10 @@ export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStruc
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -46098,6 +47980,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -46107,6 +47990,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -46163,6 +48047,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46286,6 +48171,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -46295,6 +48181,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -46358,6 +48245,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46375,6 +48263,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -46423,6 +48312,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46469,6 +48359,10 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -46514,6 +48408,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46561,6 +48456,10 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -46604,6 +48503,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46663,6 +48563,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46707,6 +48608,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46752,6 +48654,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46773,6 +48676,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -46782,6 +48686,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -46799,6 +48704,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -46873,6 +48779,10 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -46949,6 +48859,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47120,6 +49031,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -47129,6 +49041,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -47185,6 +49098,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47308,6 +49222,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -47317,6 +49232,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -47380,6 +49296,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47397,6 +49314,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -47445,6 +49363,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47491,6 +49410,10 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -47536,6 +49459,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47583,6 +49507,10 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -47626,6 +49554,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47685,6 +49614,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47729,6 +49659,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47774,6 +49705,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47795,6 +49727,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -47804,6 +49737,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -47821,6 +49755,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -47895,6 +49830,10 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -47971,6 +49910,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48142,6 +50082,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -48151,6 +50092,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -48207,6 +50149,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48330,6 +50273,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -48339,6 +50283,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -48402,6 +50347,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48419,6 +50365,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -48467,6 +50414,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48513,6 +50461,10 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -48558,6 +50510,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48605,6 +50558,10 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -48648,6 +50605,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48707,6 +50665,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48751,6 +50710,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48796,6 +50756,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48817,6 +50778,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -48826,6 +50788,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -48843,6 +50806,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -48917,6 +50881,10 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -48993,6 +50961,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49087,6 +51056,7 @@ export const playerSummariesByPlayerId = /* GraphQL */ `query PlayerSummariesByP
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49152,6 +51122,7 @@ export const playerSummariesByPlayerId = /* GraphQL */ `query PlayerSummariesByP
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49342,6 +51313,7 @@ export const playerSummariesByPlayerId = /* GraphQL */ `query PlayerSummariesByP
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -49351,6 +51323,7 @@ export const playerSummariesByPlayerId = /* GraphQL */ `query PlayerSummariesByP
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -49502,6 +51475,7 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49567,6 +51541,7 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49757,6 +51732,7 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -49766,6 +51742,7 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -49860,6 +51837,10 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -49869,6 +51850,7 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -49952,6 +51934,7 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -50026,6 +52009,10 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -50179,6 +52166,7 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50244,6 +52232,7 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50434,6 +52423,7 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -50443,6 +52433,7 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -50537,6 +52528,10 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -50546,6 +52541,7 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -50629,6 +52625,7 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -50703,6 +52700,10 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -50856,6 +52857,7 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50921,6 +52923,7 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51111,6 +53114,7 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -51120,6 +53124,7 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -51214,6 +53219,10 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -51223,6 +53232,7 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -51306,6 +53316,7 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -51380,6 +53391,10 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -51528,6 +53543,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51593,6 +53609,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51783,6 +53800,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -51792,6 +53810,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -51887,6 +53906,10 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -51896,6 +53919,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -51979,6 +54003,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -52053,6 +54078,10 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -52201,6 +54230,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52266,6 +54296,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52456,6 +54487,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -52465,6 +54497,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -52560,6 +54593,10 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -52569,6 +54606,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -52652,6 +54690,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -52726,6 +54765,10 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -52875,6 +54918,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52940,6 +54984,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53130,6 +55175,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -53139,6 +55185,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -53204,6 +55251,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -53221,6 +55269,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -53295,6 +55344,10 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -53371,6 +55424,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53467,6 +55521,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53532,6 +55587,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53722,6 +55778,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -53731,6 +55788,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -53796,6 +55854,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -53813,6 +55872,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -53887,6 +55947,10 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -53963,6 +56027,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54060,6 +56125,7 @@ export const playerTransactionsByPlayerIdAndTransactionDate = /* GraphQL */ `que
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54125,6 +56191,7 @@ export const playerTransactionsByPlayerIdAndTransactionDate = /* GraphQL */ `que
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54315,6 +56382,7 @@ export const playerTransactionsByPlayerIdAndTransactionDate = /* GraphQL */ `que
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -54324,6 +56392,7 @@ export const playerTransactionsByPlayerIdAndTransactionDate = /* GraphQL */ `que
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -54456,6 +56525,7 @@ export const playerTransactionsByGameId = /* GraphQL */ `query PlayerTransaction
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54521,6 +56591,7 @@ export const playerTransactionsByGameId = /* GraphQL */ `query PlayerTransaction
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54711,6 +56782,7 @@ export const playerTransactionsByGameId = /* GraphQL */ `query PlayerTransaction
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -54720,6 +56792,7 @@ export const playerTransactionsByGameId = /* GraphQL */ `query PlayerTransaction
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -54854,6 +56927,7 @@ export const playerCreditsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54919,6 +56993,7 @@ export const playerCreditsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -55109,6 +57184,7 @@ export const playerCreditsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pl
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -55118,6 +57194,7 @@ export const playerCreditsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pl
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -55251,6 +57328,7 @@ export const playerCreditsByRelatedGameId = /* GraphQL */ `query PlayerCreditsBy
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -55316,6 +57394,7 @@ export const playerCreditsByRelatedGameId = /* GraphQL */ `query PlayerCreditsBy
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -55506,6 +57585,7 @@ export const playerCreditsByRelatedGameId = /* GraphQL */ `query PlayerCreditsBy
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -55515,6 +57595,7 @@ export const playerCreditsByRelatedGameId = /* GraphQL */ `query PlayerCreditsBy
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -55650,6 +57731,7 @@ export const playerPointsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -55715,6 +57797,7 @@ export const playerPointsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pla
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -55905,6 +57988,7 @@ export const playerPointsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pla
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -55914,6 +57998,7 @@ export const playerPointsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pla
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -56047,6 +58132,7 @@ export const playerPointsByRelatedGameId = /* GraphQL */ `query PlayerPointsByRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56112,6 +58198,7 @@ export const playerPointsByRelatedGameId = /* GraphQL */ `query PlayerPointsByRe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56302,6 +58389,7 @@ export const playerPointsByRelatedGameId = /* GraphQL */ `query PlayerPointsByRe
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -56311,6 +58399,7 @@ export const playerPointsByRelatedGameId = /* GraphQL */ `query PlayerPointsByRe
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -56441,6 +58530,7 @@ export const knownPlayerIdentitiesByPlayerId = /* GraphQL */ `query KnownPlayerI
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56506,6 +58596,7 @@ export const knownPlayerIdentitiesByPlayerId = /* GraphQL */ `query KnownPlayerI
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56696,6 +58787,7 @@ export const knownPlayerIdentitiesByPlayerId = /* GraphQL */ `query KnownPlayerI
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -56705,6 +58797,7 @@ export const knownPlayerIdentitiesByPlayerId = /* GraphQL */ `query KnownPlayerI
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -56834,6 +58927,7 @@ export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlaye
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56899,6 +58993,7 @@ export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlaye
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57089,6 +59184,7 @@ export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlaye
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -57098,6 +59194,7 @@ export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlaye
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -57263,6 +59360,7 @@ export const playerTicketsByTicketTemplateId = /* GraphQL */ `query PlayerTicket
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57328,6 +59426,7 @@ export const playerTicketsByTicketTemplateId = /* GraphQL */ `query PlayerTicket
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57518,6 +59617,7 @@ export const playerTicketsByTicketTemplateId = /* GraphQL */ `query PlayerTicket
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -57527,6 +59627,7 @@ export const playerTicketsByTicketTemplateId = /* GraphQL */ `query PlayerTicket
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -57764,6 +59865,7 @@ export const playerMarketingPreferencesByPlayerId = /* GraphQL */ `query PlayerM
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57829,6 +59931,7 @@ export const playerMarketingPreferencesByPlayerId = /* GraphQL */ `query PlayerM
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -58019,6 +60122,7 @@ export const playerMarketingPreferencesByPlayerId = /* GraphQL */ `query PlayerM
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -58028,6 +60132,7 @@ export const playerMarketingPreferencesByPlayerId = /* GraphQL */ `query PlayerM
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -58202,6 +60307,7 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -58219,6 +60325,7 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -58293,6 +60400,10 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -58369,6 +60480,7 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt

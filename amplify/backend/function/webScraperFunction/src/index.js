@@ -36,6 +36,10 @@ const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
 
+// VENUE ASSIGNMENT CONSTANTS
+const UNASSIGNED_VENUE_ID = "00000000-0000-0000-0000-000000000000";
+const UNASSIGNED_VENUE_NAME = "Unassigned";
+
 const {
     runScraper,
     getStatusAndReg
@@ -210,6 +214,9 @@ const upsertPlayerEntries = async (savedGameItem, scrapedData) => {
         console.log(`[upsertPlayerEntries] No player entries to process for game ${savedGameItem.id}.`);
         return;
     }
+    
+    // Handle unassigned venue - use UNASSIGNED_VENUE_ID if venue is not set
+    const effectiveVenueId = savedGameItem.venueId || UNASSIGNED_VENUE_ID;
 
     const promises = allPlayers.map(async (playerData) => {
         const playerId = generatePlayerId(playerData.name);
@@ -223,7 +230,7 @@ const upsertPlayerEntries = async (savedGameItem, scrapedData) => {
             id: entryId,
             playerId: playerId,
             gameId: savedGameItem.id,
-            venueId: savedGameItem.venueId,
+            venueId: effectiveVenueId,  // Can be UNASSIGNED_VENUE_ID
             status: status,
             registrationTime: savedGameItem.gameStartDateTime,
             gameStartDateTime: savedGameItem.gameStartDateTime,
@@ -542,7 +549,11 @@ const handleSave = async (input) => {
 
     console.log(`[handleSave] START processing save request. Job ID: ${jobId || 'N/A'}, Source: ${triggerSource || 'N/A'}`);
     
-    const { sourceUrl, venueId, existingGameId, data } = input;
+    const { sourceUrl, existingGameId, data } = input;
+    // Handle optional venue - use UNASSIGNED_VENUE_ID if no venue provided
+    const venueId = input.venueId || UNASSIGNED_VENUE_ID;
+    const isUnassigned = venueId === UNASSIGNED_VENUE_ID;
+    
     const now = new Date().toISOString();
     const gameTable = getTableName('Game');
     const structureTable = getTableName('TournamentStructure');
@@ -603,6 +614,12 @@ const handleSave = async (input) => {
             gameVariant: data.gameVariant || existingGame.Item.gameVariant || 'NLHE',
             gameStartDateTime: data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : existingGame.Item.gameStartDateTime,
             gameEndDateTime: data.gameEndDateTime,
+            // UPDATE: Handle venue updates for existing games
+            venueId: venueId || existingGame.Item.venueId || UNASSIGNED_VENUE_ID,
+            venueAssignmentStatus: input.venueAssignmentStatus || existingGame.Item.venueAssignmentStatus || (isUnassigned ? 'PENDING_ASSIGNMENT' : 'AUTO_ASSIGNED'),
+            requiresVenueAssignment: isUnassigned || existingGame.Item.requiresVenueAssignment,
+            suggestedVenueName: input.suggestedVenueName || existingGame.Item.suggestedVenueName || data.venueName || null,
+            venueAssignmentConfidence: input.venueAssignmentConfidence || existingGame.Item.venueAssignmentConfidence || 0,
             tournamentType: data.tournamentType || existingGame.Item.tournamentType,
             buyIn: data.buyIn !== undefined ? data.buyIn : existingGame.Item.buyIn,
             rake: data.rake !== undefined ? data.rake : existingGame.Item.rake,
@@ -664,6 +681,11 @@ const handleSave = async (input) => {
             gameVariant: data.gameVariant || 'NLHE',
             gameStartDateTime: data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : now,
             gameEndDateTime: ensureISODate(data.gameEndDateTime), sourceUrl, venueId,
+            // ADD: Venue assignment tracking
+            venueAssignmentStatus: input.venueAssignmentStatus || (isUnassigned ? 'PENDING_ASSIGNMENT' : 'AUTO_ASSIGNED'),
+            requiresVenueAssignment: isUnassigned,
+            suggestedVenueName: input.suggestedVenueName || data.venueName || null,
+            venueAssignmentConfidence: input.venueAssignmentConfidence || 0,
             tournamentType: data.tournamentType, buyIn: data.buyIn, rake: data.rake || 0,
             startingStack: data.startingStack, hasGuarantee: data.hasGuarantee,
             guaranteeAmount: data.guaranteeAmount, revenueByBuyIns: data.revenueByBuyIns,

@@ -7,6 +7,7 @@ import { fetchTournamentData, saveTournamentData } from '../graphql/mutations';
 import { fetchTournamentDataRange } from '../graphql/queries'; // Assuming you have this query defined
 import * as APITypes from '../API';
 import type { GameData } from '../types/game';
+import { VenueAssignmentStatus } from '../API';
 
 /**
  * Calls the backend Lambda to fetch and parse tournament data without saving.
@@ -51,18 +52,32 @@ export const fetchGameDataFromBackend = async (url: string): Promise<APITypes.Sc
  */
 export const saveGameDataToBackend = async (
     sourceUrl: string, 
-    venueId: string, 
+    venueId: string | null | undefined, 
     data: GameData,
     existingGameId: string | null | undefined
 ): Promise<APITypes.Game> => {
     const client = generateClient();
     console.log(`[GameService] Saving ${data.gameStatus} tournament data for ${sourceUrl} to database...`);
     
+    let assignmentStatus: VenueAssignmentStatus;
+    if (venueId) {
+        // User manually selected a venue
+        assignmentStatus = VenueAssignmentStatus.MANUALLY_ASSIGNED;
+    } else if (data.venueMatch?.autoAssignedVenue?.id) {
+        // Backend auto-assigned a venue (but user didn't confirm, so it's still auto)
+        // NOTE: Your UI logic might change this. If autoAssignedVenue.id is passed as venueId,
+        // this logic is fine.
+        assignmentStatus = VenueAssignmentStatus.AUTO_ASSIGNED;
+    } else {
+        // No venue provided, no auto-match
+        assignmentStatus = VenueAssignmentStatus.PENDING_ASSIGNMENT;
+    }
+
     try {
         // Prepare the input matching the refactored schema
         const input: APITypes.SaveTournamentInput = {
             sourceUrl,
-            venueId,
+            venueId : venueId,
             existingGameId: existingGameId,
             doNotScrape: data.doNotScrape ?? false,
 
@@ -70,6 +85,11 @@ export const saveGameDataToBackend = async (
             // This converts the JavaScript object into a JSON string, which is what the AWSJSON type expects.
             originalScrapedData: JSON.stringify(data),
             
+            venueAssignmentStatus: assignmentStatus,
+            requiresVenueAssignment: !venueId, // If no venue is set, it requires assignment
+            suggestedVenueName: data.venueMatch?.suggestions?.[0]?.name ?? undefined,
+            venueAssignmentConfidence: data.venueMatch?.suggestions?.[0]?.score ?? undefined,
+
             // This is the 'clean' object, containing only fields for the Game table.
             data: {
                 name: data.name,

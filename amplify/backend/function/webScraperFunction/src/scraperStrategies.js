@@ -699,6 +699,13 @@ const defaultStrategy = {
         const gameName = ctx.data.name;
         if (!gameName || !venues || venues.length === 0) {
             console.log('[DEBUG-VENUE-MATCH] Skipped: Missing scraped name or venue list.');
+            // Return null match instead of undefined
+            ctx.add('venueMatch', { 
+                autoAssignedVenue: null, 
+                suggestions: [],
+                extractedVenueName: gameName || null,
+                matchingFailed: true 
+            });
             return;
         }
         let exactVenueMatch = null;
@@ -716,7 +723,12 @@ const defaultStrategy = {
         if (exactVenueMatch) {
             console.log(`[DEBUG-VENUE-MATCH] Found exact substring match: "${exactVenueMatch.name}"`);
             const matchResult = { id: exactVenueMatch.id, name: exactVenueMatch.name, score: 1.0 };
-            const venueMatch = { autoAssignedVenue: matchResult, suggestions: [matchResult] };
+            const venueMatch = { 
+                autoAssignedVenue: matchResult, 
+                suggestions: [matchResult],
+                extractedVenueName: gameName,
+                matchingFailed: false
+            };
             ctx.add('venueMatch', venueMatch);
             ctx.add('venueName', exactVenueMatch.name);
             return;
@@ -749,7 +761,12 @@ const defaultStrategy = {
             .filter(v => v.score > 0)
             .slice(0, 3);
         if (sortedSuggestions.length === 0) {
-            ctx.add('venueMatch', { suggestions: [] });
+            ctx.add('venueMatch', { 
+                autoAssignedVenue: null,
+                suggestions: [],
+                extractedVenueName: gameName,
+                matchingFailed: true
+            });
             return;
         }
         let autoAssignedVenue = null;
@@ -759,7 +776,12 @@ const defaultStrategy = {
                 ctx.add('venueName', autoAssignedVenue.name);
             }
         }
-        const venueMatch = { autoAssignedVenue, suggestions: sortedSuggestions };
+        const venueMatch = { 
+            autoAssignedVenue, 
+            suggestions: sortedSuggestions,
+            extractedVenueName: gameName,
+            matchingFailed: autoAssignedVenue === null
+        };
         ctx.add('venueMatch', venueMatch);
     },
 

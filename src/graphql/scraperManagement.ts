@@ -415,6 +415,20 @@ export const scraperManagementMutations = {
         isNewStructure
         structureLabel
         foundKeys
+        venueMatch {
+          autoAssignedVenue {
+            id
+            name
+            score
+          }
+          suggestions {
+            id
+            name
+            score
+          }
+        }
+        existingGameId
+        doNotScrape
       }
     }
   `,
@@ -432,6 +446,8 @@ export const scraperManagementMutations = {
         venueId
         sourceUrl
         tournamentId
+        venueAssignmentStatus
+        requiresVenueAssignment
       }
     }
   `,

@@ -8,6 +8,10 @@ const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');
 const crypto = require('crypto');
 const { TextDecoder } = require('util');
 
+// VENUE ASSIGNMENT CONSTANTS
+const UNASSIGNED_VENUE_ID = "00000000-0000-0000-0000-000000000000";
+const UNASSIGNED_VENUE_NAME = "Unassigned";
+
 // --- Configuration & Clients ---
 const client = new DynamoDBClient({});
 const marshallOptions = {
@@ -410,48 +414,50 @@ const scrapeAndProcessTournament = async (url, existingGameData, jobId, triggerS
             if (scrapedData.isInactive) {
                 result.status = 'INACTIVE';
             } else {
-                // Get venue assignment
-                const autoAssignedVenueId = scrapedData?.venueMatch?.autoAssignedVenue?.id || existingGameData?.venueId;
+                // Get venue assignment - use UNASSIGNED_VENUE_ID if no match
+                const autoAssignedVenueId = scrapedData?.venueMatch?.autoAssignedVenue?.id || existingGameData?.venueId || UNASSIGNED_VENUE_ID;
+                const isUnassigned = autoAssignedVenueId === UNASSIGNED_VENUE_ID;
                 
-                if (!autoAssignedVenueId) {
-                    result.status = 'SKIPPED_VENUE';
-                } else {
-                    result.venueId = autoAssignedVenueId;
-                    
-                    // Save tournament data
-                    const savePayload = {
-                        fieldName: 'saveTournamentData',
-                        arguments: {
-                            input: {
-                                sourceUrl: url,
-                                venueId: autoAssignedVenueId,
-                                existingGameId: gameIdFromFetch,
-                                doNotScrape: scrapedData.doNotScrape || false,
-                                originalScrapedData: JSON.stringify(scrapedData),
-                                data: createCleanDataForSave(scrapedData)
-                            }
-                        },
-                        identity: { claims: { jobId, triggerSource }}
-                    };
-                    console.log(`[AUTO-SCRAPER-TRACE] Building savePayload for ${url}.`);
-                    console.log(`[AUTO-SCRAPER-TRACE] Type of originalScrapedData being sent:`, typeof savePayload.arguments.input.originalScrapedData);
-                    console.log(`[AUTO-SCRAPER-TRACE] Length of originalScrapedData string:`, savePayload.arguments.input.originalScrapedData?.length);
+                result.venueId = autoAssignedVenueId;
+                
+                // Save tournament data even without venue
+                const savePayload = {
+                    fieldName: 'saveTournamentData',
+                    arguments: {
+                        input: {
+                            sourceUrl: url,
+                            venueId: autoAssignedVenueId,
+                            existingGameId: gameIdFromFetch,
+                            doNotScrape: scrapedData.doNotScrape || false,
+                            originalScrapedData: JSON.stringify(scrapedData),
+                            data: createCleanDataForSave(scrapedData),
+                            // Add venue assignment tracking
+                            venueAssignmentStatus: isUnassigned ? 'PENDING_ASSIGNMENT' : 'AUTO_ASSIGNED',
+                            requiresVenueAssignment: isUnassigned,
+                            suggestedVenueName: scrapedData?.venueName || scrapedData?.venueMatch?.extractedVenueName || null,
+                            venueAssignmentConfidence: scrapedData?.venueMatch?.autoAssignedVenue?.score || 0
+                        }
+                    },
+                    identity: { claims: { jobId, triggerSource }}
+                };
+                console.log(`[AUTO-SCRAPER-TRACE] Building savePayload for ${url}.`);
+                console.log(`[AUTO-SCRAPER-TRACE] Type of originalScrapedData being sent:`, typeof savePayload.arguments.input.originalScrapedData);
+                console.log(`[AUTO-SCRAPER-TRACE] Length of originalScrapedData string:`, savePayload.arguments.input.originalScrapedData?.length);
 
-                    const saveResponse = await lambdaClient.send(new InvokeCommand({
-                        FunctionName: functionName,
-                        InvocationType: 'RequestResponse',
-                        Payload: JSON.stringify(savePayload)
-                    }));
-                    
-                    const saveResult = JSON.parse(new TextDecoder().decode(saveResponse.Payload));
-                    
-                    if (saveResult.errorMessage) {
-                        result.error = `SAVE failed: ${saveResult.errorMessage}`;
-                        result.status = 'FAILED';
-                    } else {
-                        result.gameId = saveResult.id || existingGameData?.id;
-                        result.status = existingGameData ? 'UPDATED' : 'SAVED';
-                    }
+                const saveResponse = await lambdaClient.send(new InvokeCommand({
+                    FunctionName: functionName,
+                    InvocationType: 'RequestResponse',
+                    Payload: JSON.stringify(savePayload)
+                }));
+                
+                const saveResult = JSON.parse(new TextDecoder().decode(saveResponse.Payload));
+                
+                if (saveResult.errorMessage) {
+                    result.error = `SAVE failed: ${saveResult.errorMessage}`;
+                    result.status = 'FAILED';
+                } else {
+                    result.gameId = saveResult.id || existingGameData?.id;
+                    result.status = existingGameData ? 'UPDATED' : 'SAVED';
                 }
             }
         } else {

@@ -185,6 +185,14 @@ export enum PointsTransactionType {
   EXPIRED = "EXPIRED"
 }
 
+export enum VenueAssignmentStatus {
+  AUTO_ASSIGNED = "AUTO_ASSIGNED",
+  MANUALLY_ASSIGNED = "MANUALLY_ASSIGNED",
+  PENDING_ASSIGNMENT = "PENDING_ASSIGNMENT",
+  UNASSIGNED = "UNASSIGNED",
+  RETROACTIVE_ASSIGNED = "RETROACTIVE_ASSIGNED"
+}
+
 export enum ScraperJobTriggerSource {
   SCHEDULED = "SCHEDULED",
   MANUAL = "MANUAL",
@@ -414,6 +422,96 @@ type LazyUserMetricsSummary = {
 export declare type UserMetricsSummary = LazyLoading extends LazyLoadingDisabled ? EagerUserMetricsSummary : LazyUserMetricsSummary
 
 export declare const UserMetricsSummary: (new (init: ModelInit<UserMetricsSummary>) => UserMetricsSummary)
+
+type EagerGamesNeedingVenueResponse = {
+  readonly items?: (Game | null)[] | null;
+  readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
+}
+
+type LazyGamesNeedingVenueResponse = {
+  readonly items: AsyncCollection<Game>;
+  readonly nextToken?: string | null;
+  readonly totalCount?: number | null;
+}
+
+export declare type GamesNeedingVenueResponse = LazyLoading extends LazyLoadingDisabled ? EagerGamesNeedingVenueResponse : LazyGamesNeedingVenueResponse
+
+export declare const GamesNeedingVenueResponse: (new (init: ModelInit<GamesNeedingVenueResponse>) => GamesNeedingVenueResponse)
+
+type EagerVenueAssignmentSummary = {
+  readonly totalGames?: number | null;
+  readonly gamesWithVenue?: number | null;
+  readonly gamesNeedingVenue?: number | null;
+  readonly pendingAssignments?: number | null;
+}
+
+type LazyVenueAssignmentSummary = {
+  readonly totalGames?: number | null;
+  readonly gamesWithVenue?: number | null;
+  readonly gamesNeedingVenue?: number | null;
+  readonly pendingAssignments?: number | null;
+}
+
+export declare type VenueAssignmentSummary = LazyLoading extends LazyLoadingDisabled ? EagerVenueAssignmentSummary : LazyVenueAssignmentSummary
+
+export declare const VenueAssignmentSummary: (new (init: ModelInit<VenueAssignmentSummary>) => VenueAssignmentSummary)
+
+type EagerVenueAssignmentResult = {
+  readonly success: boolean;
+  readonly gameId: string;
+  readonly venueId: string;
+  readonly affectedRecords?: AffectedRecords | null;
+  readonly error?: string | null;
+}
+
+type LazyVenueAssignmentResult = {
+  readonly success: boolean;
+  readonly gameId: string;
+  readonly venueId: string;
+  readonly affectedRecords?: AffectedRecords | null;
+  readonly error?: string | null;
+}
+
+export declare type VenueAssignmentResult = LazyLoading extends LazyLoadingDisabled ? EagerVenueAssignmentResult : LazyVenueAssignmentResult
+
+export declare const VenueAssignmentResult: (new (init: ModelInit<VenueAssignmentResult>) => VenueAssignmentResult)
+
+type EagerAffectedRecords = {
+  readonly gameUpdated?: boolean | null;
+  readonly playerEntriesUpdated?: number | null;
+  readonly playerVenueRecordsCreated?: number | null;
+  readonly playersWithRegistrationUpdated?: number | null;
+  readonly playerSummariesUpdated?: number | null;
+}
+
+type LazyAffectedRecords = {
+  readonly gameUpdated?: boolean | null;
+  readonly playerEntriesUpdated?: number | null;
+  readonly playerVenueRecordsCreated?: number | null;
+  readonly playersWithRegistrationUpdated?: number | null;
+  readonly playerSummariesUpdated?: number | null;
+}
+
+export declare type AffectedRecords = LazyLoading extends LazyLoadingDisabled ? EagerAffectedRecords : LazyAffectedRecords
+
+export declare const AffectedRecords: (new (init: ModelInit<AffectedRecords>) => AffectedRecords)
+
+type EagerBatchVenueAssignmentResult = {
+  readonly successful?: (VenueAssignmentResult | null)[] | null;
+  readonly failed?: (VenueAssignmentResult | null)[] | null;
+  readonly totalProcessed?: number | null;
+}
+
+type LazyBatchVenueAssignmentResult = {
+  readonly successful?: (VenueAssignmentResult | null)[] | null;
+  readonly failed?: (VenueAssignmentResult | null)[] | null;
+  readonly totalProcessed?: number | null;
+}
+
+export declare type BatchVenueAssignmentResult = LazyLoading extends LazyLoadingDisabled ? EagerBatchVenueAssignmentResult : LazyBatchVenueAssignmentResult
+
+export declare const BatchVenueAssignmentResult: (new (init: ModelInit<BatchVenueAssignmentResult>) => BatchVenueAssignmentResult)
 
 type EagerScraperJobURLResult = {
   readonly url: string;
@@ -929,6 +1027,7 @@ type EagerVenue = {
   readonly address?: string | null;
   readonly city?: string | null;
   readonly country?: string | null;
+  readonly isSpecial?: boolean | null;
   readonly details?: VenueDetails | null;
   readonly assets?: (Asset | null)[] | null;
   readonly games?: (Game | null)[] | null;
@@ -952,6 +1051,7 @@ type LazyVenue = {
   readonly address?: string | null;
   readonly city?: string | null;
   readonly country?: string | null;
+  readonly isSpecial?: boolean | null;
   readonly details: AsyncItem<VenueDetails | undefined>;
   readonly assets: AsyncCollection<Asset>;
   readonly games: AsyncCollection<Game>;
@@ -1061,7 +1161,7 @@ type EagerTournamentSeries = {
   readonly actualPrizepool?: number | null;
   readonly tournamentSeriesTitleId: string;
   readonly title?: TournamentSeriesTitle | null;
-  readonly venueId: string;
+  readonly venueId?: string | null;
   readonly venue?: Venue | null;
   readonly games?: (Game | null)[] | null;
   readonly createdAt?: string | null;
@@ -1086,7 +1186,7 @@ type LazyTournamentSeries = {
   readonly actualPrizepool?: number | null;
   readonly tournamentSeriesTitleId: string;
   readonly title: AsyncItem<TournamentSeriesTitle | undefined>;
-  readonly venueId: string;
+  readonly venueId?: string | null;
   readonly venue: AsyncItem<Venue | undefined>;
   readonly games: AsyncCollection<Game>;
   readonly createdAt?: string | null;
@@ -1140,7 +1240,11 @@ type EagerGame = {
   readonly tournamentId?: number | null;
   readonly dataSource?: DataSource | keyof typeof DataSource | null;
   readonly originalScrapedData?: string | null;
-  readonly venueId: string;
+  readonly venueAssignmentStatus?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
+  readonly requiresVenueAssignment?: boolean | null;
+  readonly suggestedVenueName?: string | null;
+  readonly venueAssignmentConfidence?: number | null;
+  readonly venueId?: string | null;
   readonly venue?: Venue | null;
   readonly tournamentSeriesId?: string | null;
   readonly tournamentSeries?: TournamentSeries | null;
@@ -1193,7 +1297,11 @@ type LazyGame = {
   readonly tournamentId?: number | null;
   readonly dataSource?: DataSource | keyof typeof DataSource | null;
   readonly originalScrapedData?: string | null;
-  readonly venueId: string;
+  readonly venueAssignmentStatus?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
+  readonly requiresVenueAssignment?: boolean | null;
+  readonly suggestedVenueName?: string | null;
+  readonly venueAssignmentConfidence?: number | null;
+  readonly venueId?: string | null;
   readonly venue: AsyncItem<Venue | undefined>;
   readonly tournamentSeriesId?: string | null;
   readonly tournamentSeries: AsyncItem<TournamentSeries | undefined>;
@@ -1370,7 +1478,8 @@ type EagerPlayer = {
   readonly playerTransactions?: (PlayerTransaction | null)[] | null;
   readonly playerCredits?: (PlayerCredits | null)[] | null;
   readonly playerPoints?: (PlayerPoints | null)[] | null;
-  readonly registrationVenueId: string;
+  readonly venueAssignmentStatus?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
+  readonly registrationVenueId?: string | null;
   readonly registrationVenue?: Venue | null;
   readonly updatedAt: string;
   readonly createdAt?: string | null;
@@ -1405,7 +1514,8 @@ type LazyPlayer = {
   readonly playerTransactions: AsyncCollection<PlayerTransaction>;
   readonly playerCredits: AsyncCollection<PlayerCredits>;
   readonly playerPoints: AsyncCollection<PlayerPoints>;
-  readonly registrationVenueId: string;
+  readonly venueAssignmentStatus?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
+  readonly registrationVenueId?: string | null;
   readonly registrationVenue: AsyncItem<Venue | undefined>;
   readonly updatedAt: string;
   readonly createdAt?: string | null;
@@ -1491,7 +1601,7 @@ type EagerPlayerEntry = {
   readonly id: string;
   readonly playerId: string;
   readonly gameId: string;
-  readonly venueId: string;
+  readonly venueId?: string | null;
   readonly status: PlayerEntryStatus | keyof typeof PlayerEntryStatus;
   readonly registrationTime: string;
   readonly eliminationTime?: string | null;
@@ -1515,7 +1625,7 @@ type LazyPlayerEntry = {
   readonly id: string;
   readonly playerId: string;
   readonly gameId: string;
-  readonly venueId: string;
+  readonly venueId?: string | null;
   readonly status: PlayerEntryStatus | keyof typeof PlayerEntryStatus;
   readonly registrationTime: string;
   readonly eliminationTime?: string | null;

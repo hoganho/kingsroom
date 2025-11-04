@@ -1,6 +1,6 @@
 # ===================================================================
-# KINGSROOM SCHEMA - WITH SCRAPER ENHANCEMENTS
-# Version: 5.0.0
+# KINGSROOM SCHEMA - MERGED WITH VENUE REFACTOR
+# Version: 1.0.2 (Merged)
 # ===================================================================
 
 # ===================================================================
@@ -32,7 +32,19 @@ enum CreditTransactionType { AWARD_PROMOTION, AWARD_REFUND, AWARD_MANUAL, REDEEM
 enum PointsTransactionType { EARN_FROM_PLAY, EARN_FROM_PROMOTION, REDEEM_FOR_BUY_IN, REDEEM_FOR_MERCH, ADJUSTMENT_MANUAL, EXPIRED }
 
 # ===================================================================
-# 1A. NEW ENUMS FOR SCRAPER MANAGEMENT (ADDITIONS ONLY)
+# 1A. NEW ENUMS FOR VENUE ASSIGNMENT
+# ===================================================================
+
+enum VenueAssignmentStatus {
+  AUTO_ASSIGNED
+  MANUALLY_ASSIGNED
+  PENDING_ASSIGNMENT
+  UNASSIGNED
+  RETROACTIVE_ASSIGNED
+}
+
+# ===================================================================
+# 1B. EXISTING SCRAPER ENUMS
 # ===================================================================
 
 enum ScraperJobTriggerSource { SCHEDULED, MANUAL, API, CONTROL, BULK, ADMIN }
@@ -141,6 +153,8 @@ type Venue @model @auth(rules: [{ allow: private }]) {
   address: String
   city: String
   country: String
+  # ADD: Flag for special venues like "Unassigned"
+  isSpecial: Boolean @default(value: "false")
   details: VenueDetails @hasOne
   assets: [Asset] @hasMany(indexName: "byVenue", fields: ["id"])
   games: [Game] @hasMany(indexName: "byVenue", fields: ["id"])
@@ -186,7 +200,7 @@ type TournamentSeries @model @auth(rules: [{ allow: private }]) {
   actualPrizepool: Float
   tournamentSeriesTitleId: ID! @index(name: "byTournamentSeriesTitle", sortKeyFields: ["year"])
   title: TournamentSeriesTitle @belongsTo(fields: ["tournamentSeriesTitleId"])
-  venueId: ID! @index(name: "byVenue")
+  venueId: ID @index(name: "byVenue") # CHANGED: Made optional
   venue: Venue @belongsTo(fields: ["venueId"])
   games: [Game] @hasMany(indexName: "byTournamentSeries", fields: ["id"])
 }
@@ -237,7 +251,7 @@ type Game @model @auth(rules: [{ allow: private }]) {
 
   # --- Categorization & Metadata ---
   tournamentType: TournamentType
- 
+
   isRegular: Boolean
   isSeries: Boolean
   isSatellite: Boolean
@@ -246,24 +260,25 @@ type Game @model @auth(rules: [{ allow: private }]) {
 
   # --- Data Source (SIMPLE REFERENCE ONLY - NO SCRAPER FIELDS) ---
   sourceUrl: AWSURL @index(name: "bySourceUrl", queryField: "gameBySourceUrl")
-  # REMOVED: sourceSystem (moved to ScrapeURL)
   tournamentId: Int
   dataSource: DataSource
-  # REMOVED: doNotScrape (moved to ScrapeURL)
-  # REMOVED: sourceDataIssue (moved to ScrapeURL)
-  # REMOVED: gameDataVerified (moved to ScrapeURL)
-  # REMOVED: missingKeysFromScrape (moved to ScrapeURL)
   originalScrapedData: AWSJSON
 
+  # --- NEW: Venue Assignment Tracking ---
+  venueAssignmentStatus: VenueAssignmentStatus @default(value: "PENDING_ASSIGNMENT")
+  requiresVenueAssignment: Boolean @default(value: "false")
+  suggestedVenueName: String
+  venueAssignmentConfidence: Float
+
   # --- Relationships ---
-  venueId: ID! @index(name: "byVenue", sortKeyFields: ["gameStartDateTime"])
+  venueId: ID @index(name: "byVenue", sortKeyFields: ["gameStartDateTime"]) ## <-- CHANGED: Made optional
   venue: Venue @belongsTo(fields: ["venueId"])
   tournamentSeriesId: ID @index(name: "byTournamentSeries", sortKeyFields: ["gameStartDateTime"])
   tournamentSeries: TournamentSeries @belongsTo(fields: ["tournamentSeriesId"])
   structure: TournamentStructure @hasOne
   playerEntries: [PlayerEntry] @hasMany(indexName: "byGame", fields: ["id"])
   playerResults: [PlayerResult] @hasMany(indexName: "byGame", fields: ["id"])
-  
+
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -329,7 +344,7 @@ type Player @model @auth(rules: [{ allow: private }]) {
   lastPlayedDate: AWSDateTime
   creditBalance: Int
   pointsBalance: Int
-  
+
   # --- ADDED RELATIONSHIP FIELDS ---
   playerSummary: PlayerSummary @hasOne(fields: ["id"])
   knownIdentities: [KnownPlayerIdentity] @hasMany(indexName: "byPlayer", fields: ["id"])
@@ -337,15 +352,16 @@ type Player @model @auth(rules: [{ allow: private }]) {
   marketingMessages: [PlayerMarketingMessage] @hasMany(indexName: "byPlayer", fields: ["id"])
   # --- END ADDED FIELDS ---
 
-  playerVenues: [PlayerVenue] @hasMany(indexName: "byVenue", fields: ["id"]) 
-  playerEntries: [PlayerEntry] @hasMany(indexName: "byPlayer", fields: ["id"]) 
-  playerResults: [PlayerResult] @hasMany(indexName: "byPlayer", fields: ["id"]) 
-  playerTickets: [PlayerTicket] @hasMany(indexName: "byPlayer", fields: ["id"]) 
-  playerTransactions: [PlayerTransaction] @hasMany(indexName: "byPlayer", fields: ["id"]) 
-  playerCredits: [PlayerCredits] @hasMany(indexName: "byPlayer", fields: ["id"]) 
-  playerPoints: [PlayerPoints] @hasMany(indexName: "byPlayer", fields: ["id"]) 
-  
-  registrationVenueId: ID!  @index(name: "byRegistrationVenue")
+  playerVenues: [PlayerVenue] @hasMany(indexName: "byVenue", fields: ["id"])
+  playerEntries: [PlayerEntry] @hasMany(indexName: "byPlayer", fields: ["id"])
+  playerResults: [PlayerResult] @hasMany(indexName: "byPlayer", fields: ["id"])
+  playerTickets: [PlayerTicket] @hasMany(indexName: "byPlayer", fields: ["id"])
+  playerTransactions: [PlayerTransaction] @hasMany(indexName: "byPlayer", fields: ["id"])
+  playerCredits: [PlayerCredits] @hasMany(indexName: "byPlayer", fields: ["id"])
+  playerPoints: [PlayerPoints] @hasMany(indexName: "byPlayer", fields: ["id"])
+
+  venueAssignmentStatus: VenueAssignmentStatus @default(value: "PENDING_ASSIGNMENT")
+  registrationVenueId: ID @index(name: "byRegistrationVenue") ## <-- CHANGED: Made optional
   registrationVenue: Venue @belongsTo(fields: ["registrationVenueId"])
   updatedAt: AWSDateTime!
 }
@@ -380,7 +396,7 @@ type PlayerEntry @model @auth(rules: [{ allow: private }]) {
   id: ID!
   playerId: ID! @index(name: "byPlayer", sortKeyFields: ["gameStartDateTime"])
   gameId: ID! @index(name: "byGame")
-  venueId: ID! @index(name: "byVenue")
+  venueId: ID @index(name: "byVenue") ## <-- CHANGED: Made optional
   status: PlayerEntryStatus!
   registrationTime: AWSDateTime!
   eliminationTime: AWSDateTime
@@ -624,14 +640,14 @@ type ScrapeURL @model @auth(rules: [{ allow: private }]) {
   id: ID!
   url: AWSURL! @index(name: "byURL", queryField: "scrapeURLByURL")
   tournamentId: Int! @index(name: "byTournamentId")
-  
+
   # === FIELDS MOVED FROM GAME TABLE ===
   doNotScrape: Boolean!
   sourceDataIssue: Boolean
   gameDataVerified: Boolean
   missingKeysFromScrape: [String]
   sourceSystem: String! @index(name: "bySourceSystem", queryField: "scrapeURLsBySourceSystem", sortKeyFields: ["tournamentId"])
-  
+
   # === ORIGINAL SCRAPEURL FIELDS ===
   status: ScrapeURLStatus!
   placedIntoDatabase: Boolean!
@@ -693,28 +709,28 @@ type ScrapeAttempt @model @auth(rules: [{ allow: private }]) {
 # =================================================================
 
 input ClientMetricInput {
-    metricName: String!
-    value: Float!
-    unit: String!
-    dimensions: String
-    timestamp: String
-    metadata: String
+  metricName: String!
+  value: Float!
+  unit: String!
+  dimensions: String
+  timestamp: String
+  metadata: String
 }
 
 type ClientMetricResponse {
-    success: Boolean!
-    message: String
-    userId: String
+  success: Boolean!
+  message: String
+  userId: String
 }
 
 type UserMetricsSummary {
-    userId: String!
-    userName: String
-    totalActions: Int
-    totalPageViews: Int
-    totalErrors: Int
-    lastActive: String
-    mostUsedFeature: String
+  userId: String!
+  userName: String
+  totalActions: Int
+  totalPageViews: Int
+  totalErrors: Int
+  lastActive: String
+  mostUsedFeature: String
 }
 
 # =================================================================
@@ -725,7 +741,7 @@ type Query {
   fetchTournamentDataRange(startId: Int!, endId: Int!): [ScrapedGameSummary!] @function(name: "webScraperFunction-${env}")
   getScraperControlState: ScraperControlResponse @function(name: "autoScraper-${env}")
   fetchUpdateCandidates: [String!] @function(name: "webScraperFunction-${env}")
-  
+
   # NEW ENHANCED SCRAPER QUERIES
   getScraperJobsReport(status: ScraperJobStatus, limit: Int, nextToken: String): ScraperJobConnection @function(name: "scraperManagement-${env}")
   fetchScrapeURLDetails(url: AWSURL!): ScrapeURL @function(name: "scraperManagement-${env}")
@@ -733,47 +749,99 @@ type Query {
   getScraperMetrics(timeRange: TimeRange!): ScraperMetrics @function(name: "scraperManagement-${env}")
   getUpdateCandidateURLs(limit: Int): [ScrapeURL!] @function(name: "scraperManagement-${env}")
 
+  # --- NEW VENUE ASSIGNMENT QUERIES ---
+  listGamesNeedingVenue(limit: Int, nextToken: String): GamesNeedingVenueResponse @function(name: "venueAssignmentService-${env}")
+  getVenueAssignmentSummary: VenueAssignmentSummary @function(name: "venueAssignmentService-${env}")
+
   # NEW CLOUDWATCH MUTATIONS
   # Get current user's metrics summary
-    getMyMetrics(timeRange: String): UserMetricsSummary
+  getMyMetrics(timeRange: String): UserMetricsSummary
     @function(name: "getUserMetrics-${env}")
     @auth(rules: [
-        { allow: private }  # Users can only see their own metrics
+      { allow: private } # Users can only see their own metrics
     ])
-  
-  # Admin-only: Get any user's metrics  
+
+  # Admin-only: Get any user's metrics
   getUserMetrics(userId: String!, timeRange: String): UserMetricsSummary
     @function(name: "getUserMetrics-${env}")
     @auth(rules: [
       { allow: groups, groups: ["Admin"] }
     ])
-        
+
 }
 
 type Mutation {
   fetchTournamentData(url: AWSURL!): ScrapedGameData @function(name: "webScraperFunction-${env}")
   saveTournamentData(input: SaveTournamentInput!): Game @function(name: "webScraperFunction-${env}")
   controlScraperOperation(operation: ScraperOperation!): ScraperControlResponse @function(name: "autoScraper-${env}")
- 
+
   triggerAutoScraping(maxGames: Int): ScraperControlResponse @function(name: "autoScraper-${env}")
-  
+
   # NEW ENHANCED SCRAPER MUTATIONS
   startScraperJob(input: StartScraperJobInput!): ScraperJob @function(name: "scraperManagement-${env}")
   cancelScraperJob(jobId: String!): ScraperJob @function(name: "scraperManagement-${env}")
   modifyScrapeURLStatus(url: AWSURL!, status: ScrapeURLStatus, doNotScrape: Boolean): ScrapeURL @function(name: "scraperManagement-${env}")
   bulkModifyScrapeURLs(urls: [AWSURL!]!, status: ScrapeURLStatus, doNotScrape: Boolean): [ScrapeURL!] @function(name: "scraperManagement-${env}")
 
+  # --- NEW VENUE ASSIGNMENT MUTATIONS ---
+  assignVenueToGame(gameId: ID!, venueId: ID!): VenueAssignmentResult @function(name: "venueAssignmentService-${env}")
+  batchAssignVenues(assignments: [VenueAssignment!]!): BatchVenueAssignmentResult @function(name: "venueAssignmentService-${env}")
+
   # NEW CLOUDWATCH MUTATIONS (FIXED - NO operations argument)
   publishClientMetrics(metrics: [ClientMetricInput!]!): ClientMetricResponse
     @function(name: "publishClientMetrics-${env}")
     @auth(rules: [
-      { allow: private }  # Only authenticated users
+      { allow: private } # Only authenticated users
     ])
 }
 
 type Subscription {
   onScraperJobUpdate(jobId: String): ScraperJob @aws_subscribe(mutations: ["startScraperJob", "cancelScraperJob"])
   onScrapeURLStatusChange(url: AWSURL): ScrapeURL @aws_subscribe(mutations: ["modifyScrapeURLStatus", "bulkModifyScrapeURLs"])
+}
+
+# ===================================================================
+# NEW VENUE ASSIGNMENT TYPES
+# ===================================================================
+
+type GamesNeedingVenueResponse {
+  items: [Game]
+  nextToken: String
+  totalCount: Int
+}
+
+type VenueAssignmentSummary {
+  totalGames: Int
+  gamesWithVenue: Int
+  gamesNeedingVenue: Int
+  pendingAssignments: Int
+}
+
+type VenueAssignmentResult {
+  success: Boolean!
+  gameId: ID!
+  venueId: ID!
+  affectedRecords: AffectedRecords
+  error: String
+}
+
+type AffectedRecords {
+  gameUpdated: Boolean
+  playerEntriesUpdated: Int
+  playerVenueRecordsCreated: Int
+  playersWithRegistrationUpdated: Int
+  playerSummariesUpdated: Int
+}
+
+type BatchVenueAssignmentResult {
+  successful: [VenueAssignmentResult]
+  failed: [VenueAssignmentResult]
+  totalProcessed: Int
+}
+
+input VenueAssignment {
+  gameId: ID!
+  venueId: ID!
 }
 
 # NON-MODEL TYPES FOR SCRAPER OPERATIONS
@@ -825,11 +893,16 @@ type ScrapeURLConnection {
 
 input SaveTournamentInput {
   sourceUrl: AWSURL!
-  venueId: ID!
+  venueId: ID ## <-- CHANGED: Made optional
   existingGameId: ID
   doNotScrape: Boolean
   data: ScrapedGameDataInput!
   originalScrapedData: AWSJSON
+  # ADD: Venue assignment tracking
+  venueAssignmentStatus: VenueAssignmentStatus
+  requiresVenueAssignment: Boolean
+  suggestedVenueName: String
+  venueAssignmentConfidence: Float
 }
 
 input ScrapedGameDataInput {

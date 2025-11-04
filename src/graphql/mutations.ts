@@ -152,6 +152,10 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
     tournamentId
     dataSource
     originalScrapedData
+    venueAssignmentStatus
+    requiresVenueAssignment
+    suggestedVenueName
+    venueAssignmentConfidence
     venueId
     venue {
       id
@@ -161,6 +165,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -178,6 +183,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -251,6 +257,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -309,6 +316,10 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -318,6 +329,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -414,6 +426,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -461,6 +474,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -478,6 +492,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -597,6 +612,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -606,6 +622,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -693,6 +710,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -710,6 +728,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -784,6 +803,10 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -860,6 +883,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -919,6 +943,10 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -928,6 +956,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -1051,6 +1080,10 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -1060,6 +1093,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -1143,6 +1177,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -1217,6 +1252,10 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -1411,6 +1450,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -1420,6 +1460,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -1473,6 +1514,10 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -1482,6 +1527,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -1660,6 +1706,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -1669,6 +1716,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -1723,6 +1771,10 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -1732,6 +1784,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -2582,6 +2635,67 @@ export const bulkModifyScrapeURLs = /* GraphQL */ `mutation BulkModifyScrapeURLs
   APITypes.BulkModifyScrapeURLsMutationVariables,
   APITypes.BulkModifyScrapeURLsMutation
 >;
+export const assignVenueToGame = /* GraphQL */ `mutation AssignVenueToGame($gameId: ID!, $venueId: ID!) {
+  assignVenueToGame(gameId: $gameId, venueId: $venueId) {
+    success
+    gameId
+    venueId
+    affectedRecords {
+      gameUpdated
+      playerEntriesUpdated
+      playerVenueRecordsCreated
+      playersWithRegistrationUpdated
+      playerSummariesUpdated
+      __typename
+    }
+    error
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.AssignVenueToGameMutationVariables,
+  APITypes.AssignVenueToGameMutation
+>;
+export const batchAssignVenues = /* GraphQL */ `mutation BatchAssignVenues($assignments: [VenueAssignment!]!) {
+  batchAssignVenues(assignments: $assignments) {
+    successful {
+      success
+      gameId
+      venueId
+      affectedRecords {
+        gameUpdated
+        playerEntriesUpdated
+        playerVenueRecordsCreated
+        playersWithRegistrationUpdated
+        playerSummariesUpdated
+        __typename
+      }
+      error
+      __typename
+    }
+    failed {
+      success
+      gameId
+      venueId
+      affectedRecords {
+        gameUpdated
+        playerEntriesUpdated
+        playerVenueRecordsCreated
+        playersWithRegistrationUpdated
+        playerSummariesUpdated
+        __typename
+      }
+      error
+      __typename
+    }
+    totalProcessed
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.BatchAssignVenuesMutationVariables,
+  APITypes.BatchAssignVenuesMutation
+>;
 export const publishClientMetrics = /* GraphQL */ `mutation PublishClientMetrics($metrics: [ClientMetricInput!]!) {
   publishClientMetrics(metrics: $metrics) {
     success
@@ -2864,6 +2978,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
     address
     city
     country
+    isSpecial
     details {
       id
       startDate
@@ -2881,6 +2996,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -2898,6 +3014,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -2972,6 +3089,10 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -3048,6 +3169,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -3092,6 +3214,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -3191,6 +3314,10 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -3200,6 +3327,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -3283,6 +3411,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -3357,6 +3486,10 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -3473,6 +3606,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -3561,6 +3695,10 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -3694,6 +3832,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -3703,6 +3842,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -3727,6 +3867,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -3824,6 +3965,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -3889,6 +4031,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -4079,6 +4222,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -4088,6 +4232,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -4173,6 +4318,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
     address
     city
     country
+    isSpecial
     details {
       id
       startDate
@@ -4190,6 +4336,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -4207,6 +4354,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -4281,6 +4429,10 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -4357,6 +4509,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -4401,6 +4554,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -4500,6 +4654,10 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -4509,6 +4667,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -4592,6 +4751,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -4666,6 +4826,10 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -4782,6 +4946,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -4870,6 +5035,10 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -5003,6 +5172,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -5012,6 +5182,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5036,6 +5207,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -5133,6 +5305,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -5198,6 +5371,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -5388,6 +5562,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -5397,6 +5572,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -5482,6 +5658,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
     address
     city
     country
+    isSpecial
     details {
       id
       startDate
@@ -5499,6 +5676,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -5516,6 +5694,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5590,6 +5769,10 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -5666,6 +5849,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -5710,6 +5894,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -5809,6 +5994,10 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -5818,6 +6007,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -5901,6 +6091,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -5975,6 +6166,10 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -6091,6 +6286,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -6179,6 +6375,10 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -6312,6 +6512,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -6321,6 +6522,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -6345,6 +6547,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -6442,6 +6645,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -6507,6 +6711,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -6697,6 +6902,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -6706,6 +6912,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -6800,6 +7007,7 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -6817,6 +7025,7 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -6890,6 +7099,7 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -6948,6 +7158,10 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -6957,6 +7171,7 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7053,6 +7268,7 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7100,6 +7316,7 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -7117,6 +7334,7 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7236,6 +7454,7 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -7245,6 +7464,7 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7305,6 +7525,7 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -7322,6 +7543,7 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -7395,6 +7617,7 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7453,6 +7676,10 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -7462,6 +7689,7 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7558,6 +7786,7 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7605,6 +7834,7 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -7622,6 +7852,7 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7741,6 +7972,7 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -7750,6 +7982,7 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7810,6 +8043,7 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -7827,6 +8061,7 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -7900,6 +8135,7 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -7958,6 +8194,10 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -7967,6 +8207,7 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -8063,6 +8304,7 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -8110,6 +8352,7 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -8127,6 +8370,7 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -8246,6 +8490,7 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -8255,6 +8500,7 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -8341,6 +8587,7 @@ export const createTournamentSeriesTitle = /* GraphQL */ `mutation CreateTournam
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -8429,6 +8676,10 @@ export const createTournamentSeriesTitle = /* GraphQL */ `mutation CreateTournam
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -8513,6 +8764,7 @@ export const updateTournamentSeriesTitle = /* GraphQL */ `mutation UpdateTournam
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -8601,6 +8853,10 @@ export const updateTournamentSeriesTitle = /* GraphQL */ `mutation UpdateTournam
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -8685,6 +8941,7 @@ export const deleteTournamentSeriesTitle = /* GraphQL */ `mutation DeleteTournam
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -8773,6 +9030,10 @@ export const deleteTournamentSeriesTitle = /* GraphQL */ `mutation DeleteTournam
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -8865,6 +9126,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -8905,6 +9167,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -8922,6 +9185,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -8995,6 +9259,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -9053,6 +9318,10 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -9062,6 +9331,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -9158,6 +9428,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -9205,6 +9476,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -9222,6 +9494,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -9341,6 +9614,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -9350,6 +9624,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -9416,6 +9691,10 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -9425,6 +9704,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -9508,6 +9788,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -9582,6 +9863,10 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -9726,6 +10011,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -9766,6 +10052,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -9783,6 +10070,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -9856,6 +10144,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -9914,6 +10203,10 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -9923,6 +10216,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -10019,6 +10313,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -10066,6 +10361,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -10083,6 +10379,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -10202,6 +10499,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -10211,6 +10509,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -10277,6 +10576,10 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -10286,6 +10589,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -10369,6 +10673,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -10443,6 +10748,10 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -10587,6 +10896,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -10627,6 +10937,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -10644,6 +10955,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -10717,6 +11029,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -10775,6 +11088,10 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -10784,6 +11101,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -10880,6 +11198,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -10927,6 +11246,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -10944,6 +11264,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -11063,6 +11384,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -11072,6 +11394,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -11138,6 +11461,10 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -11147,6 +11474,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -11230,6 +11558,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -11304,6 +11633,10 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -11435,6 +11768,10 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
     tournamentId
     dataSource
     originalScrapedData
+    venueAssignmentStatus
+    requiresVenueAssignment
+    suggestedVenueName
+    venueAssignmentConfidence
     venueId
     venue {
       id
@@ -11444,6 +11781,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -11461,6 +11799,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -11534,6 +11873,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -11592,6 +11932,10 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -11601,6 +11945,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -11697,6 +12042,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -11744,6 +12090,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -11761,6 +12108,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -11880,6 +12228,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -11889,6 +12238,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -11976,6 +12326,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -11993,6 +12344,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12067,6 +12419,10 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -12143,6 +12499,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -12202,6 +12559,10 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -12211,6 +12572,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12334,6 +12696,10 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -12343,6 +12709,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -12426,6 +12793,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12500,6 +12868,10 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -12694,6 +13066,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -12703,6 +13076,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12756,6 +13130,10 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -12765,6 +13143,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -12943,6 +13322,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -12952,6 +13332,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13006,6 +13387,10 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -13015,6 +13400,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13139,6 +13525,10 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
     tournamentId
     dataSource
     originalScrapedData
+    venueAssignmentStatus
+    requiresVenueAssignment
+    suggestedVenueName
+    venueAssignmentConfidence
     venueId
     venue {
       id
@@ -13148,6 +13538,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -13165,6 +13556,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -13238,6 +13630,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13296,6 +13689,10 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -13305,6 +13702,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13401,6 +13799,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13448,6 +13847,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -13465,6 +13865,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13584,6 +13985,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -13593,6 +13995,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13680,6 +14083,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -13697,6 +14101,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -13771,6 +14176,10 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -13847,6 +14256,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -13906,6 +14316,10 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -13915,6 +14329,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -14038,6 +14453,10 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -14047,6 +14466,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -14130,6 +14550,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -14204,6 +14625,10 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -14398,6 +14823,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -14407,6 +14833,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -14460,6 +14887,10 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -14469,6 +14900,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -14647,6 +15079,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -14656,6 +15089,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -14710,6 +15144,10 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -14719,6 +15157,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -14843,6 +15282,10 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
     tournamentId
     dataSource
     originalScrapedData
+    venueAssignmentStatus
+    requiresVenueAssignment
+    suggestedVenueName
+    venueAssignmentConfidence
     venueId
     venue {
       id
@@ -14852,6 +15295,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -14869,6 +15313,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -14942,6 +15387,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -15000,6 +15446,10 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -15009,6 +15459,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -15105,6 +15556,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -15152,6 +15604,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -15169,6 +15622,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -15288,6 +15742,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -15297,6 +15752,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -15384,6 +15840,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -15401,6 +15858,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -15475,6 +15933,10 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -15551,6 +16013,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -15610,6 +16073,10 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -15619,6 +16086,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -15742,6 +16210,10 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
         tournamentId
         dataSource
         originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
         venueId
         venue {
           id
@@ -15751,6 +16223,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -15834,6 +16307,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -15908,6 +16382,10 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -16102,6 +16580,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -16111,6 +16590,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -16164,6 +16644,10 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -16173,6 +16657,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -16351,6 +16836,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -16360,6 +16846,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -16414,6 +16901,10 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -16423,6 +16914,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -16563,6 +17055,10 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -16572,6 +17068,7 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -16589,6 +17086,7 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -16663,6 +17161,10 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -16739,6 +17241,7 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -16798,6 +17301,7 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -16886,6 +17390,10 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -16961,6 +17469,10 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -16970,6 +17482,7 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -17064,6 +17577,7 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -17110,6 +17624,10 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -17155,6 +17673,7 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -17202,6 +17721,10 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -17301,6 +17824,10 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -17310,6 +17837,7 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -17327,6 +17855,7 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -17401,6 +17930,10 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -17477,6 +18010,7 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -17536,6 +18070,7 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -17624,6 +18159,10 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -17699,6 +18238,10 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -17708,6 +18251,7 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -17802,6 +18346,7 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -17848,6 +18393,10 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -17893,6 +18442,7 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -17940,6 +18490,10 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -18039,6 +18593,10 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -18048,6 +18606,7 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -18065,6 +18624,7 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -18139,6 +18699,10 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -18215,6 +18779,7 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -18274,6 +18839,7 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -18362,6 +18928,10 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -18437,6 +19007,10 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -18446,6 +19020,7 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -18540,6 +19115,7 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -18586,6 +19162,10 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -18631,6 +19211,7 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -18678,6 +19259,10 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -18991,6 +19576,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -19056,6 +19642,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -19246,6 +19833,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -19255,6 +19843,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -19437,6 +20026,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -19446,6 +20036,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -19513,6 +20104,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -19578,6 +20170,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -19768,6 +20361,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -19777,6 +20371,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -19966,6 +20561,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -19975,6 +20571,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -19999,6 +20596,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -20173,6 +20771,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -20182,6 +20781,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -20235,6 +20835,10 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -20244,6 +20848,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -20422,6 +21027,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -20431,6 +21037,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -20485,6 +21092,10 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -20494,6 +21105,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -20670,6 +21282,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -20679,6 +21292,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -20835,6 +21449,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -20844,6 +21459,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -20980,6 +21596,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -20989,6 +21606,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21126,6 +21744,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -21135,6 +21754,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21163,6 +21783,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
       startedAt
       __typename
     }
+    venueAssignmentStatus
     registrationVenueId
     registrationVenue {
       id
@@ -21172,6 +21793,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -21189,6 +21811,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -21262,6 +21885,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21320,6 +21944,10 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -21329,6 +21957,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21425,6 +22054,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21472,6 +22102,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -21489,6 +22120,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21608,6 +22240,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -21617,6 +22250,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -21718,6 +22352,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -21783,6 +22418,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -21973,6 +22609,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -21982,6 +22619,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -22164,6 +22802,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -22173,6 +22812,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -22240,6 +22880,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -22305,6 +22946,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -22495,6 +23137,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -22504,6 +23147,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -22693,6 +23337,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -22702,6 +23347,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -22726,6 +23372,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -22900,6 +23547,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -22909,6 +23557,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -22962,6 +23611,10 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -22971,6 +23624,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -23149,6 +23803,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -23158,6 +23813,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -23212,6 +23868,10 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -23221,6 +23881,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -23397,6 +24058,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -23406,6 +24068,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -23562,6 +24225,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -23571,6 +24235,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -23707,6 +24372,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -23716,6 +24382,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -23853,6 +24520,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -23862,6 +24530,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -23890,6 +24559,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
       startedAt
       __typename
     }
+    venueAssignmentStatus
     registrationVenueId
     registrationVenue {
       id
@@ -23899,6 +24569,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -23916,6 +24587,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -23989,6 +24661,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24047,6 +24720,10 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -24056,6 +24733,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24152,6 +24830,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24199,6 +24878,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -24216,6 +24896,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24335,6 +25016,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -24344,6 +25026,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24445,6 +25128,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -24510,6 +25194,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -24700,6 +25385,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -24709,6 +25395,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -24891,6 +25578,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -24900,6 +25588,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -24967,6 +25656,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -25032,6 +25722,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -25222,6 +25913,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           startedAt
           __typename
         }
+        venueAssignmentStatus
         registrationVenueId
         registrationVenue {
           id
@@ -25231,6 +25923,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -25420,6 +26113,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -25429,6 +26123,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -25453,6 +26148,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -25627,6 +26323,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -25636,6 +26333,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -25689,6 +26387,10 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -25698,6 +26400,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -25876,6 +26579,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -25885,6 +26589,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -25939,6 +26644,10 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -25948,6 +26657,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -26124,6 +26834,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -26133,6 +26844,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -26289,6 +27001,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -26298,6 +27011,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -26434,6 +27148,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -26443,6 +27158,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -26580,6 +27296,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -26589,6 +27306,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -26617,6 +27335,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
       startedAt
       __typename
     }
+    venueAssignmentStatus
     registrationVenueId
     registrationVenue {
       id
@@ -26626,6 +27345,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -26643,6 +27363,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -26716,6 +27437,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -26774,6 +27496,10 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -26783,6 +27509,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -26879,6 +27606,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -26926,6 +27654,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -26943,6 +27672,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -27062,6 +27792,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -27071,6 +27802,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -27243,6 +27975,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -27252,6 +27985,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -27308,6 +28042,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27431,6 +28166,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -27440,6 +28176,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -27503,6 +28240,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27520,6 +28258,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -27568,6 +28307,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27614,6 +28354,10 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -27659,6 +28403,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27706,6 +28451,10 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -27749,6 +28498,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27808,6 +28558,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27852,6 +28603,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27897,6 +28649,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -27918,6 +28671,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -27927,6 +28681,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -27944,6 +28699,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -28018,6 +28774,10 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -28094,6 +28854,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28279,6 +29040,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -28288,6 +29050,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -28344,6 +29107,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28467,6 +29231,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -28476,6 +29241,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -28539,6 +29305,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28556,6 +29323,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -28604,6 +29372,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28650,6 +29419,10 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -28695,6 +29468,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28742,6 +29516,10 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -28785,6 +29563,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28844,6 +29623,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28888,6 +29668,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28933,6 +29714,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -28954,6 +29736,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -28963,6 +29746,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -28980,6 +29764,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -29054,6 +29839,10 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -29130,6 +29919,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29315,6 +30105,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -29324,6 +30115,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -29380,6 +30172,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29503,6 +30296,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -29512,6 +30306,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -29575,6 +30370,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29592,6 +30388,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -29640,6 +30437,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29686,6 +30484,10 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -29731,6 +30533,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29778,6 +30581,10 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -29821,6 +30628,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29880,6 +30688,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29924,6 +30733,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29969,6 +30779,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -29990,6 +30801,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -29999,6 +30811,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -30016,6 +30829,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -30090,6 +30904,10 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -30166,6 +30984,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30357,6 +31176,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -30366,6 +31186,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -30422,6 +31243,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30545,6 +31367,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -30554,6 +31377,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -30617,6 +31441,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30634,6 +31459,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -30682,6 +31508,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30728,6 +31555,10 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -30773,6 +31604,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30820,6 +31652,10 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -30863,6 +31699,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30922,6 +31759,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -30966,6 +31804,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -31011,6 +31850,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -31032,6 +31872,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -31041,6 +31882,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -31058,6 +31900,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -31132,6 +31975,10 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -31208,6 +32055,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -31273,6 +32121,10 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -31282,6 +32134,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -31299,6 +32152,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -31373,6 +32227,10 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -31449,6 +32307,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -31508,6 +32367,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -31596,6 +32456,10 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -31671,6 +32535,10 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -31680,6 +32548,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -31774,6 +32643,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -31820,6 +32690,10 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -31865,6 +32739,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -31912,6 +32787,10 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -32092,6 +32971,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -32101,6 +32981,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -32157,6 +33038,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32280,6 +33162,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -32289,6 +33172,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -32352,6 +33236,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32369,6 +33254,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -32417,6 +33303,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32463,6 +33350,10 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -32508,6 +33399,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32555,6 +33447,10 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -32598,6 +33494,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32657,6 +33554,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32701,6 +33599,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32746,6 +33645,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -32767,6 +33667,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -32776,6 +33677,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -32793,6 +33695,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -32867,6 +33770,10 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -32943,6 +33850,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -33008,6 +33916,10 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -33017,6 +33929,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -33034,6 +33947,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -33108,6 +34022,10 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -33184,6 +34102,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -33243,6 +34162,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -33331,6 +34251,10 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -33406,6 +34330,10 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -33415,6 +34343,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -33509,6 +34438,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -33555,6 +34485,10 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -33600,6 +34534,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -33647,6 +34582,10 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -33827,6 +34766,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -33836,6 +34776,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -33892,6 +34833,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34015,6 +34957,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -34024,6 +34967,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -34087,6 +35031,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34104,6 +35049,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -34152,6 +35098,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34198,6 +35145,10 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -34243,6 +35194,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34290,6 +35242,10 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -34333,6 +35289,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34392,6 +35349,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34436,6 +35394,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34481,6 +35440,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34502,6 +35462,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -34511,6 +35472,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -34528,6 +35490,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -34602,6 +35565,10 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -34678,6 +35645,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34743,6 +35711,10 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -34752,6 +35724,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -34769,6 +35742,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -34843,6 +35817,10 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -34919,6 +35897,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -34978,6 +35957,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -35066,6 +36046,10 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -35141,6 +36125,10 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -35150,6 +36138,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -35244,6 +36233,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35290,6 +36280,10 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -35335,6 +36329,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35382,6 +36377,10 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -35557,6 +36556,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -35566,6 +36566,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -35622,6 +36623,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35745,6 +36747,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -35754,6 +36757,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -35817,6 +36821,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35834,6 +36839,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -35882,6 +36888,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -35928,6 +36935,10 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -35973,6 +36984,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -36020,6 +37032,10 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -36063,6 +37079,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -36122,6 +37139,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -36166,6 +37184,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -36211,6 +37230,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -36232,6 +37252,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -36241,6 +37262,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -36258,6 +37280,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -36332,6 +37355,10 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -36408,6 +37435,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -36474,6 +37502,10 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -36483,6 +37515,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -36500,6 +37533,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -36574,6 +37608,10 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -36650,6 +37688,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -36709,6 +37748,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -36797,6 +37837,10 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -36872,6 +37916,10 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -36881,6 +37929,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -36975,6 +38024,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37021,6 +38071,10 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -37066,6 +38120,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37113,6 +38168,10 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -37288,6 +38347,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -37297,6 +38357,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -37353,6 +38414,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37476,6 +38538,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -37485,6 +38548,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -37548,6 +38612,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37565,6 +38630,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -37613,6 +38679,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37659,6 +38726,10 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -37704,6 +38775,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37751,6 +38823,10 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -37794,6 +38870,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37853,6 +38930,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37897,6 +38975,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37942,6 +39021,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -37963,6 +39043,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -37972,6 +39053,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -37989,6 +39071,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -38063,6 +39146,10 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -38139,6 +39226,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -38205,6 +39293,10 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -38214,6 +39306,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -38231,6 +39324,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -38305,6 +39399,10 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -38381,6 +39479,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -38440,6 +39539,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -38528,6 +39628,10 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -38603,6 +39707,10 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -38612,6 +39720,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -38706,6 +39815,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -38752,6 +39862,10 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -38797,6 +39911,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -38844,6 +39959,10 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -39019,6 +40138,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -39028,6 +40148,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -39084,6 +40205,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -39207,6 +40329,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -39216,6 +40339,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -39279,6 +40403,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -39296,6 +40421,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -39344,6 +40470,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -39390,6 +40517,10 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -39435,6 +40566,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -39482,6 +40614,10 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -39525,6 +40661,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -39584,6 +40721,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -39628,6 +40766,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -39673,6 +40812,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -39694,6 +40834,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -39703,6 +40844,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -39720,6 +40862,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -39794,6 +40937,10 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -39870,6 +41017,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -39936,6 +41084,10 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
       tournamentId
       dataSource
       originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
       venueId
       venue {
         id
@@ -39945,6 +41097,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -39962,6 +41115,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -40036,6 +41190,10 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -40112,6 +41270,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -40171,6 +41330,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -40259,6 +41419,10 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -40334,6 +41498,10 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -40343,6 +41511,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -40437,6 +41606,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -40483,6 +41653,10 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -40528,6 +41702,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -40575,6 +41750,10 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -40749,6 +41928,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -40758,6 +41938,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -40814,6 +41995,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -40937,6 +42119,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -40946,6 +42129,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41009,6 +42193,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -41026,6 +42211,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41074,6 +42260,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -41120,6 +42307,10 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -41165,6 +42356,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -41212,6 +42404,10 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -41255,6 +42451,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -41314,6 +42511,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -41358,6 +42556,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -41403,6 +42602,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -41424,6 +42624,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -41433,6 +42634,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -41450,6 +42652,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41524,6 +42727,10 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -41600,6 +42807,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -41636,6 +42844,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -41653,6 +42862,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -41726,6 +42936,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41784,6 +42995,10 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -41793,6 +43008,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41889,6 +43105,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -41936,6 +43153,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -41953,6 +43171,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -42072,6 +43291,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -42081,6 +43301,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -42253,6 +43474,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -42262,6 +43484,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -42318,6 +43541,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -42441,6 +43665,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -42450,6 +43675,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -42513,6 +43739,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -42530,6 +43757,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -42578,6 +43806,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -42624,6 +43853,10 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -42669,6 +43902,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -42716,6 +43950,10 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -42759,6 +43997,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -42818,6 +44057,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -42862,6 +44102,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -42907,6 +44148,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -42928,6 +44170,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -42937,6 +44180,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -42954,6 +44198,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -43028,6 +44273,10 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -43104,6 +44353,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -43140,6 +44390,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -43157,6 +44408,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -43230,6 +44482,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -43288,6 +44541,10 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -43297,6 +44554,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -43393,6 +44651,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -43440,6 +44699,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -43457,6 +44717,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -43576,6 +44837,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -43585,6 +44847,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -43757,6 +45020,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -43766,6 +45030,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -43822,6 +45087,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -43945,6 +45211,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -43954,6 +45221,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -44017,6 +45285,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44034,6 +45303,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -44082,6 +45352,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44128,6 +45399,10 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -44173,6 +45448,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44220,6 +45496,10 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -44263,6 +45543,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44322,6 +45603,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44366,6 +45648,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44411,6 +45694,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44432,6 +45716,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -44441,6 +45726,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -44458,6 +45744,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -44532,6 +45819,10 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -44608,6 +45899,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44644,6 +45936,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -44661,6 +45954,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -44734,6 +46028,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -44792,6 +46087,10 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -44801,6 +46100,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -44897,6 +46197,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -44944,6 +46245,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -44961,6 +46263,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -45080,6 +46383,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -45089,6 +46393,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -45262,6 +46567,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -45271,6 +46577,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -45327,6 +46634,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45450,6 +46758,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -45459,6 +46768,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -45522,6 +46832,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45539,6 +46850,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -45587,6 +46899,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45633,6 +46946,10 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -45678,6 +46995,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45725,6 +47043,10 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -45768,6 +47090,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45827,6 +47150,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45871,6 +47195,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45916,6 +47241,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -45937,6 +47263,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -45946,6 +47273,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -45963,6 +47291,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -46037,6 +47366,10 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -46113,6 +47446,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46287,6 +47621,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -46296,6 +47631,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -46352,6 +47688,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46475,6 +47812,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -46484,6 +47822,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -46547,6 +47886,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46564,6 +47904,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -46612,6 +47953,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46658,6 +48000,10 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -46703,6 +48049,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46750,6 +48097,10 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -46793,6 +48144,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46852,6 +48204,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46896,6 +48249,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46941,6 +48295,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -46962,6 +48317,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -46971,6 +48327,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -46988,6 +48345,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -47062,6 +48420,10 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -47138,6 +48500,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47312,6 +48675,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -47321,6 +48685,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -47377,6 +48742,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47500,6 +48866,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -47509,6 +48876,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -47572,6 +48940,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47589,6 +48958,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -47637,6 +49007,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47683,6 +49054,10 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -47728,6 +49103,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47775,6 +49151,10 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -47818,6 +49198,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47877,6 +49258,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47921,6 +49303,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47966,6 +49349,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -47987,6 +49371,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -47996,6 +49381,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -48013,6 +49399,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -48087,6 +49474,10 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -48163,6 +49554,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48337,6 +49729,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -48346,6 +49739,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -48402,6 +49796,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48525,6 +49920,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -48534,6 +49930,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -48597,6 +49994,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48614,6 +50012,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -48662,6 +50061,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48708,6 +50108,10 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -48753,6 +50157,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48800,6 +50205,10 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -48843,6 +50252,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48902,6 +50312,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48946,6 +50357,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -48991,6 +50403,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49012,6 +50425,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -49021,6 +50435,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -49038,6 +50453,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -49112,6 +50528,10 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -49188,6 +50608,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49363,6 +50784,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -49372,6 +50794,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -49428,6 +50851,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49551,6 +50975,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -49560,6 +50985,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -49623,6 +51049,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49640,6 +51067,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -49688,6 +51116,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49734,6 +51163,10 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -49779,6 +51212,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49826,6 +51260,10 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -49869,6 +51307,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49928,6 +51367,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -49972,6 +51412,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50017,6 +51458,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50038,6 +51480,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -50047,6 +51490,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -50064,6 +51508,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -50138,6 +51583,10 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -50214,6 +51663,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50389,6 +51839,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -50398,6 +51849,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -50454,6 +51906,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50577,6 +52030,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -50586,6 +52040,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -50649,6 +52104,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50666,6 +52122,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -50714,6 +52171,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50760,6 +52218,10 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -50805,6 +52267,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50852,6 +52315,10 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -50895,6 +52362,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50954,6 +52422,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -50998,6 +52467,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51043,6 +52513,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51064,6 +52535,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -51073,6 +52545,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -51090,6 +52563,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -51164,6 +52638,10 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -51240,6 +52718,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51415,6 +52894,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -51424,6 +52904,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -51480,6 +52961,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51603,6 +53085,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -51612,6 +53095,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -51675,6 +53159,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51692,6 +53177,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -51740,6 +53226,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51786,6 +53273,10 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -51831,6 +53322,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51878,6 +53370,10 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -51921,6 +53417,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -51980,6 +53477,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52024,6 +53522,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52069,6 +53568,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52090,6 +53590,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -52099,6 +53600,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -52116,6 +53618,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -52190,6 +53693,10 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -52266,6 +53773,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52441,6 +53949,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -52450,6 +53959,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -52506,6 +54016,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52629,6 +54140,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -52638,6 +54150,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -52701,6 +54214,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52718,6 +54232,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -52766,6 +54281,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52812,6 +54328,10 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -52857,6 +54377,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -52904,6 +54425,10 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -52947,6 +54472,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53006,6 +54532,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53050,6 +54577,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53095,6 +54623,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53116,6 +54645,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -53125,6 +54655,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -53142,6 +54673,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -53216,6 +54748,10 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -53292,6 +54828,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53467,6 +55004,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -53476,6 +55014,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -53532,6 +55071,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53655,6 +55195,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -53664,6 +55205,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -53727,6 +55269,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53744,6 +55287,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -53792,6 +55336,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53838,6 +55383,10 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -53883,6 +55432,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -53930,6 +55480,10 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -53973,6 +55527,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54032,6 +55587,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54076,6 +55632,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54121,6 +55678,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54142,6 +55700,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -54151,6 +55710,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -54168,6 +55728,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -54242,6 +55803,10 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -54318,6 +55883,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54490,6 +56056,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -54499,6 +56066,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -54555,6 +56123,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54678,6 +56247,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -54687,6 +56257,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -54750,6 +56321,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54767,6 +56339,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -54815,6 +56388,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54861,6 +56435,10 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -54906,6 +56484,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -54953,6 +56532,10 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -54996,6 +56579,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -55055,6 +56639,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -55099,6 +56684,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -55144,6 +56730,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -55165,6 +56752,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -55174,6 +56762,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -55191,6 +56780,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -55265,6 +56855,10 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -55341,6 +56935,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -55511,6 +57106,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -55520,6 +57116,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -55576,6 +57173,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -55699,6 +57297,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -55708,6 +57307,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -55771,6 +57371,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -55788,6 +57389,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -55836,6 +57438,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -55882,6 +57485,10 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -55927,6 +57534,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -55974,6 +57582,10 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -56017,6 +57629,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56076,6 +57689,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56120,6 +57734,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56165,6 +57780,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56186,6 +57802,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -56195,6 +57812,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -56212,6 +57830,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -56286,6 +57905,10 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -56362,6 +57985,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56532,6 +58156,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -56541,6 +58166,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -56597,6 +58223,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56720,6 +58347,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -56729,6 +58357,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -56792,6 +58421,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56809,6 +58439,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -56857,6 +58488,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56903,6 +58535,10 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -56948,6 +58584,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -56995,6 +58632,10 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -57038,6 +58679,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57097,6 +58739,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57141,6 +58784,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57186,6 +58830,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57207,6 +58852,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -57216,6 +58862,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -57233,6 +58880,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -57307,6 +58955,10 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -57383,6 +59035,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -57541,6 +59194,7 @@ export const createTicketTemplate = /* GraphQL */ `mutation CreateTicketTemplate
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -57550,6 +59204,7 @@ export const createTicketTemplate = /* GraphQL */ `mutation CreateTicketTemplate
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -57728,6 +59383,7 @@ export const updateTicketTemplate = /* GraphQL */ `mutation UpdateTicketTemplate
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -57737,6 +59393,7 @@ export const updateTicketTemplate = /* GraphQL */ `mutation UpdateTicketTemplate
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -57915,6 +59572,7 @@ export const deleteTicketTemplate = /* GraphQL */ `mutation DeleteTicketTemplate
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -57924,6 +59582,7 @@ export const deleteTicketTemplate = /* GraphQL */ `mutation DeleteTicketTemplate
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -58115,6 +59774,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -58124,6 +59784,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -58180,6 +59841,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -58303,6 +59965,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -58312,6 +59975,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -58375,6 +60039,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -58392,6 +60057,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -58440,6 +60106,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -58486,6 +60153,10 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -58531,6 +60202,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -58578,6 +60250,10 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -58621,6 +60297,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -58680,6 +60357,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -58724,6 +60402,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -58769,6 +60448,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -58790,6 +60470,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -58799,6 +60480,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -58816,6 +60498,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -58890,6 +60573,10 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -58966,6 +60653,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59024,6 +60712,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59210,6 +60899,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -59219,6 +60909,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -59275,6 +60966,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59398,6 +61090,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -59407,6 +61100,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -59470,6 +61164,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59487,6 +61182,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -59535,6 +61231,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59581,6 +61278,10 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -59626,6 +61327,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59673,6 +61375,10 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -59716,6 +61422,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59775,6 +61482,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59819,6 +61527,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59864,6 +61573,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -59885,6 +61595,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -59894,6 +61605,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -59911,6 +61623,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -59985,6 +61698,10 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -60061,6 +61778,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60119,6 +61837,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60305,6 +62024,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -60314,6 +62034,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -60370,6 +62091,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60493,6 +62215,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -60502,6 +62225,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -60565,6 +62289,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60582,6 +62307,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -60630,6 +62356,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60676,6 +62403,10 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -60721,6 +62452,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60768,6 +62500,10 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -60811,6 +62547,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60870,6 +62607,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60914,6 +62652,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60959,6 +62698,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -60980,6 +62720,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -60989,6 +62730,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -61006,6 +62748,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -61080,6 +62823,10 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -61156,6 +62903,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -61214,6 +62962,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -61584,6 +63333,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -61593,6 +63343,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -61649,6 +63400,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -61772,6 +63524,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -61781,6 +63534,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -61844,6 +63598,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -61861,6 +63616,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -61909,6 +63665,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -61955,6 +63712,10 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -62000,6 +63761,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -62047,6 +63809,10 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -62090,6 +63856,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -62149,6 +63916,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -62193,6 +63961,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -62238,6 +64007,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -62259,6 +64029,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -62268,6 +64039,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -62285,6 +64057,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -62359,6 +64132,10 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -62435,6 +64212,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -62604,6 +64382,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -62613,6 +64392,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -62669,6 +64449,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -62792,6 +64573,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -62801,6 +64583,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -62864,6 +64647,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -62881,6 +64665,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -62929,6 +64714,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -62975,6 +64761,10 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -63020,6 +64810,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -63067,6 +64858,10 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -63110,6 +64905,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -63169,6 +64965,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -63213,6 +65010,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -63258,6 +65056,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -63279,6 +65078,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -63288,6 +65088,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -63305,6 +65106,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -63379,6 +65181,10 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -63455,6 +65261,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -63624,6 +65431,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -63633,6 +65441,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -63689,6 +65498,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -63812,6 +65622,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -63821,6 +65632,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -63884,6 +65696,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -63901,6 +65714,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -63949,6 +65763,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -63995,6 +65810,10 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -64040,6 +65859,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -64087,6 +65907,10 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -64130,6 +65954,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -64189,6 +66014,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -64233,6 +66059,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -64278,6 +66105,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -64299,6 +66127,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
         startedAt
         __typename
       }
+      venueAssignmentStatus
       registrationVenueId
       registrationVenue {
         id
@@ -64308,6 +66137,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
         address
         city
         country
+        isSpecial
         details {
           id
           startDate
@@ -64325,6 +66155,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -64399,6 +66230,10 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             tournamentId
             dataSource
             originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
             venueId
             tournamentSeriesId
             createdAt
@@ -64475,6 +66310,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -64783,6 +66619,7 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -64800,6 +66637,7 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -64873,6 +66711,7 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -64931,6 +66770,10 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -64940,6 +66783,7 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -65036,6 +66880,7 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -65083,6 +66928,7 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -65100,6 +66946,7 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -65219,6 +67066,7 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -65228,6 +67076,7 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -65287,6 +67136,7 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -65304,6 +67154,7 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -65377,6 +67228,7 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -65435,6 +67287,10 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -65444,6 +67300,7 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -65540,6 +67397,7 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -65587,6 +67445,7 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -65604,6 +67463,7 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -65723,6 +67583,7 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -65732,6 +67593,7 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -65791,6 +67653,7 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
       address
       city
       country
+      isSpecial
       details {
         id
         startDate
@@ -65808,6 +67671,7 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
           address
           city
           country
+          isSpecial
           details {
             id
             startDate
@@ -65881,6 +67745,7 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -65939,6 +67804,10 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
           tournamentId
           dataSource
           originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
           venueId
           venue {
             id
@@ -65948,6 +67817,7 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -66044,6 +67914,7 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -66091,6 +67962,7 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
             lastPlayedDate
             creditBalance
             pointsBalance
+            venueAssignmentStatus
             registrationVenueId
             updatedAt
             createdAt
@@ -66108,6 +67980,7 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version
@@ -66227,6 +68100,7 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
             startedAt
             __typename
           }
+          venueAssignmentStatus
           registrationVenueId
           registrationVenue {
             id
@@ -66236,6 +68110,7 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
             address
             city
             country
+            isSpecial
             createdAt
             updatedAt
             _version

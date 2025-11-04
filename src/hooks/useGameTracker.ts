@@ -189,6 +189,13 @@ export const useGameTracker = () => {
                 });
             }
 
+            if (!data.venueMatch?.autoAssignedVenue) {
+                // Only add this if no venue was auto-assigned
+                missingFields.push(
+                    { model: 'Venue', field: 'all fields', reason: 'Venue must be selected manually' }
+                );
+            }
+
             missingFields.push(
                 { model: 'Venue', field: 'all fields', reason: 'Venue must be selected manually' },
                 { model: 'Player', field: 'all fields', reason: 'Player data cannot be scraped from this page' },
@@ -254,6 +261,13 @@ export const useGameTracker = () => {
         if (!game || !game.data) {
             updateJobStatus({ id, jobStatus: 'ERROR', errorMessage: "No data available to save." });
             return;
+        }
+        
+        // --- 3. LOGIC: Handle auto-assignment if no venueId is passed ---
+        let finalVenueId = venueId;
+        if (!finalVenueId && game.data.venueMatch?.autoAssignedVenue?.id) {
+            console.log(`[useGameTracker] No venue selected, using auto-assigned venue: ${game.data.venueMatch.autoAssignedVenue.name}`);
+            finalVenueId = game.data.venueMatch.autoAssignedVenue.id;
         }
         
         console.log(`[useGameTracker] Saving ${game.data.gameStatus} tournament: ${id}`);
