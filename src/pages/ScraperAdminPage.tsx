@@ -1,7 +1,7 @@
-// src/pages/ScraperAdminPage-Updated.tsx
-// Enhanced Scraper Administration Panel with CloudWatch Analytics
+// src/pages/ScraperAdminPage.tsx
+// Scraper Administration Panel (CloudWatch removed for performance)
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     Database, 
     List, 
@@ -10,11 +10,7 @@ import {
     Target, 
     Settings,
     RefreshCw,
-    BarChart3  // New icon for Analytics
 } from 'lucide-react';
-
-// Import CloudWatch monitoring
-import { useCloudWatchMetrics } from '../infrastructure/client-cloudwatch';
 
 // Import the tab components
 import { OverviewTab } from './scraper-admin-tabs/OverviewTab';
@@ -23,7 +19,7 @@ import { ManualTrackerTab } from './scraper-admin-tabs/ManualTrackerTab';
 import { BulkScraperTab } from './scraper-admin-tabs/BulkScraperTab';
 import { JobHistoryTab } from './scraper-admin-tabs/JobHistoryTab';
 import { URLManagementTab } from './scraper-admin-tabs/URLManagementTab';
-import { AnalyticsTab } from './scraper-admin-tabs/AnalyticsTab';
+//import { AnalyticsTab } from './scraper-admin-tabs/AnalyticsTab';
 import { SettingsTab } from './scraper-admin-tabs/SettingsTab';
 
 // Tab definitions
@@ -43,72 +39,22 @@ const tabs: Tab[] = [
     { key: 'auto', label: 'Auto Scrape', icon: <RefreshCw className="h-4 w-4" />, description: 'Automated scraping' },
     { key: 'jobs', label: 'Job History', icon: <Clock className="h-4 w-4" />, description: 'View all scraping jobs' },
     { key: 'urls', label: 'URL Management', icon: <List className="h-4 w-4" />, description: 'Manage scraped URLs' },
-    { key: 'analytics', label: 'Analytics', icon: <BarChart3 className="h-4 w-4" />, description: 'Performance metrics & monitoring' },  // NEW
+    //{ key: 'analytics', label: 'Analytics', icon: <BarChart3 className="h-4 w-4" />, description: 'Performance metrics' },
     { key: 'settings', label: 'Settings', icon: <Settings className="h-4 w-4" />, description: 'Configuration and preferences' }
 ];
 
 // ===================================================================
-// MAIN COMPONENT WITH CLOUDWATCH INTEGRATION
+// MAIN COMPONENT WITHOUT CLOUDWATCH
 // ===================================================================
 export const ScraperAdminPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabKey>('overview');
-    const { cloudWatch, userMetrics, isInitialized } = useCloudWatchMetrics();
 
-    // Helper function to format duration
-    const formatDuration = (ms: number): string => {
-        if (ms < 60000) return '< 1 min';
-        const minutes = Math.floor(ms / 60000);
-        const hours = Math.floor(minutes / 60);
-        return hours > 0 ? `${hours}h ${minutes % 60}m` : `${minutes} min`;
-    };
-
-    // Track page view and initialize CloudWatch
-    useEffect(() => {
-        // Wait for the service to be initialized
-        if (isInitialized) {
-            // Track initial page view
-            cloudWatch.trackPageView('ScraperAdminPage', {
-                initialTab: activeTab,
-                timestamp: new Date().toISOString()
-            });
-
-            // Track render performance
-            cloudWatch.startPerformanceMark('ScraperAdminPageRender');
-    }
-
-    return () => {
-        // Track how long the page was open
-        if (isInitialized) { // Only run if it was started
-            const duration = cloudWatch.endPerformanceMark('ScraperAdminPageRender');
-            console.log(`User spent ${duration}ms on ScraperAdminPage`);
-        }
-    };
-}, [isInitialized, cloudWatch, activeTab]);
-
-    // Track tab switches with CloudWatch
+    // Simple tab switch handler (no CloudWatch tracking)
     const handleTabSwitch = (newTab: TabKey) => {
-        // Track the tab switch
-        cloudWatch.trackTabSwitch(activeTab, newTab);
-        
-        // Track user action
-        cloudWatch.trackUserAction('tab_switch', 'navigation', {
-            from: activeTab,
-            to: newTab,
-            timestamp: new Date().toISOString()
-        });
-
-        // Track feature usage
-        cloudWatch.trackFeatureUsage(`ScraperAdmin_${newTab}`, 'switch_tab', {
-            timestamp: Date.now()
-        });
-        
         setActiveTab(newTab);
     };
 
     const renderTabContent = () => {
-        // Track tab view duration
-        cloudWatch.startPerformanceMark(`TabView_${activeTab}`);
-
         switch (activeTab) {
             case 'overview':
                 return <OverviewTab />;
@@ -122,8 +68,8 @@ export const ScraperAdminPage: React.FC = () => {
                 return <JobHistoryTab />;
             case 'urls':
                 return <URLManagementTab />;
-            case 'analytics':
-                return <AnalyticsTab />;  // NEW
+            //case 'analytics':
+            //    return <AnalyticsTab />;
             case 'settings':
                 return <SettingsTab />;
             default:
@@ -136,18 +82,9 @@ export const ScraperAdminPage: React.FC = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Header */}
                 <div className="mb-8">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Scraper Administration</h1>
-                            <p className="text-gray-600 mt-2">Manage and monitor tournament scraping operations</p>
-                        </div>
-                        {/* User Metrics Summary (if available) */}
-                        {userMetrics && (
-                            <div className="text-right text-sm text-gray-500">
-                                <p>Your session: {userMetrics.totalActions || 0} actions</p>
-                                <p>Active for: {formatDuration(userMetrics.sessionDuration || 0)}</p>
-                            </div>
-                        )}
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900">Scraper Administration</h1>
+                        <p className="text-gray-600 mt-2">Manage and monitor tournament scraping operations</p>
                     </div>
                 </div>
 
@@ -167,36 +104,20 @@ export const ScraperAdminPage: React.FC = () => {
                             >
                                 {tab.icon}
                                 <span className="ml-2">{tab.label}</span>
-                                {/* Show badge for Analytics tab if there are issues */}
-                                {tab.key === 'analytics' && (
-                                    <span className="ml-2 px-2 py-0.5 text-xs bg-red-100 text-red-800 rounded-full">
-                                        New
-                                    </span>
-                                )}
                             </button>
                         ))}
                     </div>
                 </div>
 
-                {/* Tab Content with Performance Monitoring */}
+                {/* Tab Content */}
                 <div className="animate-fadeIn">
                     {renderTabContent()}
                 </div>
 
-                {/* Footer with Metrics Link */}
+                {/* Footer */}
                 <div className="mt-8 text-center text-sm text-gray-500">
                     <p>
-                        Performance metrics are being tracked via CloudWatch. 
-                        <a 
-                            href="/scraper-admin?tab=analytics" 
-                            className="text-blue-600 hover:underline ml-1"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                handleTabSwitch('analytics');
-                            }}
-                        >
-                            View Analytics →
-                        </a>
+                        Scraper system operational. Check the Analytics tab for performance metrics.
                     </p>
                 </div>
             </div>

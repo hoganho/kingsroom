@@ -1,48 +1,44 @@
 // src/pages/scraper-admin-tabs/AnalyticsTab.tsx
-// Analytics and Monitoring Tab for CloudWatch metrics and performance analysis
+// Analytics Tab - Simplified version without CloudWatch integration
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import type { GraphQLResult } from '@aws-amplify/api-graphql';
 import {
     Activity, AlertTriangle,
-    Clock, CheckCircle, XCircle, BarChart,
-    Eye, RefreshCw, Download
+    Clock, XCircle, BarChart,
+    Eye, RefreshCw, Download, Info
 } from 'lucide-react';
-import { useCloudWatchMetrics } from '../../infrastructure/client-cloudwatch.ts';
 import {
     analyzeScraperPerformance,
     ErrorAnalyzer,
     ScraperAnalytics
-} from '../../utils/scraperAnalytics.ts';
-import { scraperManagementQueries } from '../../graphql/scraperManagement.ts';
+} from '../../utils/scraperAnalytics';
+import { scraperManagementQueries } from '../../graphql/scraperManagement';
 import type { ScraperJob, ScrapeURL } from '../../API';
 
 // ===================================================================
-// Analytics Tab Component
+// Analytics Tab Component (CloudWatch removed)
 // ===================================================================
 
 export const AnalyticsTab: React.FC = () => {
     const client = useMemo(() => generateClient(), []);
-    const { cloudWatch, isInitialized, userMetrics: hookUserMetrics } = useCloudWatchMetrics();
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [timeRange, setTimeRange] = useState<'1h' | '24h' | '7d' | '30d'>('24h');
     
     // Metrics Data
     const [systemMetrics, setSystemMetrics] = useState<any>(null);
-    const [userMetrics, setUserMetrics] = useState<any>(null);
     const [performanceData, setPerformanceData] = useState<any[]>([]);
     const [issuesList, setIssuesList] = useState<any[]>([]);
     const [recommendations, setRecommendations] = useState<string[]>([]);
     
     // ===================================================================
-    // Load Analytics Data
+    // Load Analytics Data (without CloudWatch)
     // ===================================================================
     
     const loadAnalytics = useCallback(async () => {
         setLoading(true);
-        cloudWatch.trackPageView('AnalyticsTab');
         
         try {
             // Load recent jobs for analysis
@@ -69,20 +65,15 @@ export const AnalyticsTab: React.FC = () => {
             
             const problematicUrls = (urlsResponse as GraphQLResult<any>).data.searchScrapeURLs?.items || [];
             
-            // This replaces the 'new ScraperAnalytics()' and subsequent broken method calls
+            // Analyze the data
             const analysis = analyzeScraperPerformance(jobs, problematicUrls);
-            
-            // --- Populate state from the analysis object ---
             
             // Calculate simple metrics
             const metrics = {
                 totalJobs: jobs.length,
-                // Use ErrorAnalyzer directly for failure rate
                 failureRate: ErrorAnalyzer.generateErrorReport(jobs).errorRate,
-                // Use URLHealthChecker for active URL count (from problematic ones)
                 activeURLs: problematicUrls.filter((u: ScrapeURL) => u.status === 'ACTIVE').length,
-                // Get metrics from the trend analysis
-                successRate: analysis.trends.successRateTrend, // Note: This is a trend, not a snapshot
+                successRate: analysis.trends.successRateTrend,
                 averageProcessingTime: jobs.length > 0 ? jobs.reduce((acc: number, j: ScraperJob) => acc + (j.averageScrapingTime || 0), 0) / jobs.length : 0,
                 peakHour: ScraperAnalytics.identifyPeakTimes(jobs).peakHour,
             };
@@ -115,23 +106,12 @@ export const AnalyticsTab: React.FC = () => {
             // Get unique recommendations
             setRecommendations([...new Set(recs)]);
             
-            // Load user metrics if available
-            if (hookUserMetrics) {
-                setUserMetrics(hookUserMetrics);
-            }
-            
-            // Track analytics view
-            cloudWatch.trackFeatureUsage('analytics_dashboard', 'view', {
-                timestamp: Date.now()
-            });
-            
         } catch (error) {
             console.error('Failed to load analytics:', error);
-            cloudWatch.trackError(error as Error, 'API');
         } finally {
             setLoading(false);
         }
-    }, [client, cloudWatch, hookUserMetrics]);
+    }, [client]);
     
     // ===================================================================
     // Refresh Analytics
@@ -139,7 +119,6 @@ export const AnalyticsTab: React.FC = () => {
     
     const handleRefresh = async () => {
         setRefreshing(true);
-        cloudWatch.trackUserAction('refresh_analytics', 'analytics');
         await loadAnalytics();
         setRefreshing(false);
     };
@@ -149,16 +128,13 @@ export const AnalyticsTab: React.FC = () => {
     // ===================================================================
     
     const exportReport = () => {
-        cloudWatch.trackUserAction('export_analytics', 'analytics');
-        
         const report = {
             generatedAt: new Date().toISOString(),
             timeRange,
             metrics: systemMetrics,
             performance: performanceData,
             issues: issuesList,
-            recommendations,
-            userActivity: userMetrics
+            recommendations
         };
         
         // Create downloadable JSON
@@ -168,32 +144,31 @@ export const AnalyticsTab: React.FC = () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `analytics-report-${Date.now()}.json`;
+        a.download = `scraper-analytics-${new Date().toISOString()}.json`;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
     };
     
     // ===================================================================
-    // Effects
+    // Load data on mount
     // ===================================================================
     
     useEffect(() => {
-        // Wait for the cloudWatch service to be initialized before loading
-        if (isInitialized) {
-            loadAnalytics();
-        }
-    }, [loadAnalytics, timeRange, isInitialized]);
-
+        loadAnalytics();
+    }, [loadAnalytics]);
+    
     // ===================================================================
     // Render
     // ===================================================================
     
     if (loading && !systemMetrics) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading analytics...</p>
+            <div className="bg-white rounded-lg shadow p-8">
+                <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <span className="ml-3 text-gray-600">Loading analytics...</span>
                 </div>
             </div>
         );
@@ -202,45 +177,68 @@ export const AnalyticsTab: React.FC = () => {
     return (
         <div className="space-y-6">
             {/* Header with Controls */}
-            <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">System Analytics</h2>
+            <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h2>
+                        <p className="text-gray-600 mt-1">Performance metrics from database analysis</p>
+                    </div>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={handleRefresh}
+                            disabled={refreshing}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                        >
+                            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                            Refresh
+                        </button>
+                        <button
+                            onClick={exportReport}
+                            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                        >
+                            <Download className="h-4 w-4" />
+                            Export
+                        </button>
+                    </div>
+                </div>
                 
-                <div className="flex gap-3">
-                    {/* Time Range Selector */}
-                    <select
-                        value={timeRange}
-                        onChange={(e) => setTimeRange(e.target.value as any)}
-                        className="px-3 py-2 border rounded-lg"
-                    >
-                        <option value="1h">Last Hour</option>
-                        <option value="24h">Last 24 Hours</option>
-                        <option value="7d">Last 7 Days</option>
-                        <option value="30d">Last 30 Days</option>
-                    </select>
-                    
-                    {/* Refresh Button */}
-                    <button
-                        onClick={handleRefresh}
-                        disabled={refreshing}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
-                    >
-                        <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-                        Refresh
-                    </button>
-                    
-                    {/* Export Button */}
-                    <button
-                        onClick={exportReport}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
-                    >
-                        <Download className="h-4 w-4" />
-                        Export
-                    </button>
+                {/* CloudWatch Notice */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <div className="flex items-start gap-3">
+                        <Info className="h-5 w-5 text-blue-600 mt-0.5" />
+                        <div className="flex-1">
+                            <p className="text-sm font-medium text-blue-900">Performance Mode Active</p>
+                            <p className="text-sm text-blue-700 mt-1">
+                                CloudWatch tracking has been temporarily disabled to improve application performance. 
+                                Analytics shown here are based on database queries only.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                {/* Time Range Selector */}
+                <div className="flex gap-2">
+                    {(['1h', '24h', '7d', '30d'] as const).map((range) => (
+                        <button
+                            key={range}
+                            onClick={() => setTimeRange(range)}
+                            className={`px-3 py-1 rounded ${
+                                timeRange === range
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                        >
+                            {range === '1h' ? 'Last Hour' :
+                             range === '24h' ? 'Last 24 Hours' :
+                             range === '7d' ? 'Last 7 Days' :
+                             'Last 30 Days'}
+                        </button>
+                    ))}
                 </div>
             </div>
             
-            {/* System Metrics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Key Metrics */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {/* Total Jobs */}
                 <div className="bg-white p-6 rounded-lg shadow-sm border">
                     <div className="flex items-center justify-between">
@@ -251,19 +249,6 @@ export const AnalyticsTab: React.FC = () => {
                             </p>
                         </div>
                         <Activity className="h-8 w-8 text-blue-500" />
-                    </div>
-                </div>
-                
-                {/* Success Rate */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-600">Success Rate Trend</p>
-                            <p className="text-2xl font-bold">
-                                {systemMetrics?.successRate || 'N/A'}
-                            </p>
-                        </div>
-                        <CheckCircle className="h-8 w-8 text-green-500" />
                     </div>
                 </div>
                 
@@ -395,41 +380,15 @@ export const AnalyticsTab: React.FC = () => {
                 </div>
             )}
             
-            {/* User Activity (if available) */}
-            {userMetrics && (
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                    <h3 className="text-lg font-semibold mb-4">Your Activity</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {userMetrics.topActions?.map((action: any, idx: number) => (
-                            <div key={idx} className="text-center">
-                                <p className="text-2xl font-bold">{action.count}</p>
-                                <p className="text-xs text-gray-600">{action.action}</p>
-                            </div>
-                        ))}
-                    </div>
-                    {userMetrics.sessionCount && (
-                        <div className="mt-4 pt-4 border-t text-center text-sm text-gray-600">
-                            {userMetrics.sessionCount} sessions • 
-                            Avg duration: {Math.round(userMetrics.averageSessionDuration / 60000)} min
-                        </div>
-                    )}
-                </div>
-            )}
-            
-            {/* CloudWatch Integration Status */}
-            <div className="bg-blue-50 p-4 rounded-lg">
+            {/* AWS CloudWatch Note */}
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <div className="flex items-center gap-2">
-                    <Activity className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm text-blue-900">
-                        CloudWatch metrics are being collected. View detailed metrics in AWS CloudWatch console.
+                    <Activity className="h-4 w-4 text-gray-600" />
+                    <span className="text-sm text-gray-700">
+                        For detailed performance metrics, you can still access the AWS CloudWatch console directly. 
+                        Lambda functions continue to log metrics to CloudWatch.
                     </span>
                 </div>
-                {cloudWatch.getSessionSummary && (
-                    <div className="mt-2 text-xs text-blue-700">
-                        Session: {cloudWatch.getSessionSummary().sessionId} • 
-                        Buffered metrics: {cloudWatch.getSessionSummary().metricsBuffered}
-                    </div>
-                )}
             </div>
         </div>
     );

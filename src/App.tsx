@@ -1,14 +1,11 @@
-// src/App.tsx - UPDATED WITH NEW PAGE STRUCTURE
+// src/App.tsx - CORRECTED VERSION WITHOUT CLOUDWATCH
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
 import { Hub } from 'aws-amplify/utils';
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import awsExports from './aws-exports.js';
-import { useEffect, useState } from 'react';
-
-// CloudWatch monitoring
-import { cloudWatchClient } from './infrastructure/client-cloudwatch';
+import { useEffect } from 'react';
 
 // Context Providers
 import { AuthProvider } from './contexts/AuthContext';
@@ -49,26 +46,14 @@ import { ScraperAdminPage } from './pages/scraper/ScraperAdmin';
 import { GamesDebug } from './pages/debug/GamesDebug';
 import { PlayersDebug } from './pages/debug/PlayersDebug';
 
-// Error Boundary for CloudWatch error tracking
+// Error Boundary for error tracking
 import React from 'react';
 
 // Configure Amplify
 Amplify.configure(awsExports);
 
-// Initialize CloudWatch
-const initializeCloudWatch = async () => {
-    try {
-        await cloudWatchClient.initialize();
-        console.log('CloudWatch initialized successfully');
-    } catch (error) {
-        console.error('Failed to initialize CloudWatch:', error);
-    }
-};
-
-initializeCloudWatch();
-
-// CloudWatch Error Boundary
-class CloudWatchErrorBoundary extends React.Component<
+// Simple Error Boundary (without CloudWatch)
+class ErrorBoundary extends React.Component<
     { children: React.ReactNode },
     { hasError: boolean; error: Error | null }
 > {
@@ -82,16 +67,7 @@ class CloudWatchErrorBoundary extends React.Component<
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-        try {
-            cloudWatchClient.trackError(error, 'CLIENT', {
-                componentStack: errorInfo.componentStack,
-                errorBoundary: true,
-                timestamp: new Date().toISOString()
-            });
-            cloudWatchClient.flush();
-        } catch (e) {
-            console.error('Failed to track error to CloudWatch:', e);
-        }
+        // Just log to console - no CloudWatch tracking
         console.error('Error caught by boundary:', error, errorInfo);
     }
 
@@ -120,7 +96,7 @@ class CloudWatchErrorBoundary extends React.Component<
     }
 }
 
-// Protected Layout
+// Protected Layout Component
 const ProtectedLayout = () => {
     return (
         <ProtectedRoute>
@@ -135,185 +111,55 @@ const ProtectedLayout = () => {
 
 // Main App Component
 function App() {
-    const [cloudWatchReady, setCloudWatchReady] = useState(false);
-    
     useEffect(() => {
-        const setupCloudWatch = async () => {
-            try {
-                await cloudWatchClient.initialize();
-                setCloudWatchReady(true);
-                await cloudWatchClient.updateUserContext();
-                
-                cloudWatchClient.trackPageView('App', {
-                    version: import.meta.env.VITE_BUILD_VERSION || 'dev',
-                    environment: import.meta.env.MODE,
-                    timestamp: new Date().toISOString()
-                });
-                
-                if (window.performance?.timing) {
-                    const perfData = window.performance.timing;
-                    const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
-                    
-                    if (pageLoadTime > 0) {
-                        cloudWatchClient.recordMetric({
-                            metricName: 'PageLoadTime',
-                            value: pageLoadTime,
-                            unit: 'Milliseconds',
-                            dimensions: { Page: 'InitialLoad' }
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error('CloudWatch setup error:', error);
-                setCloudWatchReady(true);
-            }
-        };
-        
-        setupCloudWatch();
-    }, []);
-    
-    useEffect(() => {
-        if (!cloudWatchReady) return;
-        
-        const authListener = (data: any) => {
-            if (!cloudWatchReady) return;
+        // Listen for auth events (without CloudWatch)
+        const unsubscribe = Hub.listen('auth', (data) => {
+            const { payload } = data;
+            console.log('Auth event:', payload.event);
             
-            switch (data.payload.event) {
-                case 'signIn':
-                    console.log('User signed in, updating CloudWatch context');
-                    setTimeout(async () => {
-                        try {
-                            await cloudWatchClient.updateUserContext();
-                            cloudWatchClient.recordMetric({
-                                metricName: 'UserLogin',
-                                value: 1,
-                                dimensions: { 
-                                    LoginMethod: data.payload.data?.signInUserSession?.idToken?.payload?.identities?.[0]?.providerName || 'Cognito'
-                                }
-                            });
-                        } catch (error) {
-                            console.error('Failed to update context after sign in:', error);
-                        }
-                    }, 1000);
+            switch (payload.event) {
+                case 'signedIn':
+                    console.log('User signed in');
                     break;
-                    
-                case 'signOut':
-                    console.log('User signed out, clearing CloudWatch context');
-                    try {
-                        cloudWatchClient.clearUserContext();
-                        cloudWatchClient.recordMetric({
-                            metricName: 'UserLogout',
-                            value: 1
-                        });
-                    } catch (error) {
-                        console.error('Failed to clear context after sign out:', error);
-                    }
+                case 'signedOut':
+                    console.log('User signed out');
                     break;
-                    
                 case 'tokenRefresh':
-                    console.log('Token refreshed, updating CloudWatch context');
-                    cloudWatchClient.updateUserContext().catch(console.error);
+                    console.log('Token refreshed');
                     break;
-                    
-                case 'signIn_failure':
-                    try {
-                        cloudWatchClient.trackError(
-                            new Error('Sign in failed'),
-                            'AUTH',
-                            { reason: data.payload.data?.message }
-                        );
-                    } catch (error) {
-                        console.error('Failed to track auth error:', error);
-                    }
+                case 'tokenRefresh_failure':
+                    console.error('Token refresh failed');
+                    break;
+                case 'signInWithRedirect':
+                    console.log('Sign in with redirect initiated');
+                    break;
+                case 'signInWithRedirect_failure':
+                    console.error('Sign in with redirect failed');
+                    break;
+                case 'customOAuthState':
+                    console.log('Custom OAuth state received');
                     break;
             }
-        };
-        
-        const hubListenerUnsubscribe = Hub.listen('auth', authListener);
-        
-        const errorHandler = (event: ErrorEvent) => {
-            if (!cloudWatchReady) return;
-            try {
-                cloudWatchClient.trackError(event.error || new Error(event.message), 'CLIENT', {
-                    message: event.message,
-                    filename: event.filename,
-                    lineno: event.lineno,
-                    colno: event.colno,
-                    timestamp: new Date().toISOString()
-                });
-            } catch (error) {
-                console.error('Failed to track error:', error);
-            }
-        };
-        
-        const unhandledRejectionHandler = (event: PromiseRejectionEvent) => {
-            if (!cloudWatchReady) return;
-            try {
-                cloudWatchClient.trackError(
-                    new Error(event.reason?.message || String(event.reason)),
-                    'CLIENT',
-                    { 
-                        type: 'unhandledRejection',
-                        reason: event.reason,
-                        timestamp: new Date().toISOString()
-                    }
-                );
-            } catch (error) {
-                console.error('Failed to track unhandled rejection:', error);
-            }
-        };
-        
-        window.addEventListener('error', errorHandler);
-        window.addEventListener('unhandledrejection', unhandledRejectionHandler);
-        
+        });
+
+        // Cleanup function
         return () => {
-            if (typeof hubListenerUnsubscribe === 'function') {
-                hubListenerUnsubscribe();
-            }
-            window.removeEventListener('error', errorHandler);
-            window.removeEventListener('unhandledrejection', unhandledRejectionHandler);
-            
-            if (cloudWatchReady) {
-                cloudWatchClient.flush().catch(console.error);
+            if (typeof unsubscribe === 'function') {
+                unsubscribe();
             }
         };
-    }, [cloudWatchReady]);
-    
-    useEffect(() => {
-        if (!cloudWatchReady) return;
-        
-        const handleRouteChange = () => {
-            try {
-                const path = window.location.pathname;
-                cloudWatchClient.trackPageView(path, {
-                    referrer: document.referrer,
-                    timestamp: new Date().toISOString()
-                });
-            } catch (error) {
-                console.error('Failed to track route change:', error);
-            }
-        };
-        
-        window.addEventListener('popstate', handleRouteChange);
-        
-        return () => {
-            window.removeEventListener('popstate', handleRouteChange);
-        };
-    }, [cloudWatchReady]);
+    }, []);
 
     return (
         <Authenticator>
             {({ user }) => {
-                if (user && cloudWatchReady) {
-                    try {
-                        cloudWatchClient.setUserId(user.username);
-                    } catch (error) {
-                        console.error('Failed to set user ID:', error);
-                    }
+                // Log user info for debugging (no CloudWatch)
+                if (user) {
+                    console.log('Authenticated user:', user.username);
                 }
                 
                 return (
-                    <CloudWatchErrorBoundary>
+                    <ErrorBoundary>
                         <BrowserRouter>
                             <AuthProvider>
                                 <Routes>
@@ -348,28 +194,19 @@ function App() {
                                         <Route path="/settings/series-management" element={<SeriesManagementPage />} />
                                         
                                         {/* Scraper Management (SuperAdmin) */}
-                                        <Route path="/scraper/admin" element={<ScraperAdminPage />} />
+                                        <Route path="/scraper-admin" element={<ScraperAdminPage />} />
                                         
-                                        {/* Debug (SuperAdmin) */}
+                                        {/* Debug Pages (SuperAdmin) */}
                                         <Route path="/debug/games" element={<GamesDebug />} />
                                         <Route path="/debug/players" element={<PlayersDebug />} />
                                     </Route>
-                                    
-                                    {/* 404 handler */}
-                                    <Route path="*" element={
-                                        <MainLayout>
-                                            <div className="flex items-center justify-center min-h-[50vh]">
-                                                <div className="text-center">
-                                                    <h1 className="text-3xl font-bold text-gray-900 mb-2">404</h1>
-                                                    <p className="text-gray-600">Page not found</p>
-                                                </div>
-                                            </div>
-                                        </MainLayout>
-                                    } />
+
+                                    {/* Catch all */}
+                                    <Route path="*" element={<Navigate to="/" replace />} />
                                 </Routes>
                             </AuthProvider>
                         </BrowserRouter>
-                    </CloudWatchErrorBoundary>
+                    </ErrorBoundary>
                 );
             }}
         </Authenticator>
