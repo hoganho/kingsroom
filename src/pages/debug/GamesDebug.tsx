@@ -176,7 +176,7 @@ export const GamesDebug = () => {
                   games.map((game) => (
                     <tr key={game.id}>
                       <td className="px-6 py-4 text-sm text-gray-900">
-                        {game.tournamentId}...
+                        {game.tournamentId}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">{game.name}</td>
                       <td className="px-6 py-4 text-sm text-gray-900">{game.gameType}</td>

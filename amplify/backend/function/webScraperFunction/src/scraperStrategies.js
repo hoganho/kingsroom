@@ -554,9 +554,43 @@ const defaultStrategy = {
             return;
         }
         console.log(`[DEBUG-LIVE] Scraping live data, game status is ${currentStatus}.`);
-        const playersRemaining = ctx.data.seating ? ctx.data.seating.length : 0;
+        
+        // Enhanced players remaining detection
+        let playersRemaining = 0;
+        
+        // Method 1: Try to get from seating data (players with current seats)
+        if (ctx.data.seating && ctx.data.seating.length > 0) {
+            playersRemaining = ctx.data.seating.length;
+            console.log(`[DEBUG-LIVE] Players remaining from seating data: ${playersRemaining}`);
+        }
+        
+        // Method 2: Parse from the playersentries text (format: "remaining/total")
+        if (playersRemaining === 0) {
+            const selector = '#cw_clock_playersentries';
+            const entriesText = ctx.$(selector).first().text().trim();
+            console.log(`[DEBUG-LIVE] Entries text found: "${entriesText}"`);
+            
+            if (entriesText && entriesText.includes('/')) {
+                const parts = entriesText.split('/');
+                const remaining = parseInt(parts[0].trim(), 10);
+                if (!isNaN(remaining)) {
+                    playersRemaining = remaining;
+                    console.log(`[DEBUG-LIVE] Players remaining from entries text: ${playersRemaining}`);
+                }
+            }
+        }
+        
+        // Method 3: If still 0, check if there's embedded game data
+        if (playersRemaining === 0 && ctx.gameData) {
+            if (ctx.gameData.players_remaining !== undefined) {
+                playersRemaining = ctx.gameData.players_remaining;
+                console.log(`[DEBUG-LIVE] Players remaining from embedded data: ${playersRemaining}`);
+            }
+        }
+        
         ctx.add('playersRemaining', playersRemaining);
-        console.log(`[DEBUG-LIVE] -> Players Remaining: ${playersRemaining}`);
+        console.log(`[DEBUG-LIVE] -> Final Players Remaining: ${playersRemaining}`);
+        
         const totalChips = ctx.parseNumeric('totalChipsInPlay', '#cw_clock_entire_stack');
         console.log(`[DEBUG-LIVE] -> Total Chips: ${totalChips !== undefined ? totalChips : 'Not Found'}`);
         const avgStack = ctx.parseNumeric('averagePlayerStack', '#cw_clock_avg_stack');
@@ -820,14 +854,34 @@ const defaultStrategy = {
             ctx.add('gameFrequency', 'UNKNOWN');
         }
     },
+
+    getTournamentId(ctx, url) {
+        if (!url) return;
+        
+        try {
+            // Handle both full URLs and just the ID parameter
+            if (url.includes('?id=')) {
+                const match = url.match(/[?&]id=(\d+)/);
+                if (match && match[1]) {
+                    ctx.add('tournamentId', match[1]);
+                    console.log(`[DEBUG-ID] Extracted tournament ID from URL: ${match[1]}`);
+                }
+            } else if (/^\d+$/.test(url)) {
+                // If it's just a number, that's the tournament ID
+                ctx.add('tournamentId', url);
+                console.log(`[DEBUG-ID] Using direct tournament ID: ${url}`);
+            }
+        } catch (e) {
+            console.warn('Could not extract tournament ID from URL:', e.message);
+        }
+    },
 };
 
-const runScraper = (html, structureLabel, venues = [], seriesTitles = []) => {
+const runScraper = (html, structureLabel, venues = [], seriesTitles = [], url = null) => {
     const ctx = new ScrapeContext(html);
     const strategy = defaultStrategy;
     console.log(`[Scraper] Using unified robust strategy.`);
 
-    // ✅ UPDATED: Added initializeDefaultFlags as the first step.
     const executionOrder = [
         'initializeDefaultFlags',
         'getName',
@@ -861,6 +915,7 @@ const runScraper = (html, structureLabel, venues = [], seriesTitles = []) => {
         'getBreaks',
         'getMatchingVenue',
         'getLiveData',
+        'getTournamentId',
     ];
 
     executionOrder.forEach(key => {
@@ -870,7 +925,9 @@ const runScraper = (html, structureLabel, venues = [], seriesTitles = []) => {
                     strategy[key](ctx, seriesTitles, venues);
                 } else if (key === 'getMatchingVenue') {
                     strategy[key](ctx, venues, seriesTitles);
-                } else {
+                } else if (key === 'getTournamentId') {
+                    strategy[key](ctx, url);
+                } else {                    
                     strategy[key](ctx);
                 }
             } catch (e) {

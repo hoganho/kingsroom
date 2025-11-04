@@ -1,4 +1,4 @@
-// src/components/layout/Sidebar.tsx - Refactored with hierarchical menu structure
+// src/components/layout/Sidebar.tsx - Fixed with correct route paths
 
 import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
@@ -35,7 +35,7 @@ export const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
   const { userRole } = useAuth(); // Assumes AuthContext provides userRole
   const buildVersion = import.meta.env.VITE_BUILD_VERSION || 'dev';
 
-  // Main navigation items
+  // Main navigation items - FIXED PATHS
   const mainMenuItems: MenuItem[] = [
     {
       to: '/home',
@@ -94,7 +94,7 @@ export const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
   // Scraper Management section (SuperAdmin only)
   const scraperMenuItems: MenuItem[] = [
     {
-      to: '/scraper/admin',
+      to: '/scraper/admin',  // Correct path matching App.tsx route
       label: 'Scraper Admin',
       icon: WrenchIcon,
       requiredRoles: ['SuperAdmin'],

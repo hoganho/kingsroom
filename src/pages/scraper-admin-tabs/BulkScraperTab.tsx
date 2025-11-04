@@ -271,6 +271,7 @@ export const BulkScraperTab: React.FC = () => {
             autoRefresh: false,
             data: {
                 name: game.name || '',
+                tournamentId: parseInt(game.id, 10),
                 gameStatus: gameStatus,
                 registrationStatus: registrationStatus,
                 gameStartDateTime: game.gameStartDateTime || undefined,

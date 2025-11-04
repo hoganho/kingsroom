@@ -960,6 +960,7 @@ type ScrapedGameSummary {
 
 type ScrapedGameData {
   name: String!
+  tournamentId: Int!
   gameStartDateTime: String
   gameEndDateTime: String
   gameStatus: GameStatus

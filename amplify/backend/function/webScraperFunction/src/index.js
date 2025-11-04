@@ -405,11 +405,11 @@ const createPlayerProcessingInstructions = (playerData, gameInfo) => {
 
 // --- SCRAPING & SAVING LOGIC ---
 
-const scrapeDataFromHtml = (html, venues, seriesTitles) => {
+const scrapeDataFromHtml = (html, venues, seriesTitles, url) => {
     const { gameStatus, registrationStatus } = getStatusAndReg(html);
     const structureLabel = `STATUS: ${gameStatus || 'UNKNOWN'} | REG: ${registrationStatus || 'UNKNOWN'}`;
     console.log(`[DEBUG-SCRAPER] Identified Structure: ${structureLabel}`);
-    const { data, foundKeys } = runScraper(html, structureLabel, venues, seriesTitles);
+    const { data, foundKeys } = runScraper(html, structureLabel, venues, seriesTitles, url);
     if (!data.hasOwnProperty('gameStatus') && gameStatus !== 'UNKNOWN_STATUS') {
         data.gameStatus = gameStatus;
         if (!foundKeys.includes('gameStatus')) {
@@ -511,7 +511,7 @@ const handleFetch = async (url, jobId = null, triggerSource = null) => {
         const html = response.data;
         console.log('[handleFetch] HTTP request successful. Starting scrape logic.');
         
-        const scrapingResult = scrapeDataFromHtml(html, venues, seriesTitles);
+        const scrapingResult = scrapeDataFromHtml(html, venues, seriesTitles, url);
         scrapedData = scrapingResult.data;
         foundKeys = scrapingResult.foundKeys;
         
@@ -553,7 +553,7 @@ const handleSave = async (input) => {
     const jobId = input.jobId || null;
     const triggerSource = input.triggerSource || null;
     console.log(`[WEB-SCRAPER-TRACE] handleSave received. Type of input.originalScrapedData:`, typeof input.originalScrapedData);
-    console.log(`[WEB-SCRAPER-TRACE] input.originalScrapedData (first 200 chars):`, String(input.originalScrapedData).substring(0, 200));
+    console.log(`[WEB-SCRAPER-TRACE] input.originalScrapedData:`, input.originalScrapedData);
 
     console.log(`[handleSave] START processing save request. Job ID: ${jobId || 'N/A'}, Source: ${triggerSource || 'N/A'}`);
     
@@ -596,6 +596,23 @@ const handleSave = async (input) => {
     }
     // --- ⚡️ END: ROBUST AWSJSON PARSING FIX ⚡️ ---
 
+        // Extract missing fields from originalScrapedData
+    if (originalScrapedData) {
+        // Extract tournamentId if it's missing from data
+        if (originalScrapedData.tournamentId !== undefined && !data.tournamentId) {
+            data.tournamentId = originalScrapedData.tournamentId;
+            console.log(`[HANDLE-SAVE-FIX] Extracted tournamentId ${data.tournamentId} from originalScrapedData`);
+        }
+        
+        // Also extract playersRemaining if missing
+        if (originalScrapedData.playersRemaining !== undefined && data.playersRemaining === undefined) {
+            data.playersRemaining = originalScrapedData.playersRemaining;
+            console.log(`[HANDLE-SAVE-FIX] Extracted playersRemaining ${data.playersRemaining} from originalScrapedData`);
+        }
+    }
+
+    console.log(`[WEB-SCRAPER-TRACE] Final data.tournamentId: ${data.tournamentId}, data.playersRemaining: ${data.playersRemaining}`);
+    
     console.log(`[WEB-SCRAPER-TRACE] Parsed originalScrapedData. Is now object:`, typeof originalScrapedData === 'object');
     console.log(`[WEB-SCRAPER-TRACE] Parsed player entries:`, originalScrapedData?.entries?.length, 'Parsed player results:', originalScrapedData?.results?.length);
 

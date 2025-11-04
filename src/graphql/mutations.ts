@@ -11,6 +11,7 @@ type GeneratedMutation<InputType, OutputType> = string & {
 export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData($url: AWSURL!) {
   fetchTournamentData(url: $url) {
     name
+    tournamentId
     gameStartDateTime
     gameEndDateTime
     gameStatus

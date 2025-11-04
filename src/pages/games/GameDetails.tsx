@@ -288,7 +288,7 @@ export const GameDetails = () => {
                 {game.name}
               </h2>
               <p className="text-sm text-gray-500 mt-1">
-                Tournament ID: {game.tournamentId || game.id}
+                Tournament ID: {game.tournamentId}
               </p>
             </div>
             <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusBadgeClass(game.gameStatus)}`}>

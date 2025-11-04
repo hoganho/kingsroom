@@ -65,6 +65,7 @@ export const useGameTracker = () => {
 
             const data: GameData = {
                 name: dataFromBackend.name,
+                tournamentId: dataFromBackend.tournamentId,
                 gameStartDateTime: dataFromBackend.gameStartDateTime || undefined,
                 gameEndDateTime: dataFromBackend.gameEndDateTime || undefined,
                 gameStatus: (dataFromBackend as any).gameStatus || undefined,

@@ -257,7 +257,7 @@ export const GameSearch = () => {
                             {game.name}
                           </p>
                           <p className="text-xs text-gray-500 mt-1">
-                            ID: {game.tournamentId || game.id.slice(0, 8)}
+                            ID: {game.tournamentId}
                           </p>
                         </div>
                         <div className="ml-2 flex-shrink-0">

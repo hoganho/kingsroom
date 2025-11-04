@@ -221,6 +221,7 @@ export const AutoScraperTab: React.FC = () => {
             autoRefresh: false,
             data: {
                 name: game.name,
+                tournamentId: parseInt(game.id, 10),
                 gameStatus: (game.gameStatus as GameStatus) || GameStatus.UNKNOWN,
                 registrationStatus: game.registrationStatus as RegistrationStatus | undefined,
                 gameStartDateTime: game.gameStartDateTime,

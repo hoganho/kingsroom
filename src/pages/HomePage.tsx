@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 
 interface Tournament {
   id: string;
-  tournamentId?: string;
+  tournamentId?: number;
   name: string;
   gameStartDateTime: string;
   gameEndDateTime?: string;
@@ -239,11 +239,11 @@ export const HomePage = () => {
                         rel="noopener noreferrer"
                         className="text-indigo-600 hover:text-indigo-900"
                       >
-                        {tournament.tournamentId || tournament.id.slice(0, 8)}
+                        {tournament.tournamentId}
                       </a>
                     ) : (
                       <span className="text-gray-900">
-                        {tournament.tournamentId || tournament.id.slice(0, 8)}
+                        {tournament.tournamentId}
                       </span>
                     )}
                   </td>

@@ -62,6 +62,7 @@ export type BulkGameSummary = {
 export type GameData = {
     // Basic game information
     name: string;
+    tournamentId: number;
     gameStartDateTime?: string;
     gameEndDateTime?: string;
     gameStatus: GameStatus;

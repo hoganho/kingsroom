@@ -194,7 +194,7 @@ function App() {
                                         <Route path="/settings/series-management" element={<SeriesManagementPage />} />
                                         
                                         {/* Scraper Management (SuperAdmin) */}
-                                        <Route path="/scraper-admin" element={<ScraperAdminPage />} />
+                                        <Route path="/scraper/admin" element={<ScraperAdminPage />} />
                                         
                                         {/* Debug Pages (SuperAdmin) */}
                                         <Route path="/debug/games" element={<GamesDebug />} />

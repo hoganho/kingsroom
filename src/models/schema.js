@@ -6516,6 +6516,13 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "tournamentId": {
+                    "name": "tournamentId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
                 "gameStartDateTime": {
                     "name": "gameStartDateTime",
                     "isArray": false,
@@ -7109,5 +7116,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "2809568a3af2916f3a300a3f48816468"
+    "version": "a4c8c377dec055878a9cde1a4a80391d"
 };

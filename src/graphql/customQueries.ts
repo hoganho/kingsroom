@@ -375,6 +375,7 @@ export const listGamesForDebug = /* GraphQL */ `
         gameStatus
         gameStartDateTime
         venueId
+        tournamentId
         venue {
           id
           name

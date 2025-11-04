@@ -651,6 +651,7 @@ export declare const ScrapedGameSummary: (new (init: ModelInit<ScrapedGameSummar
 
 type EagerScrapedGameData = {
   readonly name: string;
+  readonly tournamentId: number;
   readonly gameStartDateTime?: string | null;
   readonly gameEndDateTime?: string | null;
   readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
@@ -699,6 +700,7 @@ type EagerScrapedGameData = {
 
 type LazyScrapedGameData = {
   readonly name: string;
+  readonly tournamentId: number;
   readonly gameStartDateTime?: string | null;
   readonly gameEndDateTime?: string | null;
   readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
