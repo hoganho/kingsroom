@@ -1,5 +1,5 @@
-/* Enhanced Auto Scraper Lambda with ScraperJobs and ScrapeURLs tracking
- * This file replaces the existing index.js with comprehensive record keeping
+/* Enhanced Auto Scraper Lambda with Entity ID Support
+ * This file includes comprehensive Entity ID assignment for all scraper models
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
@@ -12,10 +12,12 @@ const { TextDecoder } = require('util');
 const UNASSIGNED_VENUE_ID = "00000000-0000-0000-0000-000000000000";
 const UNASSIGNED_VENUE_NAME = "Unassigned";
 
+// --- ENTITY ---: Added default entity ID
+const DEFAULT_ENTITY_ID = "default-entity-id";
+
 // --- Configuration & Clients ---
 const client = new DynamoDBClient({});
 const marshallOptions = {
-    // Instructs the client to remove undefined values
     removeUndefinedValues: true 
 };
 const translateConfig = { marshallOptions };
@@ -31,9 +33,13 @@ const MAX_GAME_LIST_SIZE = 5;
 
 // --- Table Name Helper ---
 const getTableName = (modelName) => {
+    // --- ENTITY ---: Added new table names from schema
     const specialTables = {
         'ScraperState': process.env.API_KINGSROOM_SCRAPERSTATETABLE_NAME,
         'Game': process.env.API_KINGSROOM_GAMETABLE_NAME,
+        'ScraperJob': process.env.API_KINGSROOM_SCRAPERJOBTABLE_NAME,
+        'ScrapeURL': process.env.API_KINGSROOM_SCRAPEURLTABLE_NAME,
+        'ScrapeAttempt': process.env.API_KINGSROOM_SCRAPEATTEMPTTABLE_NAME,
     };
     
     if (specialTables[modelName]) return specialTables[modelName];
@@ -49,13 +55,16 @@ const getTableName = (modelName) => {
 /**
  * Creates a new ScraperJob record
  */
-const createScraperJob = async (triggerSource, triggeredBy, config = {}) => {
+// --- ENTITY ---: Added entityId parameter
+const createScraperJob = async (triggerSource, triggeredBy, entityId, config = {}) => {
     const jobId = crypto.randomBytes(16).toString('hex');
     const now = new Date().toISOString();
     
     const jobRecord = {
         id: jobId,
         jobId: jobId,
+        // --- ENTITY ---: Added entityId to the record
+        entityId: entityId || DEFAULT_ENTITY_ID,
         triggerSource,
         triggeredBy: triggeredBy || 'SYSTEM',
         startTime: now,
@@ -95,7 +104,6 @@ const createScraperJob = async (triggerSource, triggeredBy, config = {}) => {
 const updateScraperJob = async (jobId, updates) => {
     const now = new Date().toISOString();
     
-    // Build update expression
     const updateExpressions = [];
     const expressionAttributeNames = {};
     const expressionAttributeValues = {};
@@ -106,12 +114,9 @@ const updateScraperJob = async (jobId, updates) => {
         expressionAttributeValues[`:${key}`] = value;
     }
     
-    // Always update timestamps
-    updateExpressions.push('#updatedAt = :updatedAt');
+    updateExpressions.push('#updatedAt = :updatedAt, #_lastChangedAt = :_lastChangedAt');
     expressionAttributeNames['#updatedAt'] = 'updatedAt';
     expressionAttributeValues[':updatedAt'] = now;
-    
-    updateExpressions.push('#_lastChangedAt = :_lastChangedAt');
     expressionAttributeNames['#_lastChangedAt'] = '_lastChangedAt';
     expressionAttributeValues[':_lastChangedAt'] = Date.now();
     
@@ -143,7 +148,7 @@ const finalizeScraperJob = async (jobId, startTime, results) => {
     const updates = {
         endTime,
         durationSeconds,
-        status: results.errors > 0 ? 'COMPLETED' : 'COMPLETED', // Could be FAILED if many errors
+        status: 'COMPLETED', // Set to COMPLETED, errors are tracked inside
         totalURLsProcessed: totalProcessed,
         newGamesScraped: results.newGamesScraped,
         gamesUpdated: results.gamesUpdated,
@@ -160,9 +165,10 @@ const finalizeScraperJob = async (jobId, startTime, results) => {
 /**
  * Gets or creates a ScrapeURL record
  */
-const getOrCreateScrapeURL = async (url, tournamentId) => {
+// --- ENTITY ---: Added entityId parameter
+const getOrCreateScrapeURL = async (url, tournamentId, entityId) => {
     const scrapeURLTable = getTableName('ScrapeURL');
-    const urlId = url; // Use URL as ID for uniqueness
+    const urlId = url;
     
     try {
         const response = await ddbDocClient.send(new GetCommand({
@@ -183,6 +189,8 @@ const getOrCreateScrapeURL = async (url, tournamentId) => {
         id: urlId,
         url,
         tournamentId,
+        // --- ENTITY ---: Added entityId to the record
+        entityId: entityId || DEFAULT_ENTITY_ID,
         status: 'ACTIVE',
         doNotScrape: false,
         placedIntoDatabase: false,
@@ -211,21 +219,21 @@ const getOrCreateScrapeURL = async (url, tournamentId) => {
 /**
  * Updates a ScrapeURL record after scraping
  */
-const updateScrapeURL = async (url, result, scrapedData = null) => {
+// --- ENTITY ---: Added entityId parameter
+const updateScrapeURL = async (url, entityId, result, scrapedData = null) => {
     const now = new Date().toISOString();
     const urlId = url;
     
-    // Get current record
-    const current = await getOrCreateScrapeURL(url, result.tournamentId);
+    // --- ENTITY ---: Pass entityId to get/create
+    const current = await getOrCreateScrapeURL(url, result.tournamentId, entityId);
     
-    // Calculate new metrics
+    // ... (rest of the function is unchanged, but now operates on the correct record)
     const timesScraped = (current.timesScraped || 0) + 1;
     const isSuccess = ['SAVED', 'UPDATED', 'NO_CHANGES'].includes(result.status);
     const timesSuccessful = (current.timesSuccessful || 0) + (isSuccess ? 1 : 0);
     const timesFailed = (current.timesFailed || 0) + (!isSuccess ? 1 : 0);
     const consecutiveFailures = isSuccess ? 0 : (current.consecutiveFailures || 0) + 1;
     
-    // Calculate data hash if we have scraped data
     let dataHash = null;
     let hasDataChanges = false;
     if (scrapedData) {
@@ -240,7 +248,6 @@ const updateScrapeURL = async (url, result, scrapedData = null) => {
         hasDataChanges = current.lastDataHash && current.lastDataHash !== dataHash;
     }
     
-    // Determine new status
     let status = current.status;
     if (result.status === 'INACTIVE') {
         status = 'INACTIVE';
@@ -273,7 +280,6 @@ const updateScrapeURL = async (url, result, scrapedData = null) => {
         _lastChangedAt: Date.now()
     };
     
-    // Update record
     const updateExpressions = [];
     const expressionAttributeNames = {};
     const expressionAttributeValues = {};
@@ -338,15 +344,21 @@ const createScrapeAttempt = async (url, tournamentId, jobId, result, scrapedData
 /**
  * Gets URLs that need updating (active games)
  */
-const getUpdateCandidateURLs = async (limit = 10) => {
+// --- ENTITY ---: Added entityId and updated query to use 'byEntityGame' index
+const getUpdateCandidateURLs = async (entityId, limit = 10) => {
     const response = await ddbDocClient.send(new QueryCommand({
         TableName: getTableName('Game'),
-        IndexName: 'byStatus',
-        KeyConditionExpression: '#status = :status',
+        // Use the GSI for entity-specific game queries
+        IndexName: 'byEntityGame', 
+        KeyConditionExpression: '#ent = :entId',
+        // Filter by status since it's not part of the GSI key
+        FilterExpression: '#status = :status', 
         ExpressionAttributeNames: {
+            '#ent': 'entityId',
             '#status': 'gameStatus'
         },
         ExpressionAttributeValues: {
+            ':entId': entityId || DEFAULT_ENTITY_ID,
             ':status': 'RUNNING'
         },
         Limit: limit
@@ -358,7 +370,8 @@ const getUpdateCandidateURLs = async (limit = 10) => {
 /**
  * Enhanced scrape and process function with full tracking
  */
-const scrapeAndProcessTournament = async (url, existingGameData, jobId, triggerSource) => {
+// --- ENTITY ---: Added entityId parameter
+const scrapeAndProcessTournament = async (url, existingGameData, jobId, entityId, triggerSource) => {
     const startTime = Date.now();
     const functionName = process.env.FUNCTION_WEBSCRAPERFUNCTION_NAME;
     const idMatch = url.match(/id=(\d+)/);
@@ -368,7 +381,6 @@ const scrapeAndProcessTournament = async (url, existingGameData, jobId, triggerS
         throw new Error(`Could not determine tournament ID from URL: ${url}`);
     }
     
-    // Initialize result tracking
     const result = {
         url,
         tournamentId,
@@ -381,10 +393,9 @@ const scrapeAndProcessTournament = async (url, existingGameData, jobId, triggerS
     };
     
     try {
-        // Log to ScraperState
-        await logStatus('INFO', `Fetching/Scraping ID #${tournamentId}`);
+        // --- ENTITY ---: Pass entityId to log
+        await logStatus('INFO', `Fetching/Scraping ID #${tournamentId}`, `Entity: ${entityId}`, entityId);
         
-        // Fetch tournament data
         const fetchPayload = {
             fieldName: 'fetchTournamentData',
             arguments: { url, existingGameId: existingGameData?.id },
@@ -400,38 +411,31 @@ const scrapeAndProcessTournament = async (url, existingGameData, jobId, triggerS
         const scraperResult = JSON.parse(new TextDecoder().decode(response.Payload));
         let scrapedData = scraperResult.data || scraperResult;
         const gameIdFromFetch = scraperResult.existingGameId || existingGameData?.id;
-        console.log(`[AUTO-SCRAPER-TRACE] Fetched data for ${url}. Player entries:`, scrapedData?.entries?.length, 'Player results:', scrapedData?.results?.length);
 
         if (scraperResult.errorMessage) {
             result.error = scraperResult.errorMessage;
-            if (result.error.includes('Scraping is disabled')) {
-                result.status = 'SKIPPED_DONOTSCRAPE';
-            } else {
-                result.status = 'FAILED';
-            }
+            result.status = result.error.includes('Scraping is disabled') ? 'SKIPPED_DONOTSCRAPE' : 'FAILED';
         } else if (scrapedData && scrapedData.name) {
-            // Check for inactive tournament
             if (scrapedData.isInactive) {
                 result.status = 'INACTIVE';
             } else {
-                // Get venue assignment - use UNASSIGNED_VENUE_ID if no match
                 const autoAssignedVenueId = scrapedData?.venueMatch?.autoAssignedVenue?.id || existingGameData?.venueId || UNASSIGNED_VENUE_ID;
                 const isUnassigned = autoAssignedVenueId === UNASSIGNED_VENUE_ID;
                 
                 result.venueId = autoAssignedVenueId;
                 
-                // Save tournament data even without venue
                 const savePayload = {
                     fieldName: 'saveTournamentData',
                     arguments: {
                         input: {
+                            // --- ENTITY ---: Pass entityId to the saveTournamentData mutation
+                            entityId: entityId,
                             sourceUrl: url,
                             venueId: autoAssignedVenueId,
                             existingGameId: gameIdFromFetch,
                             doNotScrape: scrapedData.doNotScrape || false,
                             originalScrapedData: JSON.stringify(scrapedData),
                             data: createCleanDataForSave(scrapedData),
-                            // Add venue assignment tracking
                             venueAssignmentStatus: isUnassigned ? 'PENDING_ASSIGNMENT' : 'AUTO_ASSIGNED',
                             requiresVenueAssignment: isUnassigned,
                             suggestedVenueName: scrapedData?.venueName || scrapedData?.venueMatch?.extractedVenueName || null,
@@ -440,9 +444,6 @@ const scrapeAndProcessTournament = async (url, existingGameData, jobId, triggerS
                     },
                     identity: { claims: { jobId, triggerSource }}
                 };
-                console.log(`[AUTO-SCRAPER-TRACE] Building savePayload for ${url}.`);
-                console.log(`[AUTO-SCRAPER-TRACE] Type of originalScrapedData being sent:`, typeof savePayload.arguments.input.originalScrapedData);
-                console.log(`[AUTO-SCRAPER-TRACE] Length of originalScrapedData string:`, savePayload.arguments.input.originalScrapedData?.length);
 
                 const saveResponse = await lambdaClient.send(new InvokeCommand({
                     FunctionName: functionName,
@@ -465,21 +466,14 @@ const scrapeAndProcessTournament = async (url, existingGameData, jobId, triggerS
             result.status = 'BLANK';
         }
         
-        // Calculate processing time
         result.processingTime = (Date.now() - startTime) / 1000;
         
-        // Update all tracking records
         await Promise.all([
-            // Update ScrapeURL record
-            updateScrapeURL(url, result, scrapedData),
-            
-            // Create ScrapeAttempt record
+            // --- ENTITY ---: Pass entityId to updateScrapeURL
+            updateScrapeURL(url, entityId, result, scrapedData),
             createScrapeAttempt(url, tournamentId, jobId, result, scrapedData),
-            
-            // Update game list in ScraperState
-            updateGameList(tournamentId, scrapedData?.name || `ID ${tournamentId}`, result.status),
-            
-            // Add to job's URL results
+            // --- ENTITY ---: Pass entityId to updateGameList
+            updateGameList(tournamentId, scrapedData?.name || `ID ${tournamentId}`, result.status, entityId),
             addURLResultToJob(jobId, result)
         ]);
         
@@ -490,9 +484,11 @@ const scrapeAndProcessTournament = async (url, existingGameData, jobId, triggerS
         result.processingTime = (Date.now() - startTime) / 1000;
         
         await Promise.all([
-            updateScrapeURL(url, result),
+            // --- ENTITY ---: Pass entityId to updateScrapeURL
+            updateScrapeURL(url, entityId, result),
             createScrapeAttempt(url, tournamentId, jobId, result),
-            logStatus('ERROR', `Failed for ID #${tournamentId}`, error.message)
+            // --- ENTITY ---: Pass entityId to logStatus
+            logStatus('ERROR', `Failed for ID #${tournamentId}`, error.message, entityId)
         ]);
         
         return result;
@@ -506,7 +502,6 @@ const addURLResultToJob = async (jobId, result) => {
     try {
         const jobTable = getTableName('ScraperJob');
         
-        // Get current job
         const response = await ddbDocClient.send(new GetCommand({
             TableName: jobTable,
             Key: { id: jobId }
@@ -518,18 +513,16 @@ const addURLResultToJob = async (jobId, result) => {
                 url: result.url,
                 tournamentId: result.tournamentId,
                 status: result.status,
-                gameName: result.gameName,
+                gameName: result.gameName, // This might be undefined, which is fine
                 processingTime: result.processingTime,
                 error: result.error
             });
             
-            // Update counters
             const updates = {
                 urlResults,
                 totalURLsProcessed: (response.Item.totalURLsProcessed || 0) + 1
             };
             
-            // Update specific counters based on status
             switch (result.status) {
                 case 'SAVED':
                     updates.newGamesScraped = (response.Item.newGamesScraped || 0) + 1;
@@ -571,11 +564,13 @@ const performScrapingEnhanced = async (config = {}) => {
         triggeredBy = 'SYSTEM',
         targetURLs = null,
         startId = null,
-        endId = null
+        endId = null,
+        // --- ENTITY ---: Extract entityId from config
+        entityId = DEFAULT_ENTITY_ID
     } = config;
     
-    // Create job record
-    const job = await createScraperJob(triggerSource, triggeredBy, {
+    // --- ENTITY ---: Pass entityId to createScraperJob
+    const job = await createScraperJob(triggerSource, triggeredBy, entityId, {
         maxGames,
         targetURLs,
         startId,
@@ -584,8 +579,8 @@ const performScrapingEnhanced = async (config = {}) => {
     
     const jobId = job.id;
     
-    // Update ScraperState
-    await updateScraperState({
+    // --- ENTITY ---: Pass entityId to updateScraperState
+    await updateScraperState(entityId, {
         isRunning: true,
         lastRunStartTime: new Date().toISOString(),
         currentLog: [],
@@ -594,7 +589,8 @@ const performScrapingEnhanced = async (config = {}) => {
         currentJobId: jobId
     });
     
-    await logStatus('INFO', `Scraper job started`, `Job ID: ${jobId}, Source: ${triggerSource}`);
+    // --- ENTITY ---: Pass entityId to logStatus
+    await logStatus('INFO', `Scraper job started`, `Job ID: ${jobId}, Source: ${triggerSource}`, entityId);
     
     const results = {
         newGamesScraped: 0,
@@ -606,35 +602,39 @@ const performScrapingEnhanced = async (config = {}) => {
     
     try {
         if (targetURLs && targetURLs.length > 0) {
-            // Process specific URLs
-            await logStatus('INFO', `Processing ${targetURLs.length} specific URLs`);
+            // --- ENTITY ---: Pass entityId to logStatus
+            await logStatus('INFO', `Processing ${targetURLs.length} specific URLs`, `Entity: ${entityId}`, entityId);
             
             for (const url of targetURLs) {
                 if (Date.now() - startTime >= LAMBDA_TIMEOUT_BUFFER) break;
                 
-                const result = await scrapeAndProcessTournament(url, null, jobId, triggerSource);
+                // --- ENTITY ---: Pass entityId to scrapeAndProcessTournament
+                const result = await scrapeAndProcessTournament(url, null, jobId, entityId, triggerSource);
                 updateResultCounters(results, result.status);
             }
         } else {
-            // Phase 1: Check active games for updates
             if (triggerSource === 'SCHEDULED') {
-                await logStatus('INFO', 'Phase 1: Checking active games for updates');
-                const updateCandidates = await getUpdateCandidateURLs(5);
+                // --- ENTITY ---: Pass entityId to logStatus
+                await logStatus('INFO', 'Phase 1: Checking active games for updates', `Entity: ${entityId}`, entityId);
+                // --- ENTITY ---: Pass entityId to getUpdateCandidateURLs
+                const updateCandidates = await getUpdateCandidateURLs(entityId, 5);
                 
                 for (const url of updateCandidates) {
                     if (Date.now() - startTime >= LAMBDA_TIMEOUT_BUFFER) break;
                     
-                    const result = await scrapeAndProcessTournament(url, null, jobId, triggerSource);
+                    // --- ENTITY ---: Pass entityId to scrapeAndProcessTournament
+                    const result = await scrapeAndProcessTournament(url, null, jobId, entityId, triggerSource);
                     updateResultCounters(results, result.status);
                 }
             }
             
-            // Phase 2: Scan for new games
-            const state = await getScraperState(true);
+            // --- ENTITY ---: Pass entityId to getScraperState
+            const state = await getScraperState(entityId, true);
             const scanStartId = startId || state.lastScannedId + 1;
             const scanEndId = endId || scanStartId + maxGames - 1;
             
-            await logStatus('INFO', `Phase 2: Scanning for new games from ID ${scanStartId}`);
+            // --- ENTITY ---: Pass entityId to logStatus
+            await logStatus('INFO', `Phase 2: Scanning for new games from ID ${scanStartId}`, `Entity: ${entityId}`, entityId);
             
             let currentId = scanStartId;
             let consecutiveBlanks = 0;
@@ -646,7 +646,8 @@ const performScrapingEnhanced = async (config = {}) => {
                 (Date.now() - startTime < LAMBDA_TIMEOUT_BUFFER)
             ) {
                 const url = `https://kingsroom.com.au/tournament/?id=${currentId}`;
-                const result = await scrapeAndProcessTournament(url, null, jobId, triggerSource);
+                // --- ENTITY ---: Pass entityId to scrapeAndProcessTournament
+                const result = await scrapeAndProcessTournament(url, null, jobId, entityId, triggerSource);
                 
                 updateResultCounters(results, result.status);
                 
@@ -656,7 +657,8 @@ const performScrapingEnhanced = async (config = {}) => {
                     consecutiveBlanks = 0;
                 }
                 
-                await updateScraperState({
+                // --- ENTITY ---: Pass entityId to updateScraperState
+                await updateScraperState(entityId, {
                     lastScannedId: currentId,
                     consecutiveBlankCount: consecutiveBlanks
                 });
@@ -665,11 +667,11 @@ const performScrapingEnhanced = async (config = {}) => {
             }
         }
         
-        // Finalize job
         await finalizeScraperJob(jobId, startTime, results);
         
         const duration = Math.round((Date.now() - startTime) / 1000);
-        await logStatus('INFO', 'Scraper job completed', `Duration: ${duration}s, Results: ${JSON.stringify(results)}`);
+        // --- ENTITY ---: Pass entityId to logStatus
+        await logStatus('INFO', 'Scraper job completed', `Duration: ${duration}s, Results: ${JSON.stringify(results)}`, entityId);
         
         return {
             success: true,
@@ -680,9 +682,9 @@ const performScrapingEnhanced = async (config = {}) => {
         
     } catch (error) {
         console.error(`Fatal error in scraping job: ${error.message}`);
-        await logStatus('ERROR', 'Fatal error during scraping', error.message);
+        // --- ENTITY ---: Pass entityId to logStatus
+        await logStatus('ERROR', 'Fatal error during scraping', error.message, entityId);
         
-        // Update job as failed
         await updateScraperJob(jobId, {
             status: 'FAILED',
             endTime: new Date().toISOString(),
@@ -697,9 +699,9 @@ const performScrapingEnhanced = async (config = {}) => {
         };
         
     } finally {
-        // Update ScraperState
-        const finalState = await getScraperState(true);
-        await updateScraperState({
+        // --- ENTITY ---: Pass entityId to getScraperState and updateScraperState
+        const finalState = await getScraperState(entityId, true);
+        await updateScraperState(entityId, {
             isRunning: false,
             lastRunEndTime: new Date().toISOString(),
             totalScraped: (finalState.totalScraped || 0) + results.newGamesScraped + results.gamesUpdated,
@@ -736,16 +738,21 @@ const updateResultCounters = (results, status) => {
 };
 
 // --- Legacy support functions (keeping compatibility) ---
-const updateScraperState = async (updates) => {
-    const stateId = 'AUTO_SCRAPER_STATE';
+// --- ENTITY ---: Added entityId parameter
+const updateScraperState = async (entityId, updates) => {
+    // --- ENTITY ---: State ID is now dynamic based on entityId
+    const stateId = entityId ? `STATE_${entityId}` : 'AUTO_SCRAPER_STATE';
     const now = new Date().toISOString();
     try {
         const scraperStateTable = getTableName('ScraperState');
-        const currentState = await getScraperState(true);
+        // --- ENTITY ---: Pass entityId to getScraperState
+        const currentState = await getScraperState(entityId, true);
         const mergedItem = {
             ...currentState,
             ...updates,
             id: stateId,
+            // --- ENTITY ---: Store entityId on the state record
+            entityId: entityId || null,
             updatedAt: now,
             _lastChangedAt: Date.now(),
             __typename: 'ScraperState'
@@ -761,11 +768,15 @@ const updateScraperState = async (updates) => {
     }
 };
 
-const getScraperState = async (isInternalCall = false) => {
-    const stateId = 'AUTO_SCRAPER_STATE';
+// --- ENTITY ---: Added entityId parameter
+const getScraperState = async (entityId, isInternalCall = false) => {
+    // --- ENTITY ---: State ID is now dynamic based on entityId
+    const stateId = entityId ? `STATE_${entityId}` : 'AUTO_SCRAPER_STATE';
     const scraperStateTable = getTableName('ScraperState');
     const defaultState = {
         id: stateId,
+        // --- ENTITY ---: Include entityId in default state
+        entityId: entityId || null,
         isRunning: false,
         lastScannedId: 0,
         lastRunStartTime: null,
@@ -795,8 +806,10 @@ const getScraperState = async (isInternalCall = false) => {
     }
 };
 
-const logStatus = async (level, message, details = '') => {
-    const state = await getScraperState(true);
+// --- ENTITY ---: Added entityId parameter
+const logStatus = async (level, message, details = '', entityId) => {
+    // --- ENTITY ---: Pass entityId to getScraperState
+    const state = await getScraperState(entityId, true);
     const newEntry = {
         timestamp: new Date().toISOString(),
         level,
@@ -804,18 +817,22 @@ const logStatus = async (level, message, details = '') => {
         details
     };
     const newLog = [newEntry, ...(state.currentLog || [])].slice(0, MAX_LOG_SIZE);
-    await updateScraperState({ currentLog: newLog });
+    // --- ENTITY ---: Pass entityId to updateScraperState
+    await updateScraperState(entityId, { currentLog: newLog });
 };
 
-const updateGameList = async (id, name, status) => {
-    const state = await getScraperState(true);
+// --- ENTITY ---: Added entityId parameter
+const updateGameList = async (id, name, status, entityId) => {
+    // --- ENTITY ---: Pass entityId to getScraperState
+    const state = await getScraperState(entityId, true);
     const newGameEntry = {
         id: id.toString(),
         name,
         status
     };
     const newList = [newGameEntry, ...(state.lastGamesProcessed || [])].slice(0, MAX_GAME_LIST_SIZE);
-    await updateScraperState({ lastGamesProcessed: newList });
+    // --- ENTITY ---: Pass entityId to updateScraperState
+    await updateScraperState(entityId, { lastGamesProcessed: newList });
 };
 
 const createCleanDataForSave = (scraped) => ({
@@ -857,38 +874,46 @@ exports.handler = async (event) => {
     
     const { fieldName, operation, arguments: args, source, ['detail-type']: detailType } = event;
     
+    // --- ENTITY ---: Determine entityId from various event sources
+    const entityId = args?.entityId || args?.input?.entityId || event.entityId || DEFAULT_ENTITY_ID;
+    
     try {
-        // Handle GraphQL operations
         if (fieldName) {
             switch (fieldName) {
                 case 'triggerAutoScraping':
                     return await performScrapingEnhanced({
                         maxGames: args?.maxGames,
                         triggerSource: 'MANUAL',
-                        triggeredBy: event.identity?.username || 'UNKNOWN'
+                        triggeredBy: event.identity?.username || 'UNKNOWN',
+                        entityId: entityId // Pass entityId
                     });
                     
                 case 'controlScraperOperation':
-                    return await controlScraperEnhanced(args?.operation);
+                    // --- ENTITY ---: Pass entityId to control function
+                    return await controlScraperEnhanced(args?.operation, entityId);
                     
                 case 'getScraperControlState':
-                    const state = await getScraperState();
+                    // --- ENTITY ---: Pass entityId to get state
+                    const state = await getScraperState(entityId);
                     return { success: true, state };
                     
                 case 'startScraperJob':
                     return await performScrapingEnhanced({
-                        ...args?.input,
+                        ...args?.input, // entityId is expected inside args.input
                         triggeredBy: event.identity?.username || 'UNKNOWN'
                     });
                     
                 case 'getScraperJobs':
+                    // --- ENTITY ---: Pass entityId from args
                     return await getScraperJobs(args);
                     
                 case 'getScrapeURLs':
+                    // --- ENTITY ---: Pass entityId from args
                     return await getScrapeURLs(args);
                     
                 case 'getUpdateCandidateURLs':
-                    const urls = await getUpdateCandidateURLs(args?.limit);
+                    // --- ENTITY ---: Pass entityId
+                    const urls = await getUpdateCandidateURLs(entityId, args?.limit);
                     return urls;
                     
                 default:
@@ -896,20 +921,21 @@ exports.handler = async (event) => {
             }
         }
         
-        // Handle scheduled events
         if (source === 'aws.scheduler' || detailType === 'Scheduled Event') {
             return await performScrapingEnhanced({
-                triggerSource: 'SCHEDULED'
+                triggerSource: 'SCHEDULED',
+                // --- ENTITY ---: entityId from scheduler input (or default)
+                entityId: entityId
             });
         }
         
-        // Handle async worker
         if (operation === 'START_WORKER') {
+            // --- ENTITY ---: entityId is expected in event.config
             return await performScrapingEnhanced(event.config);
         }
         
         // Default
-        const state = await getScraperState();
+        const state = await getScraperState(entityId);
         return { success: true, state };
         
     } catch (error) {
@@ -921,48 +947,50 @@ exports.handler = async (event) => {
 /**
  * Enhanced control function
  */
-const controlScraperEnhanced = async (operation) => {
-    const state = await getScraperState();
+// --- ENTITY ---: Added entityId parameter
+const controlScraperEnhanced = async (operation, entityId) => {
+    // --- ENTITY ---: Pass entityId to getScraperState
+    const state = await getScraperState(entityId);
     
     switch (operation) {
         case 'START':
             if (state.isRunning || !state.enabled) {
-                return {
-                    success: false,
-                    message: state.isRunning ? 'Already running' : 'Disabled',
-                    state
-                };
+                return { success: false, message: state.isRunning ? 'Already running' : 'Disabled', state };
             }
             
-            // Start async worker
             await lambdaClient.send(new InvokeCommand({
                 FunctionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
                 InvocationType: 'Event',
                 Payload: JSON.stringify({
                     operation: 'START_WORKER',
-                    config: { triggerSource: 'CONTROL' }
+                    // --- ENTITY ---: Pass entityId in the async payload
+                    config: { triggerSource: 'CONTROL', entityId: entityId }
                 })
             }));
             
             return { success: true, message: 'Scraper started', state };
             
         case 'STOP':
-            await updateScraperState({ isRunning: false });
+            // --- ENTITY ---: Pass entityId to updateScraperState
+            await updateScraperState(entityId, { isRunning: false });
             return { success: true, message: 'Scraper stopped', state };
             
         case 'ENABLE':
-            await updateScraperState({ enabled: true });
+            // --- ENTITY ---: Pass entityId to updateScraperState
+            await updateScraperState(entityId, { enabled: true });
             return { success: true, message: 'Auto-scraping enabled', state };
             
         case 'DISABLE':
-            await updateScraperState({ enabled: false });
+            // --- ENTITY ---: Pass entityId to updateScraperState
+            await updateScraperState(entityId, { enabled: false });
             return { success: true, message: 'Auto-scraping disabled', state };
             
         case 'RESET':
             if (state.isRunning) {
                 return { success: false, message: 'Cannot reset while running', state };
             }
-            const resetState = await updateScraperState({
+            // --- ENTITY ---: Pass entityId to updateScraperState
+            const resetState = await updateScraperState(entityId, {
                 isRunning: false,
                 lastScannedId: 0,
                 lastRunStartTime: null,
@@ -987,27 +1015,36 @@ const controlScraperEnhanced = async (operation) => {
 /**
  * Get scraper jobs with filtering
  */
+// --- ENTITY ---: Updated function to query by entityId
 const getScraperJobs = async (args = {}) => {
-    const { status, limit = 20, nextToken } = args;
+    const { entityId, status, limit = 20, nextToken } = args;
+    
+    if (!entityId) {
+        throw new Error("entityId is required to get ScraperJobs");
+    }
+
     const params = {
         TableName: getTableName('ScraperJob'),
-        Limit: limit
+        IndexName: 'byEntityScraperJob', // GSI from schema
+        KeyConditionExpression: '#ent = :entId',
+        ExpressionAttributeNames: { '#ent': 'entityId' },
+        ExpressionAttributeValues: { ':entId': entityId },
+        Limit: limit,
+        ScanIndexForward: false // Show newest jobs first
     };
     
+    // Add filter for status if provided
     if (status) {
-        params.IndexName = 'byStatus';
-        params.KeyConditionExpression = '#status = :status';
-        params.ExpressionAttributeNames = { '#status': 'status' };
-        params.ExpressionAttributeValues = { ':status': status };
+        params.FilterExpression = '#status = :status';
+        params.ExpressionAttributeNames['#status'] = 'status';
+        params.ExpressionAttributeValues[':status'] = status;
     }
     
     if (nextToken) {
         params.ExclusiveStartKey = JSON.parse(Buffer.from(nextToken, 'base64').toString());
     }
     
-    const response = await ddbDocClient.send(
-        status ? new QueryCommand(params) : new ScanCommand(params)
-    );
+    const response = await ddbDocClient.send(new QueryCommand(params));
     
     return {
         items: response.Items || [],
@@ -1020,24 +1057,35 @@ const getScraperJobs = async (args = {}) => {
 /**
  * Get scrape URLs with filtering
  */
+// --- ENTITY ---: Updated function to query by entityId
 const getScrapeURLs = async (args = {}) => {
-    const { status, limit = 20, nextToken } = args;
+    const { entityId, status, limit = 20, nextToken } = args;
+
+    if (!entityId) {
+        throw new Error("entityId is required to get ScrapeURLs");
+    }
+
     const params = {
         TableName: getTableName('ScrapeURL'),
+        IndexName: 'byEntityScrapeURL', // GSI from schema
+        KeyConditionExpression: '#ent = :entId',
+        ExpressionAttributeNames: { '#ent': 'entityId' },
+        ExpressionAttributeValues: { ':entId': entityId },
         Limit: limit
     };
     
+    // Add filter for status if provided
     if (status) {
         params.FilterExpression = '#status = :status';
-        params.ExpressionAttributeNames = { '#status': 'status' };
-        params.ExpressionAttributeValues = { ':status': status };
+        params.ExpressionAttributeNames['#status'] = 'status';
+        params.ExpressionAttributeValues[':status'] = status;
     }
     
     if (nextToken) {
         params.ExclusiveStartKey = JSON.parse(Buffer.from(nextToken, 'base64').toString());
     }
     
-    const response = await ddbDocClient.send(new ScanCommand(params));
+    const response = await ddbDocClient.send(new QueryCommand(params));
     
     return {
         items: response.Items || [],

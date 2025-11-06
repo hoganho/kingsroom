@@ -1,4 +1,4 @@
-// src/App.tsx - CORRECTED VERSION WITHOUT CLOUDWATCH
+// src/App.tsx - UPDATED WITH ENTITY MANAGEMENT
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
 import { Hub } from 'aws-amplify/utils';
@@ -10,6 +10,7 @@ import { useEffect } from 'react';
 // Context Providers
 import { AuthProvider } from './contexts/AuthContext';
 import { GameProvider } from './contexts/GameContext';
+import { EntityProvider } from './contexts/EntityContext';
 
 // Layout and Auth Components
 import { MainLayout } from './components/layout/MainLayout';
@@ -36,6 +37,7 @@ import { VenuesDashboard } from './pages/venues/VenuesDashboard';
 import { VenueDetails } from './pages/venues/VenueDetails';
 
 // Settings Pages (Admin/SuperAdmin)
+import EntityManagement from './pages/settings/EntityManagement';
 import VenueManagement from './pages/settings/VenueManagement';
 import { SeriesManagementPage } from './pages/settings/SeriesManagement';
 
@@ -96,15 +98,17 @@ class ErrorBoundary extends React.Component<
     }
 }
 
-// Protected Layout Component
+// Protected Layout Component - UPDATED with EntityProvider
 const ProtectedLayout = () => {
     return (
         <ProtectedRoute>
-            <GameProvider>
-                <MainLayout>
-                    <Outlet />
-                </MainLayout>
-            </GameProvider>
+            <EntityProvider>
+                <GameProvider>
+                    <MainLayout>
+                        <Outlet />
+                    </MainLayout>
+                </GameProvider>
+            </EntityProvider>
         </ProtectedRoute>
     );
 };
@@ -190,6 +194,7 @@ function App() {
                                         <Route path="/venues/details" element={<VenueDetails />} />
                                         
                                         {/* Settings (Admin/SuperAdmin) */}
+                                        <Route path="/settings/entity-management" element={<EntityManagement />} /> {/* NEW: Entity Management Route */}
                                         <Route path="/settings/venue-management" element={<VenueManagement />} />
                                         <Route path="/settings/series-management" element={<SeriesManagementPage />} />
                                         

@@ -1,6 +1,6 @@
 // types/game.ts
+// Enhanced type definitions with Entity ID support
 
-// Updated type definitions to match the refactored schema
 import type { DataSource, GameType, GameStatus, RegistrationStatus, TournamentType, GameVariant, GameFrequency, VenueAssignmentStatus } from '../API';
 
 export type TournamentLevelData = {
@@ -68,6 +68,7 @@ export type GameData = {
     gameStatus: GameStatus;
     gameType?: GameType;
     venueId?: string | null;
+    entityId?: string | null; // ✅ Added entity ID
     gameVariant?: GameVariant;
     gameFrequency?: GameFrequency;
     isSeries?: boolean;
@@ -153,17 +154,19 @@ export interface GameState {
     autoRefresh?: boolean;
     fetchCount: number;
     existingGameId?: string | null;
+    entityId?: string | null; // ✅ Added entity ID
 }
 
-// Updated input types to match new schema
+// Enhanced input types with entity ID
 export interface SaveTournamentInput {
     id?: string;
     sourceUrl: string;
     venueId?: string | null;
+    entityId?: string | null; // ✅ Added entity ID
     data: GameDataInput;
     existingGameId?: string | null;
     doNotScrape?: boolean;
-    originalScrapedData?: GameData;
+    originalScrapedData?: any; // Changed to any to handle AWSJSON type
     venueAssignmentStatus?: VenueAssignmentStatus | null;
     requiresVenueAssignment?: boolean | null;
     suggestedVenueName?: string | null;
@@ -172,6 +175,7 @@ export interface SaveTournamentInput {
 
 export interface GameDataInput {
     name: string;
+    entityId?: string; // ✅ Added entity ID
     gameStartDateTime?: string; 
     gameEndDateTime?: string; 
     gameStatus?: GameStatus;
@@ -206,15 +210,25 @@ export interface TournamentLevelInput {
     breakMinutes?: number;
 }
 
-// ✅ NEW: Defines the shape of a single venue suggestion.
+// Defines the shape of a single venue suggestion
 export type ScrapedVenueMatchDetails = {
   id: string;
   name: string;
   score: number;
 };
 
-// ✅ REVISED: This replaces the old VenueMatch type to align with the new backend response.
+// Venue match type aligned with backend response
 export type ScrapedVenueMatch = {
   autoAssignedVenue?: ScrapedVenueMatchDetails | null;
   suggestions?: ScrapedVenueMatchDetails[] | null;
 };
+
+// ✅ NEW: Entity configuration type
+export interface EntityConfig {
+    id: string;
+    entityName: string;
+    gameUrlDomain: string;
+    gameUrlPath: string;
+    entityLogo?: string | null;
+    isActive: boolean;
+}

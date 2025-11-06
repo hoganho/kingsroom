@@ -1,6 +1,6 @@
 import { ModelInit, MutableModel, __modelMeta__, ManagedIdentifier } from "@aws-amplify/datastore";
 // @ts-ignore
-import { LazyLoading, LazyLoadingDisabled, AsyncItem, AsyncCollection } from "@aws-amplify/datastore";
+import { LazyLoading, LazyLoadingDisabled, AsyncCollection, AsyncItem } from "@aws-amplify/datastore";
 
 export enum DataSource {
   SCRAPE = "SCRAPE",
@@ -277,6 +277,7 @@ type EagerScraperStateData = {
   readonly enabled: boolean;
   readonly currentLog?: (ScraperLogData | null)[] | null;
   readonly lastGamesProcessed?: (ScrapedGameStatus | null)[] | null;
+  readonly entityId?: string | null;
 }
 
 type LazyScraperStateData = {
@@ -291,6 +292,7 @@ type LazyScraperStateData = {
   readonly enabled: boolean;
   readonly currentLog?: (ScraperLogData | null)[] | null;
   readonly lastGamesProcessed?: (ScrapedGameStatus | null)[] | null;
+  readonly entityId?: string | null;
 }
 
 export declare type ScraperStateData = LazyLoading extends LazyLoadingDisabled ? EagerScraperStateData : LazyScraperStateData
@@ -423,6 +425,48 @@ export declare type UserMetricsSummary = LazyLoading extends LazyLoadingDisabled
 
 export declare const UserMetricsSummary: (new (init: ModelInit<UserMetricsSummary>) => UserMetricsSummary)
 
+type EagerEntityVenueAssignmentSummary = {
+  readonly entityId?: string | null;
+  readonly entityName: string;
+  readonly totalGames?: number | null;
+  readonly gamesWithVenue?: number | null;
+  readonly gamesNeedingVenue?: number | null;
+}
+
+type LazyEntityVenueAssignmentSummary = {
+  readonly entityId?: string | null;
+  readonly entityName: string;
+  readonly totalGames?: number | null;
+  readonly gamesWithVenue?: number | null;
+  readonly gamesNeedingVenue?: number | null;
+}
+
+export declare type EntityVenueAssignmentSummary = LazyLoading extends LazyLoadingDisabled ? EagerEntityVenueAssignmentSummary : LazyEntityVenueAssignmentSummary
+
+export declare const EntityVenueAssignmentSummary: (new (init: ModelInit<EntityVenueAssignmentSummary>) => EntityVenueAssignmentSummary)
+
+type EagerEntityScraperMetrics = {
+  readonly entityId?: string | null;
+  readonly entityName: string;
+  readonly totalJobs: number;
+  readonly successfulJobs: number;
+  readonly failedJobs: number;
+  readonly totalURLsScraped: number;
+}
+
+type LazyEntityScraperMetrics = {
+  readonly entityId?: string | null;
+  readonly entityName: string;
+  readonly totalJobs: number;
+  readonly successfulJobs: number;
+  readonly failedJobs: number;
+  readonly totalURLsScraped: number;
+}
+
+export declare type EntityScraperMetrics = LazyLoading extends LazyLoadingDisabled ? EagerEntityScraperMetrics : LazyEntityScraperMetrics
+
+export declare const EntityScraperMetrics: (new (init: ModelInit<EntityScraperMetrics>) => EntityScraperMetrics)
+
 type EagerGamesNeedingVenueResponse = {
   readonly items?: (Game | null)[] | null;
   readonly nextToken?: string | null;
@@ -444,6 +488,7 @@ type EagerVenueAssignmentSummary = {
   readonly gamesWithVenue?: number | null;
   readonly gamesNeedingVenue?: number | null;
   readonly pendingAssignments?: number | null;
+  readonly byEntity?: (EntityVenueAssignmentSummary | null)[] | null;
 }
 
 type LazyVenueAssignmentSummary = {
@@ -451,6 +496,7 @@ type LazyVenueAssignmentSummary = {
   readonly gamesWithVenue?: number | null;
   readonly gamesNeedingVenue?: number | null;
   readonly pendingAssignments?: number | null;
+  readonly byEntity?: (EntityVenueAssignmentSummary | null)[] | null;
 }
 
 export declare type VenueAssignmentSummary = LazyLoading extends LazyLoadingDisabled ? EagerVenueAssignmentSummary : LazyVenueAssignmentSummary
@@ -544,6 +590,7 @@ type EagerScraperMetrics = {
   readonly successRate: number;
   readonly topErrors?: ErrorMetric[] | null;
   readonly hourlyActivity?: HourlyMetric[] | null;
+  readonly byEntity?: (EntityScraperMetrics | null)[] | null;
 }
 
 type LazyScraperMetrics = {
@@ -555,6 +602,7 @@ type LazyScraperMetrics = {
   readonly successRate: number;
   readonly topErrors?: ErrorMetric[] | null;
   readonly hourlyActivity?: HourlyMetric[] | null;
+  readonly byEntity?: (EntityScraperMetrics | null)[] | null;
 }
 
 export declare type ScraperMetrics = LazyLoading extends LazyLoadingDisabled ? EagerScraperMetrics : LazyScraperMetrics
@@ -651,7 +699,6 @@ export declare const ScrapedGameSummary: (new (init: ModelInit<ScrapedGameSummar
 
 type EagerScrapedGameData = {
   readonly name: string;
-  readonly tournamentId: number;
   readonly gameStartDateTime?: string | null;
   readonly gameEndDateTime?: string | null;
   readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
@@ -696,11 +743,12 @@ type EagerScrapedGameData = {
   readonly venueMatch?: ScrapedVenueMatch | null;
   readonly existingGameId?: string | null;
   readonly doNotScrape?: boolean | null;
+  readonly tournamentId: number;
+  readonly entityId?: string | null;
 }
 
 type LazyScrapedGameData = {
   readonly name: string;
-  readonly tournamentId: number;
   readonly gameStartDateTime?: string | null;
   readonly gameEndDateTime?: string | null;
   readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
@@ -745,6 +793,8 @@ type LazyScrapedGameData = {
   readonly venueMatch?: ScrapedVenueMatch | null;
   readonly existingGameId?: string | null;
   readonly doNotScrape?: boolean | null;
+  readonly tournamentId: number;
+  readonly entityId?: string | null;
 }
 
 export declare type ScrapedGameData = LazyLoading extends LazyLoadingDisabled ? EagerScrapedGameData : LazyScrapedGameData
@@ -897,6 +947,52 @@ export declare type ScrapedVenueMatchDetails = LazyLoading extends LazyLoadingDi
 
 export declare const ScrapedVenueMatchDetails: (new (init: ModelInit<ScrapedVenueMatchDetails>) => ScrapedVenueMatchDetails)
 
+type EagerEntity = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<Entity, 'id'>;
+  };
+  readonly id: string;
+  readonly entityName: string;
+  readonly gameUrlDomain: string;
+  readonly gameUrlPath: string;
+  readonly entityLogo?: string | null;
+  readonly isActive: boolean;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly scraperStates?: (ScraperState | null)[] | null;
+  readonly scraperJobs?: (ScraperJob | null)[] | null;
+  readonly scrapeURLs?: (ScrapeURL | null)[] | null;
+  readonly venues?: (Venue | null)[] | null;
+  readonly games?: (Game | null)[] | null;
+  readonly assets?: (Asset | null)[] | null;
+}
+
+type LazyEntity = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<Entity, 'id'>;
+  };
+  readonly id: string;
+  readonly entityName: string;
+  readonly gameUrlDomain: string;
+  readonly gameUrlPath: string;
+  readonly entityLogo?: string | null;
+  readonly isActive: boolean;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly scraperStates: AsyncCollection<ScraperState>;
+  readonly scraperJobs: AsyncCollection<ScraperJob>;
+  readonly scrapeURLs: AsyncCollection<ScrapeURL>;
+  readonly venues: AsyncCollection<Venue>;
+  readonly games: AsyncCollection<Game>;
+  readonly assets: AsyncCollection<Asset>;
+}
+
+export declare type Entity = LazyLoading extends LazyLoadingDisabled ? EagerEntity : LazyEntity
+
+export declare const Entity: (new (init: ModelInit<Entity>) => Entity) & {
+  copyOf(source: Entity, mutator: (draft: MutableModel<Entity>) => MutableModel<Entity> | void): Entity;
+}
+
 type EagerScrapeStructure = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<ScrapeStructure, 'id'>;
@@ -987,6 +1083,8 @@ type EagerScraperState = {
   readonly enabled: boolean;
   readonly currentLog?: (ScraperLogData | null)[] | null;
   readonly lastGamesProcessed?: (ScrapedGameStatus | null)[] | null;
+  readonly entityId?: string | null;
+  readonly entity?: Entity | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -1007,6 +1105,8 @@ type LazyScraperState = {
   readonly enabled: boolean;
   readonly currentLog?: (ScraperLogData | null)[] | null;
   readonly lastGamesProcessed?: (ScrapedGameStatus | null)[] | null;
+  readonly entityId?: string | null;
+  readonly entity: AsyncItem<Entity | undefined>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -1036,6 +1136,8 @@ type EagerVenue = {
   readonly series?: (TournamentSeries | null)[] | null;
   readonly playerMemberships?: (PlayerVenue | null)[] | null;
   readonly registeredPlayers?: (Player | null)[] | null;
+  readonly entityId?: string | null;
+  readonly entity?: Entity | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
   readonly venueDetailsId?: string | null;
@@ -1060,6 +1162,8 @@ type LazyVenue = {
   readonly series: AsyncCollection<TournamentSeries>;
   readonly playerMemberships: AsyncCollection<PlayerVenue>;
   readonly registeredPlayers: AsyncCollection<Player>;
+  readonly entityId?: string | null;
+  readonly entity: AsyncItem<Entity | undefined>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
   readonly venueDetailsId?: string | null;
@@ -1253,6 +1357,8 @@ type EagerGame = {
   readonly structure?: TournamentStructure | null;
   readonly playerEntries?: (PlayerEntry | null)[] | null;
   readonly playerResults?: (PlayerResult | null)[] | null;
+  readonly entityId?: string | null;
+  readonly entity?: Entity | null;
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly gameStructureId?: string | null;
@@ -1310,6 +1416,8 @@ type LazyGame = {
   readonly structure: AsyncItem<TournamentStructure | undefined>;
   readonly playerEntries: AsyncCollection<PlayerEntry>;
   readonly playerResults: AsyncCollection<PlayerResult>;
+  readonly entityId?: string | null;
+  readonly entity: AsyncItem<Entity | undefined>;
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly gameStructureId?: string | null;
@@ -1457,6 +1565,7 @@ type EagerPlayer = {
     readOnlyFields: 'createdAt';
   };
   readonly id: string;
+  readonly primaryEntityId?: string | null;
   readonly firstName: string;
   readonly lastName: string;
   readonly phone?: string | null;
@@ -1493,6 +1602,7 @@ type LazyPlayer = {
     readOnlyFields: 'createdAt';
   };
   readonly id: string;
+  readonly primaryEntityId?: string | null;
   readonly firstName: string;
   readonly lastName: string;
   readonly phone?: string | null;
@@ -2212,6 +2322,8 @@ type EagerAsset = {
   readonly lastCheckedDate: string;
   readonly venueId: string;
   readonly venue?: Venue | null;
+  readonly entityId?: string | null;
+  readonly entity?: Entity | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -2229,6 +2341,8 @@ type LazyAsset = {
   readonly lastCheckedDate: string;
   readonly venueId: string;
   readonly venue: AsyncItem<Venue | undefined>;
+  readonly entityId?: string | null;
+  readonly entity: AsyncItem<Entity | undefined>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -2336,6 +2450,8 @@ type EagerScraperJob = {
   readonly failedURLs?: (string | null)[] | null;
   readonly urlResults?: (ScraperJobURLResult | null)[] | null;
   readonly scrapeAttempts?: (ScrapeAttempt | null)[] | null;
+  readonly entityId?: string | null;
+  readonly entity?: Entity | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -2369,6 +2485,8 @@ type LazyScraperJob = {
   readonly failedURLs?: (string | null)[] | null;
   readonly urlResults?: (ScraperJobURLResult | null)[] | null;
   readonly scrapeAttempts: AsyncCollection<ScrapeAttempt>;
+  readonly entityId?: string | null;
+  readonly entity: AsyncItem<Entity | undefined>;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -2415,6 +2533,8 @@ type EagerScrapeURL = {
   readonly averageScrapingTime?: number | null;
   readonly lastScrapingTime?: number | null;
   readonly attempts?: (ScrapeAttempt | null)[] | null;
+  readonly entityId?: string | null;
+  readonly entity?: Entity | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -2455,6 +2575,8 @@ type LazyScrapeURL = {
   readonly averageScrapingTime?: number | null;
   readonly lastScrapingTime?: number | null;
   readonly attempts: AsyncCollection<ScrapeAttempt>;
+  readonly entityId?: string | null;
+  readonly entity: AsyncItem<Entity | undefined>;
   readonly createdAt: string;
   readonly updatedAt: string;
 }

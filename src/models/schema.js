@@ -1,5 +1,195 @@
 export const schema = {
     "models": {
+        "Entity": {
+            "name": "Entity",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "entityName": {
+                    "name": "entityName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameUrlDomain": {
+                    "name": "gameUrlDomain",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameUrlPath": {
+                    "name": "gameUrlPath",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "entityLogo": {
+                    "name": "entityLogo",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isActive": {
+                    "name": "isActive",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "scraperStates": {
+                    "name": "scraperStates",
+                    "isArray": true,
+                    "type": {
+                        "model": "ScraperState"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "entity"
+                        ]
+                    }
+                },
+                "scraperJobs": {
+                    "name": "scraperJobs",
+                    "isArray": true,
+                    "type": {
+                        "model": "ScraperJob"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "entity"
+                        ]
+                    }
+                },
+                "scrapeURLs": {
+                    "name": "scrapeURLs",
+                    "isArray": true,
+                    "type": {
+                        "model": "ScrapeURL"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "entity"
+                        ]
+                    }
+                },
+                "venues": {
+                    "name": "venues",
+                    "isArray": true,
+                    "type": {
+                        "model": "Venue"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "entity"
+                        ]
+                    }
+                },
+                "games": {
+                    "name": "games",
+                    "isArray": true,
+                    "type": {
+                        "model": "Game"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "entity"
+                        ]
+                    }
+                },
+                "assets": {
+                    "name": "assets",
+                    "isArray": true,
+                    "type": {
+                        "model": "Asset"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "entity"
+                        ]
+                    }
+                }
+            },
+            "syncable": true,
+            "pluralName": "Entities",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityName",
+                        "fields": [
+                            "entityName"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
         "ScrapeStructure": {
             "name": "ScrapeStructure",
             "fields": {
@@ -270,6 +460,28 @@ export const schema = {
                     "attributes": [],
                     "isArrayNullable": true
                 },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entity": {
+                    "name": "entity",
+                    "isArray": false,
+                    "type": {
+                        "model": "Entity"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "entityId"
+                        ]
+                    }
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -293,6 +505,15 @@ export const schema = {
                 {
                     "type": "model",
                     "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityScraperState",
+                        "fields": [
+                            "entityId"
+                        ]
+                    }
                 },
                 {
                     "type": "auth",
@@ -470,6 +691,28 @@ export const schema = {
                         ]
                     }
                 },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entity": {
+                    "name": "entity",
+                    "isArray": false,
+                    "type": {
+                        "model": "Entity"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "entityId"
+                        ]
+                    }
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -507,6 +750,16 @@ export const schema = {
                         "name": "byVenueNumber",
                         "fields": [
                             "venueNumber",
+                            "name"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityVenue",
+                        "fields": [
+                            "entityId",
                             "name"
                         ]
                     }
@@ -1343,6 +1596,28 @@ export const schema = {
                         ]
                     }
                 },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entity": {
+                    "name": "entity",
+                    "isArray": false,
+                    "type": {
+                        "model": "Entity"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "entityId"
+                        ]
+                    }
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -1409,6 +1684,16 @@ export const schema = {
                         "name": "byTournamentSeries",
                         "fields": [
                             "tournamentSeriesId",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityGame",
+                        "fields": [
+                            "entityId",
                             "gameStartDateTime"
                         ]
                     }
@@ -1793,6 +2078,13 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "primaryEntityId": {
+                    "name": "primaryEntityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "firstName": {
                     "name": "firstName",
                     "isArray": false,
@@ -2116,6 +2408,15 @@ export const schema = {
                 {
                     "type": "model",
                     "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byPrimaryEntity",
+                        "fields": [
+                            "primaryEntityId"
+                        ]
+                    }
                 },
                 {
                     "type": "key",
@@ -4343,6 +4644,28 @@ export const schema = {
                         ]
                     }
                 },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entity": {
+                    "name": "entity",
+                    "isArray": false,
+                    "type": {
+                        "model": "Entity"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "entityId"
+                        ]
+                    }
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -4373,6 +4696,16 @@ export const schema = {
                         "name": "byVenue",
                         "fields": [
                             "venueId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityAsset",
+                        "fields": [
+                            "entityId",
+                            "type"
                         ]
                     }
                 },
@@ -4761,6 +5094,28 @@ export const schema = {
                         ]
                     }
                 },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entity": {
+                    "name": "entity",
+                    "isArray": false,
+                    "type": {
+                        "model": "Entity"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "entityId"
+                        ]
+                    }
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -4781,7 +5136,11 @@ export const schema = {
             "attributes": [
                 {
                     "type": "model",
-                    "properties": {}
+                    "properties": {
+                        "queries": {
+                            "list": null
+                        }
+                    }
                 },
                 {
                     "type": "key",
@@ -4798,6 +5157,16 @@ export const schema = {
                         "name": "byStatus",
                         "fields": [
                             "status",
+                            "startTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityScraperJob",
+                        "fields": [
+                            "entityId",
                             "startTime"
                         ]
                     }
@@ -5064,6 +5433,28 @@ export const schema = {
                         ]
                     }
                 },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entity": {
+                    "name": "entity",
+                    "isArray": false,
+                    "type": {
+                        "model": "Entity"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "entityId"
+                        ]
+                    }
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -5084,7 +5475,12 @@ export const schema = {
             "attributes": [
                 {
                     "type": "model",
-                    "properties": {}
+                    "properties": {
+                        "queries": {
+                            "get": "getScrapeURL",
+                            "list": null
+                        }
+                    }
                 },
                 {
                     "type": "key",
@@ -5122,6 +5518,15 @@ export const schema = {
                         "name": "byGameId",
                         "fields": [
                             "gameId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityScrapeURL",
+                        "fields": [
+                            "entityId"
                         ]
                     }
                 },
@@ -5815,6 +6220,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": [],
                     "isArrayNullable": true
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
                 }
             }
         },
@@ -6049,6 +6461,93 @@ export const schema = {
                 }
             }
         },
+        "EntityVenueAssignmentSummary": {
+            "name": "EntityVenueAssignmentSummary",
+            "fields": {
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityName": {
+                    "name": "entityName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalGames": {
+                    "name": "totalGames",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gamesWithVenue": {
+                    "name": "gamesWithVenue",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gamesNeedingVenue": {
+                    "name": "gamesNeedingVenue",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "EntityScraperMetrics": {
+            "name": "EntityScraperMetrics",
+            "fields": {
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityName": {
+                    "name": "entityName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalJobs": {
+                    "name": "totalJobs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "successfulJobs": {
+                    "name": "successfulJobs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "failedJobs": {
+                    "name": "failedJobs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalURLsScraped": {
+                    "name": "totalURLsScraped",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
         "GamesNeedingVenueResponse": {
             "name": "GamesNeedingVenueResponse",
             "fields": {
@@ -6108,6 +6607,16 @@ export const schema = {
                     "type": "Int",
                     "isRequired": false,
                     "attributes": []
+                },
+                "byEntity": {
+                    "name": "byEntity",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "EntityVenueAssignmentSummary"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
                 }
             }
         },
@@ -6338,6 +6847,16 @@ export const schema = {
                     "isRequired": true,
                     "attributes": [],
                     "isArrayNullable": true
+                },
+                "byEntity": {
+                    "name": "byEntity",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "EntityScraperMetrics"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
                 }
             }
         },
@@ -6513,13 +7032,6 @@ export const schema = {
                     "name": "name",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "tournamentId": {
-                    "name": "tournamentId",
-                    "isArray": false,
-                    "type": "Int",
                     "isRequired": true,
                     "attributes": []
                 },
@@ -6862,6 +7374,20 @@ export const schema = {
                     "type": "Boolean",
                     "isRequired": false,
                     "attributes": []
+                },
+                "tournamentId": {
+                    "name": "tournamentId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
                 }
             }
         },
@@ -7116,5 +7642,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "a4c8c377dec055878a9cde1a4a80391d"
+    "version": "58e3c34dd8936d3a8589e075c9a4ab3f"
 };

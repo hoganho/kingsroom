@@ -78,6 +78,12 @@ export const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
   // Settings section (Admin and SuperAdmin)
   const settingsMenuItems: MenuItem[] = [
     {
+      to: '/settings/entity-management',
+      label: 'Entity Management',
+      icon: BuildingOffice2Icon,
+      requiredRoles: ['SuperAdmin'],
+    },
+    {
       to: '/settings/venue-management',
       label: 'Venue Management',
       icon: BuildingOffice2Icon,

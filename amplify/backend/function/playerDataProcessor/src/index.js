@@ -25,6 +25,16 @@
 	REGION
 Amplify Params - DO NOT EDIT */
 
+/*
+ * ===================================================================
+ * FINAL MERGED Player Data Processor Lambda
+ *
+ * This version combines the advanced business logic from the original
+ * index.js (complex targeting, wasNewVenue, skip logic) with the
+ * multi-entity support from PDP-index-enhanced.js.
+ * ===================================================================
+ */
+
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, PutCommand, UpdateCommand, GetCommand, QueryCommand, BatchWriteCommand } = require('@aws-sdk/lib-dynamodb');
 const crypto = require('crypto');
@@ -34,11 +44,14 @@ const { v4: uuidv4 } = require('uuid');
 const UNASSIGNED_VENUE_ID = "00000000-0000-0000-0000-000000000000";
 const UNASSIGNED_VENUE_NAME = "Unassigned";
 
+// --- MERGE ---: Added from PDP-index-enhanced.js
+const DEFAULT_ENTITY_ID = "default-entity-id";
+
 const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
 
 // ===================================================================
-// HELPER FUNCTIONS
+// HELPER FUNCTIONS (PRESERVED FROM index.js)
 // ===================================================================
 
 /**
@@ -99,6 +112,7 @@ const daysBetween = (date1, date2) => {
 
 /**
  * Calculate PlayerVenue targeting classification based on flowchart logic
+ * (Preserved from index.js)
  */
 const calculatePlayerVenueTargetingClassification = (lastActivityDate, membershipCreatedDate) => {
     const now = new Date();
@@ -131,6 +145,7 @@ const calculatePlayerVenueTargetingClassification = (lastActivityDate, membershi
 
 /**
  * Calculate Player targeting classification based on flowchart logic
+ * (Preserved from index.js)
  */
 const calculatePlayerTargetingClassification = async (playerId, lastPlayedDate, registrationDate, isNewPlayer = false) => {
     const now = new Date();
@@ -204,6 +219,7 @@ const calculatePlayerTargetingClassification = async (playerId, lastPlayedDate, 
 
 /**
  * Generate a deterministic player ID based on name and venue
+ * (Preserved from index.js)
  */
 const generatePlayerId = (playerName) => {
     const normalized = playerName.toLowerCase().trim();
@@ -214,19 +230,20 @@ const generatePlayerId = (playerName) => {
 };
 
 // ===================================================================
-// MAIN PROCESSING FUNCTIONS
+// MAIN PROCESSING FUNCTIONS (MERGED)
 // ===================================================================
 
 /**
  * Create or update a Player record
+ * (Merged: Preserved index.js logic, added entityId)
  */
-const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) => {
+// --- MERGE ---: Added entityId parameter
+const upsertPlayerRecord = async (playerId, playerName, gameData, playerData, entityId) => {
     console.log(`[PLAYER-UPSERT] Starting upsert for player ${playerName} (${playerId})`);
     const playerTable = getTableName('Player');
     const now = new Date().toISOString();
     const nameParts = parsePlayerName(playerName);
     const gameDateTime = gameData.game.gameEndDateTime || gameData.game.gameStartDateTime;
-    // FIXED: Keep full ISO date instead of extracting date-only part
     const gameDate = gameDateTime ? (gameDateTime.includes('T') ? gameDateTime : `${gameDateTime}T00:00:00.000Z`) : now;
 
     try {
@@ -243,18 +260,26 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) =>
             await ddbDocClient.send(new UpdateCommand({
                 TableName: playerTable,
                 Key: { id: playerId },
+                // --- MERGE ---: Added #ent = :entityId
                 UpdateExpression: `
                     SET lastPlayedDate = :lastPlayedDate,
                         targetingClassification = :targetingClassification,
                         pointsBalance = pointsBalance + :points,
-                        #version = #version + :inc
+                        #version = #version + :inc,
+                        #ent = :entityId
                 `,
-                ExpressionAttributeNames: { '#version': '_version' },
+                // --- MERGE ---: Added #ent
+                ExpressionAttributeNames: { 
+                    '#version': '_version',
+                    '#ent': 'primaryEntityId'
+                },
+                // --- MERGE ---: Added :entityId
                 ExpressionAttributeValues: {
                     ':lastPlayedDate': gameDate,
                     ':targetingClassification': targetingClassification,
                     ':points': playerData.points || 0,
-                    ':inc': 1
+                    ':inc': 1,
+                    ':entityId': entityId || existingPlayer.Item.primaryEntityId || DEFAULT_ENTITY_ID
                 }
             }));
             console.log(`[PLAYER-UPSERT] Updated existing player ${playerId}`);
@@ -265,7 +290,6 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) =>
                 playerId, gameDateTime, now, true
             );
             
-            // Only set registrationVenueId if venue is assigned
             const isUnassignedVenue = !gameData.game.venueId || gameData.game.venueId === UNASSIGNED_VENUE_ID;
             
             const newPlayer = {
@@ -282,6 +306,8 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) =>
                 venueAssignmentStatus: isUnassignedVenue ? 'PENDING_ASSIGNMENT' : 'AUTO_ASSIGNED',
                 creditBalance: 0,
                 pointsBalance: playerData.points || 0,
+                // --- MERGE ---: Added primaryEntityId
+                primaryEntityId: entityId || DEFAULT_ENTITY_ID,
                 createdAt: now,
                 updatedAt: now,
                 _version: 1,
@@ -304,11 +330,13 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData) =>
 
 /**
  * Upserts a PlayerEntry record
+ * (Merged: Preserved index.js logic [Update/Catch/Put], added entityId)
  */
-const upsertPlayerEntry = async (playerId, gameData) => {
+// --- MERGE ---: Added entityId parameter
+const upsertPlayerEntry = async (playerId, gameData, entityId) => {
     console.log(`[ENTRY-UPSERT] Starting upsert for game ${gameData.game.id}.`);
     const playerEntryTable = getTableName('PlayerEntry');
-    const entryId = `${gameData.game.id}#${playerId}`;
+    const entryId = `${gameData.game.id}#${playerId}`; // Preserved from index.js
     const now = new Date().toISOString();
 
     try {
@@ -316,11 +344,14 @@ const upsertPlayerEntry = async (playerId, gameData) => {
         await ddbDocClient.send(new UpdateCommand({
             TableName: playerEntryTable,
             Key: { id: entryId },
-            UpdateExpression: 'SET #status = :status, updatedAt = :updatedAt',
+            // --- MERGE ---: Added entityId = :entityId
+            UpdateExpression: 'SET #status = :status, updatedAt = :updatedAt, entityId = :entityId',
             ExpressionAttributeNames: { '#status': 'status' },
+            // --- MERGE ---: Added :entityId
             ExpressionAttributeValues: {
                 ':status': 'COMPLETED',
-                ':updatedAt': now
+                ':updatedAt': now,
+                ':entityId': entityId || DEFAULT_ENTITY_ID
             },
             ConditionExpression: 'attribute_exists(id)'
         }));
@@ -334,6 +365,8 @@ const upsertPlayerEntry = async (playerId, gameData) => {
                 playerId: playerId,
                 gameId: gameData.game.id,
                 venueId: gameData.game.venueId,
+                // --- MERGE ---: Added entityId
+                entityId: entityId || DEFAULT_ENTITY_ID,
                 status: 'COMPLETED',
                 registrationTime: gameData.game.gameStartDateTime,
                 gameStartDateTime: gameData.game.gameStartDateTime,
@@ -363,8 +396,10 @@ const upsertPlayerEntry = async (playerId, gameData) => {
 
 /**
  * Create PlayerResult record
+ * (Merged: Preserved index.js logic [incl. venueId], added entityId)
  */
-const createPlayerResult = async (playerId, gameData, playerData) => {
+// --- MERGE ---: Added entityId parameter
+const createPlayerResult = async (playerId, gameData, playerData, entityId) => {
     console.log(`[RESULT-CREATE] Attempting result creation for ${playerId}.`);
     const playerResultTable = getTableName('PlayerResult');
     const resultId = `${playerId}#${gameData.game.id}`;
@@ -375,7 +410,9 @@ const createPlayerResult = async (playerId, gameData, playerData) => {
             id: resultId,
             playerId: playerId,
             gameId: gameData.game.id,
-            venueId: gameData.game.venueId,
+            venueId: gameData.game.venueId, // Preserved from index.js
+            // --- MERGE ---: Added entityId
+            entityId: entityId || DEFAULT_ENTITY_ID,
             finishingPlace: playerData.rank || null,
             prizeWon: playerData.winnings > 0 || playerData.isQualification || false,
             amountWon: playerData.winnings || 0,
@@ -409,10 +446,10 @@ const createPlayerResult = async (playerId, gameData, playerData) => {
 
 /**
  * Update or create PlayerSummary record
+ * (Merged: Preserved index.js logic [wasNewVenue], added entityId)
  */
-// *** MODIFIED FUNCTION SIGNATURE ***
-const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue) => {
-    // *** MODIFIED LOG ***
+// --- MERGE ---: Added entityId parameter
+const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue, entityId) => {
     console.log(`[SUMMARY-UPSERT] Starting upsert for player ${playerId}. (NewVenue: ${wasNewVenue})`);
     const playerSummaryTable = getTableName('PlayerSummary');
     const summaryId = `${playerId}`;
@@ -435,7 +472,7 @@ const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue) 
             await ddbDocClient.send(new UpdateCommand({
                 TableName: playerSummaryTable,
                 Key: { id: summaryId },
-                // *** MODIFIED UpdateExpression ***
+                // --- MERGE ---: Added #ent = :entityId
                 UpdateExpression: `
                     SET #lastPlayed = :lastPlayed,
                         sessionsPlayed = sessionsPlayed + :one,
@@ -449,13 +486,16 @@ const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue) 
                         netBalance = netBalance + :profitLoss,
                         venuesVisited = venuesVisited + :venueInc,
                         updatedAt = :updatedAt,
-                        #version = #version + :one
+                        #version = #version + :one,
+                        #ent = :entityId
                 `,
+                // --- MERGE ---: Added #ent
                 ExpressionAttributeNames: {
                     '#version': '_version',
-                    '#lastPlayed': 'lastPlayed'
+                    '#lastPlayed': 'lastPlayed',
+                    '#ent': 'entityId'
                 },
-                // *** MODIFIED ExpressionAttributeValues ***
+                // --- MERGE ---: Added :entityId
                 ExpressionAttributeValues: {
                     ':lastPlayed': gameDateTime,
                     ':one': 1,
@@ -464,8 +504,9 @@ const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue) 
                     ':itm': isITM ? 1 : 0,
                     ':cash': isCash ? 1 : 0,
                     ':profitLoss': winningsAmount - buyInAmount,
-                    ':venueInc': wasNewVenue ? 1 : 0, // Increment by 1 if new venue, 0 if not
-                    ':updatedAt': now
+                    ':venueInc': wasNewVenue ? 1 : 0, 
+                    ':updatedAt': now,
+                    ':entityId': entityId || existingSummary.Item.entityId || DEFAULT_ENTITY_ID
                 }
             }));
             console.log(`[SUMMARY-UPSERT] Updated existing summary.`);
@@ -473,10 +514,12 @@ const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue) 
             const newSummary = {
                 id: summaryId,
                 playerId: playerId,
+                // --- MERGE ---: Added entityId
+                entityId: entityId || DEFAULT_ENTITY_ID,
                 sessionsPlayed: 1,
                 tournamentsPlayed: 1,
                 cashGamesPlayed: 0,
-                venuesVisited: 1, // Correct: first summary means first venue
+                venuesVisited: 1, 
                 tournamentWinnings: winningsAmount,
                 tournamentBuyIns: buyInAmount,
                 tournamentITM: isITM ? 1 : 0,
@@ -508,12 +551,12 @@ const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue) 
 
 /**
  * Update or create PlayerVenue record
+ * (Merged: Preserved index.js logic [returns wasNewVenue], added entityId)
  */
-// *** MODIFIED FUNCTION (ADDED RETURN VALUES) ***
-const upsertPlayerVenue = async (playerId, gameData, playerData) => {
+// --- MERGE ---: Added entityId parameter
+const upsertPlayerVenue = async (playerId, gameData, playerData, entityId) => {
     console.log(`[VENUE-UPSERT] Starting upsert for player ${playerId} at venue ${gameData.game.venueId}.`);
     
-    // Skip PlayerVenue creation for unassigned venues
     if (!gameData.game.venueId || gameData.game.venueId === UNASSIGNED_VENUE_ID) {
         console.log(`[VENUE-UPSERT] Skipping - venue is unassigned for game ${gameData.game.id}`);
         return { success: true, skipped: true, wasNewVenue: false };
@@ -522,7 +565,6 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
     const playerVenueTable = getTableName('PlayerVenue');
     const playerVenueId = `${playerId}#${gameData.game.venueId}`;
     const now = new Date().toISOString();
-    // FIXED: Keep full ISO date instead of extracting date-only part
     const gameDateTime = gameData.game.gameEndDateTime || gameData.game.gameStartDateTime;
     const gameDate = gameDateTime ? (gameDateTime.includes('T') ? gameDateTime : `${gameDateTime}T00:00:00.000Z`) : now;
     const currentGameBuyIn = (gameData.game.buyIn || 0) + (gameData.game.rake || 0);
@@ -551,33 +593,41 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
             await ddbDocClient.send(new UpdateCommand({
                 TableName: playerVenueTable,
                 Key: { id: playerVenueId },
+                // --- MERGE ---: Added #ent = :entityId
                 UpdateExpression: `
                     SET totalGamesPlayed = totalGamesPlayed + :inc,
                         lastPlayedDate = :lastPlayedDate,
                         targetingClassification = :targetingClassification,
                         averageBuyIn = :newAverageBuyIn,
                         updatedAt = :updatedAt,
-                        #version = #version + :inc
+                        #version = #version + :inc,
+                        #ent = :entityId
                 `,
+                // --- MERGE ---: Added #ent
                 ExpressionAttributeNames: {
-                    '#version': '_version'
+                    '#version': '_version',
+                    '#ent': 'entityId'
                 },
+                // --- MERGE ---: Added :entityId
                 ExpressionAttributeValues: {
                     ':inc': 1,
                     ':lastPlayedDate': gameDate,
                     ':targetingClassification': targetingClassification,
                     ':newAverageBuyIn': newAverageBuyIn,
-                    ':updatedAt': now
+                    ':updatedAt': now,
+                    ':entityId': entityId || existingRecord.Item.entityId || DEFAULT_ENTITY_ID
                 }
             }));
             console.log(`[VENUE-UPSERT] Updated existing PlayerVenue record.`);
-            return { wasNewVenue: false }; // <-- MODIFIED: Return false
+            return { wasNewVenue: false }; // Preserved from index.js
 
         } else {
             const newPlayerVenue = {
                 id: playerVenueId,
                 playerId: playerId,
                 venueId: gameData.game.venueId,
+                // --- MERGE ---: Added entityId
+                entityId: entityId || DEFAULT_ENTITY_ID,
                 membershipCreatedDate: gameDate,
                 firstPlayedDate: gameDate,
                 lastPlayedDate: gameDate,
@@ -596,7 +646,7 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
                 Item: newPlayerVenue
             }));
             console.log(`[VENUE-UPSERT] Created new PlayerVenue record.`);
-            return { wasNewVenue: true }; // <-- MODIFIED: Return true
+            return { wasNewVenue: true }; // Preserved from index.js
         }
         
     } catch (error) {
@@ -608,8 +658,10 @@ const upsertPlayerVenue = async (playerId, gameData, playerData) => {
 
 /**
  * Create PlayerTransaction records
+ * (Merged: Preserved index.js logic [uuidv4, BatchWrite], added entityId)
  */
-const createPlayerTransactions = async (playerId, gameData, playerData, processingInstructions) => {
+// --- MERGE ---: Added entityId parameter
+const createPlayerTransactions = async (playerId, gameData, playerData, processingInstructions, entityId) => {
     console.log(`[TRANSACTION-CREATE] Starting creation for player ${playerId}.`);
     const playerTransactionTable = getTableName('PlayerTransaction');
     const transactions = [];
@@ -619,13 +671,15 @@ const createPlayerTransactions = async (playerId, gameData, playerData, processi
     
     try {
         for (const transaction of transactionsToCreate) {
-            const transactionId = uuidv4();
+            const transactionId = uuidv4(); // Preserved from index.js
             
             const playerTransaction = {
                 id: transactionId,
                 playerId: playerId,
                 venueId: gameData.game.venueId,
                 gameId: gameData.game.id,
+                // --- MERGE ---: Added entityId
+                entityId: entityId || DEFAULT_ENTITY_ID,
                 type: transaction.type,
                 amount: transaction.amount,
                 paymentSource: transaction.paymentSource,
@@ -675,18 +729,22 @@ const createPlayerTransactions = async (playerId, gameData, playerData, processi
 
 /**
  * Process a single player
+ * (Merged: Preserved index.js logic [skip, call order], added entityId)
  */
-// *** MODIFIED FUNCTION (RE-ORDERED CALLS) ***
 const processPlayer = async (playerData, processingInstructions, gameData) => {
     const playerName = playerData.name;
     const playerResultTable = getTableName('PlayerResult');
+    // --- MERGE ---: Added entityId extraction
+    const entityId = gameData.game.entityId || DEFAULT_ENTITY_ID;
     
     try {
         const playerId = generatePlayerId(playerName);
         const resultId = `${playerId}#${gameData.game.id}`;
 
-        console.log(`[PROCESS-PLAYER] Starting processing for player: ${playerName} (ID: ${playerId})`);
+        // --- MERGE ---: Added entityId to log
+        console.log(`[PROCESS-PLAYER] Starting processing for player: ${playerName} (ID: ${playerId}) with entity ${entityId}`);
 
+        // Preserved skip logic from index.js
         const existingResult = await ddbDocClient.send(new GetCommand({
             TableName: playerResultTable,
             Key: { id: resultId }
@@ -694,56 +752,57 @@ const processPlayer = async (playerData, processingInstructions, gameData) => {
 
         if (existingResult.Item) {
             console.log(`[PROCESS-PLAYER] SKIPPING: Result already exists for game ${gameData.game.id}`);
-            return { success: true, playerName, playerId, status: 'SKIPPED' };
+            // --- MERGE ---: Added entityId to return
+            return { success: true, playerName, playerId, entityId, status: 'SKIPPED' };
         }
         
+        // --- MERGE ---: All calls updated to pass entityId
+        
         console.log(`[PROCESS-PLAYER] Step 1: upsertPlayerRecord...`);
-        await upsertPlayerRecord(playerId, playerName, gameData, playerData);
+        await upsertPlayerRecord(playerId, playerName, gameData, playerData, entityId);
         
         console.log(`[PROCESS-PLAYER] Step 2: createPlayerResult...`);
-        await createPlayerResult(playerId, gameData, playerData);
+        await createPlayerResult(playerId, gameData, playerData, entityId);
         
-        // --- LOGIC RE-ORDERED ---
-        
+        // Call order preserved from index.js
         console.log(`[PROCESS-PLAYER] Step 3: upsertPlayerVenue...`);
-        // Capture the return value
-        const { wasNewVenue } = await upsertPlayerVenue(playerId, gameData, playerData);
+        const { wasNewVenue } = await upsertPlayerVenue(playerId, gameData, playerData, entityId);
         
         console.log(`[PROCESS-PLAYER] Step 4: upsertPlayerSummary...`);
-        // Pass the value to the summary function
-        await upsertPlayerSummary(playerId, gameData, playerData, wasNewVenue);
+        await upsertPlayerSummary(playerId, gameData, playerData, wasNewVenue, entityId);
         
-        // --- END RE-ORDER ---
-
         console.log(`[PROCESS-PLAYER] Step 5: createPlayerTransactions...`);
-        await createPlayerTransactions(playerId, gameData, playerData, processingInstructions);
+        await createPlayerTransactions(playerId, gameData, playerData, processingInstructions, entityId);
         
         console.log(`[PROCESS-PLAYER] Step 6: upsertPlayerEntry...`);
-        await upsertPlayerEntry(playerId, gameData);
+        await upsertPlayerEntry(playerId, gameData, entityId);
 
-        console.log(`[PROCESS-PLAYER] SUCCESS: Player ${playerName} completely processed.`);
-        return { success: true, playerName, playerId, status: 'PROCESSED' };
+        // --- MERGE ---: Added entityId to log
+        console.log(`[PROCESS-PLAYER] SUCCESS: Player ${playerName} completely processed with entity ${entityId}`);
+        // --- MERGE ---: Added entityId to return
+        return { success: true, playerName, playerId, entityId, status: 'PROCESSED' };
         
     } catch (error) {
         console.error(`[PROCESS-PLAYER] CRITICAL FAILURE for player ${playerName}:`, error);
-        return { success: false, playerName, error: error.message };
+        // --- MERGE ---: Added entityId to return
+        return { success: false, playerName, entityId, error: error.message };
     }
 };
 
 /**
  * Main Lambda handler
+ * (Merged: Added entityId reporting)
  */
 exports.handler = async (event) => {
     console.log('[HANDLER] START: Player Data Processor invoked.');
-
-    // ✅ DIAGNOSTIC: Log the entire event structure
-    // NOTE: SQS events wrap the actual message body inside event.Records[i].body
     console.log('Received Lambda Event (Raw):', JSON.stringify(event, null, 2));
 
+    // --- MERGE ---: Added entityId to results object
     const results = {
         successful: [],
         failed: [],
-        totalProcessed: 0
+        totalProcessed: 0,
+        entityId: null
     };
     
     if (!event.Records || event.Records.length === 0) {
@@ -758,12 +817,17 @@ exports.handler = async (event) => {
         try {
             console.log(`[HANDLER] Processing message ID: ${record.messageId}`);
             
-            // 1. Parse the SQS message body
             const messageBody = record.body;
             gameData = JSON.parse(messageBody);
             
             console.log(`[HANDLER] SUCCESS: Message body parsed.`);
             console.log(`[HANDLER] Game ID from SQS: ${gameData.game.id}`);
+            
+            // --- MERGE ---: Added entityId extraction and logging
+            console.log(`[HANDLER] Entity ID from SQS: ${gameData.game.entityId}`);
+            if (!results.entityId) {
+                results.entityId = gameData.game.entityId || DEFAULT_ENTITY_ID;
+            }
             
             if (!gameData.players || !gameData.processingInstructions) {
                 console.error('[HANDLER] CRITICAL ERROR: SQS Payload missing required fields (players/instructions).');
@@ -781,7 +845,6 @@ exports.handler = async (event) => {
                 );
             }
             
-            // 2. Batch Processing for Concurrency
             const batchSize = 10;
             for (let i = 0; i < playerPromises.length; i += batchSize) {
                 const batch = playerPromises.slice(i, i + batchSize);
@@ -791,7 +854,6 @@ exports.handler = async (event) => {
                     if (result.status === 'fulfilled' && result.value.success) {
                         results.successful.push(result.value);
                     } else {
-                        // Log reason for failure (rejected promise or processPlayer failure)
                         const failureReason = result.reason || result.value;
                         console.error('[HANDLER] Player Processing Failed:', JSON.stringify(failureReason));
                         results.failed.push(failureReason);
@@ -800,30 +862,33 @@ exports.handler = async (event) => {
                 });
             }
             
-            console.log(`[HANDLER] Game ${gameData.game.id} batch processing completed.`);
+            // --- MERGE ---: Added entityId to log
+            console.log(`[HANDLER] Game ${gameData.game.id} batch processing completed for entity ${results.entityId}.`);
             
         } catch (error) {
             console.error('[HANDLER] CRITICAL FAILURE: Unhandled error processing SQS message record:', error);
-            // Re-throw the error so SQS knows to redeliver the message (or move to DLQ)
             throw error; 
         }
     }
     
     console.log('--- FINAL SUMMARY ---');
+    // --- MERGE ---: Added entityId to log
+    console.log(`Entity ID: ${results.entityId}`);
     console.log(`Total Players Processed: ${results.totalProcessed}`);
     console.log(`Successful: ${results.successful.length}`);
     console.log(`Failed: ${results.failed.length}`);
     
-    // If any failures occurred, throw an error to trigger SQS redelivery mechanism
     if (results.failed.length > 0) {
         console.error('Final result contains failures. Triggering SQS redelivery.');
         throw new Error(`Failed to process ${results.failed.length} players. Check logs for details.`);
     }
     
+    // --- MERGE ---: Added entityId to response body
     return {
         statusCode: 200,
         body: JSON.stringify({
             message: 'Successfully processed all messages.',
+            entityId: results.entityId,
             results: {
                 totalProcessed: results.totalProcessed,
                 successful: results.successful.length,

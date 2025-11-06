@@ -25,8 +25,8 @@ export const fetchTournamentDataRange = /* GraphQL */ `query FetchTournamentData
   APITypes.FetchTournamentDataRangeQueryVariables,
   APITypes.FetchTournamentDataRangeQuery
 >;
-export const getScraperControlState = /* GraphQL */ `query GetScraperControlState {
-  getScraperControlState {
+export const getScraperControlState = /* GraphQL */ `query GetScraperControlState($entityId: ID) {
+  getScraperControlState(entityId: $entityId) {
     success
     message
     state {
@@ -52,6 +52,7 @@ export const getScraperControlState = /* GraphQL */ `query GetScraperControlStat
         status
         __typename
       }
+      entityId
       __typename
     }
     results {
@@ -145,6 +146,7 @@ export const getScraperJobsReport = /* GraphQL */ `query GetScraperJobsReport(
             successRate
             errorMessages
             failedURLs
+            entityId
             createdAt
             updatedAt
             _version
@@ -185,6 +187,7 @@ export const getScraperJobsReport = /* GraphQL */ `query GetScraperJobsReport(
             lastStructureLabel
             averageScrapingTime
             lastScrapingTime
+            entityId
             createdAt
             updatedAt
             _version
@@ -215,6 +218,226 @@ export const getScraperJobsReport = /* GraphQL */ `query GetScraperJobsReport(
         }
         nextToken
         startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -310,6 +533,21 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -355,6 +593,21 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -385,6 +638,460 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
       }
       nextToken
       startedAt
+      __typename
+    }
+    entityId
+    entity {
+      id
+      entityName
+      gameUrlDomain
+      gameUrlPath
+      entityLogo
+      isActive
+      createdAt
+      updatedAt
+      scraperStates {
+        items {
+          id
+          isRunning
+          lastScannedId
+          lastRunStartTime
+          lastRunEndTime
+          consecutiveBlankCount
+          totalScraped
+          totalErrors
+          enabled
+          currentLog {
+            timestamp
+            level
+            message
+            details
+            __typename
+          }
+          lastGamesProcessed {
+            id
+            name
+            status
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      scraperJobs {
+        items {
+          id
+          jobId
+          triggerSource
+          triggeredBy
+          startTime
+          endTime
+          durationSeconds
+          maxGames
+          targetURLs
+          isFullScan
+          startId
+          endId
+          status
+          totalURLsProcessed
+          newGamesScraped
+          gamesUpdated
+          gamesSkipped
+          errors
+          blanks
+          averageScrapingTime
+          successRate
+          errorMessages
+          failedURLs
+          urlResults {
+            url
+            tournamentId
+            status
+            gameName
+            processingTime
+            error
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      scrapeURLs {
+        items {
+          id
+          url
+          tournamentId
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          missingKeysFromScrape
+          sourceSystem
+          status
+          placedIntoDatabase
+          firstScrapedAt
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          timesScraped
+          timesSuccessful
+          timesFailed
+          consecutiveFailures
+          lastScrapeStatus
+          lastScrapeMessage
+          lastScrapeJobId
+          gameId
+          gameName
+          gameStatus
+          venueId
+          venueName
+          lastDataHash
+          hasDataChanges
+          lastFoundKeys
+          lastStructureLabel
+          averageScrapingTime
+          lastScrapingTime
+          attempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      venues {
+        items {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          tournamentId
+          dataSource
+          originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          structure {
+            id
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          gameStructureId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      _version
+      _deleted
+      _lastChangedAt
       __typename
     }
     createdAt
@@ -468,6 +1175,7 @@ export const searchScrapeURLs = /* GraphQL */ `query SearchScrapeURLs(
             successRate
             errorMessages
             failedURLs
+            entityId
             createdAt
             updatedAt
             _version
@@ -508,6 +1216,7 @@ export const searchScrapeURLs = /* GraphQL */ `query SearchScrapeURLs(
             lastStructureLabel
             averageScrapingTime
             lastScrapingTime
+            entityId
             createdAt
             updatedAt
             _version
@@ -540,6 +1249,226 @@ export const searchScrapeURLs = /* GraphQL */ `query SearchScrapeURLs(
         startedAt
         __typename
       }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -555,8 +1484,8 @@ export const searchScrapeURLs = /* GraphQL */ `query SearchScrapeURLs(
   APITypes.SearchScrapeURLsQueryVariables,
   APITypes.SearchScrapeURLsQuery
 >;
-export const getScraperMetrics = /* GraphQL */ `query GetScraperMetrics($timeRange: TimeRange!) {
-  getScraperMetrics(timeRange: $timeRange) {
+export const getScraperMetrics = /* GraphQL */ `query GetScraperMetrics($timeRange: TimeRange!, $entityId: ID) {
+  getScraperMetrics(timeRange: $timeRange, entityId: $entityId) {
     totalJobs
     successfulJobs
     failedJobs
@@ -574,6 +1503,15 @@ export const getScraperMetrics = /* GraphQL */ `query GetScraperMetrics($timeRan
       jobCount
       urlsScraped
       successRate
+      __typename
+    }
+    byEntity {
+      entityId
+      entityName
+      totalJobs
+      successfulJobs
+      failedJobs
+      totalURLsScraped
       __typename
     }
     __typename
@@ -661,6 +1599,21 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -706,6 +1659,21 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -738,6 +1706,460 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
       startedAt
       __typename
     }
+    entityId
+    entity {
+      id
+      entityName
+      gameUrlDomain
+      gameUrlPath
+      entityLogo
+      isActive
+      createdAt
+      updatedAt
+      scraperStates {
+        items {
+          id
+          isRunning
+          lastScannedId
+          lastRunStartTime
+          lastRunEndTime
+          consecutiveBlankCount
+          totalScraped
+          totalErrors
+          enabled
+          currentLog {
+            timestamp
+            level
+            message
+            details
+            __typename
+          }
+          lastGamesProcessed {
+            id
+            name
+            status
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      scraperJobs {
+        items {
+          id
+          jobId
+          triggerSource
+          triggeredBy
+          startTime
+          endTime
+          durationSeconds
+          maxGames
+          targetURLs
+          isFullScan
+          startId
+          endId
+          status
+          totalURLsProcessed
+          newGamesScraped
+          gamesUpdated
+          gamesSkipped
+          errors
+          blanks
+          averageScrapingTime
+          successRate
+          errorMessages
+          failedURLs
+          urlResults {
+            url
+            tournamentId
+            status
+            gameName
+            processingTime
+            error
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      scrapeURLs {
+        items {
+          id
+          url
+          tournamentId
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          missingKeysFromScrape
+          sourceSystem
+          status
+          placedIntoDatabase
+          firstScrapedAt
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          timesScraped
+          timesSuccessful
+          timesFailed
+          consecutiveFailures
+          lastScrapeStatus
+          lastScrapeMessage
+          lastScrapeJobId
+          gameId
+          gameName
+          gameStatus
+          venueId
+          venueName
+          lastDataHash
+          hasDataChanges
+          lastFoundKeys
+          lastStructureLabel
+          averageScrapingTime
+          lastScrapingTime
+          attempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      venues {
+        items {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          tournamentId
+          dataSource
+          originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          structure {
+            id
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          gameStructureId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -750,8 +2172,1998 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
   APITypes.GetUpdateCandidateURLsQueryVariables,
   APITypes.GetUpdateCandidateURLsQuery
 >;
-export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue($limit: Int, $nextToken: String) {
-  listGamesNeedingVenue(limit: $limit, nextToken: $nextToken) {
+export const listEntitiesByDomain = /* GraphQL */ `query ListEntitiesByDomain($domain: String!) {
+  listEntitiesByDomain(domain: $domain) {
+    id
+    entityName
+    gameUrlDomain
+    gameUrlPath
+    entityLogo
+    isActive
+    createdAt
+    updatedAt
+    scraperStates {
+      items {
+        id
+        isRunning
+        lastScannedId
+        lastRunStartTime
+        lastRunEndTime
+        consecutiveBlankCount
+        totalScraped
+        totalErrors
+        enabled
+        currentLog {
+          timestamp
+          level
+          message
+          details
+          __typename
+        }
+        lastGamesProcessed {
+          id
+          name
+          status
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    scraperJobs {
+      items {
+        id
+        jobId
+        triggerSource
+        triggeredBy
+        startTime
+        endTime
+        durationSeconds
+        maxGames
+        targetURLs
+        isFullScan
+        startId
+        endId
+        status
+        totalURLsProcessed
+        newGamesScraped
+        gamesUpdated
+        gamesSkipped
+        errors
+        blanks
+        averageScrapingTime
+        successRate
+        errorMessages
+        failedURLs
+        urlResults {
+          url
+          tournamentId
+          status
+          gameName
+          processingTime
+          error
+          __typename
+        }
+        scrapeAttempts {
+          items {
+            id
+            url
+            tournamentId
+            attemptTime
+            scraperJobId
+            scrapeURLId
+            status
+            processingTime
+            gameName
+            gameStatus
+            registrationStatus
+            dataHash
+            hasChanges
+            errorMessage
+            errorType
+            gameId
+            wasNewGame
+            fieldsUpdated
+            foundKeys
+            structureLabel
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+    scrapeURLs {
+      items {
+        id
+        url
+        tournamentId
+        doNotScrape
+        sourceDataIssue
+        gameDataVerified
+        missingKeysFromScrape
+        sourceSystem
+        status
+        placedIntoDatabase
+        firstScrapedAt
+        lastScrapedAt
+        lastSuccessfulScrapeAt
+        timesScraped
+        timesSuccessful
+        timesFailed
+        consecutiveFailures
+        lastScrapeStatus
+        lastScrapeMessage
+        lastScrapeJobId
+        gameId
+        gameName
+        gameStatus
+        venueId
+        venueName
+        lastDataHash
+        hasDataChanges
+        lastFoundKeys
+        lastStructureLabel
+        averageScrapingTime
+        lastScrapingTime
+        attempts {
+          items {
+            id
+            url
+            tournamentId
+            attemptTime
+            scraperJobId
+            scrapeURLId
+            status
+            processingTime
+            gameName
+            gameStatus
+            registrationStatus
+            dataHash
+            hasChanges
+            errorMessage
+            errorType
+            gameId
+            wasNewGame
+            fieldsUpdated
+            foundKeys
+            structureLabel
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+    venues {
+      items {
+        id
+        venueNumber
+        name
+        aliases
+        address
+        city
+        country
+        isSpecial
+        details {
+          id
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        series {
+          items {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        registeredPlayers {
+          items {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    games {
+      items {
+        id
+        name
+        gameType
+        gameVariant
+        gameStatus
+        gameStartDateTime
+        gameEndDateTime
+        registrationStatus
+        totalDuration
+        gameFrequency
+        buyIn
+        rake
+        startingStack
+        hasGuarantee
+        guaranteeAmount
+        prizepool
+        totalEntries
+        totalRebuys
+        totalAddons
+        revenueByBuyIns
+        totalRake
+        profitLoss
+        guaranteeOverlay
+        guaranteeSurplus
+        playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
+        tournamentType
+        isRegular
+        isSeries
+        isSatellite
+        seriesName
+        gameTags
+        sourceUrl
+        tournamentId
+        dataSource
+        originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
+        venueId
+        venue {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        tournamentSeriesId
+        tournamentSeries {
+          id
+          name
+          year
+          status
+          startDate
+          endDate
+          events
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        structure {
+          id
+          levels {
+            levelNumber
+            durationMinutes
+            smallBlind
+            bigBlind
+            ante
+            __typename
+          }
+          breaks {
+            levelNumberBeforeBreak
+            durationMinutes
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        playerEntries {
+          items {
+            id
+            playerId
+            gameId
+            venueId
+            status
+            registrationTime
+            eliminationTime
+            gameStartDateTime
+            lastKnownStackSize
+            tableNumber
+            seatNumber
+            numberOfReEntries
+            isMultiDayTournament
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerResults {
+          items {
+            id
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            pointsEarned
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        gameStructureId
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    assets {
+      items {
+        id
+        name
+        type
+        condition
+        acquiredDate
+        lastCheckedDate
+        venueId
+        venue {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListEntitiesByDomainQueryVariables,
+  APITypes.ListEntitiesByDomainQuery
+>;
+export const scrapeGame = /* GraphQL */ `query ScrapeGame(
+  $url: AWSURL!
+  $entityId: ID
+  $venueId: ID
+  $doNotScrape: Boolean
+) {
+  scrapeGame(
+    url: $url
+    entityId: $entityId
+    venueId: $venueId
+    doNotScrape: $doNotScrape
+  ) {
+    name
+    gameStartDateTime
+    gameEndDateTime
+    gameStatus
+    registrationStatus
+    gameType
+    gameVariant
+    tournamentType
+    prizepool
+    revenueByBuyIns
+    profitLoss
+    buyIn
+    rake
+    totalRake
+    startingStack
+    hasGuarantee
+    guaranteeAmount
+    guaranteeOverlay
+    guaranteeSurplus
+    totalEntries
+    totalRebuys
+    totalAddons
+    totalDuration
+    playersRemaining
+    totalChipsInPlay
+    averagePlayerStack
+    seriesName
+    isRegular
+    isSeries
+    isSatellite
+    gameFrequency
+    gameTags
+    levels {
+      levelNumber
+      durationMinutes
+      smallBlind
+      bigBlind
+      ante
+      __typename
+    }
+    breaks {
+      levelNumberBeforeBreak
+      durationMinutes
+      __typename
+    }
+    entries {
+      name
+      __typename
+    }
+    seating {
+      name
+      table
+      seat
+      playerStack
+      __typename
+    }
+    results {
+      rank
+      name
+      winnings
+      points
+      isQualification
+      __typename
+    }
+    tables {
+      tableName
+      seats {
+        seat
+        isOccupied
+        playerName
+        playerStack
+        __typename
+      }
+      __typename
+    }
+    rawHtml
+    isNewStructure
+    structureLabel
+    foundKeys
+    venueMatch {
+      autoAssignedVenue {
+        id
+        name
+        score
+        __typename
+      }
+      suggestions {
+        id
+        name
+        score
+        __typename
+      }
+      __typename
+    }
+    existingGameId
+    doNotScrape
+    tournamentId
+    entityId
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ScrapeGameQueryVariables,
+  APITypes.ScrapeGameQuery
+>;
+export const scrapeBulkGames = /* GraphQL */ `query ScrapeBulkGames($startId: Int!, $endId: Int!, $entityId: ID) {
+  scrapeBulkGames(startId: $startId, endId: $endId, entityId: $entityId) {
+    id
+    name
+    gameStatus
+    registrationStatus
+    gameStartDateTime
+    inDatabase
+    doNotScrape
+    error
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ScrapeBulkGamesQueryVariables,
+  APITypes.ScrapeBulkGamesQuery
+>;
+export const listScraperJobs = /* GraphQL */ `query ListScraperJobs(
+  $entityId: ID
+  $status: ScraperJobStatus
+  $startTime: AWSDateTime
+  $endTime: AWSDateTime
+  $limit: Int
+  $nextToken: String
+) {
+  listScraperJobs(
+    entityId: $entityId
+    status: $status
+    startTime: $startTime
+    endTime: $endTime
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      jobId
+      triggerSource
+      triggeredBy
+      startTime
+      endTime
+      durationSeconds
+      maxGames
+      targetURLs
+      isFullScan
+      startId
+      endId
+      status
+      totalURLsProcessed
+      newGamesScraped
+      gamesUpdated
+      gamesSkipped
+      errors
+      blanks
+      averageScrapingTime
+      successRate
+      errorMessages
+      failedURLs
+      urlResults {
+        url
+        tournamentId
+        status
+        gameName
+        processingTime
+        error
+        __typename
+      }
+      scrapeAttempts {
+        items {
+          id
+          url
+          tournamentId
+          attemptTime
+          scraperJobId
+          scraperJob {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          scrapeURLId
+          scrapeURL {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          status
+          processingTime
+          gameName
+          gameStatus
+          registrationStatus
+          dataHash
+          hasChanges
+          errorMessage
+          errorType
+          gameId
+          wasNewGame
+          fieldsUpdated
+          foundKeys
+          structureLabel
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListScraperJobsQueryVariables,
+  APITypes.ListScraperJobsQuery
+>;
+export const listScrapeURLs = /* GraphQL */ `query ListScrapeURLs(
+  $entityId: ID
+  $status: ScrapeURLStatus
+  $limit: Int
+  $nextToken: String
+) {
+  listScrapeURLs(
+    entityId: $entityId
+    status: $status
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      url
+      tournamentId
+      doNotScrape
+      sourceDataIssue
+      gameDataVerified
+      missingKeysFromScrape
+      sourceSystem
+      status
+      placedIntoDatabase
+      firstScrapedAt
+      lastScrapedAt
+      lastSuccessfulScrapeAt
+      timesScraped
+      timesSuccessful
+      timesFailed
+      consecutiveFailures
+      lastScrapeStatus
+      lastScrapeMessage
+      lastScrapeJobId
+      gameId
+      gameName
+      gameStatus
+      venueId
+      venueName
+      lastDataHash
+      hasDataChanges
+      lastFoundKeys
+      lastStructureLabel
+      averageScrapingTime
+      lastScrapingTime
+      attempts {
+        items {
+          id
+          url
+          tournamentId
+          attemptTime
+          scraperJobId
+          scraperJob {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          scrapeURLId
+          scrapeURL {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          status
+          processingTime
+          gameName
+          gameStatus
+          registrationStatus
+          dataHash
+          hasChanges
+          errorMessage
+          errorType
+          gameId
+          wasNewGame
+          fieldsUpdated
+          foundKeys
+          structureLabel
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListScrapeURLsQueryVariables,
+  APITypes.ListScrapeURLsQuery
+>;
+export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue($limit: Int, $nextToken: String, $entityId: ID) {
+  listGamesNeedingVenue(
+    limit: $limit
+    nextToken: $nextToken
+    entityId: $entityId
+  ) {
     items {
       id
       name
@@ -822,6 +4234,7 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -846,6 +4259,7 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -902,6 +4316,7 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -964,6 +4379,7 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -987,6 +4403,49 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -1078,6 +4537,21 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -1131,6 +4605,7 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -1218,6 +4693,7 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -1268,6 +4744,21 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -1300,6 +4791,7 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -1365,6 +4857,7 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -1396,6 +4889,7 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -1462,6 +4956,7 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -1481,6 +4976,226 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
         startedAt
         __typename
       }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1498,12 +5213,20 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
   APITypes.ListGamesNeedingVenueQueryVariables,
   APITypes.ListGamesNeedingVenueQuery
 >;
-export const getVenueAssignmentSummary = /* GraphQL */ `query GetVenueAssignmentSummary {
-  getVenueAssignmentSummary {
+export const getVenueAssignmentSummary = /* GraphQL */ `query GetVenueAssignmentSummary($entityId: ID) {
+  getVenueAssignmentSummary(entityId: $entityId) {
     totalGames
     gamesWithVenue
     gamesNeedingVenue
     pendingAssignments
+    byEntity {
+      entityId
+      entityName
+      totalGames
+      gamesWithVenue
+      gamesNeedingVenue
+      __typename
+    }
     __typename
   }
 }
@@ -1542,6 +5265,2024 @@ export const getUserMetrics = /* GraphQL */ `query GetUserMetrics($userId: Strin
 ` as GeneratedQuery<
   APITypes.GetUserMetricsQueryVariables,
   APITypes.GetUserMetricsQuery
+>;
+export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
+  getEntity(id: $id) {
+    id
+    entityName
+    gameUrlDomain
+    gameUrlPath
+    entityLogo
+    isActive
+    createdAt
+    updatedAt
+    scraperStates {
+      items {
+        id
+        isRunning
+        lastScannedId
+        lastRunStartTime
+        lastRunEndTime
+        consecutiveBlankCount
+        totalScraped
+        totalErrors
+        enabled
+        currentLog {
+          timestamp
+          level
+          message
+          details
+          __typename
+        }
+        lastGamesProcessed {
+          id
+          name
+          status
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    scraperJobs {
+      items {
+        id
+        jobId
+        triggerSource
+        triggeredBy
+        startTime
+        endTime
+        durationSeconds
+        maxGames
+        targetURLs
+        isFullScan
+        startId
+        endId
+        status
+        totalURLsProcessed
+        newGamesScraped
+        gamesUpdated
+        gamesSkipped
+        errors
+        blanks
+        averageScrapingTime
+        successRate
+        errorMessages
+        failedURLs
+        urlResults {
+          url
+          tournamentId
+          status
+          gameName
+          processingTime
+          error
+          __typename
+        }
+        scrapeAttempts {
+          items {
+            id
+            url
+            tournamentId
+            attemptTime
+            scraperJobId
+            scrapeURLId
+            status
+            processingTime
+            gameName
+            gameStatus
+            registrationStatus
+            dataHash
+            hasChanges
+            errorMessage
+            errorType
+            gameId
+            wasNewGame
+            fieldsUpdated
+            foundKeys
+            structureLabel
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+    scrapeURLs {
+      items {
+        id
+        url
+        tournamentId
+        doNotScrape
+        sourceDataIssue
+        gameDataVerified
+        missingKeysFromScrape
+        sourceSystem
+        status
+        placedIntoDatabase
+        firstScrapedAt
+        lastScrapedAt
+        lastSuccessfulScrapeAt
+        timesScraped
+        timesSuccessful
+        timesFailed
+        consecutiveFailures
+        lastScrapeStatus
+        lastScrapeMessage
+        lastScrapeJobId
+        gameId
+        gameName
+        gameStatus
+        venueId
+        venueName
+        lastDataHash
+        hasDataChanges
+        lastFoundKeys
+        lastStructureLabel
+        averageScrapingTime
+        lastScrapingTime
+        attempts {
+          items {
+            id
+            url
+            tournamentId
+            attemptTime
+            scraperJobId
+            scrapeURLId
+            status
+            processingTime
+            gameName
+            gameStatus
+            registrationStatus
+            dataHash
+            hasChanges
+            errorMessage
+            errorType
+            gameId
+            wasNewGame
+            fieldsUpdated
+            foundKeys
+            structureLabel
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+    venues {
+      items {
+        id
+        venueNumber
+        name
+        aliases
+        address
+        city
+        country
+        isSpecial
+        details {
+          id
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        series {
+          items {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        registeredPlayers {
+          items {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    games {
+      items {
+        id
+        name
+        gameType
+        gameVariant
+        gameStatus
+        gameStartDateTime
+        gameEndDateTime
+        registrationStatus
+        totalDuration
+        gameFrequency
+        buyIn
+        rake
+        startingStack
+        hasGuarantee
+        guaranteeAmount
+        prizepool
+        totalEntries
+        totalRebuys
+        totalAddons
+        revenueByBuyIns
+        totalRake
+        profitLoss
+        guaranteeOverlay
+        guaranteeSurplus
+        playersRemaining
+        totalChipsInPlay
+        averagePlayerStack
+        tournamentType
+        isRegular
+        isSeries
+        isSatellite
+        seriesName
+        gameTags
+        sourceUrl
+        tournamentId
+        dataSource
+        originalScrapedData
+        venueAssignmentStatus
+        requiresVenueAssignment
+        suggestedVenueName
+        venueAssignmentConfidence
+        venueId
+        venue {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        tournamentSeriesId
+        tournamentSeries {
+          id
+          name
+          year
+          status
+          startDate
+          endDate
+          events
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        structure {
+          id
+          levels {
+            levelNumber
+            durationMinutes
+            smallBlind
+            bigBlind
+            ante
+            __typename
+          }
+          breaks {
+            levelNumberBeforeBreak
+            durationMinutes
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        playerEntries {
+          items {
+            id
+            playerId
+            gameId
+            venueId
+            status
+            registrationTime
+            eliminationTime
+            gameStartDateTime
+            lastKnownStackSize
+            tableNumber
+            seatNumber
+            numberOfReEntries
+            isMultiDayTournament
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerResults {
+          items {
+            id
+            finishingPlace
+            isMultiDayQualification
+            prizeWon
+            amountWon
+            totalRunners
+            pointsEarned
+            playerId
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        gameStructureId
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    assets {
+      items {
+        id
+        name
+        type
+        condition
+        acquiredDate
+        lastCheckedDate
+        venueId
+        venue {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedQuery<APITypes.GetEntityQueryVariables, APITypes.GetEntityQuery>;
+export const listEntities = /* GraphQL */ `query ListEntities(
+  $filter: ModelEntityFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listEntities(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      entityName
+      gameUrlDomain
+      gameUrlPath
+      entityLogo
+      isActive
+      createdAt
+      updatedAt
+      scraperStates {
+        items {
+          id
+          isRunning
+          lastScannedId
+          lastRunStartTime
+          lastRunEndTime
+          consecutiveBlankCount
+          totalScraped
+          totalErrors
+          enabled
+          currentLog {
+            timestamp
+            level
+            message
+            details
+            __typename
+          }
+          lastGamesProcessed {
+            id
+            name
+            status
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      scraperJobs {
+        items {
+          id
+          jobId
+          triggerSource
+          triggeredBy
+          startTime
+          endTime
+          durationSeconds
+          maxGames
+          targetURLs
+          isFullScan
+          startId
+          endId
+          status
+          totalURLsProcessed
+          newGamesScraped
+          gamesUpdated
+          gamesSkipped
+          errors
+          blanks
+          averageScrapingTime
+          successRate
+          errorMessages
+          failedURLs
+          urlResults {
+            url
+            tournamentId
+            status
+            gameName
+            processingTime
+            error
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      scrapeURLs {
+        items {
+          id
+          url
+          tournamentId
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          missingKeysFromScrape
+          sourceSystem
+          status
+          placedIntoDatabase
+          firstScrapedAt
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          timesScraped
+          timesSuccessful
+          timesFailed
+          consecutiveFailures
+          lastScrapeStatus
+          lastScrapeMessage
+          lastScrapeJobId
+          gameId
+          gameName
+          gameStatus
+          venueId
+          venueName
+          lastDataHash
+          hasDataChanges
+          lastFoundKeys
+          lastStructureLabel
+          averageScrapingTime
+          lastScrapingTime
+          attempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      venues {
+        items {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          tournamentId
+          dataSource
+          originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          structure {
+            id
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          gameStructureId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListEntitiesQueryVariables,
+  APITypes.ListEntitiesQuery
+>;
+export const syncEntities = /* GraphQL */ `query SyncEntities(
+  $filter: ModelEntityFilterInput
+  $limit: Int
+  $nextToken: String
+  $lastSync: AWSTimestamp
+) {
+  syncEntities(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+    lastSync: $lastSync
+  ) {
+    items {
+      id
+      entityName
+      gameUrlDomain
+      gameUrlPath
+      entityLogo
+      isActive
+      createdAt
+      updatedAt
+      scraperStates {
+        items {
+          id
+          isRunning
+          lastScannedId
+          lastRunStartTime
+          lastRunEndTime
+          consecutiveBlankCount
+          totalScraped
+          totalErrors
+          enabled
+          currentLog {
+            timestamp
+            level
+            message
+            details
+            __typename
+          }
+          lastGamesProcessed {
+            id
+            name
+            status
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      scraperJobs {
+        items {
+          id
+          jobId
+          triggerSource
+          triggeredBy
+          startTime
+          endTime
+          durationSeconds
+          maxGames
+          targetURLs
+          isFullScan
+          startId
+          endId
+          status
+          totalURLsProcessed
+          newGamesScraped
+          gamesUpdated
+          gamesSkipped
+          errors
+          blanks
+          averageScrapingTime
+          successRate
+          errorMessages
+          failedURLs
+          urlResults {
+            url
+            tournamentId
+            status
+            gameName
+            processingTime
+            error
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      scrapeURLs {
+        items {
+          id
+          url
+          tournamentId
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          missingKeysFromScrape
+          sourceSystem
+          status
+          placedIntoDatabase
+          firstScrapedAt
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          timesScraped
+          timesSuccessful
+          timesFailed
+          consecutiveFailures
+          lastScrapeStatus
+          lastScrapeMessage
+          lastScrapeJobId
+          gameId
+          gameName
+          gameStatus
+          venueId
+          venueName
+          lastDataHash
+          hasDataChanges
+          lastFoundKeys
+          lastStructureLabel
+          averageScrapingTime
+          lastScrapingTime
+          attempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      venues {
+        items {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          tournamentId
+          dataSource
+          originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          structure {
+            id
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          gameStructureId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.SyncEntitiesQueryVariables,
+  APITypes.SyncEntitiesQuery
 >;
 export const getScrapeStructure = /* GraphQL */ `query GetScrapeStructure($id: ID!) {
   getScrapeStructure(id: $id) {
@@ -1738,6 +7479,460 @@ export const getScraperState = /* GraphQL */ `query GetScraperState($id: ID!) {
       status
       __typename
     }
+    entityId
+    entity {
+      id
+      entityName
+      gameUrlDomain
+      gameUrlPath
+      entityLogo
+      isActive
+      createdAt
+      updatedAt
+      scraperStates {
+        items {
+          id
+          isRunning
+          lastScannedId
+          lastRunStartTime
+          lastRunEndTime
+          consecutiveBlankCount
+          totalScraped
+          totalErrors
+          enabled
+          currentLog {
+            timestamp
+            level
+            message
+            details
+            __typename
+          }
+          lastGamesProcessed {
+            id
+            name
+            status
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      scraperJobs {
+        items {
+          id
+          jobId
+          triggerSource
+          triggeredBy
+          startTime
+          endTime
+          durationSeconds
+          maxGames
+          targetURLs
+          isFullScan
+          startId
+          endId
+          status
+          totalURLsProcessed
+          newGamesScraped
+          gamesUpdated
+          gamesSkipped
+          errors
+          blanks
+          averageScrapingTime
+          successRate
+          errorMessages
+          failedURLs
+          urlResults {
+            url
+            tournamentId
+            status
+            gameName
+            processingTime
+            error
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      scrapeURLs {
+        items {
+          id
+          url
+          tournamentId
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          missingKeysFromScrape
+          sourceSystem
+          status
+          placedIntoDatabase
+          firstScrapedAt
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          timesScraped
+          timesSuccessful
+          timesFailed
+          consecutiveFailures
+          lastScrapeStatus
+          lastScrapeMessage
+          lastScrapeJobId
+          gameId
+          gameName
+          gameStatus
+          venueId
+          venueName
+          lastDataHash
+          hasDataChanges
+          lastFoundKeys
+          lastStructureLabel
+          averageScrapingTime
+          lastScrapingTime
+          attempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      venues {
+        items {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          tournamentId
+          dataSource
+          originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          structure {
+            id
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          gameStructureId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -1777,6 +7972,226 @@ export const listScraperStates = /* GraphQL */ `query ListScraperStates(
         id
         name
         status
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -1828,6 +8243,226 @@ export const syncScraperStates = /* GraphQL */ `query SyncScraperStates(
         id
         name
         status
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -1892,6 +8527,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -1916,6 +8552,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -1972,6 +8609,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -2034,6 +8672,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -2057,6 +8696,49 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -2133,12 +8815,70 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
           _deleted
           _lastChangedAt
           venueDetailsId
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -2246,6 +8986,21 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -2289,6 +9044,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -2369,6 +9125,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -2430,6 +9187,49 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -2525,6 +9325,21 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -2578,6 +9393,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -2612,6 +9428,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -2720,6 +9537,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -2786,6 +9604,21 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -2808,6 +9641,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
     registeredPlayers {
       items {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -2830,6 +9664,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -2896,6 +9731,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -3151,6 +9987,21 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -3168,6 +10019,460 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
       }
       nextToken
       startedAt
+      __typename
+    }
+    entityId
+    entity {
+      id
+      entityName
+      gameUrlDomain
+      gameUrlPath
+      entityLogo
+      isActive
+      createdAt
+      updatedAt
+      scraperStates {
+        items {
+          id
+          isRunning
+          lastScannedId
+          lastRunStartTime
+          lastRunEndTime
+          consecutiveBlankCount
+          totalScraped
+          totalErrors
+          enabled
+          currentLog {
+            timestamp
+            level
+            message
+            details
+            __typename
+          }
+          lastGamesProcessed {
+            id
+            name
+            status
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      scraperJobs {
+        items {
+          id
+          jobId
+          triggerSource
+          triggeredBy
+          startTime
+          endTime
+          durationSeconds
+          maxGames
+          targetURLs
+          isFullScan
+          startId
+          endId
+          status
+          totalURLsProcessed
+          newGamesScraped
+          gamesUpdated
+          gamesSkipped
+          errors
+          blanks
+          averageScrapingTime
+          successRate
+          errorMessages
+          failedURLs
+          urlResults {
+            url
+            tournamentId
+            status
+            gameName
+            processingTime
+            error
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      scrapeURLs {
+        items {
+          id
+          url
+          tournamentId
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          missingKeysFromScrape
+          sourceSystem
+          status
+          placedIntoDatabase
+          firstScrapedAt
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          timesScraped
+          timesSuccessful
+          timesFailed
+          consecutiveFailures
+          lastScrapeStatus
+          lastScrapeMessage
+          lastScrapeJobId
+          gameId
+          gameName
+          gameStatus
+          venueId
+          venueName
+          lastDataHash
+          hasDataChanges
+          lastFoundKeys
+          lastStructureLabel
+          averageScrapingTime
+          lastScrapingTime
+          attempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      venues {
+        items {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          tournamentId
+          dataSource
+          originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          structure {
+            id
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          gameStructureId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      _version
+      _deleted
+      _lastChangedAt
       __typename
     }
     createdAt
@@ -3254,6 +10559,21 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -3287,12 +10607,28 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
             venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -3359,6 +10695,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -3409,6 +10746,21 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -3456,6 +10808,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -3491,6 +10844,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -3522,6 +10876,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -3544,6 +10899,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
       registeredPlayers {
         items {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -3652,6 +11008,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -3669,6 +11026,226 @@ export const listVenues = /* GraphQL */ `query ListVenues(
         }
         nextToken
         startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -3768,6 +11345,21 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -3801,12 +11393,28 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
             venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -3873,6 +11481,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -3923,6 +11532,21 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -3970,6 +11594,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -4005,6 +11630,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -4036,6 +11662,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -4058,6 +11685,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
       registeredPlayers {
         items {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -4166,6 +11794,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -4183,6 +11812,226 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
         }
         nextToken
         startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -4280,6 +12129,21 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -4313,12 +12177,28 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
             venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -4385,6 +12265,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -4435,6 +12316,21 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -4482,6 +12378,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -4517,6 +12414,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -4548,6 +12446,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -4570,6 +12469,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
       registeredPlayers {
         items {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -4678,6 +12578,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -4695,6 +12596,226 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
         }
         nextToken
         startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -4759,6 +12880,7 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -4783,6 +12905,7 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -4839,6 +12962,7 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -4901,6 +13025,7 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -4924,6 +13049,49 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -4998,6 +13166,7 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -5022,6 +13191,7 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -5078,6 +13248,7 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -5140,6 +13311,7 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -5163,6 +13335,49 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -5275,6 +13490,21 @@ export const getTournamentSeriesTitle = /* GraphQL */ `query GetTournamentSeries
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -5328,6 +13558,7 @@ export const getTournamentSeriesTitle = /* GraphQL */ `query GetTournamentSeries
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -5412,6 +13643,7 @@ export const listTournamentSeriesTitles = /* GraphQL */ `query ListTournamentSer
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -5503,6 +13735,7 @@ export const syncTournamentSeriesTitles = /* GraphQL */ `query SyncTournamentSer
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -5596,6 +13829,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -5696,6 +13930,21 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -5729,12 +13978,28 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
             venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -5801,6 +14066,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -5851,6 +14117,21 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -5898,6 +14179,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -5933,6 +14215,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -5964,6 +14247,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -5986,6 +14270,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
       registeredPlayers {
         items {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -6094,6 +14379,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -6111,6 +14397,226 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
         }
         nextToken
         startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -6215,6 +14721,21 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -6258,6 +14779,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -6338,6 +14860,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -6399,6 +14922,49 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -6509,6 +15075,7 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -6533,6 +15100,7 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -6589,6 +15157,7 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -6651,6 +15220,7 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -6674,6 +15244,49 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -6737,6 +15350,7 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -6785,6 +15399,21 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
           playerResults {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -6905,6 +15534,7 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -6929,6 +15559,7 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -6985,6 +15616,7 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -7047,6 +15679,7 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -7070,6 +15703,49 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -7133,6 +15809,7 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -7181,6 +15858,21 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
           playerResults {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -7323,6 +16015,21 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -7356,12 +16063,28 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
             venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -7428,6 +16151,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -7478,6 +16202,21 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -7525,6 +16264,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -7560,6 +16300,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -7591,6 +16332,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -7613,6 +16355,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
       registeredPlayers {
         items {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -7721,6 +16464,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -7738,6 +16482,226 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
         }
         nextToken
         startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -7827,6 +16791,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -7851,6 +16816,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -7907,6 +16873,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -7969,6 +16936,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -7992,6 +16960,49 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -8055,6 +17066,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -8103,6 +17115,21 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           playerResults {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -8233,6 +17260,21 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -8276,6 +17318,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -8356,6 +17399,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -8419,6 +17463,49 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           startedAt
           __typename
         }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -8451,6 +17538,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
         isMultiDayTournament
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -8559,6 +17647,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -8626,6 +17715,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -8674,6 +17764,21 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           playerResults {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -8707,6 +17812,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -8815,6 +17921,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -8883,6 +17990,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -8933,6 +18041,21 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -8950,6 +18073,460 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
       }
       nextToken
       startedAt
+      __typename
+    }
+    entityId
+    entity {
+      id
+      entityName
+      gameUrlDomain
+      gameUrlPath
+      entityLogo
+      isActive
+      createdAt
+      updatedAt
+      scraperStates {
+        items {
+          id
+          isRunning
+          lastScannedId
+          lastRunStartTime
+          lastRunEndTime
+          consecutiveBlankCount
+          totalScraped
+          totalErrors
+          enabled
+          currentLog {
+            timestamp
+            level
+            message
+            details
+            __typename
+          }
+          lastGamesProcessed {
+            id
+            name
+            status
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      scraperJobs {
+        items {
+          id
+          jobId
+          triggerSource
+          triggeredBy
+          startTime
+          endTime
+          durationSeconds
+          maxGames
+          targetURLs
+          isFullScan
+          startId
+          endId
+          status
+          totalURLsProcessed
+          newGamesScraped
+          gamesUpdated
+          gamesSkipped
+          errors
+          blanks
+          averageScrapingTime
+          successRate
+          errorMessages
+          failedURLs
+          urlResults {
+            url
+            tournamentId
+            status
+            gameName
+            processingTime
+            error
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      scrapeURLs {
+        items {
+          id
+          url
+          tournamentId
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          missingKeysFromScrape
+          sourceSystem
+          status
+          placedIntoDatabase
+          firstScrapedAt
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          timesScraped
+          timesSuccessful
+          timesFailed
+          consecutiveFailures
+          lastScrapeStatus
+          lastScrapeMessage
+          lastScrapeJobId
+          gameId
+          gameName
+          gameStatus
+          venueId
+          venueName
+          lastDataHash
+          hasDataChanges
+          lastFoundKeys
+          lastStructureLabel
+          averageScrapingTime
+          lastScrapingTime
+          attempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      venues {
+        items {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          tournamentId
+          dataSource
+          originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          structure {
+            id
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          gameStructureId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      _version
+      _deleted
+      _lastChangedAt
       __typename
     }
     createdAt
@@ -9038,6 +18615,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -9062,6 +18640,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -9118,6 +18697,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -9180,6 +18760,7 @@ export const listGames = /* GraphQL */ `query ListGames(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -9203,6 +18784,49 @@ export const listGames = /* GraphQL */ `query ListGames(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -9294,6 +18918,21 @@ export const listGames = /* GraphQL */ `query ListGames(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -9347,6 +18986,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -9434,6 +19074,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -9484,6 +19125,21 @@ export const listGames = /* GraphQL */ `query ListGames(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -9516,6 +19172,7 @@ export const listGames = /* GraphQL */ `query ListGames(
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -9581,6 +19238,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -9612,6 +19270,7 @@ export const listGames = /* GraphQL */ `query ListGames(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -9678,6 +19337,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -9695,6 +19355,226 @@ export const listGames = /* GraphQL */ `query ListGames(
         }
         nextToken
         startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -9793,6 +19673,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -9817,6 +19698,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -9873,6 +19755,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -9935,6 +19818,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -9958,6 +19842,49 @@ export const syncGames = /* GraphQL */ `query SyncGames(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -10049,6 +19976,21 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -10102,6 +20044,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -10189,6 +20132,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -10239,6 +20183,21 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -10271,6 +20230,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -10336,6 +20296,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -10367,6 +20328,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -10433,6 +20395,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -10450,6 +20413,226 @@ export const syncGames = /* GraphQL */ `query SyncGames(
         }
         nextToken
         startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -10553,6 +20736,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -10577,6 +20761,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -10633,6 +20818,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -10695,6 +20881,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -10718,6 +20905,49 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -10809,6 +21039,21 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -10862,6 +21107,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -10949,6 +21195,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -10999,6 +21246,21 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -11031,6 +21293,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -11096,6 +21359,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -11127,6 +21391,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -11193,6 +21458,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -11210,6 +21476,226 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
         }
         nextToken
         startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -11351,6 +21837,21 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -11394,6 +21895,7 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -11474,6 +21976,7 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -11535,6 +22038,49 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -11682,6 +22228,21 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -11725,6 +22286,7 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -11805,6 +22367,7 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -11866,6 +22429,49 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -12154,6 +22760,7 @@ export const syncRakeStructures = /* GraphQL */ `query SyncRakeStructures(
 export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
   getPlayer(id: $id) {
     id
+    primaryEntityId
     firstName
     lastName
     phone
@@ -12176,6 +22783,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
       netBalance
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -12198,6 +22806,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -12264,6 +22873,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -12519,6 +23129,21 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -12563,6 +23188,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -12671,6 +23297,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -12704,6 +23331,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -12726,6 +23354,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -12792,6 +23421,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -13045,6 +23675,21 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -13098,6 +23743,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -13206,6 +23852,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -13272,6 +23919,21 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -13308,6 +23970,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
         isMultiDayTournament
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -13416,6 +24079,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -13483,6 +24147,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -13533,6 +24198,21 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -13564,6 +24244,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -13672,6 +24353,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -13740,6 +24422,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -13790,6 +24473,21 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -13819,6 +24517,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -13927,6 +24626,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -13986,6 +24686,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -14094,6 +24795,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -14133,6 +24835,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -14241,6 +24944,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -14281,6 +24985,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -14389,6 +25094,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -14487,6 +25193,21 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -14520,12 +25241,28 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
             venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -14592,6 +25329,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -14642,6 +25380,21 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -14689,6 +25442,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -14724,6 +25478,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -14755,6 +25510,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -14777,6 +25533,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
       registeredPlayers {
         items {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -14885,6 +25642,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -14902,6 +25660,226 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
         }
         nextToken
         startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -14929,6 +25907,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
   listPlayers(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
       id
+      primaryEntityId
       firstName
       lastName
       phone
@@ -14951,6 +25930,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
         netBalance
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -15059,6 +26039,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -15103,6 +26084,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -15142,6 +26124,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -15250,6 +26233,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -15301,6 +26285,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -15332,6 +26317,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -15368,6 +26354,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -15433,6 +26420,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -15464,6 +26452,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -15530,6 +26519,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -15559,6 +26549,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -15619,6 +26610,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -15664,6 +26656,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -15710,6 +26703,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -15773,6 +26767,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -15797,6 +26792,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -15853,6 +26849,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -15915,6 +26912,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -15938,6 +26936,49 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -15978,6 +27019,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
   ) {
     items {
       id
+      primaryEntityId
       firstName
       lastName
       phone
@@ -16000,6 +27042,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
         netBalance
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -16108,6 +27151,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -16152,6 +27196,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -16191,6 +27236,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -16299,6 +27345,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -16350,6 +27397,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -16381,6 +27429,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -16417,6 +27466,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -16482,6 +27532,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -16513,6 +27564,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -16579,6 +27631,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -16608,6 +27661,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -16668,6 +27722,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -16713,6 +27768,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -16759,6 +27815,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -16822,6 +27879,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -16846,6 +27904,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -16902,6 +27961,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -16964,6 +28024,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -16987,6 +28048,49 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -17024,6 +28128,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
     netBalance
     player {
       id
+      primaryEntityId
       firstName
       lastName
       phone
@@ -17046,6 +28151,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
         netBalance
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -17154,6 +28260,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -17198,6 +28305,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -17237,6 +28345,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -17345,6 +28454,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -17396,6 +28506,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -17427,6 +28538,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -17463,6 +28575,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -17528,6 +28641,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -17559,6 +28673,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -17625,6 +28740,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -17654,6 +28770,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -17714,6 +28831,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -17759,6 +28877,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -17805,6 +28924,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -17868,6 +28988,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -17892,6 +29013,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -17948,6 +29070,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -18010,6 +29133,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -18033,6 +29157,49 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -18091,6 +29258,7 @@ export const listPlayerSummaries = /* GraphQL */ `query ListPlayerSummaries(
       netBalance
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -18113,6 +29281,7 @@ export const listPlayerSummaries = /* GraphQL */ `query ListPlayerSummaries(
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -18179,6 +29348,7 @@ export const listPlayerSummaries = /* GraphQL */ `query ListPlayerSummaries(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -18432,6 +29602,21 @@ export const listPlayerSummaries = /* GraphQL */ `query ListPlayerSummaries(
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -18500,6 +29685,7 @@ export const syncPlayerSummaries = /* GraphQL */ `query SyncPlayerSummaries(
       netBalance
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -18522,6 +29708,7 @@ export const syncPlayerSummaries = /* GraphQL */ `query SyncPlayerSummaries(
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -18588,6 +29775,7 @@ export const syncPlayerSummaries = /* GraphQL */ `query SyncPlayerSummaries(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -18841,6 +30029,21 @@ export const syncPlayerSummaries = /* GraphQL */ `query SyncPlayerSummaries(
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -18904,6 +30107,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
     isMultiDayTournament
     player {
       id
+      primaryEntityId
       firstName
       lastName
       phone
@@ -18926,6 +30130,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
         netBalance
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -19034,6 +30239,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -19078,6 +30284,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -19117,6 +30324,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -19225,6 +30433,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -19276,6 +30485,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -19307,6 +30517,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -19343,6 +30554,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -19408,6 +30620,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -19439,6 +30652,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -19505,6 +30719,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -19534,6 +30749,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -19594,6 +30810,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -19639,6 +30856,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -19685,6 +30903,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -19748,6 +30967,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -19772,6 +30992,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -19828,6 +31049,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -19890,6 +31112,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -19913,6 +31136,49 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -20000,6 +31266,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -20024,6 +31291,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -20080,6 +31348,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -20142,6 +31411,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -20165,6 +31435,49 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -20256,6 +31569,21 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -20309,6 +31637,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -20396,6 +31725,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -20446,6 +31776,21 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -20478,6 +31823,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -20543,6 +31889,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -20574,6 +31921,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -20640,6 +31988,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -20657,6 +32006,226 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
         }
         nextToken
         startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -20701,6 +32270,7 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
       isMultiDayTournament
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -20723,6 +32293,7 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -20789,6 +32360,7 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -21044,6 +32616,21 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -21152,6 +32739,21 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -21195,6 +32797,7 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -21275,6 +32878,7 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -21336,6 +32940,49 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -21390,6 +33037,7 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
       isMultiDayTournament
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -21412,6 +33060,7 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -21478,6 +33127,7 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -21733,6 +33383,21 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -21841,6 +33506,21 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -21884,6 +33564,7 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -21964,6 +33645,7 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -22027,6 +33709,49 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
           startedAt
           __typename
         }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -22063,6 +33788,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
     playerId
     player {
       id
+      primaryEntityId
       firstName
       lastName
       phone
@@ -22085,6 +33811,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
         netBalance
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -22193,6 +33920,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -22237,6 +33965,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -22276,6 +34005,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -22384,6 +34114,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -22435,6 +34166,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -22466,6 +34198,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -22502,6 +34235,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -22567,6 +34301,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -22598,6 +34333,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -22664,6 +34400,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -22693,6 +34430,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -22753,6 +34491,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -22798,6 +34537,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -22844,6 +34584,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -22907,6 +34648,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -22931,6 +34673,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -22987,6 +34730,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -23049,6 +34793,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -23072,6 +34817,49 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -23160,6 +34948,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -23184,6 +34973,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -23240,6 +35030,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -23302,6 +35093,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -23325,6 +35117,49 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -23416,6 +35251,21 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -23469,6 +35319,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -23556,6 +35407,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -23606,6 +35458,21 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -23638,6 +35505,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -23703,6 +35571,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -23734,6 +35603,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -23800,6 +35670,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -23817,6 +35688,226 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
         }
         nextToken
         startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -23856,6 +35947,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -23878,6 +35970,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -23944,6 +36037,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -24199,6 +36293,21 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -24308,6 +36417,21 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -24351,6 +36475,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -24431,6 +36556,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -24492,6 +36618,49 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -24541,6 +36710,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -24563,6 +36733,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -24629,6 +36800,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -24884,6 +37056,21 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -24993,6 +37180,21 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -25036,6 +37238,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -25116,6 +37319,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -25179,6 +37383,49 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
           startedAt
           __typename
         }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -25214,6 +37461,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
     playerId
     player {
       id
+      primaryEntityId
       firstName
       lastName
       phone
@@ -25236,6 +37484,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
         netBalance
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -25344,6 +37593,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -25388,6 +37638,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -25427,6 +37678,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -25535,6 +37787,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -25586,6 +37839,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -25617,6 +37871,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -25653,6 +37908,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -25718,6 +37974,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -25749,6 +38006,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -25815,6 +38073,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -25844,6 +38103,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -25904,6 +38164,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -25949,6 +38210,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -25995,6 +38257,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -26058,6 +38321,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -26082,6 +38346,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -26138,6 +38403,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -26200,6 +38466,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -26223,6 +38490,49 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -26309,6 +38619,21 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -26342,12 +38667,28 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
             venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -26414,6 +38755,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -26464,6 +38806,21 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -26511,6 +38868,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -26546,6 +38904,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -26577,6 +38936,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -26599,6 +38959,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
       registeredPlayers {
         items {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -26707,6 +39068,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -26724,6 +39086,226 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
         }
         nextToken
         startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -26762,6 +39344,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -26784,6 +39367,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -26850,6 +39434,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -27105,6 +39690,21 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -27148,6 +39748,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -27172,6 +39773,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -27228,6 +39830,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -27290,6 +39893,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -27313,6 +39917,49 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -27361,6 +40008,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -27383,6 +40031,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -27449,6 +40098,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -27704,6 +40354,21 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -27747,6 +40412,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -27771,6 +40437,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -27827,6 +40494,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -27889,6 +40557,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -27912,6 +40581,49 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -27950,6 +40662,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
     playerId
     player {
       id
+      primaryEntityId
       firstName
       lastName
       phone
@@ -27972,6 +40685,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
         netBalance
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -28080,6 +40794,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -28124,6 +40839,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -28163,6 +40879,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -28271,6 +40988,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -28322,6 +41040,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -28353,6 +41072,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -28389,6 +41109,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -28454,6 +41175,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -28485,6 +41207,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -28551,6 +41274,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -28580,6 +41304,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -28640,6 +41365,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -28685,6 +41411,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -28731,6 +41458,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -28794,6 +41522,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -28818,6 +41547,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -28874,6 +41604,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -28936,6 +41667,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -28959,6 +41691,49 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -29010,6 +41785,7 @@ export const listPlayerTransactions = /* GraphQL */ `query ListPlayerTransaction
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -29032,6 +41808,7 @@ export const listPlayerTransactions = /* GraphQL */ `query ListPlayerTransaction
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -29098,6 +41875,7 @@ export const listPlayerTransactions = /* GraphQL */ `query ListPlayerTransaction
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -29351,6 +42129,21 @@ export const listPlayerTransactions = /* GraphQL */ `query ListPlayerTransaction
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -29408,6 +42201,7 @@ export const syncPlayerTransactions = /* GraphQL */ `query SyncPlayerTransaction
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -29430,6 +42224,7 @@ export const syncPlayerTransactions = /* GraphQL */ `query SyncPlayerTransaction
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -29496,6 +42291,7 @@ export const syncPlayerTransactions = /* GraphQL */ `query SyncPlayerTransaction
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -29751,6 +42547,21 @@ export const syncPlayerTransactions = /* GraphQL */ `query SyncPlayerTransaction
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -29795,6 +42606,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
     playerId
     player {
       id
+      primaryEntityId
       firstName
       lastName
       phone
@@ -29817,6 +42629,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
         netBalance
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -29925,6 +42738,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -29969,6 +42783,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -30008,6 +42823,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -30116,6 +42932,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -30167,6 +42984,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -30198,6 +43016,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -30234,6 +43053,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -30299,6 +43119,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -30330,6 +43151,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -30396,6 +43218,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -30425,6 +43248,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -30485,6 +43309,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -30530,6 +43355,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -30576,6 +43402,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -30639,6 +43466,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -30663,6 +43491,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -30719,6 +43548,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -30781,6 +43611,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -30804,6 +43635,49 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -30852,6 +43726,7 @@ export const listPlayerCredits = /* GraphQL */ `query ListPlayerCredits(
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -30874,6 +43749,7 @@ export const listPlayerCredits = /* GraphQL */ `query ListPlayerCredits(
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -30940,6 +43816,7 @@ export const listPlayerCredits = /* GraphQL */ `query ListPlayerCredits(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -31193,6 +44070,21 @@ export const listPlayerCredits = /* GraphQL */ `query ListPlayerCredits(
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -31251,6 +44143,7 @@ export const syncPlayerCredits = /* GraphQL */ `query SyncPlayerCredits(
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -31273,6 +44166,7 @@ export const syncPlayerCredits = /* GraphQL */ `query SyncPlayerCredits(
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -31339,6 +44233,7 @@ export const syncPlayerCredits = /* GraphQL */ `query SyncPlayerCredits(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -31594,6 +44489,21 @@ export const syncPlayerCredits = /* GraphQL */ `query SyncPlayerCredits(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -31639,6 +44549,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
     playerId
     player {
       id
+      primaryEntityId
       firstName
       lastName
       phone
@@ -31661,6 +44572,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
         netBalance
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -31769,6 +44681,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -31813,6 +44726,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -31852,6 +44766,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -31960,6 +44875,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -32011,6 +44927,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -32042,6 +44959,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -32078,6 +44996,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -32143,6 +45062,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -32174,6 +45094,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -32240,6 +45161,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -32269,6 +45191,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -32329,6 +45252,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -32374,6 +45298,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -32420,6 +45345,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -32483,6 +45409,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -32507,6 +45434,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -32563,6 +45491,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -32625,6 +45554,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -32648,6 +45578,49 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -32696,6 +45669,7 @@ export const listPlayerPoints = /* GraphQL */ `query ListPlayerPoints(
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -32718,6 +45692,7 @@ export const listPlayerPoints = /* GraphQL */ `query ListPlayerPoints(
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -32784,6 +45759,7 @@ export const listPlayerPoints = /* GraphQL */ `query ListPlayerPoints(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -33037,6 +46013,21 @@ export const listPlayerPoints = /* GraphQL */ `query ListPlayerPoints(
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -33095,6 +46086,7 @@ export const syncPlayerPoints = /* GraphQL */ `query SyncPlayerPoints(
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -33117,6 +46109,7 @@ export const syncPlayerPoints = /* GraphQL */ `query SyncPlayerPoints(
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -33183,6 +46176,7 @@ export const syncPlayerPoints = /* GraphQL */ `query SyncPlayerPoints(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -33438,6 +46432,21 @@ export const syncPlayerPoints = /* GraphQL */ `query SyncPlayerPoints(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -33480,6 +46489,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
     playerId
     player {
       id
+      primaryEntityId
       firstName
       lastName
       phone
@@ -33502,6 +46512,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
         netBalance
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -33610,6 +46621,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -33654,6 +46666,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -33693,6 +46706,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -33801,6 +46815,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -33852,6 +46867,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -33883,6 +46899,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -33919,6 +46936,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -33984,6 +47002,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -34015,6 +47034,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -34081,6 +47101,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -34110,6 +47131,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -34170,6 +47192,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -34215,6 +47238,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -34261,6 +47285,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -34324,6 +47349,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -34348,6 +47374,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -34404,6 +47431,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -34466,6 +47494,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -34489,6 +47518,49 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -34536,6 +47608,7 @@ export const listKnownPlayerIdentities = /* GraphQL */ `query ListKnownPlayerIde
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -34558,6 +47631,7 @@ export const listKnownPlayerIdentities = /* GraphQL */ `query ListKnownPlayerIde
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -34624,6 +47698,7 @@ export const listKnownPlayerIdentities = /* GraphQL */ `query ListKnownPlayerIde
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -34877,6 +47952,21 @@ export const listKnownPlayerIdentities = /* GraphQL */ `query ListKnownPlayerIde
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -34930,6 +48020,7 @@ export const syncKnownPlayerIdentities = /* GraphQL */ `query SyncKnownPlayerIde
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -34952,6 +48043,7 @@ export const syncKnownPlayerIdentities = /* GraphQL */ `query SyncKnownPlayerIde
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -35018,6 +48110,7 @@ export const syncKnownPlayerIdentities = /* GraphQL */ `query SyncKnownPlayerIde
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -35273,6 +48366,21 @@ export const syncKnownPlayerIdentities = /* GraphQL */ `query SyncKnownPlayerIde
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -35323,6 +48431,7 @@ export const getTicketTemplate = /* GraphQL */ `query GetTicketTemplate($id: ID!
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -35431,6 +48540,7 @@ export const getTicketTemplate = /* GraphQL */ `query GetTicketTemplate($id: ID!
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -35514,6 +48624,7 @@ export const listTicketTemplates = /* GraphQL */ `query ListTicketTemplates(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -35608,6 +48719,7 @@ export const syncTicketTemplates = /* GraphQL */ `query SyncTicketTemplates(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -35682,6 +48794,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
     playerId
     player {
       id
+      primaryEntityId
       firstName
       lastName
       phone
@@ -35704,6 +48817,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
         netBalance
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -35812,6 +48926,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -35856,6 +48971,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -35895,6 +49011,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -36003,6 +49120,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -36054,6 +49172,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -36085,6 +49204,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -36121,6 +49241,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -36186,6 +49307,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -36217,6 +49339,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -36283,6 +49406,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -36312,6 +49436,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -36372,6 +49497,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -36417,6 +49543,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -36463,6 +49590,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -36526,6 +49654,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -36550,6 +49679,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -36606,6 +49736,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -36668,6 +49799,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -36691,6 +49823,49 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -36727,6 +49902,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -36809,6 +49985,7 @@ export const listPlayerTickets = /* GraphQL */ `query ListPlayerTickets(
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -36831,6 +50008,7 @@ export const listPlayerTickets = /* GraphQL */ `query ListPlayerTickets(
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -36897,6 +50075,7 @@ export const listPlayerTickets = /* GraphQL */ `query ListPlayerTickets(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -37150,6 +50329,21 @@ export const listPlayerTickets = /* GraphQL */ `query ListPlayerTickets(
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -37240,6 +50434,7 @@ export const syncPlayerTickets = /* GraphQL */ `query SyncPlayerTickets(
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -37262,6 +50457,7 @@ export const syncPlayerTickets = /* GraphQL */ `query SyncPlayerTickets(
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -37328,6 +50524,7 @@ export const syncPlayerTickets = /* GraphQL */ `query SyncPlayerTickets(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -37581,6 +50778,21 @@ export const syncPlayerTickets = /* GraphQL */ `query SyncPlayerTickets(
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -37878,6 +51090,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
     playerId
     player {
       id
+      primaryEntityId
       firstName
       lastName
       phone
@@ -37900,6 +51113,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
         netBalance
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -38008,6 +51222,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -38052,6 +51267,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -38091,6 +51307,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -38199,6 +51416,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -38250,6 +51468,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -38281,6 +51500,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -38317,6 +51537,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -38382,6 +51603,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -38413,6 +51635,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -38479,6 +51702,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -38508,6 +51732,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -38568,6 +51793,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -38613,6 +51839,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -38659,6 +51886,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -38722,6 +51950,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -38746,6 +51975,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -38802,6 +52032,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -38864,6 +52095,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -38887,6 +52119,49 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -38933,6 +52208,7 @@ export const listPlayerMarketingPreferences = /* GraphQL */ `query ListPlayerMar
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -38955,6 +52231,7 @@ export const listPlayerMarketingPreferences = /* GraphQL */ `query ListPlayerMar
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -39021,6 +52298,7 @@ export const listPlayerMarketingPreferences = /* GraphQL */ `query ListPlayerMar
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -39274,6 +52552,21 @@ export const listPlayerMarketingPreferences = /* GraphQL */ `query ListPlayerMar
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -39326,6 +52619,7 @@ export const syncPlayerMarketingPreferences = /* GraphQL */ `query SyncPlayerMar
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -39348,6 +52642,7 @@ export const syncPlayerMarketingPreferences = /* GraphQL */ `query SyncPlayerMar
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -39414,6 +52709,7 @@ export const syncPlayerMarketingPreferences = /* GraphQL */ `query SyncPlayerMar
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -39667,6 +52963,21 @@ export const syncPlayerMarketingPreferences = /* GraphQL */ `query SyncPlayerMar
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -40053,6 +53364,21 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -40086,12 +53412,28 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
             venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -40158,6 +53500,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -40208,6 +53551,21 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -40255,6 +53613,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -40290,6 +53649,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -40321,6 +53681,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -40343,6 +53704,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
       registeredPlayers {
         items {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -40451,6 +53813,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -40470,12 +53833,686 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
         startedAt
         __typename
       }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
       _deleted
       _lastChangedAt
       venueDetailsId
+      __typename
+    }
+    entityId
+    entity {
+      id
+      entityName
+      gameUrlDomain
+      gameUrlPath
+      entityLogo
+      isActive
+      createdAt
+      updatedAt
+      scraperStates {
+        items {
+          id
+          isRunning
+          lastScannedId
+          lastRunStartTime
+          lastRunEndTime
+          consecutiveBlankCount
+          totalScraped
+          totalErrors
+          enabled
+          currentLog {
+            timestamp
+            level
+            message
+            details
+            __typename
+          }
+          lastGamesProcessed {
+            id
+            name
+            status
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      scraperJobs {
+        items {
+          id
+          jobId
+          triggerSource
+          triggeredBy
+          startTime
+          endTime
+          durationSeconds
+          maxGames
+          targetURLs
+          isFullScan
+          startId
+          endId
+          status
+          totalURLsProcessed
+          newGamesScraped
+          gamesUpdated
+          gamesSkipped
+          errors
+          blanks
+          averageScrapingTime
+          successRate
+          errorMessages
+          failedURLs
+          urlResults {
+            url
+            tournamentId
+            status
+            gameName
+            processingTime
+            error
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      scrapeURLs {
+        items {
+          id
+          url
+          tournamentId
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          missingKeysFromScrape
+          sourceSystem
+          status
+          placedIntoDatabase
+          firstScrapedAt
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          timesScraped
+          timesSuccessful
+          timesFailed
+          consecutiveFailures
+          lastScrapeStatus
+          lastScrapeMessage
+          lastScrapeJobId
+          gameId
+          gameName
+          gameStatus
+          venueId
+          venueName
+          lastDataHash
+          hasDataChanges
+          lastFoundKeys
+          lastStructureLabel
+          averageScrapingTime
+          lastScrapingTime
+          attempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      venues {
+        items {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          tournamentId
+          dataSource
+          originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          structure {
+            id
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          gameStructureId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      _version
+      _deleted
+      _lastChangedAt
       __typename
     }
     createdAt
@@ -40528,6 +54565,7 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -40552,6 +54590,7 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -40608,6 +54647,7 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -40670,6 +54710,7 @@ export const listAssets = /* GraphQL */ `query ListAssets(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -40695,12 +54736,275 @@ export const listAssets = /* GraphQL */ `query ListAssets(
           startedAt
           __typename
         }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
         _deleted
         _lastChangedAt
         venueDetailsId
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -40766,6 +55070,7 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -40790,6 +55095,7 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -40846,6 +55152,7 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -40908,6 +55215,7 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -40933,12 +55241,275 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
           startedAt
           __typename
         }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
         _deleted
         _lastChangedAt
         venueDetailsId
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -41119,496 +55690,6 @@ export const syncSocialPosts = /* GraphQL */ `query SyncSocialPosts(
   APITypes.SyncSocialPostsQueryVariables,
   APITypes.SyncSocialPostsQuery
 >;
-export const getScraperJob = /* GraphQL */ `query GetScraperJob($id: ID!) {
-  getScraperJob(id: $id) {
-    id
-    jobId
-    triggerSource
-    triggeredBy
-    startTime
-    endTime
-    durationSeconds
-    maxGames
-    targetURLs
-    isFullScan
-    startId
-    endId
-    status
-    totalURLsProcessed
-    newGamesScraped
-    gamesUpdated
-    gamesSkipped
-    errors
-    blanks
-    averageScrapingTime
-    successRate
-    errorMessages
-    failedURLs
-    urlResults {
-      url
-      tournamentId
-      status
-      gameName
-      processingTime
-      error
-      __typename
-    }
-    scrapeAttempts {
-      items {
-        id
-        url
-        tournamentId
-        attemptTime
-        scraperJobId
-        scraperJob {
-          id
-          jobId
-          triggerSource
-          triggeredBy
-          startTime
-          endTime
-          durationSeconds
-          maxGames
-          targetURLs
-          isFullScan
-          startId
-          endId
-          status
-          totalURLsProcessed
-          newGamesScraped
-          gamesUpdated
-          gamesSkipped
-          errors
-          blanks
-          averageScrapingTime
-          successRate
-          errorMessages
-          failedURLs
-          urlResults {
-            url
-            tournamentId
-            status
-            gameName
-            processingTime
-            error
-            __typename
-          }
-          scrapeAttempts {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        scrapeURLId
-        scrapeURL {
-          id
-          url
-          tournamentId
-          doNotScrape
-          sourceDataIssue
-          gameDataVerified
-          missingKeysFromScrape
-          sourceSystem
-          status
-          placedIntoDatabase
-          firstScrapedAt
-          lastScrapedAt
-          lastSuccessfulScrapeAt
-          timesScraped
-          timesSuccessful
-          timesFailed
-          consecutiveFailures
-          lastScrapeStatus
-          lastScrapeMessage
-          lastScrapeJobId
-          gameId
-          gameName
-          gameStatus
-          venueId
-          venueName
-          lastDataHash
-          hasDataChanges
-          lastFoundKeys
-          lastStructureLabel
-          averageScrapingTime
-          lastScrapingTime
-          attempts {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        status
-        processingTime
-        gameName
-        gameStatus
-        registrationStatus
-        dataHash
-        hasChanges
-        errorMessage
-        errorType
-        gameId
-        wasNewGame
-        fieldsUpdated
-        foundKeys
-        structureLabel
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      nextToken
-      startedAt
-      __typename
-    }
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.GetScraperJobQueryVariables,
-  APITypes.GetScraperJobQuery
->;
-export const listScraperJobs = /* GraphQL */ `query ListScraperJobs(
-  $filter: ModelScraperJobFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  listScraperJobs(filter: $filter, limit: $limit, nextToken: $nextToken) {
-    items {
-      id
-      jobId
-      triggerSource
-      triggeredBy
-      startTime
-      endTime
-      durationSeconds
-      maxGames
-      targetURLs
-      isFullScan
-      startId
-      endId
-      status
-      totalURLsProcessed
-      newGamesScraped
-      gamesUpdated
-      gamesSkipped
-      errors
-      blanks
-      averageScrapingTime
-      successRate
-      errorMessages
-      failedURLs
-      urlResults {
-        url
-        tournamentId
-        status
-        gameName
-        processingTime
-        error
-        __typename
-      }
-      scrapeAttempts {
-        items {
-          id
-          url
-          tournamentId
-          attemptTime
-          scraperJobId
-          scraperJob {
-            id
-            jobId
-            triggerSource
-            triggeredBy
-            startTime
-            endTime
-            durationSeconds
-            maxGames
-            targetURLs
-            isFullScan
-            startId
-            endId
-            status
-            totalURLsProcessed
-            newGamesScraped
-            gamesUpdated
-            gamesSkipped
-            errors
-            blanks
-            averageScrapingTime
-            successRate
-            errorMessages
-            failedURLs
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          scrapeURLId
-          scrapeURL {
-            id
-            url
-            tournamentId
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            missingKeysFromScrape
-            sourceSystem
-            status
-            placedIntoDatabase
-            firstScrapedAt
-            lastScrapedAt
-            lastSuccessfulScrapeAt
-            timesScraped
-            timesSuccessful
-            timesFailed
-            consecutiveFailures
-            lastScrapeStatus
-            lastScrapeMessage
-            lastScrapeJobId
-            gameId
-            gameName
-            gameStatus
-            venueId
-            venueName
-            lastDataHash
-            hasDataChanges
-            lastFoundKeys
-            lastStructureLabel
-            averageScrapingTime
-            lastScrapingTime
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          status
-          processingTime
-          gameName
-          gameStatus
-          registrationStatus
-          dataHash
-          hasChanges
-          errorMessage
-          errorType
-          gameId
-          wasNewGame
-          fieldsUpdated
-          foundKeys
-          structureLabel
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    nextToken
-    startedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.ListScraperJobsQueryVariables,
-  APITypes.ListScraperJobsQuery
->;
-export const syncScraperJobs = /* GraphQL */ `query SyncScraperJobs(
-  $filter: ModelScraperJobFilterInput
-  $limit: Int
-  $nextToken: String
-  $lastSync: AWSTimestamp
-) {
-  syncScraperJobs(
-    filter: $filter
-    limit: $limit
-    nextToken: $nextToken
-    lastSync: $lastSync
-  ) {
-    items {
-      id
-      jobId
-      triggerSource
-      triggeredBy
-      startTime
-      endTime
-      durationSeconds
-      maxGames
-      targetURLs
-      isFullScan
-      startId
-      endId
-      status
-      totalURLsProcessed
-      newGamesScraped
-      gamesUpdated
-      gamesSkipped
-      errors
-      blanks
-      averageScrapingTime
-      successRate
-      errorMessages
-      failedURLs
-      urlResults {
-        url
-        tournamentId
-        status
-        gameName
-        processingTime
-        error
-        __typename
-      }
-      scrapeAttempts {
-        items {
-          id
-          url
-          tournamentId
-          attemptTime
-          scraperJobId
-          scraperJob {
-            id
-            jobId
-            triggerSource
-            triggeredBy
-            startTime
-            endTime
-            durationSeconds
-            maxGames
-            targetURLs
-            isFullScan
-            startId
-            endId
-            status
-            totalURLsProcessed
-            newGamesScraped
-            gamesUpdated
-            gamesSkipped
-            errors
-            blanks
-            averageScrapingTime
-            successRate
-            errorMessages
-            failedURLs
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          scrapeURLId
-          scrapeURL {
-            id
-            url
-            tournamentId
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            missingKeysFromScrape
-            sourceSystem
-            status
-            placedIntoDatabase
-            firstScrapedAt
-            lastScrapedAt
-            lastSuccessfulScrapeAt
-            timesScraped
-            timesSuccessful
-            timesFailed
-            consecutiveFailures
-            lastScrapeStatus
-            lastScrapeMessage
-            lastScrapeJobId
-            gameId
-            gameName
-            gameStatus
-            venueId
-            venueName
-            lastDataHash
-            hasDataChanges
-            lastFoundKeys
-            lastStructureLabel
-            averageScrapingTime
-            lastScrapingTime
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          status
-          processingTime
-          gameName
-          gameStatus
-          registrationStatus
-          dataHash
-          hasChanges
-          errorMessage
-          errorType
-          gameId
-          wasNewGame
-          fieldsUpdated
-          foundKeys
-          structureLabel
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    nextToken
-    startedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.SyncScraperJobsQueryVariables,
-  APITypes.SyncScraperJobsQuery
->;
 export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
   getScrapeURL(id: $id) {
     id
@@ -41687,6 +55768,21 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -41732,6 +55828,21 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -41764,6 +55875,460 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
       startedAt
       __typename
     }
+    entityId
+    entity {
+      id
+      entityName
+      gameUrlDomain
+      gameUrlPath
+      entityLogo
+      isActive
+      createdAt
+      updatedAt
+      scraperStates {
+        items {
+          id
+          isRunning
+          lastScannedId
+          lastRunStartTime
+          lastRunEndTime
+          consecutiveBlankCount
+          totalScraped
+          totalErrors
+          enabled
+          currentLog {
+            timestamp
+            level
+            message
+            details
+            __typename
+          }
+          lastGamesProcessed {
+            id
+            name
+            status
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      scraperJobs {
+        items {
+          id
+          jobId
+          triggerSource
+          triggeredBy
+          startTime
+          endTime
+          durationSeconds
+          maxGames
+          targetURLs
+          isFullScan
+          startId
+          endId
+          status
+          totalURLsProcessed
+          newGamesScraped
+          gamesUpdated
+          gamesSkipped
+          errors
+          blanks
+          averageScrapingTime
+          successRate
+          errorMessages
+          failedURLs
+          urlResults {
+            url
+            tournamentId
+            status
+            gameName
+            processingTime
+            error
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      scrapeURLs {
+        items {
+          id
+          url
+          tournamentId
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          missingKeysFromScrape
+          sourceSystem
+          status
+          placedIntoDatabase
+          firstScrapedAt
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          timesScraped
+          timesSuccessful
+          timesFailed
+          consecutiveFailures
+          lastScrapeStatus
+          lastScrapeMessage
+          lastScrapeJobId
+          gameId
+          gameName
+          gameStatus
+          venueId
+          venueName
+          lastDataHash
+          hasDataChanges
+          lastFoundKeys
+          lastStructureLabel
+          averageScrapingTime
+          lastScrapingTime
+          attempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      venues {
+        items {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          tournamentId
+          dataSource
+          originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          structure {
+            id
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          gameStructureId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -41775,326 +56340,6 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
 ` as GeneratedQuery<
   APITypes.GetScrapeURLQueryVariables,
   APITypes.GetScrapeURLQuery
->;
-export const listScrapeURLS = /* GraphQL */ `query ListScrapeURLS(
-  $filter: ModelScrapeURLFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  listScrapeURLS(filter: $filter, limit: $limit, nextToken: $nextToken) {
-    items {
-      id
-      url
-      tournamentId
-      doNotScrape
-      sourceDataIssue
-      gameDataVerified
-      missingKeysFromScrape
-      sourceSystem
-      status
-      placedIntoDatabase
-      firstScrapedAt
-      lastScrapedAt
-      lastSuccessfulScrapeAt
-      timesScraped
-      timesSuccessful
-      timesFailed
-      consecutiveFailures
-      lastScrapeStatus
-      lastScrapeMessage
-      lastScrapeJobId
-      gameId
-      gameName
-      gameStatus
-      venueId
-      venueName
-      lastDataHash
-      hasDataChanges
-      lastFoundKeys
-      lastStructureLabel
-      averageScrapingTime
-      lastScrapingTime
-      attempts {
-        items {
-          id
-          url
-          tournamentId
-          attemptTime
-          scraperJobId
-          scraperJob {
-            id
-            jobId
-            triggerSource
-            triggeredBy
-            startTime
-            endTime
-            durationSeconds
-            maxGames
-            targetURLs
-            isFullScan
-            startId
-            endId
-            status
-            totalURLsProcessed
-            newGamesScraped
-            gamesUpdated
-            gamesSkipped
-            errors
-            blanks
-            averageScrapingTime
-            successRate
-            errorMessages
-            failedURLs
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          scrapeURLId
-          scrapeURL {
-            id
-            url
-            tournamentId
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            missingKeysFromScrape
-            sourceSystem
-            status
-            placedIntoDatabase
-            firstScrapedAt
-            lastScrapedAt
-            lastSuccessfulScrapeAt
-            timesScraped
-            timesSuccessful
-            timesFailed
-            consecutiveFailures
-            lastScrapeStatus
-            lastScrapeMessage
-            lastScrapeJobId
-            gameId
-            gameName
-            gameStatus
-            venueId
-            venueName
-            lastDataHash
-            hasDataChanges
-            lastFoundKeys
-            lastStructureLabel
-            averageScrapingTime
-            lastScrapingTime
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          status
-          processingTime
-          gameName
-          gameStatus
-          registrationStatus
-          dataHash
-          hasChanges
-          errorMessage
-          errorType
-          gameId
-          wasNewGame
-          fieldsUpdated
-          foundKeys
-          structureLabel
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    nextToken
-    startedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.ListScrapeURLSQueryVariables,
-  APITypes.ListScrapeURLSQuery
->;
-export const syncScrapeURLS = /* GraphQL */ `query SyncScrapeURLS(
-  $filter: ModelScrapeURLFilterInput
-  $limit: Int
-  $nextToken: String
-  $lastSync: AWSTimestamp
-) {
-  syncScrapeURLS(
-    filter: $filter
-    limit: $limit
-    nextToken: $nextToken
-    lastSync: $lastSync
-  ) {
-    items {
-      id
-      url
-      tournamentId
-      doNotScrape
-      sourceDataIssue
-      gameDataVerified
-      missingKeysFromScrape
-      sourceSystem
-      status
-      placedIntoDatabase
-      firstScrapedAt
-      lastScrapedAt
-      lastSuccessfulScrapeAt
-      timesScraped
-      timesSuccessful
-      timesFailed
-      consecutiveFailures
-      lastScrapeStatus
-      lastScrapeMessage
-      lastScrapeJobId
-      gameId
-      gameName
-      gameStatus
-      venueId
-      venueName
-      lastDataHash
-      hasDataChanges
-      lastFoundKeys
-      lastStructureLabel
-      averageScrapingTime
-      lastScrapingTime
-      attempts {
-        items {
-          id
-          url
-          tournamentId
-          attemptTime
-          scraperJobId
-          scraperJob {
-            id
-            jobId
-            triggerSource
-            triggeredBy
-            startTime
-            endTime
-            durationSeconds
-            maxGames
-            targetURLs
-            isFullScan
-            startId
-            endId
-            status
-            totalURLsProcessed
-            newGamesScraped
-            gamesUpdated
-            gamesSkipped
-            errors
-            blanks
-            averageScrapingTime
-            successRate
-            errorMessages
-            failedURLs
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          scrapeURLId
-          scrapeURL {
-            id
-            url
-            tournamentId
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            missingKeysFromScrape
-            sourceSystem
-            status
-            placedIntoDatabase
-            firstScrapedAt
-            lastScrapedAt
-            lastSuccessfulScrapeAt
-            timesScraped
-            timesSuccessful
-            timesFailed
-            consecutiveFailures
-            lastScrapeStatus
-            lastScrapeMessage
-            lastScrapeJobId
-            gameId
-            gameName
-            gameStatus
-            venueId
-            venueName
-            lastDataHash
-            hasDataChanges
-            lastFoundKeys
-            lastStructureLabel
-            averageScrapingTime
-            lastScrapingTime
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          status
-          processingTime
-          gameName
-          gameStatus
-          registrationStatus
-          dataHash
-          hasChanges
-          errorMessage
-          errorType
-          gameId
-          wasNewGame
-          fieldsUpdated
-          foundKeys
-          structureLabel
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    nextToken
-    startedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.SyncScrapeURLSQueryVariables,
-  APITypes.SyncScrapeURLSQuery
 >;
 export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) {
   getScrapeAttempt(id: $id) {
@@ -42167,6 +56412,7 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
             successRate
             errorMessages
             failedURLs
+            entityId
             createdAt
             updatedAt
             _version
@@ -42207,6 +56453,7 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
             lastStructureLabel
             averageScrapingTime
             lastScrapingTime
+            entityId
             createdAt
             updatedAt
             _version
@@ -42237,6 +56484,226 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
         }
         nextToken
         startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -42310,6 +56777,7 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
             successRate
             errorMessages
             failedURLs
+            entityId
             createdAt
             updatedAt
             _version
@@ -42350,6 +56818,7 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
             lastStructureLabel
             averageScrapingTime
             lastScrapingTime
+            entityId
             createdAt
             updatedAt
             _version
@@ -42380,6 +56849,226 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
         }
         nextToken
         startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -42493,6 +57182,49 @@ export const listScrapeAttempts = /* GraphQL */ `query ListScrapeAttempts(
           startedAt
           __typename
         }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -42564,6 +57296,49 @@ export const listScrapeAttempts = /* GraphQL */ `query ListScrapeAttempts(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -42687,6 +57462,49 @@ export const syncScrapeAttempts = /* GraphQL */ `query SyncScrapeAttempts(
           startedAt
           __typename
         }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -42760,6 +57578,49 @@ export const syncScrapeAttempts = /* GraphQL */ `query SyncScrapeAttempts(
           startedAt
           __typename
         }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -42796,6 +57657,755 @@ export const syncScrapeAttempts = /* GraphQL */ `query SyncScrapeAttempts(
 ` as GeneratedQuery<
   APITypes.SyncScrapeAttemptsQueryVariables,
   APITypes.SyncScrapeAttemptsQuery
+>;
+export const entitiesByEntityName = /* GraphQL */ `query EntitiesByEntityName(
+  $entityName: String!
+  $sortDirection: ModelSortDirection
+  $filter: ModelEntityFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  entitiesByEntityName(
+    entityName: $entityName
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      entityName
+      gameUrlDomain
+      gameUrlPath
+      entityLogo
+      isActive
+      createdAt
+      updatedAt
+      scraperStates {
+        items {
+          id
+          isRunning
+          lastScannedId
+          lastRunStartTime
+          lastRunEndTime
+          consecutiveBlankCount
+          totalScraped
+          totalErrors
+          enabled
+          currentLog {
+            timestamp
+            level
+            message
+            details
+            __typename
+          }
+          lastGamesProcessed {
+            id
+            name
+            status
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      scraperJobs {
+        items {
+          id
+          jobId
+          triggerSource
+          triggeredBy
+          startTime
+          endTime
+          durationSeconds
+          maxGames
+          targetURLs
+          isFullScan
+          startId
+          endId
+          status
+          totalURLsProcessed
+          newGamesScraped
+          gamesUpdated
+          gamesSkipped
+          errors
+          blanks
+          averageScrapingTime
+          successRate
+          errorMessages
+          failedURLs
+          urlResults {
+            url
+            tournamentId
+            status
+            gameName
+            processingTime
+            error
+            __typename
+          }
+          scrapeAttempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      scrapeURLs {
+        items {
+          id
+          url
+          tournamentId
+          doNotScrape
+          sourceDataIssue
+          gameDataVerified
+          missingKeysFromScrape
+          sourceSystem
+          status
+          placedIntoDatabase
+          firstScrapedAt
+          lastScrapedAt
+          lastSuccessfulScrapeAt
+          timesScraped
+          timesSuccessful
+          timesFailed
+          consecutiveFailures
+          lastScrapeStatus
+          lastScrapeMessage
+          lastScrapeJobId
+          gameId
+          gameName
+          gameStatus
+          venueId
+          venueName
+          lastDataHash
+          hasDataChanges
+          lastFoundKeys
+          lastStructureLabel
+          averageScrapingTime
+          lastScrapingTime
+          attempts {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      venues {
+        items {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          tournamentId
+          dataSource
+          originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          structure {
+            id
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          gameStructureId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.EntitiesByEntityNameQueryVariables,
+  APITypes.EntitiesByEntityNameQuery
+>;
+export const scraperStatesByEntityId = /* GraphQL */ `query ScraperStatesByEntityId(
+  $entityId: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelScraperStateFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  scraperStatesByEntityId(
+    entityId: $entityId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      isRunning
+      lastScannedId
+      lastRunStartTime
+      lastRunEndTime
+      consecutiveBlankCount
+      totalScraped
+      totalErrors
+      enabled
+      currentLog {
+        timestamp
+        level
+        message
+        details
+        __typename
+      }
+      lastGamesProcessed {
+        id
+        name
+        status
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ScraperStatesByEntityIdQueryVariables,
+  APITypes.ScraperStatesByEntityIdQuery
 >;
 export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumberAndName(
   $venueNumber: Int!
@@ -42881,6 +58491,21 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -42914,12 +58539,28 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
             _deleted
             _lastChangedAt
             venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -42986,6 +58627,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -43036,6 +58678,21 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -43083,6 +58740,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -43118,6 +58776,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -43149,6 +58808,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -43171,6 +58831,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
       registeredPlayers {
         items {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -43279,6 +58940,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -43298,6 +58960,226 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
         startedAt
         __typename
       }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -43314,6 +59196,796 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
 ` as GeneratedQuery<
   APITypes.VenuesByVenueNumberAndNameQueryVariables,
   APITypes.VenuesByVenueNumberAndNameQuery
+>;
+export const venuesByEntityIdAndName = /* GraphQL */ `query VenuesByEntityIdAndName(
+  $entityId: ID!
+  $name: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelVenueFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  venuesByEntityIdAndName(
+    entityId: $entityId
+    name: $name
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      venueNumber
+      name
+      aliases
+      address
+      city
+      country
+      isSpecial
+      details {
+        id
+        startDate
+        status
+        lastCustomerSuccessVisit
+        totalGamesHeld
+        averagePlayersPerGame
+        gameNights
+        venueId
+        venue {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      assets {
+        items {
+          id
+          name
+          type
+          condition
+          acquiredDate
+          lastCheckedDate
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      games {
+        items {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          tournamentId
+          dataSource
+          originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          structure {
+            id
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          gameStructureId
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      series {
+        items {
+          id
+          name
+          year
+          status
+          startDate
+          endDate
+          events
+          numberOfEvents
+          guaranteedPrizepool
+          estimatedPrizepool
+          actualPrizepool
+          tournamentSeriesTitleId
+          title {
+            id
+            title
+            aliases
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerMemberships {
+        items {
+          id
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          playerId
+          player {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      registeredPlayers {
+        items {
+          id
+          primaryEntityId
+          firstName
+          lastName
+          phone
+          email
+          status
+          category
+          targetingClassification
+          registrationDate
+          firstGamePlayed
+          lastPlayedDate
+          creditBalance
+          pointsBalance
+          playerSummary {
+            id
+            playerId
+            gamesPlayedLast30Days
+            gamesPlayedLast90Days
+            gamesPlayedAllTime
+            averageFinishPosition
+            netBalance
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            lastPlayed
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          knownIdentities {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          marketingMessages {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerVenues {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerTickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerTransactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerCredits {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerPoints {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueAssignmentStatus
+          registrationVenueId
+          registrationVenue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          updatedAt
+          createdAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      venueDetailsId
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.VenuesByEntityIdAndNameQueryVariables,
+  APITypes.VenuesByEntityIdAndNameQuery
 >;
 export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
   $venueId: ID!
@@ -43365,6 +60037,7 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -43389,6 +60062,7 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -43445,6 +60119,7 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -43507,6 +60182,7 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -43530,6 +60206,49 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -43650,6 +60369,7 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -43674,6 +60394,7 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -43730,6 +60451,7 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -43792,6 +60514,7 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -43815,6 +60538,49 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -43878,6 +60644,7 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -43926,6 +60693,21 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
           playerResults {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -44048,6 +60830,7 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -44072,6 +60855,7 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -44128,6 +60912,7 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -44190,6 +60975,7 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -44213,6 +60999,49 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -44276,6 +61105,7 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -44324,6 +61154,21 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
           playerResults {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -44440,6 +61285,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -44464,6 +61310,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -44520,6 +61367,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -44582,6 +61430,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -44605,6 +61454,49 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -44696,6 +61588,21 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -44749,6 +61656,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -44836,6 +61744,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -44886,6 +61795,21 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -44918,6 +61842,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -44983,6 +61908,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -45014,6 +61940,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -45080,6 +62007,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -45097,6 +62025,226 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
         }
         nextToken
         startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -45200,6 +62348,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -45224,6 +62373,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -45280,6 +62430,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -45342,6 +62493,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -45365,6 +62517,49 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -45456,6 +62651,21 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -45509,6 +62719,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -45596,6 +62807,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -45646,6 +62858,21 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -45678,6 +62905,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -45743,6 +62971,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -45774,6 +63003,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -45840,6 +63070,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -45857,6 +63088,226 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
         }
         nextToken
         startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -45962,6 +63413,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -45986,6 +63438,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -46042,6 +63495,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -46104,6 +63558,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -46127,6 +63582,49 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -46218,6 +63716,21 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -46271,6 +63784,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -46358,6 +63872,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -46408,6 +63923,21 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -46440,6 +63970,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -46505,6 +64036,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -46536,6 +64068,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -46602,6 +64135,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -46619,6 +64153,226 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
         }
         nextToken
         startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -46724,6 +64478,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -46748,6 +64503,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -46804,6 +64560,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -46866,6 +64623,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -46889,6 +64647,49 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -46980,6 +64781,21 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -47033,6 +64849,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -47120,6 +64937,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -47170,6 +64988,21 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -47202,6 +65035,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -47267,6 +65101,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -47298,6 +65133,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -47364,6 +65200,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -47383,6 +65220,226 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
         startedAt
         __typename
       }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -47399,6 +65456,1071 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
 ` as GeneratedQuery<
   APITypes.GamesByTournamentSeriesIdAndGameStartDateTimeQueryVariables,
   APITypes.GamesByTournamentSeriesIdAndGameStartDateTimeQuery
+>;
+export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByEntityIdAndGameStartDateTime(
+  $entityId: ID!
+  $gameStartDateTime: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelGameFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  gamesByEntityIdAndGameStartDateTime(
+    entityId: $entityId
+    gameStartDateTime: $gameStartDateTime
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      name
+      gameType
+      gameVariant
+      gameStatus
+      gameStartDateTime
+      gameEndDateTime
+      registrationStatus
+      totalDuration
+      gameFrequency
+      buyIn
+      rake
+      startingStack
+      hasGuarantee
+      guaranteeAmount
+      prizepool
+      totalEntries
+      totalRebuys
+      totalAddons
+      revenueByBuyIns
+      totalRake
+      profitLoss
+      guaranteeOverlay
+      guaranteeSurplus
+      playersRemaining
+      totalChipsInPlay
+      averagePlayerStack
+      tournamentType
+      isRegular
+      isSeries
+      isSatellite
+      seriesName
+      gameTags
+      sourceUrl
+      tournamentId
+      dataSource
+      originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
+      venueId
+      venue {
+        id
+        venueNumber
+        name
+        aliases
+        address
+        city
+        country
+        isSpecial
+        details {
+          id
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        series {
+          items {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        registeredPlayers {
+          items {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
+      tournamentSeriesId
+      tournamentSeries {
+        id
+        name
+        year
+        status
+        startDate
+        endDate
+        events
+        numberOfEvents
+        guaranteedPrizepool
+        estimatedPrizepool
+        actualPrizepool
+        tournamentSeriesTitleId
+        title {
+          id
+          title
+          aliases
+          seriesInstances {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        venueId
+        venue {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      structure {
+        id
+        levels {
+          levelNumber
+          durationMinutes
+          smallBlind
+          bigBlind
+          ante
+          __typename
+        }
+        breaks {
+          levelNumberBeforeBreak
+          durationMinutes
+          __typename
+        }
+        gameId
+        game {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          tournamentId
+          dataSource
+          originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          structure {
+            id
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          gameStructureId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      playerEntries {
+        items {
+          id
+          playerId
+          gameId
+          venueId
+          status
+          registrationTime
+          eliminationTime
+          gameStartDateTime
+          lastKnownStackSize
+          tableNumber
+          seatNumber
+          numberOfReEntries
+          isMultiDayTournament
+          player {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerResults {
+        items {
+          id
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          pointsEarned
+          playerId
+          player {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      gameStructureId
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GamesByEntityIdAndGameStartDateTimeQueryVariables,
+  APITypes.GamesByEntityIdAndGameStartDateTimeQuery
 >;
 export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStructuresByGameId(
   $gameId: ID!
@@ -47523,6 +66645,21 @@ export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStruc
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -47566,6 +66703,7 @@ export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStruc
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -47646,6 +66784,7 @@ export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStruc
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -47707,6 +66846,49 @@ export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStruc
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -47845,15 +67027,15 @@ export const rakeStructuresByGameId = /* GraphQL */ `query RakeStructuresByGameI
   APITypes.RakeStructuresByGameIdQueryVariables,
   APITypes.RakeStructuresByGameIdQuery
 >;
-export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
-  $phone: String!
+export const playersByPrimaryEntityId = /* GraphQL */ `query PlayersByPrimaryEntityId(
+  $primaryEntityId: ID!
   $sortDirection: ModelSortDirection
   $filter: ModelPlayerFilterInput
   $limit: Int
   $nextToken: String
 ) {
-  playerByPhone(
-    phone: $phone
+  playersByPrimaryEntityId(
+    primaryEntityId: $primaryEntityId
     sortDirection: $sortDirection
     filter: $filter
     limit: $limit
@@ -47861,6 +67043,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
   ) {
     items {
       id
+      primaryEntityId
       firstName
       lastName
       phone
@@ -47883,6 +67066,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
         netBalance
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -47991,6 +67175,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -48035,6 +67220,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -48074,6 +67260,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -48182,6 +67369,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -48233,6 +67421,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -48264,6 +67453,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -48300,6 +67490,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -48365,6 +67556,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -48396,6 +67588,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -48462,6 +67655,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -48491,6 +67685,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -48551,6 +67746,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -48596,6 +67792,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -48642,6 +67839,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -48705,6 +67903,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -48729,6 +67928,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -48785,6 +67985,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -48847,6 +68048,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -48870,6 +68072,1163 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
+      updatedAt
+      createdAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.PlayersByPrimaryEntityIdQueryVariables,
+  APITypes.PlayersByPrimaryEntityIdQuery
+>;
+export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
+  $phone: String!
+  $sortDirection: ModelSortDirection
+  $filter: ModelPlayerFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  playerByPhone(
+    phone: $phone
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      primaryEntityId
+      firstName
+      lastName
+      phone
+      email
+      status
+      category
+      targetingClassification
+      registrationDate
+      firstGamePlayed
+      lastPlayedDate
+      creditBalance
+      pointsBalance
+      playerSummary {
+        id
+        playerId
+        gamesPlayedLast30Days
+        gamesPlayedLast90Days
+        gamesPlayedAllTime
+        averageFinishPosition
+        netBalance
+        player {
+          id
+          primaryEntityId
+          firstName
+          lastName
+          phone
+          email
+          status
+          category
+          targetingClassification
+          registrationDate
+          firstGamePlayed
+          lastPlayedDate
+          creditBalance
+          pointsBalance
+          playerSummary {
+            id
+            playerId
+            gamesPlayedLast30Days
+            gamesPlayedLast90Days
+            gamesPlayedAllTime
+            averageFinishPosition
+            netBalance
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            lastPlayed
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          knownIdentities {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          marketingMessages {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerVenues {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerTickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerTransactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerCredits {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerPoints {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueAssignmentStatus
+          registrationVenueId
+          registrationVenue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          updatedAt
+          createdAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        sessionsPlayed
+        tournamentsPlayed
+        cashGamesPlayed
+        venuesVisited
+        tournamentWinnings
+        tournamentBuyIns
+        tournamentITM
+        tournamentsCashed
+        cashGameWinnings
+        cashGameBuyIns
+        totalWinnings
+        totalBuyIns
+        lastPlayed
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      knownIdentities {
+        items {
+          id
+          sourceSystem
+          identityValue
+          identityType
+          playerId
+          player {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      marketingPreferences {
+        id
+        optOutSms
+        optOutEmail
+        playerId
+        player {
+          id
+          primaryEntityId
+          firstName
+          lastName
+          phone
+          email
+          status
+          category
+          targetingClassification
+          registrationDate
+          firstGamePlayed
+          lastPlayedDate
+          creditBalance
+          pointsBalance
+          playerSummary {
+            id
+            playerId
+            gamesPlayedLast30Days
+            gamesPlayedLast90Days
+            gamesPlayedAllTime
+            averageFinishPosition
+            netBalance
+            sessionsPlayed
+            tournamentsPlayed
+            cashGamesPlayed
+            venuesVisited
+            tournamentWinnings
+            tournamentBuyIns
+            tournamentITM
+            tournamentsCashed
+            cashGameWinnings
+            cashGameBuyIns
+            totalWinnings
+            totalBuyIns
+            lastPlayed
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          knownIdentities {
+            nextToken
+            startedAt
+            __typename
+          }
+          marketingPreferences {
+            id
+            optOutSms
+            optOutEmail
+            playerId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          marketingMessages {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerVenues {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerTickets {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerTransactions {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerCredits {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerPoints {
+            nextToken
+            startedAt
+            __typename
+          }
+          venueAssignmentStatus
+          registrationVenueId
+          registrationVenue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          updatedAt
+          createdAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      marketingMessages {
+        items {
+          id
+          status
+          sentAt
+          playerId
+          marketingMessageId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerVenues {
+        items {
+          id
+          totalGamesPlayed
+          averageBuyIn
+          firstPlayedDate
+          lastPlayedDate
+          targetingClassification
+          playerId
+          player {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerEntries {
+        items {
+          id
+          playerId
+          gameId
+          venueId
+          status
+          registrationTime
+          eliminationTime
+          gameStartDateTime
+          lastKnownStackSize
+          tableNumber
+          seatNumber
+          numberOfReEntries
+          isMultiDayTournament
+          player {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerResults {
+        items {
+          id
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          pointsEarned
+          playerId
+          player {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerTickets {
+        items {
+          id
+          assignedAt
+          expiryDate
+          status
+          usedInGameId
+          playerId
+          player {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          ticketTemplateId
+          ticketTemplate {
+            id
+            name
+            description
+            value
+            validityDays
+            originGameId
+            targetGameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerTransactions {
+        items {
+          id
+          type
+          amount
+          rake
+          paymentSource
+          transactionDate
+          notes
+          playerId
+          player {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          gameId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerCredits {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerPoints {
+        items {
+          id
+          type
+          changeAmount
+          balanceAfter
+          transactionDate
+          reason
+          expiryDate
+          playerId
+          player {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          relatedGameId
+          relatedTransactionId
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      venueAssignmentStatus
+      registrationVenueId
+      registrationVenue {
+        id
+        venueNumber
+        name
+        aliases
+        address
+        city
+        country
+        isSpecial
+        details {
+          id
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        series {
+          items {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        registeredPlayers {
+          items {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -48912,6 +69271,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
   ) {
     items {
       id
+      primaryEntityId
       firstName
       lastName
       phone
@@ -48934,6 +69294,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
         netBalance
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -49042,6 +69403,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -49086,6 +69448,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -49125,6 +69488,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -49233,6 +69597,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -49284,6 +69649,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -49315,6 +69681,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -49351,6 +69718,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -49416,6 +69784,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -49447,6 +69816,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -49513,6 +69883,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -49542,6 +69913,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -49602,6 +69974,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -49647,6 +70020,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -49693,6 +70067,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -49756,6 +70131,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -49780,6 +70156,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -49836,6 +70213,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -49898,6 +70276,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -49921,6 +70300,49 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -49963,6 +70385,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
   ) {
     items {
       id
+      primaryEntityId
       firstName
       lastName
       phone
@@ -49985,6 +70408,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
         netBalance
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -50093,6 +70517,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -50137,6 +70562,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -50176,6 +70602,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
         playerId
         player {
           id
+          primaryEntityId
           firstName
           lastName
           phone
@@ -50284,6 +70711,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -50335,6 +70763,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -50366,6 +70795,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -50402,6 +70832,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
           isMultiDayTournament
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -50467,6 +70898,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -50498,6 +70930,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -50564,6 +70997,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -50593,6 +71027,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -50653,6 +71088,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -50698,6 +71134,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -50744,6 +71181,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -50807,6 +71245,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -50831,6 +71270,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -50887,6 +71327,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -50949,6 +71390,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -50972,6 +71414,49 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -51022,6 +71507,7 @@ export const playerSummariesByPlayerId = /* GraphQL */ `query PlayerSummariesByP
       netBalance
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -51044,6 +71530,7 @@ export const playerSummariesByPlayerId = /* GraphQL */ `query PlayerSummariesByP
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -51110,6 +71597,7 @@ export const playerSummariesByPlayerId = /* GraphQL */ `query PlayerSummariesByP
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -51363,6 +71851,21 @@ export const playerSummariesByPlayerId = /* GraphQL */ `query PlayerSummariesByP
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -51441,6 +71944,7 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
       isMultiDayTournament
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -51463,6 +71967,7 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -51529,6 +72034,7 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -51784,6 +72290,21 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -51892,6 +72413,21 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -51935,6 +72471,7 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -52015,6 +72552,7 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -52076,6 +72614,49 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -52132,6 +72713,7 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
       isMultiDayTournament
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -52154,6 +72736,7 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -52220,6 +72803,7 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -52475,6 +73059,21 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -52583,6 +73182,21 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -52626,6 +73240,7 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -52706,6 +73321,7 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -52767,6 +73383,49 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -52823,6 +73482,7 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
       isMultiDayTournament
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -52845,6 +73505,7 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -52911,6 +73572,7 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -53166,6 +73828,21 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -53274,6 +73951,21 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -53317,6 +74009,7 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -53397,6 +74090,7 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -53458,6 +74152,49 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -53509,6 +74246,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -53531,6 +74269,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -53597,6 +74336,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -53852,6 +74592,21 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -53961,6 +74716,21 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -54004,6 +74774,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -54084,6 +74855,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -54145,6 +74917,49 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -54196,6 +75011,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -54218,6 +75034,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -54284,6 +75101,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -54539,6 +75357,21 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -54648,6 +75481,21 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -54691,6 +75539,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -54771,6 +75620,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -54832,6 +75682,49 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -54884,6 +75777,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -54906,6 +75800,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -54972,6 +75867,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -55227,6 +76123,21 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -55270,6 +76181,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -55294,6 +76206,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -55350,6 +76263,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -55412,6 +76326,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -55435,6 +76350,49 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -55487,6 +76445,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -55509,6 +76468,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -55575,6 +76535,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -55830,6 +76791,21 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -55873,6 +76849,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -55897,6 +76874,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -55953,6 +76931,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -56015,6 +76994,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -56038,6 +77018,49 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -56091,6 +77114,7 @@ export const playerTransactionsByPlayerIdAndTransactionDate = /* GraphQL */ `que
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -56113,6 +77137,7 @@ export const playerTransactionsByPlayerIdAndTransactionDate = /* GraphQL */ `que
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -56179,6 +77204,7 @@ export const playerTransactionsByPlayerIdAndTransactionDate = /* GraphQL */ `que
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -56432,6 +77458,21 @@ export const playerTransactionsByPlayerIdAndTransactionDate = /* GraphQL */ `que
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -56491,6 +77532,7 @@ export const playerTransactionsByGameId = /* GraphQL */ `query PlayerTransaction
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -56513,6 +77555,7 @@ export const playerTransactionsByGameId = /* GraphQL */ `query PlayerTransaction
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -56579,6 +77622,7 @@ export const playerTransactionsByGameId = /* GraphQL */ `query PlayerTransaction
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -56832,6 +77876,21 @@ export const playerTransactionsByGameId = /* GraphQL */ `query PlayerTransaction
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -56893,6 +77952,7 @@ export const playerCreditsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pl
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -56915,6 +77975,7 @@ export const playerCreditsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pl
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -56981,6 +78042,7 @@ export const playerCreditsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pl
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -57234,6 +78296,21 @@ export const playerCreditsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pl
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -57294,6 +78371,7 @@ export const playerCreditsByRelatedGameId = /* GraphQL */ `query PlayerCreditsBy
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -57316,6 +78394,7 @@ export const playerCreditsByRelatedGameId = /* GraphQL */ `query PlayerCreditsBy
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -57382,6 +78461,7 @@ export const playerCreditsByRelatedGameId = /* GraphQL */ `query PlayerCreditsBy
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -57635,6 +78715,21 @@ export const playerCreditsByRelatedGameId = /* GraphQL */ `query PlayerCreditsBy
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -57697,6 +78792,7 @@ export const playerPointsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pla
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -57719,6 +78815,7 @@ export const playerPointsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pla
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -57785,6 +78882,7 @@ export const playerPointsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pla
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -58038,6 +79136,21 @@ export const playerPointsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pla
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -58098,6 +79211,7 @@ export const playerPointsByRelatedGameId = /* GraphQL */ `query PlayerPointsByRe
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -58120,6 +79234,7 @@ export const playerPointsByRelatedGameId = /* GraphQL */ `query PlayerPointsByRe
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -58186,6 +79301,7 @@ export const playerPointsByRelatedGameId = /* GraphQL */ `query PlayerPointsByRe
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -58439,6 +79555,21 @@ export const playerPointsByRelatedGameId = /* GraphQL */ `query PlayerPointsByRe
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -58496,6 +79627,7 @@ export const knownPlayerIdentitiesByPlayerId = /* GraphQL */ `query KnownPlayerI
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -58518,6 +79650,7 @@ export const knownPlayerIdentitiesByPlayerId = /* GraphQL */ `query KnownPlayerI
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -58584,6 +79717,7 @@ export const knownPlayerIdentitiesByPlayerId = /* GraphQL */ `query KnownPlayerI
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -58837,6 +79971,21 @@ export const knownPlayerIdentitiesByPlayerId = /* GraphQL */ `query KnownPlayerI
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -58893,6 +80042,7 @@ export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlaye
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -58915,6 +80065,7 @@ export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlaye
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -58981,6 +80132,7 @@ export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlaye
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -59234,6 +80386,21 @@ export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlaye
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -59326,6 +80493,7 @@ export const playerTicketsByTicketTemplateId = /* GraphQL */ `query PlayerTicket
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -59348,6 +80516,7 @@ export const playerTicketsByTicketTemplateId = /* GraphQL */ `query PlayerTicket
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -59414,6 +80583,7 @@ export const playerTicketsByTicketTemplateId = /* GraphQL */ `query PlayerTicket
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -59667,6 +80837,21 @@ export const playerTicketsByTicketTemplateId = /* GraphQL */ `query PlayerTicket
           registeredPlayers {
             nextToken
             startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
             __typename
           }
           createdAt
@@ -59831,6 +81016,7 @@ export const playerMarketingPreferencesByPlayerId = /* GraphQL */ `query PlayerM
       playerId
       player {
         id
+        primaryEntityId
         firstName
         lastName
         phone
@@ -59853,6 +81039,7 @@ export const playerMarketingPreferencesByPlayerId = /* GraphQL */ `query PlayerM
           netBalance
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -59919,6 +81106,7 @@ export const playerMarketingPreferencesByPlayerId = /* GraphQL */ `query PlayerM
           playerId
           player {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -60174,6 +81362,21 @@ export const playerMarketingPreferencesByPlayerId = /* GraphQL */ `query PlayerM
             startedAt
             __typename
           }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
           createdAt
           updatedAt
           _version
@@ -60326,6 +81529,7 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             city
             country
             isSpecial
+            entityId
             createdAt
             updatedAt
             _version
@@ -60350,6 +81554,7 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             acquiredDate
             lastCheckedDate
             venueId
+            entityId
             createdAt
             updatedAt
             _version
@@ -60406,6 +81611,7 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             venueAssignmentConfidence
             venueId
             tournamentSeriesId
+            entityId
             createdAt
             updatedAt
             _version
@@ -60468,6 +81674,7 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
         registeredPlayers {
           items {
             id
+            primaryEntityId
             firstName
             lastName
             phone
@@ -60493,12 +81700,275 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
           startedAt
           __typename
         }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
         _deleted
         _lastChangedAt
         venueDetailsId
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       createdAt
@@ -60516,6 +81986,515 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
 ` as GeneratedQuery<
   APITypes.AssetsByVenueIdQueryVariables,
   APITypes.AssetsByVenueIdQuery
+>;
+export const assetsByEntityIdAndType = /* GraphQL */ `query AssetsByEntityIdAndType(
+  $entityId: ID!
+  $type: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelAssetFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  assetsByEntityIdAndType(
+    entityId: $entityId
+    type: $type
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      name
+      type
+      condition
+      acquiredDate
+      lastCheckedDate
+      venueId
+      venue {
+        id
+        venueNumber
+        name
+        aliases
+        address
+        city
+        country
+        isSpecial
+        details {
+          id
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        series {
+          items {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        registeredPlayers {
+          items {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.AssetsByEntityIdAndTypeQueryVariables,
+  APITypes.AssetsByEntityIdAndTypeQuery
 >;
 export const socialPostsBySocialAccountIdAndPostedAt = /* GraphQL */ `query SocialPostsBySocialAccountIdAndPostedAt(
   $socialAccountId: ID!
@@ -60633,6 +82612,7 @@ export const scraperJobsByJobId = /* GraphQL */ `query ScraperJobsByJobId(
             successRate
             errorMessages
             failedURLs
+            entityId
             createdAt
             updatedAt
             _version
@@ -60673,6 +82653,7 @@ export const scraperJobsByJobId = /* GraphQL */ `query ScraperJobsByJobId(
             lastStructureLabel
             averageScrapingTime
             lastScrapingTime
+            entityId
             createdAt
             updatedAt
             _version
@@ -60705,6 +82686,226 @@ export const scraperJobsByJobId = /* GraphQL */ `query ScraperJobsByJobId(
         startedAt
         __typename
       }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -60713,7 +82914,6 @@ export const scraperJobsByJobId = /* GraphQL */ `query ScraperJobsByJobId(
       __typename
     }
     nextToken
-    startedAt
     __typename
   }
 }
@@ -60801,6 +83001,7 @@ export const scraperJobsByStatusAndStartTime = /* GraphQL */ `query ScraperJobsB
             successRate
             errorMessages
             failedURLs
+            entityId
             createdAt
             updatedAt
             _version
@@ -60841,6 +83042,7 @@ export const scraperJobsByStatusAndStartTime = /* GraphQL */ `query ScraperJobsB
             lastStructureLabel
             averageScrapingTime
             lastScrapingTime
+            entityId
             createdAt
             updatedAt
             _version
@@ -60873,6 +83075,226 @@ export const scraperJobsByStatusAndStartTime = /* GraphQL */ `query ScraperJobsB
         startedAt
         __typename
       }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -60881,13 +83303,401 @@ export const scraperJobsByStatusAndStartTime = /* GraphQL */ `query ScraperJobsB
       __typename
     }
     nextToken
-    startedAt
     __typename
   }
 }
 ` as GeneratedQuery<
   APITypes.ScraperJobsByStatusAndStartTimeQueryVariables,
   APITypes.ScraperJobsByStatusAndStartTimeQuery
+>;
+export const scraperJobsByEntityIdAndStartTime = /* GraphQL */ `query ScraperJobsByEntityIdAndStartTime(
+  $entityId: ID!
+  $startTime: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelScraperJobFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  scraperJobsByEntityIdAndStartTime(
+    entityId: $entityId
+    startTime: $startTime
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      jobId
+      triggerSource
+      triggeredBy
+      startTime
+      endTime
+      durationSeconds
+      maxGames
+      targetURLs
+      isFullScan
+      startId
+      endId
+      status
+      totalURLsProcessed
+      newGamesScraped
+      gamesUpdated
+      gamesSkipped
+      errors
+      blanks
+      averageScrapingTime
+      successRate
+      errorMessages
+      failedURLs
+      urlResults {
+        url
+        tournamentId
+        status
+        gameName
+        processingTime
+        error
+        __typename
+      }
+      scrapeAttempts {
+        items {
+          id
+          url
+          tournamentId
+          attemptTime
+          scraperJobId
+          scraperJob {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          scrapeURLId
+          scrapeURL {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          status
+          processingTime
+          gameName
+          gameStatus
+          registrationStatus
+          dataHash
+          hasChanges
+          errorMessage
+          errorType
+          gameId
+          wasNewGame
+          fieldsUpdated
+          foundKeys
+          structureLabel
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ScraperJobsByEntityIdAndStartTimeQueryVariables,
+  APITypes.ScraperJobsByEntityIdAndStartTimeQuery
 >;
 export const scrapeURLByURL = /* GraphQL */ `query ScrapeURLByURL(
   $url: AWSURL!
@@ -60966,6 +83776,7 @@ export const scrapeURLByURL = /* GraphQL */ `query ScrapeURLByURL(
             successRate
             errorMessages
             failedURLs
+            entityId
             createdAt
             updatedAt
             _version
@@ -61006,6 +83817,7 @@ export const scrapeURLByURL = /* GraphQL */ `query ScrapeURLByURL(
             lastStructureLabel
             averageScrapingTime
             lastScrapingTime
+            entityId
             createdAt
             updatedAt
             _version
@@ -61038,6 +83850,226 @@ export const scrapeURLByURL = /* GraphQL */ `query ScrapeURLByURL(
         startedAt
         __typename
       }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -61046,7 +84078,6 @@ export const scrapeURLByURL = /* GraphQL */ `query ScrapeURLByURL(
       __typename
     }
     nextToken
-    startedAt
     __typename
   }
 }
@@ -61131,6 +84162,7 @@ export const scrapeURLSByTournamentId = /* GraphQL */ `query ScrapeURLSByTournam
             successRate
             errorMessages
             failedURLs
+            entityId
             createdAt
             updatedAt
             _version
@@ -61171,6 +84203,7 @@ export const scrapeURLSByTournamentId = /* GraphQL */ `query ScrapeURLSByTournam
             lastStructureLabel
             averageScrapingTime
             lastScrapingTime
+            entityId
             createdAt
             updatedAt
             _version
@@ -61203,6 +84236,226 @@ export const scrapeURLSByTournamentId = /* GraphQL */ `query ScrapeURLSByTournam
         startedAt
         __typename
       }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -61211,7 +84464,6 @@ export const scrapeURLSByTournamentId = /* GraphQL */ `query ScrapeURLSByTournam
       __typename
     }
     nextToken
-    startedAt
     __typename
   }
 }
@@ -61298,6 +84550,7 @@ export const scrapeURLsBySourceSystem = /* GraphQL */ `query ScrapeURLsBySourceS
             successRate
             errorMessages
             failedURLs
+            entityId
             createdAt
             updatedAt
             _version
@@ -61338,6 +84591,7 @@ export const scrapeURLsBySourceSystem = /* GraphQL */ `query ScrapeURLsBySourceS
             lastStructureLabel
             averageScrapingTime
             lastScrapingTime
+            entityId
             createdAt
             updatedAt
             _version
@@ -61370,6 +84624,226 @@ export const scrapeURLsBySourceSystem = /* GraphQL */ `query ScrapeURLsBySourceS
         startedAt
         __typename
       }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -61378,7 +84852,6 @@ export const scrapeURLsBySourceSystem = /* GraphQL */ `query ScrapeURLsBySourceS
       __typename
     }
     nextToken
-    startedAt
     __typename
   }
 }
@@ -61463,6 +84936,7 @@ export const scrapeURLSByGameId = /* GraphQL */ `query ScrapeURLSByGameId(
             successRate
             errorMessages
             failedURLs
+            entityId
             createdAt
             updatedAt
             _version
@@ -61503,6 +84977,7 @@ export const scrapeURLSByGameId = /* GraphQL */ `query ScrapeURLSByGameId(
             lastStructureLabel
             averageScrapingTime
             lastScrapingTime
+            entityId
             createdAt
             updatedAt
             _version
@@ -61535,6 +85010,226 @@ export const scrapeURLSByGameId = /* GraphQL */ `query ScrapeURLSByGameId(
         startedAt
         __typename
       }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -61543,13 +85238,398 @@ export const scrapeURLSByGameId = /* GraphQL */ `query ScrapeURLSByGameId(
       __typename
     }
     nextToken
-    startedAt
     __typename
   }
 }
 ` as GeneratedQuery<
   APITypes.ScrapeURLSByGameIdQueryVariables,
   APITypes.ScrapeURLSByGameIdQuery
+>;
+export const scrapeURLSByEntityId = /* GraphQL */ `query ScrapeURLSByEntityId(
+  $entityId: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelScrapeURLFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  scrapeURLSByEntityId(
+    entityId: $entityId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      url
+      tournamentId
+      doNotScrape
+      sourceDataIssue
+      gameDataVerified
+      missingKeysFromScrape
+      sourceSystem
+      status
+      placedIntoDatabase
+      firstScrapedAt
+      lastScrapedAt
+      lastSuccessfulScrapeAt
+      timesScraped
+      timesSuccessful
+      timesFailed
+      consecutiveFailures
+      lastScrapeStatus
+      lastScrapeMessage
+      lastScrapeJobId
+      gameId
+      gameName
+      gameStatus
+      venueId
+      venueName
+      lastDataHash
+      hasDataChanges
+      lastFoundKeys
+      lastStructureLabel
+      averageScrapingTime
+      lastScrapingTime
+      attempts {
+        items {
+          id
+          url
+          tournamentId
+          attemptTime
+          scraperJobId
+          scraperJob {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          scrapeURLId
+          scrapeURL {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          status
+          processingTime
+          gameName
+          gameStatus
+          registrationStatus
+          dataHash
+          hasChanges
+          errorMessage
+          errorType
+          gameId
+          wasNewGame
+          fieldsUpdated
+          foundKeys
+          structureLabel
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            dataSource
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ScrapeURLSByEntityIdQueryVariables,
+  APITypes.ScrapeURLSByEntityIdQuery
 >;
 export const scrapeAttemptsByScraperJobIdAndAttemptTime = /* GraphQL */ `query ScrapeAttemptsByScraperJobIdAndAttemptTime(
   $scraperJobId: ID!
@@ -61639,6 +85719,49 @@ export const scrapeAttemptsByScraperJobIdAndAttemptTime = /* GraphQL */ `query S
           startedAt
           __typename
         }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -61710,6 +85833,49 @@ export const scrapeAttemptsByScraperJobIdAndAttemptTime = /* GraphQL */ `query S
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt
@@ -61837,6 +86003,49 @@ export const scrapeAttemptsByScrapeURLIdAndAttemptTime = /* GraphQL */ `query Sc
           startedAt
           __typename
         }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -61908,6 +86117,49 @@ export const scrapeAttemptsByScrapeURLIdAndAttemptTime = /* GraphQL */ `query Sc
           }
           nextToken
           startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
           __typename
         }
         createdAt

@@ -54,6 +54,28 @@ enum ScrapeAttemptStatus { SUCCESS, FAILED, SKIPPED_DONOTSCRAPE, SKIPPED_VENUE, 
 enum TimeRange { LAST_HOUR, LAST_24_HOURS, LAST_7_DAYS, LAST_30_DAYS, CUSTOM }
 
 # ===================================================================
+# 2. NEW ENTITY MODEL FOR MULTI-ENTITY SUPPORT (PHASE 1)
+# ===================================================================
+
+type Entity @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  entityName: String! @index(name: "byEntityName")
+  gameUrlDomain: String!
+  gameUrlPath: String!
+  entityLogo: AWSURL
+  isActive: Boolean! @default(value: "true")
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  
+  scraperStates: [ScraperState] @hasMany(indexName: "byEntityScraperState", fields: ["id"])
+  scraperJobs: [ScraperJob] @hasMany(indexName: "byEntityScraperJob", fields: ["id"])
+  scrapeURLs: [ScrapeURL] @hasMany(indexName: "byEntityScrapeURL", fields: ["id"])
+  venues: [Venue] @hasMany(indexName: "byEntityVenue", fields: ["id"])
+  games: [Game] @hasMany(indexName: "byEntityGame", fields: ["id"])
+  assets: [Asset] @hasMany(indexName: "byEntityAsset", fields: ["id"])
+}
+
+# ===================================================================
 # 2. SCRAPING & DATA MANAGEMENT (ORIGINAL)
 # ===================================================================
 
@@ -92,6 +114,8 @@ type ScraperState @model @auth(rules: [{ allow: private }]) {
   enabled: Boolean!
   currentLog: [ScraperLogData]
   lastGamesProcessed: [ScrapedGameStatus]
+  entityId: ID @index(name: "byEntityScraperState")
+  entity: Entity @belongsTo(fields: ["entityId"])
 }
 
 # ===================================================================
@@ -119,6 +143,7 @@ type ScraperStateData {
   enabled: Boolean!
   currentLog: [ScraperLogData]
   lastGamesProcessed: [ScrapedGameStatus]
+  entityId: String
 }
 
 type ScraperResults {
@@ -161,6 +186,8 @@ type Venue @model @auth(rules: [{ allow: private }]) {
   series: [TournamentSeries] @hasMany(indexName: "byVenue", fields: ["id"])
   playerMemberships: [PlayerVenue] @hasMany(indexName: "byVenue", fields: ["id"])
   registeredPlayers: [Player] @hasMany(indexName: "byRegistrationVenue", fields: ["id"])
+  entityId: ID @index(name: "byEntityVenue", sortKeyFields: ["name"])
+  entity: Entity @belongsTo(fields: ["entityId"])
 }
 
 type VenueDetails @model @auth(rules: [{ allow: private }]) {
@@ -278,6 +305,8 @@ type Game @model @auth(rules: [{ allow: private }]) {
   structure: TournamentStructure @hasOne
   playerEntries: [PlayerEntry] @hasMany(indexName: "byGame", fields: ["id"])
   playerResults: [PlayerResult] @hasMany(indexName: "byGame", fields: ["id"])
+  entityId: ID @index(name: "byEntityGame", sortKeyFields: ["gameStartDateTime"])
+  entity: Entity @belongsTo(fields: ["entityId"])
 
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
@@ -332,6 +361,7 @@ type RakeStructure @model @auth(rules: [{ allow: private }]) {
 
 type Player @model @auth(rules: [{ allow: private }]) {
   id: ID!
+  primaryEntityId: ID @index(name: "byPrimaryEntity")
   firstName: String!
   lastName: String!
   phone: String @index(name: "byPhone", queryField: "playerByPhone")
@@ -584,6 +614,8 @@ type Asset @model @auth(rules: [{ allow: private }]) {
   lastCheckedDate: AWSDateTime!
   venueId: ID! @index(name: "byVenue")
   venue: Venue @belongsTo(fields: ["venueId"])
+  entityId: ID @index(name: "byEntityAsset", sortKeyFields: ["type"])
+  entity: Entity @belongsTo(fields: ["entityId"])
 }
 
 type SocialAccount @model @auth(rules: [{ allow: private }]) {
@@ -606,7 +638,7 @@ type SocialPost @model @auth(rules: [{ allow: private }]) {
 # 10. NEW SCRAPER MANAGEMENT MODELS (3 NEW TABLES ONLY)
 # ===================================================================
 
-type ScraperJob @model @auth(rules: [{ allow: private }]) {
+type ScraperJob @model(queries: { list: null }) @auth(rules: [{ allow: private }]) {
   id: ID!
   jobId: String! @index(name: "byJobId")
   triggerSource: ScraperJobTriggerSource!
@@ -632,12 +664,13 @@ type ScraperJob @model @auth(rules: [{ allow: private }]) {
   failedURLs: [String]
   urlResults: [ScraperJobURLResult]
   scrapeAttempts: [ScrapeAttempt] @hasMany(indexName: "byScraperJob", fields: ["id"])
+  entityId: ID @index(name: "byEntityScraperJob", sortKeyFields: ["startTime"])
+  entity: Entity @belongsTo(fields: ["entityId"])
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
 
-type ScrapeURL @model @auth(rules: [{ allow: private }]) {
-  id: ID!
+type ScrapeURL @model(queries: { get: "getScrapeURL", list: null }) @auth(rules: [{ allow: private }]) {  id: ID!
   url: AWSURL! @index(name: "byURL", queryField: "scrapeURLByURL")
   tournamentId: Int! @index(name: "byTournamentId")
 
@@ -673,6 +706,8 @@ type ScrapeURL @model @auth(rules: [{ allow: private }]) {
   averageScrapingTime: Float
   lastScrapingTime: Float
   attempts: [ScrapeAttempt] @hasMany(indexName: "byScrapeURL", fields: ["id"])
+  entityId: ID @index(name: "byEntityScrapeURL")
+  entity: Entity @belongsTo(fields: ["entityId"])
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -739,19 +774,25 @@ type UserMetricsSummary {
 
 type Query {
   fetchTournamentDataRange(startId: Int!, endId: Int!): [ScrapedGameSummary!] @function(name: "webScraperFunction-${env}")
-  getScraperControlState: ScraperControlResponse @function(name: "autoScraper-${env}")
+  getScraperControlState(entityId: ID): ScraperControlResponse @function(name: "autoScraper-${env}")
   fetchUpdateCandidates: [String!] @function(name: "webScraperFunction-${env}")
 
   # NEW ENHANCED SCRAPER QUERIES
   getScraperJobsReport(status: ScraperJobStatus, limit: Int, nextToken: String): ScraperJobConnection @function(name: "scraperManagement-${env}")
   fetchScrapeURLDetails(url: AWSURL!): ScrapeURL @function(name: "scraperManagement-${env}")
   searchScrapeURLs(status: ScrapeURLStatus, limit: Int, nextToken: String): ScrapeURLConnection @function(name: "scraperManagement-${env}")
-  getScraperMetrics(timeRange: TimeRange!): ScraperMetrics @function(name: "scraperManagement-${env}")
+  getScraperMetrics(timeRange: TimeRange!, entityId: ID): ScraperMetrics @function(name: "scraperManagement-${env}")
   getUpdateCandidateURLs(limit: Int): [ScrapeURL!] @function(name: "scraperManagement-${env}")
 
+  listEntitiesByDomain(domain: String!): [Entity] @function(name: "entityLookup-${env}")
+  scrapeGame(url: AWSURL!, entityId: ID, venueId: ID, doNotScrape: Boolean): ScrapedGameData @function(name: "singleGameScraper-${env}")
+  scrapeBulkGames(startId: Int!, endId: Int!, entityId: ID): [ScrapedGameSummary] @function(name: "bulkGamesScraper-${env}")
+  listScraperJobs(entityId: ID, status: ScraperJobStatus, startTime: AWSDateTime, endTime: AWSDateTime, limit: Int, nextToken: String): ScraperJobConnection @function(name: "scraperJobQuery-${env}")
+  listScrapeURLs(entityId: ID, status: ScrapeURLStatus, limit: Int, nextToken: String): ScrapeURLConnection @function(name: "scrapeURLQuery-${env}")
+
   # --- NEW VENUE ASSIGNMENT QUERIES ---
-  listGamesNeedingVenue(limit: Int, nextToken: String): GamesNeedingVenueResponse @function(name: "venueAssignmentService-${env}")
-  getVenueAssignmentSummary: VenueAssignmentSummary @function(name: "venueAssignmentService-${env}")
+  listGamesNeedingVenue(limit: Int, nextToken: String, entityId: ID): GamesNeedingVenueResponse @function(name: "venueAssignmentService-${env}")  
+  getVenueAssignmentSummary(entityId: ID): VenueAssignmentSummary @function(name: "venueAssignmentService-${env}")
 
   # NEW CLOUDWATCH MUTATIONS
   # Get current user's metrics summary
@@ -773,8 +814,7 @@ type Query {
 type Mutation {
   fetchTournamentData(url: AWSURL!): ScrapedGameData @function(name: "webScraperFunction-${env}")
   saveTournamentData(input: SaveTournamentInput!): Game @function(name: "webScraperFunction-${env}")
-  controlScraperOperation(operation: ScraperOperation!): ScraperControlResponse @function(name: "autoScraper-${env}")
-
+  controlScraperOperation(operation: ScraperOperation!, entityId: ID): ScraperControlResponse @function(name: "autoScraper-${env}")
   triggerAutoScraping(maxGames: Int): ScraperControlResponse @function(name: "autoScraper-${env}")
 
   # NEW ENHANCED SCRAPER MUTATIONS
@@ -801,6 +841,28 @@ type Subscription {
 }
 
 # ===================================================================
+# 13. CUSTOM OPERATIONS & NON-MODEL TYPES (PHASE 1 ADDITIONS)
+# ===================================================================
+
+# --- NEW: Entity-related Non-Model Types ---
+type EntityVenueAssignmentSummary {
+  entityId: ID
+  entityName: String!
+  totalGames: Int
+  gamesWithVenue: Int
+  gamesNeedingVenue: Int
+}
+
+type EntityScraperMetrics {
+  entityId: ID
+  entityName: String!
+  totalJobs: Int!
+  successfulJobs: Int!
+  failedJobs: Int!
+  totalURLsScraped: Int!
+}
+
+# ===================================================================
 # NEW VENUE ASSIGNMENT TYPES
 # ===================================================================
 
@@ -815,6 +877,7 @@ type VenueAssignmentSummary {
   gamesWithVenue: Int
   gamesNeedingVenue: Int
   pendingAssignments: Int
+  byEntity: [EntityVenueAssignmentSummary]
 }
 
 type VenueAssignmentResult {
@@ -864,6 +927,7 @@ type ScraperMetrics {
   successRate: Float!
   topErrors: [ErrorMetric!]
   hourlyActivity: [HourlyMetric!]
+  byEntity: [EntityScraperMetrics]
 }
 
 type ErrorMetric {
@@ -903,6 +967,7 @@ input SaveTournamentInput {
   requiresVenueAssignment: Boolean
   suggestedVenueName: String
   venueAssignmentConfidence: Float
+  entityId: ID
 }
 
 input ScrapedGameDataInput {
@@ -945,6 +1010,8 @@ input StartScraperJobInput {
   endId: Int
   isFullScan: Boolean
   triggeredBy: String
+  entityId: ID
+  isSequential: Boolean
 }
 
 type ScrapedGameSummary {
@@ -960,7 +1027,6 @@ type ScrapedGameSummary {
 
 type ScrapedGameData {
   name: String!
-  tournamentId: Int!
   gameStartDateTime: String
   gameEndDateTime: String
   gameStatus: GameStatus
@@ -1005,6 +1071,8 @@ type ScrapedGameData {
   venueMatch: ScrapedVenueMatch
   existingGameId: String
   doNotScrape: Boolean
+  tournamentId: Int!
+  entityId: ID
 }
 
 type ScrapedTournamentLevel {

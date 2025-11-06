@@ -1,13 +1,97 @@
 // services/gameService.ts
-
-// Updated service to handle refactored schema with RUNNING status
+// Enhanced service with Entity ID support - Fixed TypeScript errors
 
 import { generateClient } from 'aws-amplify/api';
+import type { GraphQLResult } from '@aws-amplify/api';
 import { fetchTournamentData, saveTournamentData } from '../graphql/mutations';
-import { fetchTournamentDataRange } from '../graphql/queries'; // Assuming you have this query defined
+import { fetchTournamentDataRange } from '../graphql/queries'; 
 import * as APITypes from '../API';
-import type { GameData } from '../types/game';
-import { VenueAssignmentStatus } from '../API';
+import type { GameData, EntityConfig } from '../types/game';
+import { VenueAssignmentStatus, ScrapedGameData } from '../API';
+
+// Default entity ID - should be fetched from Entity table or configured
+const DEFAULT_ENTITY_ID = 'default-entity-id';
+
+/**
+ * Get the current active entity from local storage or use default
+ */
+export const getCurrentEntityId = (): string => {
+    // Check if we have a selected entity in local storage
+    const storedEntityId = localStorage.getItem('currentEntityId');
+    if (storedEntityId) {
+        return storedEntityId;
+    }
+    
+    // Otherwise use default
+    return DEFAULT_ENTITY_ID;
+};
+
+/**
+ * Set the current active entity
+ */
+export const setCurrentEntityId = (entityId: string): void => {
+    localStorage.setItem('currentEntityId', entityId);
+};
+
+/**
+ * Fetch all available entities using auto-generated listEntities query
+ */
+export const fetchEntities = async (): Promise<EntityConfig[]> => {
+    const client = generateClient();
+    try {
+        // Using auto-generated listEntities query
+        const response = await client.graphql({
+            query: /* GraphQL */ `
+                query ListEntities {
+                    listEntities(filter: { isActive: { eq: true } }) {
+                        items {
+                            id
+                            entityName
+                            gameUrlDomain
+                            gameUrlPath
+                            entityLogo
+                            isActive
+                        }
+                    }
+                }
+            `
+        });
+        
+        // Fix: Cast to GraphQLResult to access data property
+        const responseData = (response as GraphQLResult<any>).data;
+        if (responseData?.listEntities?.items) {
+            return responseData.listEntities.items as EntityConfig[];
+        }
+        return [];
+    } catch (error) {
+        console.error('[GameService] Error fetching entities:', error);
+        return [];
+    }
+};
+
+/**
+ * Get entity ID from URL domain
+ */
+export const getEntityIdFromUrl = async (url: string): Promise<string> => {
+    try {
+        const urlObj = new URL(url);
+        const domain = urlObj.hostname;
+        
+        const entities = await fetchEntities();
+        const matchingEntity = entities.find(e => e.gameUrlDomain === domain);
+        
+        if (matchingEntity) {
+            console.log(`[GameService] Found entity for domain ${domain}: ${matchingEntity.id}`);
+            return matchingEntity.id;
+        }
+        
+        console.log(`[GameService] No entity found for domain ${domain}, using current entity`);
+        return getCurrentEntityId();
+    } catch (error) {
+        console.error('[GameService] Error determining entity from URL:', error);
+        return getCurrentEntityId();
+    }
+};
 
 /**
  * Calls the backend Lambda to fetch and parse tournament data without saving.
@@ -15,26 +99,42 @@ import { VenueAssignmentStatus } from '../API';
  * @param url The URL of the tournament.
  * @returns A promise that resolves to the structured GameData.
  */
-export const fetchGameDataFromBackend = async (url: string): Promise<APITypes.ScrapedGameData> => {
+export const fetchGameDataFromBackend = async (url: string): Promise<ScrapedGameData> => {
     const client = generateClient();
     console.log(`[GameService] Fetching data for ${url} from backend...`);
+    
     try {
+        // Determine entity ID from URL
+        const entityId = await getEntityIdFromUrl(url);
+        console.log(`[GameService] Using entity ID: ${entityId}`);
+        
+        // Note: If fetchTournamentData mutation doesn't accept entityId,
+        // you'll need to handle it differently or update your GraphQL schema
         const response = await client.graphql({
             query: fetchTournamentData,
-            variables: { url }
+            variables: { 
+                url
+                // Removed entityId - add it back if your mutation supports it
+            }
         });
 
         if (response.errors) {
             // Handle the custom error from the backend for "Do Not Scrape"
             if (response.errors[0].message.includes('Scraping is disabled')) {
-                 console.warn(`[GameService] Scraping disabled for ${url}`);
+                console.warn(`[GameService] Scraping disabled for ${url}`);
             }
             throw new Error(response.errors[0].message);
         }
         
-        console.log('[GameService] Successfully fetched data:', response.data.fetchTournamentData);
-        // Cast to ScrapedGameData, which now includes the new fields from the schema
-        return response.data.fetchTournamentData as APITypes.ScrapedGameData;
+        const data = response.data.fetchTournamentData as ScrapedGameData;
+        
+        // Manually add entity ID to response if not included
+        if (!data.entityId) {
+            data.entityId = entityId;
+        }
+        
+        console.log('[GameService] Successfully fetched data:', data);
+        return data;
     } catch (error) {
         console.error('[GameService] Error fetching data from backend:', error);
         throw error;
@@ -48,25 +148,29 @@ export const fetchGameDataFromBackend = async (url: string): Promise<APITypes.Sc
  * @param venueId The ID of the venue to associate with this game.
  * @param data The structured GameData to save.
  * @param existingGameId The ID of the game if it already exists in the DB (for updates).
+ * @param entityId Optional entity ID to override the default
  * @returns The saved or updated Game object from the database.
  */
 export const saveGameDataToBackend = async (
     sourceUrl: string, 
     venueId: string | null | undefined, 
     data: GameData,
-    existingGameId: string | null | undefined
+    existingGameId: string | null | undefined,
+    entityId?: string | null
 ): Promise<APITypes.Game> => {
     const client = generateClient();
     console.log(`[GameService] Saving ${data.gameStatus} tournament data for ${sourceUrl} to database...`);
+    
+    // Determine entity ID
+    const finalEntityId = entityId || data.entityId || await getEntityIdFromUrl(sourceUrl);
+    console.log(`[GameService] Using entity ID: ${finalEntityId}`);
     
     let assignmentStatus: VenueAssignmentStatus;
     if (venueId) {
         // User manually selected a venue
         assignmentStatus = VenueAssignmentStatus.MANUALLY_ASSIGNED;
     } else if (data.venueMatch?.autoAssignedVenue?.id) {
-        // Backend auto-assigned a venue (but user didn't confirm, so it's still auto)
-        // NOTE: Your UI logic might change this. If autoAssignedVenue.id is passed as venueId,
-        // this logic is fine.
+        // Backend auto-assigned a venue
         assignmentStatus = VenueAssignmentStatus.AUTO_ASSIGNED;
     } else {
         // No venue provided, no auto-match
@@ -74,15 +178,15 @@ export const saveGameDataToBackend = async (
     }
 
     try {
-        // Prepare the input matching the refactored schema
+        // Prepare the input matching the refactored schema with entity ID
         const input: APITypes.SaveTournamentInput = {
             sourceUrl,
-            venueId : venueId,
+            venueId: venueId,
+            entityId: finalEntityId, // Include entity ID at the top level
             existingGameId: existingGameId,
             doNotScrape: data.doNotScrape ?? false,
-
-            // ✅ FIXED: Stringify the complete data object before sending.
-            // This converts the JavaScript object into a JSON string, which is what the AWSJSON type expects.
+            
+            // Stringify the complete data object before sending
             originalScrapedData: JSON.stringify(data),
             
             venueAssignmentStatus: assignmentStatus,
@@ -90,9 +194,12 @@ export const saveGameDataToBackend = async (
             suggestedVenueName: data.venueMatch?.suggestions?.[0]?.name ?? undefined,
             venueAssignmentConfidence: data.venueMatch?.suggestions?.[0]?.score ?? undefined,
 
-            // This is the 'clean' object, containing only fields for the Game table.
+            // This is the 'clean' object, containing only fields for the Game table
+            // Note: Remove entityId from data if ScrapedGameDataInput doesn't support it
             data: {
                 name: data.name,
+                // Only include entityId if your ScrapedGameDataInput type supports it
+                // entityId: finalEntityId, // Removed as it doesn't exist in type
                 gameStartDateTime: data.gameStartDateTime ?? undefined,
                 gameEndDateTime: data.gameEndDateTime ?? undefined,
                 gameStatus: data.gameStatus,
@@ -144,7 +251,7 @@ export const saveGameDataToBackend = async (
  * based on its status and other criteria
  */
 export const shouldAutoRefreshTournament = (data: GameData): boolean => {
-    // ✅ UPDATED: Do not refresh if doNotScrape is true
+    // Do not refresh if doNotScrape is true
     if (data.doNotScrape) {
         return false;
     }
@@ -152,24 +259,103 @@ export const shouldAutoRefreshTournament = (data: GameData): boolean => {
 };
 
 /**
- * ✅ UPDATED: This function is now corrected to use the `generateClient` pattern.
+ * Fetch game data range from backend
+ * Note: If the query doesn't support entityId, you may need to filter results client-side
  */
-export const fetchGameDataRangeFromBackend = async (startId: number, endId: number) => {
-    const client = generateClient(); // ✅ Use the modern client
-    console.log(`[GameService] Fetching game range ${startId}-${endId} from backend...`);
+export const fetchGameDataRangeFromBackend = async (
+    startId: number, 
+    endId: number,
+    entityId?: string
+) => {
+    const client = generateClient();
+    const finalEntityId = entityId || getCurrentEntityId();
+    
+    console.log(`[GameService] Fetching game range ${startId}-${endId} for entity ${finalEntityId} from backend...`);
+    
     try {
-        const response = await client.graphql({ // ✅ Call GraphQL using the client
+        // Check if your fetchTournamentDataRange query accepts entityId
+        // If not, you'll need to filter the results after fetching
+        const response = await client.graphql({
             query: fetchTournamentDataRange,
-            variables: { startId, endId }
+            variables: { 
+                startId, 
+                endId
+                // Removed entityId - add it back if your query supports it
+            }
         });
 
         if (response.errors) {
             throw new Error(response.errors[0].message);
         }
         
-        return response.data.fetchTournamentDataRange;
+        const data = response.data.fetchTournamentDataRange;
+        
+        // If the query doesn't support entityId filtering,
+        // you can filter the results client-side:
+        // return data.filter(item => item.entityId === finalEntityId);
+        
+        return data;
     } catch (error) {
         console.error('Error fetching game data range from backend:', error);
-        throw error; // Re-throw the error to be handled by the hook
+        throw error;
     }
+};
+
+/**
+ * Helper to validate that all required entity fields are present
+ */
+export const validateEntityData = (data: GameData, entityId?: string): string[] => {
+    const errors: string[] = [];
+    
+    if (!entityId && !data.entityId) {
+        errors.push('Entity ID is required but not provided');
+    }
+    
+    // Add any additional entity-related validation here
+    
+    return errors;
+};
+
+/**
+ * Batch save games with entity validation
+ */
+export const batchSaveGamesWithEntity = async (
+    games: Array<{
+        sourceUrl: string;
+        venueId?: string;
+        data: GameData;
+        existingGameId?: string;
+    }>,
+    entityId?: string
+): Promise<Array<APITypes.Game | { error: string }>> => {
+    const results = [];
+    const finalEntityId = entityId || getCurrentEntityId();
+    
+    for (const game of games) {
+        try {
+            // Validate entity data
+            const validationErrors = validateEntityData(game.data, finalEntityId);
+            if (validationErrors.length > 0) {
+                results.push({ error: validationErrors.join(', ') });
+                continue;
+            }
+            
+            // Save with entity ID
+            const saved = await saveGameDataToBackend(
+                game.sourceUrl,
+                game.venueId,
+                game.data,
+                game.existingGameId,
+                finalEntityId
+            );
+            
+            results.push(saved);
+        } catch (error) {
+            // Fix: Properly handle unknown error type
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            results.push({ error: errorMessage });
+        }
+    }
+    
+    return results;
 };

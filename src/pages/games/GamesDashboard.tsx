@@ -1,333 +1,417 @@
 // src/pages/games/GamesDashboard.tsx
+// Games Dashboard with multi-entity viewing support
 
-import { useState, useEffect } from 'react';
-import { getClient } from '../../utils/apiClient';
+import React, { useState, useEffect } from 'react';
+import { generateClient } from 'aws-amplify/api';
+import { GraphQLResult } from '@aws-amplify/api';
+import { useEntity } from '../../contexts/EntityContext';
+import { MultiEntitySelector, EntityQuickFilters } from '../../components/entities/MultiEntitySelector';
 import { PageWrapper } from '../../components/layout/PageWrapper';
-import { useNavigate } from 'react-router-dom';
-import { CalendarIcon, UserGroupIcon, TrophyIcon, MapPinIcon } from '@heroicons/react/24/outline';
-import { format, subDays } from 'date-fns';
+import { GameCard } from '../../components/games/GameCard';
+import { 
+  TrophyIcon, 
+  UserGroupIcon,
+  CurrencyDollarIcon,
+  BuildingOffice2Icon 
+} from '@heroicons/react/24/outline';
+import * as APITypes from '../../API';
 
+type Game = APITypes.Game;
 
-interface Game {
-  id: string;
-  tournamentId?: string;
-  name: string;
-  gameType: string;
-  gameStatus: string;
-  gameStartDateTime: string;
-  gameEndDateTime?: string;
-  buyIn?: number;
-  rake?: number;
-  totalEntries?: number;
-  playersRemaining?: number;
-  prizepool?: number;
-  venue?: {
-    id: string;
-    name: string;
-  };
-  sourceUrl?: string;
-}
-
-export const GamesDashboard = () => {
-  const navigate = useNavigate();
+export const GamesDashboard: React.FC = () => {
+  const client = generateClient();
+  const { selectedEntities, loading: entitiesLoading } = useEntity();
+  
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState<7 | 30 | 60 | 90>(30);
+  const [_error, setError] = useState<string | null>(null);
+  const [nextToken, setNextToken] = useState<string | null>(null);
+  
+  // Statistics by entity
+  const [statsByEntity, setStatsByEntity] = useState<Record<string, any>>({});
+  const [totalStats, setTotalStats] = useState({
+    totalGames: 0,
+    activeGames: 0,
+    totalPrizePool: 0,
+    totalPlayers: 0,
+    todaysGames: 0,
+    upcomingGames: 0
+  });
 
+  // Fetch games when selected entities change
   useEffect(() => {
-    fetchGames();
-  }, [timeRange]);
+    if (!entitiesLoading && selectedEntities.length > 0) {
+      fetchGames();
+    } else if (selectedEntities.length === 0) {
+      setGames([]);
+      setTotalStats({
+        totalGames: 0,
+        activeGames: 0,
+        totalPrizePool: 0,
+        totalPlayers: 0,
+        todaysGames: 0,
+        upcomingGames: 0
+      });
+    }
+  }, [selectedEntities, entitiesLoading]);
 
-  const fetchGames = async () => {
-    const client = getClient();
-    setLoading(true);
+  const fetchGames = async (token: string | null = null) => {
+    if (selectedEntities.length === 0) {
+      setGames([]);
+      return;
+    }
+
     try {
-      const startDate = subDays(new Date(), timeRange).toISOString();
-      
-      const response = await client.graphql({
+      setLoading(true);
+      setError(null);
+
+      // Build filter for selected entities
+      const entityFilter = selectedEntities.length === 1
+        ? { entityId: { eq: selectedEntities[0].id } }
+        : { or: selectedEntities.map(e => ({ entityId: { eq: e.id } })) };
+
+      const response = await client.graphql<GraphQLResult<any>>({
         query: /* GraphQL */ `
-          query ListRecentGames($startDate: String) {
-            listGames(
-              filter: { gameStartDateTime: { gt: $startDate } }
-              limit: 500
-            ) {
+          query ListGamesForEntities($filter: ModelGameFilterInput, $limit: Int, $nextToken: String) {
+            listGames(filter: $filter, limit: $limit, nextToken: $nextToken) {
               items {
                 id
-                tournamentId
                 name
                 gameType
+                gameVariant
                 gameStatus
                 gameStartDateTime
-                gameEndDateTime
                 buyIn
-                rake
                 totalEntries
-                playersRemaining
                 prizepool
-                sourceUrl
+                entityId
+                entity {
+                  id
+                  entityName
+                }
                 venue {
                   id
                   name
                 }
+                createdAt
+                updatedAt
               }
+              nextToken
             }
           }
         `,
-        variables: { startDate }
+        variables: {
+          filter: {
+            and: [
+              entityFilter,
+              { gameStatus: { ne: 'CANCELLED' } }
+            ]
+          },
+          limit: 50,
+          nextToken: token
+        }
       });
 
       if ('data' in response && response.data) {
-        const gameItems = response.data.listGames.items
-          .filter(Boolean)
-          .sort((a: Game, b: Game) => {
-            const dateA = new Date(a.gameStartDateTime);
-            const dateB = new Date(b.gameStartDateTime);
-            return dateB.getTime() - dateA.getTime();
-          }) as Game[];
+        const gameItems = response.data.listGames.items as Game[];
         
-        setGames(gameItems);
+        if (token) {
+          setGames(prev => [...prev, ...gameItems]);
+        } else {
+          setGames(gameItems);
+        }
+        
+        setNextToken(response.data.listGames.nextToken);
+        
+        // Calculate statistics
+        calculateStats(gameItems);
       }
-    } catch (error) {
-      console.error('Error fetching games:', error);
+    } catch (err) {
+      console.error('Error fetching games:', err);
+      setError('Failed to load games. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGameClick = (gameId: string) => {
-    navigate(`/games/details/${gameId}`);
+  const calculateStats = (gamesList: Game[]) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    // Calculate stats by entity
+    const entityStats: Record<string, any> = {};
+    
+    gamesList.forEach(game => {
+      const entityId = game.entityId || 'unknown';
+      
+      if (!entityStats[entityId]) {
+        entityStats[entityId] = {
+          entityName: game.entity?.entityName || 'Unknown',
+          totalGames: 0,
+          activeGames: 0,
+          totalPrizePool: 0,
+          totalPlayers: 0,
+          todaysGames: 0,
+          upcomingGames: 0
+        };
+      }
+      
+      entityStats[entityId].totalGames++;
+      
+      if (game.gameStatus === 'RUNNING' || game.gameStatus === 'REGISTERING') {
+        entityStats[entityId].activeGames++;
+      }
+      
+      if (game.prizepool) {
+        entityStats[entityId].totalPrizePool += game.prizepool;
+      }
+      
+      if (game.totalEntries) {
+        entityStats[entityId].totalPlayers += game.totalEntries;
+      }
+      
+      const gameDate = new Date(game.gameStartDateTime);
+      if (gameDate.toDateString() === today.toDateString()) {
+        entityStats[entityId].todaysGames++;
+      }
+      
+      if (gameDate > now) {
+        entityStats[entityId].upcomingGames++;
+      }
+    });
+    
+    setStatsByEntity(entityStats);
+    
+    // Calculate total stats
+    const totals = Object.values(entityStats).reduce((acc: any, stats: any) => ({
+      totalGames: acc.totalGames + stats.totalGames,
+      activeGames: acc.activeGames + stats.activeGames,
+      totalPrizePool: acc.totalPrizePool + stats.totalPrizePool,
+      totalPlayers: acc.totalPlayers + stats.totalPlayers,
+      todaysGames: acc.todaysGames + stats.todaysGames,
+      upcomingGames: acc.upcomingGames + stats.upcomingGames
+    }), {
+      totalGames: 0,
+      activeGames: 0,
+      totalPrizePool: 0,
+      totalPlayers: 0,
+      todaysGames: 0,
+      upcomingGames: 0
+    });
+    
+    setTotalStats(totals);
   };
 
-  const formatDateTime = (dateString: string) => {
-    try {
-      return format(new Date(dateString), "dd-MMM-yy '@' HH:mm");
-    } catch {
-      return 'Invalid Date';
+  const handleLoadMore = () => {
+    if (nextToken) {
+      fetchGames(nextToken);
     }
   };
 
-  const formatCurrency = (amount?: number) => {
-    if (!amount) return '-';
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
+  const handleRefresh = () => {
+    setGames([]);
+    setNextToken(null);
+    fetchGames();
   };
 
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case 'Running':
-      case 'Late Registration':
-        return 'bg-green-100 text-green-800';
-      case 'Complete':
-        return 'bg-gray-100 text-gray-800';
-      case 'Registration Open':
-        return 'bg-blue-100 text-blue-800';
-      case 'Cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-yellow-100 text-yellow-800';
+  // Group games by entity for display
+  const gamesByEntity = games.reduce((acc, game) => {
+    const entityName = game.entity?.entityName || 'Unknown';
+    if (!acc[entityName]) {
+      acc[entityName] = [];
     }
-  };
-
-  // Calculate statistics
-  const stats = {
-    totalGames: games.length,
-    runningGames: games.filter(g => g.gameStatus === 'Running' || g.gameStatus === 'Late Registration').length,
-    completedGames: games.filter(g => g.gameStatus === 'Complete').length,
-    totalPrizepool: games.reduce((sum, g) => sum + (g.prizepool || 0), 0),
-    totalEntries: games.reduce((sum, g) => sum + (g.totalEntries || 0), 0),
-    uniqueVenues: new Set(games.map(g => g.venue?.id).filter(Boolean)).size,
-  };
-
-  const timeRangeOptions = [
-    { value: 7, label: '7 Days' },
-    { value: 30, label: '30 Days' },
-    { value: 60, label: '60 Days' },
-    { value: 90, label: '90 Days' },
-  ];
+    acc[entityName].push(game);
+    return acc;
+  }, {} as Record<string, Game[]>);
 
   return (
     <PageWrapper
       title="Games Dashboard"
-      maxWidth="7xl"
       actions={
-        <div className="flex items-center space-x-2">
-          {timeRangeOptions.map((option) => (
-            <button
-              key={option.value}
-              onClick={() => setTimeRange(option.value as any)}
-              className={`px-3 py-1 text-sm rounded-md ${
-                timeRange === option.value
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
+        <div className="flex items-center space-x-4">
+          <MultiEntitySelector showLabel={false} />
+          <button
+            onClick={handleRefresh}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Refresh
+          </button>
         </div>
       }
     >
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow p-4">
+      {/* Entity Quick Filters */}
+      <div className="mb-6">
+        <EntityQuickFilters />
+      </div>
+
+      {/* Selected Entities Info */}
+      {selectedEntities.length > 0 && (
+        <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center">
-            <TrophyIcon className="h-6 w-6 text-indigo-600 mr-2" />
-            <div>
-              <p className="text-xs text-gray-500">Total Games</p>
-              <p className="text-xl font-bold">{stats.totalGames}</p>
+            <BuildingOffice2Icon className="h-5 w-5 text-blue-500 mr-2" />
+            <span className="text-sm font-medium text-blue-900">
+              Viewing games from: {selectedEntities.map(e => e.entityName).join(', ')}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Statistics Grid */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <TrophyIcon className="h-6 w-6 text-gray-400" />
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Total Games
+                  </dt>
+                  <dd className="text-lg font-medium text-gray-900">
+                    {totalStats.totalGames}
+                  </dd>
+                </dl>
+              </div>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center">
-            <CalendarIcon className="h-6 w-6 text-green-600 mr-2" />
-            <div>
-              <p className="text-xs text-gray-500">Running</p>
-              <p className="text-xl font-bold">{stats.runningGames}</p>
+
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <UserGroupIcon className="h-6 w-6 text-gray-400" />
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Total Players
+                  </dt>
+                  <dd className="text-lg font-medium text-gray-900">
+                    {totalStats.totalPlayers.toLocaleString()}
+                  </dd>
+                </dl>
+              </div>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center">
-            <div>
-              <p className="text-xs text-gray-500">Completed</p>
-              <p className="text-xl font-bold">{stats.completedGames}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center">
-            <UserGroupIcon className="h-6 w-6 text-blue-600 mr-2" />
-            <div>
-              <p className="text-xs text-gray-500">Total Entries</p>
-              <p className="text-lg font-bold">{stats.totalEntries.toLocaleString()}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div>
-            <p className="text-xs text-gray-500">Total Prizepool</p>
-            <p className="text-lg font-bold">{formatCurrency(stats.totalPrizepool)}</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center">
-            <MapPinIcon className="h-6 w-6 text-purple-600 mr-2" />
-            <div>
-              <p className="text-xs text-gray-500">Venues</p>
-              <p className="text-xl font-bold">{stats.uniqueVenues}</p>
+
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <CurrencyDollarIcon className="h-6 w-6 text-gray-400" />
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Total Prize Pool
+                  </dt>
+                  <dd className="text-lg font-medium text-gray-900">
+                    ${totalStats.totalPrizePool.toLocaleString()}
+                  </dd>
+                </dl>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Games Table */}
-      <div className="bg-white shadow rounded-lg">
+      {/* Stats by Entity */}
+      {selectedEntities.length > 1 && Object.keys(statsByEntity).length > 0 && (
+        <div className="mb-8 bg-white shadow overflow-hidden sm:rounded-md">
+          <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <h3 className="text-lg leading-6 font-medium text-gray-900">
+              Statistics by Entity
+            </h3>
+          </div>
+          <div className="divide-y divide-gray-200">
+            {Object.entries(statsByEntity).map(([entityId, stats]: [string, any]) => (
+              <div key={entityId} className="px-4 py-4 sm:px-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{stats.entityName}</p>
+                    <p className="text-sm text-gray-500">
+                      {stats.totalGames} games • {stats.totalPlayers} players • ${stats.totalPrizePool.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="flex space-x-4 text-sm">
+                    <span className="text-green-600">{stats.activeGames} active</span>
+                    <span className="text-blue-600">{stats.todaysGames} today</span>
+                    <span className="text-gray-600">{stats.upcomingGames} upcoming</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Games List */}
+      <div className="bg-white shadow overflow-hidden sm:rounded-md">
         <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Games from Past {timeRange} Days ({games.length})
+          <h3 className="text-lg leading-6 font-medium text-gray-900">
+            Recent Games
           </h3>
         </div>
 
-        {loading ? (
+        {loading && games.length === 0 ? (
           <div className="flex justify-center items-center h-64">
-            <div className="text-gray-500">Loading games...</div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          </div>
+        ) : games.length === 0 ? (
+          <div className="text-center py-12">
+            <TrophyIcon className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900">No games found</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {selectedEntities.length === 0 
+                ? 'Please select at least one entity to view games.'
+                : 'No games have been created for the selected entities.'}
+            </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tournament ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Start Date/Time
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Venue
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Buy-in
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Entries
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Prizepool
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {games.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="px-6 py-4 text-center text-sm text-gray-500">
-                      No games found in this time period
-                    </td>
-                  </tr>
-                ) : (
-                  games.map((game) => (
-                    <tr
-                      key={game.id}
-                      onClick={() => handleGameClick(game.id)}
-                      className="hover:bg-gray-50 cursor-pointer"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        {game.sourceUrl ? (
-                          <a
-                            href={game.sourceUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-indigo-600 hover:text-indigo-900"
-                          >
-                            {game.tournamentId || game.id.slice(0, 8)}
-                          </a>
-                        ) : (
-                          <span className="text-gray-900">
-                            {game.tournamentId || game.id.slice(0, 8)}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDateTime(game.gameStartDateTime)}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {game.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {game.venue?.name || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span className={`inline-flex px-2 text-xs font-semibold rounded-full ${getStatusBadgeClass(game.gameStatus)}`}>
-                          {game.gameStatus}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatCurrency(game.buyIn)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {game.totalEntries || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatCurrency(game.prizepool)}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+          <>
+            {/* Group by entity if multiple selected */}
+            {selectedEntities.length > 1 ? (
+              <div className="divide-y divide-gray-200">
+                {Object.entries(gamesByEntity).map(([entityName, entityGames]) => (
+                  <div key={entityName}>
+                    <div className="px-4 py-3 bg-gray-50">
+                      <h4 className="text-sm font-medium text-gray-700">
+                        {entityName} ({entityGames.length})
+                      </h4>
+                    </div>
+                    <ul className="divide-y divide-gray-200">
+                      {entityGames.map((game) => (
+                        <GameCard key={game.id} game={game} />
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <ul className="divide-y divide-gray-200">
+                {games.map((game) => (
+                  <GameCard key={game.id} game={game} />
+                ))}
+              </ul>
+            )}
+
+            {/* Load More Button */}
+            {nextToken && (
+              <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={loading}
+                  className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                >
+                  {loading ? 'Loading...' : 'Load More'}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </PageWrapper>

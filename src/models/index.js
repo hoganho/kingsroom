@@ -247,9 +247,10 @@ const ScraperOperation = {
   "RESET": "RESET"
 };
 
-const { ScrapeStructure, DataSync, ScraperState, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, TournamentLevelData, CashStructure, RakeStructure, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, KnownPlayerIdentity, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, ScraperJob, ScrapeURL, ScrapeAttempt, ScraperControlResponse, ScraperStateData, ScraperResults, ScraperLogData, ScrapedGameStatus, TournamentLevel, Break, ClientMetricResponse, UserMetricsSummary, GamesNeedingVenueResponse, VenueAssignmentSummary, VenueAssignmentResult, AffectedRecords, BatchVenueAssignmentResult, ScraperJobURLResult, ScraperMetrics, ErrorMetric, HourlyMetric, ScraperJobConnection, ScrapeURLConnection, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails } = initSchema(schema);
+const { Entity, ScrapeStructure, DataSync, ScraperState, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, TournamentLevelData, CashStructure, RakeStructure, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, KnownPlayerIdentity, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, ScraperJob, ScrapeURL, ScrapeAttempt, ScraperControlResponse, ScraperStateData, ScraperResults, ScraperLogData, ScrapedGameStatus, TournamentLevel, Break, ClientMetricResponse, UserMetricsSummary, EntityVenueAssignmentSummary, EntityScraperMetrics, GamesNeedingVenueResponse, VenueAssignmentSummary, VenueAssignmentResult, AffectedRecords, BatchVenueAssignmentResult, ScraperJobURLResult, ScraperMetrics, ErrorMetric, HourlyMetric, ScraperJobConnection, ScrapeURLConnection, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails } = initSchema(schema);
 
 export {
+  Entity,
   ScrapeStructure,
   DataSync,
   ScraperState,
@@ -324,6 +325,8 @@ export {
   Break,
   ClientMetricResponse,
   UserMetricsSummary,
+  EntityVenueAssignmentSummary,
+  EntityScraperMetrics,
   GamesNeedingVenueResponse,
   VenueAssignmentSummary,
   VenueAssignmentResult,

@@ -1,336 +1,521 @@
 // src/pages/players/PlayersDashboard.tsx
+// Players Dashboard - Shows ALL activity across ALL entities (no filtering)
 
-import { useState, useEffect } from 'react';
-import { getClient } from '../../utils/apiClient';
+import React, { useState, useEffect } from 'react';
+import { generateClient } from 'aws-amplify/api';
+import type { GraphQLResult } from '@aws-amplify/api';
 import { PageWrapper } from '../../components/layout/PageWrapper';
+import { PlayerCard } from '../../components/players/PlayerCard';
 import { 
-  TrophyIcon, 
-  CurrencyPoundIcon, 
-  ChartBarIcon, 
-  UserPlusIcon,
-  FireIcon,
-  BanknotesIcon
+  UserGroupIcon,
+  TrophyIcon,
+  CurrencyDollarIcon,
+  BuildingOffice2Icon 
 } from '@heroicons/react/24/outline';
-import { format, subDays } from 'date-fns';
 
-
-interface PlayerStat {
-  playerId: string;
-  firstName: string;
-  lastName: string;
-  value: number;
-  additionalInfo?: string;
+// Player type that matches the GraphQL query response
+// Not extending APITypes.Player to avoid __typename conflicts
+interface PlayerWithSummary {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  isActive?: boolean | null;
+  registrationVenue?: {
+    id?: string;
+    name?: string;
+    entityId?: string;
+    entity?: {
+      entityName?: string;
+    };
+  } | null;
+  summary?: {
+    totalGamesPlayed?: number | null;
+    totalEarnings?: number | null;
+    roi?: number | null;
+    lastGameDate?: string | null;
+  } | null;
+  playerEntries?: {
+    items?: Array<{
+      id?: string;
+      winnings?: number;
+      game?: {
+        id?: string;
+        entityId?: string;
+        entity?: {
+          entityName?: string;
+        } | null;
+        venue?: {
+          name?: string;
+        } | null;
+      } | null;
+    } | null> | null;
+  } | null;
+  createdAt?: string;
+  updatedAt?: string;
+  // Allow additional fields from the API
+  [key: string]: any;
 }
 
-type TimePeriod = 7 | 30 | 60 | 90 | 180 | 365;
-
-export const PlayersDashboard = () => {
-  const [timePeriod, setTimePeriod] = useState<TimePeriod>(30);
-  const [loading, setLoading] = useState(true);
+export const PlayersDashboard: React.FC = () => {
+  const client = generateClient();
   
-  // Player statistics states
-  const [mostActive, setMostActive] = useState<PlayerStat[]>([]);
-  const [highestSpending, setHighestSpending] = useState<PlayerStat[]>([]);
-  const [mostCashes, setMostCashes] = useState<PlayerStat[]>([]);
-  const [highestCashes, setHighestCashes] = useState<PlayerStat[]>([]);
-  const [bestROI, setBestROI] = useState<PlayerStat[]>([]);
-  const [newestSignups, setNewestSignups] = useState<PlayerStat[]>([]);
+  // NO entity filtering for players - they play across all entities
+  const [players, setPlayers] = useState<PlayerWithSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [nextToken, setNextToken] = useState<string | null>(null);
+  
+  // Statistics across ALL entities
+  const [stats, setStats] = useState({
+    totalPlayers: 0,
+    activePlayers: 0,
+    totalGamesPlayed: 0,
+    totalPrizeWon: 0,
+    uniqueEntities: new Set<string>(),
+    uniqueVenues: new Set<string>()
+  });
 
-  const timePeriodOptions: { value: TimePeriod | 'all'; label: string }[] = [
-    { value: 7, label: '7 Days' },
-    { value: 30, label: '30 Days' },
-    { value: 60, label: '60 Days' },
-    { value: 90, label: '90 Days' },
-    { value: 180, label: '180 Days' },
-    { value: 'all', label: 'All Time' },
-  ];
+  // Top players with entity breakdown
+  const [topPlayers, setTopPlayers] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchPlayerStats();
-  }, [timePeriod]);
+    fetchPlayers();
+    fetchTopPlayers();
+  }, []);
 
-  const fetchPlayerStats = async () => {
-    const client = getClient();
-    setLoading(true);
+  const fetchPlayers = async (token: string | null = null) => {
     try {
-      const startDate = timePeriod === 365 ? null : subDays(new Date(), timePeriod).toISOString();
+      setLoading(true);
+      setError(null);
 
-      // Fetch player summaries with optional date filtering
-        const query = /* GraphQL */ `
-          query GetPlayerStats($startDate: String) { 
-            listPlayerSummaries(
-              limit: 1000,
-              filter: { lastPlayed: { gt: $startDate } }
+      // NO entity filter - fetch ALL players
+      const response = await client.graphql({
+        query: /* GraphQL */ `
+          query ListAllPlayers($limit: Int, $nextToken: String) {
+            listPlayers(
+              limit: $limit, 
+              nextToken: $nextToken,
+              filter: { isActive: { eq: true } }
             ) {
               items {
                 id
-                playerId
-                sessionsPlayed
-                tournamentsPlayed
-                tournamentWinnings
-                tournamentBuyIns
-                tournamentsCashed
-                netBalance
-                lastPlayed
-                player {
-                  firstName
-                  lastName
-                  registrationDate
+                name
+                email
+                isActive
+                registrationVenue {
+                  id
+                  name
+                  entityId
+                  entity {
+                    entityName
+                  }
                 }
+                summary {
+                  totalGamesPlayed
+                  totalEarnings
+                  roi
+                  lastGameDate
+                }
+                playerEntries {
+                  items {
+                    id
+                    game {
+                      id
+                      entityId
+                      entity {
+                        entityName
+                      }
+                      venue {
+                        name
+                      }
+                    }
+                  }
+                }
+                createdAt
+                updatedAt
               }
+              nextToken
             }
           }
-        `;
-
-      const response = await client.graphql({
-        query,
-        variables: { startDate }
+        `,
+        variables: {
+          limit: 50,
+          nextToken: token
+        }
       });
 
-      if ('data' in response && response.data) {
-        const summaries = response.data.listPlayerSummaries.items.filter(Boolean);
+      const responseData = (response as GraphQLResult<any>).data;
+      if (responseData) {
+        const playerItems = responseData.listPlayers.items as PlayerWithSummary[];
         
-        // Process the data for each metric
-        processMostActive(summaries);
-        processHighestSpending(summaries);
-        processMostCashes(summaries);
-        processHighestCashes(summaries);
-        processBestROI(summaries);
-        processNewestSignups(summaries, startDate);
+        if (token) {
+          setPlayers(prev => [...prev, ...playerItems]);
+        } else {
+          setPlayers(playerItems);
+        }
+        
+        setNextToken(responseData.listPlayers.nextToken);
+        
+        // Calculate statistics across ALL entities
+        calculateCrossEntityStats(playerItems);
       }
-    } catch (error) {
-      console.error('Error fetching player stats:', error);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load players';
+      console.error('Error fetching players:', err);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const processMostActive = (summaries: any[]) => {
-    const sorted = summaries
-      .filter(s => s.tournamentsPlayed > 0)
-      .sort((a, b) => b.tournamentsPlayed - a.tournamentsPlayed)
-      .slice(0, 10)
-      .map(s => ({
-        playerId: s.playerId,
-        firstName: s.player?.firstName || 'Unknown',
-        lastName: s.player?.lastName || '',
-        value: s.tournamentsPlayed,
-        additionalInfo: `${s.sessionsPlayed} sessions`
-      }));
-    setMostActive(sorted);
+  const fetchTopPlayers = async () => {
+    try {
+      const response = await client.graphql({
+        query: /* GraphQL */ `
+          query ListTopPlayers {
+            listPlayers(
+              limit: 10,
+              filter: { isActive: { eq: true } }
+            ) {
+              items {
+                id
+                name
+                email
+                summary {
+                  totalGamesPlayed
+                  totalEarnings
+                  roi
+                  lastGameDate
+                }
+                playerEntries {
+                  items {
+                    id
+                    winnings
+                    game {
+                      id
+                      entity {
+                        entityName
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `
+      });
+
+      const responseData = (response as GraphQLResult<any>).data;
+      if (responseData) {
+        const players = responseData.listPlayers.items;
+        
+        // Calculate entity breakdown for each player
+        const topPlayersWithBreakdown = players.map((player: any) => {
+          const entityBreakdown: Record<string, any> = {};
+          
+          player.playerEntries?.items?.forEach((entry: any) => {
+            const entityName = entry.game?.entity?.entityName || 'Unknown';
+            if (!entityBreakdown[entityName]) {
+              entityBreakdown[entityName] = {
+                games: 0,
+                winnings: 0
+              };
+            }
+            entityBreakdown[entityName].games++;
+            entityBreakdown[entityName].winnings += entry.winnings || 0;
+          });
+          
+          return {
+            ...player,
+            entityBreakdown
+          };
+        }).sort((a: any, b: any) => 
+          (b.summary?.totalEarnings || 0) - (a.summary?.totalEarnings || 0)
+        );
+        
+        setTopPlayers(topPlayersWithBreakdown.slice(0, 5));
+      }
+    } catch (err) {
+      console.error('Error fetching top players:', err);
+    }
   };
 
-  const processHighestSpending = (summaries: any[]) => {
-    const sorted = summaries
-      .filter(s => s.tournamentBuyIns > 0)
-      .sort((a, b) => b.tournamentBuyIns - a.tournamentBuyIns)
-      .slice(0, 10)
-      .map(s => ({
-        playerId: s.playerId,
-        firstName: s.player?.firstName || 'Unknown',
-        lastName: s.player?.lastName || '',
-        value: s.tournamentBuyIns,
-      }));
-    setHighestSpending(sorted);
+  const calculateCrossEntityStats = (playersList: PlayerWithSummary[]) => {
+    const uniqueEntities = new Set<string>();
+    const uniqueVenues = new Set<string>();
+    let totalGames = 0;
+    let totalPrize = 0;
+    let activePlayers = 0;
+    
+    playersList.forEach(player => {
+      // Count games and earnings
+      if (player.summary) {
+        totalGames += player.summary.totalGamesPlayed || 0;
+        totalPrize += player.summary.totalEarnings || 0;
+        
+        // Check if active (played in last 30 days)
+        if (player.summary.lastGameDate) {
+          const lastGame = new Date(player.summary.lastGameDate);
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          if (lastGame > thirtyDaysAgo) {
+            activePlayers++;
+          }
+        }
+      }
+      
+      // Collect unique entities and venues from player entries
+      player.playerEntries?.items?.forEach(entry => {
+        if (entry?.game?.entity?.entityName) {
+          uniqueEntities.add(entry.game.entity.entityName);
+        }
+        if (entry?.game?.venue?.name) {
+          uniqueVenues.add(entry.game.venue.name);
+        }
+      });
+      
+      // Also track registration venue
+      if (player.registrationVenue?.entity?.entityName) {
+        uniqueEntities.add(player.registrationVenue.entity.entityName);
+      }
+    });
+    
+    setStats({
+      totalPlayers: playersList.length,
+      activePlayers,
+      totalGamesPlayed: totalGames,
+      totalPrizeWon: totalPrize,
+      uniqueEntities,
+      uniqueVenues
+    });
   };
 
-  const processMostCashes = (summaries: any[]) => {
-    const sorted = summaries
-      .filter(s => s.tournamentsCashed > 0)
-      .sort((a, b) => b.tournamentsCashed - a.tournamentsCashed)
-      .slice(0, 10)
-      .map(s => ({
-        playerId: s.playerId,
-        firstName: s.player?.firstName || 'Unknown',
-        lastName: s.player?.lastName || '',
-        value: s.tournamentsCashed,
-        additionalInfo: `${s.tournamentsPlayed} played`
-      }));
-    setMostCashes(sorted);
+  const loadMore = () => {
+    if (nextToken && !loading) {
+      fetchPlayers(nextToken);
+    }
   };
-
-  const processHighestCashes = (summaries: any[]) => {
-    const sorted = summaries
-      .filter(s => s.tournamentWinnings > 0)
-      .sort((a, b) => b.tournamentWinnings - a.tournamentWinnings)
-      .slice(0, 10)
-      .map(s => ({
-        playerId: s.playerId,
-        firstName: s.player?.firstName || 'Unknown',
-        lastName: s.player?.lastName || '',
-        value: s.tournamentWinnings,
-      }));
-    setHighestCashes(sorted);
-  };
-
-  const processBestROI = (summaries: any[]) => {
-    const sorted = summaries
-      .filter(s => s.tournamentBuyIns > 100) // Min buy-in threshold
-      .map(s => ({
-        ...s,
-        roi: ((s.tournamentWinnings - s.tournamentBuyIns) / s.tournamentBuyIns) * 100
-      }))
-      .sort((a, b) => b.roi - a.roi)
-      .slice(0, 10)
-      .map(s => ({
-        playerId: s.playerId,
-        firstName: s.player?.firstName || 'Unknown',
-        lastName: s.player?.lastName || '',
-        value: s.roi,
-        additionalInfo: `£${s.tournamentWinnings.toLocaleString()} won`
-      }));
-    setBestROI(sorted);
-  };
-
-  const processNewestSignups = (summaries: any[], startDate: string | null) => {
-    const sorted = summaries
-      .filter(s => s.player?.registrationDate && (!startDate || s.player.registrationDate > startDate))
-      .sort((a, b) => {
-        const dateA = new Date(a.player?.registrationDate || 0);
-        const dateB = new Date(b.player?.registrationDate || 0);
-        return dateB.getTime() - dateA.getTime();
-      })
-      .slice(0, 10)
-      .map(s => ({
-        playerId: s.playerId,
-        firstName: s.player?.firstName || 'Unknown',
-        lastName: s.player?.lastName || '',
-        value: 0,
-        additionalInfo: format(new Date(s.player.registrationDate), 'dd MMM yyyy')
-      }));
-    setNewestSignups(sorted);
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const StatCard = ({ 
-    title, 
-    icon: Icon, 
-    stats,
-    formatValue = (v: number) => v.toString(),
-    showAdditionalInfo = false
-  }: {
-    title: string;
-    icon: any;
-    stats: PlayerStat[];
-    formatValue?: (value: number) => string;
-    showAdditionalInfo?: boolean;
-  }) => (
-    <div className="bg-white overflow-hidden shadow rounded-lg">
-      <div className="px-4 py-5 sm:p-6">
-        <div className="flex items-center mb-4">
-          <Icon className="h-8 w-8 text-indigo-600 mr-3" />
-          <h3 className="text-lg font-medium text-gray-900">{title}</h3>
-        </div>
-        <div className="mt-3">
-          {stats.length === 0 ? (
-            <p className="text-sm text-gray-500">No data available</p>
-          ) : (
-            <ul className="divide-y divide-gray-200">
-              {stats.map((stat, index) => (
-                <li key={stat.playerId} className="py-3 flex items-center justify-between">
-                  <div className="flex items-center">
-                    <span className="text-sm font-medium text-gray-500 w-6">
-                      {index + 1}.
-                    </span>
-                    <span className="ml-3 text-sm font-medium text-gray-900">
-                      {stat.firstName} {stat.lastName}
-                    </span>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-gray-900">
-                      {formatValue(stat.value)}
-                    </p>
-                    {showAdditionalInfo && stat.additionalInfo && (
-                      <p className="text-xs text-gray-500">{stat.additionalInfo}</p>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-    </div>
-  );
 
   return (
-    <PageWrapper
-      title="Players Dashboard"
-      maxWidth="7xl"
-      actions={
-        <div className="flex items-center space-x-2">
-          {timePeriodOptions.map((option) => (
-            <button
-              key={option.value}
-              onClick={() => setTimePeriod(option.value === 'all' ? 365 : option.value)}
-              className={`px-3 py-1 text-sm rounded-md ${
-                (option.value === 'all' && timePeriod === 365) || option.value === timePeriod
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
+    <PageWrapper>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b">
+          <div className="px-4 sm:px-6 lg:max-w-7xl lg:mx-auto lg:px-8">
+            <div className="py-6">
+              <div className="md:flex md:items-center md:justify-between">
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                    All Players Dashboard
+                  </h1>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Activity across all entities and venues
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      }
-    >
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="text-gray-500">Loading player statistics...</div>
+
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-600">{error}</p>
+          </div>
+        )}
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <UserGroupIcon className="h-6 w-6 text-gray-400" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      Total Players
+                    </dt>
+                    <dd className="flex items-baseline">
+                      <div className="text-2xl font-semibold text-gray-900">
+                        {stats.totalPlayers}
+                      </div>
+                      <div className="ml-2 flex items-baseline text-sm font-semibold text-green-600">
+                        {stats.activePlayers} active
+                      </div>
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <TrophyIcon className="h-6 w-6 text-gray-400" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      Total Games
+                    </dt>
+                    <dd className="text-2xl font-semibold text-gray-900">
+                      {stats.totalGamesPlayed.toLocaleString()}
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <CurrencyDollarIcon className="h-6 w-6 text-gray-400" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      Total Prize Won
+                    </dt>
+                    <dd className="text-2xl font-semibold text-gray-900">
+                      ${stats.totalPrizeWon.toLocaleString()}
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <BuildingOffice2Icon className="h-6 w-6 text-gray-400" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      Entities & Venues
+                    </dt>
+                    <dd className="text-lg font-semibold text-gray-900">
+                      {stats.uniqueEntities.size} entities, {stats.uniqueVenues.size} venues
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <StatCard
-            title="Most Active"
-            icon={FireIcon}
-            stats={mostActive}
-            formatValue={(v) => `${v} games`}
-            showAdditionalInfo={true}
-          />
-          <StatCard
-            title="Highest Spending"
-            icon={BanknotesIcon}
-            stats={highestSpending}
-            formatValue={formatCurrency}
-          />
-          <StatCard
-            title="Most Cashes"
-            icon={TrophyIcon}
-            stats={mostCashes}
-            formatValue={(v) => `${v} cashes`}
-            showAdditionalInfo={true}
-          />
-          <StatCard
-            title="Highest Cashes"
-            icon={CurrencyPoundIcon}
-            stats={highestCashes}
-            formatValue={formatCurrency}
-          />
-          <StatCard
-            title="Best ROI"
-            icon={ChartBarIcon}
-            stats={bestROI}
-            formatValue={(v) => `${v.toFixed(1)}%`}
-            showAdditionalInfo={true}
-          />
-          <StatCard
-            title="Newest Sign-ups"
-            icon={UserPlusIcon}
-            stats={newestSignups}
-            formatValue={() => ''}
-            showAdditionalInfo={true}
-          />
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Player List - 2/3 width */}
+          <div className="lg:col-span-2">
+            <div className="bg-white shadow overflow-hidden sm:rounded-md">
+              <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  All Players
+                </h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Showing players across all entities
+                </p>
+              </div>
+
+              {loading && players.length === 0 ? (
+                <div className="px-4 py-5 sm:p-6">
+                  <div className="animate-pulse space-y-4">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="h-20 bg-gray-200 rounded"></div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <ul className="divide-y divide-gray-200">
+                    {players.map(player => (
+                      <li key={player.id}>
+                        <PlayerCard 
+                          player={player} 
+                          showEntityInfo={true}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+
+                  {nextToken && (
+                    <div className="px-4 py-3 bg-gray-50 text-center">
+                      <button
+                        onClick={loadMore}
+                        disabled={loading}
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                      >
+                        {loading ? 'Loading...' : 'Load More'}
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Top Players Sidebar - 1/3 width */}
+          <div className="lg:col-span-1">
+            <div className="bg-white shadow overflow-hidden sm:rounded-md">
+              <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  Top Players
+                </h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  By total earnings across all entities
+                </p>
+              </div>
+
+              <div className="px-4 py-5 sm:p-6">
+                <div className="space-y-4">
+                  {topPlayers.map((player, index) => (
+                    <div key={player.id} className="flex items-start space-x-3">
+                      <span className="flex-shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-800 text-sm font-medium">
+                        {index + 1}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {player.name}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          ${(player.summary?.totalEarnings || 0).toLocaleString()}
+                        </p>
+                        {/* Entity breakdown */}
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {Object.entries(player.entityBreakdown || {}).map(([entity, data]: [string, any]) => (
+                            <span
+                              key={entity}
+                              className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600"
+                              title={`${data.games} games, $${data.winnings}`}
+                            >
+                              {entity}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {topPlayers.length === 0 && !loading && (
+                    <p className="text-sm text-gray-500 text-center py-4">
+                      No players found
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </PageWrapper>
   );
 };

@@ -40,6 +40,9 @@ const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
 const UNASSIGNED_VENUE_ID = "00000000-0000-0000-0000-000000000000";
 const UNASSIGNED_VENUE_NAME = "Unassigned";
 
+// DEFAULT ENTITY - Replace with your actual default entity ID
+const DEFAULT_ENTITY_ID = "default-entity-id"; // This should be fetched from Entity table
+
 const {
     runScraper,
     getStatusAndReg
@@ -48,6 +51,83 @@ const {
 const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
 const sqsClient = new SQSClient({});
+
+// --- Entity Helper Functions (NEW) ---
+/**
+ * Get Entity ID from URL or default
+ * This function determines which entity owns this data based on the URL
+ */
+const getEntityIdFromUrl = async (url) => {
+    try {
+        const urlObj = new URL(url);
+        const domain = urlObj.hostname;
+        
+        // Query Entity table to find matching entity by domain
+        const entityTable = getTableName('Entity');
+        const scanResult = await ddbDocClient.send(new ScanCommand({
+            TableName: entityTable,
+            FilterExpression: 'gameUrlDomain = :domain',
+            ExpressionAttributeValues: {
+                ':domain': domain
+            }
+        }));
+        
+        if (scanResult.Items && scanResult.Items.length > 0) {
+            console.log(`[Entity] Found entity for domain ${domain}: ${scanResult.Items[0].id}`);
+            return scanResult.Items[0].id;
+        }
+        
+        console.log(`[Entity] No entity found for domain ${domain}, using default`);
+        return DEFAULT_ENTITY_ID;
+    } catch (error) {
+        console.error('[Entity] Error determining entity from URL:', error);
+        return DEFAULT_ENTITY_ID;
+    }
+};
+
+/**
+ * Get or create default entity
+ */
+const ensureDefaultEntity = async () => {
+    const entityTable = getTableName('Entity');
+    const entityId = DEFAULT_ENTITY_ID;
+    
+    try {
+        const getResult = await ddbDocClient.send(new GetCommand({
+            TableName: entityTable,
+            Key: { id: entityId }
+        }));
+        
+        if (!getResult.Item) {
+            // Create default entity if it doesn't exist
+            const now = new Date().toISOString();
+            const defaultEntity = {
+                id: entityId,
+                entityName: 'Default Entity',
+                gameUrlDomain: 'default.com',
+                gameUrlPath: '/',
+                isActive: true,
+                createdAt: now,
+                updatedAt: now,
+                _version: 1,
+                __typename: 'Entity'
+            };
+            
+            await ddbDocClient.send(new PutCommand({
+                TableName: entityTable,
+                Item: defaultEntity
+            }));
+            
+            console.log('[Entity] Created default entity');
+        }
+        
+        return entityId;
+    } catch (error) {
+        console.error('[Entity] Error ensuring default entity:', error);
+        // Don't fail the entire operation if entity creation fails
+        return DEFAULT_ENTITY_ID;
+    }
+};
 
 // --- Date Helper Functions ---
 const ensureISODate = (dateValue, fallback = null) => {
@@ -79,6 +159,7 @@ const ensureISODate = (dateValue, fallback = null) => {
 
 // --- Configuration (Assumed from environment) ---
 // Note: PLAYER_PROCESSOR_QUEUE_URL must be configured as the FIFO queue URL
+const PLAYER_PROCESSOR_QUEUE_URL = process.env.PLAYER_PROCESSOR_QUEUE_URL;
 
 const parsePlayerName = (fullName) => {
     if (!fullName) return { firstName: 'Unknown', lastName: '', givenName: 'Unknown' };
@@ -105,6 +186,29 @@ const generatePlayerId = (playerName) => {
 };
 
 const getTableName = (modelName) => {
+    // Check for specific table environment variables first
+    const specialTables = {
+        'Entity': process.env.API_KINGSROOM_ENTITYTABLE_NAME,
+        'ScraperJob': process.env.API_KINGSROOM_SCRAPERJOBTABLE_NAME,
+        'ScrapeURL': process.env.API_KINGSROOM_SCRAPEURLTABLE_NAME,
+        'ScrapeAttempt': process.env.API_KINGSROOM_SCRAPEATTEMPTTABLE_NAME,
+        'ScraperState': process.env.API_KINGSROOM_SCRAPERSTATETABLE_NAME,
+        'Game': process.env.API_KINGSROOM_GAMETABLE_NAME,
+        'Venue': process.env.API_KINGSROOM_VENUETABLE_NAME,
+        'TournamentStructure': process.env.API_KINGSROOM_TOURNAMENTSTRUCTURETABLE_NAME,
+        'TournamentSeries': process.env.API_KINGSROOM_TOURNAMENTSERIESTABLE_NAME,
+        'TournamentSeriesTitle': process.env.API_KINGSROOM_TOURNAMENTSERIESTITLETABLE_NAME,
+        'PlayerEntry': process.env.API_KINGSROOM_PLAYERENTRYTABLE_NAME,
+        'PlayerResult': process.env.API_KINGSROOM_PLAYERRESULTTABLE_NAME,
+        'PlayerSummary': process.env.API_KINGSROOM_PLAYERSUMMARYTABLE_NAME,
+        'Player': process.env.API_KINGSROOM_PLAYERTABLE_NAME,
+        'PlayerTransaction': process.env.API_KINGSROOM_PLAYERTRANSACTIONTABLE_NAME,
+        'PlayerVenue': process.env.API_KINGSROOM_PLAYERVENUETABLE_NAME,
+        'ScrapeStructure': process.env.API_KINGSROOM_SCRAPESTRUCTURETABLE_NAME,
+    };
+    
+    if (specialTables[modelName]) return specialTables[modelName];
+
     const apiId = process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT;
     const env = process.env.ENV;
 
@@ -241,61 +345,20 @@ const upsertPlayerEntries = async (savedGameItem, scrapedData) => {
             isMultiDayTournament: savedGameItem.isSeries || false,
             _version: 1,
             _lastChangedAt: Date.now(),
+            __typename: 'PlayerEntry',
             createdAt: now,
-            updatedAt: now,
-            __typename: 'PlayerEntry'
+            updatedAt: now
         };
 
-        return ddbDocClient.send(new PutCommand({
+        await ddbDocClient.send(new PutCommand({
             TableName: playerEntryTable,
             Item: playerEntry
         }));
+        console.log(`[upsertPlayerEntries] Upserted entry for player ${playerData.name} (ID: ${entryId}).`);
     });
 
-    try {
-        await Promise.all(promises);
-        console.log(`[upsertPlayerEntries] Successfully processed ${allPlayers.length} players and their entries for game ${savedGameItem.id}.`);
-    } catch (error) {
-        console.error(`[upsertPlayerEntries] Error while processing player entries for game ${savedGameItem.id}:`, error);
-    }
-};
-
-const createOptimizedPlayerPayload = (savedGameItem, scrapedData, metadata) => {
-    const now = new Date().toISOString();
-    const playerData = extractPlayerDataForProcessing(scrapedData);
-    return {
-        game: {
-            id: savedGameItem.id,
-            name: savedGameItem.name,
-            venueId: savedGameItem.venueId,
-            gameStartDateTime: savedGameItem.gameStartDateTime,
-            gameEndDateTime: savedGameItem.gameEndDateTime,
-            gameType: savedGameItem.gameType,
-            gameVariant: savedGameItem.gameVariant,
-            buyIn: savedGameItem.buyIn || 0,
-            rake: savedGameItem.rake || 0,
-            totalRake: savedGameItem.totalRake || 0,
-            prizepool: savedGameItem.prizepool || 0,
-            totalEntries: savedGameItem.totalEntries || 0,
-            totalRebuys: savedGameItem.totalRebuys || 0,
-            totalAddons: savedGameItem.totalAddons || 0,
-            isSeries: savedGameItem.isSeries || false,
-            seriesName: savedGameItem.seriesName || null,
-            gameFrequency: savedGameItem.gameFrequency || 'UNKNOWN',
-            isSatellite: savedGameItem.isSatellite || false
-        },
-        players: playerData,
-        processingInstructions: createPlayerProcessingInstructions(playerData, savedGameItem),
-        metadata: {
-            processedAt: now,
-            sourceUrl: metadata.sourceUrl,
-            venueId: metadata.venueId,
-            scrapedAt: scrapedData.fetchedAt || now,
-            hasCompleteResults: playerData.hasCompleteResults,
-            totalPlayersProcessed: playerData.allPlayers.length,
-            totalPrizesPaid: playerData.totalPrizesPaid
-        }
-    };
+    await Promise.all(promises);
+    console.log(`[upsertPlayerEntries] Completed upsert for ${allPlayers.length} player entries.`);
 };
 
 const extractPlayerDataForProcessing = (scrapedData) => {
@@ -363,6 +426,46 @@ const extractPlayerDataForProcessing = (scrapedData) => {
     };
 };
 
+const createOptimizedPlayerPayload = (savedGameItem, scrapedData, metadata) => {
+    const now = new Date().toISOString();
+    const playerData = extractPlayerDataForProcessing(scrapedData);
+    return {
+        game: {
+            id: savedGameItem.id,
+            name: savedGameItem.name,
+            venueId: savedGameItem.venueId,
+            entityId: savedGameItem.entityId || DEFAULT_ENTITY_ID,  // Add entity support
+            gameStartDateTime: savedGameItem.gameStartDateTime,
+            gameEndDateTime: savedGameItem.gameEndDateTime,
+            gameType: savedGameItem.gameType,
+            gameVariant: savedGameItem.gameVariant,
+            buyIn: savedGameItem.buyIn || 0,
+            rake: savedGameItem.rake || 0,
+            totalRake: savedGameItem.totalRake || 0,
+            prizepool: savedGameItem.prizepool || 0,
+            totalEntries: savedGameItem.totalEntries || 0,
+            totalRebuys: savedGameItem.totalRebuys || 0,
+            totalAddons: savedGameItem.totalAddons || 0,
+            isSeries: savedGameItem.isSeries || false,
+            seriesName: savedGameItem.seriesName || null,
+            gameFrequency: savedGameItem.gameFrequency || 'UNKNOWN',
+            isSatellite: savedGameItem.isSatellite || false
+        },
+        players: playerData,
+        processingInstructions: createPlayerProcessingInstructions(playerData, savedGameItem),
+        metadata: {
+            processedAt: now,
+            sourceUrl: metadata.sourceUrl,
+            venueId: metadata.venueId,
+            entityId: metadata.entityId || DEFAULT_ENTITY_ID,  // Add entity support
+            scrapedAt: scrapedData.fetchedAt || now,
+            hasCompleteResults: playerData.hasCompleteResults,
+            totalPlayersProcessed: playerData.allPlayers.length,
+            totalPrizesPaid: playerData.totalPrizesPaid
+        }
+    };
+};
+
 const createPlayerProcessingInstructions = (playerData, gameInfo) => {
     const transactionTime = gameInfo.gameEndDateTime || gameInfo.gameStartDateTime;
     return playerData.allPlayers.map(player => {
@@ -418,8 +521,9 @@ const scrapeDataFromHtml = (html, venues, seriesTitles, url) => {
     }
     data.structureLabel = structureLabel;
     if (!foundKeys.includes('structureLabel')) {
-        foundKeys.push('structureLabel');
+         foundKeys.push('structureLabel');
     }
+    console.log(`[DEBUG-SCRAPER] Scraped data:`, JSON.stringify(data, null, 2).substring(0, 500));
     return { data, foundKeys };
 };
 
@@ -468,8 +572,13 @@ const processStructureFingerprint = async (foundKeys, structureLabel, sourceUrl)
     }
 };
 
+// --- MAIN FETCH HANDLER ---
 const handleFetch = async (url, jobId = null, triggerSource = null) => {
     console.log(`[handleFetch] Processing URL: ${url}. Job ID: ${jobId || 'N/A'}, Source: ${triggerSource || 'N/A'}`);
+    
+    // Auto-detect entity from URL for game assignment
+    const entityId = await getEntityIdFromUrl(url);
+    
     const gameTable = getTableName('Game');
     let existingGameId = null;
     let doNotScrape = false;
@@ -479,7 +588,8 @@ const handleFetch = async (url, jobId = null, triggerSource = null) => {
     try {
         console.log('[handleFetch] Checking for existing game.');
         const queryResult = await ddbDocClient.send(new QueryCommand({
-            TableName: gameTable, IndexName: 'bySourceUrl',
+            TableName: gameTable, 
+            IndexName: 'bySourceUrl',
             KeyConditionExpression: 'sourceUrl = :sourceUrl',
             ExpressionAttributeValues: { ':sourceUrl': url },
             ProjectionExpression: 'id, doNotScrape' 
@@ -502,15 +612,20 @@ const handleFetch = async (url, jobId = null, triggerSource = null) => {
     }
     
     console.log(`[handleFetch] Fetching content from ${url}...`);
-    const venues = await getAllVenues();
+    // Get ALL venues, not filtered by entity - venues can be shared across entities
+    const venues = await getAllVenues();  
     const seriesTitles = await getAllSeriesTitles();
     
     try {
         console.log('[handleFetch] Starting HTTP request for HTML content.');
-        const response = await axios.get(url, { timeout: 10000, headers: { 'User-Agent': 'KingsRoom-Scraper/1.0' } });
+        const response = await axios.get(url, { 
+            timeout: 10000, 
+            headers: { 'User-Agent': 'KingsRoom-Scraper/1.0' } 
+        });
         const html = response.data;
         console.log('[handleFetch] HTTP request successful. Starting scrape logic.');
         
+        // Let scraperStrategies.js handle ALL venue matching logic
         const scrapingResult = scrapeDataFromHtml(html, venues, seriesTitles, url);
         scrapedData = scrapingResult.data;
         foundKeys = scrapingResult.foundKeys;
@@ -526,11 +641,27 @@ const handleFetch = async (url, jobId = null, triggerSource = null) => {
         if (scrapedData.gameStatus === 'UNKNOWN_STATUS' || scrapedData.gameStatus === 'UNKNOWN' || !scrapedData.name || scrapedData.name.trim() === '') {
             console.log(`[handleFetch] Tournament ID not in use for ${url}`);
             return {
-                id: existingGameId, name: 'Tournament ID Not In Use', gameStatus: 'NOT_IN_USE',
-                registrationStatus: 'N_A', gameStartDateTime: null, gameEndDateTime: null,
-                gameVariant: 'UNKNOWN', prizepool: 0, totalEntries: 0, tournamentType: 'UNKNOWN',
-                buyIn: 0, rake: 0, startingStack: 0, hasGuarantee: false, guaranteeAmount: 0,
-                gameTags: [], levels: [], isInactive: true, sourceUrl: url, existingGameId: existingGameId
+                id: existingGameId, 
+                name: 'Tournament ID Not In Use', 
+                gameStatus: 'NOT_IN_USE',
+                registrationStatus: 'N_A', 
+                gameStartDateTime: null, 
+                gameEndDateTime: null,
+                gameVariant: 'UNKNOWN', 
+                prizepool: 0, 
+                totalEntries: 0, 
+                tournamentType: 'UNKNOWN',
+                buyIn: 0, 
+                rake: 0, 
+                startingStack: 0, 
+                hasGuarantee: false, 
+                guaranteeAmount: 0,
+                gameTags: [], 
+                levels: [], 
+                isInactive: true, 
+                sourceUrl: url, 
+                existingGameId: existingGameId,
+                entityId: entityId
             };
         }
         
@@ -538,15 +669,52 @@ const handleFetch = async (url, jobId = null, triggerSource = null) => {
         scrapedData.existingGameId = existingGameId;
         scrapedData.sourceUrl = url;
         scrapedData.fetchedAt = new Date().toISOString();
+        scrapedData.entityId = entityId;  // Assign entity to the game
+        
+        // Process venue data from scraper - trust scraperStrategies.js venue matching
+        if (scrapedData.venueMatch) {
+            const venueMatch = scrapedData.venueMatch;
+            if (venueMatch.autoAssignedVenue) {
+                scrapedData.venueId = venueMatch.autoAssignedVenue.id;
+                scrapedData.venueName = venueMatch.autoAssignedVenue.name;
+                scrapedData.venueAssignmentStatus = 'AUTO_ASSIGNED';
+                scrapedData.venueAssignmentConfidence = venueMatch.autoAssignedVenue.score * 100;
+                scrapedData.requiresVenueAssignment = false;
+            } else {
+                // No confident match from scraper
+                scrapedData.venueId = UNASSIGNED_VENUE_ID;
+                scrapedData.venueName = UNASSIGNED_VENUE_NAME;
+                scrapedData.venueAssignmentStatus = 'PENDING_ASSIGNMENT';
+                scrapedData.suggestedVenueName = venueMatch.extractedVenueName;
+                scrapedData.venueAssignmentConfidence = 0;
+                scrapedData.requiresVenueAssignment = true;
+            }
+        } else {
+            // No venue match data from scraper at all
+            scrapedData.venueId = UNASSIGNED_VENUE_ID;
+            scrapedData.venueName = UNASSIGNED_VENUE_NAME;
+            scrapedData.venueAssignmentStatus = 'PENDING_ASSIGNMENT';
+            scrapedData.requiresVenueAssignment = true;
+            scrapedData.venueAssignmentConfidence = 0;
+        }
         
         console.log(`[handleFetch] Scraped data successfully for ${url}. END handleFetch.`);
-        return { ...scrapedData, existingGameId, scrapedData: scrapedData, foundKeys: foundKeys };
+        return { 
+            ...scrapedData, 
+            existingGameId, 
+            scrapedData: scrapedData, 
+            originalScrapedData: scrapedData,
+            foundKeys: foundKeys,
+            jobId: jobId,
+            triggerSource: triggerSource
+        };
     } catch (error) {
         console.error(`[handleFetch] ERROR fetching or scraping ${url}: ${error.message}`);
         return { existingGameId, errorMessage: error.message };
     }
 };
 
+// --- MAIN SAVE HANDLER ---
 const handleSave = async (input) => {
     const PLAYER_PROCESSOR_QUEUE_URL = process.env.PLAYER_PROCESSOR_QUEUE_URL;
     
@@ -561,6 +729,9 @@ const handleSave = async (input) => {
     // Handle optional venue - use UNASSIGNED_VENUE_ID if no venue provided
     const venueId = input.venueId || UNASSIGNED_VENUE_ID;
     const isUnassigned = venueId === UNASSIGNED_VENUE_ID;
+    
+    // Determine entity ID - from input or auto-detect from URL
+    const entityId = input.entityId || await getEntityIdFromUrl(sourceUrl);
     
     const now = new Date().toISOString();
     const gameTable = getTableName('Game');
@@ -596,7 +767,7 @@ const handleSave = async (input) => {
     }
     // --- ⚡️ END: ROBUST AWSJSON PARSING FIX ⚡️ ---
 
-        // Extract missing fields from originalScrapedData
+    // Extract missing fields from originalScrapedData
     if (originalScrapedData) {
         // Extract tournamentId if it's missing from data
         if (originalScrapedData.tournamentId !== undefined && !data.tournamentId) {
@@ -633,7 +804,8 @@ const handleSave = async (input) => {
             throw new Error(`No game found with ID: ${existingGameId}`);
         }
         const updatedGameItem = {
-            ...existingGame.Item, name: data.name,
+            ...existingGame.Item, 
+            name: data.name,
             gameType: data.gameType || existingGame.Item.gameType || 'TOURNAMENT',
             gameStatus: data.gameStatus || existingGame.Item.gameStatus || 'SCHEDULED',
             gameVariant: data.gameVariant || existingGame.Item.gameVariant || 'NLHE',
@@ -641,6 +813,7 @@ const handleSave = async (input) => {
             gameEndDateTime: data.gameEndDateTime,
             // UPDATE: Handle venue updates for existing games
             venueId: venueId || existingGame.Item.venueId || UNASSIGNED_VENUE_ID,
+            entityId: entityId || existingGame.Item.entityId || DEFAULT_ENTITY_ID,  // Add entity support
             venueAssignmentStatus: input.venueAssignmentStatus || existingGame.Item.venueAssignmentStatus || (isUnassigned ? 'PENDING_ASSIGNMENT' : 'AUTO_ASSIGNED'),
             requiresVenueAssignment: isUnassigned || existingGame.Item.requiresVenueAssignment,
             suggestedVenueName: input.suggestedVenueName || existingGame.Item.suggestedVenueName || data.venueName || null,
@@ -651,41 +824,49 @@ const handleSave = async (input) => {
             startingStack: data.startingStack !== undefined ? data.startingStack : existingGame.Item.startingStack,
             hasGuarantee: data.hasGuarantee !== undefined ? data.hasGuarantee : existingGame.Item.hasGuarantee,
             guaranteeAmount: data.guaranteeAmount !== undefined ? data.guaranteeAmount : existingGame.Item.guaranteeAmount,
-            revenueByBuyIns: data.revenueByBuyIns, profitLoss: data.profitLoss,
-            guaranteeSurplus: data.guaranteeSurplus, guaranteeOverlay: data.guaranteeOverlay,
-            totalRake: data.totalRake, isSatellite: data.isSatellite, isSeries: data.isSeries,
-            isRegular: data.isRegular, gameFrequency: data.gameFrequency, seriesName: data.seriesName,
-            registrationStatus: data.registrationStatus || existingGame.Item.registrationStatus,
-            prizepool: data.prizepool !== undefined ? data.prizepool : existingGame.Item.prizepool,
-            totalEntries: data.totalEntries !== undefined ? data.totalEntries : existingGame.Item.totalEntries,
+            tournamentId: data.tournamentId,
+            registrationStatus: data.registrationStatus,
+            prizepool: data.prizepool,
+            totalEntries: data.totalEntries,
             playersRemaining: data.playersRemaining,
-            totalRebuys: data.totalRebuys !== undefined ? data.totalRebuys : existingGame.Item.totalRebuys,
-            totalAddons: data.totalAddons !== undefined ? data.totalAddons : existingGame.Item.totalAddons,
-            totalDuration: data.totalDuration !== undefined ? data.totalDuration : existingGame.Item.totalDuration,
-            gameTags: data.gameTags || existingGame.Item.gameTags,
-            doNotScrape: doNotScrape, sourceDataIssue: data.sourceDataIssue || false,
+            totalRebuys: data.totalRebuys,
+            totalAddons: data.totalAddons,
+            gameTags: data.gameTags,
+            isSatellite: data.isSatellite, 
+            isSeries: data.isSeries, 
+            isRegular: data.isRegular,
+            gameFrequency: data.gameFrequency, 
+            seriesName: data.seriesName,
+            totalDuration: data.totalDuration,
+            revenueByBuyIns: data.revenueByBuyIns,
+            profitLoss: data.profitLoss,
+            guaranteeSurplus: data.guaranteeSurplus,
+            guaranteeOverlay: data.guaranteeOverlay,
+            totalRake: data.totalRake,
+            doNotScrape: doNotScrape,
+            sourceDataIssue: data.sourceDataIssue || false,
             gameDataVerified: data.gameDataVerified || false,
-            updatedAt: now, _lastChangedAt: Date.now(),
+            updatedAt: now, _lastChangedAt: Date.now()
         };
-        
-        if (processedLevels.length > 0) {
-            let structureId = existingGame.Item.tournamentStructureId || crypto.randomUUID();
-            updatedGameItem.tournamentStructureId = structureId;
-            const structureItem = {
-                id: structureId, name: `${data.name} - Blind Structure`,
-                description: `Blind structure for ${data.name}`, levels: processedLevels,
-                createdAt: now, updatedAt: now, _lastChangedAt: Date.now(),
-                _version: 1, __typename: "TournamentStructure",
-            };
-            await ddbDocClient.send(new PutCommand({ TableName: structureTable, Item: structureItem }));
-            console.log('[handleSave] Blind structure (re)saved.');
-        } else {
-            delete updatedGameItem.tournamentStructureId;
-            console.log('[handleSave] No blind structure data to save.');
-        }
+
+                if (processedLevels.length > 0) {
+                    let structureId = existingGame.Item.tournamentStructureId || crypto.randomUUID();
+                    updatedGameItem.tournamentStructureId = structureId;
+                    const structureItem = {
+                        id: structureId, name: `${data.name} - Blind Structure`,
+                        description: `Blind structure for ${data.name}`, levels: processedLevels,
+                        createdAt: now, updatedAt: now, _lastChangedAt: Date.now(),
+                        _version: 1, __typename: "TournamentStructure",
+                    };
+                    await ddbDocClient.send(new PutCommand({ TableName: structureTable, Item: structureItem }));
+                    console.log('[handleSave] Blind structure (re)saved.');
+                } else {
+                    delete updatedGameItem.tournamentStructureId;
+                    console.log('[handleSave] No blind structure data to save.');
+                }
         await ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem }));
         savedGameItem = updatedGameItem;
-
+        console.log('[handleSave] Existing game record updated successfully.');
     } else {
         console.log('[handleSave] Creating new game record.');
         const gameId = crypto.randomUUID();
@@ -701,7 +882,7 @@ const handleSave = async (input) => {
             await ddbDocClient.send(new PutCommand({ TableName: structureTable, Item: structureItem }));
         }
         const gameItem = {
-            id: gameId, name: data.name,
+            id: gameId, name: data.name, entityId: entityId,
             gameType: data.gameType || 'TOURNAMENT', gameStatus: data.gameStatus || 'SCHEDULED',
             gameVariant: data.gameVariant || 'NLHE',
             gameStartDateTime: data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : now,
@@ -732,9 +913,10 @@ const handleSave = async (input) => {
         if (structureId) {
             gameItem.tournamentStructureId = structureId;
         }
+        
         await ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: gameItem }));
         savedGameItem = gameItem;
-        console.log(`[handleSave] New game record ${gameId} created successfully.`);
+        console.log(`[handleSave] New game record ${gameId} created successfully with entity ${entityId}.`);
     }
     
     // --- 2. PLAYER PROCESSING LOGIC (Business Rule Enforcement) ---
@@ -745,11 +927,15 @@ const handleSave = async (input) => {
         console.log(`[handleSave] DIAGNOSTIC: Status is FINISHED. Triggering full processing via SQS.`);
         try {
             if (!PLAYER_PROCESSOR_QUEUE_URL) {
-                 throw new Error("PLAYER_PROCESSOR_QUEUE_URL environment variable is missing.");
+                throw new Error("PLAYER_PROCESSOR_QUEUE_URL environment variable is missing.");
             }
             
-            // ⚡️ FIX: Pass the newly parsed 'originalScrapedData' object, not the 'data' fallback.
-            const sqsPayload = createOptimizedPlayerPayload(savedGameItem, originalScrapedData, { sourceUrl, venueId });
+            // Use the proper createOptimizedPlayerPayload function with metadata
+            const sqsPayload = createOptimizedPlayerPayload(savedGameItem, parsedOriginalData, { 
+                sourceUrl, 
+                venueId, 
+                entityId 
+            });
             
             const idMatch = sourceUrl.match(/id=(\d+)/);
             const tournamentId = idMatch ? idMatch[1] : savedGameItem.id;
@@ -757,14 +943,15 @@ const handleSave = async (input) => {
             console.log(`[handleSave] DIAGNOSTIC: FIFO Group ID: ${tournamentId}. Total Players: ${sqsPayload.players.allPlayers.length}`);
 
             const command = new SendMessageCommand({
-                QueueUrl: process.env.PLAYER_PROCESSOR_QUEUE_URL, 
+                QueueUrl: PLAYER_PROCESSOR_QUEUE_URL,
                 MessageBody: JSON.stringify(sqsPayload),
                 MessageGroupId: String(tournamentId),
-                MessageDeduplicationId: String(tournamentId),
+                MessageDeduplicationId: `${tournamentId}-${Date.now()}`,
                 MessageAttributes: {
                     gameId: { DataType: 'String', StringValue: savedGameItem.id },
                     gameStatus: { DataType: 'String', StringValue: savedGameItem.gameStatus },
                     venueId: { DataType: 'String', StringValue: venueId },
+                    entityId: { DataType: 'String', StringValue: entityId },
                     totalPlayers: { DataType: 'Number', StringValue: String(sqsPayload.players.allPlayers.length || 0) },
                     jobId: { DataType: 'String', StringValue: jobId || 'N/A' },
                     triggerSource: { DataType: 'String', StringValue: triggerSource || 'N/A' }
@@ -775,13 +962,12 @@ const handleSave = async (input) => {
             
             console.log(`[handleSave] DIAGNOSTIC: SUCCESS - Message sent to SQS for ID: ${tournamentId}.`);
         } catch (error) {
-            console.error(`[handleSave] DIAGNOSTIC: FAILED - Error sending SQS message for ID ${tournamentId}: ${error.message}`);
+            console.error(`[handleSave] DIAGNOSTIC: FAILED - Error sending SQS message for ID ${tournamentIdFromUrl}: ${error.message}`);
         }
     } else if (savedGameItem && liveStatuses.includes(savedGameItem.gameStatus)) {
         console.log(`[handleSave] DIAGNOSTIC: Status is LIVE. Updating PlayerEntries only.`);
-        console.log(`[WEB-SCRAPER-TRACE] Passing to upsertPlayerEntries. Player entries:`, originalScrapedData?.entries?.length);
-        // ⚡️ FIX: Pass the newly parsed 'originalScrapedData' object, not the 'data' fallback.
-        await upsertPlayerEntries(savedGameItem, originalScrapedData);
+        console.log(`[WEB-SCRAPER-TRACE] Passing to upsertPlayerEntries. Player entries:`, parsedOriginalData?.entries?.length);
+        await upsertPlayerEntries(savedGameItem, parsedOriginalData);
     }
 
     console.log('[handleSave] END processing save request.');
@@ -794,7 +980,7 @@ const handleFetchRange = async (startId, endId) => {
     if (startId > endId) {
         throw new Error('Start ID cannot be greater than End ID.');
     }
-    if (endId - startId + 1 > 100) { 
+    if (endId - startId + 1 > 100) {
         throw new Error('The requested range is too large. Please fetch a maximum of 100 games at a time.');
     }
 
@@ -863,17 +1049,19 @@ const handleFetchRange = async (startId, endId) => {
     });
 };
 
-
 // --- MAIN LAMBDA HANDLER ---
 exports.handler = async (event) => {
     console.log('Event received:', JSON.stringify(event, null, 2));
     
-    const operationName = event.fieldName || event.arguments?.operation;
+    // Ensure default entity exists on startup
+    await ensureDefaultEntity();
+    
+    const operationName = event.fieldName || event.arguments?.operation || event.field;
     
     const jobId = event.arguments?.jobId || null;
     const triggerSource = event.arguments?.triggerSource || null;
     
-    const args = event.arguments || event; 
+    const args = event.arguments || event;
 
     console.log(`[HANDLER] Operation detected: ${operationName}. Job ID: ${jobId || 'N/A'}`);
     
@@ -882,7 +1070,11 @@ exports.handler = async (event) => {
             
             case 'fetchTournamentData':
             case 'FETCH':
-                const fetchResult = await handleFetch(args.url, jobId, triggerSource);
+                const fetchUrl = args.url;
+                if (!fetchUrl) {
+                    throw new Error('URL is required for fetching tournament data');
+                }
+                const fetchResult = await handleFetch(fetchUrl, jobId, triggerSource);
                 if (fetchResult.errorMessage) {
                     throw new Error(fetchResult.errorMessage);
                 }
@@ -890,15 +1082,16 @@ exports.handler = async (event) => {
 
             case 'saveTournamentData':
             case 'SAVE':
-                const saveInput = args.input || { 
-                    sourceUrl: args.sourceUrl, 
+                const saveInput = args.input || {
+                    sourceUrl: args.sourceUrl,
                     venueId: args.venueId,
                     existingGameId: args.existingGameId,
                     doNotScrape: args.doNotScrape,
-                    data: args.scrapedData,
+                    data: args.scrapedData || args.data,
                     originalScrapedData: args.originalScrapedData,
-                    jobId: jobId, 
-                    triggerSource: triggerSource
+                    jobId: jobId,
+                    triggerSource: triggerSource,
+                    entityId: args.entityId
                 };
                 return await handleSave(saveInput);
                 
@@ -910,6 +1103,6 @@ exports.handler = async (event) => {
         }
     } catch (error) {
         console.error('[HANDLER] CRITICAL Error:', error);
-        return { errorMessage: error.message || 'Internal Lambda Error' }; 
+        return { errorMessage: error.message || 'Internal Lambda Error' };
     }
 };

@@ -1,6 +1,10 @@
+// hooks/useGameTracker.ts
+// FINAL MERGED: Combines Entity ID support  with the
+// comprehensive missingFields logic from the original file.
+
 import { useEffect } from 'react';
 import { useGameContext } from '../contexts/GameContext';
-import { fetchGameDataFromBackend, saveGameDataToBackend, shouldAutoRefreshTournament } from '../services/gameService';
+import { fetchGameDataFromBackend, saveGameDataToBackend, shouldAutoRefreshTournament, getCurrentEntityId } from '../services/gameService';
 import type { GameState, GameData, MissingField, ScrapedVenueMatch } from '../types/game';
 import type { DataSource } from '../API';
 
@@ -47,9 +51,8 @@ export const useGameTracker = () => {
             const dataFromBackend = await fetchGameDataFromBackend(id);
             console.log('[useGameTracker] Raw data from backend:', dataFromBackend);
 
-            console.log('[useGameTracker] revenueByBuyIns value:', dataFromBackend.revenueByBuyIns);
-            console.log('[useGameTracker] typeof revenueByBuyIns:', typeof dataFromBackend.revenueByBuyIns);
-
+            // --- MERGE ---: Kept all data extraction from enhanced file 
+            const entityId = (dataFromBackend as any).entityId || getCurrentEntityId();
             const venueMatch = (dataFromBackend as any).venueMatch as ScrapedVenueMatch || null;
             const isNewStructure = dataFromBackend.isNewStructure ?? undefined;
             const structureLabel = (dataFromBackend as any).structureLabel || undefined;
@@ -57,15 +60,12 @@ export const useGameTracker = () => {
             const existingGameId = (dataFromBackend as any).existingGameId || null;
             const doNotScrape = (dataFromBackend as any).doNotScrape || false;
 
-            console.log('[useGameTracker] Extracted isNewStructure:', isNewStructure);
-            console.log('[useGameTracker] Extracted structureLabel:', structureLabel); 
-            console.log('[useGameTracker] Extracted foundKeys:', foundKeys);
-            console.log('[useGameTracker] Extracted existingGameId:', existingGameId);
-            console.log('[useGameTracker] Extracted doNotScrape:', doNotScrape);
+            console.log('[useGameTracker] Extracted entityId:', entityId);
 
             const data: GameData = {
                 name: dataFromBackend.name,
                 tournamentId: dataFromBackend.tournamentId,
+                entityId: entityId,
                 gameStartDateTime: dataFromBackend.gameStartDateTime || undefined,
                 gameEndDateTime: dataFromBackend.gameEndDateTime || undefined,
                 gameStatus: (dataFromBackend as any).gameStatus || undefined,
@@ -97,7 +97,7 @@ export const useGameTracker = () => {
                 guaranteeAmount: dataFromBackend.guaranteeAmount || undefined,
                 guaranteeOverlay: dataFromBackend.guaranteeOverlay || undefined,
                 guaranteeSurplus: dataFromBackend.guaranteeSurplus || undefined,
-                levels: dataFromBackend.levels?.map(l => ({
+                levels: dataFromBackend.levels?.map((l: any) => ({
                     levelNumber: l.levelNumber,
                     durationMinutes: l.durationMinutes || 20,
                     smallBlind: l.smallBlind || 0,
@@ -109,7 +109,6 @@ export const useGameTracker = () => {
                     levelNumberBeforeBreak: b.levelNumberBeforeBreak,
                     durationMinutes: b.durationMinutes,
                 })) ?? [],
-                // ✅ FIXED: Added safety checks to the inner `t.seats.map` call.
                 tables: (dataFromBackend as any).tables?.map((t: any) => ({
                     tableName: t.tableName,
                     seats: t.seats?.map((s: any) => ({
@@ -117,7 +116,7 @@ export const useGameTracker = () => {
                         isOccupied: s.isOccupied,
                         playerName: s.playerName,
                         playerStack: s.playerStack,
-                    })) ?? [], // Fallback to an empty array if t.seats is null/undefined
+                    })) ?? [],
                 })) ?? [],
                 seating: (dataFromBackend as any).seating?.map((s: { name: string; table: number; seat: number; playerStack: number }) => ({ 
                         name: s.name, 
@@ -126,12 +125,12 @@ export const useGameTracker = () => {
                         playerStack: s.playerStack,
                 })) ?? [],
                 entries: (dataFromBackend as any).entries?.map((e: { name: string }) => ({ name: e.name })) ?? [],
-                results: dataFromBackend.results?.map(r => ({ 
+                results: dataFromBackend.results?.map((r: any) => ({
                     name: r.name, 
                     rank: r.rank, 
                     winnings: r.winnings ?? 0,
-                    points: r.points ?? 0, // Add this line
-                    isQualification: r.isQualification ?? false // Add this line
+                    points: r.points ?? 0, // ✅ Kept fix from enhanced file 
+                    isQualification: r.isQualification ?? false // ✅ Kept fix from enhanced file 
                 })) ?? [],
                 otherDetails: {},
                 rawHtml: dataFromBackend.rawHtml || undefined,
@@ -141,6 +140,7 @@ export const useGameTracker = () => {
                 venueMatch: venueMatch,
             };
 
+            // Process breaks and merge with levels
             if (data.breaks && data.breaks.length > 0 && data.levels && data.levels.length > 0) {
                 data.breaks.forEach(breakInfo => {
                     const levelBeforeBreak = data.levels.find(
@@ -152,10 +152,21 @@ export const useGameTracker = () => {
                 });
             }
 
+            // --- MERGE ---: This entire section is rebuilt to combine the best of both files.
             const missingFields: MissingField[] = [];
+
+            // Use the cleaner checkField helper from the enhanced file,
+            // but add the array check from the old file.
+            const checkField = (value: any, model: string, field: string, reason: string) => {
+                if (value === undefined || value === null || (Array.isArray(value) && value.length === 0)) {
+                    missingFields.push({ model, field, reason });
+                }
+            };
+
+            // Use the comprehensive field list from the old file 
             const gameFields: Record<string, string> = {
                 'gameStartDateTime': 'Game start date/time not found',
-                'variant': 'Game variant (e.g., NLHE) not found', 
+                'gameVariant': 'Game variant (e.g., NLHE) not found', // Renamed from 'variant'
                 'seriesName': 'Series name not found on page',
                 'prizepool': 'Prize pool not found on page',
                 'revenueByBuyIns': 'Revenue calculated on save',
@@ -171,17 +182,22 @@ export const useGameTracker = () => {
                 'guaranteeAmount': 'Guarantee amount not found on page',
             };
 
+            // Use the loop logic from the old file 
             Object.entries(gameFields).forEach(([field, reason]) => {
                 const value = (data as any)[field];
-                if (value === undefined || value === null || (Array.isArray(value) && value.length === 0)) {
-                    if (field === 'guaranteeAmount' && data.hasGuarantee) {
+                
+                // Keep the special guarantee check from the old file 
+                if (field === 'guaranteeAmount' && data.hasGuarantee) {
+                     if (value === undefined || value === null) {
                          missingFields.push({ model: 'Game', field, reason });
-                    } else if (field !== 'guaranteeAmount') {
-                         missingFields.push({ model: 'Game', field, reason });
-                    }
+                     }
+                } else if (field !== 'guaranteeAmount') {
+                    // Use the merged helper function
+                     checkField(value, 'Game', field, reason);
                 }
             });
 
+            // Keep the levels check from the old file 
             if (!data.levels || data.levels.length === 0) {
                 missingFields.push({ 
                     model: 'TournamentStructure', 
@@ -190,15 +206,18 @@ export const useGameTracker = () => {
                 });
             }
 
+            // Add the entityId check from the enhanced file 
+            checkField(data.entityId, 'Entity', 'entityId', 'Entity could not be determined from URL');
+
+            // Keep the venue check from the old file 
             if (!data.venueMatch?.autoAssignedVenue) {
-                // Only add this if no venue was auto-assigned
                 missingFields.push(
                     { model: 'Venue', field: 'all fields', reason: 'Venue must be selected manually' }
                 );
             }
 
+            // Keep the standard list (present in both files [cite: 1, 2])
             missingFields.push(
-                { model: 'Venue', field: 'all fields', reason: 'Venue must be selected manually' },
                 { model: 'Player', field: 'all fields', reason: 'Player data cannot be scraped from this page' },
                 { model: 'PlayerResult', field: 'player linking', reason: 'Results cannot be automatically linked to player accounts' },
                 { model: 'PlayerTransaction', field: 'all fields', reason: 'Transaction data not available on page' },
@@ -206,6 +225,7 @@ export const useGameTracker = () => {
                 { model: 'CashStructure', field: 'all fields', reason: 'Not applicable for tournaments' },
                 { model: 'RakeStructure', field: 'all fields', reason: 'Not applicable for tournaments' },
             );
+            // --- END OF MERGE ---
 
             const shouldAutoRefresh = shouldAutoRefreshTournament(data);
             const newFetchCount = (game?.fetchCount || 0) + 1;
@@ -220,6 +240,7 @@ export const useGameTracker = () => {
                 autoRefresh: shouldAutoRefresh,
                 fetchCount: newFetchCount,
                 existingGameId: existingGameId,
+                entityId: entityId, // ✅ Kept from enhanced file 
             });
 
             if (shouldAutoRefresh) {
@@ -244,7 +265,8 @@ export const useGameTracker = () => {
         }
     };
     
-    const trackGame = (id: string, source: DataSource) => {
+    // --- MERGE ---: Kept enhanced trackGame function 
+    const trackGame = (id: string, source: DataSource, entityId?: string) => {
         if (games[id] && games[id].jobStatus !== 'ERROR') {
             if (games[id].errorMessage?.includes('Scraping is disabled')) {
                  console.log(`[useGameTracker] Re-tracking ${id}, which is flagged as 'Do Not Scrape'.`);
@@ -253,34 +275,58 @@ export const useGameTracker = () => {
                 return; 
             }
         }
-        dispatch({ type: 'ADD_GAME', payload: { id, source } });
+        
+        // ✅ Add game with entity ID
+        dispatch({ 
+            type: 'ADD_GAME', 
+            payload: { 
+                id, 
+                source,
+                entityId: entityId || getCurrentEntityId() 
+            } as any
+        });
+        
         setTimeout(() => fetchAndLoadData(id, source), 0);
     };
 
-    const saveGame = async (id: string, venueId: string) => {
+    // --- MERGE ---: Kept enhanced saveGame function 
+    const saveGame = async (id: string, venueId?: string, entityId?: string) => {
         const game = games[id];
         if (!game || !game.data) {
             updateJobStatus({ id, jobStatus: 'ERROR', errorMessage: "No data available to save." });
             return;
         }
         
-        // --- 3. LOGIC: Handle auto-assignment if no venueId is passed ---
+        // Handle auto-assignment (present in both files [cite: 1, 2])
         let finalVenueId = venueId;
         if (!finalVenueId && game.data.venueMatch?.autoAssignedVenue?.id) {
             console.log(`[useGameTracker] No venue selected, using auto-assigned venue: ${game.data.venueMatch.autoAssignedVenue.name}`);
             finalVenueId = game.data.venueMatch.autoAssignedVenue.id;
         }
         
-        console.log(`[useGameTracker] Saving ${game.data.gameStatus} tournament: ${id}`);
+        // ✅ Use entity ID from game state or parameter 
+        const finalEntityId = entityId || game.entityId || game.data.entityId || getCurrentEntityId();
+        
+        console.log(`[useGameTracker] Saving ${game.data.gameStatus} tournament: ${id} with entity: ${finalEntityId}`);
         updateJobStatus({ id, jobStatus: 'SAVING' });
+        
         try {
-            const result = await saveGameDataToBackend(id, venueId, game.data, game.existingGameId);
+            const result = await saveGameDataToBackend(
+                id, 
+                finalVenueId, 
+                game.data, 
+                game.existingGameId,
+                finalEntityId // ✅ Pass entity ID to save 
+            );
+            
             updateJobStatus({ 
                 id, 
                 jobStatus: 'DONE', 
                 saveResult: result,
                 existingGameId: result.id,
+                entityId: result.entityId // ✅ Store saved entity ID 
             });
+            
             console.log(`[useGameTracker] Successfully saved ${game.data.gameStatus} tournament: ${id}`);
         } catch (error: any) {
             updateJobStatus({ id, jobStatus: 'ERROR', errorMessage: `Failed to save: ${error.message}` });
@@ -299,5 +345,36 @@ export const useGameTracker = () => {
         }
     };
 
-    return { games, trackGame, saveGame, removeGame, refreshGame };
+    // --- MERGE ---: Kept new functions from enhanced file 
+    const getGamesByEntity = (entityId?: string): GameState[] => {
+        const targetEntityId = entityId || getCurrentEntityId();
+        return Object.values(games).filter(game => 
+            game.entityId === targetEntityId || 
+            game.data?.entityId === targetEntityId
+        );
+    };
+
+    const validateEntityConsistency = (): string[] => {
+        const errors: string[] = [];
+        const currentEntityId = getCurrentEntityId();
+        
+        Object.values(games).forEach(game => {
+            if (game.data && game.data.entityId !== currentEntityId) {
+                errors.push(`Game ${game.id} has mismatched entity ID: ${game.data.entityId} vs ${currentEntityId}`);
+            }
+        });
+        
+        return errors;
+    };
+
+    // --- MERGE ---: Kept enhanced return object 
+    return { 
+        games, 
+        trackGame, 
+        saveGame, 
+        removeGame, 
+        refreshGame,
+        getGamesByEntity,
+        validateEntityConsistency
+    };
 };
