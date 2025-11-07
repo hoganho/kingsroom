@@ -42,6 +42,7 @@ const GameStatus = {
 const GameVariant = {
   "NLHE": "NLHE",
   "PLO": "PLO",
+  "PLOM": "PLOM",
   "PLO5": "PLO5",
   "PLO6": "PLO6"
 };
@@ -116,10 +117,10 @@ const PlayerVenueTargetingClassification = {
   "ACTIVE": "Active",
   "RETAIN_INACTIVE31_60D": "Retain_Inactive31_60d",
   "RETAIN_INACTIVE61_90D": "Retain_Inactive61_90d",
-  "CHURNED_91_120D": "Churned_91_120d",
-  "CHURNED_121_180D": "Churned_121_180d",
-  "CHURNED_181_360D": "Churned_181_360d",
-  "CHURNED_361D": "Churned_361d"
+  "CHURN_91_120D": "Churn_91_120d",
+  "CHURN_121_180D": "Churn_121_180d",
+  "CHURN_181_360D": "Churn_181_360d",
+  "CHURN_361D": "Churn_361d"
 };
 
 const TransactionType = {
@@ -247,7 +248,7 @@ const ScraperOperation = {
   "RESET": "RESET"
 };
 
-const { Entity, ScrapeStructure, DataSync, ScraperState, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, TournamentLevelData, CashStructure, RakeStructure, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, KnownPlayerIdentity, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, ScraperJob, ScrapeURL, ScrapeAttempt, ScraperControlResponse, ScraperStateData, ScraperResults, ScraperLogData, ScrapedGameStatus, TournamentLevel, Break, ClientMetricResponse, UserMetricsSummary, EntityVenueAssignmentSummary, EntityScraperMetrics, GamesNeedingVenueResponse, VenueAssignmentSummary, VenueAssignmentResult, AffectedRecords, BatchVenueAssignmentResult, ScraperJobURLResult, ScraperMetrics, ErrorMetric, HourlyMetric, ScraperJobConnection, ScrapeURLConnection, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails } = initSchema(schema);
+const { Entity, ScrapeStructure, DataSync, ScraperState, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, TournamentLevelData, CashStructure, RakeStructure, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, KnownPlayerIdentity, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, ScraperJob, ScrapeURL, ScrapeAttempt, ScraperControlResponse, ScraperStateData, ScraperResults, ScraperLogData, ScrapedGameStatus, TournamentLevel, Break, ClientMetricResponse, UserMetricsSummary, EntityVenueAssignmentSummary, EntityScraperMetrics, GamesNeedingVenueResponse, VenueAssignmentSummary, VenueAssignmentResult, AffectedRecords, BatchVenueAssignmentResult, ScraperJobURLResult, ScraperMetrics, ErrorMetric, HourlyMetric, ScraperJobConnection, ScrapeURLConnection, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails, AllCountsResult } = initSchema(schema);
 
 export {
   Entity,
@@ -348,5 +349,6 @@ export {
   ScrapedTable,
   ScrapedTableSeatData,
   ScrapedVenueMatch,
-  ScrapedVenueMatchDetails
+  ScrapedVenueMatchDetails,
+  AllCountsResult
 };

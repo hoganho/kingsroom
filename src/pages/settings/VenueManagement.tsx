@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { GraphQLResult } from '@aws-amplify/api';
-import { listVenuesShallow } from '../../graphql/customQueries';
+import { listVenuesShallow, listEntitiesShallow } from '../../graphql/customQueries';
 import { createVenue, updateVenue, deleteVenue } from '../../graphql/mutations';
 import { VenueTable } from '../../components/venues/VenueTable';
 import { VenueModal } from '../../components/venues/VenueModal';
@@ -14,10 +14,14 @@ import { VenueFormData } from '../../types/venue';
 import { PageWrapper } from '../../components/layout/PageWrapper';
 
 type Venue = APITypes.Venue;
+// ✅ NEW: Define Entity type
+type Entity = Pick<APITypes.Entity, 'id' | 'entityName'>;
 
 const VenueManagement = () => {
   const client = generateClient();
   const [venues, setVenues] = useState<Venue[]>([]);
+  // ✅ NEW: State for entities
+  const [entities, setEntities] = useState<Entity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nextVenueNumber, setNextVenueNumber] = useState<number>(1);
@@ -28,10 +32,26 @@ const VenueManagement = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingVenueId, setDeletingVenueId] = useState<string | null>(null);
 
-  const fetchVenues = async () => {
-    setLoading(true);
-    setError(null);
+  // ✅ NEW: Function to fetch entities
+  const fetchEntities = async () => {
+    try {
+      const response = await client.graphql<GraphQLResult<APITypes.ListEntitiesShallowQuery>>({
+        query: listEntitiesShallow
+      });
+      if ('data' in response && response.data) {
+        const entityItems = (response.data.listEntities.items as Entity[])
+          .filter(Boolean)
+          .sort((a, b) => a.entityName.localeCompare(b.entityName));
+        setEntities(entityItems);
+      }
+    } catch (err) {
+      console.error('Error fetching entities:', err);
+      // Non-critical error, venues can still be managed
+      setError('Failed to fetch entities, but venue data is available.');
+    }
+  };
 
+  const fetchVenues = async () => {
     try {
       const response = await client.graphql<GraphQLResult<APITypes.ListVenuesShallowQuery>>({
         query: listVenuesShallow,
@@ -68,13 +88,25 @@ const VenueManagement = () => {
     } catch (err) {
       console.error('Error fetching venues:', err);
       setError('Failed to fetch venues. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 
+  // ✅ UPDATED: Fetch both venues and entities on load
   useEffect(() => {
-    fetchVenues();
+    const loadData = async () => {
+      setLoading(true);
+      setError(null);
+      
+      // Fetch in parallel
+      await Promise.all([
+        fetchVenues(),
+        fetchEntities()
+      ]);
+      
+      setLoading(false);
+    };
+    
+    loadData();
   }, []);
 
   const handleAddVenue = () => {
@@ -94,7 +126,8 @@ const VenueManagement = () => {
 
   const handleSaveVenue = async (venueData: VenueFormData) => {
     try {
-      const { name, address, city, country, aliases } = venueData;
+      // ✅ UPDATED: Destructure entityId
+      const { name, address, city, country, aliases, entityId } = venueData;
       
       if (editingVenue) {
         await client.graphql({
@@ -108,6 +141,7 @@ const VenueManagement = () => {
               city, 
               country,
               aliases,
+              entityId, // ✅ ADDED
               venueNumber: editingVenue.venueNumber 
             } 
           },
@@ -122,6 +156,7 @@ const VenueManagement = () => {
               city, 
               country,
               aliases,
+              entityId, // ✅ ADDED
               venueNumber: nextVenueNumber 
             } 
           },
@@ -129,7 +164,7 @@ const VenueManagement = () => {
       }
       
       setIsModalOpen(false);
-      fetchVenues();
+      fetchVenues(); // Refetch venues to show updated data
     } catch (err) {
       console.error('Error saving venue:', err);
       setError('Failed to save venue. Make sure to run "amplify codegen" after updating your schema.');
@@ -182,8 +217,7 @@ const VenueManagement = () => {
         <div className="sm:flex-auto">
           <h1 className="text-xl font-semibold text-gray-900">Manage Venues</h1>
           <p className="mt-2 text-sm text-gray-700">
-            Add, edit, and manage venue information. Each venue has a unique ID
-            number for easy reference.
+            Add, edit, and manage venue information and their entity association.
           </p>
           {nextVenueNumber && (
             <p className="mt-1 text-xs text-gray-500">
@@ -202,6 +236,8 @@ const VenueManagement = () => {
       <div className="mt-8">
         <VenueTable
           venues={venues}
+          // ✅ UPDATED: Pass entities list
+          entities={entities}
           loading={loading}
           onEdit={handleEditVenue}
           onDelete={handleDeleteVenue}
@@ -213,6 +249,8 @@ const VenueManagement = () => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveVenue}
         venue={editingVenue}
+        // ✅ UPDATED: Pass entities list
+        entities={entities}
       />
 
       <DeleteConfirmationModal

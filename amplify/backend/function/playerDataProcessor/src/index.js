@@ -1,4 +1,6 @@
 /* Amplify Params - DO NOT EDIT
+	API_KINGSROOM_ENTITYTABLE_ARN
+	API_KINGSROOM_ENTITYTABLE_NAME
 	API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
 	API_KINGSROOM_GRAPHQLAPIIDOUTPUT
 	API_KINGSROOM_PLAYERCREDITSTABLE_ARN
@@ -45,7 +47,7 @@ const UNASSIGNED_VENUE_ID = "00000000-0000-0000-0000-000000000000";
 const UNASSIGNED_VENUE_NAME = "Unassigned";
 
 // --- MERGE ---: Added from PDP-index-enhanced.js
-const DEFAULT_ENTITY_ID = "default-entity-id";
+const DEFAULT_ENTITY_ID = "42101695-1332-48e3-963b-3c6ad4e909a0";
 
 const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
@@ -161,7 +163,7 @@ const calculatePlayerTargetingClassification = async (playerId, lastPlayedDate, 
         if (daysSinceLastPlayed <= 90) return 'Retain_Inactive31_60d';
         if (daysSinceLastPlayed <= 120) return 'Retain_Inactive61_90d';
         if (daysSinceLastPlayed <= 180) return 'Churned_91_120d';
-        if (daysSinceLastPlayed <= 360) return 'Churned_121_180d';
+        if (daysSinceLastPlayed <= 360) return 'Churned_121-180d';
         if (daysSinceLastPlayed <= 720) return 'Churned_181_360d';
         return 'Churned_361d';
     }
@@ -208,7 +210,7 @@ const calculatePlayerTargetingClassification = async (playerId, lastPlayedDate, 
         if (daysSinceLastPlayed <= 90) return 'Retain_Inactive31_60d';
         if (daysSinceLastPlayed <= 120) return 'Retain_Inactive61_90d';
         if (daysSinceLastPlayed <= 180) return 'Churned_91_120d';
-        if (daysSinceLastPlayed <= 360) return 'Churned_121_180d';
+        if (daysSinceLastPlayed <= 360) return 'Churned_121-180d';
         if (daysSinceLastPlayed <= 720) return 'Churned_181_360d';
         return 'Churned_361d';
     } catch (error) {
@@ -230,21 +232,32 @@ const generatePlayerId = (playerName) => {
 };
 
 // ===================================================================
-// MAIN PROCESSING FUNCTIONS (MERGED)
+// MAIN PROCESSING FUNCTIONS (MERGED & REFACTORED)
 // ===================================================================
 
 /**
  * Create or update a Player record
  * (Merged: Preserved index.js logic, added entityId)
+ *
+ * ===================================================================
+ * REFACTORED (Nov 2025):
+ * 1. Adds conditional logic for date fields based on Game.gameStartDateTime.
+ * 2. Only updates lastPlayedDate/targetingClassification if the new game is the LATEST.
+ * 3. Back-fills registrationDate/firstGamePlayed/registrationVenueId if the new game is the EARLIEST.
+ * 4. Adds 'firstGamePlayed' to new player records.
+ * 5. Corrects registrationVenueId logic based on venueAssignmentStatus.
+ * ===================================================================
  */
-// --- MERGE ---: Added entityId parameter
 const upsertPlayerRecord = async (playerId, playerName, gameData, playerData, entityId) => {
     console.log(`[PLAYER-UPSERT] Starting upsert for player ${playerName} (${playerId})`);
     const playerTable = getTableName('Player');
     const now = new Date().toISOString();
     const nameParts = parsePlayerName(playerName);
-    const gameDateTime = gameData.game.gameEndDateTime || gameData.game.gameStartDateTime;
+    
+    // Use gameStartDateTime as the authoritative timestamp for all logic
+    const gameDateTime = gameData.game.gameStartDateTime || gameData.game.gameEndDateTime;
     const gameDate = gameDateTime ? (gameDateTime.includes('T') ? gameDateTime : `${gameDateTime}T00:00:00.000Z`) : now;
+    const gameDateObj = new Date(gameDate);
 
     try {
         const existingPlayer = await ddbDocClient.send(new GetCommand({
@@ -253,60 +266,94 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData, en
         }));
 
         if (existingPlayer.Item) {
-            // Player exists globally. Update their record.
-            const targetingClassification = await calculatePlayerTargetingClassification(
-                playerId, gameDateTime, existingPlayer.Item.registrationDate, false
-            );
-            await ddbDocClient.send(new UpdateCommand({
-                TableName: playerTable,
-                Key: { id: playerId },
-                // --- MERGE ---: Added #ent = :entityId
-                UpdateExpression: `
-                    SET lastPlayedDate = :lastPlayedDate,
-                        targetingClassification = :targetingClassification,
-                        pointsBalance = pointsBalance + :points,
-                        #version = #version + :inc,
-                        #ent = :entityId
-                `,
-                // --- MERGE ---: Added #ent
-                ExpressionAttributeNames: { 
-                    '#version': '_version',
-                    '#ent': 'primaryEntityId'
-                },
-                // --- MERGE ---: Added :entityId
-                ExpressionAttributeValues: {
-                    ':lastPlayedDate': gameDate,
-                    ':targetingClassification': targetingClassification,
-                    ':points': playerData.points || 0,
-                    ':inc': 1,
-                    ':entityId': entityId || existingPlayer.Item.primaryEntityId || DEFAULT_ENTITY_ID
+            // Player exists globally. Apply conditional updates.
+            console.log(`[PLAYER-UPSERT] Existing player ${playerId} found. Applying conditional logic.`);
+            
+            const currentRegDate = new Date(existingPlayer.Item.registrationDate);
+            const currentLastPlayed = new Date(existingPlayer.Item.lastPlayedDate || existingPlayer.Item.registrationDate);
+
+            // Build dynamic update expression
+            let updateExpression = 'SET #version = #version + :inc, #ent = :entityId, updatedAt = :now, pointsBalance = pointsBalance + :points';
+            let expressionNames = { 
+                '#version': '_version',
+                '#ent': 'primaryEntityId'
+            };
+            let expressionValues = {
+                ':inc': 1,
+                ':entityId': entityId || existingPlayer.Item.primaryEntityId || DEFAULT_ENTITY_ID,
+                ':now': now,
+                ':points': playerData.points || 0
+            };
+
+            // REFACTOR RULE 1: Game is EARLIER than registration date
+            if (gameDateObj < currentRegDate) {
+                console.log(`[PLAYER-UPSERT] Game date ${gameDate} is earlier than reg date ${existingPlayer.Item.registrationDate}. Back-filling first-play data.`);
+                updateExpression += ', registrationDate = :regDate, firstGamePlayed = :firstGame';
+                expressionValues[':regDate'] = gameDate;
+                expressionValues[':firstGame'] = gameDate;
+                
+                // Only assign reg venue if it's not pending/unassigned
+                const canAssignVenue = gameData.game.venueAssignmentStatus !== "PENDING_ASSIGNMENT" && gameData.game.venueId && gameData.game.venueId !== UNASSIGNED_VENUE_ID;
+                if (canAssignVenue) {
+                    updateExpression += ', registrationVenueId = :regVenue';
+                    expressionValues[':regVenue'] = gameData.game.venueId;
                 }
-            }));
-            console.log(`[PLAYER-UPSERT] Updated existing player ${playerId}`);
+            }
+
+            // REFACTOR RULE 2: Game is LATER than last played date
+            if (gameDateObj > currentLastPlayed) {
+                console.log(`[PLAYER-UPSERT] Game date ${gameDate} is later than last played ${existingPlayer.Item.lastPlayedDate}. Updating last-play data.`);
+                const targetingClassification = await calculatePlayerTargetingClassification(
+                    playerId, gameDate, existingPlayer.Item.registrationDate, false
+                );
+                
+                updateExpression += ', lastPlayedDate = :lastPlayed, targetingClassification = :targeting';
+                expressionValues[':lastPlayed'] = gameDate;
+                expressionValues[':targeting'] = targetingClassification;
+            }
+
+            // Only send update if there's something to change (points or dates)
+            if (Object.keys(expressionValues).length > 4) { // More than the base 4 values
+                 await ddbDocClient.send(new UpdateCommand({
+                    TableName: playerTable,
+                    Key: { id: playerId },
+                    UpdateExpression: updateExpression,
+                    ExpressionAttributeNames: expressionNames,
+                    ExpressionAttributeValues: expressionValues
+                }));
+                console.log(`[PLAYER-UPSERT] Updated existing player ${playerId}`);
+            } else {
+                 console.log(`[PLAYER-UPSERT] No date or point updates for player ${playerId}.`);
+            }
             return playerId;
+            
         } else {
             // Player does NOT exist globally. Create a new record.
+            // This game is by definition the first and last.
+            console.log(`[PLAYER-UPSERT] New player ${playerId}. Creating record.`);
+            
             const targetingClassification = await calculatePlayerTargetingClassification(
-                playerId, gameDateTime, now, true
+                playerId, gameDate, gameDate, true
             );
             
-            const isUnassignedVenue = !gameData.game.venueId || gameData.game.venueId === UNASSIGNED_VENUE_ID;
-            
+            // Use game's venue assignment status to determine registration venue
+            const canAssignVenue = gameData.game.venueAssignmentStatus !== "PENDING_ASSIGNMENT" && gameData.game.venueId && gameData.game.venueId !== UNASSIGNED_VENUE_ID;
+
             const newPlayer = {
                 id: playerId,
                 firstName: nameParts.firstName,
                 lastName: nameParts.lastName,
                 givenName: nameParts.givenName,
-                registrationDate: gameDateTime,
-                registrationVenueId: isUnassignedVenue ? null : gameData.game.venueId,
+                registrationDate: gameDate,
+                firstGamePlayed: gameDate, // REFACTOR: Added this field
+                registrationVenueId: canAssignVenue ? gameData.game.venueId : null, // REFACTOR: Corrected logic
                 status: 'ACTIVE',
                 category: 'NEW',
                 lastPlayedDate: gameDate,
                 targetingClassification: targetingClassification,
-                venueAssignmentStatus: isUnassignedVenue ? 'PENDING_ASSIGNMENT' : 'AUTO_ASSIGNED',
+                venueAssignmentStatus: canAssignVenue ? 'AUTO_ASSIGNED' : 'PENDING_ASSIGNMENT', // REFACTOR: Corrected logic
                 creditBalance: 0,
                 pointsBalance: playerData.points || 0,
-                // --- MERGE ---: Added primaryEntityId
                 primaryEntityId: entityId || DEFAULT_ENTITY_ID,
                 createdAt: now,
                 updatedAt: now,
@@ -323,8 +370,15 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData, en
             return playerId;
         }
     } catch (error) {
-        console.error(`[PLAYER-UPSERT] CRITICAL ERROR for ${playerName}:`, error);
-        throw error;
+        if (error.name !== 'ConditionalCheckFailedException') {
+            console.error(`[PLAYER-UPSERT] CRITICAL ERROR for ${playerName}:`, error);
+        } else {
+             console.warn(`[PLAYER-UPSERT] Condition check failed for ${playerName}, likely race condition. Skipping.`);
+        }
+        // Re-throw to fail SQS message processing if it's a real error
+        if (error.name !== 'ConditionalCheckFailedException') {
+            throw error;
+        }
     }
 };
 
@@ -455,7 +509,8 @@ const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue, 
     const summaryId = `${playerId}`;
     const now = new Date().toISOString();
     
-    const gameDateTime = gameData.game.gameEndDateTime || gameData.game.gameStartDateTime;
+    // Use gameStartDateTime as the authoritative timestamp
+    const gameDateTime = gameData.game.gameStartDateTime || gameData.game.gameEndDateTime;
 
     const buyInAmount = (gameData.game.buyIn || 0) + (gameData.game.rake || 0);
     const winningsAmount = playerData.winnings || 0;
@@ -469,45 +524,56 @@ const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue, 
         }));
 
         if (existingSummary.Item) {
+            
+            // REFACTOR: Apply conditional date logic to lastPlayed
+            const currentLastPlayed = new Date(existingSummary.Item.lastPlayed);
+            const gameDateObj = new Date(gameDateTime);
+            
+            let updateExpression = `
+                SET sessionsPlayed = sessionsPlayed + :one,
+                    tournamentsPlayed = tournamentsPlayed + :one,
+                    tournamentWinnings = tournamentWinnings + :winnings,
+                    tournamentBuyIns = tournamentBuyIns + :buyIn,
+                    tournamentITM = tournamentITM + :itm,
+                    tournamentsCashed = tournamentsCashed + :cash,
+                    totalWinnings = totalWinnings + :winnings,
+                    totalBuyIns = totalBuyIns + :buyIn,
+                    netBalance = netBalance + :profitLoss,
+                    venuesVisited = venuesVisited + :venueInc,
+                    updatedAt = :updatedAt,
+                    #version = #version + :one,
+                    #ent = :entityId
+            `;
+            let expressionNames = {
+                '#version': '_version',
+                '#ent': 'entityId'
+            };
+            let expressionValues = {
+                ':one': 1,
+                ':winnings': winningsAmount,
+                ':buyIn': buyInAmount,
+                ':itm': isITM ? 1 : 0,
+                ':cash': isCash ? 1 : 0,
+                ':profitLoss': winningsAmount - buyInAmount,
+                ':venueInc': wasNewVenue ? 1 : 0, 
+                ':updatedAt': now,
+                ':entityId': entityId || existingSummary.Item.entityId || DEFAULT_ENTITY_ID
+            };
+            
+            // REFACTOR RULE: Only update lastPlayed if this game is later
+            if (gameDateObj > currentLastPlayed) {
+                console.log(`[SUMMARY-UPSERT] Updating lastPlayed date.`);
+                updateExpression += ', #lastPlayed = :lastPlayed';
+                expressionNames['#lastPlayed'] = 'lastPlayed';
+                expressionValues[':lastPlayed'] = gameDateTime;
+            }
+
             await ddbDocClient.send(new UpdateCommand({
                 TableName: playerSummaryTable,
                 Key: { id: summaryId },
-                // --- MERGE ---: Added #ent = :entityId
-                UpdateExpression: `
-                    SET #lastPlayed = :lastPlayed,
-                        sessionsPlayed = sessionsPlayed + :one,
-                        tournamentsPlayed = tournamentsPlayed + :one,
-                        tournamentWinnings = tournamentWinnings + :winnings,
-                        tournamentBuyIns = tournamentBuyIns + :buyIn,
-                        tournamentITM = tournamentITM + :itm,
-                        tournamentsCashed = tournamentsCashed + :cash,
-                        totalWinnings = totalWinnings + :winnings,
-                        totalBuyIns = totalBuyIns + :buyIn,
-                        netBalance = netBalance + :profitLoss,
-                        venuesVisited = venuesVisited + :venueInc,
-                        updatedAt = :updatedAt,
-                        #version = #version + :one,
-                        #ent = :entityId
-                `,
-                // --- MERGE ---: Added #ent
-                ExpressionAttributeNames: {
-                    '#version': '_version',
-                    '#lastPlayed': 'lastPlayed',
-                    '#ent': 'entityId'
-                },
-                // --- MERGE ---: Added :entityId
-                ExpressionAttributeValues: {
-                    ':lastPlayed': gameDateTime,
-                    ':one': 1,
-                    ':winnings': winningsAmount,
-                    ':buyIn': buyInAmount,
-                    ':itm': isITM ? 1 : 0,
-                    ':cash': isCash ? 1 : 0,
-                    ':profitLoss': winningsAmount - buyInAmount,
-                    ':venueInc': wasNewVenue ? 1 : 0, 
-                    ':updatedAt': now,
-                    ':entityId': entityId || existingSummary.Item.entityId || DEFAULT_ENTITY_ID
-                }
+                UpdateExpression: updateExpression,
+                ExpressionAttributeNames: expressionNames,
+                ExpressionAttributeValues: expressionValues
             }));
             console.log(`[SUMMARY-UPSERT] Updated existing summary.`);
         } else {
@@ -529,7 +595,7 @@ const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue, 
                 totalWinnings: winningsAmount,
                 totalBuyIns: buyInAmount,
                 netBalance: winningsAmount - buyInAmount,
-                lastPlayed: gameDateTime,
+                lastPlayed: gameDateTime, // REFACTOR: Set based on game date
                 createdAt: now,
                 updatedAt: now,
                 _version: 1,
@@ -552,11 +618,18 @@ const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue, 
 /**
  * Update or create PlayerVenue record
  * (Merged: Preserved index.js logic [returns wasNewVenue], added entityId)
+ *
+ * ===================================================================
+ * REFACTORED (Nov 2025):
+ * 1. Adds conditional logic for date fields based on Game.gameStartDateTime.
+ * 2. Only updates lastPlayedDate/targetingClassification if the new game is the LATEST for this venue.
+ * 3. Back-fills firstPlayedDate if the new game is the EARLIEST for this venue.
+ * ===================================================================
  */
-// --- MERGE ---: Added entityId parameter
 const upsertPlayerVenue = async (playerId, gameData, playerData, entityId) => {
     console.log(`[VENUE-UPSERT] Starting upsert for player ${playerId} at venue ${gameData.game.venueId}.`);
     
+    // This logic is correct and preserved
     if (!gameData.game.venueId || gameData.game.venueId === UNASSIGNED_VENUE_ID) {
         console.log(`[VENUE-UPSERT] Skipping - venue is unassigned for game ${gameData.game.id}`);
         return { success: true, skipped: true, wasNewVenue: false };
@@ -565,8 +638,12 @@ const upsertPlayerVenue = async (playerId, gameData, playerData, entityId) => {
     const playerVenueTable = getTableName('PlayerVenue');
     const playerVenueId = `${playerId}#${gameData.game.venueId}`;
     const now = new Date().toISOString();
-    const gameDateTime = gameData.game.gameEndDateTime || gameData.game.gameStartDateTime;
+    
+    // Use gameStartDateTime as the authoritative timestamp
+    const gameDateTime = gameData.game.gameStartDateTime || gameData.game.gameEndDateTime;
     const gameDate = gameDateTime ? (gameDateTime.includes('T') ? gameDateTime : `${gameDateTime}T00:00:00.000Z`) : now;
+    const gameDateObj = new Date(gameDate);
+    
     const currentGameBuyIn = (gameData.game.buyIn || 0) + (gameData.game.rake || 0);
     
     try {
@@ -575,14 +652,12 @@ const upsertPlayerVenue = async (playerId, gameData, playerData, entityId) => {
             Key: { id: playerVenueId }
         }));
         
-        const membershipCreatedDate = existingRecord.Item?.membershipCreatedDate || gameDate;
-        
-        const targetingClassification = calculatePlayerVenueTargetingClassification(
-            gameDate,
-            membershipCreatedDate
-        );
-        
         if (existingRecord.Item) {
+            // PlayerVenue exists. Apply conditional updates.
+            const currentFirstPlayed = new Date(existingRecord.Item.firstPlayedDate);
+            const currentLastPlayed = new Date(existingRecord.Item.lastPlayedDate);
+
+            // Calculate metrics that are always updated
             const oldGamesPlayed = existingRecord.Item.totalGamesPlayed || 0;
             const oldAverageBuyIn = existingRecord.Item.averageBuyIn || 0;
             const newTotalGames = oldGamesPlayed + 1;
@@ -590,38 +665,58 @@ const upsertPlayerVenue = async (playerId, gameData, playerData, entityId) => {
                 ? ((oldAverageBuyIn * oldGamesPlayed) + currentGameBuyIn) / newTotalGames
                 : currentGameBuyIn;
 
+            // Build dynamic update expression
+            let updateExpression = 'SET #version = #version + :inc, #ent = :entityId, updatedAt = :updatedAt, totalGamesPlayed = totalGamesPlayed + :inc, averageBuyIn = :newAverageBuyIn';
+            let expressionNames = {
+                '#version': '_version',
+                '#ent': 'entityId'
+            };
+            let expressionValues = {
+                ':inc': 1,
+                ':entityId': entityId || existingRecord.Item.entityId || DEFAULT_ENTITY_ID,
+                ':updatedAt': now,
+                ':newAverageBuyIn': newAverageBuyIn
+            };
+
+            // REFACTOR RULE 1: Game is EARLIER than first played date
+            if (gameDateObj < currentFirstPlayed) {
+                console.log(`[VENUE-UPSERT] Game date ${gameDate} is earlier than first played ${existingRecord.Item.firstPlayedDate}. Back-filling.`);
+                updateExpression += ', firstPlayedDate = :firstPlayed';
+                expressionValues[':firstPlayed'] = gameDate;
+            }
+
+            // REFACTOR RULE 2: Game is LATER than last played date
+            if (gameDateObj > currentLastPlayed) {
+                console.log(`[VENUE-UPSERT] Game date ${gameDate} is later than last played ${existingRecord.Item.lastPlayedDate}. Updating.`);
+                const targetingClassification = calculatePlayerVenueTargetingClassification(
+                    gameDate, // Use new game date as last activity
+                    existingRecord.Item.membershipCreatedDate
+                );
+                
+                updateExpression += ', lastPlayedDate = :lastPlayed, targetingClassification = :targeting';
+                expressionValues[':lastPlayed'] = gameDate;
+                expressionValues[':targeting'] = targetingClassification;
+            }
+
             await ddbDocClient.send(new UpdateCommand({
                 TableName: playerVenueTable,
                 Key: { id: playerVenueId },
-                // --- MERGE ---: Added #ent = :entityId
-                UpdateExpression: `
-                    SET totalGamesPlayed = totalGamesPlayed + :inc,
-                        lastPlayedDate = :lastPlayedDate,
-                        targetingClassification = :targetingClassification,
-                        averageBuyIn = :newAverageBuyIn,
-                        updatedAt = :updatedAt,
-                        #version = #version + :inc,
-                        #ent = :entityId
-                `,
-                // --- MERGE ---: Added #ent
-                ExpressionAttributeNames: {
-                    '#version': '_version',
-                    '#ent': 'entityId'
-                },
-                // --- MERGE ---: Added :entityId
-                ExpressionAttributeValues: {
-                    ':inc': 1,
-                    ':lastPlayedDate': gameDate,
-                    ':targetingClassification': targetingClassification,
-                    ':newAverageBuyIn': newAverageBuyIn,
-                    ':updatedAt': now,
-                    ':entityId': entityId || existingRecord.Item.entityId || DEFAULT_ENTITY_ID
-                }
+                UpdateExpression: updateExpression,
+                ExpressionAttributeNames: expressionNames,
+                ExpressionAttributeValues: expressionValues
             }));
+            
             console.log(`[VENUE-UPSERT] Updated existing PlayerVenue record.`);
-            return { wasNewVenue: false }; // Preserved from index.js
+            return { wasNewVenue: false };
 
         } else {
+            // PlayerVenue does NOT exist. Create new.
+            // This game is by definition the first and last.
+            const targetingClassification = calculatePlayerVenueTargetingClassification(
+                gameDate, // lastActivityDate
+                gameDate  // membershipCreatedDate
+            );
+            
             const newPlayerVenue = {
                 id: playerVenueId,
                 playerId: playerId,
@@ -667,6 +762,9 @@ const createPlayerTransactions = async (playerId, gameData, playerData, processi
     const transactions = [];
     const now = new Date().toISOString();
     
+    // Use gameStartDateTime as the authoritative timestamp
+    const gameDateTime = gameData.game.gameStartDateTime || gameData.game.gameEndDateTime;
+
     const transactionsToCreate = processingInstructions.requiredActions?.createTransactions || [];
     
     try {
@@ -683,7 +781,7 @@ const createPlayerTransactions = async (playerId, gameData, playerData, processi
                 type: transaction.type,
                 amount: transaction.amount,
                 paymentSource: transaction.paymentSource,
-                transactionDate: gameData.game.gameEndDateTime || gameData.game.gameStartDateTime,
+                transactionDate: gameDateTime, // REFACTOR: Use authoritative date
                 notes: `SYSTEM insert from scraped data`,
                 createdAt: now,
                 updatedAt: now,

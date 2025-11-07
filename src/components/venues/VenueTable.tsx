@@ -4,15 +4,23 @@ import * as APITypes from '../../API';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 type Venue = APITypes.Venue;
+// ✅ NEW: Define Entity type
+type Entity = Pick<APITypes.Entity, 'id' | 'entityName'>;
+
 
 interface VenueTableProps {
   venues: Venue[];
+  // ✅ NEW: Prop to receive entities
+  entities: Entity[];
   loading: boolean;
   onEdit: (venue: Venue) => void;
   onDelete: (id: string) => void;
 }
 
-export const VenueTable: React.FC<VenueTableProps> = ({ venues, loading, onEdit, onDelete }) => {
+export const VenueTable: React.FC<VenueTableProps> = ({ venues, entities, loading, onEdit, onDelete }) => {
+  // ✅ NEW: Create a quick lookup map for entity names
+  const entityNameMap = new Map(entities.map(e => [e.id, e.entityName]));
+
   if (loading) {
     return <p className="text-center text-gray-500 mt-8">Loading venues...</p>;
   }
@@ -28,7 +36,8 @@ export const VenueTable: React.FC<VenueTableProps> = ({ venues, loading, onEdit,
           <tr>
             <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">ID</th>
             <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Name</th>
-            {/* ✅ NEW: Added Aliases column header */}
+            {/* ✅ NEW: Added Entity column header */}
+            <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Entity</th>
             <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Aliases</th>
             <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Address</th>
             <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">City</th>
@@ -44,7 +53,11 @@ export const VenueTable: React.FC<VenueTableProps> = ({ venues, loading, onEdit,
                 {venue.venueNumber !== undefined ? venue.venueNumber : '-'}
               </td>
               <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">{venue.name}</td>
-              {/* ✅ NEW: Added cell to display aliases */}
+              {/* ✅ NEW: Added cell to display entity name */}
+                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {/* ✅ FIX: Check if venue.entityId exists before using it */}
+                {venue.entityId ? entityNameMap.get(venue.entityId) || 'N/A' : 'N/A'}
+                </td>
               <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                 {venue.aliases && venue.aliases.length > 0 ? venue.aliases.join(', ') : 'N/A'}
               </td>

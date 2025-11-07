@@ -5843,6 +5843,7 @@ export const schema = {
             "values": [
                 "NLHE",
                 "PLO",
+                "PLOM",
                 "PLO5",
                 "PLO6"
             ]
@@ -5935,10 +5936,10 @@ export const schema = {
                 "Active",
                 "Retain_Inactive31_60d",
                 "Retain_Inactive61_90d",
-                "Churned_91_120d",
-                "Churned_121_180d",
-                "Churned_181_360d",
-                "Churned_361d"
+                "Churn_91_120d",
+                "Churn_121_180d",
+                "Churn_181_360d",
+                "Churn_361d"
             ]
         },
         "TransactionType": {
@@ -7639,8 +7640,104 @@ export const schema = {
                     "attributes": []
                 }
             }
+        },
+        "AllCountsResult": {
+            "name": "AllCountsResult",
+            "fields": {
+                "playerCount": {
+                    "name": "playerCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerSummaryCount": {
+                    "name": "playerSummaryCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerEntryCount": {
+                    "name": "playerEntryCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerResultCount": {
+                    "name": "playerResultCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerVenueCount": {
+                    "name": "playerVenueCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerTransactionCount": {
+                    "name": "playerTransactionCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerCreditsCount": {
+                    "name": "playerCreditsCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerPointsCount": {
+                    "name": "playerPointsCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerTicketCount": {
+                    "name": "playerTicketCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerMarketingPreferencesCount": {
+                    "name": "playerMarketingPreferencesCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerMarketingMessageCount": {
+                    "name": "playerMarketingMessageCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameCount": {
+                    "name": "gameCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tournamentStructureCount": {
+                    "name": "tournamentStructureCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "58e3c34dd8936d3a8589e075c9a4ab3f"
+    "version": "93b14097436f7aa436f48d485f053251"
 };

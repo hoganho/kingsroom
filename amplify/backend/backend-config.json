@@ -94,6 +94,20 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "getModelCount": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "getUserMetrics": {
       "build": true,
       "dependsOn": [
@@ -232,6 +246,22 @@
         {
           "category": "function",
           "resourceName": "autoScraper"
+        }
+      ]
+    },
+    "AMPLIFY_function_getModelCount_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getModelCount"
+        }
+      ]
+    },
+    "AMPLIFY_function_getModelCount_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getModelCount"
         }
       ]
     },

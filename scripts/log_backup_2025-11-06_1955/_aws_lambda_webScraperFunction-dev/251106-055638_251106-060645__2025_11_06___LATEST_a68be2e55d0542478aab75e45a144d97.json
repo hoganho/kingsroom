@@ -1,0 +1,854 @@
+[
+  {
+    "eventId": "39303025080255105823034207645550836854810873986489253888",
+    "ingestionTime": 1762408598296,
+    "message": "INIT_START Runtime Version: nodejs:22.v59\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:78be964f5868c0d4aba0b80888fefce9cdc59266c5fe738cfb0ddd061e6d5450\n",
+    "timestamp": 1762408598025
+  },
+  {
+    "eventId": "39303025096356243856373317565188294657171445658848264192",
+    "ingestionTime": 1762408607766,
+    "message": "START RequestId: 8adfeaf4-590d-4797-b6a4-105ca7df42e9 Version: $LATEST\n",
+    "timestamp": 1762408598747
+  },
+  {
+    "eventId": "39303025096690755034351276912311330431261171081437970433",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:38.762Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\tEvent received: {\n  \"typeName\": \"Mutation\",\n  \"fieldName\": \"fetchTournamentData\",\n  \"arguments\": {\n    \"url\": \"https://kingsroom.com.au/tournament/?id=1\"\n  },\n  \"identity\": {\n    \"claims\": {\n      \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n      \"cognito:groups\": [\n        \"Admin\"\n      ],\n      \"iss\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n      \"client_id\": \"4sth21dgrh3rjjnsl63ka32k4q\",\n      \"origin_jti\": \"015d4e4a-2207-4b94-b6c7-ec46a2320465\",\n      \"event_id\": \"0f703af2-e660-4bbd-8c29-d91561dcc35a\",\n      \"token_use\": \"access\",\n      \"scope\": \"aws.cognito.signin.user.admin\",\n      \"auth_time\": 1761780919,\n      \"exp\": 1762409580,\n      \"iat\": 1762405980,\n      \"jti\": \"a19bff9d-8cef-4c2e-94b4-c61817fa7188\",\n      \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n    },\n    \"defaultAuthStrategy\": \"ALLOW\",\n    \"groups\": [\n      \"Admin\"\n    ],\n    \"issuer\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n    \"sourceIp\": [\n      \"86.48.8.223\"\n    ],\n    \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n    \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n  },\n  \"source\": null,\n  \"request\": {\n    \"headers\": {\n      \"x-forwarded-for\": \"86.48.8.223,15.158.196.100\",\n      \"sec-ch-ua-mobile\": \"?0\",\n      \"cloudfront-viewer-country\": \"AU\",\n      \"cloudfront-is-tablet-viewer\": \"false\",\n      \"x-amzn-requestid\": \"c0c196e5-21f0-4294-8be2-02d395d138d4\",\n      \"via\": \"2.0 3dd46c3f69dcec3c9fa865d2c6209094.cloudfront.net (CloudFront)\",\n      \"cloudfront-forwarded-proto\": \"https\",\n      \"origin\": \"http://localhost:5173\",\n      \"content-length\": \"1779\",\n      \"x-forwarded-proto\": \"https\",\n      \"accept-language\": \"en-GB,en;q=0.8\",\n      \"host\": \"moi5t5e25vbajg2funkwklyhqq.appsync-api.ap-southeast-2.amazonaws.com\",\n      \"sec-gpc\": \"1\",\n      \"user-agent\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36\",\n      \"cloudfront-is-mobile-viewer\": \"false\",\n      \"accept\": \"*/*\",\n      \"priority\": \"u=1, i\",\n      \"cloudfront-viewer-asn\": \"137409\",\n      \"cloudfront-is-smarttv-viewer\": \"false\",\n      \"x-amzn-appsync-is-vpce-request\": \"false\",\n      \"accept-encoding\": \"gzip, deflate, br, zstd\",\n      \"x-amzn-account-id\": \"495599763953\",\n      \"referer\": \"http://localhost:5173/\",\n      \"x-amzn-remote-ip\": \"86.48.8.223\",\n      \"content-type\": \"application/json; charset=UTF-8\",\n      \"sec-fetch-mode\": \"cors\",\n      \"x-amzn-trace-id\": \"Root=1-690c3895-6aa7a54f0241597a66071ef3\",\n      \"x-amz-cf-id\": \"OoaNceFyMd9a0g4rl72A89Z3pqwNr4HYkdhxayJN8oNlI-UkWdZQdQ==\",\n      \"authorization\": \"eyJraWQiOiI0ZjE0SDRUWituNW01dUN4UzV6Tkh0VlBVN0x6TU9PS3VnZ1ppandhWlwvVT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYiLCJjb2duaXRvOmdyb3VwcyI6WyJBZG1pbiJdLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfajJrQWQ0a3BPIiwiY2xpZW50X2lkIjoiNHN0aDIxZGdyaDNyampuc2w2M2thMzJrNHEiLCJvcmlnaW5fanRpIjoiMDE1ZDRlNGEtMjIwNy00Yjk0LWI2YzctZWM0NmEyMzIwNDY1IiwiZXZlbnRfaWQiOiIwZjcwM2FmMi1lNjYwLTRiYmQtOGMyOS1kOTE1NjFkY2MzNWEiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzYxNzgwOTE5LCJleHAiOjE3NjI0MDk1ODAsImlhdCI6MTc2MjQwNTk4MCwianRpIjoiYTE5YmZmOWQtOGNlZi00YzJlLTk0YjQtYzYxODE3ZmE3MTg4IiwidXNlcm5hbWUiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYifQ.FUxRf4vbCC5alTusQdpFGXbHHObc8fRsWVtKrchOLOAr_8hTAmMNEL8g_3wrOCzcc6xtzy5Jk4ltcABRov1PEU1RzL4JJCrWXrafBPkNlStOAMc0c7-hFxhC0SzPtjOWFULIh7OPZA8iqJLdWMNoYZmZuDjIncJb4iLRZfPbPxeamkfoDQX2z9iJ4dehEyQClGwp66QHK0kVmBgzy-PUgXE0s383rsXISx6_I5RaM0obbwTqS42-Uu-Bu26BaVeFy1VlNKRNX_6GRHK0sGXvyyjfDxshG0T4lUGDh_Jn0FGwCdi2ehSAmkM-di5JcV-B0H6iRogx4b5MZtbzMcMUbQ\",\n      \"sec-fetch-dest\": \"empty\",\n      \"x-amz-user-agent\": \"aws-amplify/6.15.7 api/1 framework/1\",\n      \"sec-ch-ua-platform\": \"\\\"macOS\\\"\",\n      \"cloudfront-is-desktop-viewer\": \"true\",\n      \"sec-fetch-site\": \"cross-site\",\n      \"sec-ch-ua\": \"\\\"Chromium\\\";v=\\\"142\\\", \\\"Brave\\\";v=\\\"142\\\", \\\"Not_A Brand\\\";v=\\\"99\\\"\",\n      \"x-forwarded-port\": \"443\"\n    },\n    \"domainName\": null\n  },\n  \"prev\": {\n    \"result\": {}\n  }\n}\n",
+    "timestamp": 1762408598762
+  },
+  {
+    "eventId": "39303025099076934770594053588455652286434545762577874946",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:38.869Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tERROR\t[Entity] Error ensuring default entity: AccessDeniedException: User: arn:aws:sts::495599763953:assumed-role/kingsroomLambdaRole66e547c8-dev/webScraperFunction-dev is not authorized to perform: dynamodb:GetItem on resource: arn:aws:dynamodb:ap-southeast-2:495599763953:table/Entity-oi5oitkajrgtzm7feellfluriy-dev because no identity-based policy allows the dynamodb:GetItem action\n    at throwDefaultError (/var/runtime/node_modules/@aws-sdk/node_modules/@smithy/smithy-client/dist-cjs/index.js:422:20)\n    at /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/smithy-client/dist-cjs/index.js:431:5\n    at de_CommandError (/var/runtime/node_modules/@aws-sdk/client-dynamodb/dist-cjs/index.js:2359:14)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/middleware-serde/dist-cjs/index.js:36:20\n    at async /var/runtime/node_modules/@aws-sdk/lib-dynamodb/dist-cjs/index.js:173:30\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/core/dist-cjs/index.js:193:18\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/middleware-retry/dist-cjs/index.js:312:38\n    at async /var/runtime/node_modules/@aws-sdk/middleware-logger/dist-cjs/index.js:33:22\n    at async ensureDefaultEntity (/var/task/index.js:96:27) {\n  '$fault': 'client',\n  '$metadata': {\n    httpStatusCode: 400,\n    requestId: 'NGJTGPPGEO0V45EJP4SPTMHC2RVV4KQNSO5AEMVJF66Q9ASUAAJG',\n    extendedRequestId: undefined,\n    cfId: undefined,\n    attempts: 1,\n    totalRetryDelay: 0\n  },\n  __type: 'com.amazon.coral.service#AccessDeniedException'\n}\n",
+    "timestamp": 1762408598869
+  },
+  {
+    "eventId": "39303025099121536260991114834738723722979842485589835779",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:38.871Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[HANDLER] Operation detected: fetchTournamentData. Job ID: N/A\n",
+    "timestamp": 1762408598871
+  },
+  {
+    "eventId": "39303025099121536260991114834738723722979842485589835780",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:38.871Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[handleFetch] Processing URL: https://kingsroom.com.au/tournament/?id=1. Job ID: N/A, Source: N/A\n",
+    "timestamp": 1762408598871
+  },
+  {
+    "eventId": "39303025099478348184167604805003295215342216269685522437",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:38.887Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tERROR\t[Entity] Error determining entity from URL: AccessDeniedException: User: arn:aws:sts::495599763953:assumed-role/kingsroomLambdaRole66e547c8-dev/webScraperFunction-dev is not authorized to perform: dynamodb:Scan on resource: arn:aws:dynamodb:ap-southeast-2:495599763953:table/Entity-oi5oitkajrgtzm7feellfluriy-dev because no identity-based policy allows the dynamodb:Scan action\n    at throwDefaultError (/var/runtime/node_modules/@aws-sdk/node_modules/@smithy/smithy-client/dist-cjs/index.js:422:20)\n    at /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/smithy-client/dist-cjs/index.js:431:5\n    at de_CommandError (/var/runtime/node_modules/@aws-sdk/client-dynamodb/dist-cjs/index.js:2359:14)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/middleware-serde/dist-cjs/index.js:36:20\n    at async /var/runtime/node_modules/@aws-sdk/lib-dynamodb/dist-cjs/index.js:173:30\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/core/dist-cjs/index.js:193:18\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/middleware-retry/dist-cjs/index.js:312:38\n    at async /var/runtime/node_modules/@aws-sdk/middleware-logger/dist-cjs/index.js:33:22\n    at async getEntityIdFromUrl (/var/task/index.js:67:28) {\n  '$fault': 'client',\n  '$metadata': {\n    httpStatusCode: 400,\n    requestId: 'UKUOQCT2S84SQ60DJ3NG3A7SHVVV4KQNSO5AEMVJF66Q9ASUAAJG',\n    extendedRequestId: undefined,\n    cfId: undefined,\n    attempts: 1,\n    totalRetryDelay: 0\n  },\n  __type: 'com.amazon.coral.service#AccessDeniedException'\n}\n",
+    "timestamp": 1762408598887
+  },
+  {
+    "eventId": "39303025099500648929366135428144830933614864631191502854",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:38.888Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[handleFetch] Checking for existing game.\n",
+    "timestamp": 1762408598888
+  },
+  {
+    "eventId": "39303025099723656381351441659560188116341348246251307015",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:38.898Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[handleFetch] No existing game found for this URL.\n",
+    "timestamp": 1762408598898
+  },
+  {
+    "eventId": "39303025099723656381351441659560188116341348246251307016",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:38.898Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[handleFetch] Fetching content from https://kingsroom.com.au/tournament/?id=1...\n",
+    "timestamp": 1762408598898
+  },
+  {
+    "eventId": "39303025100214272775719115368673973918339612199382876169",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:38.920Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[handleFetch] Starting HTTP request for HTML content.\n",
+    "timestamp": 1762408598920
+  },
+  {
+    "eventId": "39303025106101669508131199878039403542318779636961705994",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.184Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[handleFetch] HTTP request successful. Starting scrape logic.\n",
+    "timestamp": 1762408599184
+  },
+  {
+    "eventId": "39303025110182705879462303912940439986213429792556122123",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.367Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-SCRAPER] Identified Structure: STATUS: RUNNING | REG: CLOSED\n",
+    "timestamp": 1762408599367
+  },
+  {
+    "eventId": "39303025112814193812888917443641654742385936450261811212",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.485Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[Scraper] Using unified robust strategy.\n",
+    "timestamp": 1762408599485
+  },
+  {
+    "eventId": "39303025112903396793683039936207797615476529896285732877",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.489Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-SERIES-MATCH] No exact match found. Falling back to fuzzy matching.\n",
+    "timestamp": 1762408599489
+  },
+  {
+    "eventId": "39303025113193306481263938037047761953020958595863478286",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.502Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-SERIES-MATCH] Low confidence fuzzy match, ignoring: \"Sydney Millions\" with rating 0\n",
+    "timestamp": 1762408599502
+  },
+  {
+    "eventId": "39303025113639321385234550499878476318473925825983086607",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.522Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-TYPE] Determined tournament type: REBUY\n",
+    "timestamp": 1762408599522
+  },
+  {
+    "eventId": "39303025113795426601624264861869226346382464356524949520",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.529Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-REVENUE] Calculating Revenue...\n",
+    "timestamp": 1762408599529
+  },
+  {
+    "eventId": "39303025113795426601624264861869226346382464356524949521",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.529Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-REVENUE] -> Entries: 21, Rebuys: 9, Addons: 0\n",
+    "timestamp": 1762408599529
+  },
+  {
+    "eventId": "39303025113795426601624264861869226346382464356524949522",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.529Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-REVENUE] -> Buy-In: 200\n",
+    "timestamp": 1762408599529
+  },
+  {
+    "eventId": "39303025113795426601624264861869226346382464356524949523",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.529Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-REVENUE] -> Total Transactions: 30\n",
+    "timestamp": 1762408599529
+  },
+  {
+    "eventId": "39303025113795426601624264861869226346382464356524949524",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.529Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-REVENUE] -> Calculated Revenue: 6000\n",
+    "timestamp": 1762408599529
+  },
+  {
+    "eventId": "39303025113795426601624264861869226346382464356524949525",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.529Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-GUARANTEE] Calculating metrics...\n",
+    "timestamp": 1762408599529
+  },
+  {
+    "eventId": "39303025113795426601624264861869226346382464356524949526",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.529Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-GUARANTEE] -> Prizepool: 5280, Guarantee: 5000\n",
+    "timestamp": 1762408599529
+  },
+  {
+    "eventId": "39303025113795426601624264861869226346382464356524949527",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.529Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-GUARANTEE] -> Difference (Prizepool - Guarantee): 280\n",
+    "timestamp": 1762408599529
+  },
+  {
+    "eventId": "39303025113795426601624264861869226346382464356524949528",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.529Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-GUARANTEE] -> Result: Surplus=280, Overlay=0\n",
+    "timestamp": 1762408599529
+  },
+  {
+    "eventId": "39303025114174539269999285455275333557017486502126616601",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.546Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-RAKE] Calculating total rake...\n",
+    "timestamp": 1762408599546
+  },
+  {
+    "eventId": "39303025114174539269999285455275333557017486502126616602",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.546Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-RAKE] -> Rake per transaction: 24, Entries: 21, Rebuys: 9\n",
+    "timestamp": 1762408599546
+  },
+  {
+    "eventId": "39303025114174539269999285455275333557017486502126616603",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.546Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-RAKE] -> Total Raked Transactions: 30\n",
+    "timestamp": 1762408599546
+  },
+  {
+    "eventId": "39303025114174539269999285455275333557017486502126616604",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.546Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-RAKE] -> Final Total Rake: 720\n",
+    "timestamp": 1762408599546
+  },
+  {
+    "eventId": "39303025114174539269999285455275333557017486502126616605",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.546Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-PROFIT] Calculating profit/loss...\n",
+    "timestamp": 1762408599546
+  },
+  {
+    "eventId": "39303025114174539269999285455275333557017486502126616606",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.546Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-PROFIT] -> Revenue By Buy-Ins: 6000\n",
+    "timestamp": 1762408599546
+  },
+  {
+    "eventId": "39303025114174539269999285455275333557017486502126616607",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.546Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-PROFIT] -> Prizepool: 5280\n",
+    "timestamp": 1762408599546
+  },
+  {
+    "eventId": "39303025114174539269999285455275333557017486502126616608",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.546Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-PROFIT] -> Final Profit/Loss: 720\n",
+    "timestamp": 1762408599546
+  },
+  {
+    "eventId": "39303025114620554173969897918106047922470453732246224929",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.566Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-ENTRIES] Found 21 total player entries.\n",
+    "timestamp": 1762408599566
+  },
+  {
+    "eventId": "39303025114687456409565489787530655077288398816764166178",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.569Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-RESULTS] No 'Result' table found. Could not parse results.\n",
+    "timestamp": 1762408599569
+  },
+  {
+    "eventId": "39303025115021967587543449134653690851378124239353872419",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.584Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-VENUE-MATCH] Found exact substring match: \"St. George Leagues Club\"\n",
+    "timestamp": 1762408599584
+  },
+  {
+    "eventId": "39303025115021967587543449134653690851378124239353872420",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.584Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-LIVE] Scraping live data, game status is RUNNING.\n",
+    "timestamp": 1762408599584
+  },
+  {
+    "eventId": "39303025115021967587543449134653690851378124239353872421",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.584Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-LIVE] Players remaining from seating data: 4\n",
+    "timestamp": 1762408599584
+  },
+  {
+    "eventId": "39303025115021967587543449134653690851378124239353872422",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.584Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-LIVE] -> Final Players Remaining: 4\n",
+    "timestamp": 1762408599584
+  },
+  {
+    "eventId": "39303025115044268332741979757795226569650772600859852839",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.585Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-LIVE] -> Total Chips: 900000\n",
+    "timestamp": 1762408599585
+  },
+  {
+    "eventId": "39303025115066569077940510380936762287923420962365833256",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.586Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-LIVE] -> Average Stack: 225000\n",
+    "timestamp": 1762408599586
+  },
+  {
+    "eventId": "39303025115066569077940510380936762287923420962365833257",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.586Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-ID] Extracted tournament ID from URL: 1\n",
+    "timestamp": 1762408599586
+  },
+  {
+    "eventId": "39303025115088869823139041004078298006196069323871813674",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.587Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[DEBUG-SCRAPER] Scraped data: {\n  \"isSeries\": false,\n  \"isSatellite\": false,\n  \"isRegular\": true,\n  \"name\": \"Monday St. George Leagues Club $5000 GTD\",\n  \"gameFrequency\": \"WEEKLY\",\n  \"gameStatus\": \"RUNNING\",\n  \"gameTags\": [\n    \"2xRe-Buy\"\n  ],\n  \"tournamentType\": \"REBUY\",\n  \"gameStartDateTime\": \"2022-11-16T18:30:00.000Z\",\n  \"registrationStatus\": \"CLOSED\",\n  \"gameVariant\": \"NLHE\",\n  \"prizepool\": 5280,\n  \"totalEntries\": 21,\n  \"totalRebuys\": 9,\n  \"buyIn\": 200,\n  \"rake\": 24,\n  \"startingStack\": 30000,\n  \"hasGuarantee\": true,\n  \"g\n",
+    "timestamp": 1762408599587
+  },
+  {
+    "eventId": "39303025115891696650286143437173583864011410338087108651",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.623Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\tUpdated existing structure fingerprint with ID: 688d39d74c325080b515f1a5e3c5235f1803a183a180845126479efbead51e65\n",
+    "timestamp": 1762408599623
+  },
+  {
+    "eventId": "39303025116070102611874388422305869610192597230134951980",
+    "ingestionTime": 1762408607766,
+    "message": "2025-11-06T05:56:39.631Z\t8adfeaf4-590d-4797-b6a4-105ca7df42e9\tINFO\t[handleFetch] Scraped data successfully for https://kingsroom.com.au/tournament/?id=1. END handleFetch.\n",
+    "timestamp": 1762408599631
+  },
+  {
+    "eventId": "39303025116360012299455286523145833947737025929712697389",
+    "ingestionTime": 1762408607766,
+    "message": "END RequestId: 8adfeaf4-590d-4797-b6a4-105ca7df42e9\n",
+    "timestamp": 1762408599644
+  },
+  {
+    "eventId": "39303025116382313044653817146287369666009674291218677806",
+    "ingestionTime": 1762408607766,
+    "message": "REPORT RequestId: 8adfeaf4-590d-4797-b6a4-105ca7df42e9\tDuration: 897.22 ms\tBilled Duration: 1617 ms\tMemory Size: 1024 MB\tMax Memory Used: 134 MB\tInit Duration: 719.23 ms\t\n",
+    "timestamp": 1762408599645
+  },
+  {
+    "eventId": "39303031834771713789584937000063579374732441120206749696",
+    "ingestionTime": 1762408909936,
+    "message": "START RequestId: 40ca6fc0-e10e-482f-9510-c55763e88257 Version: $LATEST\n",
+    "timestamp": 1762408900908
+  },
+  {
+    "eventId": "39303031835173127203158488216611222303640111627314397185",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:40.926Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\tEvent received: {\n  \"typeName\": \"Mutation\",\n  \"fieldName\": \"fetchTournamentData\",\n  \"arguments\": {\n    \"url\": \"https://kingsroom.com.au/tournament/?id=1\"\n  },\n  \"identity\": {\n    \"claims\": {\n      \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n      \"cognito:groups\": [\n        \"Admin\"\n      ],\n      \"iss\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n      \"client_id\": \"4sth21dgrh3rjjnsl63ka32k4q\",\n      \"origin_jti\": \"015d4e4a-2207-4b94-b6c7-ec46a2320465\",\n      \"event_id\": \"0f703af2-e660-4bbd-8c29-d91561dcc35a\",\n      \"token_use\": \"access\",\n      \"scope\": \"aws.cognito.signin.user.admin\",\n      \"auth_time\": 1761780919,\n      \"exp\": 1762409580,\n      \"iat\": 1762405980,\n      \"jti\": \"a19bff9d-8cef-4c2e-94b4-c61817fa7188\",\n      \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n    },\n    \"defaultAuthStrategy\": \"ALLOW\",\n    \"groups\": [\n      \"Admin\"\n    ],\n    \"issuer\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n    \"sourceIp\": [\n      \"86.48.8.223\"\n    ],\n    \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n    \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n  },\n  \"source\": null,\n  \"request\": {\n    \"headers\": {\n      \"x-forwarded-for\": \"86.48.8.223,15.158.196.99\",\n      \"sec-ch-ua-mobile\": \"?0\",\n      \"cloudfront-viewer-country\": \"AU\",\n      \"cloudfront-is-tablet-viewer\": \"false\",\n      \"x-amzn-requestid\": \"d24108f3-8fc0-4312-b068-9f1cdd84ee3a\",\n      \"via\": \"2.0 d49df2e90b459cb8882f9dcb6acc17b8.cloudfront.net (CloudFront)\",\n      \"cloudfront-forwarded-proto\": \"https\",\n      \"origin\": \"http://localhost:5173\",\n      \"content-length\": \"1779\",\n      \"x-forwarded-proto\": \"https\",\n      \"accept-language\": \"en-GB,en;q=0.8\",\n      \"host\": \"moi5t5e25vbajg2funkwklyhqq.appsync-api.ap-southeast-2.amazonaws.com\",\n      \"sec-gpc\": \"1\",\n      \"user-agent\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36\",\n      \"cloudfront-is-mobile-viewer\": \"false\",\n      \"accept\": \"*/*\",\n      \"priority\": \"u=1, i\",\n      \"cloudfront-viewer-asn\": \"137409\",\n      \"cloudfront-is-smarttv-viewer\": \"false\",\n      \"x-amzn-appsync-is-vpce-request\": \"false\",\n      \"accept-encoding\": \"gzip, deflate, br, zstd\",\n      \"x-amzn-account-id\": \"495599763953\",\n      \"referer\": \"http://localhost:5173/\",\n      \"x-amzn-remote-ip\": \"86.48.8.223\",\n      \"content-type\": \"application/json; charset=UTF-8\",\n      \"sec-fetch-mode\": \"cors\",\n      \"x-amzn-trace-id\": \"Root=1-690c39c4-0d5f66f14e08cb9c7d4313b1\",\n      \"x-amz-cf-id\": \"dwktxAc_MfpIkbIxX5Gc56mtiUDUwqTr-2Pc_l86oNq0T5FjUrqOXw==\",\n      \"authorization\": \"eyJraWQiOiI0ZjE0SDRUWituNW01dUN4UzV6Tkh0VlBVN0x6TU9PS3VnZ1ppandhWlwvVT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYiLCJjb2duaXRvOmdyb3VwcyI6WyJBZG1pbiJdLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfajJrQWQ0a3BPIiwiY2xpZW50X2lkIjoiNHN0aDIxZGdyaDNyampuc2w2M2thMzJrNHEiLCJvcmlnaW5fanRpIjoiMDE1ZDRlNGEtMjIwNy00Yjk0LWI2YzctZWM0NmEyMzIwNDY1IiwiZXZlbnRfaWQiOiIwZjcwM2FmMi1lNjYwLTRiYmQtOGMyOS1kOTE1NjFkY2MzNWEiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzYxNzgwOTE5LCJleHAiOjE3NjI0MDk1ODAsImlhdCI6MTc2MjQwNTk4MCwianRpIjoiYTE5YmZmOWQtOGNlZi00YzJlLTk0YjQtYzYxODE3ZmE3MTg4IiwidXNlcm5hbWUiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYifQ.FUxRf4vbCC5alTusQdpFGXbHHObc8fRsWVtKrchOLOAr_8hTAmMNEL8g_3wrOCzcc6xtzy5Jk4ltcABRov1PEU1RzL4JJCrWXrafBPkNlStOAMc0c7-hFxhC0SzPtjOWFULIh7OPZA8iqJLdWMNoYZmZuDjIncJb4iLRZfPbPxeamkfoDQX2z9iJ4dehEyQClGwp66QHK0kVmBgzy-PUgXE0s383rsXISx6_I5RaM0obbwTqS42-Uu-Bu26BaVeFy1VlNKRNX_6GRHK0sGXvyyjfDxshG0T4lUGDh_Jn0FGwCdi2ehSAmkM-di5JcV-B0H6iRogx4b5MZtbzMcMUbQ\",\n      \"sec-fetch-dest\": \"empty\",\n      \"x-amz-user-agent\": \"aws-amplify/6.15.7 api/1 framework/1\",\n      \"sec-ch-ua-platform\": \"\\\"macOS\\\"\",\n      \"cloudfront-is-desktop-viewer\": \"true\",\n      \"sec-fetch-site\": \"cross-site\",\n      \"sec-ch-ua\": \"\\\"Chromium\\\";v=\\\"142\\\", \\\"Brave\\\";v=\\\"142\\\", \\\"Not_A Brand\\\";v=\\\"99\\\"\",\n      \"x-forwarded-port\": \"443\"\n    },\n    \"domainName\": null\n  },\n  \"prev\": {\n    \"result\": {}\n  }\n}\n",
+    "timestamp": 1762408900926
+  },
+  {
+    "eventId": "39303031836867983838246815575367936892361387101768908802",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.002Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tERROR\t[Entity] Error ensuring default entity: AccessDeniedException: User: arn:aws:sts::495599763953:assumed-role/kingsroomLambdaRole66e547c8-dev/webScraperFunction-dev is not authorized to perform: dynamodb:GetItem on resource: arn:aws:dynamodb:ap-southeast-2:495599763953:table/Entity-oi5oitkajrgtzm7feellfluriy-dev because no identity-based policy allows the dynamodb:GetItem action\n    at throwDefaultError (/var/runtime/node_modules/@aws-sdk/node_modules/@smithy/smithy-client/dist-cjs/index.js:422:20)\n    at /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/smithy-client/dist-cjs/index.js:431:5\n    at de_CommandError (/var/runtime/node_modules/@aws-sdk/client-dynamodb/dist-cjs/index.js:2359:14)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/middleware-serde/dist-cjs/index.js:36:20\n    at async /var/runtime/node_modules/@aws-sdk/lib-dynamodb/dist-cjs/index.js:173:30\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/core/dist-cjs/index.js:193:18\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/middleware-retry/dist-cjs/index.js:312:38\n    at async /var/runtime/node_modules/@aws-sdk/middleware-logger/dist-cjs/index.js:33:22\n    at async ensureDefaultEntity (/var/task/index.js:96:27) {\n  '$fault': 'client',\n  '$metadata': {\n    httpStatusCode: 400,\n    requestId: 'R3IB2JLP8GGV1OOAJ0QPRK1T9NVV4KQNSO5AEMVJF66Q9ASUAAJG',\n    extendedRequestId: undefined,\n    cfId: undefined,\n    attempts: 1,\n    totalRetryDelay: 0\n  },\n  __type: 'com.amazon.coral.service#AccessDeniedException'\n}\n",
+    "timestamp": 1762408901002
+  },
+  {
+    "eventId": "39303031836867983838246815575367936892361387101768908803",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.002Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[HANDLER] Operation detected: fetchTournamentData. Job ID: N/A\n",
+    "timestamp": 1762408901002
+  },
+  {
+    "eventId": "39303031836890284583445346198509472610634035463274889220",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.003Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[handleFetch] Processing URL: https://kingsroom.com.au/tournament/?id=1. Job ID: N/A, Source: N/A\n",
+    "timestamp": 1762408901003
+  },
+  {
+    "eventId": "39303031837291697997018897415057115539541705970382536709",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.021Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tERROR\t[Entity] Error determining entity from URL: AccessDeniedException: User: arn:aws:sts::495599763953:assumed-role/kingsroomLambdaRole66e547c8-dev/webScraperFunction-dev is not authorized to perform: dynamodb:Scan on resource: arn:aws:dynamodb:ap-southeast-2:495599763953:table/Entity-oi5oitkajrgtzm7feellfluriy-dev because no identity-based policy allows the dynamodb:Scan action\n    at throwDefaultError (/var/runtime/node_modules/@aws-sdk/node_modules/@smithy/smithy-client/dist-cjs/index.js:422:20)\n    at /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/smithy-client/dist-cjs/index.js:431:5\n    at de_CommandError (/var/runtime/node_modules/@aws-sdk/client-dynamodb/dist-cjs/index.js:2359:14)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/middleware-serde/dist-cjs/index.js:36:20\n    at async /var/runtime/node_modules/@aws-sdk/lib-dynamodb/dist-cjs/index.js:173:30\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/core/dist-cjs/index.js:193:18\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/middleware-retry/dist-cjs/index.js:312:38\n    at async /var/runtime/node_modules/@aws-sdk/middleware-logger/dist-cjs/index.js:33:22\n    at async getEntityIdFromUrl (/var/task/index.js:67:28) {\n  '$fault': 'client',\n  '$metadata': {\n    httpStatusCode: 400,\n    requestId: 'QDM88KN1RKKAU4SOKISO491LK3VV4KQNSO5AEMVJF66Q9ASUAAJG',\n    extendedRequestId: undefined,\n    cfId: undefined,\n    attempts: 1,\n    totalRetryDelay: 0\n  },\n  __type: 'com.amazon.coral.service#AccessDeniedException'\n}\n",
+    "timestamp": 1762408901021
+  },
+  {
+    "eventId": "39303031837291697997018897415057115539541705970382536710",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.021Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[handleFetch] Checking for existing game.\n",
+    "timestamp": 1762408901021
+  },
+  {
+    "eventId": "39303031837514705449004203646472472722268189585442340871",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.031Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[handleFetch] No existing game found for this URL.\n",
+    "timestamp": 1762408901031
+  },
+  {
+    "eventId": "39303031837514705449004203646472472722268189585442340872",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.031Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[handleFetch] Fetching content from https://kingsroom.com.au/tournament/?id=1...\n",
+    "timestamp": 1762408901031
+  },
+  {
+    "eventId": "39303031837983021098173346732444722805993805177067929609",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.052Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[handleFetch] Starting HTTP request for HTML content.\n",
+    "timestamp": 1762408901052
+  },
+  {
+    "eventId": "39303031844160327518166329342650116767517401314224504842",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.329Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[handleFetch] HTTP request successful. Starting scrape logic.\n",
+    "timestamp": 1762408901329
+  },
+  {
+    "eventId": "39303031849512506365813678896618689152953008075659804683",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.569Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-SCRAPER] Identified Structure: STATUS: RUNNING | REG: CLOSED\n",
+    "timestamp": 1762408901569
+  },
+  {
+    "eventId": "39303031851697979395269679964489189543672547503245885452",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.667Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[Scraper] Using unified robust strategy.\n",
+    "timestamp": 1762408901667
+  },
+  {
+    "eventId": "39303031851720280140468210587630725261945195864751865869",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.668Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-SERIES-MATCH] No exact match found. Falling back to fuzzy matching.\n",
+    "timestamp": 1762408901668
+  },
+  {
+    "eventId": "39303031851720280140468210587630725261945195864751865870",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.668Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-SERIES-MATCH] Low confidence fuzzy match, ignoring: \"Sydney Millions\" with rating 0\n",
+    "timestamp": 1762408901668
+  },
+  {
+    "eventId": "39303031851764881630865271833913796698490492587763826703",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.670Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-TYPE] Determined tournament type: REBUY\n",
+    "timestamp": 1762408901670
+  },
+  {
+    "eventId": "39303031852188595789637353673602975345670811456377454608",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.689Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-REVENUE] Calculating Revenue...\n",
+    "timestamp": 1762408901689
+  },
+  {
+    "eventId": "39303031852188595789637353673602975345670811456377454609",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.689Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-REVENUE] -> Entries: 21, Rebuys: 9, Addons: 0\n",
+    "timestamp": 1762408901689
+  },
+  {
+    "eventId": "39303031852188595789637353673602975345670811456377454610",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.689Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-REVENUE] -> Buy-In: 200\n",
+    "timestamp": 1762408901689
+  },
+  {
+    "eventId": "39303031852188595789637353673602975345670811456377454611",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.689Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-REVENUE] -> Total Transactions: 30\n",
+    "timestamp": 1762408901689
+  },
+  {
+    "eventId": "39303031852188595789637353673602975345670811456377454612",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.689Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-REVENUE] -> Calculated Revenue: 6000\n",
+    "timestamp": 1762408901689
+  },
+  {
+    "eventId": "39303031852188595789637353673602975345670811456377454613",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.689Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-GUARANTEE] Calculating metrics...\n",
+    "timestamp": 1762408901689
+  },
+  {
+    "eventId": "39303031852188595789637353673602975345670811456377454614",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.689Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-GUARANTEE] -> Prizepool: 5280, Guarantee: 5000\n",
+    "timestamp": 1762408901689
+  },
+  {
+    "eventId": "39303031852188595789637353673602975345670811456377454615",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.689Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-GUARANTEE] -> Difference (Prizepool - Guarantee): 280\n",
+    "timestamp": 1762408901689
+  },
+  {
+    "eventId": "39303031852188595789637353673602975345670811456377454616",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.689Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-GUARANTEE] -> Result: Surplus=280, Overlay=0\n",
+    "timestamp": 1762408901689
+  },
+  {
+    "eventId": "39303031852188595789637353673602975345670811456377454617",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.689Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-RAKE] Calculating total rake...\n",
+    "timestamp": 1762408901689
+  },
+  {
+    "eventId": "39303031852188595789637353673602975345670811456377454618",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.689Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-RAKE] -> Rake per transaction: 24, Entries: 21, Rebuys: 9\n",
+    "timestamp": 1762408901689
+  },
+  {
+    "eventId": "39303031852188595789637353673602975345670811456377454619",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.689Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-RAKE] -> Total Raked Transactions: 30\n",
+    "timestamp": 1762408901689
+  },
+  {
+    "eventId": "39303031852188595789637353673602975345670811456377454620",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.689Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-RAKE] -> Final Total Rake: 720\n",
+    "timestamp": 1762408901689
+  },
+  {
+    "eventId": "39303031852188595789637353673602975345670811456377454621",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.689Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-PROFIT] Calculating profit/loss...\n",
+    "timestamp": 1762408901689
+  },
+  {
+    "eventId": "39303031852188595789637353673602975345670811456377454622",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.689Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-PROFIT] -> Revenue By Buy-Ins: 6000\n",
+    "timestamp": 1762408901689
+  },
+  {
+    "eventId": "39303031852188595789637353673602975345670811456377454623",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.689Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-PROFIT] -> Prizepool: 5280\n",
+    "timestamp": 1762408901689
+  },
+  {
+    "eventId": "39303031852188595789637353673602975345670811456377454624",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.689Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-PROFIT] -> Final Profit/Loss: 720\n",
+    "timestamp": 1762408901689
+  },
+  {
+    "eventId": "39303031852233197280034414919886046782216108179389415457",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.691Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-ENTRIES] Found 21 total player entries.\n",
+    "timestamp": 1762408901691
+  },
+  {
+    "eventId": "39303031852567708458012374267009082556305833601979121698",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.706Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-RESULTS] No 'Result' table found. Could not parse results.\n",
+    "timestamp": 1762408901706
+  },
+  {
+    "eventId": "39303031852969121871585925483556725485213504109086769187",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.724Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-VENUE-MATCH] Found exact substring match: \"St. George Leagues Club\"\n",
+    "timestamp": 1762408901724
+  },
+  {
+    "eventId": "39303031852969121871585925483556725485213504109086769188",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.724Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-LIVE] Scraping live data, game status is RUNNING.\n",
+    "timestamp": 1762408901724
+  },
+  {
+    "eventId": "39303031852991422616784456106698261203486152470592749605",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.725Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-LIVE] Players remaining from seating data: 4\n",
+    "timestamp": 1762408901725
+  },
+  {
+    "eventId": "39303031852991422616784456106698261203486152470592749606",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.725Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-LIVE] -> Final Players Remaining: 4\n",
+    "timestamp": 1762408901725
+  },
+  {
+    "eventId": "39303031852991422616784456106698261203486152470592749607",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.725Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-LIVE] -> Total Chips: 900000\n",
+    "timestamp": 1762408901725
+  },
+  {
+    "eventId": "39303031853013723361982986729839796921758800832098730024",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.726Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-LIVE] -> Average Stack: 225000\n",
+    "timestamp": 1762408901726
+  },
+  {
+    "eventId": "39303031853013723361982986729839796921758800832098730025",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.726Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-ID] Extracted tournament ID from URL: 1\n",
+    "timestamp": 1762408901726
+  },
+  {
+    "eventId": "39303031853036024107181517352981332640031449193604710442",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.727Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[DEBUG-SCRAPER] Scraped data: {\n  \"isSeries\": false,\n  \"isSatellite\": false,\n  \"isRegular\": true,\n  \"name\": \"Monday St. George Leagues Club $5000 GTD\",\n  \"gameFrequency\": \"WEEKLY\",\n  \"gameStatus\": \"RUNNING\",\n  \"gameTags\": [\n    \"2xRe-Buy\"\n  ],\n  \"tournamentType\": \"REBUY\",\n  \"gameStartDateTime\": \"2022-11-16T18:30:00.000Z\",\n  \"registrationStatus\": \"CLOSED\",\n  \"gameVariant\": \"NLHE\",\n  \"prizepool\": 5280,\n  \"totalEntries\": 21,\n  \"totalRebuys\": 9,\n  \"buyIn\": 200,\n  \"rake\": 24,\n  \"startingStack\": 30000,\n  \"hasGuarantee\": true,\n  \"g\n",
+    "timestamp": 1762408901727
+  },
+  {
+    "eventId": "39303031853437437520755068569528975568939119700712357931",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.745Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\tUpdated existing structure fingerprint with ID: 688d39d74c325080b515f1a5e3c5235f1803a183a180845126479efbead51e65\n",
+    "timestamp": 1762408901745
+  },
+  {
+    "eventId": "39303031853883452424725681032359689934392086930831966252",
+    "ingestionTime": 1762408909936,
+    "message": "2025-11-06T06:01:41.765Z\t40ca6fc0-e10e-482f-9510-c55763e88257\tINFO\t[handleFetch] Scraped data successfully for https://kingsroom.com.au/tournament/?id=1. END handleFetch.\n",
+    "timestamp": 1762408901765
+  },
+  {
+    "eventId": "39303031854396369564291885364615011454662999245469515821",
+    "ingestionTime": 1762408909936,
+    "message": "END RequestId: 40ca6fc0-e10e-482f-9510-c55763e88257\n",
+    "timestamp": 1762408901788
+  },
+  {
+    "eventId": "39303031854396369564291885364615011454662999245469515822",
+    "ingestionTime": 1762408909936,
+    "message": "REPORT RequestId: 40ca6fc0-e10e-482f-9510-c55763e88257\tDuration: 879.86 ms\tBilled Duration: 880 ms\tMemory Size: 1024 MB\tMax Memory Used: 134 MB\t\n",
+    "timestamp": 1762408901788
+  },
+  {
+    "eventId": "39303038604519730726732081950472998131313698457410207744",
+    "ingestionTime": 1762409213493,
+    "message": "START RequestId: e104e2e1-7a1b-4416-b044-3a69c6a3c435 Version: $LATEST\n",
+    "timestamp": 1762409204474
+  },
+  {
+    "eventId": "39303038605233354573085061891002141116038446025601581057",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:44.506Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\tEvent received: {\n  \"typeName\": \"Mutation\",\n  \"fieldName\": \"fetchTournamentData\",\n  \"arguments\": {\n    \"url\": \"https://kingsroom.com.au/tournament/?id=1\"\n  },\n  \"identity\": {\n    \"claims\": {\n      \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n      \"cognito:groups\": [\n        \"Admin\"\n      ],\n      \"iss\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n      \"client_id\": \"4sth21dgrh3rjjnsl63ka32k4q\",\n      \"origin_jti\": \"015d4e4a-2207-4b94-b6c7-ec46a2320465\",\n      \"event_id\": \"0f703af2-e660-4bbd-8c29-d91561dcc35a\",\n      \"token_use\": \"access\",\n      \"scope\": \"aws.cognito.signin.user.admin\",\n      \"auth_time\": 1761780919,\n      \"exp\": 1762409580,\n      \"iat\": 1762405980,\n      \"jti\": \"a19bff9d-8cef-4c2e-94b4-c61817fa7188\",\n      \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n    },\n    \"defaultAuthStrategy\": \"ALLOW\",\n    \"groups\": [\n      \"Admin\"\n    ],\n    \"issuer\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n    \"sourceIp\": [\n      \"86.48.8.223\"\n    ],\n    \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n    \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n  },\n  \"source\": null,\n  \"request\": {\n    \"headers\": {\n      \"x-forwarded-for\": \"86.48.8.223,15.158.196.71\",\n      \"sec-ch-ua-mobile\": \"?0\",\n      \"cloudfront-viewer-country\": \"AU\",\n      \"cloudfront-is-tablet-viewer\": \"false\",\n      \"x-amzn-requestid\": \"37e710e6-ee94-41f9-80bd-3b7e2f045059\",\n      \"via\": \"2.0 f4e259b251e31fed31ace13308dfec6c.cloudfront.net (CloudFront)\",\n      \"cloudfront-forwarded-proto\": \"https\",\n      \"origin\": \"http://localhost:5173\",\n      \"content-length\": \"1779\",\n      \"x-forwarded-proto\": \"https\",\n      \"accept-language\": \"en-GB,en;q=0.8\",\n      \"host\": \"moi5t5e25vbajg2funkwklyhqq.appsync-api.ap-southeast-2.amazonaws.com\",\n      \"sec-gpc\": \"1\",\n      \"user-agent\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36\",\n      \"cloudfront-is-mobile-viewer\": \"false\",\n      \"accept\": \"*/*\",\n      \"priority\": \"u=1, i\",\n      \"cloudfront-viewer-asn\": \"137409\",\n      \"cloudfront-is-smarttv-viewer\": \"false\",\n      \"x-amzn-appsync-is-vpce-request\": \"false\",\n      \"accept-encoding\": \"gzip, deflate, br, zstd\",\n      \"x-amzn-account-id\": \"495599763953\",\n      \"referer\": \"http://localhost:5173/\",\n      \"x-amzn-remote-ip\": \"86.48.8.223\",\n      \"content-type\": \"application/json; charset=UTF-8\",\n      \"sec-fetch-mode\": \"cors\",\n      \"x-amzn-trace-id\": \"Root=1-690c3af4-17d956783935a3df2ba55254\",\n      \"x-amz-cf-id\": \"Zdi88XM6uyzOV1Zu7zH7Tm2MwPx8mhi6FFYiQakVGMdwBwSrWUkQtg==\",\n      \"authorization\": \"eyJraWQiOiI0ZjE0SDRUWituNW01dUN4UzV6Tkh0VlBVN0x6TU9PS3VnZ1ppandhWlwvVT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYiLCJjb2duaXRvOmdyb3VwcyI6WyJBZG1pbiJdLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfajJrQWQ0a3BPIiwiY2xpZW50X2lkIjoiNHN0aDIxZGdyaDNyampuc2w2M2thMzJrNHEiLCJvcmlnaW5fanRpIjoiMDE1ZDRlNGEtMjIwNy00Yjk0LWI2YzctZWM0NmEyMzIwNDY1IiwiZXZlbnRfaWQiOiIwZjcwM2FmMi1lNjYwLTRiYmQtOGMyOS1kOTE1NjFkY2MzNWEiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzYxNzgwOTE5LCJleHAiOjE3NjI0MDk1ODAsImlhdCI6MTc2MjQwNTk4MCwianRpIjoiYTE5YmZmOWQtOGNlZi00YzJlLTk0YjQtYzYxODE3ZmE3MTg4IiwidXNlcm5hbWUiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYifQ.FUxRf4vbCC5alTusQdpFGXbHHObc8fRsWVtKrchOLOAr_8hTAmMNEL8g_3wrOCzcc6xtzy5Jk4ltcABRov1PEU1RzL4JJCrWXrafBPkNlStOAMc0c7-hFxhC0SzPtjOWFULIh7OPZA8iqJLdWMNoYZmZuDjIncJb4iLRZfPbPxeamkfoDQX2z9iJ4dehEyQClGwp66QHK0kVmBgzy-PUgXE0s383rsXISx6_I5RaM0obbwTqS42-Uu-Bu26BaVeFy1VlNKRNX_6GRHK0sGXvyyjfDxshG0T4lUGDh_Jn0FGwCdi2ehSAmkM-di5JcV-B0H6iRogx4b5MZtbzMcMUbQ\",\n      \"sec-fetch-dest\": \"empty\",\n      \"x-amz-user-agent\": \"aws-amplify/6.15.7 api/1 framework/1\",\n      \"sec-ch-ua-platform\": \"\\\"macOS\\\"\",\n      \"cloudfront-is-desktop-viewer\": \"true\",\n      \"sec-fetch-site\": \"cross-site\",\n      \"sec-ch-ua\": \"\\\"Chromium\\\";v=\\\"142\\\", \\\"Brave\\\";v=\\\"142\\\", \\\"Not_A Brand\\\";v=\\\"99\\\"\",\n      \"x-forwarded-port\": \"443\"\n    },\n    \"domainName\": null\n  },\n  \"prev\": {\n    \"result\": {}\n  }\n}\n",
+    "timestamp": 1762409204506
+  },
+  {
+    "eventId": "39303038607240421640952817973740355760576798561139818498",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:44.596Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tERROR\t[Entity] Error ensuring default entity: AccessDeniedException: User: arn:aws:sts::495599763953:assumed-role/kingsroomLambdaRole66e547c8-dev/webScraperFunction-dev is not authorized to perform: dynamodb:GetItem on resource: arn:aws:dynamodb:ap-southeast-2:495599763953:table/Entity-oi5oitkajrgtzm7feellfluriy-dev because no identity-based policy allows the dynamodb:GetItem action\n    at throwDefaultError (/var/runtime/node_modules/@aws-sdk/node_modules/@smithy/smithy-client/dist-cjs/index.js:422:20)\n    at /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/smithy-client/dist-cjs/index.js:431:5\n    at de_CommandError (/var/runtime/node_modules/@aws-sdk/client-dynamodb/dist-cjs/index.js:2359:14)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/middleware-serde/dist-cjs/index.js:36:20\n    at async /var/runtime/node_modules/@aws-sdk/lib-dynamodb/dist-cjs/index.js:173:30\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/core/dist-cjs/index.js:193:18\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/middleware-retry/dist-cjs/index.js:312:38\n    at async /var/runtime/node_modules/@aws-sdk/middleware-logger/dist-cjs/index.js:33:22\n    at async ensureDefaultEntity (/var/task/index.js:96:27) {\n  '$fault': 'client',\n  '$metadata': {\n    httpStatusCode: 400,\n    requestId: 'SIV0T25MLIJR2ABAI8Q827RQR7VV4KQNSO5AEMVJF66Q9ASUAAJG',\n    extendedRequestId: undefined,\n    cfId: undefined,\n    attempts: 2,\n    totalRetryDelay: 62\n  },\n  __type: 'com.amazon.coral.service#AccessDeniedException'\n}\n",
+    "timestamp": 1762409204596
+  },
+  {
+    "eventId": "39303038607262722386151348596881891478849446922645798915",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:44.597Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[HANDLER] Operation detected: fetchTournamentData. Job ID: N/A\n",
+    "timestamp": 1762409204597
+  },
+  {
+    "eventId": "39303038607262722386151348596881891478849446922645798916",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:44.597Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[handleFetch] Processing URL: https://kingsroom.com.au/tournament/?id=1. Job ID: N/A, Source: N/A\n",
+    "timestamp": 1762409204597
+  },
+  {
+    "eventId": "39303038607597233564129307944004927252939172345235505157",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:44.612Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tERROR\t[Entity] Error determining entity from URL: AccessDeniedException: User: arn:aws:sts::495599763953:assumed-role/kingsroomLambdaRole66e547c8-dev/webScraperFunction-dev is not authorized to perform: dynamodb:Scan on resource: arn:aws:dynamodb:ap-southeast-2:495599763953:table/Entity-oi5oitkajrgtzm7feellfluriy-dev because no identity-based policy allows the dynamodb:Scan action\n    at throwDefaultError (/var/runtime/node_modules/@aws-sdk/node_modules/@smithy/smithy-client/dist-cjs/index.js:422:20)\n    at /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/smithy-client/dist-cjs/index.js:431:5\n    at de_CommandError (/var/runtime/node_modules/@aws-sdk/client-dynamodb/dist-cjs/index.js:2359:14)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/middleware-serde/dist-cjs/index.js:36:20\n    at async /var/runtime/node_modules/@aws-sdk/lib-dynamodb/dist-cjs/index.js:173:30\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/core/dist-cjs/index.js:193:18\n    at async /var/runtime/node_modules/@aws-sdk/node_modules/@smithy/middleware-retry/dist-cjs/index.js:312:38\n    at async /var/runtime/node_modules/@aws-sdk/middleware-logger/dist-cjs/index.js:33:22\n    at async getEntityIdFromUrl (/var/task/index.js:67:28) {\n  '$fault': 'client',\n  '$metadata': {\n    httpStatusCode: 400,\n    requestId: '93F9LL8GRT98R7VKG01BMQOMH7VV4KQNSO5AEMVJF66Q9ASUAAJG',\n    extendedRequestId: undefined,\n    cfId: undefined,\n    attempts: 1,\n    totalRetryDelay: 0\n  },\n  __type: 'com.amazon.coral.service#AccessDeniedException'\n}\n",
+    "timestamp": 1762409204612
+  },
+  {
+    "eventId": "39303038607619534309327838567146462971211820706741485574",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:44.613Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[handleFetch] Checking for existing game.\n",
+    "timestamp": 1762409204613
+  },
+  {
+    "eventId": "39303038607842541761313144798561820153938304321801289735",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:44.623Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[handleFetch] No existing game found for this URL.\n",
+    "timestamp": 1762409204623
+  },
+  {
+    "eventId": "39303038607842541761313144798561820153938304321801289736",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:44.623Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[handleFetch] Fetching content from https://kingsroom.com.au/tournament/?id=1...\n",
+    "timestamp": 1762409204623
+  },
+  {
+    "eventId": "39303038608511564117269063492807891702117755166980702217",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:44.653Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[handleFetch] Starting HTTP request for HTML content.\n",
+    "timestamp": 1762409204653
+  },
+  {
+    "eventId": "39303038617409561451482782126280643292904451407866888202",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.052Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[handleFetch] HTTP request successful. Starting scrape logic.\n",
+    "timestamp": 1762409205052
+  },
+  {
+    "eventId": "39303038619528132245343191324726536528806045750935027723",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.147Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-SCRAPER] Identified Structure: STATUS: RUNNING | REG: CLOSED\n",
+    "timestamp": 1762409205147
+  },
+  {
+    "eventId": "39303038620910778447652089959501751061710244164305813516",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.209Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[Scraper] Using unified robust strategy.\n",
+    "timestamp": 1762409205209
+  },
+  {
+    "eventId": "39303038620933079192850620582643286779982892525811793933",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.210Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-SERIES-MATCH] No exact match found. Falling back to fuzzy matching.\n",
+    "timestamp": 1762409205210
+  },
+  {
+    "eventId": "39303038620933079192850620582643286779982892525811793934",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.210Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-SERIES-MATCH] Low confidence fuzzy match, ignoring: \"Sydney Millions\" with rating 0\n",
+    "timestamp": 1762409205210
+  },
+  {
+    "eventId": "39303038620955379938049151205784822498255540887317774351",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.211Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-TYPE] Determined tournament type: REBUY\n",
+    "timestamp": 1762409205211
+  },
+  {
+    "eventId": "39303038620999981428446212452067893934800837610329735184",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.213Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-REVENUE] Calculating Revenue...\n",
+    "timestamp": 1762409205213
+  },
+  {
+    "eventId": "39303038620999981428446212452067893934800837610329735185",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.213Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-REVENUE] -> Entries: 21, Rebuys: 9, Addons: 0\n",
+    "timestamp": 1762409205213
+  },
+  {
+    "eventId": "39303038620999981428446212452067893934800837610329735186",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.213Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-REVENUE] -> Buy-In: 200\n",
+    "timestamp": 1762409205213
+  },
+  {
+    "eventId": "39303038620999981428446212452067893934800837610329735187",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.213Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-REVENUE] -> Total Transactions: 30\n",
+    "timestamp": 1762409205213
+  },
+  {
+    "eventId": "39303038620999981428446212452067893934800837610329735188",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.213Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-REVENUE] -> Calculated Revenue: 6000\n",
+    "timestamp": 1762409205213
+  },
+  {
+    "eventId": "39303038620999981428446212452067893934800837610329735189",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.213Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-GUARANTEE] Calculating metrics...\n",
+    "timestamp": 1762409205213
+  },
+  {
+    "eventId": "39303038620999981428446212452067893934800837610329735190",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.213Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-GUARANTEE] -> Prizepool: 5280, Guarantee: 5000\n",
+    "timestamp": 1762409205213
+  },
+  {
+    "eventId": "39303038620999981428446212452067893934800837610329735191",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.213Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-GUARANTEE] -> Difference (Prizepool - Guarantee): 280\n",
+    "timestamp": 1762409205213
+  },
+  {
+    "eventId": "39303038620999981428446212452067893934800837610329735192",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.213Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-GUARANTEE] -> Result: Surplus=280, Overlay=0\n",
+    "timestamp": 1762409205213
+  },
+  {
+    "eventId": "39303038620999981428446212452067893934800837610329735193",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.213Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-RAKE] Calculating total rake...\n",
+    "timestamp": 1762409205213
+  },
+  {
+    "eventId": "39303038620999981428446212452067893934800837610329735194",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.213Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-RAKE] -> Rake per transaction: 24, Entries: 21, Rebuys: 9\n",
+    "timestamp": 1762409205213
+  },
+  {
+    "eventId": "39303038620999981428446212452067893934800837610329735195",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.213Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-RAKE] -> Total Raked Transactions: 30\n",
+    "timestamp": 1762409205213
+  },
+  {
+    "eventId": "39303038620999981428446212452067893934800837610329735196",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.213Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-RAKE] -> Final Total Rake: 720\n",
+    "timestamp": 1762409205213
+  },
+  {
+    "eventId": "39303038620999981428446212452067893934800837610329735197",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.213Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-PROFIT] Calculating profit/loss...\n",
+    "timestamp": 1762409205213
+  },
+  {
+    "eventId": "39303038620999981428446212452067893934800837610329735198",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.213Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-PROFIT] -> Revenue By Buy-Ins: 6000\n",
+    "timestamp": 1762409205213
+  },
+  {
+    "eventId": "39303038620999981428446212452067893934800837610329735199",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.213Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-PROFIT] -> Prizepool: 5280\n",
+    "timestamp": 1762409205213
+  },
+  {
+    "eventId": "39303038620999981428446212452067893934800837610329735200",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.213Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-PROFIT] -> Final Profit/Loss: 720\n",
+    "timestamp": 1762409205213
+  },
+  {
+    "eventId": "39303038621334492606424171799190929708890563032919441441",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.228Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-ENTRIES] Found 21 total player entries.\n",
+    "timestamp": 1762409205228
+  },
+  {
+    "eventId": "39303038621735906019997723015738572637798233540027088930",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.246Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-RESULTS] No 'Result' table found. Could not parse results.\n",
+    "timestamp": 1762409205246
+  },
+  {
+    "eventId": "39303038621780507510394784262021644074343530263039049763",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.248Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-VENUE-MATCH] Found exact substring match: \"St. George Leagues Club\"\n",
+    "timestamp": 1762409205248
+  },
+  {
+    "eventId": "39303038621780507510394784262021644074343530263039049764",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.248Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-LIVE] Scraping live data, game status is RUNNING.\n",
+    "timestamp": 1762409205248
+  },
+  {
+    "eventId": "39303038621780507510394784262021644074343530263039049765",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.248Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-LIVE] Players remaining from seating data: 4\n",
+    "timestamp": 1762409205248
+  },
+  {
+    "eventId": "39303038621780507510394784262021644074343530263039049766",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.248Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-LIVE] -> Final Players Remaining: 4\n",
+    "timestamp": 1762409205248
+  },
+  {
+    "eventId": "39303038621802808255593314885163179792616178624545030183",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.249Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-LIVE] -> Total Chips: 900000\n",
+    "timestamp": 1762409205249
+  },
+  {
+    "eventId": "39303038621802808255593314885163179792616178624545030184",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.249Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-LIVE] -> Average Stack: 225000\n",
+    "timestamp": 1762409205249
+  },
+  {
+    "eventId": "39303038621802808255593314885163179792616178624545030185",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.249Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-ID] Extracted tournament ID from URL: 1\n",
+    "timestamp": 1762409205249
+  },
+  {
+    "eventId": "39303038621825109000791845508304715510888826986051010602",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.250Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[DEBUG-SCRAPER] Scraped data: {\n  \"isSeries\": false,\n  \"isSatellite\": false,\n  \"isRegular\": true,\n  \"name\": \"Monday St. George Leagues Club $5000 GTD\",\n  \"gameFrequency\": \"WEEKLY\",\n  \"gameStatus\": \"RUNNING\",\n  \"gameTags\": [\n    \"2xRe-Buy\"\n  ],\n  \"tournamentType\": \"REBUY\",\n  \"gameStartDateTime\": \"2022-11-16T18:30:00.000Z\",\n  \"registrationStatus\": \"CLOSED\",\n  \"gameVariant\": \"NLHE\",\n  \"prizepool\": 5280,\n  \"totalEntries\": 21,\n  \"totalRebuys\": 9,\n  \"buyIn\": 200,\n  \"rake\": 24,\n  \"startingStack\": 30000,\n  \"hasGuarantee\": true,\n  \"g\n",
+    "timestamp": 1762409205250
+  },
+  {
+    "eventId": "39303038622204221669166866101710822721523849131652677675",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.267Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\tUpdated existing structure fingerprint with ID: 688d39d74c325080b515f1a5e3c5235f1803a183a180845126479efbead51e65\n",
+    "timestamp": 1762409205267
+  },
+  {
+    "eventId": "39303038622650236573137478564541537086976816361772285996",
+    "ingestionTime": 1762409213493,
+    "message": "2025-11-06T06:06:45.287Z\te104e2e1-7a1b-4416-b044-3a69c6a3c435\tINFO\t[handleFetch] Scraped data successfully for https://kingsroom.com.au/tournament/?id=1. END handleFetch.\n",
+    "timestamp": 1762409205287
+  },
+  {
+    "eventId": "39303038623564567126277234113344501536155399183517483053",
+    "ingestionTime": 1762409213493,
+    "message": "END RequestId: e104e2e1-7a1b-4416-b044-3a69c6a3c435\n",
+    "timestamp": 1762409205328
+  },
+  {
+    "eventId": "39303038623564567126277234113344501536155399183517483054",
+    "ingestionTime": 1762409213493,
+    "message": "REPORT RequestId: e104e2e1-7a1b-4416-b044-3a69c6a3c435\tDuration: 853.36 ms\tBilled Duration: 854 ms\tMemory Size: 1024 MB\tMax Memory Used: 136 MB\t\n",
+    "timestamp": 1762409205328
+  }
+]

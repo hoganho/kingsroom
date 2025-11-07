@@ -10,7 +10,7 @@ import type { GameData, EntityConfig } from '../types/game';
 import { VenueAssignmentStatus, ScrapedGameData } from '../API';
 
 // Default entity ID - should be fetched from Entity table or configured
-const DEFAULT_ENTITY_ID = 'default-entity-id';
+const DEFAULT_ENTITY_ID = '42101695-1332-48e3-963b-3c6ad4e909a0';
 
 /**
  * Get the current active entity from local storage or use default
@@ -75,21 +75,32 @@ export const fetchEntities = async (): Promise<EntityConfig[]> => {
 export const getEntityIdFromUrl = async (url: string): Promise<string> => {
     try {
         const urlObj = new URL(url);
+        // Fix: Use hostname to match domain (e.g., kingsroom.com.au)
         const domain = urlObj.hostname;
         
         const entities = await fetchEntities();
-        const matchingEntity = entities.find(e => e.gameUrlDomain === domain);
+        // FIX: Compare just the hostnames, ignoring protocol and 'www'
+        const matchingEntity = entities.find(e => {
+            try {
+                const entityDomain = new URL(e.gameUrlDomain).hostname;
+                // Compare domain.com === domain.com OR www.domain.com === domain.com
+                return entityDomain === domain || entityDomain === `www.${domain}`;
+            } catch {
+                // Fallback for non-URL domains (e.g., just 'kingsroom.com.au')
+                return e.gameUrlDomain === domain || `www.${e.gameUrlDomain}` === domain;
+            }
+        });
         
         if (matchingEntity) {
             console.log(`[GameService] Found entity for domain ${domain}: ${matchingEntity.id}`);
             return matchingEntity.id;
         }
         
-        console.log(`[GameService] No entity found for domain ${domain}, using current entity`);
-        return getCurrentEntityId();
+        console.log(`[GameService] No entity found for domain ${domain}, using current entity from storage`);
+        return getCurrentEntityId(); // Fallback to localStorage
     } catch (error) {
         console.error('[GameService] Error determining entity from URL:', error);
-        return getCurrentEntityId();
+        return getCurrentEntityId(); // Fallback to localStorage
     }
 };
 
@@ -97,24 +108,30 @@ export const getEntityIdFromUrl = async (url: string): Promise<string> => {
  * Calls the backend Lambda to fetch and parse tournament data without saving.
  * The backend will handle the SCRAPING and PARSING status updates internally.
  * @param url The URL of the tournament.
+ * @param entityId (FIX) Optional: The entity ID. If provided, skips URL lookup.
  * @returns A promise that resolves to the structured GameData.
  */
-export const fetchGameDataFromBackend = async (url: string): Promise<ScrapedGameData> => {
+export const fetchGameDataFromBackend = async (
+    url: string,
+    entityId?: string // <-- *** FIX: Added optional entityId parameter ***
+): Promise<ScrapedGameData> => {
     const client = generateClient();
     console.log(`[GameService] Fetching data for ${url} from backend...`);
     
     try {
-        // Determine entity ID from URL
-        const entityId = await getEntityIdFromUrl(url);
-        console.log(`[GameService] Using entity ID: ${entityId}`);
+        // *** FIX: Determine entity ID ***
+        // 1. Use the entityId if it was passed directly (from ManualTrackerTab)
+        // 2. If not, fall back to guessing from the URL (for other parts of the app)
+        const finalEntityId = entityId || (await getEntityIdFromUrl(url));
         
-        // Note: If fetchTournamentData mutation doesn't accept entityId,
-        // you'll need to handle it differently or update your GraphQL schema
+        console.log(`[GameService] Using entity ID: ${finalEntityId}`);
+        
+        // Note: The fetchTournamentData mutation itself doesn't take entityId,
+        // but the lambda it calls may use it. We're passing the URL.
         const response = await client.graphql({
             query: fetchTournamentData,
             variables: { 
                 url
-                // Removed entityId - add it back if your mutation supports it
             }
         });
 
@@ -128,9 +145,10 @@ export const fetchGameDataFromBackend = async (url: string): Promise<ScrapedGame
         
         const data = response.data.fetchTournamentData as ScrapedGameData;
         
-        // Manually add entity ID to response if not included
+        // Manually add the determined entity ID to response if not included
+        // This is crucial for the UI to know which entity this data belongs to.
         if (!data.entityId) {
-            data.entityId = entityId;
+            data.entityId = finalEntityId;
         }
         
         console.log('[GameService] Successfully fetched data:', data);

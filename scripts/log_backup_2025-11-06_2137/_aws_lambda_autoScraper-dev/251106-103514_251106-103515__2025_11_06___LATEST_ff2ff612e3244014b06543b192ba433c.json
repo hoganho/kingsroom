@@ -1,0 +1,38 @@
+[
+  {
+    "eventId": "39303397877463944345747813404914431055500515424444612608",
+    "ingestionTime": 1762425323359,
+    "message": "INIT_START Runtime Version: nodejs:22.v59\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:78be964f5868c0d4aba0b80888fefce9cdc59266c5fe738cfb0ddd061e6d5450\n",
+    "timestamp": 1762425314830
+  },
+  {
+    "eventId": "39303397885759821559601205213565718252925705904669327361",
+    "ingestionTime": 1762425323359,
+    "message": "START RequestId: 5fe260de-0991-4ad2-95bd-aee974a99bf3 Version: $LATEST\n",
+    "timestamp": 1762425315202
+  },
+  {
+    "eventId": "39303397886116633482777695183830289745288079688765014018",
+    "ingestionTime": 1762425323359,
+    "message": "2025-11-06T10:35:15.218Z\t5fe260de-0991-4ad2-95bd-aee974a99bf3\tINFO\t[HANDLER] Invoked at 2025-11-06T10:35:15.203Z\n",
+    "timestamp": 1762425315218
+  },
+  {
+    "eventId": "39303397886518046896351246400377932674195750195872661507",
+    "ingestionTime": 1762425323359,
+    "message": "2025-11-06T10:35:15.236Z\t5fe260de-0991-4ad2-95bd-aee974a99bf3\tINFO\t[HANDLER] Event: {\n  \"typeName\": \"Mutation\",\n  \"fieldName\": \"triggerAutoScraping\",\n  \"arguments\": {\n    \"maxGames\": 10\n  },\n  \"identity\": {\n    \"claims\": {\n      \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n      \"cognito:groups\": [\n        \"Admin\"\n      ],\n      \"iss\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n      \"client_id\": \"4sth21dgrh3rjjnsl63ka32k4q\",\n      \"origin_jti\": \"f3a1f82b-ed1e-4e45-b4ca-9a4f9759e4c0\",\n      \"event_id\": \"5ae1dad2-8148-4e6a-b200-2382374401c8\",\n      \"token_use\": \"access\",\n      \"scope\": \"aws.cognito.signin.user.admin\",\n      \"auth_time\": 1762419362,\n      \"exp\": 1762428767,\n      \"iat\": 1762425167,\n      \"jti\": \"620694c2-0e3b-4506-b224-0b9d0c963079\",\n      \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n    },\n    \"defaultAuthStrategy\": \"ALLOW\",\n    \"groups\": [\n      \"Admin\"\n    ],\n    \"issuer\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n    \"sourceIp\": [\n      \"86.48.8.222\"\n    ],\n    \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n    \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n  }\n}\n",
+    "timestamp": 1762425315236
+  },
+  {
+    "eventId": "39303398280393808592799112348613298319056391854901231616",
+    "ingestionTime": 1762425341914,
+    "message": "END RequestId: 5fe260de-0991-4ad2-95bd-aee974a99bf3\n",
+    "timestamp": 1762425332898
+  },
+  {
+    "eventId": "39303398280393808592799112348613298319056391854901231617",
+    "ingestionTime": 1762425341914,
+    "message": "REPORT RequestId: 5fe260de-0991-4ad2-95bd-aee974a99bf3\tDuration: 17695.58 ms\tBilled Duration: 18064 ms\tMemory Size: 128 MB\tMax Memory Used: 107 MB\tInit Duration: 368.42 ms\t\n",
+    "timestamp": 1762425332898
+  }
+]

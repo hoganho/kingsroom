@@ -20,6 +20,9 @@
       ]
     },
     "storage": {
+      "Entity:@model(appsync)": [
+        "read"
+      ],
       "ScraperState:@model(appsync)": [
         "create",
         "read",

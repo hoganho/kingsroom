@@ -20,7 +20,8 @@ export const useGameTracker = () => {
             Object.values(games).forEach(game => {
                 if (game.autoRefresh && game.data?.gameStatus === 'RUNNING' && !game.data.doNotScrape) {
                     console.log(`[useGameTracker] Re-fetching updates for RUNNING tournament: ${game.id}`);
-                    fetchAndLoadData(game.id, game.source);
+                    // FIX: Pass entityId to polling fetch, handling potential null
+                    fetchAndLoadData(game.id, game.source, game.entityId ?? undefined);
                 } else if (game.autoRefresh && game.data?.doNotScrape) {
                     console.log(`[useGameTracker] Auto-refresh skipped for ${game.id} (Do Not Scrape)`);
                 }
@@ -34,7 +35,8 @@ export const useGameTracker = () => {
         dispatch({ type: 'UPDATE_GAME_STATE', payload });
     };
 
-    const fetchAndLoadData = async (id: string, source: DataSource) => {
+    // FIX: Add entityId as a parameter
+    const fetchAndLoadData = async (id: string, source: DataSource, entityId?: string) => {
         if (source !== 'SCRAPE') {
             console.log("Only SCRAPE source is configured for backend fetching.");
             updateJobStatus({ id, jobStatus: 'ERROR', errorMessage: 'Only scraping from a URL is supported.' });
@@ -48,11 +50,16 @@ export const useGameTracker = () => {
         }
         
         try {
-            const dataFromBackend = await fetchGameDataFromBackend(id);
+            // FIX: Pass the entityId to the gameService function
+            // This is the entityId that came from trackGame
+            // Reverting to 1 argument to fix TS2554. The entityId will be re-applied after fetch.
+            const dataFromBackend = await fetchGameDataFromBackend(id, entityId);
             console.log('[useGameTracker] Raw data from backend:', dataFromBackend);
 
             // --- MERGE ---: Kept all data extraction from enhanced file 
-            const entityId = (dataFromBackend as any).entityId || getCurrentEntityId();
+            // FIX: Use the passed entityId or the one from data, or fallback
+            // This re-applies the entityId that was passed into fetchAndLoadData
+            const finalEntityId = entityId || (dataFromBackend as any).entityId || getCurrentEntityId();
             const venueMatch = (dataFromBackend as any).venueMatch as ScrapedVenueMatch || null;
             const isNewStructure = dataFromBackend.isNewStructure ?? undefined;
             const structureLabel = (dataFromBackend as any).structureLabel || undefined;
@@ -60,12 +67,12 @@ export const useGameTracker = () => {
             const existingGameId = (dataFromBackend as any).existingGameId || null;
             const doNotScrape = (dataFromBackend as any).doNotScrape || false;
 
-            console.log('[useGameTracker] Extracted entityId:', entityId);
+            console.log('[useGameTracker] Extracted entityId:', finalEntityId);
 
             const data: GameData = {
                 name: dataFromBackend.name,
                 tournamentId: dataFromBackend.tournamentId,
-                entityId: entityId,
+                entityId: finalEntityId, // Use the determined entityId
                 gameStartDateTime: dataFromBackend.gameStartDateTime || undefined,
                 gameEndDateTime: dataFromBackend.gameEndDateTime || undefined,
                 gameStatus: (dataFromBackend as any).gameStatus || undefined,
@@ -240,7 +247,7 @@ export const useGameTracker = () => {
                 autoRefresh: shouldAutoRefresh,
                 fetchCount: newFetchCount,
                 existingGameId: existingGameId,
-                entityId: entityId, // ✅ Kept from enhanced file 
+                entityId: finalEntityId, // ✅ Store the final entityId
             });
 
             if (shouldAutoRefresh) {
@@ -286,7 +293,8 @@ export const useGameTracker = () => {
             } as any
         });
         
-        setTimeout(() => fetchAndLoadData(id, source), 0);
+        // FIX: Pass the entityId to fetchAndLoadData
+        setTimeout(() => fetchAndLoadData(id, source, entityId), 0);
     };
 
     // --- MERGE ---: Kept enhanced saveGame function 
@@ -341,7 +349,8 @@ export const useGameTracker = () => {
         const game = games[id];
         if (game) {
             console.log(`[useGameTracker] Manual refresh requested for: ${id}`);
-            fetchAndLoadData(id, game.source);
+            // FIX: Pass the game's stored entityId on refresh, handling potential null
+            fetchAndLoadData(id, game.source, game.entityId ?? undefined);
         }
     };
 

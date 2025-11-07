@@ -17,6 +17,22 @@ export const listVenuesForDropdown = /* GraphQL */ `
   }
 `;
 
+export const listEntitiesShallow = /* GraphQL */ `
+  query ListEntitiesShallow(
+    $filter: ModelEntityFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listEntities(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        entityName
+      }
+      nextToken
+    }
+  }
+`;
+
 export const listVenuesShallow = /* GraphQL */ `
   query ListVenuesShallow(
     $filter: ModelVenueFilterInput
@@ -34,6 +50,7 @@ export const listVenuesShallow = /* GraphQL */ `
         country
         createdAt
         updatedAt
+        entityId
         _version
         _deleted
         _lastChangedAt
@@ -47,8 +64,7 @@ export const listVenuesShallow = /* GraphQL */ `
 /*
  * ===================================================================
  * DEBUG QUERIES FOR PlayersPage.tsx
- * * All queries have been updated to support pagination variables
- * ($limit and $nextToken) and to return the nextToken.
+ * * All queries have been updated to remove the 'total' field.
  * ===================================================================
  */
 
@@ -63,9 +79,10 @@ export const listPlayersForDebug = /* GraphQL */ `
         id
         firstName
         lastName
-        registrationDate
+        firstGamePlayed
         lastPlayedDate
         targetingClassification
+        registrationDate
         creditBalance
         pointsBalance
         registrationVenueId
@@ -90,6 +107,11 @@ export const listPlayerSummariesForDebug = /* GraphQL */ `
       items {
         id
         playerId
+        gamesPlayedLast30Days
+        gamesPlayedLast90Days
+        gamesPlayedAllTime
+        averageFinishPosition
+        netBalance
         sessionsPlayed
         tournamentsPlayed
         cashGamesPlayed
@@ -102,9 +124,13 @@ export const listPlayerSummariesForDebug = /* GraphQL */ `
         cashGameBuyIns
         totalWinnings
         totalBuyIns
-        netBalance
         lastPlayed
         _version
+        player {
+          id
+          firstName
+          lastName
+        }
       }
       nextToken
     }
@@ -123,6 +149,7 @@ export const listPlayerEntriesForDebug = /* GraphQL */ `
         status
         registrationTime
         lastKnownStackSize
+        isMultiDayTournament
         tableNumber
         seatNumber
         player {
@@ -133,6 +160,8 @@ export const listPlayerEntriesForDebug = /* GraphQL */ `
         game {
           id
           name
+          buyIn
+          gameStartDateTime
         }
       }
       nextToken
@@ -164,9 +193,10 @@ export const listPlayerResultsForDebug = /* GraphQL */ `
           lastName
         }
         game {
-            id
-            name
-            buyIn
+          id
+          name
+          buyIn
+          gameStartDateTime
         }
       }
       nextToken
@@ -212,7 +242,11 @@ export const listPlayerTransactionsForDebug = /* GraphQL */ `
     $limit: Int
     $nextToken: String
   ) {
-    listPlayerTransactions(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    listPlayerTransactions(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
       items {
         id
         type
@@ -279,6 +313,11 @@ export const listPlayerPointsForDebug = /* GraphQL */ `
         relatedGameId
         relatedTransactionId
         _version
+        player {
+          id
+          firstName
+          lastName
+        }
       }
       nextToken
     }
@@ -354,10 +393,10 @@ export const listPlayerMarketingMessagesForDebug = /* GraphQL */ `
   }
 `;
 
-
 /*
  * ===================================================================
- * NEW: DEBUG QUERIES FOR GamesPage.tsx
+ * DEBUG QUERIES FOR GamesPage.tsx
+ * * All queries have been updated to remove the 'total' field.
  * ===================================================================
  */
 
@@ -414,6 +453,110 @@ export const listTournamentStructuresForDebug = /* GraphQL */ `
         _version
       }
       nextToken
+    }
+  }
+`;
+
+/*
+ * ===================================================================
+ * NEW: DEDICATED COUNT QUERIES
+ * ===================================================================
+ */
+
+export const getPlayerCount = /* GraphQL */ `
+  query GetPlayerCount {
+    playerCount
+  }
+`;
+
+export const getPlayerSummaryCount = /* GraphQL */ `
+  query GetPlayerSummaryCount {
+    playerSummaryCount
+  }
+`;
+
+export const getPlayerEntryCount = /* GraphQL */ `
+  query GetPlayerEntryCount {
+    playerEntryCount
+  }
+`;
+
+export const getPlayerResultCount = /* GraphQL */ `
+  query GetPlayerResultCount {
+    playerResultCount
+  }
+`;
+
+export const getPlayerVenueCount = /* GraphQL */ `
+  query GetPlayerVenueCount {
+    playerVenueCount
+  }
+`;
+
+export const getPlayerTransactionCount = /* GraphQL */ `
+  query GetPlayerTransactionCount {
+    playerTransactionCount
+  }
+`;
+
+export const getPlayerCreditsCount = /* GraphQL */ `
+  query GetPlayerCreditsCount {
+    playerCreditsCount
+  }
+`;
+
+export const getPlayerPointsCount = /* GraphQL */ `
+  query GetPlayerPointsCount {
+    playerPointsCount
+  }
+`;
+
+export const getPlayerTicketCount = /* GraphQL */ `
+  query GetPlayerTicketCount {
+    playerTicketCount
+  }
+`;
+
+export const getPlayerMarketingPreferencesCount = /* GraphQL */ `
+  query GetPlayerMarketingPreferencesCount {
+    playerMarketingPreferencesCount
+  }
+`;
+
+export const getPlayerMarketingMessageCount = /* GraphQL */ `
+  query GetPlayerMarketingMessageCount {
+    playerMarketingMessageCount
+  }
+`;
+
+export const getGameCount = /* GraphQL */ `
+  query GetGameCount {
+    gameCount
+  }
+`;
+
+export const getTournamentStructureCount = /* GraphQL */ `
+  query GetTournamentStructureCount {
+    tournamentStructureCount
+  }
+`;
+
+export const getAllCounts = /* GraphQL */ `
+  query GetAllCounts {
+    getAllCounts {
+      playerCount
+      playerSummaryCount
+      playerEntryCount
+      playerResultCount
+      playerVenueCount
+      playerTransactionCount
+      playerCreditsCount
+      playerPointsCount
+      playerTicketCount
+      playerMarketingPreferencesCount
+      playerMarketingMessageCount
+      gameCount
+      tournamentStructureCount
     }
   }
 `;

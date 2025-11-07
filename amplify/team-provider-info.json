@@ -19,28 +19,28 @@
           "EMAILSUBJECT": "Your Kings Room Poker Verification Code",
           "REDIRECTURL": "http://localhost:5173/",
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/kingsroomc05d6627CustomMessage-36486f3077736c795639-build.zip"
+          "s3Key": "amplify-builds/kingsroomc05d6627CustomMessage-70454575336d5736726e-build.zip"
         },
         "webScraperFunction": {
-          "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/webScraperFunction-792f713435723079786d-build.zip"
+          "s3Key": "amplify-builds/webScraperFunction-494c6459477a79655738-build.zip",
+          "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo"
         },
         "autoScraper": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/autoScraper-64495562705435507267-build.zip"
+          "s3Key": "amplify-builds/autoScraper-7a686e48327352394b53-build.zip"
         },
         "getUserMetrics": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/getUserMetrics-30396d70755a64416637-build.zip"
+          "s3Key": "amplify-builds/getUserMetrics-3964314b55544e576773-build.zip"
         },
         "playerDataProcessor": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/playerDataProcessor-4b44775531497932726d-build.zip"
+          "s3Key": "amplify-builds/playerDataProcessor-7a316b536c5970314153-build.zip"
         },
         "publishClientMetrics": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/publishClientMetrics-6854734f6546586e396d-build.zip"
+          "s3Key": "amplify-builds/publishClientMetrics-492b424f6d476b2b7176-build.zip"
         },
         "scraperManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
@@ -49,6 +49,10 @@
         "venueAssignmentService": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
           "s3Key": "amplify-builds/venueAssignmentService-5475304e694c62586e4f-build.zip"
+        },
+        "getModelCount": {
+          "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+          "s3Key": "amplify-builds/getModelCount-764c384c46686978774c-build.zip"
         }
       },
       "auth": {

@@ -5266,6 +5266,116 @@ export const getUserMetrics = /* GraphQL */ `query GetUserMetrics($userId: Strin
   APITypes.GetUserMetricsQueryVariables,
   APITypes.GetUserMetricsQuery
 >;
+export const playerCount = /* GraphQL */ `query PlayerCount {
+  playerCount
+}
+` as GeneratedQuery<
+  APITypes.PlayerCountQueryVariables,
+  APITypes.PlayerCountQuery
+>;
+export const playerSummaryCount = /* GraphQL */ `query PlayerSummaryCount {
+  playerSummaryCount
+}
+` as GeneratedQuery<
+  APITypes.PlayerSummaryCountQueryVariables,
+  APITypes.PlayerSummaryCountQuery
+>;
+export const playerEntryCount = /* GraphQL */ `query PlayerEntryCount {
+  playerEntryCount
+}
+` as GeneratedQuery<
+  APITypes.PlayerEntryCountQueryVariables,
+  APITypes.PlayerEntryCountQuery
+>;
+export const playerResultCount = /* GraphQL */ `query PlayerResultCount {
+  playerResultCount
+}
+` as GeneratedQuery<
+  APITypes.PlayerResultCountQueryVariables,
+  APITypes.PlayerResultCountQuery
+>;
+export const playerVenueCount = /* GraphQL */ `query PlayerVenueCount {
+  playerVenueCount
+}
+` as GeneratedQuery<
+  APITypes.PlayerVenueCountQueryVariables,
+  APITypes.PlayerVenueCountQuery
+>;
+export const playerTransactionCount = /* GraphQL */ `query PlayerTransactionCount {
+  playerTransactionCount
+}
+` as GeneratedQuery<
+  APITypes.PlayerTransactionCountQueryVariables,
+  APITypes.PlayerTransactionCountQuery
+>;
+export const playerCreditsCount = /* GraphQL */ `query PlayerCreditsCount {
+  playerCreditsCount
+}
+` as GeneratedQuery<
+  APITypes.PlayerCreditsCountQueryVariables,
+  APITypes.PlayerCreditsCountQuery
+>;
+export const playerPointsCount = /* GraphQL */ `query PlayerPointsCount {
+  playerPointsCount
+}
+` as GeneratedQuery<
+  APITypes.PlayerPointsCountQueryVariables,
+  APITypes.PlayerPointsCountQuery
+>;
+export const playerTicketCount = /* GraphQL */ `query PlayerTicketCount {
+  playerTicketCount
+}
+` as GeneratedQuery<
+  APITypes.PlayerTicketCountQueryVariables,
+  APITypes.PlayerTicketCountQuery
+>;
+export const playerMarketingPreferencesCount = /* GraphQL */ `query PlayerMarketingPreferencesCount {
+  playerMarketingPreferencesCount
+}
+` as GeneratedQuery<
+  APITypes.PlayerMarketingPreferencesCountQueryVariables,
+  APITypes.PlayerMarketingPreferencesCountQuery
+>;
+export const playerMarketingMessageCount = /* GraphQL */ `query PlayerMarketingMessageCount {
+  playerMarketingMessageCount
+}
+` as GeneratedQuery<
+  APITypes.PlayerMarketingMessageCountQueryVariables,
+  APITypes.PlayerMarketingMessageCountQuery
+>;
+export const gameCount = /* GraphQL */ `query GameCount {
+  gameCount
+}
+` as GeneratedQuery<APITypes.GameCountQueryVariables, APITypes.GameCountQuery>;
+export const tournamentStructureCount = /* GraphQL */ `query TournamentStructureCount {
+  tournamentStructureCount
+}
+` as GeneratedQuery<
+  APITypes.TournamentStructureCountQueryVariables,
+  APITypes.TournamentStructureCountQuery
+>;
+export const getAllCounts = /* GraphQL */ `query GetAllCounts {
+  getAllCounts {
+    playerCount
+    playerSummaryCount
+    playerEntryCount
+    playerResultCount
+    playerVenueCount
+    playerTransactionCount
+    playerCreditsCount
+    playerPointsCount
+    playerTicketCount
+    playerMarketingPreferencesCount
+    playerMarketingMessageCount
+    gameCount
+    tournamentStructureCount
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetAllCountsQueryVariables,
+  APITypes.GetAllCountsQuery
+>;
 export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
   getEntity(id: $id) {
     id

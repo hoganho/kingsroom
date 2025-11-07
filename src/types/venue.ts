@@ -12,4 +12,5 @@ export interface VenueFormData {
   city?: string | null;
   country?: string | null;
   aliases: string[];
+  entityId: string | null;
 }

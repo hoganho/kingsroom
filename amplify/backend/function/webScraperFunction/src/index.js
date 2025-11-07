@@ -1,4 +1,25 @@
 /* Amplify Params - DO NOT EDIT
+	API_KINGSROOM_ENTITYTABLE_ARN
+	API_KINGSROOM_ENTITYTABLE_NAME
+	API_KINGSROOM_GAMETABLE_ARN
+	API_KINGSROOM_GAMETABLE_NAME
+	API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
+	API_KINGSROOM_GRAPHQLAPIIDOUTPUT
+	API_KINGSROOM_PLAYERENTRYTABLE_ARN
+	API_KINGSROOM_PLAYERENTRYTABLE_NAME
+	API_KINGSROOM_PLAYERTABLE_ARN
+	API_KINGSROOM_PLAYERTABLE_NAME
+	API_KINGSROOM_SCRAPESTRUCTURETABLE_ARN
+	API_KINGSROOM_SCRAPESTRUCTURETABLE_NAME
+	API_KINGSROOM_TOURNAMENTSERIESTITLETABLE_ARN
+	API_KINGSROOM_TOURNAMENTSERIESTITLETABLE_NAME
+	API_KINGSROOM_TOURNAMENTSTRUCTURETABLE_ARN
+	API_KINGSROOM_TOURNAMENTSTRUCTURETABLE_NAME
+	API_KINGSROOM_VENUETABLE_ARN
+	API_KINGSROOM_VENUETABLE_NAME
+	ENV
+	REGION
+Amplify Params - DO NOT EDIT *//* Amplify Params - DO NOT EDIT
     API_KINGSROOM_GAMETABLE_ARN
     API_KINGSROOM_GAMETABLE_NAME
     API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
@@ -41,7 +62,7 @@ const UNASSIGNED_VENUE_ID = "00000000-0000-0000-0000-000000000000";
 const UNASSIGNED_VENUE_NAME = "Unassigned";
 
 // DEFAULT ENTITY - Replace with your actual default entity ID
-const DEFAULT_ENTITY_ID = "default-entity-id"; // This should be fetched from Entity table
+const DEFAULT_ENTITY_ID = "42101695-1332-48e3-963b-3c6ad4e909a0"; // This should be fetched from Entity table
 
 const {
     runScraper,
@@ -253,54 +274,124 @@ const getAllSeriesTitles = async () => {
 
 // --- SQS & PLAYER ENTRY LOGIC ---
 
+/**
+ * Create or update a "lean" Player record during live game processing.
+ *
+ * ===================================================================
+ * REFACTORED (Nov 2025):
+ * 1. Switched to a Get-then-Update/Put pattern to support conditional logic.
+ * 2. Only updates lastPlayedDate if the new game is the LATEST.
+ * 3. Back-fills registrationDate/firstGamePlayed/registrationVenueId if the new game is the EARLIEST.
+ * 4. Does NOT perform targeting calculations (remains "lean").
+ * 5. Adds 'firstGamePlayed' and 'lastPlayedDate' to new player records.
+ * 6. Corrects registrationVenueId logic for new players.
+ * ===================================================================
+ */
 const upsertLeanPlayerRecord = async (playerId, playerName, gameData) => {
     const playerTable = getTableName('Player');
     const now = new Date().toISOString();
+    
+    // Use gameStartDateTime as the authoritative timestamp
+    const gameStartDateTime = ensureISODate(gameData.gameStartDateTime);
+    const gameDateObj = new Date(gameStartDateTime);
 
     try {
-        await ddbDocClient.send(new UpdateCommand({
+        const getResult = await ddbDocClient.send(new GetCommand({
             TableName: playerTable,
-            Key: { id: playerId },
-            UpdateExpression: 'SET updatedAt = :now, lastPlayedDate = :lastPlayed',
-            ConditionExpression: 'attribute_exists(id)',
-            ExpressionAttributeValues: { 
-                ':now': now,
-                ':lastPlayed': ensureISODate(gameData.gameStartDateTime)
-            }
+            Key: { id: playerId }
         }));
-    } catch (error) {
-        if (error.name === 'ConditionalCheckFailedException') {
-            console.log(`[upsertLeanPlayerRecord] Player ${playerId} not found, creating new record.`);
+        
+        const existingPlayer = getResult.Item;
+
+        if (existingPlayer) {
+            // Player exists. Apply conditional "lean" updates.
+            const currentRegDate = new Date(existingPlayer.registrationDate);
+            const currentLastPlayed = new Date(existingPlayer.lastPlayedDate || existingPlayer.registrationDate); // Fallback for older records
+
+            // Build dynamic update expression
+            let updateExpression = 'SET updatedAt = :now';
+            let expressionValues = { ':now': now };
+            let needsUpdate = false; // Only update if something changes
+
+            // REFACTOR RULE 1: Game is EARLIER than registration date
+            if (gameDateObj < currentRegDate) {
+                console.log(`[upsertLeanPlayerRecord] Game date ${gameStartDateTime} is earlier than reg date ${existingPlayer.registrationDate}. Back-filling.`);
+                updateExpression += ', registrationDate = :regDate, firstGamePlayed = :firstGame';
+                expressionValues[':regDate'] = gameStartDateTime;
+                expressionValues[':firstGame'] = gameStartDateTime;
+                
+                const canAssignVenue = gameData.venueId && gameData.venueId !== UNASSIGNED_VENUE_ID;
+                if (canAssignVenue) {
+                    updateExpression += ', registrationVenueId = :regVenue';
+                    expressionValues[':regVenue'] = gameData.venueId;
+                }
+                needsUpdate = true;
+            }
+
+            // REFACTOR RULE 2: Game is LATER than last played date
+            if (gameDateObj > currentLastPlayed) {
+                console.log(`[upsertLeanPlayerRecord] Game date ${gameStartDateTime} is later than last played ${existingPlayer.lastPlayedDate}. Updating.`);
+                updateExpression += ', lastPlayedDate = :lastPlayed';
+                expressionValues[':lastPlayed'] = gameStartDateTime;
+                needsUpdate = true;
+            }
+
+            if (needsUpdate) {
+                await ddbDocClient.send(new UpdateCommand({
+                    TableName: playerTable,
+                    Key: { id: playerId },
+                    UpdateExpression: updateExpression,
+                    ExpressionAttributeValues: expressionValues
+                }));
+                console.log(`[upsertLeanPlayerRecord] Conditionally updated player ${playerId}.`);
+            } else {
+                 console.log(`[upsertLeanPlayerRecord] No date updates needed for player ${playerId}.`);
+            }
+            
+        } else {
+            // Player does not exist. Create new "lean" record.
+            console.log(`[upsertLeanPlayerRecord] Player ${playerId} not found, creating new lean record.`);
             
             const nameParts = parsePlayerName(playerName);
-            
+            const canAssignVenue = gameData.venueId && gameData.venueId !== UNASSIGNED_VENUE_ID;
+
             const newPlayer = {
                 id: playerId,
                 firstName: nameParts.firstName,
                 lastName: nameParts.lastName,
                 givenName: nameParts.givenName,
-                registrationDate: ensureISODate(gameData.gameStartDateTime),
-                firstGamePlayed: ensureISODate(gameData.gameStartDateTime),
-                lastPlayedDate: ensureISODate(gameData.gameStartDateTime),
-                registrationVenueId: gameData.venueId,
+                registrationDate: gameStartDateTime,
+                firstGamePlayed: gameStartDateTime, // REFACTOR: Added this field
+                lastPlayedDate: gameStartDateTime, // REFACTOR: Added this field
+                registrationVenueId: canAssignVenue ? gameData.venueId : null, // REFACTOR: Corrected logic
                 creditBalance: 0,
                 pointsBalance: 0,
-                status: 'ACTIVE',
-                category: 'NEW',
-                targetingClassification: 'NotPlayed',
+                status: 'ACTIVE', // Default status
+                category: 'NEW',   // Default category
+                targetingClassification: 'NotPlayed', // Default classification, PDP will update
                 createdAt: now,
                 updatedAt: now,
                 _version: 1,
                 _lastChangedAt: Date.now(),
                 __typename: 'Player'
+                // Note: We don't add entityId here, as this lean record will be
+                // fully populated by PDP later, which WILL add the entityId.
             };
+            
             await ddbDocClient.send(new PutCommand({
                 TableName: playerTable,
-                Item: newPlayer
+                Item: newPlayer,
+                ConditionExpression: 'attribute_not_exists(id)' // Safety check
             }));
+            console.log(`[upsertLeanPlayerRecord] Created new lean player ${playerId}.`);
+        }
+    } catch (error) {
+        if (error.name === 'ConditionalCheckFailedException') {
+            // This could happen in a race condition, it's safe to ignore
+            console.warn(`[upsertLeanPlayerRecord] Race condition: Player ${playerId} was created by another process.`);
         } else {
-            console.error(`[upsertLeanPlayerRecord] Error checking for player ${playerId}:`, error);
-            throw error;
+            console.error(`[upsertLeanPlayerRecord] Error processing player ${playerId}:`, error);
+            throw error; // Re-throw to signal failure
         }
     }
 };
@@ -321,11 +412,16 @@ const upsertPlayerEntries = async (savedGameItem, scrapedData) => {
     
     // Handle unassigned venue - use UNASSIGNED_VENUE_ID if venue is not set
     const effectiveVenueId = savedGameItem.venueId || UNASSIGNED_VENUE_ID;
+    const gameDataForLeanPlayer = {
+        gameStartDateTime: savedGameItem.gameStartDateTime,
+        venueId: effectiveVenueId
+    };
 
     const promises = allPlayers.map(async (playerData) => {
         const playerId = generatePlayerId(playerData.name);
         
-        await upsertLeanPlayerRecord(playerId, playerData.name, savedGameItem);
+        // REFACTOR: This now points to the new conditional logic function
+        await upsertLeanPlayerRecord(playerId, playerData.name, gameDataForLeanPlayer);
 
         const entryId = `${savedGameItem.id}#${playerId}`;
         const status = playerData.rank ? 'ELIMINATED' : 'PLAYING';
@@ -429,14 +525,19 @@ const extractPlayerDataForProcessing = (scrapedData) => {
 const createOptimizedPlayerPayload = (savedGameItem, scrapedData, metadata) => {
     const now = new Date().toISOString();
     const playerData = extractPlayerDataForProcessing(scrapedData);
+    
+    // REFACTOR: Ensure gameStartDateTime is prioritized in SQS payload
+    const authoritativeGameStart = ensureISODate(savedGameItem.gameStartDateTime);
+    
     return {
         game: {
             id: savedGameItem.id,
             name: savedGameItem.name,
             venueId: savedGameItem.venueId,
+            venueAssignmentStatus: savedGameItem.venueAssignmentStatus, // REFACTOR: Pass venue status to PDP
             entityId: savedGameItem.entityId || DEFAULT_ENTITY_ID,  // Add entity support
-            gameStartDateTime: savedGameItem.gameStartDateTime,
-            gameEndDateTime: savedGameItem.gameEndDateTime,
+            gameStartDateTime: authoritativeGameStart,
+            gameEndDateTime: ensureISODate(savedGameItem.gameEndDateTime, authoritativeGameStart), // Fallback to start time
             gameType: savedGameItem.gameType,
             gameVariant: savedGameItem.gameVariant,
             buyIn: savedGameItem.buyIn || 0,
@@ -467,7 +568,9 @@ const createOptimizedPlayerPayload = (savedGameItem, scrapedData, metadata) => {
 };
 
 const createPlayerProcessingInstructions = (playerData, gameInfo) => {
-    const transactionTime = gameInfo.gameEndDateTime || gameInfo.gameStartDateTime;
+    // REFACTOR: Use authoritative game date for transactions
+    const transactionTime = ensureISODate(gameInfo.gameStartDateTime) || ensureISODate(gameInfo.gameEndDateTime);
+    
     return playerData.allPlayers.map(player => {
         const createTransactions = [];
         createTransactions.push({
@@ -499,7 +602,9 @@ const createPlayerProcessingInstructions = (playerData, gameInfo) => {
                 },
                 updatePlayerVenue: {
                     incrementGamesPlayed: 1,
-                    lastPlayedDate: gameInfo.gameEndDateTime || gameInfo.gameStartDateTime
+                    // REFACTOR: This data is no longer used by PDP, but left for compatibility.
+                    // PDP now handles all date logic internally.
+                    lastPlayedDate: transactionTime
                 }
             }
         };
@@ -743,49 +848,49 @@ const handleSave = async (input) => {
     // This handles both the pre-parsed object from AppSync (manual) 
     // and the raw string from Lambda.invoke (automated).
     
-    let originalScrapedData = {}; // Default to empty object
+    let parsedOriginalData = {}; // Default to empty object
     const rawOriginalData = input.originalScrapedData || null;
 
     if (rawOriginalData) {
         if (typeof rawOriginalData === 'string') {
             try {
                 // This is the missing step for the automated flow
-                originalScrapedData = JSON.parse(rawOriginalData);
-                console.log(`[HANDLE-SAVE-DEBUG] Successfully parsed stringified originalScrapedData. Entries found: ${originalScrapedData.entries?.length || 0}`);
+                parsedOriginalData = JSON.parse(rawOriginalData);
+                console.log(`[HANDLE-SAVE-DEBUG] Successfully parsed stringified parsedOriginalData. Entries found: ${parsedOriginalData.entries?.length || 0}`);
             } catch (e) {
-                console.error('[HANDLE-SAVE-DEBUG] CRITICAL: Failed to parse originalScrapedData JSON string. Player data will be lost.', e);
+                console.error('[HANDLE-SAVE-DEBUG] CRITICAL: Failed to parse parsedOriginalData JSON string. Player data will be lost.', e);
             }
         } else if (typeof rawOriginalData === 'object') {
             // This handles the "magic" pre-parsed object from the manual flow
-            originalScrapedData = rawOriginalData;
-            console.log(`[HANDLE-SAVE-DEBUG] Received pre-parsed object for originalScrapedData. Entries found: ${originalScrapedData.entries?.length || 0}`);
+            parsedOriginalData = rawOriginalData;
+            console.log(`[HANDLE-SAVE-DEBUG] Received pre-parsed object for parsedOriginalData. Entries found: ${parsedOriginalData.entries?.length || 0}`);
         } else {
-             console.warn(`[HANDLE-SAVE-DEBUG] originalScrapedData was of an unexpected type: ${typeof rawOriginalData}`);
+             console.warn(`[HANDLE-SAVE-DEBUG] parsedOriginalData was of an unexpected type: ${typeof rawOriginalData}`);
         }
     } else {
-        console.warn('[HANDLE-SAVE-DEBUG] WARNING: originalScrapedData field was missing from the input. No player data can be processed.');
+        console.warn('[HANDLE-SAVE-DEBUG] WARNING: parsedOriginalData field was missing from the input. No player data can be processed.');
     }
     // --- ⚡️ END: ROBUST AWSJSON PARSING FIX ⚡️ ---
 
-    // Extract missing fields from originalScrapedData
-    if (originalScrapedData) {
+    // Extract missing fields from parsedOriginalData
+    if (parsedOriginalData) {
         // Extract tournamentId if it's missing from data
-        if (originalScrapedData.tournamentId !== undefined && !data.tournamentId) {
-            data.tournamentId = originalScrapedData.tournamentId;
-            console.log(`[HANDLE-SAVE-FIX] Extracted tournamentId ${data.tournamentId} from originalScrapedData`);
+        if (parsedOriginalData.tournamentId !== undefined && !data.tournamentId) {
+            data.tournamentId = parsedOriginalData.tournamentId;
+            console.log(`[HANDLE-SAVE-FIX] Extracted tournamentId ${data.tournamentId} from parsedOriginalData`);
         }
         
         // Also extract playersRemaining if missing
-        if (originalScrapedData.playersRemaining !== undefined && data.playersRemaining === undefined) {
-            data.playersRemaining = originalScrapedData.playersRemaining;
-            console.log(`[HANDLE-SAVE-FIX] Extracted playersRemaining ${data.playersRemaining} from originalScrapedData`);
+        if (parsedOriginalData.playersRemaining !== undefined && data.playersRemaining === undefined) {
+            data.playersRemaining = parsedOriginalData.playersRemaining;
+            console.log(`[HANDLE-SAVE-FIX] Extracted playersRemaining ${data.playersRemaining} from parsedOriginalData`);
         }
     }
 
     console.log(`[WEB-SCRAPER-TRACE] Final data.tournamentId: ${data.tournamentId}, data.playersRemaining: ${data.playersRemaining}`);
     
-    console.log(`[WEB-SCRAPER-TRACE] Parsed originalScrapedData. Is now object:`, typeof originalScrapedData === 'object');
-    console.log(`[WEB-SCRAPER-TRACE] Parsed player entries:`, originalScrapedData?.entries?.length, 'Parsed player results:', originalScrapedData?.results?.length);
+    console.log(`[WEB-SCRAPER-TRACE] Parsed parsedOriginalData. Is now object:`, typeof parsedOriginalData === 'object');
+    console.log(`[WEB-SCRAPER-TRACE] Parsed player entries:`, parsedOriginalData?.entries?.length, 'Parsed player results:', parsedOriginalData?.results?.length);
 
     const processedLevels = (data.levels || []).map(level => ({
         levelNumber: level.levelNumber, durationMinutes: level.durationMinutes || 0,
@@ -803,14 +908,22 @@ const handleSave = async (input) => {
         if (!existingGame.Item) {
             throw new Error(`No game found with ID: ${existingGameId}`);
         }
+        
+        // REFACTOR: Prioritize existing gameStartDateTime unless new one is provided AND different
+        // This prevents overwriting a manually corrected start time with a bad scrape.
+        const newGameStartDateTime = data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : null;
+        const authoritativeGameStart = (newGameStartDateTime && newGameStartDateTime !== existingGame.Item.gameStartDateTime) 
+                                        ? newGameStartDateTime 
+                                        : existingGame.Item.gameStartDateTime;
+
         const updatedGameItem = {
             ...existingGame.Item, 
             name: data.name,
             gameType: data.gameType || existingGame.Item.gameType || 'TOURNAMENT',
             gameStatus: data.gameStatus || existingGame.Item.gameStatus || 'SCHEDULED',
             gameVariant: data.gameVariant || existingGame.Item.gameVariant || 'NLHE',
-            gameStartDateTime: data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : existingGame.Item.gameStartDateTime,
-            gameEndDateTime: data.gameEndDateTime,
+            gameStartDateTime: authoritativeGameStart, // Use authoritative date
+            gameEndDateTime: ensureISODate(data.gameEndDateTime), // Always update end date if present
             // UPDATE: Handle venue updates for existing games
             venueId: venueId || existingGame.Item.venueId || UNASSIGNED_VENUE_ID,
             entityId: entityId || existingGame.Item.entityId || DEFAULT_ENTITY_ID,  // Add entity support
@@ -881,11 +994,14 @@ const handleSave = async (input) => {
             };
             await ddbDocClient.send(new PutCommand({ TableName: structureTable, Item: structureItem }));
         }
+        
+        const authoritativeGameStart = data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : now;
+
         const gameItem = {
             id: gameId, name: data.name, entityId: entityId,
             gameType: data.gameType || 'TOURNAMENT', gameStatus: data.gameStatus || 'SCHEDULED',
             gameVariant: data.gameVariant || 'NLHE',
-            gameStartDateTime: data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : now,
+            gameStartDateTime: authoritativeGameStart, // Use authoritative date
             gameEndDateTime: ensureISODate(data.gameEndDateTime), sourceUrl, venueId,
             // ADD: Venue assignment tracking
             venueAssignmentStatus: input.venueAssignmentStatus || (isUnassigned ? 'PENDING_ASSIGNMENT' : 'AUTO_ASSIGNED'),
@@ -938,14 +1054,15 @@ const handleSave = async (input) => {
             });
             
             const idMatch = sourceUrl.match(/id=(\d+)/);
-            const tournamentId = idMatch ? idMatch[1] : savedGameItem.id;
+            // REFACTOR: Use savedGameItem.tournamentId as primary group key, fallback to URL match
+            const tournamentId = savedGameItem.tournamentId || (idMatch ? idMatch[1] : savedGameItem.id);
 
             console.log(`[handleSave] DIAGNOSTIC: FIFO Group ID: ${tournamentId}. Total Players: ${sqsPayload.players.allPlayers.length}`);
 
             const command = new SendMessageCommand({
                 QueueUrl: PLAYER_PROCESSOR_QUEUE_URL,
                 MessageBody: JSON.stringify(sqsPayload),
-                MessageGroupId: String(tournamentId),
+                MessageGroupId: String(tournamentId), // Preserves one-at-a-time logic
                 MessageDeduplicationId: `${tournamentId}-${Date.now()}`,
                 MessageAttributes: {
                     gameId: { DataType: 'String', StringValue: savedGameItem.id },
@@ -962,7 +1079,7 @@ const handleSave = async (input) => {
             
             console.log(`[handleSave] DIAGNOSTIC: SUCCESS - Message sent to SQS for ID: ${tournamentId}.`);
         } catch (error) {
-            console.error(`[handleSave] DIAGNOSTIC: FAILED - Error sending SQS message for ID ${tournamentIdFromUrl}: ${error.message}`);
+            console.error(`[handleSave] DIAGNOSTIC: FAILED - Error sending SQS message for game ${savedGameItem.id}: ${error.message}`);
         }
     } else if (savedGameItem && liveStatuses.includes(savedGameItem.gameStatus)) {
         console.log(`[handleSave] DIAGNOSTIC: Status is LIVE. Updating PlayerEntries only.`);

@@ -1,0 +1,82 @@
+# Add this to your amplify/backend/api/kingsroom/schema.graphql file
+# OR create as a separate file and import it
+
+# Extend Player-related connections
+type ModelPlayerConnection {
+  items: [Player]
+  nextToken: String
+  total: Int
+}
+
+type ModelPlayerSummaryConnection {
+  items: [PlayerSummary]
+  nextToken: String
+  total: Int
+}
+
+type ModelPlayerEntryConnection {
+  items: [PlayerEntry]
+  nextToken: String
+  total: Int
+}
+
+type ModelPlayerResultConnection {
+  items: [PlayerResult]
+  nextToken: String
+  total: Int
+}
+
+type ModelPlayerVenueConnection {
+  items: [PlayerVenue]
+  nextToken: String
+  total: Int
+}
+
+type ModelPlayerTransactionConnection {
+  items: [PlayerTransaction]
+  nextToken: String
+  total: Int
+}
+
+type ModelPlayerCreditsConnection {
+  items: [PlayerCredits]
+  nextToken: String
+  total: Int
+}
+
+type ModelPlayerPointsConnection {
+  items: [PlayerPoints]
+  nextToken: String
+  total: Int
+}
+
+type ModelPlayerTicketConnection {
+  items: [PlayerTicket]
+  nextToken: String
+  total: Int
+}
+
+type ModelPlayerMarketingPreferencesConnection {
+  items: [PlayerMarketingPreferences]
+  nextToken: String
+  total: Int
+}
+
+type ModelPlayerMarketingMessageConnection {
+  items: [PlayerMarketingMessage]
+  nextToken: String
+  total: Int
+}
+
+# Extend Game-related connections
+type ModelGameConnection {
+  items: [Game]
+  nextToken: String
+  total: Int
+}
+
+type ModelTournamentStructureConnection {
+  items: [TournamentStructure]
+  nextToken: String
+  total: Int
+}

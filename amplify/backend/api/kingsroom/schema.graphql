@@ -12,7 +12,7 @@ enum AssetCondition { NEW, GOOD, FAIR, POOR, RETIRED }
 enum VenueStatus { ACTIVE, INACTIVE, PENDING }
 enum GameType { TOURNAMENT, CASH_GAME }
 enum GameStatus { INITIATING, SCHEDULED, REGISTERING, RUNNING, CANCELLED, FINISHED, NOT_IN_USE, CLOCK_STOPPED, UNKNOWN }
-enum GameVariant { NLHE, PLO, PLO5, PLO6 }
+enum GameVariant { NLHE, PLO, PLOM, PLO5, PLO6 }
 enum GameFrequency { DAILY, WEEKLY, FORTNIGHTLY, MONTHLY, QUARTERLY, YEARLY, UNKNOWN }
 enum RegistrationStatus { SCHEDULED, OPEN, FINAL, CLOSED, N_A }
 enum TournamentType { FREEZEOUT, REBUY, SATELLITE, DEEPSTACK }
@@ -21,7 +21,7 @@ enum PlayerAccountStatus { ACTIVE, SUSPENDED, PENDING_VERIFICATION }
 enum PlayerAccountCategory { NEW, RECREATIONAL, REGULAR, VIP, LAPSED }
 enum SeriesStatus { LIVE, SCHEDULED, COMPLETED }
 enum PlayerTargetingClassification { NotPlayed, Active_EL, Active, Retain_Inactive31_60d, Retain_Inactive61_90d, Churned_91_120d, Churned_121_180d, Churned_181_360d, Churned_361d }
-enum PlayerVenueTargetingClassification { Active_EL, Active, Retain_Inactive31_60d, Retain_Inactive61_90d, Churned_91_120d, Churned_121_180d, Churned_181_360d, Churned_361d }
+enum PlayerVenueTargetingClassification { Active_EL, Active, Retain_Inactive31_60d, Retain_Inactive61_90d, Churn_91_120d, Churn_121_180d, Churn_181_360d, Churn_361d }
 enum TransactionType { BUY_IN, DEPOSIT, TICKET_AWARD, TICKET_REDEMPTION, CASH_AWARD, QUALIFICATION, WITHDRAWAL }
 enum MessageStatus { SENT, DELIVERED, FAILED, READ }
 enum UserRole { SUPER_ADMIN, ADMIN, VENUE_MANAGER, TOURNAMENT_DIRECTOR, MARKETING }
@@ -391,7 +391,7 @@ type Player @model @auth(rules: [{ allow: private }]) {
   playerPoints: [PlayerPoints] @hasMany(indexName: "byPlayer", fields: ["id"])
 
   venueAssignmentStatus: VenueAssignmentStatus @default(value: "PENDING_ASSIGNMENT")
-  registrationVenueId: ID @index(name: "byRegistrationVenue") ## <-- CHANGED: Made optional
+  registrationVenueId: ID @index(name: "byRegistrationVenue")
   registrationVenue: Venue @belongsTo(fields: ["registrationVenueId"])
   updatedAt: AWSDateTime!
 }
@@ -768,9 +768,9 @@ type UserMetricsSummary {
   mostUsedFeature: String
 }
 
-# =================================================================
+# ================================================================
 # 12. CUSTOM OPERATIONS & NON-MODEL TYPES (ORIGINAL + ENHANCED)
-# =================================================================
+# ================================================================
 
 type Query {
   fetchTournamentDataRange(startId: Int!, endId: Int!): [ScrapedGameSummary!] @function(name: "webScraperFunction-${env}")
@@ -808,6 +808,24 @@ type Query {
     @auth(rules: [
       { allow: groups, groups: ["Admin"] }
     ])
+
+    playerCount: Int @function(name: "getModelCount-${env}")
+    playerSummaryCount: Int @function(name: "getModelCount-${env}")
+    playerEntryCount: Int @function(name: "getModelCount-${env}")
+    playerResultCount: Int @function(name: "getModelCount-${env}")
+    playerVenueCount: Int @function(name: "getModelCount-${env}")
+    playerTransactionCount: Int @function(name: "getModelCount-${env}")
+    playerCreditsCount: Int @function(name: "getModelCount-${env}")
+    playerPointsCount: Int @function(name: "getModelCount-${env}")
+    playerTicketCount: Int @function(name: "getModelCount-${env}")
+    playerMarketingPreferencesCount: Int @function(name: "getModelCount-${env}")
+    playerMarketingMessageCount: Int @function(name: "getModelCount-${env}")
+    
+    # Game-related counts
+    gameCount: Int @function(name: "getModelCount-${env}")
+    tournamentStructureCount: Int @function(name: "getModelCount-${env}")
+    
+    getAllCounts: AllCountsResult @function(name: "getModelCount-${env}")
 
 }
 
@@ -957,12 +975,11 @@ type ScrapeURLConnection {
 
 input SaveTournamentInput {
   sourceUrl: AWSURL!
-  venueId: ID ## <-- CHANGED: Made optional
+  venueId: ID
   existingGameId: ID
   doNotScrape: Boolean
   data: ScrapedGameDataInput!
   originalScrapedData: AWSJSON
-  # ADD: Venue assignment tracking
   venueAssignmentStatus: VenueAssignmentStatus
   requiresVenueAssignment: Boolean
   suggestedVenueName: String
@@ -1128,6 +1145,22 @@ type ScrapedVenueMatchDetails {
   id: ID!
   name: String!
   score: Float!
+}
+
+type AllCountsResult {
+  playerCount: Int
+  playerSummaryCount: Int
+  playerEntryCount: Int
+  playerResultCount: Int
+  playerVenueCount: Int
+  playerTransactionCount: Int
+  playerCreditsCount: Int
+  playerPointsCount: Int
+  playerTicketCount: Int
+  playerMarketingPreferencesCount: Int
+  playerMarketingMessageCount: Int
+  gameCount: Int
+  tournamentStructureCount: Int
 }
 
 # ===================================================================
