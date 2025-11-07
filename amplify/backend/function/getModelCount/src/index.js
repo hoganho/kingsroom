@@ -30,31 +30,28 @@
 	REGION
 Amplify Params - DO NOT EDIT */
 
-// Corrected Lambda function - fieldName is at event.fieldName, not event.info.fieldName
-// Place in amplify/backend/function/getModelCount/src/index.js
-
 const AWS = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 const dynamodbService = new AWS.DynamoDB();
 
-// Map field names to DynamoDB table names
+// ✅ FIXED: Map models to the environment variables provided by Amplify
 const TABLE_MAPPINGS = {
-  'Player': 'Player-oi5oitkajrgtzm7feellfluriy-dev',
-  'PlayerSummary': 'PlayerSummary-oi5oitkajrgtzm7feellfluriy-dev',
-  'PlayerEntry': 'PlayerEntry-oi5oitkajrgtzm7feellfluriy-dev',
-  'PlayerResult': 'PlayerResult-oi5oitkajrgtzm7feellfluriy-dev',
-  'PlayerVenue': 'PlayerVenue-oi5oitkajrgtzm7feellfluriy-dev',
-  'PlayerTransaction': 'PlayerTransaction-oi5oitkajrgtzm7feellfluriy-dev',
-  'PlayerCredits': 'PlayerCredits-oi5oitkajrgtzm7feellfluriy-dev',
-  'PlayerPoints': 'PlayerPoints-oi5oitkajrgtzm7feellfluriy-dev',
-  'PlayerTicket': 'PlayerTicket-oi5oitkajrgtzm7feellfluriy-dev',
-  'PlayerMarketingPreferences': 'PlayerMarketingPreferences-oi5oitkajrgtzm7feellfluriy-dev',
-  'PlayerMarketingMessage': 'PlayerMarketingMessage-oi5oitkajrgtzm7feellfluriy-dev',
-  'Game': 'Game-oi5oitkajrgtzm7feellfluriy-dev',
-  'TournamentStructure': 'TournamentStructure-oi5oitkajrgtzm7feellfluriy-dev'
+  'Player': process.env.API_KINGSROOM_PLAYERTABLE_NAME,
+  'PlayerSummary': process.env.API_KINGSROOM_PLAYERSUMMARYTABLE_NAME,
+  'PlayerEntry': process.env.API_KINGSROOM_PLAYERENTRYTABLE_NAME,
+  'PlayerResult': process.env.API_KINGSROOM_PLAYERRESULTTABLE_NAME,
+  'PlayerVenue': process.env.API_KINGSROOM_PLAYERVENUETABLE_NAME,
+  'PlayerTransaction': process.env.API_KINGSROOM_PLAYERTRANSACTIONTABLE_NAME,
+  'PlayerCredits': process.env.API_KINGSROOM_PLAYERCREDITSTABLE_NAME,
+  'PlayerPoints': process.env.API_KINGSROOM_PLAYERPOINTSTABLE_NAME,
+  'PlayerTicket': process.env.API_KINGSROOM_PLAYERTICKETTABLE_NAME,
+  'PlayerMarketingPreferences': process.env.API_KINGSROOM_PLAYERMARKETINGPREFERENCESTABLE_NAME, // Note: This table name wasn't in your list, assuming from map
+  'PlayerMarketingMessage': process.env.API_KINGSROOM_PLAYERMARKETINGMESSAGETABLE_NAME,
+  'Game': process.env.API_KINGSROOM_GAMETABLE_NAME,
+  'TournamentStructure': process.env.API_KINGSROOM_TOURNAMENTSTRUCTURETABLE_NAME
 };
 
-// Map query field names to model names
+// Map query field names to model names (this was already correct)
 const QUERY_TO_MODEL_MAP = {
   'playerCount': 'Player',
   'playerSummaryCount': 'PlayerSummary',
@@ -71,27 +68,68 @@ const QUERY_TO_MODEL_MAP = {
   'tournamentStructureCount': 'TournamentStructure'
 };
 
+/**
+ * Gets the count for a single table using an (expensive) Scan.
+ * This is accurate but slow.
+ */
+const getAccurateCount = async (tableName) => {
+  let totalCount = 0;
+  let lastEvaluatedKey = null;
+
+  do {
+    const params = {
+      TableName: tableName,
+      Select: 'COUNT',
+      ...(lastEvaluatedKey && { ExclusiveStartKey: lastEvaluatedKey })
+    };
+
+    const result = await dynamodb.scan(params).promise();
+    totalCount += result.Count || 0;
+    lastEvaluatedKey = result.LastEvaluatedKey;
+
+  } while (lastEvaluatedKey);
+
+  console.log(`Table ${tableName} has ${totalCount} items (from Scan)`);
+  return totalCount;
+};
+
+/**
+ * Gets the (stale) count for a single table using DescribeTable.
+ * This is fast but can be up to 6 hours out of date.
+ */
+const getStaleCount = async (tableName) => {
+  try {
+    const tableInfo = await dynamodbService.describeTable({ TableName: tableName }).promise();
+    const itemCount = tableInfo.Table?.ItemCount || 0;
+    console.log(`Table ${tableName} has ${itemCount} items (from DescribeTable)`);
+    return itemCount;
+  } catch (err) {
+    console.error(`Error with DescribeTable for ${tableName}:`, err);
+    return 0;
+  }
+};
+
+
 exports.handler = async (event) => {
   console.log('Event received:', JSON.stringify(event, null, 2));
   
-  // FIXED: Get the field name from event.fieldName (not event.info.fieldName)
   const fieldName = event.fieldName;
   console.log('Field name:', fieldName);
   
-    // Handle batch request for all counts
+  // Handle batch request for all counts
   if (fieldName === 'getAllCounts') {
     const counts = {};
     
-    // Get all counts in parallel (within Lambda's execution context)
+    // For "getAllCounts", we use the FAST (but stale) DescribeTable method.
+    // This is much more efficient for a dashboard.
     const countPromises = Object.entries(QUERY_TO_MODEL_MAP).map(async ([field, model]) => {
       const tableName = TABLE_MAPPINGS[model];
-      try {
-        const tableInfo = await dynamodbService.describeTable({ TableName: tableName }).promise();
-        counts[field] = tableInfo.Table?.ItemCount || 0;
-      } catch (err) {
-        console.error(`Error counting ${model}:`, err);
+      if (!tableName) {
+        console.error(`No table mapping for ${model}`);
         counts[field] = 0;
+        return;
       }
+      counts[field] = await getStaleCount(tableName);
     });
     
     await Promise.all(countPromises);
@@ -111,45 +149,15 @@ exports.handler = async (event) => {
     return 0;
   }
   
-  console.log(`Counting items in table: ${tableName}`);
+  console.log(`Getting ACCURATE count for: ${tableName}`);
   
   try {
-    // Try DescribeTable first for efficient count (might be stale)
-    try {
-      const tableInfo = await dynamodbService.describeTable({ TableName: tableName }).promise();
-      const itemCount = tableInfo.Table?.ItemCount || 0;
-      console.log(`Table ${tableName} has ${itemCount} items (from DescribeTable)`);
-      
-      // Note: ItemCount is updated approximately every 6 hours
-      // For real-time accuracy, comment out this return and let it fall through to Scan
-      return itemCount;
-      
-    } catch (describeError) {
-      console.log('DescribeTable failed, falling back to Scan:', describeError.message);
-    }
-    
-    // Fallback to Scan for accurate count
-    let totalCount = 0;
-    let lastEvaluatedKey = null;
-    
-    do {
-      const params = {
-        TableName: tableName,
-        Select: 'COUNT',
-        ...(lastEvaluatedKey && { ExclusiveStartKey: lastEvaluatedKey })
-      };
-      
-      const result = await dynamodb.scan(params).promise();
-      totalCount += result.Count || 0;
-      lastEvaluatedKey = result.LastEvaluatedKey;
-      
-    } while (lastEvaluatedKey);
-    
-    console.log(`Table ${tableName} has ${totalCount} items (from Scan)`);
-    return totalCount;
+    // ✅ FIXED: For single count requests, we use the ACCURATE (but slow) Scan.
+    // This will fix your "count not updating" problem.
+    return await getAccurateCount(tableName);
     
   } catch (error) {
-    console.error('Error getting count:', error);
+    console.error('Error getting accurate count:', error);
     return 0;
   }
 };

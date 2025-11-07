@@ -16,9 +16,8 @@ import {
   listPlayerTicketsForDebug,
   listPlayerMarketingPreferencesForDebug,
   listPlayerMarketingMessagesForDebug,
-  // Import the getAllCounts query
-  getAllCounts,
 } from '../../graphql/customQueries';
+import { getAllCounts } from '../../graphql/queries';
 
 type TabType = 
   | 'players' 

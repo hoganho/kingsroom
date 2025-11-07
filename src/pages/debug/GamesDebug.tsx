@@ -4,12 +4,8 @@
 import { useState, useEffect } from 'react';
 import { getClient } from '../../utils/apiClient';
 import { PageWrapper } from '../../components/layout/PageWrapper';
-import {
-  listGamesForDebug,
-  listTournamentStructuresForDebug,
-  // Import the getAllCounts query
-  getAllCounts,
-} from '../../graphql/customQueries';
+import { listGamesForDebug, listTournamentStructuresForDebug } from '../../graphql/customQueries';
+import { getAllCounts } from '../../graphql/queries';
 
 type TabType = 'games' | 'structures';
 

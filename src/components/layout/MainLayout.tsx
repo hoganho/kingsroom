@@ -1,4 +1,4 @@
-// src/components/layout/MainLayout.tsx
+// src/components/layout/MainLayout.tsx - Complete working version
 
 import { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
@@ -14,13 +14,16 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="hidden md:flex md:flex-shrink-0">
+      {/* Desktop Sidebar - Always visible on md+ screens */}
+      <div className="hidden md:block">
+        <div className="fixed inset-y-0 left-0 w-64 z-30">
           <Sidebar />
+        </div>
       </div>
 
-      {/* --- Mobile Top Bar --- */}
+      {/* Mobile Top Bar - Visible only on mobile */}
       <div className="md:hidden sticky top-0 z-10 flex h-16 flex-shrink-0 items-center justify-between border-b border-gray-800 bg-black px-4">
-        {/* Hamburger Button */}
+        {/* Hamburger Button to open sidebar */}
         <button
           type="button"
           className="rounded-md p-2 text-gray-300 hover:bg-gray-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
@@ -30,7 +33,7 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
           <Bars3Icon className="h-6 w-6" aria-hidden="true" />
         </button>
 
-        {/* ✅ CHANGE: Replaced the h1 text with the logo image */}
+        {/* Logo */}
         <img 
           src={logo} 
           alt="Kings Room Logo" 
@@ -46,13 +49,14 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
         </button>
       </div>
 
-      {/* --- Mobile Sidebar (Sliding Panel) --- */}
+      {/* Mobile Sidebar - Sliding Panel (Dialog) */}
       <Transition.Root show={sidebarOpen} as={Fragment}>
         <Dialog
           as="div"
           className="relative z-40 md:hidden"
           onClose={setSidebarOpen}
         >
+          {/* Background overlay */}
           <Transition.Child
             as={Fragment}
             enter="transition-opacity ease-linear duration-300"
@@ -65,6 +69,7 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
             <div className="fixed inset-0 bg-gray-600 bg-opacity-75" />
           </Transition.Child>
 
+          {/* Sidebar panel */}
           <div className="fixed inset-0 z-40 flex">
             <Transition.Child
               as={Fragment}
@@ -75,7 +80,8 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
               leaveFrom="translate-x-0"
               leaveTo="-translate-x-full"
             >
-              <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-white">
+              <Dialog.Panel className="relative w-full max-w-xs h-full">
+                {/* Close button */}
                 <Transition.Child
                   as={Fragment}
                   enter="ease-in-out duration-300"
@@ -99,19 +105,25 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
                     </button>
                   </div>
                 </Transition.Child>
-                <Sidebar /> 
+                
+                {/* Render the Sidebar component with props */}
+                <div className="h-full">
+                  <Sidebar onClose={() => setSidebarOpen(false)} />
+                </div>
               </Dialog.Panel>
             </Transition.Child>
+            
+            {/* Empty space to the right */}
             <div className="w-14 flex-shrink-0" aria-hidden="true" />
           </div>
         </Dialog>
       </Transition.Root>
 
-      {/* --- Main Content Area --- */}
+      {/* Main Content Area */}
       <main className="flex-1 md:pl-64">
         {/* Desktop Top Bar */}
         <header className="sticky top-0 z-10 hidden h-16 flex-shrink-0 items-center justify-between border-b border-gray-800 bg-black px-4 sm:px-6 lg:px-8 md:flex">
-           <div className="flex-1"></div>
+          <div className="flex-1"></div>
           <div className="flex flex-1 items-center justify-center">
             <img src={logo} alt="Kings Room Logo" className="h-12 object-contain" />
           </div>
@@ -128,9 +140,11 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </header>
 
+        {/* Page content with padding for mobile bottom nav */}
         <div className="pb-20 md:pb-6">{children}</div>
       </main>
 
+      {/* Mobile Bottom Navigation */}
       <MobileBottomNav />
     </div>
   );

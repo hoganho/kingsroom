@@ -1,5 +1,5 @@
-// src/pages/scraper-admin-tabs/ManualTrackerTab.tsx
-// Entity-aware version of ManualTrackerTab
+// src/pages/scraper-admin-tabs/SingleScraperTab.tsx
+// Entity-aware version of SingleScraperTab
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
@@ -13,7 +13,7 @@ import { SaveConfirmationModal } from '../../components/scraper/SaveConfirmation
 import { GameListItem } from '../../components/scraper/GameListItem';
 import { EntitySelector } from '../../components/entities/EntitySelector';
 
-export const ManualTrackerTab: React.FC = () => {
+export const SingleScraperTab: React.FC = () => {
     const client = useMemo(() => generateClient(), []);
     // FIX 1: Removed 'entities' as it was unused
     const { currentEntity } = useEntity();
@@ -60,7 +60,7 @@ export const ManualTrackerTab: React.FC = () => {
                     });
                 
                 setVenues(venueItems);
-                console.log(`[ManualTrackerTab] Loaded ${venueItems.length} venues for entity: ${currentEntity.entityName}`);
+                console.log(`[SingleScraperTab] Loaded ${venueItems.length} venues for entity: ${currentEntity.entityName}`);
             } catch (error) {
                 console.error('Error fetching venues:', error);
             } finally {
@@ -104,7 +104,7 @@ export const ManualTrackerTab: React.FC = () => {
             // If just an ID was entered, build the full URL using entity config
             if (!id.startsWith('http')) {
                 trackUrl = buildGameUrl(currentEntity, id);
-                console.log(`[ManualTrackerTab] Built URL for entity ${currentEntity.entityName}: ${trackUrl}`);
+                console.log(`[SingleScraperTab] Built URL for entity ${currentEntity.entityName}: ${trackUrl}`);
             } else {
                 // Validate that the URL matches the current entity
                 const urlDomain = new URL(id).origin;
@@ -127,7 +127,7 @@ export const ManualTrackerTab: React.FC = () => {
     };
 
     const handleVenueChange = (gameId: string, venueId: string) => {
-        console.log(`[ManualTrackerTab] Venue changed for game ${gameId}: ${venueId}`);
+        console.log(`[SingleScraperTab] Venue changed for game ${gameId}: ${venueId}`);
         setSelectedVenues(prev => ({ 
             ...prev, 
             [gameId]: venueId 
@@ -138,11 +138,11 @@ export const ManualTrackerTab: React.FC = () => {
         const game = games[gameId];
         
         if (!game || !game.data || !venueId || !currentEntity) {
-            console.error('[ManualTrackerTab] Cannot save: Missing game data, venue, or entity');
+            console.error('[SingleScraperTab] Cannot save: Missing game data, venue, or entity');
             return;
         }
         
-        console.log(`[ManualTrackerTab] Opening save modal for game: ${gameId} with venue: ${venueId} and entity: ${currentEntity.id}`);
+        console.log(`[SingleScraperTab] Opening save modal for game: ${gameId} with venue: ${venueId} and entity: ${currentEntity.id}`);
         setConfirmModalData({ game, venueId, entityId: currentEntity.id });
     };
 
@@ -152,7 +152,7 @@ export const ManualTrackerTab: React.FC = () => {
         
         const { game, venueId, entityId } = confirmModalData;
         
-        console.log(`[ManualTrackerTab] Confirming save for game: ${game.id} with venue: ${venueId} and entity: ${entityId}`);
+        console.log(`[SingleScraperTab] Confirming save for game: ${game.id} with venue: ${venueId} and entity: ${entityId}`);
         
         // Call saveGame with the game id, venue id, and entity id
         saveGame(game.id, venueId, entityId);

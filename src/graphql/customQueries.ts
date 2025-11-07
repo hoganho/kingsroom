@@ -413,6 +413,7 @@ export const listGamesForDebug = /* GraphQL */ `
         gameType
         gameStatus
         gameStartDateTime
+        registrationStatus
         venueId
         tournamentId
         venue {
@@ -538,25 +539,5 @@ export const getGameCount = /* GraphQL */ `
 export const getTournamentStructureCount = /* GraphQL */ `
   query GetTournamentStructureCount {
     tournamentStructureCount
-  }
-`;
-
-export const getAllCounts = /* GraphQL */ `
-  query GetAllCounts {
-    getAllCounts {
-      playerCount
-      playerSummaryCount
-      playerEntryCount
-      playerResultCount
-      playerVenueCount
-      playerTransactionCount
-      playerCreditsCount
-      playerPointsCount
-      playerTicketCount
-      playerMarketingPreferencesCount
-      playerMarketingMessageCount
-      gameCount
-      tournamentStructureCount
-    }
   }
 `;

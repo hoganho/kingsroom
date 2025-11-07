@@ -120,7 +120,7 @@ export const fetchGameDataFromBackend = async (
     
     try {
         // *** FIX: Determine entity ID ***
-        // 1. Use the entityId if it was passed directly (from ManualTrackerTab)
+        // 1. Use the entityId if it was passed directly (from SingleScraperTab)
         // 2. If not, fall back to guessing from the URL (for other parts of the app)
         const finalEntityId = entityId || (await getEntityIdFromUrl(url));
         

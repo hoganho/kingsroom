@@ -15,7 +15,7 @@ import {
 // Import the tab components
 import { OverviewTab } from './scraper-admin-tabs/OverviewTab';
 import { AutoScraperTab } from './scraper-admin-tabs/AutoScraperTab';
-import { ManualTrackerTab } from './scraper-admin-tabs/ManualTrackerTab';
+import { SingleScraperTab } from './scraper-admin-tabs/SingleScraperTab';
 import { BulkScraperTab } from './scraper-admin-tabs/BulkScraperTab';
 import { JobHistoryTab } from './scraper-admin-tabs/JobHistoryTab';
 import { URLManagementTab } from './scraper-admin-tabs/URLManagementTab';
@@ -61,7 +61,7 @@ export const ScraperAdminPage: React.FC = () => {
             case 'auto':
                 return <AutoScraperTab />;
             case 'manual':
-                return <ManualTrackerTab />;
+                return <SingleScraperTab />;
             case 'bulk':
                 return <BulkScraperTab />;
             case 'jobs':

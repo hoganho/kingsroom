@@ -4,8 +4,34 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 // FIX: Attempting to resolve import error by changing to the v5 package name
 import { generateClient } from '@aws-amplify/api'; 
-import { listEntities } from '../graphql/queries';
+// Removed the problematic auto-generated query
 import { Entity } from '../types/entity';
+
+// Custom shallow query to avoid nested relationship issues
+const listEntitiesShallow = /* GraphQL */ `
+  query ListEntitiesShallow(
+    $filter: ModelEntityFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listEntities(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+      }
+      nextToken
+    }
+  }
+`;
 
 interface EntityContextType {
   // All available entities
@@ -56,7 +82,7 @@ export const EntityProvider: React.FC<EntityProviderProps> = ({ children }) => {
       setError(null);
       
       const response = await client.graphql({
-        query: listEntities,
+        query: listEntitiesShallow,  // Using custom shallow query
         variables: {
           filter: { isActive: { eq: true } }
         }

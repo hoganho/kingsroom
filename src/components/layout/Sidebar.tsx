@@ -1,4 +1,4 @@
-// src/components/layout/Sidebar.tsx - Fixed with correct route paths
+// src/components/layout/Sidebar.tsx - Final version without unused parameters
 
 import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
@@ -10,13 +10,11 @@ import {
   BeakerIcon,
   BuildingOffice2Icon,
   WrenchIcon,
-  Bars3Icon,
-  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
+import { EntitySelector } from '../entities/EntitySelector';
 
 interface SidebarProps {
-  isOpen?: boolean;
   onClose?: () => void;
 }
 
@@ -28,14 +26,13 @@ interface MenuItem {
   requiredRoles?: string[];
 }
 
-export const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(isOpen);
+export const Sidebar = ({ onClose }: SidebarProps) => {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const location = useLocation();
-  const { userRole } = useAuth(); // Assumes AuthContext provides userRole
+  const { userRole } = useAuth();
   const buildVersion = import.meta.env.VITE_BUILD_VERSION || 'dev';
 
-  // Main navigation items - FIXED PATHS
+  // Main navigation items
   const mainMenuItems: MenuItem[] = [
     {
       to: '/home',
@@ -100,7 +97,7 @@ export const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
   // Scraper Management section (SuperAdmin only)
   const scraperMenuItems: MenuItem[] = [
     {
-      to: '/scraper/admin',  // Correct path matching App.tsx route
+      to: '/scraper/admin',
       label: 'Scraper Admin',
       icon: WrenchIcon,
       requiredRoles: ['SuperAdmin'],
@@ -123,16 +120,6 @@ export const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
     },
   ];
 
-  // Sync with parent's isOpen prop
-  useEffect(() => {
-    setIsMobileMenuOpen(isOpen);
-  }, [isOpen]);
-
-  // Close mobile menu on route change
-  useEffect(() => {
-    handleCloseMobileMenu();
-  }, [location]);
-
   // Auto-expand parent if child is active
   useEffect(() => {
     mainMenuItems.forEach((item) => {
@@ -146,11 +133,6 @@ export const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
       }
     });
   }, [location.pathname]);
-
-  const handleCloseMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-    onClose?.();
-  };
 
   const toggleExpanded = (label: string) => {
     setExpandedItems((prev) => {
@@ -172,8 +154,9 @@ export const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
     }`;
 
   const handleNavClick = () => {
-    if (window.innerWidth < 768) {
-      handleCloseMobileMenu();
+    // Close mobile menu on navigation if on mobile and callback provided
+    if (onClose && window.innerWidth < 768) {
+      setTimeout(onClose, 100); // Small delay for better UX
     }
   };
 
@@ -230,91 +213,75 @@ export const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
     );
   };
 
+  // The sidebar content - works in both desktop (fixed) and mobile (dialog) contexts
   return (
-    <>
-      {/* Mobile menu button */}
-      <button
-        type="button"
-        className="md:hidden fixed top-4 left-4 z-50 inline-flex items-center justify-center p-2 rounded-md text-gray-700 bg-white shadow-lg hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-      >
-        <span className="sr-only">Toggle menu</span>
-        {isMobileMenuOpen ? (
-          <XMarkIcon className="h-6 w-6" />
-        ) : (
-          <Bars3Icon className="h-6 w-6" />
-        )}
-      </button>
+    <div className="h-full flex flex-col bg-white">
+      {/* Header */}
+      <div className="flex-shrink-0 h-16 flex items-center justify-center px-4 bg-black border-b">
+        <span className="font-mono text-sm font-semibold text-gray-300 tracking-wider">
+          Prototype v{buildVersion}
+        </span>
+      </div>
 
-      {/* Mobile menu overlay */}
-      {isMobileMenuOpen && (
-        <div
-          className="md:hidden fixed inset-0 z-40 bg-gray-600 bg-opacity-75"
-          onClick={handleCloseMobileMenu}
+      {/* Entity Selector */}
+      <div className="flex-shrink-0 px-4 py-3 bg-gray-50 border-b">
+        <EntitySelector 
+          showLabel={true}
+          className="w-full"
         />
-      )}
+      </div>
 
-      {/* Sidebar */}
-      <aside
-        className={`
-          fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r bg-white transform transition-transform duration-300 ease-in-out
-          md:translate-x-0 md:z-30
-          ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}
-      >
-        <div className="flex flex-shrink-0 items-center justify-center px-4 h-16 border-b bg-black">
-          <span className="font-mono text-sm font-semibold text-gray-300 tracking-wider">
-            Prototype v{buildVersion}
-          </span>
-        </div>
+      {/* Scrollable Navigation Area */}
+      <div className="flex-1 overflow-y-auto">
+        <nav className="p-4 space-y-2">
+          {/* Main navigation */}
+          {mainMenuItems.map((item) => renderMenuItem(item))}
 
-        <nav className="flex flex-1 flex-col overflow-y-auto">
-          <div className="p-4 space-y-2">
-            {/* Main navigation */}
-            {mainMenuItems.map((item) => renderMenuItem(item))}
+          {/* Settings section (Admin/SuperAdmin) */}
+          {hasRole(['Admin', 'SuperAdmin']) && (
+            <>
+              <div className="pt-6 pb-2">
+                <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  Settings
+                </p>
+              </div>
+              {settingsMenuItems.map((item) => renderMenuItem(item))}
+            </>
+          )}
 
-            {/* Settings section (Admin/SuperAdmin) */}
-            {hasRole(['Admin', 'SuperAdmin']) && (
-              <>
-                <div className="pt-6 pb-2">
-                  <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Settings
-                  </p>
-                </div>
-                {settingsMenuItems.map((item) => renderMenuItem(item))}
-              </>
-            )}
+          {/* Scraper Management section (SuperAdmin) */}
+          {hasRole(['SuperAdmin']) && (
+            <>
+              <div className="pt-6 pb-2">
+                <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  Scraper Management
+                </p>
+              </div>
+              {scraperMenuItems.map((item) => renderMenuItem(item))}
+            </>
+          )}
 
-            {/* Scraper Management section (SuperAdmin) */}
-            {hasRole(['SuperAdmin']) && (
-              <>
-                <div className="pt-6 pb-2">
-                  <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Scraper Management
-                  </p>
-                </div>
-                {scraperMenuItems.map((item) => renderMenuItem(item))}
-              </>
-            )}
-
-            {/* Debug section (SuperAdmin) */}
-            {hasRole(['SuperAdmin']) && (
-              <>
-                <div className="pt-6 pb-2">
-                  <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Debug
-                  </p>
-                </div>
-                {debugMenuItems.map((item) => renderMenuItem(item))}
-              </>
-            )}
-          </div>
+          {/* Debug section (SuperAdmin) */}
+          {hasRole(['SuperAdmin']) && (
+            <>
+              <div className="pt-6 pb-2">
+                <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  Debug
+                </p>
+              </div>
+              {debugMenuItems.map((item) => renderMenuItem(item))}
+            </>
+          )}
         </nav>
+      </div>
 
-        <div className="p-4 border-t">
-          <p className="text-xs text-gray-500">© 2025 Top Set Ventures</p>
+      {/* Footer */}
+      <div className="flex-shrink-0 p-4 bg-gray-50 border-t">
+        <div className="text-xs text-gray-500">
+          <div className="mb-1">Version: {buildVersion}</div>
+          <div>© 2025 Top Set Ventures</div>
         </div>
-      </aside>
-    </>
+      </div>
+    </div>
   );
 };

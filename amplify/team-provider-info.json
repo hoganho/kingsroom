@@ -52,7 +52,7 @@
         },
         "getModelCount": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/getModelCount-764c384c46686978774c-build.zip"
+          "s3Key": "amplify-builds/getModelCount-30567279312b30594444-build.zip"
         }
       },
       "auth": {
