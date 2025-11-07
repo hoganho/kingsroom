@@ -164,10 +164,33 @@ const VenueManagement = () => {
       }
       
       setIsModalOpen(false);
+      setEditingVenue(null); // Clear editing state
       fetchVenues(); // Refetch venues to show updated data
-    } catch (err) {
+    } catch (err: any) { // <-- Typed err as 'any' to inspect it
       console.error('Error saving venue:', err);
-      setError('Failed to save venue. Make sure to run "amplify codegen" after updating your schema.');
+
+      // ✅ NEW: Check if this is a conflict error
+      const isConflict = err?.errors?.some(
+        (e: any) => e.errorType === 'ConflictUnhandled'
+      );
+
+      if (isConflict) {
+        // This is a conflict. The local data is stale.
+        setError(
+          'This venue was modified by someone else. The data has been refreshed, please try again.'
+        );
+        // Force refetch the latest data from the server
+        fetchVenues();
+      } else {
+        // This is a different error (e.g., validation, network)
+        setError(
+          'Failed to save venue. Make sure to run "amplify codegen" after updating your schema.'
+        );
+      }
+      
+      // Ensure modal closes and state is cleared even on error
+      setIsModalOpen(false);
+      setEditingVenue(null);
     }
   };
   
@@ -193,9 +216,26 @@ const VenueManagement = () => {
       setIsDeleteModalOpen(false);
       setDeletingVenueId(null);
       fetchVenues();
-    } catch (err) {
+    } catch (err: any) { // <-- Typed err as 'any' to inspect it
       console.error('Error deleting venue:', err);
-      setError('Failed to delete venue.');
+      
+      // ✅ NEW: Add conflict handling for delete
+      const isConflict = err?.errors?.some(
+        (e: any) => e.errorType === 'ConflictUnhandled'
+      );
+      
+      if (isConflict) {
+        setError(
+          'This venue was modified by someone else. The data has been refreshed, please try again.'
+        );
+        fetchVenues(); // Refresh data
+      } else {
+         setError('Failed to delete venue.');
+      }
+      
+      // Ensure modal closes and state is cleared even on error
+      setIsDeleteModalOpen(false);
+      setDeletingVenueId(null);
     }
   };
 

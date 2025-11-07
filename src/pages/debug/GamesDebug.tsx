@@ -155,18 +155,22 @@ export const GamesDebug = () => {
         
         if (nextToken && isLoadMore) {
           // Load more: Append items and re-sort if games
-          let allItems = [...prev[tab], ...items];
-          if (tab === 'games') {
-            allItems = allItems.sort((a: any, b: any) => {
-              const dateA = a.gameStartDateTime ? new Date(a.gameStartDateTime).getTime() : 0;
-              const dateB = b.gameStartDateTime ? new Date(b.gameStartDateTime).getTime() : 0;
-              return dateB - dateA;
-            });
-          }
-          setData(prev => ({
-            ...prev,
-            [tab]: allItems
-          }));
+          setData(prev => { // <-- 'prev' is defined here
+            let allItems = [...prev[tab], ...items]; // <-- Now this works
+            
+            if (tab === 'games') {
+              allItems = allItems.sort((a: any, b: any) => {
+                const dateA = a.gameStartDateTime ? new Date(a.gameStartDateTime).getTime() : 0;
+                const dateB = b.gameStartDateTime ? new Date(b.gameStartDateTime).getTime() : 0;
+                return dateB - dateA; // Most recent first
+              });
+            }
+            
+            return { // <-- Return the new state object
+              ...prev,
+              [tab]: allItems
+            };
+          });
         } else {
           // First fetch: Set items
           setData(prev => ({
