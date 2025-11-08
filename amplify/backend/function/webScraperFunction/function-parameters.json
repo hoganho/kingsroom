@@ -42,6 +42,11 @@
         "create",
         "read",
         "update"
+      ],
+      "S3Storage:@model(appsync)": [
+        "create",
+        "read",
+        "update"
       ]
     }
   },
@@ -50,6 +55,10 @@
     {
       "cloudFormationParameterName": "playerProcessorQueueUrl",
       "environmentVariableName": "PLAYER_PROCESSOR_QUEUE_URL"
+    },
+    {
+      "cloudFormationParameterName": "scraperS3Bucket",
+      "environmentVariableName": "SCRAPER_S3_BUCKET"
     }
   ]
 }

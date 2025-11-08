@@ -1,9 +1,9 @@
-// src/pages/scraper-admin-tabs/SingleScraperTab.tsx
-// Entity-aware version of SingleScraperTab
+// src/pages/scraper-admin-tabs/SingleScraperTabEnhanced.tsx
+// Enhanced version with S3 HTML support and modal
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import { Target, Building2 } from 'lucide-react';
+import { Target, Building2, FastForward } from 'lucide-react';
 import { useGameTracker } from '../../hooks/useGameTracker';
 import { useEntity, buildGameUrl } from '../../contexts/EntityContext';
 import { listVenuesForDropdown } from '../../graphql/customQueries';
@@ -12,21 +12,33 @@ import { GameDetailsModal } from '../../components/scraper/admin/GameDetailsModa
 import { SaveConfirmationModal } from '../../components/scraper/SaveConfirmationModal';
 import { GameListItem } from '../../components/scraper/GameListItem';
 import { EntitySelector } from '../../components/entities/EntitySelector';
+import { ScrapeOptionsModal } from '../../components/scraper/ScrapeOptionsModal';
 
 export const SingleScraperTab: React.FC = () => {
     const client = useMemo(() => generateClient(), []);
-    // FIX 1: Removed 'entities' as it was unused
     const { currentEntity } = useEntity();
     const [inputId, setInputId] = useState('');
-    const { games, trackGame, saveGame, removeGame, refreshGame } = useGameTracker();
-    const [selectedGame, setSelectedGame] = useState<any>(null);
     
-    // State for venues and selection
+    // Use enhanced tracker with S3 support
+    const { 
+        games, 
+        trackGame, 
+        saveGame, 
+        removeGame 
+    } = useGameTracker();
+    
+    const [selectedGame, setSelectedGame] = useState<any>(null);
+    const [trackedIds, setTrackedIds] = useState<Set<string>>(new Set());
     const [venues, setVenues] = useState<Venue[]>([]);
     const [venuesLoading, setVenuesLoading] = useState(false);
     const [selectedVenues, setSelectedVenues] = useState<Record<string, string>>({});
     
-    // State for the save confirmation modal
+    // Modal state for scrape options
+    const [scrapeModalInfo, setScrapeModalInfo] = useState<{
+        url: string;
+        entityId: string;
+    } | null>(null);
+    
     const [confirmModalData, setConfirmModalData] = useState<{
         game: any;
         venueId: string;
@@ -69,6 +81,28 @@ export const SingleScraperTab: React.FC = () => {
         };
         fetchVenues();
     }, [client, currentEntity]);
+
+    // Track which IDs have been tracked for the current entity
+    useEffect(() => {
+        if (!currentEntity) return;
+        
+        const ids = new Set<string>();
+        Object.values(games).forEach((game: any) => {
+            try {
+                const gameUrl = new URL(game.id);
+                const gameDomain = `${gameUrl.protocol}//${gameUrl.hostname}`;
+                if (gameDomain === currentEntity.gameUrlDomain) {
+                    const pathMatch = game.id.match(/id=(\d+)/);
+                    if (pathMatch) {
+                        ids.add(pathMatch[1]);
+                    }
+                }
+            } catch {
+                // Ignore invalid URLs
+            }
+        });
+        setTrackedIds(ids);
+    }, [games, currentEntity]);
     
     // Effect to auto-select venue
     useEffect(() => {
@@ -78,9 +112,7 @@ export const SingleScraperTab: React.FC = () => {
             const gameId = game.id;
             const autoAssignedId = game.data?.venueMatch?.autoAssignedVenue?.id;
             
-            // Check if we should auto-select a venue for this game
             if (autoAssignedId && !selectedVenues[gameId]) {
-                // Verify the venue exists in our list
                 if (venues.some(v => v.id === autoAssignedId)) {
                     console.log(`[Auto-Assign] Automatically selecting venue ID: ${autoAssignedId} for game: ${gameId}`);
                     setSelectedVenues(prev => ({
@@ -114,10 +146,55 @@ export const SingleScraperTab: React.FC = () => {
                 }
             }
             
-            // Track with entity context
-            trackGame(trackUrl, 'SCRAPE' as DataSource, currentEntity.id);
+            // Show modal for scrape options
+            setScrapeModalInfo({
+                url: trackUrl,
+                entityId: currentEntity.id
+            });
+            
             setInputId('');
         }
+    };
+
+    const handleScrapeOptionSelected = (option: 'S3' | 'LIVE') => {
+        if (!scrapeModalInfo) return;
+        
+        console.log(`[SingleScraperTab] User selected ${option} for ${scrapeModalInfo.url}`);
+        
+        // TODO: The useGameTracker hook's trackGame function expects a TrackOptions type
+        // for its 4th parameter, but the type definition is not available here.
+        // Using 'as any' as a temporary workaround until the hook's types are properly exported.
+        // The expected structure likely includes { scrapeFrom: 'S3' | 'LIVE' }
+        const options = option === 'S3' ? { scrapeFrom: 'S3' } : undefined;
+        
+        trackGame(
+            scrapeModalInfo.url, 
+            'SCRAPE' as DataSource, 
+            scrapeModalInfo.entityId, 
+            options as any
+        );
+        
+        setScrapeModalInfo(null);
+    };
+
+    const handleTrackNext = () => {
+        if (!currentEntity) {
+            alert('Please select an entity first');
+            return;
+        }
+
+        let nextId = 1;
+        while (trackedIds.has(nextId.toString())) {
+            nextId++;
+            if (nextId > 100000) {
+                alert('Could not find an untracked ID in reasonable range');
+                return;
+            }
+        }
+        
+        const nextIdStr = nextId.toString();
+        setInputId(nextIdStr);
+        handleTrackGame(nextIdStr);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -146,7 +223,6 @@ export const SingleScraperTab: React.FC = () => {
         setConfirmModalData({ game, venueId, entityId: currentEntity.id });
     };
 
-    // Handle save confirmation from modal
     const handleConfirmSave = () => {
         if (!confirmModalData) return;
         
@@ -154,14 +230,21 @@ export const SingleScraperTab: React.FC = () => {
         
         console.log(`[SingleScraperTab] Confirming save for game: ${game.id} with venue: ${venueId} and entity: ${entityId}`);
         
-        // Call saveGame with the game id, venue id, and entity id
         saveGame(game.id, venueId, entityId);
         
-        // Close the modal
         setConfirmModalData(null);
     };
 
-    // Show entity selector if no entity is selected
+    const handleRefreshGame = (gameId: string) => {
+        // When refreshing, show the modal again
+        if (!currentEntity) return;
+        
+        setScrapeModalInfo({
+            url: gameId,
+            entityId: currentEntity.id
+        });
+    };
+
     if (!currentEntity) {
         return (
             <div className="space-y-6">
@@ -188,17 +271,16 @@ export const SingleScraperTab: React.FC = () => {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                         <Building2 className="h-5 w-5 text-blue-500" />
-                        <div>
-                            <p className="text-sm font-medium text-blue-900">
-                                Current Entity: {currentEntity.entityName}
-                            </p>
-                            <p className="text-xs text-blue-700 font-mono">
-                                URL Pattern: {currentEntity.gameUrlDomain}{currentEntity.gameUrlPath}[ID]
-                            </p>
+                        <div className="flex items-center space-x-2">
+                            <span className="text-sm font-medium text-blue-900">Entity:</span>
+                            <EntitySelector />
                         </div>
                     </div>
-                    {/* FIX 2: Removed 'showLabel' prop */}
-                    <EntitySelector />
+                    <div>
+                        <p className="text-xs text-blue-700 font-mono">
+                            URL Pattern: {currentEntity.gameUrlDomain}{currentEntity.gameUrlPath}[ID]
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -206,14 +288,25 @@ export const SingleScraperTab: React.FC = () => {
             <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-lg font-semibold mb-4">Track Tournament</h3>
                 <form className="space-y-3" onSubmit={handleSubmit}>
-                    <div className="flex items-center space-x-2">
+                    <div>
                         <input
                             type="text"
                             value={inputId}
                             onChange={(e) => setInputId(e.target.value)}
-                            className="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder={`Enter Tournament ID (e.g., 12345) for ${currentEntity.entityName}...`}
                         />
+                    </div>
+                    <div className="flex space-x-2">
+                        <button
+                            type="button"
+                            onClick={handleTrackNext}
+                            disabled={!currentEntity}
+                            className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-300 flex items-center space-x-2"
+                        >
+                            <FastForward className="h-4 w-4" />
+                            <span>Track Next</span>
+                        </button>
                         <button
                             type="submit"
                             disabled={!currentEntity}
@@ -235,7 +328,6 @@ export const SingleScraperTab: React.FC = () => {
                     <div className="space-y-2">
                         {Object.values(games)
                             .filter((game: any) => {
-                                // Filter games by current entity
                                 try {
                                     const gameUrl = new URL(game.id);
                                     const gameDomain = `${gameUrl.protocol}//${gameUrl.hostname}`;
@@ -254,11 +346,15 @@ export const SingleScraperTab: React.FC = () => {
                                     onVenueChange={handleVenueChange}
                                     onSave={handleSave}
                                     onRemove={removeGame}
-                                    onRefresh={refreshGame}
+                                    onRefresh={handleRefreshGame}
                                     onViewDetails={setSelectedGame}
                                     mode="manual"
                                     showVenueSelector={true}
                                     showActions={true}
+                                    // TODO: Add showS3Indicator when prop is added to GameListItem component
+                                    // showS3Indicator={game.s3Key ? true : false}
+                                    // TODO: Add hasUpdateAvailable when prop is added to GameListItem component  
+                                    // hasUpdateAvailable={game.updateAvailable}
                                 />
                             ))}
                     </div>
@@ -271,6 +367,17 @@ export const SingleScraperTab: React.FC = () => {
                     </div>
                 )}
             </div>
+
+            {/* Scrape Options Modal */}
+            {scrapeModalInfo && (
+                <ScrapeOptionsModal
+                    isOpen={true}
+                    onClose={() => setScrapeModalInfo(null)}
+                    onSelectOption={handleScrapeOptionSelected}
+                    url={scrapeModalInfo.url}
+                    entityId={scrapeModalInfo.entityId}
+                />
+            )}
 
             {/* Game Details Modal */}
             {selectedGame && (
@@ -288,7 +395,6 @@ export const SingleScraperTab: React.FC = () => {
                     onConfirm={handleConfirmSave}
                     gameData={confirmModalData.game.data}
                     venueId={confirmModalData.venueId}
-                    // FIX 3: Removed 'entityId' prop
                     sourceUrl={confirmModalData.game.id}
                 />
             )}

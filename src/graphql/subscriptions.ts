@@ -164,6 +164,16 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -373,6 +383,16 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -815,6 +835,16 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -1024,6 +1054,16 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -1301,6 +1341,16 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
     }
     createdAt
     updatedAt
+    etag
+    lastModifiedHeader
+    contentHash
+    s3StoragePrefix
+    latestS3Key
+    s3StorageEnabled
+    lastContentChangeAt
+    totalContentChanges
+    lastHeaderCheckAt
+    cachedContentUsedCount
     _version
     _deleted
     _lastChangedAt
@@ -1630,6 +1680,16 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
         }
         createdAt
         updatedAt
+        etag
+        lastModifiedHeader
+        contentHash
+        s3StoragePrefix
+        latestS3Key
+        s3StorageEnabled
+        lastContentChangeAt
+        totalContentChanges
+        lastHeaderCheckAt
+        cachedContentUsedCount
         _version
         _deleted
         _lastChangedAt
@@ -2709,6 +2769,16 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
         }
         createdAt
         updatedAt
+        etag
+        lastModifiedHeader
+        contentHash
+        s3StoragePrefix
+        latestS3Key
+        s3StorageEnabled
+        lastContentChangeAt
+        totalContentChanges
+        lastHeaderCheckAt
+        cachedContentUsedCount
         _version
         _deleted
         _lastChangedAt
@@ -3788,6 +3858,16 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
         }
         createdAt
         updatedAt
+        etag
+        lastModifiedHeader
+        contentHash
+        s3StoragePrefix
+        latestS3Key
+        s3StorageEnabled
+        lastContentChangeAt
+        totalContentChanges
+        lastHeaderCheckAt
+        cachedContentUsedCount
         _version
         _deleted
         _lastChangedAt
@@ -4882,6 +4962,16 @@ export const onCreateScraperState = /* GraphQL */ `subscription OnCreateScraperS
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -5374,6 +5464,16 @@ export const onUpdateScraperState = /* GraphQL */ `subscription OnUpdateScraperS
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -5866,6 +5966,16 @@ export const onDeleteScraperState = /* GraphQL */ `subscription OnDeleteScraperS
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -7872,6 +7982,16 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -9879,6 +9999,16 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -11886,6 +12016,16 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -12828,6 +12968,16 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -13617,6 +13767,16 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -14406,6 +14566,16 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -15847,6 +16017,16 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -17064,6 +17244,16 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -18281,6 +18471,16 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -19454,6 +19654,16 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -21119,6 +21329,16 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -22093,6 +22313,16 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -23758,6 +23988,16 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -24732,6 +24972,16 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -26397,6 +26647,16 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -27621,6 +27881,16 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -28692,6 +28962,16 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -29763,6 +30043,16 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -33109,6 +33399,16 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -36254,6 +36554,16 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -39399,6 +39709,16 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -44940,6 +45260,16 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -47100,6 +47430,16 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -49260,6 +49600,16 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -51416,6 +51766,16 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -53572,6 +53932,16 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -55728,6 +56098,16 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -57608,6 +57988,16 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -59488,6 +59878,16 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -61368,6 +61768,16 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -83427,6 +83837,16 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -83729,6 +84149,16 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -84667,6 +85097,16 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -84969,6 +85409,16 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -85907,6 +86357,16 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -86209,6 +86669,16 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -86780,6 +87250,16 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -86989,6 +87469,16 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -87434,6 +87924,16 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -87643,6 +88143,16 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -88088,6 +88598,16 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -88297,6 +88817,16 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -88739,6 +89269,16 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -88948,6 +89488,16 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -89225,6 +89775,16 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
     }
     createdAt
     updatedAt
+    etag
+    lastModifiedHeader
+    contentHash
+    s3StoragePrefix
+    latestS3Key
+    s3StorageEnabled
+    lastContentChangeAt
+    totalContentChanges
+    lastHeaderCheckAt
+    cachedContentUsedCount
     _version
     _deleted
     _lastChangedAt
@@ -89390,6 +89950,16 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -89599,6 +90169,16 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -89876,6 +90456,16 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
     }
     createdAt
     updatedAt
+    etag
+    lastModifiedHeader
+    contentHash
+    s3StoragePrefix
+    latestS3Key
+    s3StorageEnabled
+    lastContentChangeAt
+    totalContentChanges
+    lastHeaderCheckAt
+    cachedContentUsedCount
     _version
     _deleted
     _lastChangedAt
@@ -90041,6 +90631,16 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -90250,6 +90850,16 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -90527,6 +91137,16 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
     }
     createdAt
     updatedAt
+    etag
+    lastModifiedHeader
+    contentHash
+    s3StoragePrefix
+    latestS3Key
+    s3StorageEnabled
+    lastContentChangeAt
+    totalContentChanges
+    lastHeaderCheckAt
+    cachedContentUsedCount
     _version
     _deleted
     _lastChangedAt
@@ -90654,6 +91274,16 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -90789,6 +91419,16 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -91019,6 +91659,16 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -91154,6 +91804,16 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -91271,6 +91931,16 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
       }
       createdAt
       updatedAt
+      etag
+      lastModifiedHeader
+      contentHash
+      s3StoragePrefix
+      latestS3Key
+      s3StorageEnabled
+      lastContentChangeAt
+      totalContentChanges
+      lastHeaderCheckAt
+      cachedContentUsedCount
       _version
       _deleted
       _lastChangedAt
@@ -91419,6 +92089,16 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -91554,6 +92234,16 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -91784,6 +92474,16 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -91919,6 +92619,16 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -92036,6 +92746,16 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
       }
       createdAt
       updatedAt
+      etag
+      lastModifiedHeader
+      contentHash
+      s3StoragePrefix
+      latestS3Key
+      s3StorageEnabled
+      lastContentChangeAt
+      totalContentChanges
+      lastHeaderCheckAt
+      cachedContentUsedCount
       _version
       _deleted
       _lastChangedAt
@@ -92184,6 +92904,16 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -92319,6 +93049,16 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -92549,6 +93289,16 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -92684,6 +93434,16 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -92801,6 +93561,16 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
       }
       createdAt
       updatedAt
+      etag
+      lastModifiedHeader
+      contentHash
+      s3StoragePrefix
+      latestS3Key
+      s3StorageEnabled
+      lastContentChangeAt
+      totalContentChanges
+      lastHeaderCheckAt
+      cachedContentUsedCount
       _version
       _deleted
       _lastChangedAt
@@ -92831,4 +93601,100 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
 ` as GeneratedSubscription<
   APITypes.OnDeleteScrapeAttemptSubscriptionVariables,
   APITypes.OnDeleteScrapeAttemptSubscription
+>;
+export const onCreateS3Storage = /* GraphQL */ `subscription OnCreateS3Storage($filter: ModelSubscriptionS3StorageFilterInput) {
+  onCreateS3Storage(filter: $filter) {
+    id
+    scrapeURLId
+    url
+    tournamentId
+    entityId
+    s3Key
+    s3Bucket
+    scrapedAt
+    contentSize
+    contentHash
+    etag
+    lastModified
+    headers
+    dataExtracted
+    gameId
+    isManualUpload
+    uploadedBy
+    notes
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateS3StorageSubscriptionVariables,
+  APITypes.OnCreateS3StorageSubscription
+>;
+export const onUpdateS3Storage = /* GraphQL */ `subscription OnUpdateS3Storage($filter: ModelSubscriptionS3StorageFilterInput) {
+  onUpdateS3Storage(filter: $filter) {
+    id
+    scrapeURLId
+    url
+    tournamentId
+    entityId
+    s3Key
+    s3Bucket
+    scrapedAt
+    contentSize
+    contentHash
+    etag
+    lastModified
+    headers
+    dataExtracted
+    gameId
+    isManualUpload
+    uploadedBy
+    notes
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateS3StorageSubscriptionVariables,
+  APITypes.OnUpdateS3StorageSubscription
+>;
+export const onDeleteS3Storage = /* GraphQL */ `subscription OnDeleteS3Storage($filter: ModelSubscriptionS3StorageFilterInput) {
+  onDeleteS3Storage(filter: $filter) {
+    id
+    scrapeURLId
+    url
+    tournamentId
+    entityId
+    s3Key
+    s3Bucket
+    scrapedAt
+    contentSize
+    contentHash
+    etag
+    lastModified
+    headers
+    dataExtracted
+    gameId
+    isManualUpload
+    uploadedBy
+    notes
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteS3StorageSubscriptionVariables,
+  APITypes.OnDeleteS3StorageSubscription
 >;

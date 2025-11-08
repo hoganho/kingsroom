@@ -114,7 +114,6 @@ export type GameData = {
     tables?: TableData[] | null;
 
     // Additional data
-    otherDetails: Record<string, string>;
     rawHtml?: string | null;
 
     // Scraper metadata
@@ -122,6 +121,7 @@ export type GameData = {
     foundKeys?: string[];
     doNotScrape?: boolean;
     venueMatch?: ScrapedVenueMatch | null;
+    s3Key: string;
 };
 
 export type MissingField = {
@@ -154,8 +154,11 @@ export interface GameState {
     autoRefresh?: boolean;
     fetchCount: number;
     existingGameId?: string | null;
-    entityId?: string | null; // ✅ Added entity ID
+    entityId?: string | null;
 }
+
+// Note: TrackOptions interface should be exported from useGameTracker hook
+// to avoid type conflicts. The hook defines its own TrackOptions type.
 
 // Enhanced input types with entity ID
 export interface SaveTournamentInput {
@@ -175,7 +178,7 @@ export interface SaveTournamentInput {
 
 export interface GameDataInput {
     name: string;
-    entityId?: string; // ✅ Added entity ID
+    entityId?: string;
     gameStartDateTime?: string; 
     gameEndDateTime?: string; 
     gameStatus?: GameStatus;

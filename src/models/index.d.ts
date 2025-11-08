@@ -426,6 +426,238 @@ export declare type UserMetricsSummary = LazyLoading extends LazyLoadingDisabled
 
 export declare const UserMetricsSummary: (new (init: ModelInit<UserMetricsSummary>) => UserMetricsSummary)
 
+type EagerS3StorageConnection = {
+  readonly items: S3Storage[];
+  readonly nextToken?: string | null;
+}
+
+type LazyS3StorageConnection = {
+  readonly items: AsyncCollection<S3Storage>;
+  readonly nextToken?: string | null;
+}
+
+export declare type S3StorageConnection = LazyLoading extends LazyLoadingDisabled ? EagerS3StorageConnection : LazyS3StorageConnection
+
+export declare const S3StorageConnection: (new (init: ModelInit<S3StorageConnection>) => S3StorageConnection)
+
+type EagerCachingStatsResponse = {
+  readonly totalURLs: number;
+  readonly urlsWithETags: number;
+  readonly urlsWithLastModified: number;
+  readonly totalCacheHits: number;
+  readonly totalCacheMisses: number;
+  readonly averageCacheHitRate: number;
+  readonly storageUsedMB: number;
+  readonly recentCacheActivity?: CacheActivityLog[] | null;
+}
+
+type LazyCachingStatsResponse = {
+  readonly totalURLs: number;
+  readonly urlsWithETags: number;
+  readonly urlsWithLastModified: number;
+  readonly totalCacheHits: number;
+  readonly totalCacheMisses: number;
+  readonly averageCacheHitRate: number;
+  readonly storageUsedMB: number;
+  readonly recentCacheActivity?: CacheActivityLog[] | null;
+}
+
+export declare type CachingStatsResponse = LazyLoading extends LazyLoadingDisabled ? EagerCachingStatsResponse : LazyCachingStatsResponse
+
+export declare const CachingStatsResponse: (new (init: ModelInit<CachingStatsResponse>) => CachingStatsResponse)
+
+type EagerCacheActivityLog = {
+  readonly url: string;
+  readonly timestamp: string;
+  readonly action: string;
+  readonly reason?: string | null;
+}
+
+type LazyCacheActivityLog = {
+  readonly url: string;
+  readonly timestamp: string;
+  readonly action: string;
+  readonly reason?: string | null;
+}
+
+export declare type CacheActivityLog = LazyLoading extends LazyLoadingDisabled ? EagerCacheActivityLog : LazyCacheActivityLog
+
+export declare const CacheActivityLog: (new (init: ModelInit<CacheActivityLog>) => CacheActivityLog)
+
+type EagerS3StorageHistoryResponse = {
+  readonly items?: (S3Storage | null)[] | null;
+  readonly nextToken?: string | null;
+}
+
+type LazyS3StorageHistoryResponse = {
+  readonly items: AsyncCollection<S3Storage>;
+  readonly nextToken?: string | null;
+}
+
+export declare type S3StorageHistoryResponse = LazyLoading extends LazyLoadingDisabled ? EagerS3StorageHistoryResponse : LazyS3StorageHistoryResponse
+
+export declare const S3StorageHistoryResponse: (new (init: ModelInit<S3StorageHistoryResponse>) => S3StorageHistoryResponse)
+
+type EagerS3ContentResponse = {
+  readonly s3Key: string;
+  readonly html: string;
+  readonly metadata?: string | null;
+  readonly size?: number | null;
+  readonly lastModified?: string | null;
+}
+
+type LazyS3ContentResponse = {
+  readonly s3Key: string;
+  readonly html: string;
+  readonly metadata?: string | null;
+  readonly size?: number | null;
+  readonly lastModified?: string | null;
+}
+
+export declare type S3ContentResponse = LazyLoading extends LazyLoadingDisabled ? EagerS3ContentResponse : LazyS3ContentResponse
+
+export declare const S3ContentResponse: (new (init: ModelInit<S3ContentResponse>) => S3ContentResponse)
+
+type EagerCachingStats = {
+  readonly totalURLs: number;
+  readonly urlsWithETags: number;
+  readonly urlsWithLastModified: number;
+  readonly totalCacheHits: number;
+  readonly totalCacheMisses: number;
+  readonly averageCacheHitRate: number;
+  readonly storageUsedMB: number;
+  readonly recentCacheActivity?: (CacheActivity | null)[] | null;
+}
+
+type LazyCachingStats = {
+  readonly totalURLs: number;
+  readonly urlsWithETags: number;
+  readonly urlsWithLastModified: number;
+  readonly totalCacheHits: number;
+  readonly totalCacheMisses: number;
+  readonly averageCacheHitRate: number;
+  readonly storageUsedMB: number;
+  readonly recentCacheActivity?: (CacheActivity | null)[] | null;
+}
+
+export declare type CachingStats = LazyLoading extends LazyLoadingDisabled ? EagerCachingStats : LazyCachingStats
+
+export declare const CachingStats: (new (init: ModelInit<CachingStats>) => CachingStats)
+
+type EagerCacheActivity = {
+  readonly url: string;
+  readonly timestamp: string;
+  readonly action: string;
+  readonly reason: string;
+}
+
+type LazyCacheActivity = {
+  readonly url: string;
+  readonly timestamp: string;
+  readonly action: string;
+  readonly reason: string;
+}
+
+export declare type CacheActivity = LazyLoading extends LazyLoadingDisabled ? EagerCacheActivity : LazyCacheActivity
+
+export declare const CacheActivity: (new (init: ModelInit<CacheActivity>) => CacheActivity)
+
+type EagerS3StorageListResponse = {
+  readonly items?: (S3Storage | null)[] | null;
+  readonly nextToken?: string | null;
+}
+
+type LazyS3StorageListResponse = {
+  readonly items: AsyncCollection<S3Storage>;
+  readonly nextToken?: string | null;
+}
+
+export declare type S3StorageListResponse = LazyLoading extends LazyLoadingDisabled ? EagerS3StorageListResponse : LazyS3StorageListResponse
+
+export declare const S3StorageListResponse: (new (init: ModelInit<S3StorageListResponse>) => S3StorageListResponse)
+
+type EagerRefreshResponse = {
+  readonly message: string;
+  readonly status: string;
+}
+
+type LazyRefreshResponse = {
+  readonly message: string;
+  readonly status: string;
+}
+
+export declare type RefreshResponse = LazyLoading extends LazyLoadingDisabled ? EagerRefreshResponse : LazyRefreshResponse
+
+export declare const RefreshResponse: (new (init: ModelInit<RefreshResponse>) => RefreshResponse)
+
+type EagerReScrapeResult = {
+  readonly name?: string | null;
+  readonly gameStartDateTime?: string | null;
+  readonly gameEndDateTime?: string | null;
+  readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
+  readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
+  readonly gameType?: GameType | keyof typeof GameType | null;
+  readonly gameVariant?: GameVariant | keyof typeof GameVariant | null;
+  readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
+  readonly prizepool?: number | null;
+  readonly buyIn?: number | null;
+  readonly rake?: number | null;
+  readonly startingStack?: number | null;
+  readonly hasGuarantee?: boolean | null;
+  readonly guaranteeAmount?: number | null;
+  readonly totalEntries?: number | null;
+  readonly totalRebuys?: number | null;
+  readonly totalAddons?: number | null;
+  readonly totalDuration?: string | null;
+  readonly playersRemaining?: number | null;
+  readonly seriesName?: string | null;
+  readonly gameTags?: (string | null)[] | null;
+  readonly venueMatch?: VenueMatch | null;
+  readonly existingGameId?: string | null;
+  readonly doNotScrape?: boolean | null;
+  readonly sourceUrl?: string | null;
+  readonly tournamentId?: number | null;
+  readonly entityId?: string | null;
+  readonly s3Key?: string | null;
+  readonly reScrapedAt?: string | null;
+}
+
+type LazyReScrapeResult = {
+  readonly name?: string | null;
+  readonly gameStartDateTime?: string | null;
+  readonly gameEndDateTime?: string | null;
+  readonly gameStatus?: GameStatus | keyof typeof GameStatus | null;
+  readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
+  readonly gameType?: GameType | keyof typeof GameType | null;
+  readonly gameVariant?: GameVariant | keyof typeof GameVariant | null;
+  readonly tournamentType?: TournamentType | keyof typeof TournamentType | null;
+  readonly prizepool?: number | null;
+  readonly buyIn?: number | null;
+  readonly rake?: number | null;
+  readonly startingStack?: number | null;
+  readonly hasGuarantee?: boolean | null;
+  readonly guaranteeAmount?: number | null;
+  readonly totalEntries?: number | null;
+  readonly totalRebuys?: number | null;
+  readonly totalAddons?: number | null;
+  readonly totalDuration?: string | null;
+  readonly playersRemaining?: number | null;
+  readonly seriesName?: string | null;
+  readonly gameTags?: (string | null)[] | null;
+  readonly venueMatch?: VenueMatch | null;
+  readonly existingGameId?: string | null;
+  readonly doNotScrape?: boolean | null;
+  readonly sourceUrl?: string | null;
+  readonly tournamentId?: number | null;
+  readonly entityId?: string | null;
+  readonly s3Key?: string | null;
+  readonly reScrapedAt?: string | null;
+}
+
+export declare type ReScrapeResult = LazyLoading extends LazyLoadingDisabled ? EagerReScrapeResult : LazyReScrapeResult
+
+export declare const ReScrapeResult: (new (init: ModelInit<ReScrapeResult>) => ReScrapeResult)
+
 type EagerEntityVenueAssignmentSummary = {
   readonly entityId?: string | null;
   readonly entityName: string;
@@ -983,6 +1215,20 @@ type LazyAllCountsResult = {
 export declare type AllCountsResult = LazyLoading extends LazyLoadingDisabled ? EagerAllCountsResult : LazyAllCountsResult
 
 export declare const AllCountsResult: (new (init: ModelInit<AllCountsResult>) => AllCountsResult)
+
+type EagerVenueMatch = {
+  readonly autoAssignedVenue?: ScrapedVenueMatchDetails | null;
+  readonly suggestions?: (ScrapedVenueMatchDetails | null)[] | null;
+}
+
+type LazyVenueMatch = {
+  readonly autoAssignedVenue?: ScrapedVenueMatchDetails | null;
+  readonly suggestions?: (ScrapedVenueMatchDetails | null)[] | null;
+}
+
+export declare type VenueMatch = LazyLoading extends LazyLoadingDisabled ? EagerVenueMatch : LazyVenueMatch
+
+export declare const VenueMatch: (new (init: ModelInit<VenueMatch>) => VenueMatch)
 
 type EagerEntity = {
   readonly [__modelMeta__]: {
@@ -2574,6 +2820,16 @@ type EagerScrapeURL = {
   readonly entity?: Entity | null;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly etag?: string | null;
+  readonly lastModifiedHeader?: string | null;
+  readonly contentHash?: string | null;
+  readonly s3StoragePrefix?: string | null;
+  readonly latestS3Key?: string | null;
+  readonly s3StorageEnabled?: boolean | null;
+  readonly lastContentChangeAt?: string | null;
+  readonly totalContentChanges?: number | null;
+  readonly lastHeaderCheckAt?: string | null;
+  readonly cachedContentUsedCount?: number | null;
 }
 
 type LazyScrapeURL = {
@@ -2616,6 +2872,16 @@ type LazyScrapeURL = {
   readonly entity: AsyncItem<Entity | undefined>;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly etag?: string | null;
+  readonly lastModifiedHeader?: string | null;
+  readonly contentHash?: string | null;
+  readonly s3StoragePrefix?: string | null;
+  readonly latestS3Key?: string | null;
+  readonly s3StorageEnabled?: boolean | null;
+  readonly lastContentChangeAt?: string | null;
+  readonly totalContentChanges?: number | null;
+  readonly lastHeaderCheckAt?: string | null;
+  readonly cachedContentUsedCount?: number | null;
 }
 
 export declare type ScrapeURL = LazyLoading extends LazyLoadingDisabled ? EagerScrapeURL : LazyScrapeURL
@@ -2688,4 +2954,62 @@ export declare type ScrapeAttempt = LazyLoading extends LazyLoadingDisabled ? Ea
 
 export declare const ScrapeAttempt: (new (init: ModelInit<ScrapeAttempt>) => ScrapeAttempt) & {
   copyOf(source: ScrapeAttempt, mutator: (draft: MutableModel<ScrapeAttempt>) => MutableModel<ScrapeAttempt> | void): ScrapeAttempt;
+}
+
+type EagerS3Storage = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<S3Storage, 'id'>;
+  };
+  readonly id: string;
+  readonly scrapeURLId?: string | null;
+  readonly url: string;
+  readonly tournamentId: number;
+  readonly entityId: string;
+  readonly s3Key: string;
+  readonly s3Bucket: string;
+  readonly scrapedAt: string;
+  readonly contentSize?: number | null;
+  readonly contentHash?: string | null;
+  readonly etag?: string | null;
+  readonly lastModified?: string | null;
+  readonly headers?: string | null;
+  readonly dataExtracted?: boolean | null;
+  readonly gameId?: string | null;
+  readonly isManualUpload?: boolean | null;
+  readonly uploadedBy?: string | null;
+  readonly notes?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyS3Storage = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<S3Storage, 'id'>;
+  };
+  readonly id: string;
+  readonly scrapeURLId?: string | null;
+  readonly url: string;
+  readonly tournamentId: number;
+  readonly entityId: string;
+  readonly s3Key: string;
+  readonly s3Bucket: string;
+  readonly scrapedAt: string;
+  readonly contentSize?: number | null;
+  readonly contentHash?: string | null;
+  readonly etag?: string | null;
+  readonly lastModified?: string | null;
+  readonly headers?: string | null;
+  readonly dataExtracted?: boolean | null;
+  readonly gameId?: string | null;
+  readonly isManualUpload?: boolean | null;
+  readonly uploadedBy?: string | null;
+  readonly notes?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type S3Storage = LazyLoading extends LazyLoadingDisabled ? EagerS3Storage : LazyS3Storage
+
+export declare const S3Storage: (new (init: ModelInit<S3Storage>) => S3Storage) & {
+  copyOf(source: S3Storage, mutator: (draft: MutableModel<S3Storage>) => MutableModel<S3Storage> | void): S3Storage;
 }

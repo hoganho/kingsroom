@@ -801,6 +801,16 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -2466,6 +2476,16 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -2998,6 +3018,16 @@ export const startScraperJob = /* GraphQL */ `mutation StartScraperJob($input: S
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -3207,6 +3237,16 @@ export const startScraperJob = /* GraphQL */ `mutation StartScraperJob($input: S
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -3650,6 +3690,16 @@ export const cancelScraperJob = /* GraphQL */ `mutation CancelScraperJob($jobId:
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -3859,6 +3909,16 @@ export const cancelScraperJob = /* GraphQL */ `mutation CancelScraperJob($jobId:
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -4305,6 +4365,16 @@ export const modifyScrapeURLStatus = /* GraphQL */ `mutation ModifyScrapeURLStat
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -4514,6 +4584,16 @@ export const modifyScrapeURLStatus = /* GraphQL */ `mutation ModifyScrapeURLStat
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -4791,6 +4871,16 @@ export const modifyScrapeURLStatus = /* GraphQL */ `mutation ModifyScrapeURLStat
     }
     createdAt
     updatedAt
+    etag
+    lastModifiedHeader
+    contentHash
+    s3StoragePrefix
+    latestS3Key
+    s3StorageEnabled
+    lastContentChangeAt
+    totalContentChanges
+    lastHeaderCheckAt
+    cachedContentUsedCount
     _version
     _deleted
     _lastChangedAt
@@ -4964,6 +5054,16 @@ export const bulkModifyScrapeURLs = /* GraphQL */ `mutation BulkModifyScrapeURLs
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -5173,6 +5273,16 @@ export const bulkModifyScrapeURLs = /* GraphQL */ `mutation BulkModifyScrapeURLs
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -5450,6 +5560,16 @@ export const bulkModifyScrapeURLs = /* GraphQL */ `mutation BulkModifyScrapeURLs
     }
     createdAt
     updatedAt
+    etag
+    lastModifiedHeader
+    contentHash
+    s3StoragePrefix
+    latestS3Key
+    s3StorageEnabled
+    lastContentChangeAt
+    totalContentChanges
+    lastHeaderCheckAt
+    cachedContentUsedCount
     _version
     _deleted
     _lastChangedAt
@@ -5532,6 +5652,259 @@ export const publishClientMetrics = /* GraphQL */ `mutation PublishClientMetrics
 ` as GeneratedMutation<
   APITypes.PublishClientMetricsMutationVariables,
   APITypes.PublishClientMetricsMutation
+>;
+export const uploadManualHTML = /* GraphQL */ `mutation UploadManualHTML($input: ManualHTMLUploadInput!) {
+  uploadManualHTML(input: $input) {
+    id
+    scrapeURLId
+    url
+    tournamentId
+    entityId
+    s3Key
+    s3Bucket
+    scrapedAt
+    contentSize
+    contentHash
+    etag
+    lastModified
+    headers
+    dataExtracted
+    gameId
+    isManualUpload
+    uploadedBy
+    notes
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UploadManualHTMLMutationVariables,
+  APITypes.UploadManualHTMLMutation
+>;
+export const reScrapeFromCache = /* GraphQL */ `mutation ReScrapeFromCache($input: ReScrapeFromCacheInput!) {
+  reScrapeFromCache(input: $input) {
+    name
+    gameStartDateTime
+    gameEndDateTime
+    gameStatus
+    registrationStatus
+    gameType
+    gameVariant
+    tournamentType
+    prizepool
+    revenueByBuyIns
+    profitLoss
+    buyIn
+    rake
+    totalRake
+    startingStack
+    hasGuarantee
+    guaranteeAmount
+    guaranteeOverlay
+    guaranteeSurplus
+    totalEntries
+    totalRebuys
+    totalAddons
+    totalDuration
+    playersRemaining
+    totalChipsInPlay
+    averagePlayerStack
+    seriesName
+    isRegular
+    isSeries
+    isSatellite
+    gameFrequency
+    gameTags
+    levels {
+      levelNumber
+      durationMinutes
+      smallBlind
+      bigBlind
+      ante
+      __typename
+    }
+    breaks {
+      levelNumberBeforeBreak
+      durationMinutes
+      __typename
+    }
+    entries {
+      name
+      __typename
+    }
+    seating {
+      name
+      table
+      seat
+      playerStack
+      __typename
+    }
+    results {
+      rank
+      name
+      winnings
+      points
+      isQualification
+      __typename
+    }
+    tables {
+      tableName
+      seats {
+        seat
+        isOccupied
+        playerName
+        playerStack
+        __typename
+      }
+      __typename
+    }
+    rawHtml
+    isNewStructure
+    structureLabel
+    foundKeys
+    venueMatch {
+      autoAssignedVenue {
+        id
+        name
+        score
+        __typename
+      }
+      suggestions {
+        id
+        name
+        score
+        __typename
+      }
+      __typename
+    }
+    existingGameId
+    doNotScrape
+    tournamentId
+    entityId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.ReScrapeFromCacheMutationVariables,
+  APITypes.ReScrapeFromCacheMutation
+>;
+export const forceRefreshScrape = /* GraphQL */ `mutation ForceRefreshScrape($url: AWSURL!) {
+  forceRefreshScrape(url: $url) {
+    name
+    gameStartDateTime
+    gameEndDateTime
+    gameStatus
+    registrationStatus
+    gameType
+    gameVariant
+    tournamentType
+    prizepool
+    revenueByBuyIns
+    profitLoss
+    buyIn
+    rake
+    totalRake
+    startingStack
+    hasGuarantee
+    guaranteeAmount
+    guaranteeOverlay
+    guaranteeSurplus
+    totalEntries
+    totalRebuys
+    totalAddons
+    totalDuration
+    playersRemaining
+    totalChipsInPlay
+    averagePlayerStack
+    seriesName
+    isRegular
+    isSeries
+    isSatellite
+    gameFrequency
+    gameTags
+    levels {
+      levelNumber
+      durationMinutes
+      smallBlind
+      bigBlind
+      ante
+      __typename
+    }
+    breaks {
+      levelNumberBeforeBreak
+      durationMinutes
+      __typename
+    }
+    entries {
+      name
+      __typename
+    }
+    seating {
+      name
+      table
+      seat
+      playerStack
+      __typename
+    }
+    results {
+      rank
+      name
+      winnings
+      points
+      isQualification
+      __typename
+    }
+    tables {
+      tableName
+      seats {
+        seat
+        isOccupied
+        playerName
+        playerStack
+        __typename
+      }
+      __typename
+    }
+    rawHtml
+    isNewStructure
+    structureLabel
+    foundKeys
+    venueMatch {
+      autoAssignedVenue {
+        id
+        name
+        score
+        __typename
+      }
+      suggestions {
+        id
+        name
+        score
+        __typename
+      }
+      __typename
+    }
+    existingGameId
+    doNotScrape
+    tournamentId
+    entityId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.ForceRefreshScrapeMutationVariables,
+  APITypes.ForceRefreshScrapeMutation
+>;
+export const clearURLCache = /* GraphQL */ `mutation ClearURLCache($url: AWSURL!) {
+  clearURLCache(url: $url)
+}
+` as GeneratedMutation<
+  APITypes.ClearURLCacheMutationVariables,
+  APITypes.ClearURLCacheMutation
 >;
 export const createEntity = /* GraphQL */ `mutation CreateEntity(
   $input: CreateEntityInput!
@@ -5855,6 +6228,16 @@ export const createEntity = /* GraphQL */ `mutation CreateEntity(
         }
         createdAt
         updatedAt
+        etag
+        lastModifiedHeader
+        contentHash
+        s3StoragePrefix
+        latestS3Key
+        s3StorageEnabled
+        lastContentChangeAt
+        totalContentChanges
+        lastHeaderCheckAt
+        cachedContentUsedCount
         _version
         _deleted
         _lastChangedAt
@@ -6937,6 +7320,16 @@ export const updateEntity = /* GraphQL */ `mutation UpdateEntity(
         }
         createdAt
         updatedAt
+        etag
+        lastModifiedHeader
+        contentHash
+        s3StoragePrefix
+        latestS3Key
+        s3StorageEnabled
+        lastContentChangeAt
+        totalContentChanges
+        lastHeaderCheckAt
+        cachedContentUsedCount
         _version
         _deleted
         _lastChangedAt
@@ -8019,6 +8412,16 @@ export const deleteEntity = /* GraphQL */ `mutation DeleteEntity(
         }
         createdAt
         updatedAt
+        etag
+        lastModifiedHeader
+        contentHash
+        s3StoragePrefix
+        latestS3Key
+        s3StorageEnabled
+        lastContentChangeAt
+        totalContentChanges
+        lastHeaderCheckAt
+        cachedContentUsedCount
         _version
         _deleted
         _lastChangedAt
@@ -9126,6 +9529,16 @@ export const createScraperState = /* GraphQL */ `mutation CreateScraperState(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -9619,6 +10032,16 @@ export const updateScraperState = /* GraphQL */ `mutation UpdateScraperState(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -10112,6 +10535,16 @@ export const deleteScraperState = /* GraphQL */ `mutation DeleteScraperState(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -12121,6 +12554,16 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -14131,6 +14574,16 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -16141,6 +16594,16 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -17084,6 +17547,16 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -17874,6 +18347,16 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -18664,6 +19147,16 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -20109,6 +20602,16 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -21327,6 +21830,16 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -22545,6 +23058,16 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -23721,6 +24244,16 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -25386,6 +25919,16 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -26363,6 +26906,16 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -28028,6 +28581,16 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -29005,6 +29568,16 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -30670,6 +31243,16 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -31895,6 +32478,16 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -32967,6 +33560,16 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -34039,6 +34642,16 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -37397,6 +38010,16 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -40545,6 +41168,16 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -43693,6 +44326,16 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -49238,6 +49881,16 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -51399,6 +52052,16 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -53560,6 +54223,16 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -55717,6 +56390,16 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -57874,6 +58557,16 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -60031,6 +60724,16 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -61912,6 +62615,16 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -63793,6 +64506,16 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -65674,6 +66397,16 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -87772,6 +88505,16 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -88074,6 +88817,16 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -89015,6 +89768,16 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -89317,6 +90080,16 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -90258,6 +91031,16 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -90560,6 +91343,16 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -91138,6 +91931,16 @@ export const createScraperJob = /* GraphQL */ `mutation CreateScraperJob(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -91347,6 +92150,16 @@ export const createScraperJob = /* GraphQL */ `mutation CreateScraperJob(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -91793,6 +92606,16 @@ export const updateScraperJob = /* GraphQL */ `mutation UpdateScraperJob(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -92002,6 +92825,16 @@ export const updateScraperJob = /* GraphQL */ `mutation UpdateScraperJob(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -92448,6 +93281,16 @@ export const deleteScraperJob = /* GraphQL */ `mutation DeleteScraperJob(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -92657,6 +93500,16 @@ export const deleteScraperJob = /* GraphQL */ `mutation DeleteScraperJob(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -93102,6 +93955,16 @@ export const createScrapeURL = /* GraphQL */ `mutation CreateScrapeURL(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -93311,6 +94174,16 @@ export const createScrapeURL = /* GraphQL */ `mutation CreateScrapeURL(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -93588,6 +94461,16 @@ export const createScrapeURL = /* GraphQL */ `mutation CreateScrapeURL(
     }
     createdAt
     updatedAt
+    etag
+    lastModifiedHeader
+    contentHash
+    s3StoragePrefix
+    latestS3Key
+    s3StorageEnabled
+    lastContentChangeAt
+    totalContentChanges
+    lastHeaderCheckAt
+    cachedContentUsedCount
     _version
     _deleted
     _lastChangedAt
@@ -93756,6 +94639,16 @@ export const updateScrapeURL = /* GraphQL */ `mutation UpdateScrapeURL(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -93965,6 +94858,16 @@ export const updateScrapeURL = /* GraphQL */ `mutation UpdateScrapeURL(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -94242,6 +95145,16 @@ export const updateScrapeURL = /* GraphQL */ `mutation UpdateScrapeURL(
     }
     createdAt
     updatedAt
+    etag
+    lastModifiedHeader
+    contentHash
+    s3StoragePrefix
+    latestS3Key
+    s3StorageEnabled
+    lastContentChangeAt
+    totalContentChanges
+    lastHeaderCheckAt
+    cachedContentUsedCount
     _version
     _deleted
     _lastChangedAt
@@ -94410,6 +95323,16 @@ export const deleteScrapeURL = /* GraphQL */ `mutation DeleteScrapeURL(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -94619,6 +95542,16 @@ export const deleteScrapeURL = /* GraphQL */ `mutation DeleteScrapeURL(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -94896,6 +95829,16 @@ export const deleteScrapeURL = /* GraphQL */ `mutation DeleteScrapeURL(
     }
     createdAt
     updatedAt
+    etag
+    lastModifiedHeader
+    contentHash
+    s3StoragePrefix
+    latestS3Key
+    s3StorageEnabled
+    lastContentChangeAt
+    totalContentChanges
+    lastHeaderCheckAt
+    cachedContentUsedCount
     _version
     _deleted
     _lastChangedAt
@@ -95024,6 +95967,16 @@ export const createScrapeAttempt = /* GraphQL */ `mutation CreateScrapeAttempt(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -95159,6 +96112,16 @@ export const createScrapeAttempt = /* GraphQL */ `mutation CreateScrapeAttempt(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -95389,6 +96352,16 @@ export const createScrapeAttempt = /* GraphQL */ `mutation CreateScrapeAttempt(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -95524,6 +96497,16 @@ export const createScrapeAttempt = /* GraphQL */ `mutation CreateScrapeAttempt(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -95641,6 +96624,16 @@ export const createScrapeAttempt = /* GraphQL */ `mutation CreateScrapeAttempt(
       }
       createdAt
       updatedAt
+      etag
+      lastModifiedHeader
+      contentHash
+      s3StoragePrefix
+      latestS3Key
+      s3StorageEnabled
+      lastContentChangeAt
+      totalContentChanges
+      lastHeaderCheckAt
+      cachedContentUsedCount
       _version
       _deleted
       _lastChangedAt
@@ -95790,6 +96783,16 @@ export const updateScrapeAttempt = /* GraphQL */ `mutation UpdateScrapeAttempt(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -95925,6 +96928,16 @@ export const updateScrapeAttempt = /* GraphQL */ `mutation UpdateScrapeAttempt(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -96155,6 +97168,16 @@ export const updateScrapeAttempt = /* GraphQL */ `mutation UpdateScrapeAttempt(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -96290,6 +97313,16 @@ export const updateScrapeAttempt = /* GraphQL */ `mutation UpdateScrapeAttempt(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -96407,6 +97440,16 @@ export const updateScrapeAttempt = /* GraphQL */ `mutation UpdateScrapeAttempt(
       }
       createdAt
       updatedAt
+      etag
+      lastModifiedHeader
+      contentHash
+      s3StoragePrefix
+      latestS3Key
+      s3StorageEnabled
+      lastContentChangeAt
+      totalContentChanges
+      lastHeaderCheckAt
+      cachedContentUsedCount
       _version
       _deleted
       _lastChangedAt
@@ -96556,6 +97599,16 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -96691,6 +97744,16 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -96921,6 +97984,16 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -97056,6 +98129,16 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -97173,6 +98256,16 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
       }
       createdAt
       updatedAt
+      etag
+      lastModifiedHeader
+      contentHash
+      s3StoragePrefix
+      latestS3Key
+      s3StorageEnabled
+      lastContentChangeAt
+      totalContentChanges
+      lastHeaderCheckAt
+      cachedContentUsedCount
       _version
       _deleted
       _lastChangedAt
@@ -97203,4 +98296,109 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
 ` as GeneratedMutation<
   APITypes.DeleteScrapeAttemptMutationVariables,
   APITypes.DeleteScrapeAttemptMutation
+>;
+export const createS3Storage = /* GraphQL */ `mutation CreateS3Storage(
+  $input: CreateS3StorageInput!
+  $condition: ModelS3StorageConditionInput
+) {
+  createS3Storage(input: $input, condition: $condition) {
+    id
+    scrapeURLId
+    url
+    tournamentId
+    entityId
+    s3Key
+    s3Bucket
+    scrapedAt
+    contentSize
+    contentHash
+    etag
+    lastModified
+    headers
+    dataExtracted
+    gameId
+    isManualUpload
+    uploadedBy
+    notes
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateS3StorageMutationVariables,
+  APITypes.CreateS3StorageMutation
+>;
+export const updateS3Storage = /* GraphQL */ `mutation UpdateS3Storage(
+  $input: UpdateS3StorageInput!
+  $condition: ModelS3StorageConditionInput
+) {
+  updateS3Storage(input: $input, condition: $condition) {
+    id
+    scrapeURLId
+    url
+    tournamentId
+    entityId
+    s3Key
+    s3Bucket
+    scrapedAt
+    contentSize
+    contentHash
+    etag
+    lastModified
+    headers
+    dataExtracted
+    gameId
+    isManualUpload
+    uploadedBy
+    notes
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateS3StorageMutationVariables,
+  APITypes.UpdateS3StorageMutation
+>;
+export const deleteS3Storage = /* GraphQL */ `mutation DeleteS3Storage(
+  $input: DeleteS3StorageInput!
+  $condition: ModelS3StorageConditionInput
+) {
+  deleteS3Storage(input: $input, condition: $condition) {
+    id
+    scrapeURLId
+    url
+    tournamentId
+    entityId
+    s3Key
+    s3Bucket
+    scrapedAt
+    contentSize
+    contentHash
+    etag
+    lastModified
+    headers
+    dataExtracted
+    gameId
+    isManualUpload
+    uploadedBy
+    notes
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteS3StorageMutationVariables,
+  APITypes.DeleteS3StorageMutation
 >;

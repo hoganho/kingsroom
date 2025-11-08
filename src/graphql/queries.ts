@@ -190,6 +190,16 @@ export const getScraperJobsReport = /* GraphQL */ `query GetScraperJobsReport(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -325,6 +335,16 @@ export const getScraperJobsReport = /* GraphQL */ `query GetScraperJobsReport(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -610,6 +630,16 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -819,6 +849,16 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -1096,6 +1136,16 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
     }
     createdAt
     updatedAt
+    etag
+    lastModifiedHeader
+    contentHash
+    s3StoragePrefix
+    latestS3Key
+    s3StorageEnabled
+    lastContentChangeAt
+    totalContentChanges
+    lastHeaderCheckAt
+    cachedContentUsedCount
     _version
     _deleted
     _lastChangedAt
@@ -1219,6 +1269,16 @@ export const searchScrapeURLs = /* GraphQL */ `query SearchScrapeURLs(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -1354,6 +1414,16 @@ export const searchScrapeURLs = /* GraphQL */ `query SearchScrapeURLs(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -1471,6 +1541,16 @@ export const searchScrapeURLs = /* GraphQL */ `query SearchScrapeURLs(
       }
       createdAt
       updatedAt
+      etag
+      lastModifiedHeader
+      contentHash
+      s3StoragePrefix
+      latestS3Key
+      s3StorageEnabled
+      lastContentChangeAt
+      totalContentChanges
+      lastHeaderCheckAt
+      cachedContentUsedCount
       _version
       _deleted
       _lastChangedAt
@@ -1676,6 +1756,16 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -1885,6 +1975,16 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -2162,6 +2262,16 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
     }
     createdAt
     updatedAt
+    etag
+    lastModifiedHeader
+    contentHash
+    s3StoragePrefix
+    latestS3Key
+    s3StorageEnabled
+    lastContentChangeAt
+    totalContentChanges
+    lastHeaderCheckAt
+    cachedContentUsedCount
     _version
     _deleted
     _lastChangedAt
@@ -2491,6 +2601,16 @@ export const listEntitiesByDomain = /* GraphQL */ `query ListEntitiesByDomain($d
         }
         createdAt
         updatedAt
+        etag
+        lastModifiedHeader
+        contentHash
+        s3StoragePrefix
+        latestS3Key
+        s3StorageEnabled
+        lastContentChangeAt
+        totalContentChanges
+        lastHeaderCheckAt
+        cachedContentUsedCount
         _version
         _deleted
         _lastChangedAt
@@ -3509,6 +3629,16 @@ export const listScraperJobs = /* GraphQL */ `query ListScraperJobs(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -3644,6 +3774,16 @@ export const listScraperJobs = /* GraphQL */ `query ListScraperJobs(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -3893,6 +4033,16 @@ export const listScrapeURLs = /* GraphQL */ `query ListScrapeURLs(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -4028,6 +4178,16 @@ export const listScrapeURLs = /* GraphQL */ `query ListScrapeURLs(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -4145,6 +4305,16 @@ export const listScrapeURLs = /* GraphQL */ `query ListScrapeURLs(
       }
       createdAt
       updatedAt
+      etag
+      lastModifiedHeader
+      contentHash
+      s3StoragePrefix
+      latestS3Key
+      s3StorageEnabled
+      lastContentChangeAt
+      totalContentChanges
+      lastHeaderCheckAt
+      cachedContentUsedCount
       _version
       _deleted
       _lastChangedAt
@@ -5081,6 +5251,16 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -5375,6 +5555,119 @@ export const getAllCounts = /* GraphQL */ `query GetAllCounts {
 ` as GeneratedQuery<
   APITypes.GetAllCountsQueryVariables,
   APITypes.GetAllCountsQuery
+>;
+export const getS3StorageHistory = /* GraphQL */ `query GetS3StorageHistory($tournamentId: Int!, $entityId: ID!, $limit: Int) {
+  getS3StorageHistory(
+    tournamentId: $tournamentId
+    entityId: $entityId
+    limit: $limit
+  ) {
+    items {
+      id
+      scrapeURLId
+      url
+      tournamentId
+      entityId
+      s3Key
+      s3Bucket
+      scrapedAt
+      contentSize
+      contentHash
+      etag
+      lastModified
+      headers
+      dataExtracted
+      gameId
+      isManualUpload
+      uploadedBy
+      notes
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetS3StorageHistoryQueryVariables,
+  APITypes.GetS3StorageHistoryQuery
+>;
+export const viewS3Content = /* GraphQL */ `query ViewS3Content($s3Key: String!) {
+  viewS3Content(s3Key: $s3Key) {
+    s3Key
+    html
+    metadata
+    size
+    lastModified
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ViewS3ContentQueryVariables,
+  APITypes.ViewS3ContentQuery
+>;
+export const getCachingStats = /* GraphQL */ `query GetCachingStats($entityId: ID!, $timeRange: TimeRange) {
+  getCachingStats(entityId: $entityId, timeRange: $timeRange) {
+    totalURLs
+    urlsWithETags
+    urlsWithLastModified
+    totalCacheHits
+    totalCacheMisses
+    averageCacheHitRate
+    storageUsedMB
+    recentCacheActivity {
+      url
+      timestamp
+      action
+      reason
+      __typename
+    }
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetCachingStatsQueryVariables,
+  APITypes.GetCachingStatsQuery
+>;
+export const listStoredHTML = /* GraphQL */ `query ListStoredHTML($url: AWSURL!, $limit: Int) {
+  listStoredHTML(url: $url, limit: $limit) {
+    items {
+      id
+      scrapeURLId
+      url
+      tournamentId
+      entityId
+      s3Key
+      s3Bucket
+      scrapedAt
+      contentSize
+      contentHash
+      etag
+      lastModified
+      headers
+      dataExtracted
+      gameId
+      isManualUpload
+      uploadedBy
+      notes
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListStoredHTMLQueryVariables,
+  APITypes.ListStoredHTMLQuery
 >;
 export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
   getEntity(id: $id) {
@@ -5695,6 +5988,16 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
         }
         createdAt
         updatedAt
+        etag
+        lastModifiedHeader
+        contentHash
+        s3StoragePrefix
+        latestS3Key
+        s3StorageEnabled
+        lastContentChangeAt
+        totalContentChanges
+        lastHeaderCheckAt
+        cachedContentUsedCount
         _version
         _deleted
         _lastChangedAt
@@ -6636,6 +6939,16 @@ export const listEntities = /* GraphQL */ `query ListEntities(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -7110,6 +7423,16 @@ export const syncEntities = /* GraphQL */ `query SyncEntities(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -7768,6 +8091,16 @@ export const getScraperState = /* GraphQL */ `query GetScraperState($id: ID!) {
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -8189,6 +8522,16 @@ export const listScraperStates = /* GraphQL */ `query ListScraperStates(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -8460,6 +8803,16 @@ export const syncScraperStates = /* GraphQL */ `query SyncScraperStates(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -10310,6 +10663,16 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -11243,6 +11606,16 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -12029,6 +12402,16 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -12813,6 +13196,16 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -14614,6 +15007,16 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -16699,6 +17102,16 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -18364,6 +18777,16 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -19572,6 +19995,16 @@ export const listGames = /* GraphQL */ `query ListGames(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -20630,6 +21063,16 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -21693,6 +22136,16 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -25877,6 +26330,16 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -32223,6 +32686,16 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -35905,6 +36378,16 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -39303,6 +39786,16 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -54048,6 +54541,16 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -54350,6 +54853,16 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -55002,6 +55515,16 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -55507,6 +56030,16 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -55955,6 +56488,16 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -56164,6 +56707,16 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -56441,6 +56994,16 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
     }
     createdAt
     updatedAt
+    etag
+    lastModifiedHeader
+    contentHash
+    s3StoragePrefix
+    latestS3Key
+    s3StorageEnabled
+    lastContentChangeAt
+    totalContentChanges
+    lastHeaderCheckAt
+    cachedContentUsedCount
     _version
     _deleted
     _lastChangedAt
@@ -56566,6 +57129,16 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -56701,6 +57274,16 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -56931,6 +57514,16 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -57066,6 +57659,16 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -57183,6 +57786,16 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
       }
       createdAt
       updatedAt
+      etag
+      lastModifiedHeader
+      contentHash
+      s3StoragePrefix
+      latestS3Key
+      s3StorageEnabled
+      lastContentChangeAt
+      totalContentChanges
+      lastHeaderCheckAt
+      cachedContentUsedCount
       _version
       _deleted
       _lastChangedAt
@@ -57453,6 +58066,16 @@ export const listScrapeAttempts = /* GraphQL */ `query ListScrapeAttempts(
         }
         createdAt
         updatedAt
+        etag
+        lastModifiedHeader
+        contentHash
+        s3StoragePrefix
+        latestS3Key
+        s3StorageEnabled
+        lastContentChangeAt
+        totalContentChanges
+        lastHeaderCheckAt
+        cachedContentUsedCount
         _version
         _deleted
         _lastChangedAt
@@ -57733,6 +58356,16 @@ export const syncScrapeAttempts = /* GraphQL */ `query SyncScrapeAttempts(
         }
         createdAt
         updatedAt
+        etag
+        lastModifiedHeader
+        contentHash
+        s3StoragePrefix
+        latestS3Key
+        s3StorageEnabled
+        lastContentChangeAt
+        totalContentChanges
+        lastHeaderCheckAt
+        cachedContentUsedCount
         _version
         _deleted
         _lastChangedAt
@@ -57767,6 +58400,126 @@ export const syncScrapeAttempts = /* GraphQL */ `query SyncScrapeAttempts(
 ` as GeneratedQuery<
   APITypes.SyncScrapeAttemptsQueryVariables,
   APITypes.SyncScrapeAttemptsQuery
+>;
+export const getS3Storage = /* GraphQL */ `query GetS3Storage($id: ID!) {
+  getS3Storage(id: $id) {
+    id
+    scrapeURLId
+    url
+    tournamentId
+    entityId
+    s3Key
+    s3Bucket
+    scrapedAt
+    contentSize
+    contentHash
+    etag
+    lastModified
+    headers
+    dataExtracted
+    gameId
+    isManualUpload
+    uploadedBy
+    notes
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetS3StorageQueryVariables,
+  APITypes.GetS3StorageQuery
+>;
+export const listS3Storages = /* GraphQL */ `query ListS3Storages(
+  $filter: ModelS3StorageFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listS3Storages(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      scrapeURLId
+      url
+      tournamentId
+      entityId
+      s3Key
+      s3Bucket
+      scrapedAt
+      contentSize
+      contentHash
+      etag
+      lastModified
+      headers
+      dataExtracted
+      gameId
+      isManualUpload
+      uploadedBy
+      notes
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListS3StoragesQueryVariables,
+  APITypes.ListS3StoragesQuery
+>;
+export const syncS3Storages = /* GraphQL */ `query SyncS3Storages(
+  $filter: ModelS3StorageFilterInput
+  $limit: Int
+  $nextToken: String
+  $lastSync: AWSTimestamp
+) {
+  syncS3Storages(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+    lastSync: $lastSync
+  ) {
+    items {
+      id
+      scrapeURLId
+      url
+      tournamentId
+      entityId
+      s3Key
+      s3Bucket
+      scrapedAt
+      contentSize
+      contentHash
+      etag
+      lastModified
+      headers
+      dataExtracted
+      gameId
+      isManualUpload
+      uploadedBy
+      notes
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.SyncS3StoragesQueryVariables,
+  APITypes.SyncS3StoragesQuery
 >;
 export const entitiesByEntityName = /* GraphQL */ `query EntitiesByEntityName(
   $entityName: String!
@@ -57960,6 +58713,16 @@ export const entitiesByEntityName = /* GraphQL */ `query EntitiesByEntityName(
           }
           createdAt
           updatedAt
+          etag
+          lastModifiedHeader
+          contentHash
+          s3StoragePrefix
+          latestS3Key
+          s3StorageEnabled
+          lastContentChangeAt
+          totalContentChanges
+          lastHeaderCheckAt
+          cachedContentUsedCount
           _version
           _deleted
           _lastChangedAt
@@ -58386,6 +59149,16 @@ export const scraperStatesByEntityId = /* GraphQL */ `query ScraperStatesByEntit
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -59175,6 +59948,16 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -59965,6 +60748,16 @@ export const venuesByEntityIdAndName = /* GraphQL */ `query VenuesByEntityIdAndN
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -62242,6 +63035,16 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -63305,6 +64108,16 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -64370,6 +65183,16 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -65435,6 +66258,16 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -66500,6 +67333,16 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -81966,6 +82809,16 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -82475,6 +83328,16 @@ export const assetsByEntityIdAndType = /* GraphQL */ `query AssetsByEntityIdAndT
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -82766,6 +83629,16 @@ export const scraperJobsByJobId = /* GraphQL */ `query ScraperJobsByJobId(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -82901,6 +83774,16 @@ export const scraperJobsByJobId = /* GraphQL */ `query ScraperJobsByJobId(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -83155,6 +84038,16 @@ export const scraperJobsByStatusAndStartTime = /* GraphQL */ `query ScraperJobsB
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -83290,6 +84183,16 @@ export const scraperJobsByStatusAndStartTime = /* GraphQL */ `query ScraperJobsB
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -83544,6 +84447,16 @@ export const scraperJobsByEntityIdAndStartTime = /* GraphQL */ `query ScraperJob
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -83679,6 +84592,16 @@ export const scraperJobsByEntityIdAndStartTime = /* GraphQL */ `query ScraperJob
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -83930,6 +84853,16 @@ export const scrapeURLByURL = /* GraphQL */ `query ScrapeURLByURL(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -84065,6 +84998,16 @@ export const scrapeURLByURL = /* GraphQL */ `query ScrapeURLByURL(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -84182,6 +85125,16 @@ export const scrapeURLByURL = /* GraphQL */ `query ScrapeURLByURL(
       }
       createdAt
       updatedAt
+      etag
+      lastModifiedHeader
+      contentHash
+      s3StoragePrefix
+      latestS3Key
+      s3StorageEnabled
+      lastContentChangeAt
+      totalContentChanges
+      lastHeaderCheckAt
+      cachedContentUsedCount
       _version
       _deleted
       _lastChangedAt
@@ -84316,6 +85269,16 @@ export const scrapeURLSByTournamentId = /* GraphQL */ `query ScrapeURLSByTournam
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -84451,6 +85414,16 @@ export const scrapeURLSByTournamentId = /* GraphQL */ `query ScrapeURLSByTournam
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -84568,6 +85541,16 @@ export const scrapeURLSByTournamentId = /* GraphQL */ `query ScrapeURLSByTournam
       }
       createdAt
       updatedAt
+      etag
+      lastModifiedHeader
+      contentHash
+      s3StoragePrefix
+      latestS3Key
+      s3StorageEnabled
+      lastContentChangeAt
+      totalContentChanges
+      lastHeaderCheckAt
+      cachedContentUsedCount
       _version
       _deleted
       _lastChangedAt
@@ -84704,6 +85687,16 @@ export const scrapeURLsBySourceSystem = /* GraphQL */ `query ScrapeURLsBySourceS
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -84839,6 +85832,16 @@ export const scrapeURLsBySourceSystem = /* GraphQL */ `query ScrapeURLsBySourceS
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -84956,6 +85959,16 @@ export const scrapeURLsBySourceSystem = /* GraphQL */ `query ScrapeURLsBySourceS
       }
       createdAt
       updatedAt
+      etag
+      lastModifiedHeader
+      contentHash
+      s3StoragePrefix
+      latestS3Key
+      s3StorageEnabled
+      lastContentChangeAt
+      totalContentChanges
+      lastHeaderCheckAt
+      cachedContentUsedCount
       _version
       _deleted
       _lastChangedAt
@@ -85090,6 +86103,16 @@ export const scrapeURLSByGameId = /* GraphQL */ `query ScrapeURLSByGameId(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -85225,6 +86248,16 @@ export const scrapeURLSByGameId = /* GraphQL */ `query ScrapeURLSByGameId(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -85342,6 +86375,16 @@ export const scrapeURLSByGameId = /* GraphQL */ `query ScrapeURLSByGameId(
       }
       createdAt
       updatedAt
+      etag
+      lastModifiedHeader
+      contentHash
+      s3StoragePrefix
+      latestS3Key
+      s3StorageEnabled
+      lastContentChangeAt
+      totalContentChanges
+      lastHeaderCheckAt
+      cachedContentUsedCount
       _version
       _deleted
       _lastChangedAt
@@ -85476,6 +86519,16 @@ export const scrapeURLSByEntityId = /* GraphQL */ `query ScrapeURLSByEntityId(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -85611,6 +86664,16 @@ export const scrapeURLSByEntityId = /* GraphQL */ `query ScrapeURLSByEntityId(
             entityId
             createdAt
             updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
             _version
             _deleted
             _lastChangedAt
@@ -85728,6 +86791,16 @@ export const scrapeURLSByEntityId = /* GraphQL */ `query ScrapeURLSByEntityId(
       }
       createdAt
       updatedAt
+      etag
+      lastModifiedHeader
+      contentHash
+      s3StoragePrefix
+      latestS3Key
+      s3StorageEnabled
+      lastContentChangeAt
+      totalContentChanges
+      lastHeaderCheckAt
+      cachedContentUsedCount
       _version
       _deleted
       _lastChangedAt
@@ -85990,6 +87063,16 @@ export const scrapeAttemptsByScraperJobIdAndAttemptTime = /* GraphQL */ `query S
         }
         createdAt
         updatedAt
+        etag
+        lastModifiedHeader
+        contentHash
+        s3StoragePrefix
+        latestS3Key
+        s3StorageEnabled
+        lastContentChangeAt
+        totalContentChanges
+        lastHeaderCheckAt
+        cachedContentUsedCount
         _version
         _deleted
         _lastChangedAt
@@ -86274,6 +87357,16 @@ export const scrapeAttemptsByScrapeURLIdAndAttemptTime = /* GraphQL */ `query Sc
         }
         createdAt
         updatedAt
+        etag
+        lastModifiedHeader
+        contentHash
+        s3StoragePrefix
+        latestS3Key
+        s3StorageEnabled
+        lastContentChangeAt
+        totalContentChanges
+        lastHeaderCheckAt
+        cachedContentUsedCount
         _version
         _deleted
         _lastChangedAt
@@ -86308,4 +87401,206 @@ export const scrapeAttemptsByScrapeURLIdAndAttemptTime = /* GraphQL */ `query Sc
 ` as GeneratedQuery<
   APITypes.ScrapeAttemptsByScrapeURLIdAndAttemptTimeQueryVariables,
   APITypes.ScrapeAttemptsByScrapeURLIdAndAttemptTimeQuery
+>;
+export const s3StoragesByScrapeURLIdAndScrapedAt = /* GraphQL */ `query S3StoragesByScrapeURLIdAndScrapedAt(
+  $scrapeURLId: ID!
+  $scrapedAt: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelS3StorageFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  s3StoragesByScrapeURLIdAndScrapedAt(
+    scrapeURLId: $scrapeURLId
+    scrapedAt: $scrapedAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      scrapeURLId
+      url
+      tournamentId
+      entityId
+      s3Key
+      s3Bucket
+      scrapedAt
+      contentSize
+      contentHash
+      etag
+      lastModified
+      headers
+      dataExtracted
+      gameId
+      isManualUpload
+      uploadedBy
+      notes
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.S3StoragesByScrapeURLIdAndScrapedAtQueryVariables,
+  APITypes.S3StoragesByScrapeURLIdAndScrapedAtQuery
+>;
+export const s3StoragesByTournamentIdAndScrapedAt = /* GraphQL */ `query S3StoragesByTournamentIdAndScrapedAt(
+  $tournamentId: Int!
+  $scrapedAt: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelS3StorageFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  s3StoragesByTournamentIdAndScrapedAt(
+    tournamentId: $tournamentId
+    scrapedAt: $scrapedAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      scrapeURLId
+      url
+      tournamentId
+      entityId
+      s3Key
+      s3Bucket
+      scrapedAt
+      contentSize
+      contentHash
+      etag
+      lastModified
+      headers
+      dataExtracted
+      gameId
+      isManualUpload
+      uploadedBy
+      notes
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.S3StoragesByTournamentIdAndScrapedAtQueryVariables,
+  APITypes.S3StoragesByTournamentIdAndScrapedAtQuery
+>;
+export const s3StoragesByEntityIdAndScrapedAt = /* GraphQL */ `query S3StoragesByEntityIdAndScrapedAt(
+  $entityId: ID!
+  $scrapedAt: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelS3StorageFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  s3StoragesByEntityIdAndScrapedAt(
+    entityId: $entityId
+    scrapedAt: $scrapedAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      scrapeURLId
+      url
+      tournamentId
+      entityId
+      s3Key
+      s3Bucket
+      scrapedAt
+      contentSize
+      contentHash
+      etag
+      lastModified
+      headers
+      dataExtracted
+      gameId
+      isManualUpload
+      uploadedBy
+      notes
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.S3StoragesByEntityIdAndScrapedAtQueryVariables,
+  APITypes.S3StoragesByEntityIdAndScrapedAtQuery
+>;
+export const s3StoragesByGameId = /* GraphQL */ `query S3StoragesByGameId(
+  $gameId: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelS3StorageFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  s3StoragesByGameId(
+    gameId: $gameId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      scrapeURLId
+      url
+      tournamentId
+      entityId
+      s3Key
+      s3Bucket
+      scrapedAt
+      contentSize
+      contentHash
+      etag
+      lastModified
+      headers
+      dataExtracted
+      gameId
+      isManualUpload
+      uploadedBy
+      notes
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.S3StoragesByGameIdQueryVariables,
+  APITypes.S3StoragesByGameIdQuery
 >;

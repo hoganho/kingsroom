@@ -1,10 +1,9 @@
-// src/pages/scraper-admin-tabs/BulkScraperTab.tsx
-// REFACTORED: Uses useGameTracker for local state, no auto-saving.
-// Behaves like SingleScraperTab but for a range of IDs.
+// src/pages/scraper-admin-tabs/BulkScraperTabEnhanced.tsx
+// Enhanced version with S3 HTML support for bulk scraping
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import { Database, Target, Building2 } from 'lucide-react';
+import { Database, Target, Building2, AlertCircle, Globe } from 'lucide-react';
 import { useGameTracker } from '../../hooks/useGameTracker';
 import { useEntity, buildGameUrl } from '../../contexts/EntityContext';
 import { listVenuesForDropdown } from '../../graphql/customQueries';
@@ -13,24 +12,44 @@ import { GameDetailsModal } from '../../components/scraper/admin/GameDetailsModa
 import { SaveConfirmationModal } from '../../components/scraper/SaveConfirmationModal';
 import { GameListItem } from '../../components/scraper/GameListItem';
 import { EntitySelector } from '../../components/entities/EntitySelector';
+import { ScrapeOptionsModal } from '../../components/scraper/ScrapeOptionsModal';
 
 export const BulkScraperTab: React.FC = () => {
     const client = useMemo(() => generateClient(), []);
     
     // Entity and Game State
     const { currentEntity } = useEntity();
-    const { games, trackGame, saveGame, removeGame, refreshGame } = useGameTracker();
+    const { 
+        games, 
+        trackGame, 
+        saveGame, 
+        removeGame, 
+        refreshGame 
+    } = useGameTracker();
     
     // Form State
     const [startId, setStartId] = useState('');
     const [endId, setEndId] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [useS3ByDefault, setUseS3ByDefault] = useState(false);
+    const [showSourceModal, setShowSourceModal] = useState(true);
+    
+    // Bulk tracking state
+    const [bulkTrackingQueue, setBulkTrackingQueue] = useState<string[]>([]);
+    const [currentTrackingUrl, setCurrentTrackingUrl] = useState<string | null>(null);
+    const [bulkSource, setBulkSource] = useState<'S3' | 'LIVE' | null>(null);
     
     // Modals
     const [selectedGame, setSelectedGame] = useState<any>(null);
     const [confirmModalData, setConfirmModalData] = useState<{
         game: any;
         venueId: string;
+        entityId: string;
+    } | null>(null);
+    
+    // Modal for individual game refresh
+    const [scrapeModalInfo, setScrapeModalInfo] = useState<{
+        url: string;
         entityId: string;
     } | null>(null);
     
@@ -99,7 +118,26 @@ export const BulkScraperTab: React.FC = () => {
         });
     }, [games, venues]);
 
-    // Handle form submission to track a *range* of games
+    // Process bulk tracking queue
+    useEffect(() => {
+        if (bulkTrackingQueue.length > 0 && bulkSource && !currentTrackingUrl) {
+            const nextUrl = bulkTrackingQueue[0];
+            setCurrentTrackingUrl(nextUrl);
+            
+            // Track the game with selected source
+            trackGame(nextUrl, 'SCRAPE' as DataSource, currentEntity!.id, { forceSource: bulkSource });
+            
+            // Remove from queue
+            setBulkTrackingQueue(prev => prev.slice(1));
+            
+            // Clear current after a delay
+            setTimeout(() => {
+                setCurrentTrackingUrl(null);
+            }, 500);
+        }
+    }, [bulkTrackingQueue, bulkSource, currentTrackingUrl, trackGame, currentEntity]);
+
+    // Handle form submission to track a range of games
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
@@ -117,27 +155,48 @@ export const BulkScraperTab: React.FC = () => {
             return;
         }
         
-        console.log(`[BulkScraperTab] Tracking games from ${start} to ${end} for entity ${currentEntity.entityName}`);
-
-        // Loop and track each game locally
+        // Build URLs for the range
+        const urls: string[] = [];
         for (let id = start; id <= end; id++) {
             const gameIdStr = id.toString();
-            // Build the URL based on entity rules
             const trackUrl = buildGameUrl(currentEntity, gameIdStr);
-            
-            // Track game with entity context
-            // This adds to local state (useGameTracker) and scrapes,
-            // but does NOT save to database.
-            trackGame(trackUrl, 'SCRAPE' as DataSource, currentEntity.id);
+            urls.push(trackUrl);
         }
-
-        // Clear inputs after tracking
+        
+        console.log(`[BulkScraperTab] Preparing to track ${urls.length} games for entity ${currentEntity.entityName}`);
+        
+        // Set up the queue
+        setBulkTrackingQueue(urls);
+        
+        // Clear inputs
         setStartId('');
         setEndId('');
     };
 
-    // --- Handlers copied from SingleScraperTab ---
+    // Handle source selection for bulk tracking
+    const handleBulkSourceSelection = (source: 'S3' | 'LIVE') => {
+        setBulkSource(source);
+        setShowSourceModal(false);
+    };
 
+    // Handle individual game refresh
+    const handleRefreshGame = (gameId: string) => {
+        if (!currentEntity) return;
+        
+        setScrapeModalInfo({
+            url: gameId,
+            entityId: currentEntity.id
+        });
+    };
+
+    const handleScrapeOptionSelected = (option: 'S3' | 'LIVE') => {
+        if (!scrapeModalInfo) return;
+        
+        refreshGame(scrapeModalInfo.url, { forceSource: option });
+        setScrapeModalInfo(null);
+    };
+
+    // Other handlers remain the same
     const handleVenueChange = (gameId: string, venueId: string) => {
         console.log(`[BulkScraperTab] Venue changed for game ${gameId}: ${venueId}`);
         setSelectedVenues(prev => ({ 
@@ -230,7 +289,7 @@ export const BulkScraperTab: React.FC = () => {
                             onChange={(e) => setStartId(e.target.value)}
                             className="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm"
                             placeholder="Start ID (e.g., 1)"
-                            disabled={!currentEntity}
+                            disabled={!currentEntity || bulkTrackingQueue.length > 0}
                         />
                         <span className="text-gray-500">to</span>
                         <input
@@ -239,12 +298,12 @@ export const BulkScraperTab: React.FC = () => {
                             onChange={(e) => setEndId(e.target.value)}
                             className="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm"
                             placeholder="End ID (e.g., 100)"
-                            disabled={!currentEntity}
+                            disabled={!currentEntity || bulkTrackingQueue.length > 0}
                         />
                         <button
                             type="submit"
                             className="px-4 py-2 border rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 flex items-center justify-center space-x-2"
-                            disabled={!currentEntity}
+                            disabled={!currentEntity || bulkTrackingQueue.length > 0}
                         >
                             <Database className="h-4 w-4" />
                             <span>Track Range</span>
@@ -257,6 +316,38 @@ export const BulkScraperTab: React.FC = () => {
                         {error}
                     </div>
                 )}
+                
+                {/* Bulk tracking progress */}
+                {bulkTrackingQueue.length > 0 && (
+                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                        <div className="flex items-center space-x-2">
+                            <AlertCircle className="h-4 w-4 text-yellow-600" />
+                            <span className="text-sm text-yellow-900">
+                                Processing bulk tracking: {bulkTrackingQueue.length} remaining
+                            </span>
+                        </div>
+                    </div>
+                )}
+                
+                {/* Source preference toggle */}
+                <div className="mt-4 flex items-center space-x-3">
+                    <label className="flex items-center space-x-2">
+                        <input
+                            type="checkbox"
+                            checked={useS3ByDefault}
+                            onChange={(e) => setUseS3ByDefault(e.target.checked)}
+                            className="rounded border-gray-300"
+                        />
+                        <span className="text-sm text-gray-700">
+                            Prefer S3 HTML when available
+                        </span>
+                    </label>
+                    {bulkSource && (
+                        <span className="text-xs text-gray-500">
+                            (Currently using: {bulkSource})
+                        </span>
+                    )}
+                </div>
             </div>
 
             {/* Tracked Games List */}
@@ -274,7 +365,7 @@ export const BulkScraperTab: React.FC = () => {
                                 onVenueChange={handleVenueChange}
                                 onSave={handleSave}
                                 onRemove={removeGame}
-                                onRefresh={refreshGame}
+                                onRefresh={handleRefreshGame}
                                 onViewDetails={setSelectedGame}
                                 mode="manual"
                                 showVenueSelector={true}
@@ -292,6 +383,47 @@ export const BulkScraperTab: React.FC = () => {
                     </div>
                 )}
             </div>
+
+            {/* Bulk Source Selection Modal */}
+            {showSourceModal && bulkTrackingQueue.length > 0 && (
+                <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+                        <h3 className="text-lg font-semibold mb-4">
+                            Select Data Source for Bulk Tracking
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-6">
+                            Choose how to fetch data for {bulkTrackingQueue.length} tournaments:
+                        </p>
+                        <div className="space-y-3">
+                            <button
+                                onClick={() => handleBulkSourceSelection('S3')}
+                                className="w-full px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center justify-center space-x-2"
+                            >
+                                <Database className="h-4 w-4" />
+                                <span>Use S3 HTML (when available)</span>
+                            </button>
+                            <button
+                                onClick={() => handleBulkSourceSelection('LIVE')}
+                                className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center space-x-2"
+                            >
+                                <Globe className="h-4 w-4" />
+                                <span>Scrape Live Pages</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Individual Scrape Options Modal */}
+            {scrapeModalInfo && (
+                <ScrapeOptionsModal
+                    isOpen={true}
+                    onClose={() => setScrapeModalInfo(null)}
+                    onSelectOption={handleScrapeOptionSelected}
+                    url={scrapeModalInfo.url}
+                    entityId={scrapeModalInfo.entityId}
+                />
+            )}
 
             {/* Game Details Modal */}
             {selectedGame && (

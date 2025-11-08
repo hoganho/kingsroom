@@ -10,6 +10,7 @@ import {
     Target, 
     Settings,
     RefreshCw,
+    HardDrive,
 } from 'lucide-react';
 
 // Import the tab components
@@ -21,9 +22,10 @@ import { JobHistoryTab } from './scraper-admin-tabs/JobHistoryTab';
 import { URLManagementTab } from './scraper-admin-tabs/URLManagementTab';
 //import { AnalyticsTab } from './scraper-admin-tabs/AnalyticsTab';
 import { SettingsTab } from './scraper-admin-tabs/SettingsTab';
+import { S3ManagementTab } from './scraper-admin-tabs/S3ManagementTab';
 
 // Tab definitions
-type TabKey = 'overview' | 'auto' | 'manual' | 'bulk' | 'jobs' | 'urls' | 'analytics' | 'settings';
+type TabKey = 'overview' | 'auto' | 'manual' | 'bulk' | 'jobs' | 'urls' | 'analytics' | 's3' | 'settings';
 
 interface Tab {
     key: TabKey;
@@ -40,6 +42,7 @@ const tabs: Tab[] = [
     { key: 'jobs', label: 'Job History', icon: <Clock className="h-4 w-4" />, description: 'View all scraping jobs' },
     { key: 'urls', label: 'URL Management', icon: <List className="h-4 w-4" />, description: 'Manage scraped URLs' },
     //{ key: 'analytics', label: 'Analytics', icon: <BarChart3 className="h-4 w-4" />, description: 'Performance metrics' },
+    { key: 's3', label: 'S3 Storage', icon: <HardDrive className="h-4 w-4" />, description: 'Manage HTML storage' },    
     { key: 'settings', label: 'Settings', icon: <Settings className="h-4 w-4" />, description: 'Configuration and preferences' }
 ];
 
@@ -68,6 +71,8 @@ export const ScraperAdminPage: React.FC = () => {
                 return <JobHistoryTab />;
             case 'urls':
                 return <URLManagementTab />;
+            case 's3':
+                return <S3ManagementTab />;
             //case 'analytics':
             //    return <AnalyticsTab />;
             case 'settings':

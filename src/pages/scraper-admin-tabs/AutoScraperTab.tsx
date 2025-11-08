@@ -1,545 +1,517 @@
-// src/pages/scraper-admin-tabs/AutoScraperTab.tsx
+// src/pages/scraper-admin-tabs/AutoScraperTabEnhanced.tsx
+// Enhanced version that checks for updates before scraping and respects DO NOT SCRAPE/FINISHED states
 
-import React, { useState, useEffect, useCallback } from 'react'; // 🚀 Added useCallback
-// import { generateClient } from 'aws-amplify/api'; // FIX: This client is unused
-import { useNavigate } from 'react-router-dom';
-import {
-    Play, 
-    Pause, 
-    RefreshCw, 
-    Eye,
-    Clock,
-    Activity,
-    CheckCircle,
-    XCircle,
-    AlertCircle,
-    ChevronDown,
-    ChevronUp,
-    Zap
-} from 'lucide-react';
-import { useScraperJobs } from '../../hooks/useScraperManagement.ts';
-import { ScraperJobTriggerSource, GameStatus, RegistrationStatus } from '../../API.ts';
-import type { ScraperJob } from '../../API.ts';
-import { DataSource } from '../../API.ts';
-import { JobStatusBadge } from '../../components/scraper/admin/ScraperAdminShared.tsx';
-import { JobDetailsModal } from '../../components/scraper/admin/JobDetailsModal.tsx';
-import { GameListItem } from '../../components/scraper/GameListItem.tsx';
-import type { GameState } from '../../types/game.ts';
-import { InitialScanPanel } from '../../components/scraper/InitialScanPanel';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { generateClient } from 'aws-amplify/api';
+import { PlayCircle, StopCircle, RefreshCw, Building2 } from 'lucide-react';
+import { useEntity } from '../../contexts/EntityContext';
+import { EntitySelector } from '../../components/entities/EntitySelector';
+import { GameStatus } from '../../API';
 
-interface RecentGame {
-    id: string;
-    name: string;
-    gameStatus?: string;
-    registrationStatus?: string;
-    gameStartDateTime?: string;
-    venueId?: string;
-    scrapedAt: string;
-    jobId: string;
-    error?: string;
+interface AutoScraperState {
+    isRunning: boolean;
+    currentId: number;
+    stats: {
+        totalChecked: number;
+        skippedFinished: number;
+        skippedDoNotScrape: number;
+        skippedNoUpdates: number;
+        scraped: number;
+        errors: number;
+    };
+    lastError?: string;
+    currentStatus?: string;
+}
+
+interface URLCheckResult {
+    url: string;
+    tournamentId: number;
+    shouldScrape: boolean;
+    reason?: string;
+    status?: GameStatus;
+    doNotScrape?: boolean;
+    hasUpdates?: boolean;
 }
 
 export const AutoScraperTab: React.FC = () => {
-    const navigate = useNavigate();
-    const { 
-        jobs,
-        loading,
-        error,
-        startJob,
-        cancelJob,
-        fetchJobs
-    } = useScraperJobs();
+    const client = useMemo(() => generateClient(), []);
+    const { currentEntity } = useEntity();
     
-    const [maxGames, setMaxGames] = useState('10');
-    const [selectedJob, setSelectedJob] = useState<ScraperJob | null>(null);
-    const [success, setSuccess] = useState<string | null>(null);
-    const [showRecentGames, setShowRecentGames] = useState(true);
-    const [recentGames, setRecentGames] = useState<RecentGame[]>([]);
-    const [isAutoMode, setIsAutoMode] = useState(false);
-    const [autoInterval, setAutoInterval] = useState('3600'); // Default 1 hour in seconds
-    
-    // 🚀 NEW: State for countdown timer
-    const [nextRunTime, setNextRunTime] = useState<number | null>(null);
-    const [countdown, setCountdown] = useState<string>('');
-
-    // Find current running job from jobs list
-    const currentJob = jobs.find(job => job.status === 'RUNNING');
-    const isJobRunning = !!currentJob;
-
-    // Auto-refresh for job status
-    useEffect(() => {
-        if (isJobRunning) {
-            const interval = setInterval(() => {
-                fetchJobs(true);
-            }, 5000); // Refresh every 5 seconds when job is running
-            
-            return () => clearInterval(interval);
+    const [state, setState] = useState<AutoScraperState>({
+        isRunning: false,
+        currentId: 1,
+        stats: {
+            totalChecked: 0,
+            skippedFinished: 0,
+            skippedDoNotScrape: 0,
+            skippedNoUpdates: 0,
+            scraped: 0,
+            errors: 0
         }
-    }, [isJobRunning, fetchJobs]);
+    });
+    
+    const [startId, setStartId] = useState('1');
+    const [endId, setEndId] = useState('100');
+    const [checkInterval, setCheckInterval] = useState('2'); // seconds between checks
+    const [logs, setLogs] = useState<string[]>([]);
+    
+    const abortControllerRef = useRef<AbortController | null>(null);
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Extract recent games from jobs
-    useEffect(() => {
-        const games: RecentGame[] = [];
+    // Add log entry
+    const addLog = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+        const timestamp = new Date().toLocaleTimeString();
+        const prefix = {
+            info: 'ℹ️',
+            success: '✅',
+            warning: '⚠️',
+            error: '❌'
+        }[type];
         
-        jobs.slice(0, 5).forEach(job => {
-            // FIX: Property is urlResults, not scrapedURLs
-            if (job.urlResults && Array.isArray(job.urlResults)) {
-                // FIX: Property is urlResults, not scrapedURLs
-                job.urlResults.slice(0, 5).forEach((urlData: any) => {
-                    if (urlData.gameData) {
-                        games.push({
-                            id: urlData.gameId || urlData.url?.split('id=')[1] || '',
-                            name: urlData.gameData.name || 'Unknown',
-                            gameStatus: urlData.gameData.gameStatus,
-                            registrationStatus: urlData.gameData.registrationStatus,
-                            gameStartDateTime: urlData.gameData.gameStartDateTime,
-                            venueId: urlData.venueId,
-                            scrapedAt: job.startTime,
-                            jobId: job.id,
-                            error: urlData.error
-                        });
-                    }
-                });
-            }
-        });
-        
-        setRecentGames(games.slice(0, 10)); // Show last 10 games
-    }, [jobs]);
+        setLogs(prev => [`[${timestamp}] ${prefix} ${message}`, ...prev].slice(0, 100));
+    };
 
-    // 🚀 MODIFIED: Wrapped handleStartJob in useCallback
-    const handleStartJob = useCallback(async () => {
+    // Check if a URL should be scraped
+    const checkURL = async (url: string, tournamentId: number): Promise<URLCheckResult> => {
         try {
-            const job = await startJob({
-                triggerSource: ScraperJobTriggerSource.MANUAL,
-                maxGames: parseInt(maxGames),
-                triggeredBy: isAutoMode ? 'auto-scheduler' : 'admin-user'
+            // First check the ScrapeURL record
+            const scrapeUrlResponse = await client.graphql({
+                query: /* GraphQL */ `
+                    query GetScrapeURL($id: ID!) {
+                        getScrapeURL(id: $id) {
+                            id
+                            doNotScrape
+                            status
+                            gameId
+                            gameStatus
+                            lastScrapedAt
+                            etag
+                            contentHash
+                        }
+                    }
+                `,
+                variables: { id: url }
             });
-            if (job) {
-                setSuccess(`Scraper job started successfully${isAutoMode ? ' (Auto Mode)' : ''}`);
-                fetchJobs(true);
+            
+            if ('data' in scrapeUrlResponse && scrapeUrlResponse.data?.getScrapeURL) {
+                const scrapeUrl = scrapeUrlResponse.data.getScrapeURL;
+                
+                // Check DO NOT SCRAPE flag
+                if (scrapeUrl.doNotScrape) {
+                    return {
+                        url,
+                        tournamentId,
+                        shouldScrape: false,
+                        reason: 'DO_NOT_SCRAPE',
+                        doNotScrape: true
+                    };
+                }
+                
+                // Check if game is FINISHED
+                if (scrapeUrl.gameStatus === 'FINISHED' || scrapeUrl.gameStatus === 'COMPLETED') {
+                    return {
+                        url,
+                        tournamentId,
+                        shouldScrape: false,
+                        reason: 'FINISHED',
+                        status: scrapeUrl.gameStatus as GameStatus
+                    };
+                }
+                
+                // If game exists and is not finished, check for updates
+                if (scrapeUrl.lastScrapedAt) {
+                    const updateCheckResponse = await client.graphql({
+                        query: /* GraphQL */ `
+                            mutation CheckPageUpdates($url: AWSURL!) {
+                                checkPageUpdates(url: $url) {
+                                    updateAvailable
+                                    message
+                                }
+                            }
+                        `,
+                        variables: { url }
+                    });
+                    
+                    if ('data' in updateCheckResponse && updateCheckResponse.data?.checkPageUpdates) {
+                        const updateStatus = updateCheckResponse.data.checkPageUpdates;
+                        
+                        if (!updateStatus.updateAvailable) {
+                            return {
+                                url,
+                                tournamentId,
+                                shouldScrape: false,
+                                reason: 'NO_UPDATES',
+                                hasUpdates: false
+                            };
+                        }
+                    }
+                }
             }
-        } catch (err) {
-            console.error('Error starting job:', err);
-            setIsAutoMode(false); // Stop auto mode on error
-        }
-    }, [startJob, maxGames, isAutoMode, setSuccess, fetchJobs, setIsAutoMode]);
-
-    // 🚀 MODIFIED: Auto-scraping interval logic
-    useEffect(() => {
-        let timer: NodeJS.Timeout | null = null;
-        
-        if (isAutoMode && !isJobRunning) {
-            const intervalMs = parseInt(autoInterval) * 1000;
-            timer = setTimeout(() => {
-                handleStartJob();
-                setNextRunTime(null); // Job is starting, clear the timer
-            }, intervalMs);
             
-            // Set the target time for the countdown
-            setNextRunTime(Date.now() + intervalMs);
-            
-            return () => {
-                if (timer) clearTimeout(timer);
-                setNextRunTime(null);
+            // Should scrape: either new URL or has updates
+            return {
+                url,
+                tournamentId,
+                shouldScrape: true,
+                hasUpdates: true
             };
-        } else {
-            // Not in auto mode or job is running, clear any pending timer
-            setNextRunTime(null);
+            
+        } catch (error) {
+            console.error(`Error checking URL ${url}:`, error);
+            return {
+                url,
+                tournamentId,
+                shouldScrape: true, // Scrape on error to be safe
+                reason: 'CHECK_ERROR'
+            };
         }
-    }, [isAutoMode, isJobRunning, autoInterval, handleStartJob]);
+    };
 
-    // 🚀 NEW: Countdown timer effect
-    useEffect(() => {
-        if (!nextRunTime || !isAutoMode || isJobRunning) {
-            setCountdown(''); // Clear countdown if not applicable
+    // Scrape a single tournament
+    const scrapeTournament = async (url: string, tournamentId: number): Promise<boolean> => {
+        try {
+            const response = await client.graphql({
+                query: /* GraphQL */ `
+                    mutation FetchTournamentDataEnhanced($url: AWSURL!, $entityId: ID!) {
+                        fetchTournamentDataEnhanced(url: $url, entityId: $entityId) {
+                            name
+                            gameStatus
+                            s3Key
+                            fromS3
+                        }
+                    }
+                `,
+                variables: { 
+                    url, 
+                    entityId: currentEntity!.id
+                }
+            });
+            
+            if ('data' in response && response.data?.fetchTournamentDataEnhanced) {
+                const data = response.data.fetchTournamentDataEnhanced;
+                addLog(
+                    `Scraped #${tournamentId}: ${data.name || 'Unknown'} (${data.gameStatus})`,
+                    'success'
+                );
+                return true;
+            }
+            
+            return false;
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            addLog(`Error scraping #${tournamentId}: ${errorMessage}`, 'error');
+            return false;
+        }
+    };
+
+    // Main auto-scraping loop
+    const runAutoScraper = async () => {
+        if (!currentEntity) {
+            addLog('No entity selected', 'error');
             return;
         }
-
-        const intervalId = setInterval(() => {
-            const remainingMs = Math.max(0, nextRunTime - Date.now());
-            
-            if (remainingMs === 0) {
-                setCountdown('00:00');
-                clearInterval(intervalId); // Stop timer when it hits 0
-                return;
+        
+        const start = parseInt(startId);
+        const end = parseInt(endId);
+        const interval = parseInt(checkInterval) * 1000;
+        
+        addLog(`Starting auto-scraper from ID ${start} to ${end}`, 'info');
+        
+        setState(prev => ({
+            ...prev,
+            isRunning: true,
+            currentId: start,
+            stats: {
+                totalChecked: 0,
+                skippedFinished: 0,
+                skippedDoNotScrape: 0,
+                skippedNoUpdates: 0,
+                scraped: 0,
+                errors: 0
             }
-            
-            const totalSeconds = Math.floor(remainingMs / 1000);
-            const minutes = Math.floor(totalSeconds / 60);
-            const seconds = totalSeconds % 60;
-            
-            // Set the mm:ss format
-            setCountdown(
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-            );
-        }, 1000); // Update every second
+        }));
+        
+        abortControllerRef.current = new AbortController();
+        
+        let currentId = start;
+        
+        const processNext = async () => {
+            if (!abortControllerRef.current?.signal.aborted && currentId <= end) {
+                const url = `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}${currentId}`;
+                
+                setState(prev => ({
+                    ...prev,
+                    currentId,
+                    currentStatus: `Checking tournament #${currentId}...`
+                }));
+                
+                // Check if we should scrape this URL
+                const checkResult = await checkURL(url, currentId);
+                
+                setState(prev => {
+                    const newStats = { ...prev.stats };
+                    newStats.totalChecked++;
+                    
+                    if (checkResult.shouldScrape) {
+                        // Scrape the tournament
+                        scrapeTournament(url, currentId).then(success => {
+                            setState(p => ({
+                                ...p,
+                                stats: {
+                                    ...p.stats,
+                                    scraped: success ? p.stats.scraped + 1 : p.stats.scraped,
+                                    errors: success ? p.stats.errors : p.stats.errors + 1
+                                }
+                            }));
+                        });
+                        newStats.scraped++;
+                        addLog(`Scraping #${currentId} (updates detected)`, 'info');
+                    } else {
+                        // Skip based on reason
+                        switch (checkResult.reason) {
+                            case 'DO_NOT_SCRAPE':
+                                newStats.skippedDoNotScrape++;
+                                addLog(`Skipped #${currentId} (DO NOT SCRAPE)`, 'warning');
+                                break;
+                            case 'FINISHED':
+                                newStats.skippedFinished++;
+                                addLog(`Skipped #${currentId} (FINISHED)`, 'info');
+                                break;
+                            case 'NO_UPDATES':
+                                newStats.skippedNoUpdates++;
+                                addLog(`Skipped #${currentId} (no updates)`, 'info');
+                                break;
+                            default:
+                                addLog(`Skipped #${currentId}`, 'info');
+                        }
+                    }
+                    
+                    return {
+                        ...prev,
+                        stats: newStats
+                    };
+                });
+                
+                currentId++;
+                
+                // Schedule next check
+                intervalRef.current = setTimeout(processNext, interval);
+            } else {
+                // Finished
+                setState(prev => ({
+                    ...prev,
+                    isRunning: false,
+                    currentStatus: 'Completed'
+                }));
+                addLog('Auto-scraper completed', 'success');
+            }
+        };
+        
+        // Start the process
+        processNext();
+    };
 
-        return () => clearInterval(intervalId); // Cleanup interval on unmount or re-run
-    }, [nextRunTime, isAutoMode, isJobRunning]);
+    // Stop auto-scraper
+    const stopAutoScraper = () => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        if (intervalRef.current) {
+            clearTimeout(intervalRef.current);
+        }
+        
+        setState(prev => ({
+            ...prev,
+            isRunning: false,
+            currentStatus: 'Stopped'
+        }));
+        
+        addLog('Auto-scraper stopped', 'warning');
+    };
 
-    // Clear success message after 5 seconds
+    // Clean up on unmount
     useEffect(() => {
-        if (success) {
-            const timer = setTimeout(() => setSuccess(null), 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [success]);
-
-    const handleCancelJob = async () => {
-        if (currentJob?.jobId) {
-            try {
-                await cancelJob(currentJob.jobId);
-                setSuccess('Scraper job cancelled');
-                fetchJobs(true);
-            } catch (err) {
-                console.error('Error cancelling job:', err);
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
             }
-        }
-    };
-
-    const toggleAutoMode = () => {
-        setIsAutoMode(!isAutoMode);
-        if (!isAutoMode) {
-            setSuccess(`Auto mode enabled - will run every ${parseInt(autoInterval) / 60} minutes`);
-        } else {
-            setSuccess('Auto mode disabled');
-        }
-    };
-
-    const handleGameClick = (gameId: string) => {
-        const trackUrl = `https://kingsroom.com.au/tournament/?id=${gameId}`;
-        navigate(`/scraper-dashboard?trackUrl=${encodeURIComponent(trackUrl)}`);
-    };
-
-    const convertRecentGameToGameState = (game: RecentGame): GameState => {
-        return {
-            id: `https://kingsroom.com.au/tournament/?id=${game.id}`,
-            source: DataSource.SCRAPE,
-            jobStatus: game.error ? 'ERROR' : 'READY_TO_SAVE',
-            lastFetched: game.scrapedAt,
-            fetchCount: 1,
-            autoRefresh: false,
-            data: {
-                name: game.name,
-                tournamentId: parseInt(game.id, 10),
-                gameStatus: (game.gameStatus as GameStatus) || GameStatus.UNKNOWN,
-                registrationStatus: game.registrationStatus as RegistrationStatus | undefined,
-                gameStartDateTime: game.gameStartDateTime,
-                foundKeys: [],
-                hasGuarantee: false,
-                levels: [],
-                otherDetails: {},
-                // --------------------------------------------------------
-            },
-            errorMessage: game.error
+            if (intervalRef.current) {
+                clearTimeout(intervalRef.current);
+            }
         };
-    };
+    }, []);
 
-    const getJobSummaryStats = (job: ScraperJob) => {
-        // FIX: Add nullish coalescing to prevent errors on null/undefined
-        const totalProcessed = job.totalURLsProcessed ?? 0;
-        return {
-            duration: job.endTime 
-                ? Math.round((new Date(job.endTime).getTime() - new Date(job.startTime).getTime()) / 1000 / 60) 
-                : null,
-            // FIX: Use the null-safe totalProcessed variable
-            successRate: totalProcessed > 0 
-                ? Math.round(((totalProcessed - (job.errors || 0)) / totalProcessed) * 100)
-                : 0
-        };
-    };
-
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'RUNNING': return <RefreshCw className="h-4 w-4 text-blue-600 animate-spin" />;
-            case 'COMPLETED': return <CheckCircle className="h-4 w-4 text-green-600" />;
-            case 'FAILED': return <XCircle className="h-4 w-4 text-red-600" />;
-            case 'CANCELLED': return <AlertCircle className="h-4 w-4 text-yellow-600" />;
-            default: return <Clock className="h-4 w-4 text-gray-600" />;
-        }
-    };
-    
-    // 🚀 DELETED: The getNextRunTime function is no longer needed
-    const showInitialScan = true;
+    if (!currentEntity) {
+        return (
+            <div className="space-y-6">
+                <div className="bg-white rounded-lg shadow p-6">
+                    <div className="text-center">
+                        <Building2 className="mx-auto h-12 w-12 text-gray-400" />
+                        <h3 className="mt-2 text-sm font-medium text-gray-900">No Entity Selected</h3>
+                        <p className="mt-1 text-sm text-gray-500">
+                            Please select an entity to start auto-scraping.
+                        </p>
+                        <div className="mt-6 flex justify-center">
+                            <EntitySelector />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
-            {/* Control Panel */}
-            {showInitialScan && <InitialScanPanel />}
-
-            <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold">Auto Scraper Control</h3>
-                    <div className="flex items-center space-x-2">
-                        <Zap className={`h-5 w-5 ${isAutoMode ? 'text-yellow-500' : 'text-gray-400'}`} />
-                        <span className="text-sm font-medium">
-                            {isAutoMode ? 'Auto Mode ON' : 'Auto Mode OFF'}
-                        </span>
+            {/* Entity Info Bar */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                        <Building2 className="h-5 w-5 text-blue-500" />
+                        <div>
+                            <p className="text-sm font-medium text-blue-900">
+                                Auto-Scraping for: {currentEntity.entityName}
+                            </p>
+                            <p className="text-xs text-blue-700 font-mono">
+                                {currentEntity.gameUrlDomain}{currentEntity.gameUrlPath}[ID]
+                            </p>
+                        </div>
                     </div>
+                    <EntitySelector />
                 </div>
+            </div>
+
+            {/* Configuration */}
+            <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-4">Auto-Scraper Configuration</h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    {/* Max Games Input */}
+                <div className="grid grid-cols-3 gap-4 mb-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Games per Run
+                            Start ID
                         </label>
                         <input
                             type="number"
-                            value={maxGames}
-                            onChange={(e) => setMaxGames(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                            min="1"
-                            max="100"
-                            disabled={isJobRunning}
+                            value={startId}
+                            onChange={(e) => setStartId(e.target.value)}
+                            disabled={state.isRunning}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
                         />
                     </div>
                     
-                    {/* Auto Interval */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Auto Run Interval
+                            End ID
                         </label>
-                        <select
-                            value={autoInterval}
-                            onChange={(e) => setAutoInterval(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                            disabled={isJobRunning}
-                        >
-                            <option value="300">5 minutes</option>
-                            <option value="900">15 minutes</option>
-                            <option value="1800">30 minutes</option>
-                            <option value="3600">1 hour</option>
-                            <option value="7200">2 hours</option>
-                            <option value="14400">4 hours</option>
-                        </select>
+                        <input
+                            type="number"
+                            value={endId}
+                            onChange={(e) => setEndId(e.target.value)}
+                            disabled={state.isRunning}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
+                        />
                     </div>
                     
-                    {/* Status Display */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Status
+                            Check Interval (seconds)
                         </label>
-                        <div className="px-3 py-2 bg-gray-50 rounded-md">
-                            {isJobRunning ? (
-                                <span className="text-blue-600 font-medium flex items-center gap-2">
-                                    <RefreshCw className="h-4 w-4 animate-spin" />
-                                    Job Running
-                                </span>
-                            ) : isAutoMode ? (
-                                // 🚀 MODIFIED: Use the countdown state
-                                <span className="text-green-600 font-medium">
-                                    Next run in: {countdown || '...'}
-                                </span>
-                            ) : (
-                                <span className="text-gray-500">Idle</span>
-                            )}
-                        </div>
+                        <input
+                            type="number"
+                            value={checkInterval}
+                            onChange={(e) => setCheckInterval(e.target.value)}
+                            disabled={state.isRunning}
+                            min="1"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
+                        />
                     </div>
                 </div>
-                
-                {/* Action Buttons */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                        {!isJobRunning ? (
-                            <>
-                                <button
-                                    onClick={handleStartJob}
-                                    disabled={loading}
-                                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
-                                >
-                                    <Play className="h-4 w-4" />
-                                    Start Manual Run
-                                </button>
-                                <button
-                                    onClick={toggleAutoMode}
-                                    className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
-                                        isAutoMode 
-                                            ? 'bg-yellow-600 text-white hover:bg-yellow-700' 
-                                            : 'bg-gray-600 text-white hover:bg-gray-700'
-                                    }`}
-                                >
-                                    {isAutoMode ? (
-                                        <>
-                                            <Pause className="h-4 w-4" />
-                                            Stop Auto Mode
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Zap className="h-4 w-4" />
-                                            Enable Auto Mode
-                                        </>
-                                    )}
-                                </button>
-                            </>
-                        ) : (
-                            <button
-                                onClick={handleCancelJob}
-                                disabled={loading}
-                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
-                            >
-                                <Pause className="h-4 w-4" />
-                                Cancel Current Job
-                            </button>
-                        )}
-                    </div>
-                    
-                    {/* Live Stats */}
-                    {currentJob && (
-                        <div className="flex items-center space-x-4 text-sm">
-                            <div className="flex items-center gap-1">
-                                <span className="text-gray-500">Processed:</span>
-                                <span className="font-medium">{currentJob.totalURLsProcessed || 0}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <span className="text-gray-500">New:</span>
-                                <span className="font-medium text-green-600">{currentJob.newGamesScraped || 0}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <span className="text-gray-500">Updated:</span>
-                                <span className="font-medium text-blue-600">{currentJob.gamesUpdated || 0}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <span className="text-gray-500">Errors:</span>
-                                <span className="font-medium text-red-600">{currentJob.errors || 0}</span>
-                            </div>
-                        </div>
+
+                <div className="flex space-x-3">
+                    {!state.isRunning ? (
+                        <button
+                            onClick={runAutoScraper}
+                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center space-x-2"
+                        >
+                            <PlayCircle className="h-4 w-4" />
+                            <span>Start Auto-Scraping</span>
+                        </button>
+                    ) : (
+                        <button
+                            onClick={stopAutoScraper}
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center space-x-2"
+                        >
+                            <StopCircle className="h-4 w-4" />
+                            <span>Stop Auto-Scraping</span>
+                        </button>
                     )}
                 </div>
-
-                {/* Status Messages */}
-                {error && (
-                    <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg flex items-center gap-2">
-                        <AlertCircle className="h-5 w-5" />
-                        {error}
-                    </div>
-                )}
-                {success && (
-                    <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-lg flex items-center gap-2">
-                        <CheckCircle className="h-5 w-5" />
-                        {success}
-                    </div>
-                )}
             </div>
 
-            {/* Recent Games Scraped */}
-            {recentGames.length > 0 && (
-                <div className="bg-white rounded-lg shadow">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-semibold">Recently Scraped Games</h3>
-                            <button
-                                onClick={() => setShowRecentGames(!showRecentGames)}
-                                className="p-2 hover:bg-gray-100 rounded"
-                            >
-                                {showRecentGames ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                            </button>
+            {/* Status and Statistics */}
+            <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-4">Status</h3>
+                
+                {state.isRunning && (
+                    <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center space-x-2">
+                            <RefreshCw className="h-4 w-4 text-green-600 animate-spin" />
+                            <span className="text-sm text-green-900">
+                                {state.currentStatus || `Processing tournament #${state.currentId}`}
+                            </span>
                         </div>
                     </div>
-                    {showRecentGames && (
-                        <div className="p-4 space-y-2">
-                            {recentGames.map((game, index) => (
-                                <GameListItem
-                                    key={`${game.id}-${index}`}
-                                    game={convertRecentGameToGameState(game)}
-                                    mode="auto"
-                                    showVenueSelector={false}
-                                    showActions={false}
-                                    onClick={() => handleGameClick(game.id)}
-                                />
+                )}
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                        <p className="text-xs text-gray-600">Total Checked</p>
+                        <p className="text-xl font-semibold">{state.stats.totalChecked}</p>
+                    </div>
+                    
+                    <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-gray-600">Scraped</p>
+                        <p className="text-xl font-semibold text-green-600">{state.stats.scraped}</p>
+                    </div>
+                    
+                    <div className="bg-yellow-50 p-3 rounded-lg">
+                        <p className="text-xs text-gray-600">Skipped (No Updates)</p>
+                        <p className="text-xl font-semibold text-yellow-600">{state.stats.skippedNoUpdates}</p>
+                    </div>
+                    
+                    <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-gray-600">Skipped (Finished)</p>
+                        <p className="text-xl font-semibold text-blue-600">{state.stats.skippedFinished}</p>
+                    </div>
+                    
+                    <div className="bg-orange-50 p-3 rounded-lg">
+                        <p className="text-xs text-gray-600">Skipped (Do Not Scrape)</p>
+                        <p className="text-xl font-semibold text-orange-600">{state.stats.skippedDoNotScrape}</p>
+                    </div>
+                    
+                    <div className="bg-red-50 p-3 rounded-lg">
+                        <p className="text-xs text-gray-600">Errors</p>
+                        <p className="text-xl font-semibold text-red-600">{state.stats.errors}</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Activity Log */}
+            <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-4">Activity Log</h3>
+                <div className="max-h-60 overflow-y-auto">
+                    {logs.length === 0 ? (
+                        <p className="text-gray-500 text-sm">No activity yet</p>
+                    ) : (
+                        <div className="space-y-1">
+                            {logs.map((log, index) => (
+                                <p key={index} className="text-xs font-mono text-gray-700">
+                                    {log}
+                                </p>
                             ))}
                         </div>
                     )}
                 </div>
-            )}
-
-            {/* Recent Jobs */}
-            <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200">
-                    <h3 className="text-lg font-semibold">Recent Scraper Jobs</h3>
-                </div>
-                <div className="divide-y divide-gray-200">
-                    {jobs.length > 0 ? (
-                        jobs.slice(0, 10).map((job) => {
-                            const stats = getJobSummaryStats(job);
-                            return (
-                                <div key={job.id} className="p-4 hover:bg-gray-50">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-3">
-                                                {getStatusIcon(job.status)}
-                                                <div>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-medium text-sm">
-                                                            Job {job.jobId?.slice(0, 8)}...
-                                                        </span>
-                                                        <JobStatusBadge status={job.status} />
-                                                        {job.triggerSource === 'SCHEDULED' && (
-                                                            <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded">
-                                                                Scheduled
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <p className="text-xs text-gray-500 mt-1">
-                                                        {new Date(job.startTime).toLocaleString()}
-                                                        {stats.duration && ` • ${stats.duration} min`}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div className="flex items-center space-x-4">
-                                            <div className="text-right">
-                                                <p className="text-sm font-medium">
-                                                    {job.totalURLsProcessed || 0} URLs
-                                                </p>
-                                                <p className="text-xs text-gray-500">
-                                                    {stats.successRate}% success
-                                                </p>
-                                            </div>
-                                            <div className="grid grid-cols-3 gap-1 text-xs">
-                                                <div className="text-center">
-                                                    <p className="font-medium text-green-600">{job.newGamesScraped || 0}</p>
-                                                    <p className="text-gray-500">New</p>
-                                                </div>
-                                                <div className="text-center">
-                                                    <p className="font-medium text-blue-600">{job.gamesUpdated || 0}</p>
-                                                    <p className="text-gray-500">Updated</p>
-                                                </div>
-                                                <div className="text-center">
-                                                    <p className="font-medium text-gray-600">{job.gamesSkipped || 0}</p>
-                                                    <p className="text-gray-500">Skipped</p>
-                                                </div>
-                                            </div>
-                                            <button
-                                                onClick={() => setSelectedJob(job)}
-                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded"
-                                                title="View Details"
-                                            >
-                                                <Eye className="h-4 w-4" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })
-                    ) : (
-                        <div className="p-8 text-center text-gray-500">
-                            <Activity className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                            <p>No scraper jobs have run yet</p>
-                            <p className="text-xs mt-1">Start a manual run or enable auto mode to begin</p>
-                        </div>
-                    )}
-                </div>
             </div>
-
-            {/* Job Details Modal */}
-            {selectedJob && (
-                <JobDetailsModal 
-                    job={selectedJob} 
-                    onClose={() => setSelectedJob(null)} 
-                />
-            )}
         </div>
     );
 };

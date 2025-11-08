@@ -1,389 +1,470 @@
-// hooks/useGameTracker.ts
-// FINAL MERGED: Combines Entity ID support  with the
-// comprehensive missingFields logic from the original file.
+// src/hooks/useGameTracker.ts
+// REFACTORED: Uses local state management with manual saving.
+// Fixed all TypeScript errors while maintaining full functionality
 
-import { useEffect } from 'react';
-import { useGameContext } from '../contexts/GameContext';
-import { fetchGameDataFromBackend, saveGameDataToBackend, shouldAutoRefreshTournament, getCurrentEntityId } from '../services/gameService';
-import type { GameState, GameData, MissingField, ScrapedVenueMatch } from '../types/game';
-import type { DataSource } from '../API';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { generateClient } from 'aws-amplify/api';
+import type { DataSource, ScrapedGameData, GameStatus, RegistrationStatus } from '../API';
+import type { GameData, GameState, JobStatus } from '../types/game';
+import { fetchGameDataFromBackend, saveGameDataToBackend, shouldAutoRefreshTournament } from '../services/gameService';
 
-export const POLLING_INTERVAL = 5 * 60 * 1000; 
+// Export POLLING_INTERVAL for use in components
+export const POLLING_INTERVAL = 120000; // 2 minutes
 
-export const useGameTracker = () => {
-    const { state, dispatch } = useGameContext();
-    const { games } = state;
+interface TrackedGame extends GameState {
+    updateAvailable?: boolean;
+    s3Key?: string;
+    fromS3?: boolean;
+    lastCheckedForUpdates?: Date;
+}
 
-    useEffect(() => {
-        const intervalId = setInterval(() => {
-            console.log(`[useGameTracker] Polling check initiated at ${new Date().toLocaleTimeString()}`);
-            Object.values(games).forEach(game => {
-                if (game.autoRefresh && game.data?.gameStatus === 'RUNNING' && !game.data.doNotScrape) {
-                    console.log(`[useGameTracker] Re-fetching updates for RUNNING tournament: ${game.id}`);
-                    // FIX: Pass entityId to polling fetch, handling potential null
-                    fetchAndLoadData(game.id, game.source, game.entityId ?? undefined);
-                } else if (game.autoRefresh && game.data?.doNotScrape) {
-                    console.log(`[useGameTracker] Auto-refresh skipped for ${game.id} (Do Not Scrape)`);
-                }
-            });
-        }, POLLING_INTERVAL);
+interface TrackOptions {
+    forceSource?: 'S3' | 'LIVE';
+    s3Key?: string;
+}
 
-        return () => clearInterval(intervalId);
-    }, [games]);
+interface UseGameTrackerReturn {
+    games: Record<string, TrackedGame>;
+    trackGame: (url: string, source: DataSource, entityId: string, options?: TrackOptions) => void;
+    trackGameWithModal: (url: string, source: DataSource, entityId: string) => void;
+    saveGame: (gameId: string, venueId: string, entityId: string) => void;
+    removeGame: (gameId: string) => void;
+    refreshGame: (gameId: string, options?: TrackOptions) => void;
+    updateGameStatus: (gameId: string, status: JobStatus) => void;
+    isModalOpen: boolean;
+    setIsModalOpen: (open: boolean) => void;
+    modalGameInfo: { url: string; source: DataSource; entityId: string } | null;
+}
 
-    const updateJobStatus = (payload: Partial<GameState> & { id: string }) => {
-        dispatch({ type: 'UPDATE_GAME_STATE', payload });
-    };
+const client = generateClient();
 
-    // FIX: Add entityId as a parameter
-    const fetchAndLoadData = async (id: string, source: DataSource, entityId?: string) => {
-        if (source !== 'SCRAPE') {
-            console.log("Only SCRAPE source is configured for backend fetching.");
-            updateJobStatus({ id, jobStatus: 'ERROR', errorMessage: 'Only scraping from a URL is supported.' });
-            return;
-        }
-
-        const game = state.games[id];
+/**
+ * Helper function to convert ScrapedGameData to GameData
+ * This handles the type differences between API response and local types
+ */
+const convertScrapedToGameData = (scraped: ScrapedGameData): GameData => {
+    // Handle all the nullable/undefined types properly
+    const gameStatus = scraped.gameStatus || 'SCHEDULED' as GameStatus;
+    
+    return {
+        // Basic game information
+        name: scraped.name || '',
+        tournamentId: scraped.tournamentId || 0,
+        gameStartDateTime: scraped.gameStartDateTime || undefined,
+        gameEndDateTime: scraped.gameEndDateTime || undefined,
+        gameStatus: gameStatus, // Now guaranteed to be GameStatus
+        gameType: scraped.gameType || undefined,
+        venueId: undefined, // venueId doesn't exist on ScrapedGameData
+        entityId: scraped.entityId || undefined,
+        gameVariant: scraped.gameVariant || undefined,
+        gameFrequency: scraped.gameFrequency || undefined,
+        isSeries: scraped.isSeries || undefined,
+        isRegular: scraped.isRegular || undefined,
+        isSatellite: scraped.isSatellite || undefined,
         
-        if (!game?.autoRefresh) {
-            updateJobStatus({ id, jobStatus: 'FETCHING', errorMessage: undefined, missingFields: [] });
-        }
+        // Game state and metadata - handle RegistrationStatus type
+        registrationStatus: (scraped.registrationStatus as RegistrationStatus) || undefined,
+        prizepool: scraped.prizepool || undefined,
+        totalEntries: scraped.totalEntries || undefined,
+        playersRemaining: scraped.playersRemaining || undefined,
+        totalChipsInPlay: scraped.totalChipsInPlay || undefined,
+        averagePlayerStack: scraped.averagePlayerStack || undefined,
+        totalRebuys: scraped.totalRebuys || undefined,
+        totalAddons: scraped.totalAddons || undefined,
+        totalDuration: scraped.totalDuration || undefined,
+        gameTags: scraped.gameTags || undefined,
+        seriesName: scraped.seriesName || undefined,
+        revenueByBuyIns: scraped.revenueByBuyIns || undefined,
+        profitLoss: scraped.profitLoss || undefined,
+
+        // Tournament-specific fields
+        tournamentType: scraped.tournamentType || undefined,
+        buyIn: scraped.buyIn || undefined,
+        rake: scraped.rake || undefined,
+        totalRake: scraped.totalRake || undefined,
+        startingStack: scraped.startingStack || undefined,
+        hasGuarantee: scraped.hasGuarantee || false,
+        guaranteeAmount: scraped.guaranteeAmount || undefined,
+        guaranteeOverlay: scraped.guaranteeOverlay || undefined,
+        guaranteeSurplus: scraped.guaranteeSurplus || undefined,
+
+        // Blind structure - handle undefined/null values properly
+        levels: scraped.levels?.map(level => ({
+            levelNumber: level.levelNumber || 0,
+            durationMinutes: level.durationMinutes || 0,
+            smallBlind: level.smallBlind || 0,
+            bigBlind: level.bigBlind || 0,
+            ante: level.ante || undefined,
+            breakMinutes: undefined // breakMinutes doesn't exist on ScrapedTournamentLevel
+        })) || [],
+        
+        // Player data - handle nullable types in nested objects
+        results: scraped.results?.map(result => ({
+            rank: result.rank || 0,
+            name: result.name || '',
+            winnings: result.winnings || 0, // Convert null/undefined to 0
+            points: result.points || undefined,
+            isQualification: result.isQualification || undefined
+        })) || undefined,
+        
+        entries: scraped.entries || undefined,
+        
+        seating: scraped.seating?.map(seat => ({
+            name: seat.name || '',
+            table: seat.table || 0, // Convert null/undefined to 0
+            seat: seat.seat || 0,
+            playerStack: seat.playerStack || undefined
+        })) || undefined,
+        
+        breaks: scraped.breaks?.map(breakData => ({
+            levelNumberBeforeBreak: breakData.levelNumberBeforeBreak || 0,
+            durationMinutes: breakData.durationMinutes || 0 // Convert null/undefined to 0
+        })) || undefined,
+        
+        tables: scraped.tables?.map(table => ({
+            tableName: table.tableName || '',
+            seats: table.seats?.map(seat => ({
+                seat: seat.seat || 0,
+                isOccupied: seat.isOccupied || false,
+                playerName: seat.playerName || undefined,
+                playerStack: seat.playerStack || undefined
+            })) || []
+        })) || undefined,
+
+        // Additional data - otherDetails doesn't exist on ScrapedGameData
+        rawHtml: scraped.rawHtml || undefined,
+
+        // Scraper metadata - handle null values in array
+        structureLabel: scraped.structureLabel || undefined,
+        foundKeys: scraped.foundKeys?.filter((key): key is string => key !== null) || undefined,
+        doNotScrape: scraped.doNotScrape || undefined,
+        venueMatch: scraped.venueMatch || undefined,
+        s3Key: (scraped as any).s3Key || ''
+
+    };
+};
+
+export const useGameTracker = (): UseGameTrackerReturn => {
+    const [games, setGames] = useState<Record<string, TrackedGame>>({});
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalGameInfo, setModalGameInfo] = useState<{
+        url: string;
+        source: DataSource;
+        entityId: string;
+    } | null>(null);
+    
+    const autoRefreshTimers = useRef<Record<string, NodeJS.Timeout>>({});
+
+    // Cleanup timers on unmount
+    useEffect(() => {
+        return () => {
+            Object.values(autoRefreshTimers.current).forEach(timer => clearInterval(timer));
+        };
+    }, []);
+
+    // Helper to fetch tournament data from S3
+    const fetchFromS3 = async (url: string, s3Key?: string): Promise<ScrapedGameData> => {
+        console.log(`[useGameTracker] Fetching from S3 for ${url}`);
         
         try {
-            // FIX: Pass the entityId to the gameService function
-            // This is the entityId that came from trackGame
-            // Reverting to 1 argument to fix TS2554. The entityId will be re-applied after fetch.
-            const dataFromBackend = await fetchGameDataFromBackend(id, entityId);
-            console.log('[useGameTracker] Raw data from backend:', dataFromBackend);
-
-            // --- MERGE ---: Kept all data extraction from enhanced file 
-            // FIX: Use the passed entityId or the one from data, or fallback
-            // This re-applies the entityId that was passed into fetchAndLoadData
-            const finalEntityId = entityId || (dataFromBackend as any).entityId || getCurrentEntityId();
-            const venueMatch = (dataFromBackend as any).venueMatch as ScrapedVenueMatch || null;
-            const isNewStructure = dataFromBackend.isNewStructure ?? undefined;
-            const structureLabel = (dataFromBackend as any).structureLabel || undefined;
-            const foundKeys = (dataFromBackend as any).foundKeys || [];
-            const existingGameId = (dataFromBackend as any).existingGameId || null;
-            const doNotScrape = (dataFromBackend as any).doNotScrape || false;
-
-            console.log('[useGameTracker] Extracted entityId:', finalEntityId);
-
-            const data: GameData = {
-                name: dataFromBackend.name,
-                tournamentId: dataFromBackend.tournamentId,
-                entityId: finalEntityId, // Use the determined entityId
-                gameStartDateTime: dataFromBackend.gameStartDateTime || undefined,
-                gameEndDateTime: dataFromBackend.gameEndDateTime || undefined,
-                gameStatus: (dataFromBackend as any).gameStatus || undefined,
-                gameType: dataFromBackend.gameType || undefined,
-                gameFrequency: dataFromBackend.gameFrequency || undefined,
-                registrationStatus: (dataFromBackend as any).registrationStatus || undefined,
-                gameVariant: dataFromBackend.gameVariant || undefined,
-                prizepool: dataFromBackend.prizepool || undefined,
-                totalEntries: dataFromBackend.totalEntries || undefined,
-                revenueByBuyIns: (dataFromBackend as any).revenueByBuyIns || undefined,
-                profitLoss: dataFromBackend.profitLoss || undefined,
-                playersRemaining: (dataFromBackend as any).playersRemaining || undefined,
-                totalChipsInPlay: (dataFromBackend as any).totalChipsInPlay || undefined,
-                averagePlayerStack: (dataFromBackend as any).averagePlayerStack || undefined,
-                totalRebuys: dataFromBackend.totalRebuys || undefined,
-                totalAddons: dataFromBackend.totalAddons || undefined,
-                totalDuration: dataFromBackend.totalDuration || undefined,
-                gameTags: dataFromBackend.gameTags || [],
-                seriesName: (dataFromBackend as any).seriesName || undefined,
-                tournamentType: dataFromBackend.tournamentType || undefined,
-                isSeries: dataFromBackend.isSeries || undefined,
-                isRegular: dataFromBackend.isRegular || undefined,
-                isSatellite: dataFromBackend.isSatellite || undefined,
-                buyIn: dataFromBackend.buyIn || undefined,
-                rake: dataFromBackend.rake || undefined,
-                totalRake: dataFromBackend.totalRake || undefined,
-                startingStack: dataFromBackend.startingStack || undefined,
-                hasGuarantee: dataFromBackend.hasGuarantee ?? false,
-                guaranteeAmount: dataFromBackend.guaranteeAmount || undefined,
-                guaranteeOverlay: dataFromBackend.guaranteeOverlay || undefined,
-                guaranteeSurplus: dataFromBackend.guaranteeSurplus || undefined,
-                levels: dataFromBackend.levels?.map((l: any) => ({
-                    levelNumber: l.levelNumber,
-                    durationMinutes: l.durationMinutes || 20,
-                    smallBlind: l.smallBlind || 0,
-                    bigBlind: l.bigBlind || 0,
-                    ante: l.ante,
-                    breakMinutes: undefined
-                })) ?? [],
-                breaks: (dataFromBackend as any).breaks?.map((b: any) => ({
-                    levelNumberBeforeBreak: b.levelNumberBeforeBreak,
-                    durationMinutes: b.durationMinutes,
-                })) ?? [],
-                tables: (dataFromBackend as any).tables?.map((t: any) => ({
-                    tableName: t.tableName,
-                    seats: t.seats?.map((s: any) => ({
-                        seat: s.seat,
-                        isOccupied: s.isOccupied,
-                        playerName: s.playerName,
-                        playerStack: s.playerStack,
-                    })) ?? [],
-                })) ?? [],
-                seating: (dataFromBackend as any).seating?.map((s: { name: string; table: number; seat: number; playerStack: number }) => ({ 
-                        name: s.name, 
-                        table: s.table, 
-                        seat: s.seat,
-                        playerStack: s.playerStack,
-                })) ?? [],
-                entries: (dataFromBackend as any).entries?.map((e: { name: string }) => ({ name: e.name })) ?? [],
-                results: dataFromBackend.results?.map((r: any) => ({
-                    name: r.name, 
-                    rank: r.rank, 
-                    winnings: r.winnings ?? 0,
-                    points: r.points ?? 0, // ✅ Kept fix from enhanced file 
-                    isQualification: r.isQualification ?? false // ✅ Kept fix from enhanced file 
-                })) ?? [],
-                otherDetails: {},
-                rawHtml: dataFromBackend.rawHtml || undefined,
-                structureLabel: structureLabel,
-                foundKeys: foundKeys,
-                doNotScrape: doNotScrape,
-                venueMatch: venueMatch,
-            };
-
-            // Process breaks and merge with levels
-            if (data.breaks && data.breaks.length > 0 && data.levels && data.levels.length > 0) {
-                data.breaks.forEach(breakInfo => {
-                    const levelBeforeBreak = data.levels.find(
-                        level => level.levelNumber === breakInfo.levelNumberBeforeBreak
-                    );
-                    if (levelBeforeBreak) {
-                        levelBeforeBreak.breakMinutes = breakInfo.durationMinutes;
+            // If we have a specific S3 key, use reScrapeFromCache
+            if (s3Key) {
+                const response = await client.graphql({
+                    query: /* GraphQL */ `
+                        mutation ReScrapeFromCache($input: ReScrapeFromCacheInput!) {
+                            reScrapeFromCache(input: $input) {
+                                name
+                                tournamentId
+                                gameStartDateTime
+                                gameEndDateTime
+                                gameStatus
+                                registrationStatus
+                                gameType
+                                gameVariant
+                                tournamentType
+                                prizepool
+                                buyIn
+                                rake
+                                startingStack
+                                hasGuarantee
+                                guaranteeAmount
+                                totalEntries
+                                totalRebuys
+                                totalAddons
+                                totalDuration
+                                playersRemaining
+                                seriesName
+                                gameTags
+                                venueMatch {
+                                    autoAssignedVenue {
+                                        id
+                                        name
+                                        score
+                                    }
+                                    suggestions {
+                                        id
+                                        name
+                                        score
+                                    }
+                                }
+                                existingGameId
+                                doNotScrape
+                                sourceUrl
+                                s3Key
+                                reScrapedAt
+                                entityId
+                            }
+                        }
+                    `,
+                    variables: { 
+                        input: {
+                            s3Key: s3Key,
+                            saveToDatabase: false
+                        }
                     }
                 });
-            }
-
-            // --- MERGE ---: This entire section is rebuilt to combine the best of both files.
-            const missingFields: MissingField[] = [];
-
-            // Use the cleaner checkField helper from the enhanced file,
-            // but add the array check from the old file.
-            const checkField = (value: any, model: string, field: string, reason: string) => {
-                if (value === undefined || value === null || (Array.isArray(value) && value.length === 0)) {
-                    missingFields.push({ model, field, reason });
-                }
-            };
-
-            // Use the comprehensive field list from the old file 
-            const gameFields: Record<string, string> = {
-                'gameStartDateTime': 'Game start date/time not found',
-                'gameVariant': 'Game variant (e.g., NLHE) not found', // Renamed from 'variant'
-                'seriesName': 'Series name not found on page',
-                'prizepool': 'Prize pool not found on page',
-                'revenueByBuyIns': 'Revenue calculated on save',
-                'totalEntries': 'Total entries not found on page',
-                'totalRebuys': 'Total rebuys not found on page',
-                'totalAddons': 'Total addons not found on page',
-                'totalDuration': 'Total duration not found on page',
-                'gameTags': 'Game tags not found on page',
-                'tournamentType': 'Tournament type needs manual specification',
-                'buyIn': 'Buy-in amount not found on page',
-                'rake': 'Rake amount not available on page',
-                'startingStack': 'Starting stack not found on page',
-                'guaranteeAmount': 'Guarantee amount not found on page',
-            };
-
-            // Use the loop logic from the old file 
-            Object.entries(gameFields).forEach(([field, reason]) => {
-                const value = (data as any)[field];
                 
-                // Keep the special guarantee check from the old file 
-                if (field === 'guaranteeAmount' && data.hasGuarantee) {
-                     if (value === undefined || value === null) {
-                         missingFields.push({ model: 'Game', field, reason });
-                     }
-                } else if (field !== 'guaranteeAmount') {
-                    // Use the merged helper function
-                     checkField(value, 'Game', field, reason);
+                if ('data' in response && response.data?.reScrapeFromCache) {
+                    return response.data.reScrapeFromCache as ScrapedGameData;
                 }
-            });
-
-            // Keep the levels check from the old file 
-            if (!data.levels || data.levels.length === 0) {
-                missingFields.push({ 
-                    model: 'TournamentStructure', 
-                    field: 'levels', 
-                    reason: 'Blind structure not found on page' 
-                });
             }
-
-            // Add the entityId check from the enhanced file 
-            checkField(data.entityId, 'Entity', 'entityId', 'Entity could not be determined from URL');
-
-            // Keep the venue check from the old file 
-            if (!data.venueMatch?.autoAssignedVenue) {
-                missingFields.push(
-                    { model: 'Venue', field: 'all fields', reason: 'Venue must be selected manually' }
-                );
-            }
-
-            // Keep the standard list (present in both files [cite: 1, 2])
-            missingFields.push(
-                { model: 'Player', field: 'all fields', reason: 'Player data cannot be scraped from this page' },
-                { model: 'PlayerResult', field: 'player linking', reason: 'Results cannot be automatically linked to player accounts' },
-                { model: 'PlayerTransaction', field: 'all fields', reason: 'Transaction data not available on page' },
-                { model: 'PlayerTicket', field: 'all fields', reason: 'Ticket data not available on page' },
-                { model: 'CashStructure', field: 'all fields', reason: 'Not applicable for tournaments' },
-                { model: 'RakeStructure', field: 'all fields', reason: 'Not applicable for tournaments' },
-            );
-            // --- END OF MERGE ---
-
-            const shouldAutoRefresh = shouldAutoRefreshTournament(data);
-            const newFetchCount = (game?.fetchCount || 0) + 1;
-
-            updateJobStatus({
-                id,
-                data,
-                jobStatus: 'READY_TO_SAVE',
-                lastFetched: new Date().toISOString(),
-                missingFields,
-                isNewStructure,
-                autoRefresh: shouldAutoRefresh,
-                fetchCount: newFetchCount,
-                existingGameId: existingGameId,
-                entityId: finalEntityId, // ✅ Store the final entityId
-            });
-
-            if (shouldAutoRefresh) {
-                console.log(`[useGameTracker] Auto-refresh enabled for RUNNING tournament: ${id}`);
-            }
-
-        } catch (error: any) {
-            console.error('[useGameTracker] Error fetching data:', error);
-            const isDoNotScrapeError = error.message.includes('Scraping is disabled');
-            updateJobStatus({
-                id,
-                jobStatus: 'ERROR',
-                errorMessage: error.message || 'Failed to fetch data from backend.',
-                ...(isDoNotScrapeError && {
-                    data: {
-                        ...(game?.data as GameData),
-                        doNotScrape: true,
-                    },
-                    autoRefresh: false,
-                })
-            });
+            
+            throw new Error('No S3 key provided or fetch failed');
+        } catch (error) {
+            console.error('[useGameTracker] Error fetching from S3:', error);
+            throw error;
         }
     };
-    
-    // --- MERGE ---: Kept enhanced trackGame function 
-    const trackGame = (id: string, source: DataSource, entityId?: string) => {
-        if (games[id] && games[id].jobStatus !== 'ERROR') {
-            if (games[id].errorMessage?.includes('Scraping is disabled')) {
-                 console.log(`[useGameTracker] Re-tracking ${id}, which is flagged as 'Do Not Scrape'.`);
-            } else {
-                console.log(`[useGameTracker] Game ${id} is already being tracked.`);
-                return; 
-            }
-        }
+
+    // Core tracking function with source option
+    const trackGameCore = useCallback(async (
+        url: string, 
+        source: DataSource, 
+        entityId: string,
+        options?: TrackOptions
+    ) => {
+        console.log(`[useGameTracker] Tracking game: ${url}, source: ${options?.forceSource || 'AUTO'}`);
         
-        // ✅ Add game with entity ID
-        dispatch({ 
-            type: 'ADD_GAME', 
-            payload: { 
-                id, 
+        // Initialize game state
+        setGames(prev => ({
+            ...prev,
+            [url]: {
+                id: url,
                 source,
-                entityId: entityId || getCurrentEntityId() 
-            } as any
-        });
-        
-        // FIX: Pass the entityId to fetchAndLoadData
-        setTimeout(() => fetchAndLoadData(id, source, entityId), 0);
-    };
+                jobStatus: 'FETCHING',
+                fetchCount: (prev[url]?.fetchCount || 0) + 1,
+                entityId,
+                existingGameId: prev[url]?.existingGameId || null,
+                autoRefresh: false
+            }
+        }));
 
-    // --- MERGE ---: Kept enhanced saveGame function 
-    const saveGame = async (id: string, venueId?: string, entityId?: string) => {
-        const game = games[id];
+        try {
+            let scrapedData: ScrapedGameData;
+            
+            if (options?.forceSource === 'S3' && options.s3Key) {
+                // Fetch from S3
+                scrapedData = await fetchFromS3(url, options.s3Key);
+                
+                // Mark as coming from S3
+                setGames(prev => ({
+                    ...prev,
+                    [url]: {
+                        ...prev[url],
+                        s3Key: options.s3Key,
+                        fromS3: true
+                    }
+                }));
+            } else {
+                // Fetch from live page (existing logic)
+                scrapedData = await fetchGameDataFromBackend(url, entityId);
+                
+                setGames(prev => ({
+                    ...prev,
+                    [url]: {
+                        ...prev[url],
+                        fromS3: false
+                    }
+                }));
+            }
+
+            // Convert ScrapedGameData to GameData
+            const data = convertScrapedToGameData(scrapedData);
+            
+            // Extract properties that exist on ScrapedGameData but not GameData
+            const existingGameId = scrapedData.existingGameId || null;
+            const s3Key = (scrapedData as any).s3Key || options?.s3Key || undefined;
+
+            // Update game state with fetched data
+            setGames(prev => ({
+                ...prev,
+                [url]: {
+                    ...prev[url],
+                    jobStatus: 'READY_TO_SAVE',
+                    data,
+                    existingGameId,
+                    s3Key,
+                    lastFetched: new Date().toISOString()
+                }
+            }));
+
+            // Setup auto-refresh if needed (only for live data)
+            if (options?.forceSource !== 'S3' && shouldAutoRefreshTournament(data)) {
+                console.log(`[useGameTracker] Setting up auto-refresh for ${url}`);
+                setGames(prev => ({
+                    ...prev,
+                    [url]: { ...prev[url], autoRefresh: true }
+                }));
+                
+                // Clear existing timer
+                if (autoRefreshTimers.current[url]) {
+                    clearInterval(autoRefreshTimers.current[url]);
+                }
+                
+                // Set new timer using POLLING_INTERVAL
+                autoRefreshTimers.current[url] = setInterval(() => {
+                    refreshGame(url, { forceSource: 'LIVE' });
+                }, POLLING_INTERVAL);
+            }
+        } catch (error) {
+            console.error('[useGameTracker] Error tracking game:', error);
+            setGames(prev => ({
+                ...prev,
+                [url]: {
+                    ...prev[url],
+                    jobStatus: 'ERROR',
+                    errorMessage: error instanceof Error ? error.message : 'Failed to fetch game data'
+                }
+            }));
+        }
+    }, []);
+
+    // Public tracking function that shows modal
+    const trackGameWithModal = useCallback((
+        url: string,
+        source: DataSource,
+        entityId: string
+    ) => {
+        setModalGameInfo({ url, source, entityId });
+        setIsModalOpen(true);
+    }, []);
+
+    // Public tracking function without modal
+    const trackGame = useCallback((
+        url: string,
+        source: DataSource,
+        entityId: string,
+        options?: TrackOptions
+    ) => {
+        trackGameCore(url, source, entityId, options);
+    }, [trackGameCore]);
+
+    // Save game to database
+    const saveGame = useCallback(async (
+        gameId: string,
+        venueId: string,
+        entityId: string
+    ) => {
+        const game = games[gameId];
         if (!game || !game.data) {
-            updateJobStatus({ id, jobStatus: 'ERROR', errorMessage: "No data available to save." });
+            console.error('[useGameTracker] Cannot save: Game data not found');
+            return;
+        }
+
+        console.log(`[useGameTracker] Saving game ${gameId} with venue ${venueId}`);
+        setGames(prev => ({
+            ...prev,
+            [gameId]: { ...prev[gameId], jobStatus: 'SAVING' }
+        }));
+
+        try {
+            const result = await saveGameDataToBackend(
+                gameId,
+                venueId,
+                game.data,
+                game.existingGameId,
+                entityId
+            );
+
+            setGames(prev => ({
+                ...prev,
+                [gameId]: {
+                    ...prev[gameId],
+                    jobStatus: 'DONE',
+                    saveResult: result
+                }
+            }));
+
+            console.log('[useGameTracker] Game saved successfully:', result);
+            
+            // Clear auto-refresh timer after successful save
+            if (autoRefreshTimers.current[gameId]) {
+                clearInterval(autoRefreshTimers.current[gameId]);
+                delete autoRefreshTimers.current[gameId];
+                setGames(prev => ({
+                    ...prev,
+                    [gameId]: { ...prev[gameId], autoRefresh: false }
+                }));
+            }
+        } catch (error) {
+            console.error('[useGameTracker] Error saving game:', error);
+            setGames(prev => ({
+                ...prev,
+                [gameId]: {
+                    ...prev[gameId],
+                    jobStatus: 'ERROR',
+                    errorMessage: error instanceof Error ? error.message : 'Failed to save game'
+                }
+            }));
+        }
+    }, [games]);
+
+    // Refresh game data
+    const refreshGame = useCallback((gameId: string, options?: TrackOptions) => {
+        const game = games[gameId];
+        if (!game) {
+            console.error('[useGameTracker] Cannot refresh: Game not found');
             return;
         }
         
-        // Handle auto-assignment (present in both files [cite: 1, 2])
-        let finalVenueId = venueId;
-        if (!finalVenueId && game.data.venueMatch?.autoAssignedVenue?.id) {
-            console.log(`[useGameTracker] No venue selected, using auto-assigned venue: ${game.data.venueMatch.autoAssignedVenue.name}`);
-            finalVenueId = game.data.venueMatch.autoAssignedVenue.id;
+        console.log(`[useGameTracker] Refreshing game: ${gameId}`);
+        trackGameCore(gameId, game.source, game.entityId || '', options);
+    }, [games, trackGameCore]);
+
+    // Remove game from tracking
+    const removeGame = useCallback((gameId: string) => {
+        console.log(`[useGameTracker] Removing game: ${gameId}`);
+        
+        // Clear auto-refresh timer
+        if (autoRefreshTimers.current[gameId]) {
+            clearInterval(autoRefreshTimers.current[gameId]);
+            delete autoRefreshTimers.current[gameId];
         }
         
-        // ✅ Use entity ID from game state or parameter 
-        const finalEntityId = entityId || game.entityId || game.data.entityId || getCurrentEntityId();
-        
-        console.log(`[useGameTracker] Saving ${game.data.gameStatus} tournament: ${id} with entity: ${finalEntityId}`);
-        updateJobStatus({ id, jobStatus: 'SAVING' });
-        
-        try {
-            const result = await saveGameDataToBackend(
-                id, 
-                finalVenueId, 
-                game.data, 
-                game.existingGameId,
-                finalEntityId // ✅ Pass entity ID to save 
-            );
-            
-            updateJobStatus({ 
-                id, 
-                jobStatus: 'DONE', 
-                saveResult: result,
-                existingGameId: result.id,
-                entityId: result.entityId // ✅ Store saved entity ID 
-            });
-            
-            console.log(`[useGameTracker] Successfully saved ${game.data.gameStatus} tournament: ${id}`);
-        } catch (error: any) {
-            updateJobStatus({ id, jobStatus: 'ERROR', errorMessage: `Failed to save: ${error.message}` });
-        }
-    };
-
-    const removeGame = (id: string) => {
-        dispatch({ type: 'REMOVE_GAME', payload: { id } });
-    };
-
-    const refreshGame = (id: string) => {
-        const game = games[id];
-        if (game) {
-            console.log(`[useGameTracker] Manual refresh requested for: ${id}`);
-            // FIX: Pass the game's stored entityId on refresh, handling potential null
-            fetchAndLoadData(id, game.source, game.entityId ?? undefined);
-        }
-    };
-
-    // --- MERGE ---: Kept new functions from enhanced file 
-    const getGamesByEntity = (entityId?: string): GameState[] => {
-        const targetEntityId = entityId || getCurrentEntityId();
-        return Object.values(games).filter(game => 
-            game.entityId === targetEntityId || 
-            game.data?.entityId === targetEntityId
-        );
-    };
-
-    const validateEntityConsistency = (): string[] => {
-        const errors: string[] = [];
-        const currentEntityId = getCurrentEntityId();
-        
-        Object.values(games).forEach(game => {
-            if (game.data && game.data.entityId !== currentEntityId) {
-                errors.push(`Game ${game.id} has mismatched entity ID: ${game.data.entityId} vs ${currentEntityId}`);
-            }
+        setGames(prev => {
+            const { [gameId]: _, ...rest } = prev;
+            return rest;
         });
-        
-        return errors;
-    };
+    }, []);
 
-    // --- MERGE ---: Kept enhanced return object 
-    return { 
-        games, 
-        trackGame, 
-        saveGame, 
-        removeGame, 
+    // Update game status
+    const updateGameStatus = useCallback((gameId: string, status: JobStatus) => {
+        setGames(prev => ({
+            ...prev,
+            [gameId]: { ...prev[gameId], jobStatus: status }
+        }));
+    }, []);
+
+    return {
+        games,
+        trackGame,
+        trackGameWithModal,
+        saveGame,
+        removeGame,
         refreshGame,
-        getGamesByEntity,
-        validateEntityConsistency
+        updateGameStatus,
+        isModalOpen,
+        setIsModalOpen,
+        modalGameInfo
     };
 };
