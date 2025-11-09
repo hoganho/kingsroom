@@ -1,9 +1,10 @@
 // src/pages/scraper-admin-tabs/AutoScraperTabEnhanced.tsx
 // Enhanced version that checks for updates before scraping and respects DO NOT SCRAPE/FINISHED states
+// Now includes S3 cache statistics tracking
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import { PlayCircle, StopCircle, RefreshCw, Building2 } from 'lucide-react';
+import { PlayCircle, StopCircle, RefreshCw, Building2, HardDrive } from 'lucide-react';
 import { useEntity } from '../../contexts/EntityContext';
 import { EntitySelector } from '../../components/entities/EntitySelector';
 import { GameStatus } from '../../API';
@@ -18,6 +19,9 @@ interface AutoScraperState {
         skippedNoUpdates: number;
         scraped: number;
         errors: number;
+        cacheHits: number;
+        cacheMisses: number;
+        cacheHitRate: number;
     };
     lastError?: string;
     currentStatus?: string;
@@ -31,6 +35,7 @@ interface URLCheckResult {
     status?: GameStatus;
     doNotScrape?: boolean;
     hasUpdates?: boolean;
+    hasCache?: boolean;
 }
 
 export const AutoScraperTab: React.FC = () => {
@@ -46,7 +51,10 @@ export const AutoScraperTab: React.FC = () => {
             skippedDoNotScrape: 0,
             skippedNoUpdates: 0,
             scraped: 0,
-            errors: 0
+            errors: 0,
+            cacheHits: 0,
+            cacheMisses: 0,
+            cacheHitRate: 0
         }
     });
     
@@ -54,6 +62,7 @@ export const AutoScraperTab: React.FC = () => {
     const [endId, setEndId] = useState('100');
     const [checkInterval, setCheckInterval] = useState('2'); // seconds between checks
     const [logs, setLogs] = useState<string[]>([]);
+    const [useCache, setUseCache] = useState(true); // Toggle for using S3 cache
     
     const abortControllerRef = useRef<AbortController | null>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -71,7 +80,7 @@ export const AutoScraperTab: React.FC = () => {
         setLogs(prev => [`[${timestamp}] ${prefix} ${message}`, ...prev].slice(0, 100));
     };
 
-    // Check if a URL should be scraped
+    // Check if a URL should be scraped (with S3 cache check)
     const checkURL = async (url: string, tournamentId: number): Promise<URLCheckResult> => {
         try {
             // First check the ScrapeURL record
@@ -87,6 +96,9 @@ export const AutoScraperTab: React.FC = () => {
                             lastScrapedAt
                             etag
                             contentHash
+                            latestS3Key
+                            cachedContentUsedCount
+                            lastCacheHitAt
                         }
                     }
                 `,
@@ -96,6 +108,28 @@ export const AutoScraperTab: React.FC = () => {
             if ('data' in scrapeUrlResponse && scrapeUrlResponse.data?.getScrapeURL) {
                 const scrapeUrl = scrapeUrlResponse.data.getScrapeURL;
                 
+                // Check if we have cached content
+                const hasCache = !!scrapeUrl.latestS3Key;
+                if (hasCache && useCache) {
+                    setState(prev => ({
+                        ...prev,
+                        stats: {
+                            ...prev.stats,
+                            cacheHits: prev.stats.cacheHits + 1,
+                            cacheHitRate: Math.round(((prev.stats.cacheHits + 1) / (prev.stats.totalChecked + 1)) * 100)
+                        }
+                    }));
+                } else if (!hasCache && useCache) {
+                    setState(prev => ({
+                        ...prev,
+                        stats: {
+                            ...prev.stats,
+                            cacheMisses: prev.stats.cacheMisses + 1,
+                            cacheHitRate: Math.round((prev.stats.cacheHits / (prev.stats.totalChecked + 1)) * 100)
+                        }
+                    }));
+                }
+                
                 // Check DO NOT SCRAPE flag
                 if (scrapeUrl.doNotScrape) {
                     return {
@@ -103,66 +137,62 @@ export const AutoScraperTab: React.FC = () => {
                         tournamentId,
                         shouldScrape: false,
                         reason: 'DO_NOT_SCRAPE',
-                        doNotScrape: true
+                        doNotScrape: true,
+                        hasCache
                     };
                 }
                 
                 // Check if game is FINISHED
-                if (scrapeUrl.gameStatus === 'FINISHED' || scrapeUrl.gameStatus === 'COMPLETED') {
+                if (scrapeUrl.gameStatus === GameStatus.FINISHED) {
                     return {
                         url,
                         tournamentId,
                         shouldScrape: false,
                         reason: 'FINISHED',
-                        status: scrapeUrl.gameStatus as GameStatus
+                        status: GameStatus.FINISHED,
+                        hasCache
                     };
                 }
                 
-                // If game exists and is not finished, check for updates
-                if (scrapeUrl.lastScrapedAt) {
-                    const updateCheckResponse = await client.graphql({
-                        query: /* GraphQL */ `
-                            mutation CheckPageUpdates($url: AWSURL!) {
-                                checkPageUpdates(url: $url) {
-                                    updateAvailable
-                                    message
-                                }
-                            }
-                        `,
-                        variables: { url }
-                    });
+                // If we have a game in database, check if it needs updates
+                if (scrapeUrl.gameId) {
+                    // Check if content has changed based on etag or content hash
+                    const lastScraped = scrapeUrl.lastScrapedAt ? new Date(scrapeUrl.lastScrapedAt) : null;
+                    const hoursSinceLastScrape = lastScraped 
+                        ? (Date.now() - lastScraped.getTime()) / (1000 * 60 * 60)
+                        : Infinity;
                     
-                    if ('data' in updateCheckResponse && updateCheckResponse.data?.checkPageUpdates) {
-                        const updateStatus = updateCheckResponse.data.checkPageUpdates;
-                        
-                        if (!updateStatus.updateAvailable) {
-                            return {
-                                url,
-                                tournamentId,
-                                shouldScrape: false,
-                                reason: 'NO_UPDATES',
-                                hasUpdates: false
-                            };
-                        }
+                    // Skip if scraped recently (within last hour) and has etag/hash
+                    if (hoursSinceLastScrape < 1 && (scrapeUrl.etag || scrapeUrl.contentHash)) {
+                        return {
+                            url,
+                            tournamentId,
+                            shouldScrape: false,
+                            reason: 'NO_UPDATES',
+                            hasUpdates: false,
+                            hasCache
+                        };
                     }
                 }
             }
             
-            // Should scrape: either new URL or has updates
+            // Default: should scrape
             return {
                 url,
                 tournamentId,
                 shouldScrape: true,
-                hasUpdates: true
+                hasUpdates: true,
+                hasCache: false
             };
             
         } catch (error) {
             console.error(`Error checking URL ${url}:`, error);
+            // If we can't check, assume we should scrape
             return {
                 url,
                 tournamentId,
-                shouldScrape: true, // Scrape on error to be safe
-                reason: 'CHECK_ERROR'
+                shouldScrape: true,
+                hasCache: false
             };
         }
     };
@@ -172,27 +202,36 @@ export const AutoScraperTab: React.FC = () => {
         try {
             const response = await client.graphql({
                 query: /* GraphQL */ `
-                    mutation FetchTournamentDataEnhanced($url: AWSURL!, $entityId: ID!) {
-                        fetchTournamentDataEnhanced(url: $url, entityId: $entityId) {
+                    mutation FetchTournamentData($url: String!) {
+                        fetchTournamentData(url: $url) {
+                            id
                             name
                             gameStatus
+                            registrationStatus
+                            prizepool
+                            totalEntries
+                            source
                             s3Key
-                            fromS3
+                            usedCache
                         }
                     }
                 `,
                 variables: { 
-                    url, 
-                    entityId: currentEntity!.id
+                    url,
+                    forceRefresh: !useCache // Control cache usage
                 }
             });
             
-            if ('data' in response && response.data?.fetchTournamentDataEnhanced) {
-                const data = response.data.fetchTournamentDataEnhanced;
-                addLog(
-                    `Scraped #${tournamentId}: ${data.name || 'Unknown'} (${data.gameStatus})`,
-                    'success'
-                );
+            if ('data' in response && response.data?.fetchTournamentData) {
+                const data = response.data.fetchTournamentData;
+                
+                // Track cache usage from response
+                if (data.source === 'S3_CACHE' || data.usedCache) {
+                    addLog(`#${tournamentId} scraped using S3 cache`, 'success');
+                } else {
+                    addLog(`#${tournamentId} scraped from live site`, 'info');
+                }
+                
                 return true;
             }
             
@@ -215,7 +254,7 @@ export const AutoScraperTab: React.FC = () => {
         const end = parseInt(endId);
         const interval = parseInt(checkInterval) * 1000;
         
-        addLog(`Starting auto-scraper from ID ${start} to ${end}`, 'info');
+        addLog(`Starting auto-scraper from ID ${start} to ${end} (Cache: ${useCache ? 'Enabled' : 'Disabled'})`, 'info');
         
         setState(prev => ({
             ...prev,
@@ -227,7 +266,10 @@ export const AutoScraperTab: React.FC = () => {
                 skippedDoNotScrape: 0,
                 skippedNoUpdates: 0,
                 scraped: 0,
-                errors: 0
+                errors: 0,
+                cacheHits: 0,
+                cacheMisses: 0,
+                cacheHitRate: 0
             }
         }));
         
@@ -265,7 +307,8 @@ export const AutoScraperTab: React.FC = () => {
                             }));
                         });
                         newStats.scraped++;
-                        addLog(`Scraping #${currentId} (updates detected)`, 'info');
+                        const cacheStatus = checkResult.hasCache ? ' (cache available)' : ' (no cache)';
+                        addLog(`Scraping #${currentId} (updates detected)${cacheStatus}`, 'info');
                     } else {
                         // Skip based on reason
                         switch (checkResult.reason) {
@@ -279,7 +322,8 @@ export const AutoScraperTab: React.FC = () => {
                                 break;
                             case 'NO_UPDATES':
                                 newStats.skippedNoUpdates++;
-                                addLog(`Skipped #${currentId} (no updates)`, 'info');
+                                const cacheInfo = checkResult.hasCache ? ' [cached]' : '';
+                                addLog(`Skipped #${currentId} (no updates)${cacheInfo}`, 'info');
                                 break;
                             default:
                                 addLog(`Skipped #${currentId}`, 'info');
@@ -303,15 +347,19 @@ export const AutoScraperTab: React.FC = () => {
                     isRunning: false,
                     currentStatus: 'Completed'
                 }));
-                addLog('Auto-scraper completed', 'success');
+                
+                const finalStats = state.stats;
+                addLog(
+                    `Auto-scraping completed. Scraped: ${finalStats.scraped}, Skipped: ${finalStats.totalChecked - finalStats.scraped}, Cache Hits: ${finalStats.cacheHits}`,
+                    'success'
+                );
             }
         };
         
-        // Start the process
+        // Start processing
         processNext();
     };
 
-    // Stop auto-scraper
     const stopAutoScraper = () => {
         if (abortControllerRef.current) {
             abortControllerRef.current.abort();
@@ -326,10 +374,10 @@ export const AutoScraperTab: React.FC = () => {
             currentStatus: 'Stopped'
         }));
         
-        addLog('Auto-scraper stopped', 'warning');
+        addLog('Auto-scraper stopped by user', 'warning');
     };
 
-    // Clean up on unmount
+    // Cleanup on unmount
     useEffect(() => {
         return () => {
             if (abortControllerRef.current) {
@@ -341,174 +389,265 @@ export const AutoScraperTab: React.FC = () => {
         };
     }, []);
 
-    if (!currentEntity) {
-        return (
-            <div className="space-y-6">
-                <div className="bg-white rounded-lg shadow p-6">
-                    <div className="text-center">
-                        <Building2 className="mx-auto h-12 w-12 text-gray-400" />
-                        <h3 className="mt-2 text-sm font-medium text-gray-900">No Entity Selected</h3>
-                        <p className="mt-1 text-sm text-gray-500">
-                            Please select an entity to start auto-scraping.
-                        </p>
-                        <div className="mt-6 flex justify-center">
-                            <EntitySelector />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="space-y-6">
-            {/* Entity Info Bar */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                        <Building2 className="h-5 w-5 text-blue-500" />
-                        <div>
-                            <p className="text-sm font-medium text-blue-900">
-                                Auto-Scraping for: {currentEntity.entityName}
-                            </p>
-                            <p className="text-xs text-blue-700 font-mono">
-                                {currentEntity.gameUrlDomain}{currentEntity.gameUrlPath}[ID]
-                            </p>
-                        </div>
-                    </div>
-                    <EntitySelector />
-                </div>
-            </div>
-
-            {/* Configuration */}
+            {/* Entity Selection */}
             <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-4">Auto-Scraper Configuration</h3>
-                
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Start ID
-                        </label>
-                        <input
-                            type="number"
-                            value={startId}
-                            onChange={(e) => setStartId(e.target.value)}
-                            disabled={state.isRunning}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
-                        />
-                    </div>
-                    
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            End ID
-                        </label>
-                        <input
-                            type="number"
-                            value={endId}
-                            onChange={(e) => setEndId(e.target.value)}
-                            disabled={state.isRunning}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
-                        />
-                    </div>
-                    
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Check Interval (seconds)
-                        </label>
-                        <input
-                            type="number"
-                            value={checkInterval}
-                            onChange={(e) => setCheckInterval(e.target.value)}
-                            disabled={state.isRunning}
-                            min="1"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
-                        />
-                    </div>
+                <div className="mb-4">
+                    <h3 className="text-lg font-semibold flex items-center">
+                        <Building2 className="h-5 w-5 mr-2 text-blue-600" />
+                        Entity Selection
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                        Select the entity (business) for auto-scraping
+                    </p>
                 </div>
-
-                <div className="flex space-x-3">
-                    {!state.isRunning ? (
-                        <button
-                            onClick={runAutoScraper}
-                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center space-x-2"
-                        >
-                            <PlayCircle className="h-4 w-4" />
-                            <span>Start Auto-Scraping</span>
-                        </button>
-                    ) : (
-                        <button
-                            onClick={stopAutoScraper}
-                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center space-x-2"
-                        >
-                            <StopCircle className="h-4 w-4" />
-                            <span>Stop Auto-Scraping</span>
-                        </button>
-                    )}
-                </div>
-            </div>
-
-            {/* Status and Statistics */}
-            <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-4">Status</h3>
-                
-                {state.isRunning && (
-                    <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                        <div className="flex items-center space-x-2">
-                            <RefreshCw className="h-4 w-4 text-green-600 animate-spin" />
-                            <span className="text-sm text-green-900">
-                                {state.currentStatus || `Processing tournament #${state.currentId}`}
-                            </span>
-                        </div>
+                <EntitySelector />
+                {currentEntity && (
+                    <div className="mt-3 p-3 bg-blue-50 rounded">
+                        <p className="text-sm text-blue-800">
+                            <strong>Active:</strong> {currentEntity.entityName}
+                        </p>
+                        <p className="text-xs text-blue-600 mt-1">
+                            Base URL: {currentEntity.gameUrlDomain}{currentEntity.gameUrlPath}
+                        </p>
                     </div>
                 )}
+            </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                        <p className="text-xs text-gray-600">Total Checked</p>
-                        <p className="text-xl font-semibold">{state.stats.totalChecked}</p>
+            {/* Auto Scraper Configuration */}
+            <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                    {state.isRunning ? (
+                        <StopCircle className="h-5 w-5 mr-2 text-red-600 animate-pulse" />
+                    ) : (
+                        <PlayCircle className="h-5 w-5 mr-2 text-green-600" />
+                    )}
+                    Auto-Scraper Configuration
+                </h3>
+                
+                {!currentEntity ? (
+                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p className="text-yellow-800">Please select an entity first to enable auto-scraping.</p>
                     </div>
+                ) : (
+                    <>
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Start ID
+                                </label>
+                                <input
+                                    type="number"
+                                    value={startId}
+                                    onChange={(e) => setStartId(e.target.value)}
+                                    disabled={state.isRunning}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    End ID
+                                </label>
+                                <input
+                                    type="number"
+                                    value={endId}
+                                    onChange={(e) => setEndId(e.target.value)}
+                                    disabled={state.isRunning}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                                />
+                            </div>
+                        </div>
+                        
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Check Interval (seconds)
+                            </label>
+                            <select
+                                value={checkInterval}
+                                onChange={(e) => setCheckInterval(e.target.value)}
+                                disabled={state.isRunning}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                            >
+                                <option value="1">1 second</option>
+                                <option value="2">2 seconds</option>
+                                <option value="5">5 seconds</option>
+                                <option value="10">10 seconds</option>
+                                <option value="30">30 seconds</option>
+                            </select>
+                        </div>
+                        
+                        {/* Cache Toggle */}
+                        <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        id="useCache"
+                                        checked={useCache}
+                                        onChange={(e) => setUseCache(e.target.checked)}
+                                        disabled={state.isRunning}
+                                        className="h-4 w-4 text-blue-600 border-gray-300 rounded disabled:opacity-50"
+                                    />
+                                    <label htmlFor="useCache" className="ml-2 text-sm text-gray-700">
+                                        Use S3 cache when available
+                                    </label>
+                                </div>
+                                <span className="text-xs text-gray-500">
+                                    {useCache ? 'Cache enabled for faster processing' : 'Will fetch fresh data'}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div className="flex space-x-3">
+                            {!state.isRunning ? (
+                                <button
+                                    onClick={runAutoScraper}
+                                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center justify-center"
+                                >
+                                    <PlayCircle className="h-5 w-5 mr-2" />
+                                    Start Auto-Scraper
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={stopAutoScraper}
+                                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors flex items-center justify-center"
+                                >
+                                    <StopCircle className="h-5 w-5 mr-2" />
+                                    Stop Auto-Scraper
+                                </button>
+                            )}
+                        </div>
+                        
+                        {state.currentStatus && (
+                            <div className="mt-3 p-2 bg-gray-100 rounded text-sm text-gray-700">
+                                Status: {state.currentStatus}
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+
+            {/* Statistics */}
+            <div className="grid grid-cols-2 gap-6">
+                {/* Scraping Statistics */}
+                <div className="bg-white rounded-lg shadow p-6">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center">
+                        <RefreshCw className="h-5 w-5 mr-2 text-blue-600" />
+                        Scraping Statistics
+                    </h3>
                     
-                    <div className="bg-green-50 p-3 rounded-lg">
-                        <p className="text-xs text-gray-600">Scraped</p>
-                        <p className="text-xl font-semibold text-green-600">{state.stats.scraped}</p>
+                    <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Total Checked:</span>
+                            <span className="text-lg font-semibold">{state.stats.totalChecked}</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Scraped:</span>
+                            <span className="text-lg font-semibold text-green-600">{state.stats.scraped}</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Skipped (Finished):</span>
+                            <span className="text-lg font-semibold text-blue-600">{state.stats.skippedFinished}</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Skipped (Do Not Scrape):</span>
+                            <span className="text-lg font-semibold text-yellow-600">{state.stats.skippedDoNotScrape}</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Skipped (No Updates):</span>
+                            <span className="text-lg font-semibold text-gray-600">{state.stats.skippedNoUpdates}</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Errors:</span>
+                            <span className="text-lg font-semibold text-red-600">{state.stats.errors}</span>
+                        </div>
                     </div>
+                </div>
+                
+                {/* S3 Cache Performance */}
+                <div className="bg-white rounded-lg shadow p-6">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center">
+                        <HardDrive className="h-5 w-5 mr-2 text-blue-600" />
+                        S3 Cache Performance
+                    </h3>
                     
-                    <div className="bg-yellow-50 p-3 rounded-lg">
-                        <p className="text-xs text-gray-600">Skipped (No Updates)</p>
-                        <p className="text-xl font-semibold text-yellow-600">{state.stats.skippedNoUpdates}</p>
-                    </div>
-                    
-                    <div className="bg-blue-50 p-3 rounded-lg">
-                        <p className="text-xs text-gray-600">Skipped (Finished)</p>
-                        <p className="text-xl font-semibold text-blue-600">{state.stats.skippedFinished}</p>
-                    </div>
-                    
-                    <div className="bg-orange-50 p-3 rounded-lg">
-                        <p className="text-xs text-gray-600">Skipped (Do Not Scrape)</p>
-                        <p className="text-xl font-semibold text-orange-600">{state.stats.skippedDoNotScrape}</p>
-                    </div>
-                    
-                    <div className="bg-red-50 p-3 rounded-lg">
-                        <p className="text-xs text-gray-600">Errors</p>
-                        <p className="text-xl font-semibold text-red-600">{state.stats.errors}</p>
+                    <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Cache Hits:</span>
+                            <span className="text-lg font-semibold text-green-600">{state.stats.cacheHits}</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Cache Misses:</span>
+                            <span className="text-lg font-semibold text-orange-600">{state.stats.cacheMisses}</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Hit Rate:</span>
+                            <span className="text-lg font-semibold text-blue-600">
+                                {state.stats.totalChecked > 0 
+                                    ? Math.round((state.stats.cacheHits / state.stats.totalChecked) * 100)
+                                    : 0}%
+                            </span>
+                        </div>
+                        
+                        {state.stats.totalChecked > 0 && (
+                            <div className="pt-3 border-t">
+                                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div 
+                                        className="bg-gradient-to-r from-green-400 to-blue-500 h-2.5 rounded-full transition-all duration-300"
+                                        style={{ width: `${state.stats.cacheHitRate}%` }}
+                                    />
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1 text-center">
+                                    Cache Efficiency
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
+
+            {/* Progress Bar */}
+            {state.isRunning && (
+                <div className="bg-white rounded-lg shadow p-6">
+                    <h3 className="text-lg font-semibold mb-4">Progress</h3>
+                    <div className="mb-2">
+                        <div className="flex justify-between text-sm text-gray-600 mb-1">
+                            <span>Current ID: {state.currentId}</span>
+                            <span>{Math.round(((state.currentId - parseInt(startId)) / (parseInt(endId) - parseInt(startId) + 1)) * 100)}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-3">
+                            <div 
+                                className="bg-blue-600 h-3 rounded-full transition-all duration-500"
+                                style={{
+                                    width: `${((state.currentId - parseInt(startId)) / (parseInt(endId) - parseInt(startId) + 1)) * 100}%`
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Activity Log */}
             <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-lg font-semibold mb-4">Activity Log</h3>
-                <div className="max-h-60 overflow-y-auto">
+                <div className="h-64 overflow-y-auto bg-gray-50 rounded p-3 font-mono text-xs">
                     {logs.length === 0 ? (
-                        <p className="text-gray-500 text-sm">No activity yet</p>
+                        <p className="text-gray-400">No activity yet...</p>
                     ) : (
-                        <div className="space-y-1">
-                            {logs.map((log, index) => (
-                                <p key={index} className="text-xs font-mono text-gray-700">
-                                    {log}
-                                </p>
-                            ))}
-                        </div>
+                        logs.map((log, index) => (
+                            <div key={index} className="mb-1">
+                                {log}
+                            </div>
+                        ))
                     )}
                 </div>
             </div>

@@ -1,14 +1,24 @@
 // src/hooks/useScraperManagement.ts
 // React hooks for enhanced scraper management
-// Updated to match correct field names from deployed schema
+// Updated with proper type checking and null/undefined handling
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
+import { scraperManagementQueries } from '../graphql/scraperManagement';
 import { 
-    scraperManagementQueries, 
-    scraperManagementMutations,
-    scraperManagementSubscriptions 
-} from '../graphql/scraperManagement';
+    getScraperJobsReport,
+    searchScrapeURLs,
+    getScrapeURL,
+    getUpdateCandidateURLs,
+    getScraperMetrics,
+} from '../graphql/queries';
+import { 
+    startScraperJob,
+    cancelScraperJob,
+    modifyScrapeURLStatus,
+    bulkModifyScrapeURLs
+ } from '../graphql/mutations';
+import { onScraperJobUpdate } from '../graphql/subscriptions';
 import {
     TimeRange,
     type ScraperJob,
@@ -29,6 +39,14 @@ function hasGraphQLData<T>(response: any): response is GraphQLResponseData<T> {
     return response && response.data !== null && response.data !== undefined;
 }
 
+// Helper to safely cast GraphQL responses to expected types
+// This handles cases where nested relationships might have incomplete data
+function castToType<T>(data: any): T | null {
+    if (!data) return null;
+    // Force cast - we know the shape is close enough for our usage
+    return data as unknown as T;
+}
+
 // ===================================================================
 // useScraperJobs - Manage scraper jobs
 // ===================================================================
@@ -47,7 +65,7 @@ export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
             setError(null);
 
             const response = await client.graphql({
-                query: scraperManagementQueries.getScraperJobsReport,
+                query: getScraperJobsReport,
                 variables: {
                     status: statusFilter,
                     limit: 20,
@@ -59,15 +77,22 @@ export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
                 throw new Error('Invalid response from GraphQL');
             }
 
-            const newJobs = response.data.getScraperJobsReport.items;
+            // Add null checking for nested properties
+            const jobsReport = response.data?.getScraperJobsReport;
+            if (!jobsReport) {
+                console.warn('No jobs report data received');
+                return;
+            }
+
+            const newJobs = jobsReport.items || [];
             
             if (reset) {
-                setJobs(newJobs);
+                setJobs(newJobs.map(job => castToType<ScraperJob>(job)!).filter(Boolean));
             } else {
-                setJobs(prev => [...prev, ...newJobs]);
+                setJobs(prev => [...prev, ...newJobs.map(job => castToType<ScraperJob>(job)!).filter(Boolean)]);
             }
             
-            setNextToken(response.data.getScraperJobsReport.nextToken);
+            setNextToken(jobsReport.nextToken || null);
         } catch (err) {
             console.error('Error fetching jobs:', err);
             setError('Failed to fetch scraper jobs');
@@ -83,7 +108,7 @@ export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
             setError(null);
 
             const response = await client.graphql({
-                query: scraperManagementMutations.startScraperJob,
+                query: startScraperJob,
                 variables: { input }
             });
 
@@ -92,9 +117,13 @@ export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
             }
 
             const newJob = response.data.startScraperJob;
-            setJobs(prev => [newJob, ...prev]);
+            // Update jobs list with castToType helper
+            const typedJob = castToType<ScraperJob>(newJob);
+            if (typedJob) {
+                setJobs(prev => [typedJob, ...prev]);
+            }
             
-            return newJob;
+            return typedJob;
         } catch (err) {
             console.error('Error starting job:', err);
             setError('Failed to start scraper job');
@@ -111,7 +140,7 @@ export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
             setError(null);
 
             const response = await client.graphql({
-                query: scraperManagementMutations.cancelScraperJob,
+                query: cancelScraperJob,
                 variables: { jobId }
             });
 
@@ -121,15 +150,18 @@ export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
 
             const cancelledJob = response.data.cancelScraperJob;
             
-            // Update local state
-            setJobs(prev => prev.map(job => 
-                job.jobId === jobId ? { ...job, ...cancelledJob } : job
-            ));
+            // Update job in list with castToType helper
+            const typedJob = castToType<ScraperJob>(cancelledJob);
+            if (typedJob) {
+                setJobs(prev => prev.map(job =>
+                    job.jobId === jobId ? { ...job, ...typedJob } : job
+                ));
+            }
             
-            return cancelledJob;
+            return typedJob;
         } catch (err) {
             console.error('Error cancelling job:', err);
-            setError('Failed to cancel job');
+            setError('Failed to cancel scraper job');
             throw err;
         } finally {
             setLoading(false);
@@ -137,24 +169,20 @@ export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
     }, [client]);
 
     // Subscribe to job updates
-    const subscribeToJob = useCallback((jobId: string, onUpdate: (job: ScraperJob) => void) => {
+    useEffect(() => {
         const subscription = client.graphql({
-            query: scraperManagementSubscriptions.onScraperJobUpdate,
-            variables: { jobId }
+            query: onScraperJobUpdate
         });
 
-        // Handle the subscription as an observable
         const sub = (subscription as any).subscribe({
             next: ({ data }: any) => {
-                if (data && data.onScraperJobUpdate) {
-                    const updatedJob = data.onScraperJobUpdate;
-                    
-                    // Update local state
-                    setJobs(prev => prev.map(job => 
-                        job.jobId === jobId ? { ...job, ...updatedJob } : job
-                    ));
-                    
-                    onUpdate(updatedJob);
+                if (data?.onScraperJobUpdate) {
+                    const updatedJob = castToType<ScraperJob>(data.onScraperJobUpdate);
+                    if (updatedJob) {
+                        setJobs(prev => prev.map(job =>
+                            job.jobId === updatedJob.jobId ? { ...job, ...updatedJob } : job
+                        ));
+                    }
                 }
             },
             error: (err: any) => console.error('Subscription error:', err)
@@ -163,10 +191,10 @@ export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
         return () => sub.unsubscribe();
     }, [client]);
 
-    // Load initial data
+    // Initial fetch
     useEffect(() => {
         fetchJobs(true);
-    }, [fetchJobs, statusFilter]);
+    }, [statusFilter]); // Note: removed fetchJobs from deps to prevent infinite loop
 
     return {
         jobs,
@@ -174,17 +202,16 @@ export const useScraperJobs = (initialStatus?: ScraperJobStatus) => {
         error,
         statusFilter,
         setStatusFilter,
+        nextToken,
         fetchJobs,
         startJob,
         cancelJob,
-        subscribeToJob,
-        hasMore: !!nextToken,
-        loadMore: () => fetchJobs(false)
+        hasMore: !!nextToken
     };
 };
 
 // ===================================================================
-// useScrapeURLs - Manage scraped URLs
+// useScrapeURLs - Manage scrape URLs
 // ===================================================================
 export const useScrapeURLs = (initialStatus?: ScrapeURLStatus) => {
     const client = useMemo(() => generateClient(), []);
@@ -194,17 +221,17 @@ export const useScrapeURLs = (initialStatus?: ScrapeURLStatus) => {
     const [statusFilter, setStatusFilter] = useState<ScrapeURLStatus | undefined>(initialStatus);
     const [nextToken, setNextToken] = useState<string | null>(null);
 
-    // Fetch URLs using renamed Lambda query
+    // Fetch URLs
     const fetchURLs = useCallback(async (reset = false) => {
         try {
             setLoading(true);
             setError(null);
 
             const response = await client.graphql({
-                query: scraperManagementQueries.searchScrapeURLs,
+                query: searchScrapeURLs,
                 variables: {
                     status: statusFilter,
-                    limit: 50,
+                    limit: 20,
                     nextToken: reset ? null : nextToken
                 }
             });
@@ -213,45 +240,32 @@ export const useScrapeURLs = (initialStatus?: ScrapeURLStatus) => {
                 throw new Error('Invalid response from GraphQL');
             }
 
-            const newURLs = response.data.searchScrapeURLs.items;
+            // Add null checking for nested properties
+            const urlsData = response.data?.searchScrapeURLs;
+            if (!urlsData) {
+                console.warn('No URLs data received');
+                return;
+            }
+
+            const newURLs = urlsData.items || [];
             
             if (reset) {
-                setUrls(newURLs);
+                setUrls(newURLs.map(url => castToType<ScrapeURL>(url)!).filter(Boolean));
             } else {
-                setUrls(prev => [...prev, ...newURLs]);
+                setUrls(prev => [...prev, ...newURLs.map(url => castToType<ScrapeURL>(url)!).filter(Boolean)]);
             }
             
-            setNextToken(response.data.searchScrapeURLs.nextToken);
+            setNextToken(urlsData.nextToken || null);
         } catch (err) {
             console.error('Error fetching URLs:', err);
-            setError('Failed to fetch URLs');
+            setError('Failed to fetch scrape URLs');
         } finally {
             setLoading(false);
         }
     }, [client, statusFilter, nextToken]);
 
-    // Get single URL details using auto-generated query
-    const getURL = useCallback(async (url: string) => {
-        try {
-            // Use auto-generated query - note: id is the URL in our schema
-            const response = await client.graphql({
-                query: scraperManagementQueries.getScrapeURL,
-                variables: { id: url }  // id parameter, not url
-            });
-            
-            if (!hasGraphQLData<any>(response)) {
-                throw new Error('Invalid response from GraphQL');
-            }
-
-            return response.data.getScrapeURL;
-        } catch (err) {
-            console.error('Error fetching URL:', err);
-            throw err;
-        }
-    }, [client]);
-
-    // Update single URL using custom Lambda mutation
-    const updateURL = useCallback(async (
+    // Modify URL status
+    const modifyURLStatus = useCallback(async (
         url: string, 
         status?: ScrapeURLStatus, 
         doNotScrape?: boolean
@@ -260,9 +274,8 @@ export const useScrapeURLs = (initialStatus?: ScrapeURLStatus) => {
             setLoading(true);
             setError(null);
 
-            // Use custom Lambda mutation for business logic
             const response = await client.graphql({
-                query: scraperManagementMutations.modifyScrapeURLStatus,
+                query: modifyScrapeURLStatus,
                 variables: { url, status, doNotScrape }
             });
 
@@ -272,24 +285,27 @@ export const useScrapeURLs = (initialStatus?: ScrapeURLStatus) => {
 
             const updatedURL = response.data.modifyScrapeURLStatus;
             
-            // Update local state
-            setUrls(prev => prev.map(u => 
-                u.url === url ? { ...u, ...updatedURL } : u
-            ));
+            // Update URL in list with castToType helper
+            const typedURL = castToType<ScrapeURL>(updatedURL);
+            if (typedURL) {
+                setUrls(prev => prev.map(u =>
+                    u.url === url ? { ...u, ...typedURL } : u
+                ));
+            }
             
-            return updatedURL;
+            return typedURL;
         } catch (err) {
-            console.error('Error updating URL:', err);
-            setError('Failed to update URL');
+            console.error('Error modifying URL status:', err);
+            setError('Failed to modify URL status');
             throw err;
         } finally {
             setLoading(false);
         }
     }, [client]);
 
-    // Bulk update URLs using custom Lambda mutation
-    const bulkUpdateURLs = useCallback(async (
-        urls: string[], 
+    // Bulk modify URLs
+    const bulkModifyURLStatuses = useCallback(async (
+        urlList: string[], 
         status?: ScrapeURLStatus, 
         doNotScrape?: boolean
     ) => {
@@ -298,56 +314,64 @@ export const useScrapeURLs = (initialStatus?: ScrapeURLStatus) => {
             setError(null);
 
             const response = await client.graphql({
-                query: scraperManagementMutations.bulkModifyScrapeURLs,
-                variables: { urls, status, doNotScrape }
+                query: bulkModifyScrapeURLs,
+                variables: { urls: urlList, status, doNotScrape }
             });
 
             if (!hasGraphQLData<any>(response)) {
                 throw new Error('Invalid response from GraphQL');
             }
 
-            const updatedURLs = response.data.bulkModifyScrapeURLs;
+            const updatedURLs = response.data.bulkModifyScrapeURLs || [];
             
-            // Update local state
-            const urlMap = new Map(updatedURLs.map((u: ScrapeURL) => [u.url, u]));
-            setUrls(prev => prev.map(u => {
-                const updated = urlMap.get(u.url);
-                return updated ? { ...u, ...updated } : u;
-            }));
+            // Create map for efficient updates with castToType helper
+            const typedURLs = updatedURLs.map(u => castToType<ScrapeURL>(u)!).filter(Boolean);
+            const urlMap = new Map(typedURLs.map(u => [u.url, u]));
             
-            return updatedURLs;
+            setUrls(prev => prev.map(u =>
+                urlMap.has(u.url) ? { ...u, ...urlMap.get(u.url)! } : u
+            ));
+            
+            return typedURLs;
         } catch (err) {
-            console.error('Error bulk updating URLs:', err);
-            setError('Failed to bulk update URLs');
+            console.error('Error bulk modifying URLs:', err);
+            setError('Failed to bulk modify URLs');
             throw err;
         } finally {
             setLoading(false);
         }
     }, [client]);
 
-    // Get update candidates
-    const getUpdateCandidates = useCallback(async (limit = 10) => {
+    // Fetch update candidates
+    const fetchUpdateCandidates = useCallback(async () => {
         try {
+            setLoading(true);
+            setError(null);
+
             const response = await client.graphql({
-                query: scraperManagementQueries.getUpdateCandidateURLs,
-                variables: { limit }
+                query: getUpdateCandidateURLs,
+                variables: { limit: 50 }
             });
-            
+
             if (!hasGraphQLData<any>(response)) {
                 throw new Error('Invalid response from GraphQL');
             }
 
-            return response.data.getUpdateCandidateURLs;
+            const candidates = response.data.getUpdateCandidateURLs || [];
+            return candidates;
         } catch (err) {
             console.error('Error fetching update candidates:', err);
-            throw err;
+            setError('Failed to fetch update candidates');
+            return [];
+        } finally {
+            setLoading(false);
         }
     }, [client]);
 
-    // Load initial data
+    // Initial fetch
     useEffect(() => {
         fetchURLs(true);
-    }, [fetchURLs, statusFilter]);
+    }, [statusFilter]); // Note: removed fetchURLs from deps to prevent infinite loop
 
     return {
         urls,
@@ -355,18 +379,17 @@ export const useScrapeURLs = (initialStatus?: ScrapeURLStatus) => {
         error,
         statusFilter,
         setStatusFilter,
+        nextToken,
         fetchURLs,
-        getURL,
-        updateURL,
-        bulkUpdateURLs,
-        getUpdateCandidates,
-        hasMore: !!nextToken,
-        loadMore: () => fetchURLs(false)
+        modifyURLStatus,
+        bulkModifyURLStatuses,
+        fetchUpdateCandidates,
+        hasMore: !!nextToken
     };
 };
 
 // ===================================================================
-// useScraperMetrics - Get system metrics
+// useScraperMetrics - Get scraper metrics
 // ===================================================================
 export const useScraperMetrics = (timeRange: TimeRange = TimeRange.LAST_24_HOURS) => {
     const client = useMemo(() => generateClient(), []);
@@ -380,7 +403,7 @@ export const useScraperMetrics = (timeRange: TimeRange = TimeRange.LAST_24_HOURS
             setError(null);
 
             const response = await client.graphql({
-                query: scraperManagementQueries.getScraperMetrics,
+                query: getScraperMetrics,
                 variables: { 
                     timeRange: range || timeRange 
                 }
@@ -390,10 +413,14 @@ export const useScraperMetrics = (timeRange: TimeRange = TimeRange.LAST_24_HOURS
                 throw new Error('Invalid response from GraphQL');
             }
 
-            setMetrics(response.data.getScraperMetrics);
+            const metricsData = response.data?.getScraperMetrics;
+            setMetrics(castToType<ScraperMetrics>(metricsData));
+            
+            return metricsData;
         } catch (err) {
             console.error('Error fetching metrics:', err);
-            setError('Failed to fetch metrics');
+            setError('Failed to fetch scraper metrics');
+            return null;
         } finally {
             setLoading(false);
         }
@@ -401,36 +428,27 @@ export const useScraperMetrics = (timeRange: TimeRange = TimeRange.LAST_24_HOURS
 
     useEffect(() => {
         fetchMetrics();
-    }, [fetchMetrics]);
-
-    // Auto-refresh metrics every 5 minutes
-    useEffect(() => {
-        const interval = setInterval(() => {
-            fetchMetrics();
-        }, 5 * 60 * 1000);
-
-        return () => clearInterval(interval);
-    }, [fetchMetrics]);
+    }, [timeRange]); // Note: removed fetchMetrics from deps to prevent infinite loop
 
     return {
         metrics,
         loading,
         error,
+        fetchMetrics,
         refresh: () => fetchMetrics()
     };
 };
 
 // ===================================================================
-// useScraperJobMonitor - Monitor a specific job
+// useJobDetails - Get details for a specific job
 // ===================================================================
-export const useScraperJobMonitor = (jobId: string) => {
+export const useJobDetails = (jobId: string | null) => {
     const client = useMemo(() => generateClient(), []);
     const [job, setJob] = useState<ScraperJob | null>(null);
     const [attempts, setAttempts] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Fetch job details
     const fetchJobDetails = useCallback(async () => {
         if (!jobId) return;
 
@@ -440,7 +458,7 @@ export const useScraperJobMonitor = (jobId: string) => {
 
             // Get job using renamed query
             const jobResponse = await client.graphql({
-                query: scraperManagementQueries.getScraperJobsReport,
+                query: getScraperJobsReport,
                 variables: { limit: 1 }
             });
 
@@ -448,11 +466,16 @@ export const useScraperJobMonitor = (jobId: string) => {
                 throw new Error('Invalid response from GraphQL');
             }
 
-            const foundJob = jobResponse.data.getScraperJobsReport.items
-                .find((j: ScraperJob) => j.jobId === jobId);
+            const jobsReport = jobResponse.data?.getScraperJobsReport;
+            if (!jobsReport || !jobsReport.items) {
+                console.warn('No jobs found');
+                return;
+            }
+
+            const foundJob = jobsReport.items.find((j: any) => j.jobId === jobId);
             
             if (foundJob) {
-                setJob(foundJob);
+                setJob(castToType<ScraperJob>(foundJob));
             }
 
             // Get attempts for this job using corrected query name
@@ -468,8 +491,8 @@ export const useScraperJobMonitor = (jobId: string) => {
                 throw new Error('Invalid response from GraphQL');
             }
 
-            // Note: The actual query name includes "Id" in the index name
-            setAttempts(attemptsResponse.data.scrapeAttemptsByScraperJobIdAndAttemptTime.items);
+            const attemptsData = attemptsResponse.data?.scrapeAttemptsByScraperJobIdAndAttemptTime;
+            setAttempts(attemptsData?.items || []);
         } catch (err) {
             console.error('Error fetching job details:', err);
             setError('Failed to fetch job details');
@@ -485,16 +508,18 @@ export const useScraperJobMonitor = (jobId: string) => {
         fetchJobDetails();
 
         const subscription = client.graphql({
-            query: scraperManagementSubscriptions.onScraperJobUpdate,
+            query: onScraperJobUpdate,
             variables: { jobId }
         });
 
         // Handle the subscription as an observable
         const sub = (subscription as any).subscribe({
             next: ({ data }: any) => {
-                if (data && data.onScraperJobUpdate) {
-                    const updatedJob = data.onScraperJobUpdate;
-                    setJob(prev => prev ? { ...prev, ...updatedJob } : updatedJob);
+                if (data?.onScraperJobUpdate) {
+                    const updatedJob = castToType<ScraperJob>(data.onScraperJobUpdate);
+                    if (updatedJob) {
+                        setJob(prev => prev ? { ...prev, ...updatedJob } : updatedJob);
+                    }
                 }
             },
             error: (err: any) => console.error('Subscription error:', err)
@@ -531,7 +556,7 @@ export const useURLHistory = (url: string) => {
 
             // Get URL data - note the id parameter is the URL
             const urlResponse = await client.graphql({
-                query: scraperManagementQueries.getScrapeURL,
+                query: getScrapeURL,
                 variables: { id: url }  // Use 'id' not 'url'
             });
 
@@ -539,7 +564,9 @@ export const useURLHistory = (url: string) => {
                 throw new Error('Invalid response from GraphQL');
             }
 
-            setUrlData(urlResponse.data.getScrapeURL);
+            const scrapeURLData = urlResponse.data?.getScrapeURL;
+            // Use castToType helper to handle incomplete nested types from GraphQL
+            setUrlData(castToType<ScrapeURL>(scrapeURLData));
 
             // Get attempts for this URL using corrected query name
             const attemptsResponse = await client.graphql({
@@ -554,8 +581,8 @@ export const useURLHistory = (url: string) => {
                 throw new Error('Invalid response from GraphQL');
             }
 
-            // Note: The actual query name includes "Id" in the index name
-            setAttempts(attemptsResponse.data.scrapeAttemptsByScrapeURLIdAndAttemptTime.items);
+            const attemptsData = attemptsResponse.data?.scrapeAttemptsByScrapeURLIdAndAttemptTime;
+            setAttempts(attemptsData?.items || []);
         } catch (err) {
             console.error('Error fetching URL history:', err);
             setError('Failed to fetch URL history');
@@ -575,15 +602,4 @@ export const useURLHistory = (url: string) => {
         error,
         refresh: fetchURLHistory
     };
-};
-
-// ===================================================================
-// Export all hooks
-// ===================================================================
-export default {
-    useScraperJobs,
-    useScrapeURLs,
-    useScraperMetrics,
-    useScraperJobMonitor,
-    useURLHistory
 };

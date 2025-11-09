@@ -1,6 +1,6 @@
 # ===================================================================
 # KINGSROOM SCHEMA
-# Version: 1.0.4.
+# Version: 1.0.4
 # ===================================================================
 
 # ===================================================================
@@ -615,7 +615,8 @@ type ScrapeURL @model(queries: { get: "getScrapeURL", list: null }) @auth(rules:
   totalContentChanges: Int @default(value: "0")
   lastHeaderCheckAt: AWSDateTime        # Last time we checked headers
   cachedContentUsedCount: Int @default(value: "0")  # Times we used cached content
-
+  lastCacheHitAt: AWSDateTime          # When S3 cache was last used
+  contentSize: Int                     # Size in bytes for monitoring
 }
 
 type ScrapeAttempt @model @auth(rules: [{ allow: private }]) {
@@ -648,7 +649,7 @@ type ScrapeAttempt @model @auth(rules: [{ allow: private }]) {
 type S3Storage @model @auth(rules: [{ allow: private }]) {
   id: ID!
   scrapeURLId: ID @index(name: "byScrapeURL", sortKeyFields: ["scrapedAt"])
-  url: AWSURL!
+  url: AWSURL! @index(name: "byURL", sortKeyFields: ["scrapedAt"])
   tournamentId: Int! @index(name: "byTournamentId", sortKeyFields: ["scrapedAt"])
   entityId: ID! @index(name: "byEntity", sortKeyFields: ["scrapedAt"])
   s3Key: String!                    # Full S3 key path
@@ -1227,17 +1228,17 @@ type Query {
     
     getAllCounts: AllCountsResult @function(name: "getModelCount-${env}")
 
-    # Get S3 storage history for a tournament
     getS3StorageHistory(tournamentId: Int!, entityId: ID!, limit: Int): S3StorageConnection
+        @function(name: "s3ManagementFunction-${env}")  # Use your actual function name
     
-    # View HTML content from S3
     viewS3Content(s3Key: String!): S3ContentResponse
+        @function(name: "s3ManagementFunction-${env}")
     
-    # Get caching statistics
     getCachingStats(entityId: ID!, timeRange: TimeRange): CachingStatsResponse
+        @function(name: "s3ManagementFunction-${env}")
     
-    # List all stored HTML for a URL
     listStoredHTML(url: AWSURL!, limit: Int): S3StorageConnection
+        @function(name: "s3ManagementFunction-${env}")
 
 }
 

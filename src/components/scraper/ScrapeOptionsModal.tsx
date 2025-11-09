@@ -1,7 +1,7 @@
 // src/components/scraper/ScrapeOptionsModalV2.tsx
-// Updated to work with existing S3 Management Lambda
+// FIXED: Stable client reference and proper cleanup to prevent re-render loops
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { X, Database, Globe, AlertCircle, RefreshCw, CheckCircle, HardDrive } from 'lucide-react';
 import { generateClient } from 'aws-amplify/api';
 import { getScrapeURL } from '../../graphql/queries';
@@ -37,67 +37,118 @@ export const ScrapeOptionsModal: React.FC<ScrapeOptionsModalProps> = ({
     const [updateAvailable, setUpdateAvailable] = useState<boolean | null>(null);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     
-    const client = generateClient();
+    // Add ref to prevent concurrent calls
+    const isCheckingStorage = useRef(false);
+    
+    // CRITICAL FIX: Memoize the client so it's stable across renders
+    const client = useMemo(() => generateClient(), []);
 
     // Check for existing S3 storage and ScrapeURL record
     useEffect(() => {
-        if (!isOpen) return;
+        if (!isOpen) {
+            // Reset state when modal closes
+            setS3StorageItems([]);
+            setScrapeUrlData(null);
+            setUpdateAvailable(null);
+            setLoading(false);
+            isCheckingStorage.current = false;
+            return;
+        }
         
         const checkStorage = async () => {
+            // Prevent multiple simultaneous calls
+            if (isCheckingStorage.current) {
+                console.log('[ScrapeOptionsModal] Skipping checkStorage - already in progress');
+                return;
+            }
+            
+            isCheckingStorage.current = true;
             setLoading(true);
             
             try {
-                // First, get S3Storage items for this URL
-                const storageResponse = await client.graphql({
-                    query: /* GraphQL */ `
-                        query ListStoredHTML($url: AWSURL!, $limit: Int) {
-                            listStoredHTML(url: $url, limit: $limit) {
-                                items {
-                                    id
-                                    s3Key
-                                    scrapedAt
-                                    contentHash
-                                    isManualUpload
-                                    entityId
-                                }
-                                nextToken
-                            }
-                        }
-                    `,
-                    variables: { url, limit: 5 }
-                });
+                let storageItems: S3StorageItem[] = []; // Local variable to avoid stale closure
                 
-                if ('data' in storageResponse && storageResponse.data?.listStoredHTML?.items) {
-                    // Filter by entity if needed
-                    const items = storageResponse.data.listStoredHTML.items
-                        .filter((item: any) => !entityId || item.entityId === entityId);
-                    setS3StorageItems(items);
+                // First, try to get S3Storage items for this URL
+                try {
+                    const storageResponse = await client.graphql({
+                        query: /* GraphQL */ `
+                            query ListStoredHTML($url: AWSURL!, $limit: Int) {
+                                listStoredHTML(url: $url, limit: $limit) {
+                                    items {
+                                        id
+                                        s3Key
+                                        scrapedAt
+                                        contentHash
+                                        isManualUpload
+                                        entityId
+                                    }
+                                    nextToken
+                                }
+                            }
+                        `,
+                        variables: { url, limit: 5 }
+                    });
+                    
+                    if ('data' in storageResponse && storageResponse.data?.listStoredHTML?.items) {
+                        // Filter by entity if needed
+                        storageItems = storageResponse.data.listStoredHTML.items
+                            .filter((item: any) => !entityId || item.entityId === entityId);
+                        setS3StorageItems(storageItems);
+                    }
+                } catch (s3Error: any) {
+                    // Handle S3 Lambda errors specifically
+                    if (s3Error?.errors?.[0]?.message?.includes('Rate Exceeded')) {
+                        console.warn('[ScrapeOptionsModal] Rate limit hit for S3 storage check');
+                    } else if (s3Error?.errors?.[0]?.message?.includes('Function not found')) {
+                        console.warn('[ScrapeOptionsModal] S3ManagementFunction not deployed');
+                    } else if (s3Error?.errors?.[0]?.message?.includes('ValidationException')) {
+                        console.warn('[ScrapeOptionsModal] DynamoDB validation error');
+                    } else {
+                        console.error('[ScrapeOptionsModal] Error checking S3 storage:', s3Error);
+                    }
+                    setS3StorageItems([]);
+                    storageItems = [];
                 }
                 
                 // Then, get ScrapeURL record for cache metadata
-                const scrapeUrlResponse = await client.graphql({
-                    query: getScrapeURL,
-                    variables: { id: url }
-                });
-                
-                if ('data' in scrapeUrlResponse && scrapeUrlResponse.data?.getScrapeURL) {
-                    setScrapeUrlData(scrapeUrlResponse.data.getScrapeURL);
+                try {
+                    const scrapeUrlResponse = await client.graphql({
+                        query: getScrapeURL,
+                        variables: { id: url }
+                    });
                     
-                    // Auto-check for updates if we have storage
-                    if (s3StorageItems.length > 0) {
-                        checkForUpdates(scrapeUrlResponse.data.getScrapeURL);
+                    if ('data' in scrapeUrlResponse && scrapeUrlResponse.data?.getScrapeURL) {
+                        setScrapeUrlData(scrapeUrlResponse.data.getScrapeURL);
+                        
+                        // Use local variable instead of state to avoid stale closure
+                        if (storageItems.length > 0) {
+                            checkForUpdates(scrapeUrlResponse.data.getScrapeURL);
+                        }
                     }
+                } catch (scrapeUrlError) {
+                    console.warn('[ScrapeOptionsModal] Could not get ScrapeURL data:', scrapeUrlError);
+                    setScrapeUrlData(null);
                 }
                 
             } catch (error) {
-                console.error('Error checking storage:', error);
+                console.error('[ScrapeOptionsModal] Unexpected error in checkStorage:', error);
             } finally {
                 setLoading(false);
+                isCheckingStorage.current = false;
             }
         };
         
-        checkStorage();
-    }, [isOpen, url, entityId, client]);
+        // Add debounce to prevent rapid calls when modal opens/closes quickly
+        const timeoutId = setTimeout(() => {
+            checkStorage();
+        }, 500); // Wait 500ms before calling
+        
+        // Cleanup timeout on unmount or dependencies change
+        return () => {
+            clearTimeout(timeoutId);
+            isCheckingStorage.current = false;
+        };
+    }, [isOpen, url, entityId]); // NOTE: 'client' removed from dependencies since it's now stable
 
     // Check for page updates using cache headers
     const checkForUpdates = async (scrapeUrl?: any) => {
@@ -161,51 +212,58 @@ export const ScrapeOptionsModal: React.FC<ScrapeOptionsModalProps> = ({
     };
 
     const getLiveScrapeButtonText = () => {
+        if (checkingUpdates) return 'Checking for updates...';
+        
         if (s3StorageItems.length === 0) {
-            return 'Scrape Live Data';
+            return 'Scrape Live Page';
         }
         
-        if (checkingUpdates) {
-            return 'Checking for Updates...';
+        if (updateAvailable === null) {
+            return 'Check for Updates';
         }
         
-        if (updateAvailable !== null) {
-            if (updateAvailable) {
-                return 'Scrape Live Page (Update detected)';
-            } else {
-                return 'Scrape Live Page (No updates)';
-            }
+        if (updateAvailable) {
+            return 'Scrape Updated Page';
         }
         
-        return 'Check Page Updates';
+        return 'Scrape Anyway (No Updates)';
     };
 
     if (!isOpen) return null;
 
     return (
         <>
-            {/* Main Modal */}
             <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center">
-                <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div className="relative bg-white rounded-lg shadow-xl max-w-lg w-full mx-4">
                     {/* Header */}
                     <div className="flex items-center justify-between p-4 border-b">
                         <h3 className="text-lg font-semibold text-gray-900">
-                            Select Data Source
+                            Scrape Options
                         </h3>
                         <button
                             onClick={onClose}
-                            className="text-gray-400 hover:text-gray-500"
+                            className="text-gray-400 hover:text-gray-500 transition-colors"
                         >
                             <X className="h-5 w-5" />
                         </button>
                     </div>
 
                     {/* Body */}
-                    <div className="p-6">
+                    <div className="p-4">
+                        {/* URL Display */}
+                        <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                            <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">
+                                Tournament URL
+                            </p>
+                            <p className="text-sm text-gray-700 break-all font-mono">
+                                {url}
+                            </p>
+                        </div>
+
                         {loading ? (
-                            <div className="text-center py-8">
-                                <RefreshCw className="h-8 w-8 animate-spin text-indigo-600 mx-auto mb-4" />
-                                <p className="text-gray-600">Checking storage status...</p>
+                            <div className="flex items-center justify-center py-8">
+                                <RefreshCw className="h-6 w-6 text-gray-400 animate-spin" />
+                                <p className="text-gray-600 ml-2">Checking storage status...</p>
                             </div>
                         ) : (
                             <div className="space-y-4">

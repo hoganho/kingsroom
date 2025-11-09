@@ -811,6 +811,8 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -2486,6 +2488,8 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -3028,6 +3032,8 @@ export const startScraperJob = /* GraphQL */ `mutation StartScraperJob($input: S
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -3247,6 +3253,8 @@ export const startScraperJob = /* GraphQL */ `mutation StartScraperJob($input: S
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -3700,6 +3708,8 @@ export const cancelScraperJob = /* GraphQL */ `mutation CancelScraperJob($jobId:
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -3919,6 +3929,8 @@ export const cancelScraperJob = /* GraphQL */ `mutation CancelScraperJob($jobId:
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -4375,6 +4387,8 @@ export const modifyScrapeURLStatus = /* GraphQL */ `mutation ModifyScrapeURLStat
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -4594,6 +4608,8 @@ export const modifyScrapeURLStatus = /* GraphQL */ `mutation ModifyScrapeURLStat
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -4881,6 +4897,8 @@ export const modifyScrapeURLStatus = /* GraphQL */ `mutation ModifyScrapeURLStat
     totalContentChanges
     lastHeaderCheckAt
     cachedContentUsedCount
+    lastCacheHitAt
+    contentSize
     _version
     _deleted
     _lastChangedAt
@@ -5064,6 +5082,8 @@ export const bulkModifyScrapeURLs = /* GraphQL */ `mutation BulkModifyScrapeURLs
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -5283,6 +5303,8 @@ export const bulkModifyScrapeURLs = /* GraphQL */ `mutation BulkModifyScrapeURLs
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -5570,6 +5592,8 @@ export const bulkModifyScrapeURLs = /* GraphQL */ `mutation BulkModifyScrapeURLs
     totalContentChanges
     lastHeaderCheckAt
     cachedContentUsedCount
+    lastCacheHitAt
+    contentSize
     _version
     _deleted
     _lastChangedAt
@@ -6238,6 +6262,8 @@ export const createEntity = /* GraphQL */ `mutation CreateEntity(
         totalContentChanges
         lastHeaderCheckAt
         cachedContentUsedCount
+        lastCacheHitAt
+        contentSize
         _version
         _deleted
         _lastChangedAt
@@ -7330,6 +7356,8 @@ export const updateEntity = /* GraphQL */ `mutation UpdateEntity(
         totalContentChanges
         lastHeaderCheckAt
         cachedContentUsedCount
+        lastCacheHitAt
+        contentSize
         _version
         _deleted
         _lastChangedAt
@@ -8422,6 +8450,8 @@ export const deleteEntity = /* GraphQL */ `mutation DeleteEntity(
         totalContentChanges
         lastHeaderCheckAt
         cachedContentUsedCount
+        lastCacheHitAt
+        contentSize
         _version
         _deleted
         _lastChangedAt
@@ -9539,6 +9569,8 @@ export const createScraperState = /* GraphQL */ `mutation CreateScraperState(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -10042,6 +10074,8 @@ export const updateScraperState = /* GraphQL */ `mutation UpdateScraperState(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -10545,6 +10579,8 @@ export const deleteScraperState = /* GraphQL */ `mutation DeleteScraperState(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -12564,6 +12600,8 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -14584,6 +14622,8 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -16604,6 +16644,8 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -17557,6 +17599,8 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -18357,6 +18401,8 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -19157,6 +19203,8 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -20612,6 +20660,8 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -21840,6 +21890,8 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -23068,6 +23120,8 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -24254,6 +24308,8 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -25929,6 +25985,8 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -26916,6 +26974,8 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -28591,6 +28651,8 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -29578,6 +29640,8 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -31253,6 +31317,8 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -32488,6 +32554,8 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -33570,6 +33638,8 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -34652,6 +34722,8 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -38020,6 +38092,8 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -41178,6 +41252,8 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -44336,6 +44412,8 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -49891,6 +49969,8 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -52062,6 +52142,8 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -54233,6 +54315,8 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -56400,6 +56484,8 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -58567,6 +58653,8 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -60734,6 +60822,8 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -62625,6 +62715,8 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -64516,6 +64608,8 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -66407,6 +66501,8 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -88515,6 +88611,8 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -88827,6 +88925,8 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -89778,6 +89878,8 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -90090,6 +90192,8 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -91041,6 +91145,8 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -91353,6 +91459,8 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -91941,6 +92049,8 @@ export const createScraperJob = /* GraphQL */ `mutation CreateScraperJob(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -92160,6 +92270,8 @@ export const createScraperJob = /* GraphQL */ `mutation CreateScraperJob(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -92616,6 +92728,8 @@ export const updateScraperJob = /* GraphQL */ `mutation UpdateScraperJob(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -92835,6 +92949,8 @@ export const updateScraperJob = /* GraphQL */ `mutation UpdateScraperJob(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -93291,6 +93407,8 @@ export const deleteScraperJob = /* GraphQL */ `mutation DeleteScraperJob(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -93510,6 +93628,8 @@ export const deleteScraperJob = /* GraphQL */ `mutation DeleteScraperJob(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -93965,6 +94085,8 @@ export const createScrapeURL = /* GraphQL */ `mutation CreateScrapeURL(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -94184,6 +94306,8 @@ export const createScrapeURL = /* GraphQL */ `mutation CreateScrapeURL(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -94471,6 +94595,8 @@ export const createScrapeURL = /* GraphQL */ `mutation CreateScrapeURL(
     totalContentChanges
     lastHeaderCheckAt
     cachedContentUsedCount
+    lastCacheHitAt
+    contentSize
     _version
     _deleted
     _lastChangedAt
@@ -94649,6 +94775,8 @@ export const updateScrapeURL = /* GraphQL */ `mutation UpdateScrapeURL(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -94868,6 +94996,8 @@ export const updateScrapeURL = /* GraphQL */ `mutation UpdateScrapeURL(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -95155,6 +95285,8 @@ export const updateScrapeURL = /* GraphQL */ `mutation UpdateScrapeURL(
     totalContentChanges
     lastHeaderCheckAt
     cachedContentUsedCount
+    lastCacheHitAt
+    contentSize
     _version
     _deleted
     _lastChangedAt
@@ -95333,6 +95465,8 @@ export const deleteScrapeURL = /* GraphQL */ `mutation DeleteScrapeURL(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -95552,6 +95686,8 @@ export const deleteScrapeURL = /* GraphQL */ `mutation DeleteScrapeURL(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -95839,6 +95975,8 @@ export const deleteScrapeURL = /* GraphQL */ `mutation DeleteScrapeURL(
     totalContentChanges
     lastHeaderCheckAt
     cachedContentUsedCount
+    lastCacheHitAt
+    contentSize
     _version
     _deleted
     _lastChangedAt
@@ -95977,6 +96115,8 @@ export const createScrapeAttempt = /* GraphQL */ `mutation CreateScrapeAttempt(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -96122,6 +96262,8 @@ export const createScrapeAttempt = /* GraphQL */ `mutation CreateScrapeAttempt(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -96362,6 +96504,8 @@ export const createScrapeAttempt = /* GraphQL */ `mutation CreateScrapeAttempt(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -96507,6 +96651,8 @@ export const createScrapeAttempt = /* GraphQL */ `mutation CreateScrapeAttempt(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -96634,6 +96780,8 @@ export const createScrapeAttempt = /* GraphQL */ `mutation CreateScrapeAttempt(
       totalContentChanges
       lastHeaderCheckAt
       cachedContentUsedCount
+      lastCacheHitAt
+      contentSize
       _version
       _deleted
       _lastChangedAt
@@ -96793,6 +96941,8 @@ export const updateScrapeAttempt = /* GraphQL */ `mutation UpdateScrapeAttempt(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -96938,6 +97088,8 @@ export const updateScrapeAttempt = /* GraphQL */ `mutation UpdateScrapeAttempt(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -97178,6 +97330,8 @@ export const updateScrapeAttempt = /* GraphQL */ `mutation UpdateScrapeAttempt(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -97323,6 +97477,8 @@ export const updateScrapeAttempt = /* GraphQL */ `mutation UpdateScrapeAttempt(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -97450,6 +97606,8 @@ export const updateScrapeAttempt = /* GraphQL */ `mutation UpdateScrapeAttempt(
       totalContentChanges
       lastHeaderCheckAt
       cachedContentUsedCount
+      lastCacheHitAt
+      contentSize
       _version
       _deleted
       _lastChangedAt
@@ -97609,6 +97767,8 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -97754,6 +97914,8 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -97994,6 +98156,8 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -98139,6 +98303,8 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -98266,6 +98432,8 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
       totalContentChanges
       lastHeaderCheckAt
       cachedContentUsedCount
+      lastCacheHitAt
+      contentSize
       _version
       _deleted
       _lastChangedAt

@@ -1,9 +1,9 @@
 // src/pages/scraper-admin-tabs/SingleScraperTabEnhanced.tsx
-// Enhanced version with S3 HTML support and modal
+// Enhanced version with S3 HTML support, cache status display, and modal
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import { Target, Building2, FastForward } from 'lucide-react';
+import { Target, Building2, FastForward, HardDrive } from 'lucide-react';
 import { useGameTracker } from '../../hooks/useGameTracker';
 import { useEntity, buildGameUrl } from '../../contexts/EntityContext';
 import { listVenuesForDropdown } from '../../graphql/customQueries';
@@ -32,6 +32,14 @@ export const SingleScraperTab: React.FC = () => {
     const [venues, setVenues] = useState<Venue[]>([]);
     const [venuesLoading, setVenuesLoading] = useState(false);
     const [selectedVenues, setSelectedVenues] = useState<Record<string, string>>({});
+    
+    // S3 cache status state
+    const [cacheStatus, setCacheStatus] = useState<Record<string, {
+        hasCache: boolean;
+        s3Key?: string;
+        lastCached?: string;
+        cacheHits?: number;
+    }>>({});
     
     // Modal state for scrape options
     const [scrapeModalInfo, setScrapeModalInfo] = useState<{
@@ -124,6 +132,41 @@ export const SingleScraperTab: React.FC = () => {
         });
     }, [games, venues]);
 
+    // Check cache status for a URL
+    const checkCacheStatus = async (url: string) => {
+        try {
+            const response = await client.graphql({
+                query: /* GraphQL */ `
+                    query GetScrapeURL($id: ID!) {
+                        getScrapeURL(id: $id) {
+                            latestS3Key
+                            lastCacheHitAt
+                            cachedContentUsedCount
+                            contentHash
+                            lastContentChangeAt
+                        }
+                    }
+                `,
+                variables: { id: url }
+            });
+            
+            if ('data' in response && response.data?.getScrapeURL) {
+                const data = response.data.getScrapeURL;
+                setCacheStatus(prev => ({
+                    ...prev,
+                    [url]: {
+                        hasCache: !!data.latestS3Key,
+                        s3Key: data.latestS3Key,
+                        lastCached: data.lastContentChangeAt,
+                        cacheHits: data.cachedContentUsedCount || 0
+                    }
+                }));
+            }
+        } catch (error) {
+            console.log('No cache status available');
+        }
+    };
+
     const handleTrackGame = (id: string) => {
         if (!currentEntity) {
             alert('Please select an entity first');
@@ -146,248 +189,290 @@ export const SingleScraperTab: React.FC = () => {
                 }
             }
             
+            // Check cache status for the URL
+            trackUrl && checkCacheStatus(trackUrl);
+            
             // Show modal for scrape options
             setScrapeModalInfo({
                 url: trackUrl,
                 entityId: currentEntity.id
             });
-            
-            setInputId('');
+        } else {
+            alert('Please enter a game ID or URL');
         }
     };
-
-    const handleScrapeOptionSelected = (option: 'S3' | 'LIVE') => {
+    
+    const handleScrapeFromModal = async (option: 'S3' | 'LIVE', s3Key?: string) => {
         if (!scrapeModalInfo) return;
         
-        console.log(`[SingleScraperTab] User selected ${option} for ${scrapeModalInfo.url}`);
+        setScrapeModalInfo(null);
         
-        // TODO: The useGameTracker hook's trackGame function expects a TrackOptions type
-        // for its 4th parameter, but the type definition is not available here.
-        // Using 'as any' as a temporary workaround until the hook's types are properly exported.
-        // The expected structure likely includes { scrapeFrom: 'S3' | 'LIVE' }
-        const options = option === 'S3' ? { scrapeFrom: 'S3' } : undefined;
+        // Map the modal option to DataSource enum
+        // 'LIVE' means scrape from website, 'S3' means use cached data
+        const dataSource = option === 'LIVE' ? DataSource.SCRAPE : DataSource.API;
         
-        trackGame(
+        // TrackOptions from useGameTracker
+        const options = {
+            forceSource: option,
+            s3Key: s3Key
+        };
+        
+        // trackGame expects: (url: string, source: DataSource, entityId: string, options?: TrackOptions)
+        await trackGame(
             scrapeModalInfo.url, 
-            'SCRAPE' as DataSource, 
-            scrapeModalInfo.entityId, 
-            options as any
+            dataSource, 
+            scrapeModalInfo.entityId,
+            options
         );
         
-        setScrapeModalInfo(null);
+        // Check cache status after scraping
+        checkCacheStatus(scrapeModalInfo.url);
     };
-
-    const handleTrackNext = () => {
-        if (!currentEntity) {
-            alert('Please select an entity first');
-            return;
-        }
-
-        let nextId = 1;
-        while (trackedIds.has(nextId.toString())) {
-            nextId++;
-            if (nextId > 100000) {
-                alert('Could not find an untracked ID in reasonable range');
-                return;
-            }
-        }
-        
-        const nextIdStr = nextId.toString();
-        setInputId(nextIdStr);
-        handleTrackGame(nextIdStr);
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!inputId) return;
-        handleTrackGame(inputId);
-    };
-
+    
     const handleVenueChange = (gameId: string, venueId: string) => {
-        console.log(`[SingleScraperTab] Venue changed for game ${gameId}: ${venueId}`);
-        setSelectedVenues(prev => ({ 
-            ...prev, 
-            [gameId]: venueId 
+        setSelectedVenues(prev => ({
+            ...prev,
+            [gameId]: venueId
         }));
     };
-
-    const handleSave = (gameId: string, venueId: string) => {
-        const game = games[gameId];
+    
+    const handleSaveGame = async (url: string) => {
+        const gameData = games[url];
+        if (!gameData || !gameData.data) return;
         
-        if (!game || !game.data || !venueId || !currentEntity) {
-            console.error('[SingleScraperTab] Cannot save: Missing game data, venue, or entity');
+        const venueId = selectedVenues[url];
+        
+        if (!venueId || venueId === '') {
+            alert('Please select a venue before saving');
             return;
         }
         
-        console.log(`[SingleScraperTab] Opening save modal for game: ${gameId} with venue: ${venueId} and entity: ${currentEntity.id}`);
-        setConfirmModalData({ game, venueId, entityId: currentEntity.id });
+        // Show confirmation modal
+        setConfirmModalData({
+            game: gameData,
+            venueId,
+            entityId: currentEntity?.id || ''
+        });
     };
-
-    const handleConfirmSave = () => {
+    
+    const handleConfirmSave = async () => {
         if (!confirmModalData) return;
         
         const { game, venueId, entityId } = confirmModalData;
         
-        console.log(`[SingleScraperTab] Confirming save for game: ${game.id} with venue: ${venueId} and entity: ${entityId}`);
-        
-        saveGame(game.id, venueId, entityId);
-        
-        setConfirmModalData(null);
+        try {
+            // saveGame expects (gameId, venueId, entityId)
+            await saveGame(game.id, venueId, entityId);
+            
+            // After successful save
+            setConfirmModalData(null);
+            removeGame(game.id);
+            setSelectedVenues(prev => {
+                const newVenues = { ...prev };
+                delete newVenues[game.id];
+                return newVenues;
+            });
+            
+            // Track the ID as saved
+            const pathMatch = game.id.match(/id=(\d+)/);
+            if (pathMatch) {
+                setTrackedIds(prev => new Set([...prev, pathMatch[1]]));
+            }
+        } catch (error) {
+            console.error('Error saving game:', error);
+            alert('Failed to save game. See console for details.');
+        }
     };
 
-    const handleRefreshGame = (gameId: string) => {
-        // When refreshing, show the modal again
-        if (!currentEntity) return;
+    const getVenueBadgeColor = (gameData: any) => {
+        const match = gameData?.data?.venueMatch;
+        if (!match) return 'bg-gray-100 text-gray-800';
         
-        setScrapeModalInfo({
-            url: gameId,
-            entityId: currentEntity.id
-        });
+        if (match.autoAssignedVenue) {
+            const confidence = match.confidence || 0;
+            if (confidence >= 90) return 'bg-green-100 text-green-800';
+            if (confidence >= 70) return 'bg-yellow-100 text-yellow-800';
+            return 'bg-orange-100 text-orange-800';
+        }
+        
+        return 'bg-red-100 text-red-800';
     };
-
-    if (!currentEntity) {
-        return (
-            <div className="space-y-6">
-                <div className="bg-white rounded-lg shadow p-6">
-                    <div className="text-center">
-                        <Building2 className="mx-auto h-12 w-12 text-gray-400" />
-                        <h3 className="mt-2 text-sm font-medium text-gray-900">No Entity Selected</h3>
-                        <p className="mt-1 text-sm text-gray-500">
-                            Please select an entity to start tracking tournaments.
-                        </p>
-                        <div className="mt-6 flex justify-center">
-                            <EntitySelector />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="space-y-6">
-            {/* Entity Info Bar */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                        <Building2 className="h-5 w-5 text-blue-500" />
-                        <div className="flex items-center space-x-2">
-                            <span className="text-sm font-medium text-blue-900">Entity:</span>
-                            <EntitySelector />
-                        </div>
-                    </div>
-                    <div>
-                        <p className="text-xs text-blue-700 font-mono">
-                            URL Pattern: {currentEntity.gameUrlDomain}{currentEntity.gameUrlPath}[ID]
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Input Form */}
+            {/* Entity Selection */}
             <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-4">Track Tournament</h3>
-                <form className="space-y-3" onSubmit={handleSubmit}>
-                    <div>
-                        <input
-                            type="text"
-                            value={inputId}
-                            onChange={(e) => setInputId(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder={`Enter Tournament ID (e.g., 12345) for ${currentEntity.entityName}...`}
-                        />
-                    </div>
-                    <div className="flex space-x-2">
-                        <button
-                            type="button"
-                            onClick={handleTrackNext}
-                            disabled={!currentEntity}
-                            className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-300 flex items-center space-x-2"
-                        >
-                            <FastForward className="h-4 w-4" />
-                            <span>Track Next</span>
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={!currentEntity}
-                            className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-300"
-                        >
-                            Track
-                        </button>
-                    </div>
-                </form>
-                <p className="text-xs text-gray-500 mt-2">
-                    Enter just the tournament ID. The URL will be built using {currentEntity.entityName}'s pattern.
-                </p>
-            </div>
-
-            {/* Tracked Games List */}
-            <div className="space-y-3">
-                <h3 className="text-lg font-semibold">Tracked Tournaments for {currentEntity.entityName}</h3>
-                {Object.values(games).length > 0 ? (
-                    <div className="space-y-2">
-                        {Object.values(games)
-                            .filter((game: any) => {
-                                try {
-                                    const gameUrl = new URL(game.id);
-                                    const gameDomain = `${gameUrl.protocol}//${gameUrl.hostname}`;
-                                    return gameDomain === currentEntity.gameUrlDomain;
-                                } catch {
-                                    return false;
-                                }
-                            })
-                            .map((game: any) => (
-                                <GameListItem
-                                    key={game.id}
-                                    game={game}
-                                    venues={venues}
-                                    venuesLoading={venuesLoading}
-                                    selectedVenueId={selectedVenues[game.id]}
-                                    onVenueChange={handleVenueChange}
-                                    onSave={handleSave}
-                                    onRemove={removeGame}
-                                    onRefresh={handleRefreshGame}
-                                    onViewDetails={setSelectedGame}
-                                    mode="manual"
-                                    showVenueSelector={true}
-                                    showActions={true}
-                                    // TODO: Add showS3Indicator when prop is added to GameListItem component
-                                    // showS3Indicator={game.s3Key ? true : false}
-                                    // TODO: Add hasUpdateAvailable when prop is added to GameListItem component  
-                                    // hasUpdateAvailable={game.updateAvailable}
-                                />
-                            ))}
-                    </div>
-                ) : (
-                    <div className="bg-white rounded-lg shadow p-10 text-center">
-                        <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-500">
-                            No games are being tracked for {currentEntity.entityName}. Add a tournament ID to begin.
+                <div className="mb-4">
+                    <h3 className="text-lg font-semibold flex items-center">
+                        <Building2 className="h-5 w-5 mr-2 text-blue-600" />
+                        Entity Selection
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                        Select the entity (business) you want to scrape games for
+                    </p>
+                </div>
+                <EntitySelector />
+                {currentEntity && (
+                    <div className="mt-3 p-3 bg-blue-50 rounded">
+                        <p className="text-sm text-blue-800">
+                            <strong>Active:</strong> {currentEntity.entityName}
+                        </p>
+                        <p className="text-xs text-blue-600 mt-1">
+                            Base URL: {currentEntity.gameUrlDomain}{currentEntity.gameUrlPath}
                         </p>
                     </div>
                 )}
             </div>
-
-            {/* Scrape Options Modal */}
+            
+            {/* Manual Scraping */}
+            <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                    <Target className="h-5 w-5 mr-2 text-blue-600" />
+                    Single Tournament Scraper
+                </h3>
+                
+                {!currentEntity ? (
+                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p className="text-yellow-800">Please select an entity first to enable scraping.</p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="flex space-x-2">
+                            <input
+                                type="text"
+                                value={inputId}
+                                onChange={(e) => setInputId(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleTrackGame(inputId)}
+                                placeholder="Enter tournament ID (e.g., 12345) or full URL"
+                                className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                            />
+                            <button
+                                onClick={() => handleTrackGame(inputId)}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                            >
+                                Track Game
+                            </button>
+                        </div>
+                        
+                        <div className="mt-2 text-sm text-gray-600">
+                            <p>Enter just the ID (e.g., "12345") or the full URL</p>
+                        </div>
+                    </>
+                )}
+            </div>
+            
+            {/* Tracked Games */}
+            {Object.keys(games).length > 0 && (
+                <div className="bg-white rounded-lg shadow p-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold flex items-center">
+                            <FastForward className="h-5 w-5 mr-2 text-green-600" />
+                            Tracked Games ({Object.keys(games).length})
+                        </h3>
+                        {venuesLoading && (
+                            <span className="text-sm text-gray-500">Loading venues...</span>
+                        )}
+                    </div>
+                    
+                    <div className="space-y-4">
+                        {Object.entries(games).map(([url, gameData]: [string, any]) => {
+                            const cache = cacheStatus[url];
+                            const venueMatch = gameData?.data?.venueMatch;
+                            const autoVenue = venueMatch?.autoAssignedVenue;
+                            const suggestions = venueMatch?.suggestions || [];
+                            const pathMatch = url.match(/id=(\d+)/);
+                            const gameIdNumber = pathMatch ? pathMatch[1] : null;
+                            
+                            return (
+                                <div key={url} className="relative border rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <GameListItem
+                                        game={gameData}
+                                        venues={venues}
+                                        selectedVenueId={selectedVenues[url]}
+                                        onVenueChange={(venueId) => handleVenueChange(url, venueId)}
+                                        onSave={() => handleSaveGame(url)}
+                                        onViewDetails={() => setSelectedGame(gameData)}
+                                        onRemove={() => removeGame(url)}
+                                    />
+                                    
+                                    {/* S3 Cache Status Badge */}
+                                    {cache?.hasCache && (
+                                        <div className="absolute top-2 right-2 flex items-center gap-2">
+                                            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full flex items-center gap-1">
+                                                <HardDrive className="w-3 h-3" />
+                                                S3 Cached
+                                                {cache.cacheHits && cache.cacheHits > 0 && ` (${cache.cacheHits} hits)`}
+                                            </span>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Additional indicator if already in database */}
+                                    {trackedIds.has(gameIdNumber || '') && (
+                                        <div className="mt-2 px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded inline-block">
+                                            Already in database
+                                        </div>
+                                    )}
+                                    
+                                    {/* Venue Match Info */}
+                                    {venueMatch && (
+                                        <div className="mt-3 pt-3 border-t">
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1">
+                                                    {autoVenue ? (
+                                                        <div className="flex items-center space-x-2">
+                                                            <span className={`px-2 py-1 text-xs rounded-full ${getVenueBadgeColor(gameData)}`}>
+                                                                Auto-matched: {autoVenue.name} ({venueMatch.confidence}% confidence)
+                                                            </span>
+                                                        </div>
+                                                    ) : suggestions.length > 0 ? (
+                                                        <div className="text-sm">
+                                                            <span className="text-gray-600">Suggestions: </span>
+                                                            {suggestions.slice(0, 3).map((s: any, idx: number) => (
+                                                                <span key={idx} className="ml-1 px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                                                                    {s.name} ({s.score}%)
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-sm text-red-600">No venue match found</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            
+                                            {gameData.data?.missingKeysFromScrape && gameData.data.missingKeysFromScrape.length > 0 && (
+                                                <div className="mt-2 p-2 bg-yellow-50 rounded">
+                                                    <p className="text-xs text-yellow-800">
+                                                        Missing fields: {gameData.data.missingKeysFromScrape.join(', ')}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+            
+            {/* Modals */}
             {scrapeModalInfo && (
                 <ScrapeOptionsModal
                     isOpen={true}
                     onClose={() => setScrapeModalInfo(null)}
-                    onSelectOption={handleScrapeOptionSelected}
+                    onSelectOption={handleScrapeFromModal}
                     url={scrapeModalInfo.url}
                     entityId={scrapeModalInfo.entityId}
                 />
             )}
-
-            {/* Game Details Modal */}
+            
             {selectedGame && (
-                <GameDetailsModal 
-                    game={selectedGame} 
-                    onClose={() => setSelectedGame(null)} 
+                <GameDetailsModal
+                    game={selectedGame}
+                    onClose={() => setSelectedGame(null)}
                 />
             )}
-
-            {/* Save Confirmation Modal */}
+            
             {confirmModalData && (
                 <SaveConfirmationModal
                     isOpen={true}

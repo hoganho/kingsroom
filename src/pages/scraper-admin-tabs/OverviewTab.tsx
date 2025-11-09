@@ -1,6 +1,5 @@
 // src/pages/scraper-admin-tabs/OverviewTab.tsx
 
-// ✅ FIX 1: Import useMemo and useCallback
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { 
@@ -10,9 +9,14 @@ import {
     CheckCircle,
     Database
 } from 'lucide-react';
-import { scraperManagementQueries } from '../../graphql/scraperManagement'; // Removed .ts
-import type { ScraperJob } from '../../API.ts';
-import { MetricCard, JobStatusBadge } from '../../components/scraper/admin/ScraperAdminShared'; // Removed .tsx
+// Import from auto-generated queries
+import { 
+    getScraperMetrics,
+    getScraperJobsReport 
+} from '../../graphql/queries';
+// Import TimeRange enum from API types
+import { TimeRange, type ScraperJob } from '../../API';
+import { MetricCard, JobStatusBadge } from '../../components/scraper/admin/ScraperAdminShared';
 
 // Define ScraperMetrics if not in API types
 interface ScraperMetrics {
@@ -35,27 +39,22 @@ interface ScraperMetrics {
     }>;
 }
 
-// ❌ FIX 2: Remove the top-level client
-// const client = generateClient();
-
 export const OverviewTab: React.FC = () => {
-    // ✅ FIX 3: Generate the client *inside* the component and memoize it.
     const client = useMemo(() => generateClient(), []);
-
     const [metrics, setMetrics] = useState<ScraperMetrics | null>(null);
     const [recentJobs, setRecentJobs] = useState<ScraperJob[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // ✅ FIX 4: Wrap in useCallback and add 'client' as a dependency
     const loadMetrics = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
             
+            // Load metrics using the correctly imported query and TimeRange enum
             const metricsResponse = await client.graphql({
-                query: scraperManagementQueries.getScraperMetrics,
-                variables: { timeRange: 'LAST_24_HOURS' }
+                query: getScraperMetrics,
+                variables: { timeRange: TimeRange.LAST_24_HOURS } // Use enum value
             }) as any;
             
             if (metricsResponse.errors) {
@@ -63,22 +62,23 @@ export const OverviewTab: React.FC = () => {
                 throw new Error(metricsResponse.errors[0].message);
             }
             
-            if (metricsResponse.data) {
+            if (metricsResponse.data?.getScraperMetrics) {
                 setMetrics(metricsResponse.data.getScraperMetrics);
             }
 
+            // Load recent jobs using the correctly imported query
             const jobsResponse = await client.graphql({
-                query: scraperManagementQueries.getScraperJobsReport,
+                query: getScraperJobsReport,
                 variables: { limit: 5 }
             }) as any;
             
             if (jobsResponse.errors) {
-                 console.error('GraphQL error loading jobs:', jobsResponse.errors);
-                 throw new Error(jobsResponse.errors[0].message);
+                console.error('GraphQL error loading jobs:', jobsResponse.errors);
+                throw new Error(jobsResponse.errors[0].message);
             }
             
-            if (jobsResponse.data) {
-                setRecentJobs(jobsResponse.data.getScraperJobsReport.items);
+            if (jobsResponse.data?.getScraperJobsReport) {
+                setRecentJobs(jobsResponse.data.getScraperJobsReport.items || []);
             }
         } catch (error: any) {
             console.error('Error loading metrics:', error);
@@ -86,13 +86,13 @@ export const OverviewTab: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [client]); // <-- Dependency added
+    }, [client]);
 
     useEffect(() => {
         loadMetrics();
         const interval = setInterval(loadMetrics, 30000); // Refresh every 30 seconds
         return () => clearInterval(interval);
-    }, [loadMetrics]); // ✅ FIX 5: Add loadMetrics dependency
+    }, [loadMetrics]);
 
     if (loading && !metrics && !error) {
         return (
@@ -105,7 +105,7 @@ export const OverviewTab: React.FC = () => {
     if (error) {
         return (
             <div className="bg-red-50 border border-red-300 rounded-lg p-6 text-center">
-                 <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-red-800">Failed to Load Overview</h3>
                 <p className="text-sm text-red-700 mt-2 mb-4">
                     The backend function may be missing or misconfigured.
@@ -207,6 +207,11 @@ export const OverviewTab: React.FC = () => {
                             ))}
                         </tbody>
                     </table>
+                    {recentJobs.length === 0 && (
+                        <div className="p-8 text-center text-gray-500">
+                            No recent jobs found.
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

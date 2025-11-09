@@ -174,6 +174,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -393,6 +395,8 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -845,6 +849,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -1064,6 +1070,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -1351,6 +1359,8 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
     totalContentChanges
     lastHeaderCheckAt
     cachedContentUsedCount
+    lastCacheHitAt
+    contentSize
     _version
     _deleted
     _lastChangedAt
@@ -1690,6 +1700,8 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
         totalContentChanges
         lastHeaderCheckAt
         cachedContentUsedCount
+        lastCacheHitAt
+        contentSize
         _version
         _deleted
         _lastChangedAt
@@ -2779,6 +2791,8 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
         totalContentChanges
         lastHeaderCheckAt
         cachedContentUsedCount
+        lastCacheHitAt
+        contentSize
         _version
         _deleted
         _lastChangedAt
@@ -3868,6 +3882,8 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
         totalContentChanges
         lastHeaderCheckAt
         cachedContentUsedCount
+        lastCacheHitAt
+        contentSize
         _version
         _deleted
         _lastChangedAt
@@ -4972,6 +4988,8 @@ export const onCreateScraperState = /* GraphQL */ `subscription OnCreateScraperS
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -5474,6 +5492,8 @@ export const onUpdateScraperState = /* GraphQL */ `subscription OnUpdateScraperS
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -5976,6 +5996,8 @@ export const onDeleteScraperState = /* GraphQL */ `subscription OnDeleteScraperS
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -7992,6 +8014,8 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -10009,6 +10033,8 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -12026,6 +12052,8 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -12978,6 +13006,8 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -13777,6 +13807,8 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -14576,6 +14608,8 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -16027,6 +16061,8 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -17254,6 +17290,8 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -18481,6 +18519,8 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -19664,6 +19704,8 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -21339,6 +21381,8 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -22323,6 +22367,8 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -23998,6 +24044,8 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -24982,6 +25030,8 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -26657,6 +26707,8 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -27891,6 +27943,8 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -28972,6 +29026,8 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -30053,6 +30109,8 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -33409,6 +33467,8 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -36564,6 +36624,8 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -39719,6 +39781,8 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -45270,6 +45334,8 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -47440,6 +47506,8 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -49610,6 +49678,8 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -51776,6 +51846,8 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -53942,6 +54014,8 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -56108,6 +56182,8 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -57998,6 +58074,8 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -59888,6 +59966,8 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -61778,6 +61858,8 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -83847,6 +83929,8 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -84159,6 +84243,8 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -85107,6 +85193,8 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -85419,6 +85507,8 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -86367,6 +86457,8 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -86679,6 +86771,8 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -87260,6 +87354,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -87479,6 +87575,8 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -87934,6 +88032,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -88153,6 +88253,8 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -88608,6 +88710,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -88827,6 +88931,8 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -89279,6 +89385,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -89498,6 +89606,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -89785,6 +89895,8 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
     totalContentChanges
     lastHeaderCheckAt
     cachedContentUsedCount
+    lastCacheHitAt
+    contentSize
     _version
     _deleted
     _lastChangedAt
@@ -89960,6 +90072,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -90179,6 +90293,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -90466,6 +90582,8 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
     totalContentChanges
     lastHeaderCheckAt
     cachedContentUsedCount
+    lastCacheHitAt
+    contentSize
     _version
     _deleted
     _lastChangedAt
@@ -90641,6 +90759,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -90860,6 +90980,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -91147,6 +91269,8 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
     totalContentChanges
     lastHeaderCheckAt
     cachedContentUsedCount
+    lastCacheHitAt
+    contentSize
     _version
     _deleted
     _lastChangedAt
@@ -91284,6 +91408,8 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -91429,6 +91555,8 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -91669,6 +91797,8 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -91814,6 +91944,8 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -91941,6 +92073,8 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
       totalContentChanges
       lastHeaderCheckAt
       cachedContentUsedCount
+      lastCacheHitAt
+      contentSize
       _version
       _deleted
       _lastChangedAt
@@ -92099,6 +92233,8 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -92244,6 +92380,8 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -92484,6 +92622,8 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -92629,6 +92769,8 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -92756,6 +92898,8 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
       totalContentChanges
       lastHeaderCheckAt
       cachedContentUsedCount
+      lastCacheHitAt
+      contentSize
       _version
       _deleted
       _lastChangedAt
@@ -92914,6 +93058,8 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -93059,6 +93205,8 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -93299,6 +93447,8 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -93444,6 +93594,8 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -93571,6 +93723,8 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
       totalContentChanges
       lastHeaderCheckAt
       cachedContentUsedCount
+      lastCacheHitAt
+      contentSize
       _version
       _deleted
       _lastChangedAt

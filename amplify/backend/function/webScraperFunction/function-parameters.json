@@ -43,6 +43,21 @@
         "read",
         "update"
       ],
+      "ScraperJob:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "ScrapeURL:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "ScrapeAttempt:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
       "S3Storage:@model(appsync)": [
         "create",
         "read",

@@ -42,7 +42,7 @@ const cleanupNameForMatching = (name, context, options = {}) => {
         (options.seriesTitles || []).forEach(series => {
             [series.title, ...(series.aliases || [])].forEach(seriesName => {
                 const cleanedSeriesName = seriesName.replace(/[^a-zA-Z0-9\s]/g, '');
-                const seriesRegex = new RegExp(`\\b${cleanedSeriesName}\\b`, 'gi');
+                const seriesRegex = new RegExp(`\b${cleanedSeriesName}\b`, 'gi');
                 cleanedName = cleanedName.replace(seriesRegex, ' ');
             });
         });
@@ -50,7 +50,7 @@ const cleanupNameForMatching = (name, context, options = {}) => {
         (options.venues || []).forEach(venue => {
             [venue.name, ...(venue.aliases || [])].forEach(venueName => {
                 const cleanedVenueName = venueName.replace(/[^a-zA-Z0-9\s]/g, '');
-                const venueRegex = new RegExp(`\\b${cleanedVenueName}\\b`, 'gi');
+                const venueRegex = new RegExp(`\b${cleanedVenueName}\b`, 'gi');
                 cleanedName = cleanedName.replace(venueRegex, ' ');
             });
         });
@@ -65,6 +65,7 @@ class ScrapeContext {
         this.foundKeys = new Set();
         this.gameData = null;
         this.levelData = null;
+        this.abortScrape = false; // Added flag to stop scraping early
         this._parseEmbeddedData();
     }
     _parseEmbeddedData() {
@@ -118,20 +119,51 @@ class ScrapeContext {
 
 const defaultStrategy = {
     /**
-     * ✅ NEW: Sets the default values for key flags at the beginning of the scrape.
-     * This ensures these fields are always present in the final data object.
+     * ✅ NEW: Robust page state detection.
+     * Uses specific CSS classes (.cw-badge.cw-bg-warning) to identify
+     * "Tournament Not Found" and "Tournament Not Published" states precisely.
      */
+    detectPageState(ctx) {
+        // Look for the specific warning badge used by the platform for errors
+        const warningBadge = ctx.$('.cw-badge.cw-bg-warning').first();
+        
+        if (warningBadge.length > 0) {
+            const warningText = warningBadge.text().trim().toLowerCase();
+            console.log(`[Scraper] Detected warning badge: "${warningText}"`);
+
+            // Case 1: Tournament Not Found (Req #3, #5)
+            // Treat as functionally identical to 'BLANK' for auto-scraper.
+            // Do NOT mark as doNotScrape=true, so it can be retried later.
+            if (warningText.includes('not found')) {
+                 console.log('[Scraper] State detected: Tournament Not Found');
+                 ctx.add('gameStatus', 'NOT_FOUND');
+                 ctx.add('name', 'Tournament Not Found');
+                 ctx.add('doNotScrape', false); // Important: Allow rescraping later
+                 ctx.abortScrape = true;
+                 return;
+            }
+
+            // Case 2: Tournament Not Published (Req #4)
+            // Exists but is hidden by publisher.
+            // MARK as doNotScrape=true to stop wasting resources on it.
+            if (warningText.includes('not published')) {
+                 console.log('[Scraper] State detected: Tournament Not Published');
+                 ctx.add('gameStatus', 'NOT_PUBLISHED');
+                 ctx.add('name', 'Tournament Not Published');
+                 ctx.add('doNotScrape', true); // Critical: Prevent future scrapes until manual reset
+                 ctx.abortScrape = true;
+                 return;
+            }
+        }
+    },
+
     initializeDefaultFlags(ctx) {
         ctx.add('isSeries', false);
-        ctx.add('seriesName', null); // Use null for "no value"
+        ctx.add('seriesName', null);
         ctx.add('isSatellite', false);
         ctx.add('isRegular', true);
     },
 
-    /**
-     * ✅ REFACTORED: Now relies on initializeDefaultFlags for defaults.
-     * This function now only *overrides* the default values if a series is detected.
-     */
     getName(ctx, seriesTitles = [], venues = []) {
         const mainTitle = ctx.$('.cw-game-title').first().text().trim();
         const subTitle = ctx.$('.cw-game-shortdesc').first().text().trim();
@@ -151,7 +183,7 @@ const defaultStrategy = {
         ctx.add('name', gameName);
 
         if (!seriesTitles || seriesTitles.length === 0) {
-            return; // No series to check against, defaults will remain.
+            return; 
         }
 
         // START: STEP 1 - Exact Substring Match
@@ -173,7 +205,7 @@ const defaultStrategy = {
             console.log(`[DEBUG-SERIES-MATCH] Found exact substring match: "${exactMatchFound.title}"`);
             ctx.add('seriesName', exactMatchFound.title);
             ctx.add('isSeries', true);
-            ctx.add('isRegular', false); // Override default
+            ctx.add('isRegular', false); 
             return; 
         }
 
@@ -201,12 +233,11 @@ const defaultStrategy = {
             if (matchedSeries) {
                 ctx.add('seriesName', matchedSeries.seriesTitle);
                 ctx.add('isSeries', true);
-                ctx.add('isRegular', false); // Override default
+                ctx.add('isRegular', false); 
             }
         } else if (bestMatch) {
              console.log(`[DEBUG-SERIES-MATCH] Low confidence fuzzy match, ignoring: "${bestMatch.target}" with rating ${bestMatch.rating}`);
         }
-        // ✅ REMOVED: No need for a final 'else' block, as defaults are already set.
     },
     
     getGameTags(ctx) {
@@ -244,7 +275,6 @@ const defaultStrategy = {
             }
         }
         ctx.add('tournamentType', tournamentType);
-        console.log(`[DEBUG-TYPE] Determined tournament type: ${tournamentType}`);
     },
 
     getGameStartDateTime(ctx) {
@@ -253,7 +283,6 @@ const defaultStrategy = {
         } else {
             const dateText = ctx.getText('gameStartDateTime', '#cw_clock_start_date_time_local');
             if (dateText) {
-                // Ensure the scraped date is in ISO format
                 try {
                     const date = new Date(dateText);
                     if (!isNaN(date.getTime())) {
@@ -267,6 +296,9 @@ const defaultStrategy = {
     },
     
     getStatus(ctx) {
+        // If already set by detectPageState, skip
+        if (ctx.data.gameStatus) return ctx.data.gameStatus;
+
         const statusElement = ctx.$('label:contains("Status")').first().next('strong');
         let gameStatus = statusElement.text().trim().toUpperCase();
         
@@ -292,7 +324,7 @@ const defaultStrategy = {
         
         if (registrationStatus.toUpperCase().startsWith('OPEN')) {
             registrationStatus = registrationStatus.replace(/\s*\(.*\)/, '').trim();
-            registrationStatus = 'OPEN'; // Force to exact enum value
+            registrationStatus = 'OPEN'; 
         }
         
         if (registrationStatus !== 'UNKNOWN_REG_STATUS') {
@@ -410,17 +442,11 @@ const defaultStrategy = {
         const rebuys = ctx.data.totalRebuys || 0;
         const addons = ctx.data.totalAddons || 0;
         const buyIn = ctx.data.buyIn || 0;
-        console.log('[DEBUG-REVENUE] Calculating Revenue...');
-        console.log(`[DEBUG-REVENUE] -> Entries: ${entries}, Rebuys: ${rebuys}, Addons: ${addons}`);
-        console.log(`[DEBUG-REVENUE] -> Buy-In: ${buyIn}`);
         if (buyIn <= 0) {
-            console.log('[DEBUG-REVENUE] Skipping calculation: Buy-In is zero or missing.');
             return;
         }
         const totalTransactions = entries + rebuys + addons;
         const revenue = totalTransactions * buyIn;
-        console.log(`[DEBUG-REVENUE] -> Total Transactions: ${totalTransactions}`);
-        console.log(`[DEBUG-REVENUE] -> Calculated Revenue: ${revenue}`);
         ctx.add('revenueByBuyIns', revenue);
     },
 
@@ -430,60 +456,43 @@ const defaultStrategy = {
 
     calculateGuaranteeMetrics(ctx) {
         if (!ctx.data.hasGuarantee) {
-            console.log('[DEBUG-GUARANTEE] Skipping metrics: Game has no guarantee.');
             return; 
         }
         const prizepool = ctx.data.prizepool || 0;
         const guarantee = ctx.data.guaranteeAmount || 0;
-        console.log('[DEBUG-GUARANTEE] Calculating metrics...');
-        console.log(`[DEBUG-GUARANTEE] -> Prizepool: ${prizepool}, Guarantee: ${guarantee}`);
         if (prizepool <= 0 || guarantee <= 0) {
-            console.log('[DEBUG-GUARANTEE] Skipping metrics: Missing prizepool or guarantee amount.');
             return;
         }
         const difference = prizepool - guarantee;
-        console.log(`[DEBUG-GUARANTEE] -> Difference (Prizepool - Guarantee): ${difference}`);
         if (difference > 0) {
             ctx.add('guaranteeSurplus', difference);
             ctx.add('guaranteeOverlay', 0);
-            console.log(`[DEBUG-GUARANTEE] -> Result: Surplus=${difference}, Overlay=0`);
         } else {
             ctx.add('guaranteeSurplus', 0);
             ctx.add('guaranteeOverlay', Math.abs(difference));
-            console.log(`[DEBUG-GUARANTEE] -> Result: Surplus=0, Overlay=${Math.abs(difference)}`);
         }
     },
 
     calculateTotalRake(ctx) {
         const rake = ctx.data.rake;
         if (rake === undefined || rake === null || rake <= 0) {
-            console.log('[DEBUG-RAKE] Skipping total rake calculation: Rake is unknown or zero.');
             return;
         }
         const entries = ctx.data.totalEntries || 0;
         const rebuys = ctx.data.totalRebuys || 0;
-        console.log('[DEBUG-RAKE] Calculating total rake...');
-        console.log(`[DEBUG-RAKE] -> Rake per transaction: ${rake}, Entries: ${entries}, Rebuys: ${rebuys}`);
         const totalRakedTransactions = entries + rebuys;
-        console.log(`[DEBUG-RAKE] -> Total Raked Transactions: ${totalRakedTransactions}`);
         const totalRake = totalRakedTransactions * rake;
         ctx.add('totalRake', totalRake);
-        console.log(`[DEBUG-RAKE] -> Final Total Rake: ${totalRake}`);
     },
 
     calculateProfitLoss(ctx) {
         const revenue = ctx.data.revenueByBuyIns;
         const prizepool = ctx.data.prizepool;
         if (revenue === undefined || revenue === null || prizepool === undefined || prizepool === null) {
-            console.log('[DEBUG-PROFIT] Skipping profit/loss calculation: Missing revenue or prizepool data.');
             return;
         }
-        console.log('[DEBUG-PROFIT] Calculating profit/loss...');
-        console.log(`[DEBUG-PROFIT] -> Revenue By Buy-Ins: ${revenue}`);
-        console.log(`[DEBUG-PROFIT] -> Prizepool: ${prizepool}`);
         const profitLoss = revenue - prizepool;
         ctx.add('profitLoss', profitLoss);
-        console.log(`[DEBUG-PROFIT] -> Final Profit/Loss: ${profitLoss}`);
     },
     
     getSeating(ctx) {
@@ -530,7 +539,6 @@ const defaultStrategy = {
         if (entries.length === 0) {
             const resultTable = ctx.$('h4.cw-text-center:contains("Result")').next('table').find('tbody tr');
             if (resultTable.length > 0) {
-                console.log("[DEBUG-ENTRIES] 'Entries' table not found, parsing player list from 'Result' table.");
                 resultTable.each((i, el) => {
                     const $row = ctx.$(el);
                     if ($row.find('th').length > 0) return;
@@ -543,17 +551,14 @@ const defaultStrategy = {
         }
         if (entries.length > 0) {
             ctx.add('entries', entries);
-            console.log(`[DEBUG-ENTRIES] Found ${entries.length} total player entries.`);
         }
     },
 
     getLiveData(ctx) {
         const currentStatus = ctx.data.gameStatus;
         if (currentStatus === 'FINISHED' || currentStatus === 'CANCELLED') {
-            console.log(`[DEBUG-LIVE] Skipping live data scrape, game status is ${currentStatus}.`);
             return;
         }
-        console.log(`[DEBUG-LIVE] Scraping live data, game status is ${currentStatus}.`);
         
         // Enhanced players remaining detection
         let playersRemaining = 0;
@@ -561,21 +566,18 @@ const defaultStrategy = {
         // Method 1: Try to get from seating data (players with current seats)
         if (ctx.data.seating && ctx.data.seating.length > 0) {
             playersRemaining = ctx.data.seating.length;
-            console.log(`[DEBUG-LIVE] Players remaining from seating data: ${playersRemaining}`);
         }
         
         // Method 2: Parse from the playersentries text (format: "remaining/total")
         if (playersRemaining === 0) {
             const selector = '#cw_clock_playersentries';
             const entriesText = ctx.$(selector).first().text().trim();
-            console.log(`[DEBUG-LIVE] Entries text found: "${entriesText}"`);
             
             if (entriesText && entriesText.includes('/')) {
                 const parts = entriesText.split('/');
                 const remaining = parseInt(parts[0].trim(), 10);
                 if (!isNaN(remaining)) {
                     playersRemaining = remaining;
-                    console.log(`[DEBUG-LIVE] Players remaining from entries text: ${playersRemaining}`);
                 }
             }
         }
@@ -584,24 +586,19 @@ const defaultStrategy = {
         if (playersRemaining === 0 && ctx.gameData) {
             if (ctx.gameData.players_remaining !== undefined) {
                 playersRemaining = ctx.gameData.players_remaining;
-                console.log(`[DEBUG-LIVE] Players remaining from embedded data: ${playersRemaining}`);
             }
         }
         
         ctx.add('playersRemaining', playersRemaining);
-        console.log(`[DEBUG-LIVE] -> Final Players Remaining: ${playersRemaining}`);
         
-        const totalChips = ctx.parseNumeric('totalChipsInPlay', '#cw_clock_entire_stack');
-        console.log(`[DEBUG-LIVE] -> Total Chips: ${totalChips !== undefined ? totalChips : 'Not Found'}`);
-        const avgStack = ctx.parseNumeric('averagePlayerStack', '#cw_clock_avg_stack');
-        console.log(`[DEBUG-LIVE] -> Average Stack: ${avgStack !== undefined ? avgStack : 'Not Found'}`);
+        ctx.parseNumeric('totalChipsInPlay', '#cw_clock_entire_stack');
+        ctx.parseNumeric('averagePlayerStack', '#cw_clock_avg_stack');
     },
 
     getResults(ctx) {
         const results = [];
         const resultTable = ctx.$('h4.cw-text-center:contains("Result")').next('table').find('tbody tr');
         if (resultTable.length > 0) {
-            console.log("[DEBUG-RESULTS] Found 'Result' table, parsing as a finished game.");
             resultTable.each((i, el) => {
                 const $row = ctx.$(el);
                 const parsedRank = parseInt($row.find('td').eq(0).text().trim(), 10);
@@ -649,12 +646,9 @@ const defaultStrategy = {
                     });
                 }
             });
-        } else {
-            console.log("[DEBUG-RESULTS] No 'Result' table found. Could not parse results.");
         }
         if (results.length > 0) {
             ctx.add('results', results);
-            console.log(`[DEBUG-RESULTS] Found ${results.length} results entries.`);
         }
     },
 
@@ -732,7 +726,6 @@ const defaultStrategy = {
     getMatchingVenue(ctx, venues, seriesTitles = []) {
         const gameName = ctx.data.name;
         if (!gameName || !venues || venues.length === 0) {
-            console.log('[DEBUG-VENUE-MATCH] Skipped: Missing scraped name or venue list.');
             // Return null match instead of undefined
             ctx.add('venueMatch', { 
                 autoAssignedVenue: null, 
@@ -777,7 +770,6 @@ const defaultStrategy = {
                 matchName: name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
             }));
         });
-        console.log(`[DEBUG-VENUE-MATCH] Cleaned scraped name for fuzzy venue match: "${cleanedScrapedName}"`);
         const { ratings } = stringSimilarity.findBestMatch(
             cleanedScrapedName,
             allNamesToMatch.map(item => item.matchName)
@@ -819,23 +811,17 @@ const defaultStrategy = {
         ctx.add('venueMatch', venueMatch);
     },
 
-    /**
-     * ✅ REFACTORED: Now only overrides the isSatellite flag if keywords are found.
-     * The default (false) is set by initializeDefaultFlags.
-     */
     getTournamentFlags(ctx) {
         const name = ctx.data.name || '';
         const satelliteKeywords = ['satellite', 'satty'];
         const satelliteRegex = new RegExp(`\\b(${satelliteKeywords.join('|')})\\b`, 'i');
 
         if (satelliteRegex.test(name)) {
-            ctx.add('isSatellite', true); // Override the default
+            ctx.add('isSatellite', true); 
         }
-        // ✅ REMOVED: No 'else' block needed, as the default is already false.
     },
 
     getGameFrequency(ctx) {
-        // ... (no changes in this function)
         const name = (ctx.data.name || '').toUpperCase();
         const weekdays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
         const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER', 'JAN', 'FEB', 'MAR', 'APR', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -864,12 +850,10 @@ const defaultStrategy = {
                 const match = url.match(/[?&]id=(\d+)/);
                 if (match && match[1]) {
                     ctx.add('tournamentId', match[1]);
-                    console.log(`[DEBUG-ID] Extracted tournament ID from URL: ${match[1]}`);
                 }
             } else if (/^\d+$/.test(url)) {
                 // If it's just a number, that's the tournament ID
                 ctx.add('tournamentId', url);
-                console.log(`[DEBUG-ID] Using direct tournament ID: ${url}`);
             }
         } catch (e) {
             console.warn('Could not extract tournament ID from URL:', e.message);
@@ -882,7 +866,9 @@ const runScraper = (html, structureLabel, venues = [], seriesTitles = [], url = 
     const strategy = defaultStrategy;
     console.log(`[Scraper] Using unified robust strategy.`);
 
+    // Execution order with detectPageState FIRST
     const executionOrder = [
+        'detectPageState', // <-- NEW: Runs first to detect special states
         'initializeDefaultFlags',
         'getName',
         'getTournamentFlags',
@@ -918,7 +904,13 @@ const runScraper = (html, structureLabel, venues = [], seriesTitles = [], url = 
         'getTournamentId',
     ];
 
-    executionOrder.forEach(key => {
+    for (const key of executionOrder) {
+        // If detectPageState set the abort flag, stop processing immediately
+        if (ctx.abortScrape) {
+            console.log(`[Scraper] Aborting scrape early due to detected page state: ${ctx.data.gameStatus}`);
+            break;
+        }
+
         if (typeof strategy[key] === 'function') {
              try {
                 if (key === 'getName') {
@@ -936,7 +928,7 @@ const runScraper = (html, structureLabel, venues = [], seriesTitles = [], url = 
         } else {
              console.warn(`[Scraper] Strategy function "${key}" not found in defaultStrategy.`);
         }
-    });
+    }
 
     ctx.add('rawHtml', html);
     return { data: ctx.data, foundKeys: Array.from(ctx.foundKeys) };
@@ -946,8 +938,12 @@ module.exports = {
     runScraper,
     getStatusAndReg: (html) => {
         const ctx = new ScrapeContext(html);
-        defaultStrategy.getStatus(ctx);
-        const registrationStatus = defaultStrategy.getRegistrationStatus(ctx);
-        return { gameStatus: ctx.data.gameStatus, registrationStatus };
+        // Check page state first here too for quick status checks
+        defaultStrategy.detectPageState(ctx);
+        if (!ctx.abortScrape) {
+             defaultStrategy.getStatus(ctx);
+             defaultStrategy.getRegistrationStatus(ctx);
+        }
+        return { gameStatus: ctx.data.gameStatus, registrationStatus: ctx.data.registrationStatus };
     }
 };

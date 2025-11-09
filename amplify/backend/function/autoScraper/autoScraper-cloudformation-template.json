@@ -31,6 +31,18 @@
     "functionplayerDataProcessorName": {
       "Type": "String",
       "Default": "functionplayerDataProcessorName"
+    },
+    "functiongetModelCountName": {
+      "Type": "String",
+      "Default": "functiongetModelCountName"
+    },
+    "functions3ManagementFunctionName": {
+      "Type": "String",
+      "Default": "functions3ManagementFunctionName"
+    },
+    "functionscraperManagementName": {
+      "Type": "String",
+      "Default": "functionscraperManagementName"
     }
   },
   "Conditions": {
@@ -227,6 +239,41 @@
                   }
                 ]
               ]
+            },
+            "FUNCTION_GETMODELCOUNT_NAME": {
+              "Ref": "functiongetModelCountName"
+            },
+            "FUNCTION_S3MANAGEMENTFUNCTION_NAME": {
+              "Ref": "functions3ManagementFunctionName"
+            },
+            "FUNCTION_SCRAPERMANAGEMENT_NAME": {
+              "Ref": "functionscraperManagementName"
+            },
+            "API_KINGSROOM_S3STORAGETABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:S3StorageTable:Name"
+              }
+            },
+            "API_KINGSROOM_S3STORAGETABLE_ARN": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:dynamodb:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":table/",
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:S3StorageTable:Name"
+                    }
+                  }
+                ]
+              ]
             }
           }
         },
@@ -401,6 +448,35 @@
                         "Ref": "apikingsroomGraphQLAPIIdOutput"
                       },
                       "/types/Subscription/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "lambda:Get*",
+                "lambda:List*",
+                "lambda:Invoke*"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:lambda:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":function:",
+                      {
+                        "Ref": "functiongetModelCountName"
+                      }
                     ]
                   ]
                 }
@@ -777,6 +853,70 @@
                       {
                         "Fn::ImportValue": {
                           "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:ScrapeAttemptTable:Name"
+                        }
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:Put*",
+                "dynamodb:Create*",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PartiQLInsert",
+                "dynamodb:Get*",
+                "dynamodb:BatchGetItem",
+                "dynamodb:List*",
+                "dynamodb:Describe*",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:PartiQLSelect",
+                "dynamodb:Update*",
+                "dynamodb:RestoreTable*",
+                "dynamodb:PartiQLUpdate"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":table/",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:S3StorageTable:Name"
+                        }
+                      }
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":table/",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${apikingsroomGraphQLAPIIdOutput}:GetAtt:S3StorageTable:Name"
                         }
                       },
                       "/index/*"

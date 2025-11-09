@@ -5538,6 +5538,20 @@ export const schema = {
                     "type": "Int",
                     "isRequired": false,
                     "attributes": []
+                },
+                "lastCacheHitAt": {
+                    "name": "lastCacheHitAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "contentSize": {
+                    "name": "contentSize",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
                 }
             },
             "syncable": true,
@@ -6016,6 +6030,16 @@ export const schema = {
                         "name": "byScrapeURL",
                         "fields": [
                             "scrapeURLId",
+                            "scrapedAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byURL",
+                        "fields": [
+                            "url",
                             "scrapedAt"
                         ]
                     }
@@ -8581,5 +8605,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "787ccda9f88c09c1a7e7d87febe614a7"
+    "version": "3ca76bbe2d153615824e53fc2f71006f"
 };

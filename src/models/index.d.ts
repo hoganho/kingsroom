@@ -2830,6 +2830,8 @@ type EagerScrapeURL = {
   readonly totalContentChanges?: number | null;
   readonly lastHeaderCheckAt?: string | null;
   readonly cachedContentUsedCount?: number | null;
+  readonly lastCacheHitAt?: string | null;
+  readonly contentSize?: number | null;
 }
 
 type LazyScrapeURL = {
@@ -2882,6 +2884,8 @@ type LazyScrapeURL = {
   readonly totalContentChanges?: number | null;
   readonly lastHeaderCheckAt?: string | null;
   readonly cachedContentUsedCount?: number | null;
+  readonly lastCacheHitAt?: string | null;
+  readonly contentSize?: number | null;
 }
 
 export declare type ScrapeURL = LazyLoading extends LazyLoadingDisabled ? EagerScrapeURL : LazyScrapeURL

@@ -7,7 +7,10 @@ import {
     RefreshCw, 
     ExternalLink
 } from 'lucide-react';
-import { scraperManagementQueries, scraperManagementMutations } from '../../graphql/scraperManagement';
+import { searchScrapeURLs } from '../../graphql/queries';
+import { 
+    bulkModifyScrapeURLs 
+} from '../../graphql/mutations';
 import type { ScrapeURL, ScrapeURLStatus } from '../../API';
 import { URLStatusBadge } from '../../components/scraper/admin/ScraperAdminShared';
 
@@ -22,7 +25,7 @@ export const URLManagementTab: React.FC = () => {
         try {
             setLoading(true);
             const response = await client.graphql({
-                query: scraperManagementQueries.searchScrapeURLs,
+                query: searchScrapeURLs,
                 variables: { 
                     status: statusFilter === 'ALL' ? null : statusFilter,
                     limit: 100 
@@ -73,7 +76,7 @@ export const URLManagementTab: React.FC = () => {
 
         try {
             await client.graphql({
-                query: scraperManagementMutations.bulkModifyScrapeURLs,
+                query: bulkModifyScrapeURLs,
                 variables: {
                     urls: Array.from(selectedURLs),
                     status,

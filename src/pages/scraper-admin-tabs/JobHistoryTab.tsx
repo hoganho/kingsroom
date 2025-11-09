@@ -6,7 +6,7 @@ import {
     RefreshCw, 
     Eye
 } from 'lucide-react';
-import { scraperManagementQueries } from '../../graphql/scraperManagement'; // Removed .ts
+import { getScraperJobsReport } from '../../graphql/queries';
 import type { ScraperJob, ScraperJobStatus } from '../../API'; // Removed .ts
 import { JobStatusBadge } from '../../components/scraper/admin/ScraperAdminShared'; // Removed .tsx
 import { JobDetailsModal } from '../../components/scraper/admin/JobDetailsModal'; // Removed .tsx
@@ -22,7 +22,7 @@ export const JobHistoryTab: React.FC = () => {
         try {
             setLoading(true);
             const response = await client.graphql({
-                query: scraperManagementQueries.getScraperJobsReport,
+                query: getScraperJobsReport,
                 variables: { 
                     status: statusFilter === 'ALL' ? null : statusFilter,
                     limit: 50 

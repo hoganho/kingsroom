@@ -1,504 +1,747 @@
-// enhanced-handleFetch.js
-// Enhanced handleFetch function with S3 storage and caching support
-// Replace your existing handleFetch function with this version
+// enhanced-handleFetch-complete.js
+// Complete S3-first caching implementation for WebScraper Lambda
+// Full production version with all error handling and logging
 
-const axios = require('axios');
-const { v4: uuidv4 } = require('uuid');
-const {
-    storeHtmlInS3,
-    getHtmlFromS3,
-    calculateContentHash
-} = require('./s3-helpers');
+const https = require('https');
+const http = require('http');
+const { URL } = require('url');
+const zlib = require('zlib');
+const { DynamoDBDocumentClient, UpdateCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
+const { getHtmlFromS3, storeHtmlInS3, calculateContentHash } = require('./s3-helpers');
+
+// Configuration constants
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000;
+const REQUEST_TIMEOUT = 30000;
+const HEAD_TIMEOUT = 5000;
+const MAX_HTML_SIZE = 10 * 1024 * 1024; // 10MB limit
+const CACHE_DEBUG = process.env.CACHE_DEBUG === 'true';
 
 /**
- * Check if content has changed using HTTP headers
- * @param {string} url - URL to check
+ * Main fetch handler with S3-first caching strategy
+ * This is the primary entry point for all HTML fetching operations
+ * * @param {string} url - URL to fetch
  * @param {object} scrapeURLRecord - Existing ScrapeURL record from database
- * @returns {object} Change detection result
+ * @param {string} entityId - Entity ID for multi-tenant support
+ * @param {number} tournamentId - Tournament ID from URL
+ * @param {boolean} forceRefresh - Bypass all caches if true
+ * @param {object} ddbDocClient - DynamoDB document client
+ * @returns {object} Fetch result with HTML and metadata
  */
-const checkForChanges = async (url, scrapeURLRecord) => {
+const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRefresh = false, ddbDocClient) => {
+    const startTime = Date.now();
+    const scrapeURLTable = getTableName('ScrapeURL');
+    
+    // Initialize detailed fetch statistics
+    const fetchStats = {
+        startTime,
+        url,
+        tournamentId,
+        entityId,
+        forceRefresh,
+        s3Checked: false,
+        s3Hit: false,
+        httpHeadersChecked: false,
+        httpNotModified: false,
+        liveScraped: false,
+        storedInS3: false,
+        s3SkippedReason: null, // Added to track why S3 might be skipped
+        errors: []
+    };
+    
+    // Logging helper
+    const log = (level, message, data = {}) => {
+        const logEntry = {
+            timestamp: new Date().toISOString(),
+            level,
+            message,
+            url,
+            tournamentId,
+            entityId,
+            ...data
+        };
+        
+        if (CACHE_DEBUG || level === 'error') {
+            console.log(`[HandleFetch] ${JSON.stringify(logEntry)}`);
+        }
+    };
+    
+    log('info', 'Starting fetch process', { forceRefresh, hasS3Key: !!scrapeURLRecord?.latestS3Key });
+    
     try {
-        // Make HEAD request to check headers without downloading content
-        const headResponse = await axios.head(url, {
-            timeout: 5000,
-            headers: { 
-                'User-Agent': 'KingsRoom-Scraper/2.0',
-                'Accept': 'text/html,application/xhtml+xml'
-            },
-            validateStatus: (status) => status < 500
-        });
-        
-        const headers = headResponse.headers;
-        const newEtag = headers.etag || headers.ETag;
-        const newLastModified = headers['last-modified'] || headers['Last-Modified'];
-        
-        console.log(`[checkForChanges] Headers for ${url}:`, {
-            etag: newEtag,
-            lastModified: newLastModified,
-            oldEtag: scrapeURLRecord.etag,
-            oldLastModified: scrapeURLRecord.lastModifiedHeader
-        });
-        
-        // Check ETag first (strongest indicator)
-        if (newEtag && scrapeURLRecord.etag) {
-            if (newEtag === scrapeURLRecord.etag) {
-                console.log(`[checkForChanges] ETag unchanged for ${url}`);
-                return { 
-                    hasChanged: false, 
-                    reason: 'etag_match',
-                    newEtag,
-                    newLastModified
-                };
-            } else {
-                console.log(`[checkForChanges] ETag changed for ${url}`);
-                return { 
-                    hasChanged: true, 
-                    reason: 'etag_changed',
-                    newEtag,
-                    newLastModified
-                };
-            }
+        // Validate inputs
+        if (!url || !isValidUrl(url)) {
+            throw new Error(`Invalid URL provided: ${url}`);
         }
         
-        // Check Last-Modified if no ETag
-        if (newLastModified && scrapeURLRecord.lastModifiedHeader) {
-            const newDate = new Date(newLastModified);
-            const oldDate = new Date(scrapeURLRecord.lastModifiedHeader);
+        if (!entityId) {
+            throw new Error('Entity ID is required for fetch operation');
+        }
+        
+        if (!scrapeURLRecord || !scrapeURLRecord.id) {
+            throw new Error('Valid ScrapeURL record is required');
+        }
+        
+        // Check if S3 storage is enabled for this URL
+        const s3Enabled = scrapeURLRecord.s3StorageEnabled !== false;
+        
+        // ========================================
+        // STEP 1: CHECK S3 STORAGE FIRST
+        // ========================================
+        if (!forceRefresh && s3Enabled && scrapeURLRecord.latestS3Key) {
+            fetchStats.s3Checked = true;
             
-            if (newDate <= oldDate) {
-                console.log(`[checkForChanges] Last-Modified unchanged for ${url}`);
-                return { 
-                    hasChanged: false, 
-                    reason: 'last_modified_match',
-                    newEtag,
-                    newLastModified
-                };
-            } else {
-                console.log(`[checkForChanges] Last-Modified changed for ${url}`);
-                return { 
-                    hasChanged: true, 
-                    reason: 'last_modified_changed',
-                    newEtag,
-                    newLastModified
-                };
+            try {
+                log('debug', 'Checking S3 cache', { s3Key: scrapeURLRecord.latestS3Key });
+                
+                const s3Content = await getHtmlFromS3(scrapeURLRecord.latestS3Key);
+                
+                if (s3Content && s3Content.html) {
+                    // Validate the HTML content
+                    if (isValidHtml(s3Content.html)) {
+                        log('info', 'S3 cache hit - using cached content', {
+                            s3Key: scrapeURLRecord.latestS3Key,
+                            contentLength: s3Content.html.length,
+                            metadata: s3Content.metadata
+                        });
+                        
+                        fetchStats.s3Hit = true;
+                        
+                        // Update cache hit statistics in database
+                        await updateCacheHitStats(scrapeURLRecord.id, ddbDocClient, scrapeURLTable);
+                        
+                        return {
+                            success: true,
+                            html: s3Content.html,
+                            source: 'S3_CACHE',
+                            s3Key: scrapeURLRecord.latestS3Key,
+                            headers: s3Content.metadata || {},
+                            usedCache: true,
+                            cacheType: 'S3',
+                            contentHash: s3Content.metadata?.contenthash || calculateContentHash(s3Content.html),
+                            contentSize: s3Content.html.length,
+                            fetchDuration: Date.now() - startTime,
+                            fetchStats,
+                            timestamp: new Date().toISOString()
+                        };
+                    } else {
+                        log('warn', 'S3 content failed validation', { s3Key: scrapeURLRecord.latestS3Key });
+                        fetchStats.errors.push('S3 content validation failed');
+                    }
+                }
+            } catch (s3Error) {
+                log('warn', 'S3 retrieval failed', { 
+                    error: s3Error.message,
+                    s3Key: scrapeURLRecord.latestS3Key 
+                });
+                fetchStats.errors.push(`S3 error: ${s3Error.message}`);
+                // Continue to next step instead of failing
             }
         }
         
-        // No headers to compare or headers missing
-        console.log(`[checkForChanges] No comparable headers for ${url}, assuming changed`);
-        return { 
-            hasChanged: true, 
-            reason: 'no_headers_to_compare',
-            newEtag,
-            newLastModified
+        // ========================================
+        // STEP 2: CHECK HTTP CACHING HEADERS
+        // ========================================
+        if (!forceRefresh && (scrapeURLRecord.etag || scrapeURLRecord.lastModifiedHeader)) {
+            fetchStats.httpHeadersChecked = true;
+            
+            try {
+                log('debug', 'Checking HTTP cache headers', {
+                    etag: scrapeURLRecord.etag,
+                    lastModified: scrapeURLRecord.lastModifiedHeader
+                });
+                
+                const headersCheckResult = await checkHTTPHeaders(url, scrapeURLRecord);
+                
+                if (headersCheckResult.notModified) {
+                    log('info', 'HTTP 304 Not Modified - content unchanged');
+                    fetchStats.httpNotModified = true;
+                    
+                    // Update header check statistics
+                    await updateHeaderCheckStats(scrapeURLRecord.id, ddbDocClient, scrapeURLTable);
+                    
+                    // Try to return S3 content if available
+                    if (scrapeURLRecord.latestS3Key) {
+                        try {
+                            const s3Content = await getHtmlFromS3(scrapeURLRecord.latestS3Key);
+                            if (s3Content && s3Content.html) {
+                                return {
+                                    success: true,
+                                    html: s3Content.html,
+                                    source: 'HTTP_304_CACHE',
+                                    s3Key: scrapeURLRecord.latestS3Key,
+                                    headers: headersCheckResult.headers,
+                                    usedCache: true,
+                                    cacheType: 'HTTP_304',
+                                    contentHash: scrapeURLRecord.contentHash,
+                                    contentSize: s3Content.html.length,
+                                    fetchDuration: Date.now() - startTime,
+                                    fetchStats,
+                                    timestamp: new Date().toISOString()
+                                };
+                            }
+                        } catch (error) {
+                            log('warn', 'Failed to retrieve S3 content after 304', { error: error.message });
+                            fetchStats.errors.push(`S3 retrieval after 304 failed: ${error.message}`);
+                        }
+                    }
+                    
+                    // If we can't get S3 content, we need to fetch fresh
+                    log('info', 'Content unchanged but no cached version available, fetching fresh');
+                } else if (headersCheckResult.newEtag || headersCheckResult.newLastModified) {
+                    log('info', 'HTTP headers indicate content has changed', {
+                        oldEtag: scrapeURLRecord.etag,
+                        newEtag: headersCheckResult.newEtag,
+                        oldLastModified: scrapeURLRecord.lastModifiedHeader,
+                        newLastModified: headersCheckResult.newLastModified
+                    });
+                }
+            } catch (headerError) {
+                log('warn', 'HTTP header check failed', { error: headerError.message });
+                fetchStats.errors.push(`Header check error: ${headerError.message}`);
+                // Continue to live scraping
+            }
+        }
+        
+        // ========================================
+        // STEP 3: FETCH FROM LIVE SITE
+        // ========================================
+        log('info', 'Fetching from live website');
+        fetchStats.liveScraped = true;
+        
+        const liveResult = await fetchFromLiveSiteWithRetries(url, MAX_RETRIES);
+        
+        if (!liveResult.success) {
+            throw new Error(`Live fetch failed after ${MAX_RETRIES} retries: ${liveResult.error}`);
+        }
+        
+        // Validate fetched content
+        if (!liveResult.html || liveResult.html.trim().length === 0) {
+            throw new Error('Fetched content is empty');
+        }
+        
+        if (liveResult.html.length > MAX_HTML_SIZE) {
+            throw new Error(`HTML content too large: ${liveResult.html.length} bytes (max: ${MAX_HTML_SIZE})`);
+        }
+        
+        // Calculate content hash
+        const contentHash = calculateContentHash(liveResult.html);
+        
+        // Check if content has actually changed
+        const contentChanged = contentHash !== scrapeURLRecord.contentHash;
+        
+        log('info', 'Live fetch successful', {
+            contentLength: liveResult.html.length,
+            statusCode: liveResult.statusCode,
+            contentChanged,
+            newHash: contentHash.substring(0, 8),
+            oldHash: scrapeURLRecord.contentHash?.substring(0, 8)
+        });
+        
+        // ========================================
+        // STEP 4: STORE IN S3 (if enabled AND appropriate)
+        // ========================================
+        let s3Result = null;
+
+        // ✅ NEW: Req #5 - Check for "Tournament Not Found" BEFORE saving to S3.
+        // We do standard string matching here to avoid full parsing overhead in the fetcher.
+        const isNotFound = isTournamentNotFound(liveResult.html);
+
+        if (s3Enabled && !isNotFound) {
+            try {
+                log('debug', 'Storing HTML in S3');
+                
+                s3Result = await storeHtmlInS3(
+                    liveResult.html,
+                    url,
+                    entityId,
+                    tournamentId,
+                    liveResult.headers,
+                    false // isManual
+                );
+                
+                fetchStats.storedInS3 = true;
+                
+                log('info', 'Successfully stored in S3', {
+                    s3Key: s3Result.s3Key,
+                    contentSize: s3Result.contentSize,
+                    bucket: s3Result.s3Bucket
+                });
+            } catch (s3Error) {
+                log('error', 'Failed to store in S3', { error: s3Error.message });
+                fetchStats.errors.push(`S3 storage error: ${s3Error.message}`);
+                // Continue even if S3 storage fails
+            }
+        } else if (isNotFound) {
+             // Req #5: Explicitly skip S3 for "Not Found" to save space
+             fetchStats.storedInS3 = false;
+             fetchStats.s3SkippedReason = 'TOURNAMENT_NOT_FOUND';
+             log('info', 'Skipped S3 storage: Tournament Not Found detected');
+        }
+        
+        // ========================================
+        // STEP 5: UPDATE SCRAPEURL RECORD
+        // ========================================
+        try {
+            const updateData = {
+                lastScrapedAt: new Date().toISOString(),
+                timesScraped: (scrapeURLRecord.timesScraped || 0) + 1,
+                contentHash: contentHash,
+                contentSize: liveResult.html.length,
+                etag: liveResult.headers?.etag || liveResult.headers?.ETag || null,
+                lastModifiedHeader: liveResult.headers?.['last-modified'] || liveResult.headers?.['Last-Modified'] || null,
+                lastHeaderCheckAt: new Date().toISOString()
+            };
+            
+            // Add S3 fields if storage succeeded
+            if (s3Result) {
+                updateData.latestS3Key = s3Result.s3Key;
+                updateData.s3StoragePrefix = `entities/${entityId}/html/${tournamentId}`;
+            }
+            
+            // Track content changes
+            if (contentChanged) {
+                updateData.lastContentChangeAt = new Date().toISOString();
+                updateData.totalContentChanges = (scrapeURLRecord.totalContentChanges || 0) + 1;
+                updateData.hasDataChanges = true;
+            }
+            
+            await updateScrapeURLRecord(scrapeURLRecord.id, updateData, ddbDocClient, scrapeURLTable);
+            
+            log('debug', 'Updated ScrapeURL record', { updates: Object.keys(updateData) });
+        } catch (updateError) {
+            log('error', 'Failed to update ScrapeURL record', { error: updateError.message });
+            fetchStats.errors.push(`Database update error: ${updateError.message}`);
+            // Don't fail the whole operation for this
+        }
+        
+        // ========================================
+        // RETURN SUCCESS RESPONSE
+        // ========================================
+        return {
+            success: true,
+            html: liveResult.html,
+            source: 'LIVE',
+            s3Key: s3Result?.s3Key || null,
+            headers: liveResult.headers,
+            usedCache: false,
+            cacheType: 'NONE',
+            storedInS3: !!s3Result,
+            s3SkippedReason: fetchStats.s3SkippedReason, // Return the reason if skipped
+            contentHash: contentHash,
+            contentSize: liveResult.html.length,
+            contentChanged,
+            fetchDuration: Date.now() - startTime,
+            fetchStats,
+            timestamp: new Date().toISOString()
         };
         
     } catch (error) {
-        console.log(`[checkForChanges] HEAD request failed for ${url}: ${error.message}`);
-        // If HEAD request fails, we need to fetch content
-        return { 
-            hasChanged: true, 
-            reason: 'head_request_failed',
-            error: error.message
+        log('error', 'Fetch operation failed', {
+            error: error.message,
+            stack: error.stack,
+            duration: Date.now() - startTime
+        });
+        
+        fetchStats.errors.push(error.message);
+        
+        // Update error statistics in ScrapeURL
+        if (scrapeURLRecord?.id) {
+            try {
+                await updateScrapeURLError(scrapeURLRecord.id, error.message, ddbDocClient, scrapeURLTable);
+            } catch (updateError) {
+                log('error', 'Failed to update error statistics', { error: updateError.message });
+            }
+        }
+        
+        // Return error response
+        return {
+            success: false,
+            error: error.message,
+            source: 'ERROR',
+            fetchDuration: Date.now() - startTime,
+            fetchStats,
+            timestamp: new Date().toISOString()
         };
     }
 };
 
 /**
- * Enhanced handleFetch with S3 storage and caching
- * @param {string} url - URL to scrape
- * @param {string} jobId - Optional job ID for tracking
- * @param {string} triggerSource - Source that triggered this scrape
- * @param {boolean} forceRefresh - Bypass cache and fetch fresh content
- * @returns {object} Scraped data
+ * Check HTTP headers to determine if content has changed
+ * Uses HEAD request with conditional headers
  */
-const handleFetchEnhanced = async (url, jobId = null, triggerSource = null, forceRefresh = false) => {
-    console.log(`[handleFetch] START processing ${url}. Force refresh: ${forceRefresh}`);
-    
-    const existingGameId = await checkExistingGame(url);
-    const entityId = await getEntityIdFromUrl(url);
-    
-    // Extract tournament ID from URL
-    const urlIdMatch = url.match(/id=(\d+)/);
-    const tournamentId = urlIdMatch ? parseInt(urlIdMatch[1], 10) : 0;
-    
-    // Get ScrapeURL record
-    const scrapeURLTable = getTableName('ScrapeURL');
-    const scrapeURLResult = await ddbDocClient.send(new QueryCommand({
-        TableName: scrapeURLTable,
-        IndexName: 'byURL',
-        KeyConditionExpression: 'url = :url',
-        ExpressionAttributeValues: { ':url': url },
-        Limit: 1
-    }));
-    
-    const scrapeURLRecord = scrapeURLResult.Items?.[0];
-    let scrapeURLId = scrapeURLRecord?.id;
-    
-    // Initialize tracking variables
-    let html = null;
-    let fetchedFromSource = false;
-    let s3StorageResult = null;
-    let cacheReason = null;
-    let responseHeaders = {};
-    
-    // Determine if we need to fetch fresh content
-    if (!forceRefresh && scrapeURLRecord?.s3StorageEnabled !== false && scrapeURLRecord?.latestS3Key) {
-        console.log(`[handleFetch] Checking if cached content can be used`);
-        
-        // Check if content has changed
-        const changeCheck = await checkForChanges(url, scrapeURLRecord);
-        
-        if (!changeCheck.hasChanged) {
-            // Use cached content from S3
-            console.log(`[handleFetch] Using cached content from S3 for ${url} (reason: ${changeCheck.reason})`);
-            const s3Content = await getHtmlFromS3(scrapeURLRecord.latestS3Key);
-            
-            if (s3Content) {
-                html = s3Content.html;
-                cacheReason = changeCheck.reason;
-                
-                // Update cached content usage count and last header check
-                await ddbDocClient.send(new UpdateCommand({
-                    TableName: scrapeURLTable,
-                    Key: { id: scrapeURLId },
-                    UpdateExpression: 'SET cachedContentUsedCount = if_not_exists(cachedContentUsedCount, :zero) + :inc, lastHeaderCheckAt = :now',
-                    ExpressionAttributeValues: {
-                        ':zero': 0,
-                        ':inc': 1,
-                        ':now': new Date().toISOString()
-                    }
-                }));
-                
-                console.log(`[handleFetch] Successfully loaded cached content (${(s3Content.html.length / 1024).toFixed(2)} KB)`);
-            } else {
-                console.log(`[handleFetch] Failed to load cached content from S3, will fetch fresh`);
+const checkHTTPHeaders = async (url, scrapeURLRecord) => {
+    return new Promise((resolve) => {
+        const urlObj = new URL(url);
+        const options = {
+            method: 'HEAD',
+            hostname: urlObj.hostname,
+            port: urlObj.port,
+            path: urlObj.pathname + urlObj.search,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (compatible; TournamentScraper/1.0)',
+                'Accept': 'text/html,application/xhtml+xml'
             }
-        } else {
-            console.log(`[handleFetch] Content has changed (${changeCheck.reason}), will fetch fresh`);
-        }
-    }
-    
-    // Fetch fresh content if needed
-    if (!html) {
-        console.log('[handleFetch] Fetching fresh content from source');
-        
-        try {
-            // Prepare conditional request headers
-            const requestHeaders = {
-                'User-Agent': 'KingsRoom-Scraper/2.0',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5',
-                'Accept-Encoding': 'gzip, deflate',
-                'Connection': 'keep-alive',
-                'Upgrade-Insecure-Requests': '1'
-            };
-            
-            // Add conditional headers if we have them
-            if (!forceRefresh && scrapeURLRecord?.etag) {
-                requestHeaders['If-None-Match'] = scrapeURLRecord.etag;
-            }
-            if (!forceRefresh && scrapeURLRecord?.lastModifiedHeader) {
-                requestHeaders['If-Modified-Since'] = scrapeURLRecord.lastModifiedHeader;
-            }
-            
-            const response = await axios.get(url, {
-                timeout: 15000,
-                headers: requestHeaders,
-                validateStatus: (status) => status < 500, // Don't throw on 304
-                maxRedirects: 5,
-                responseType: 'text'
-            });
-            
-            responseHeaders = response.headers;
-            
-            if (response.status === 304) {
-                // Content hasn't changed (server confirmed), use cached version
-                console.log(`[handleFetch] Server returned 304 Not Modified for ${url}`);
-                
-                if (scrapeURLRecord?.latestS3Key) {
-                    const s3Content = await getHtmlFromS3(scrapeURLRecord.latestS3Key);
-                    html = s3Content?.html;
-                    cacheReason = '304_not_modified';
-                    
-                    // Update last header check
-                    await ddbDocClient.send(new UpdateCommand({
-                        TableName: scrapeURLTable,
-                        Key: { id: scrapeURLId },
-                        UpdateExpression: 'SET lastHeaderCheckAt = :now, cachedContentUsedCount = if_not_exists(cachedContentUsedCount, :zero) + :inc',
-                        ExpressionAttributeValues: {
-                            ':now': new Date().toISOString(),
-                            ':zero': 0,
-                            ':inc': 1
-                        }
-                    }));
-                } else {
-                    throw new Error('Server returned 304 but no cached content available');
-                }
-            } else {
-                // New content fetched
-                html = response.data;
-                fetchedFromSource = true;
-                
-                console.log(`[handleFetch] Fetched fresh content (${response.status}, ${(html.length / 1024).toFixed(2)} KB)`);
-                
-                // Store in S3
-                try {
-                    s3StorageResult = await storeHtmlInS3(
-                        html,
-                        url,
-                        entityId,
-                        tournamentId,
-                        responseHeaders,
-                        false // not manual upload
-                    );
-                    
-                    console.log(`[handleFetch] Stored HTML in S3: ${s3StorageResult.s3Key}`);
-                    
-                    // Record S3 storage in database
-                    const s3StorageTable = getTableName('S3Storage');
-                    await ddbDocClient.send(new PutCommand({
-                        TableName: s3StorageTable,
-                        Item: {
-                            id: uuidv4(),
-                            scrapeURLId: scrapeURLId || null,
-                            url: url,
-                            tournamentId: tournamentId,
-                            entityId: entityId,
-                            s3Key: s3StorageResult.s3Key,
-                            s3Bucket: s3StorageResult.s3Bucket,
-                            scrapedAt: s3StorageResult.timestamp,
-                            contentSize: s3StorageResult.contentSize,
-                            contentHash: s3StorageResult.contentHash,
-                            etag: responseHeaders.etag || responseHeaders.ETag || null,
-                            lastModified: responseHeaders['last-modified'] || responseHeaders['Last-Modified'] || null,
-                            headers: JSON.stringify(responseHeaders),
-                            dataExtracted: false,
-                            gameId: existingGameId,
-                            isManualUpload: false,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        }
-                    }));
-                } catch (s3Error) {
-                    console.error(`[handleFetch] Failed to store in S3: ${s3Error.message}`);
-                    // Continue processing even if S3 storage fails
-                }
-            }
-        } catch (fetchError) {
-            console.error(`[handleFetch] Error fetching from source: ${fetchError.message}`);
-            
-            // Try to use cached content as fallback
-            if (!forceRefresh && scrapeURLRecord?.latestS3Key) {
-                console.log(`[handleFetch] Attempting to use cached content as fallback`);
-                const s3Content = await getHtmlFromS3(scrapeURLRecord.latestS3Key);
-                if (s3Content) {
-                    html = s3Content.html;
-                    cacheReason = 'fallback_on_error';
-                } else {
-                    throw new Error(`Failed to fetch content and no cached version available: ${fetchError.message}`);
-                }
-            } else {
-                throw fetchError;
-            }
-        }
-    }
-    
-    // Ensure we have HTML content at this point
-    if (!html) {
-        throw new Error('No HTML content available for processing');
-    }
-    
-    console.log(`[handleFetch] Processing HTML content (source: ${fetchedFromSource ? 'fresh' : `cached (${cacheReason})`})`);
-    
-    // Continue with existing scraping logic
-    const venues = await getAllVenues();
-    const seriesTitles = await getAllSeriesTitles();
-    
-    const scrapingResult = scrapeDataFromHtml(html, venues, seriesTitles, url);
-    const scrapedData = scrapingResult.data;
-    const foundKeys = scrapingResult.foundKeys;
-    
-    // Add tournament ID if found in URL
-    if (tournamentId) {
-        scrapedData.tournamentId = tournamentId;
-        if (!foundKeys.includes('tournamentId')) {
-            foundKeys.push('tournamentId');
-        }
-    }
-    
-    // Check for blank/invalid tournament
-    if (scrapedData.gameStatus === 'UNKNOWN_STATUS' || 
-        scrapedData.gameStatus === 'UNKNOWN' || 
-        !scrapedData.name || 
-        scrapedData.name.trim() === '') {
-        
-        console.log(`[handleFetch] Tournament ID not in use for ${url}`);
-        return {
-            id: existingGameId,
-            name: 'Tournament ID Not In Use',
-            gameStatus: 'NOT_IN_USE',
-            registrationStatus: 'N_A',
-            gameStartDateTime: null,
-            gameEndDateTime: null,
-            gameVariant: 'UNKNOWN',
-            prizepool: 0,
-            totalEntries: 0,
-            tournamentType: 'UNKNOWN',
-            buyIn: 0,
-            rake: 0,
-            startingStack: 0,
-            hasGuarantee: false,
-            guaranteeAmount: 0,
-            gameTags: [],
-            levels: [],
-            isInactive: true,
-            sourceUrl: url,
-            existingGameId: existingGameId,
-            entityId: entityId
         };
-    }
-    
-    // Process structure fingerprint
-    const fingerprint = await processStructureFingerprint(foundKeys, scrapedData.structureLabel, url);
-    
-    // Update or create ScrapeURL record with caching info
-    if (fetchedFromSource && s3StorageResult) {
-        const contentHashPrefix = s3StorageResult.contentHash.substring(0, 8);
         
-        // Check if content actually changed (by comparing hash)
-        const contentChanged = !scrapeURLRecord?.contentHash || 
-                             scrapeURLRecord.contentHash !== contentHashPrefix;
+        // Add conditional headers if we have them
+        if (scrapeURLRecord.etag) {
+            options.headers['If-None-Match'] = scrapeURLRecord.etag;
+        }
+        if (scrapeURLRecord.lastModifiedHeader) {
+            options.headers['If-Modified-Since'] = scrapeURLRecord.lastModifiedHeader;
+        }
         
-        // Create or update ScrapeURL record
-        if (!scrapeURLId) {
-            // Create new ScrapeURL record
-            scrapeURLId = uuidv4();
-            await ddbDocClient.send(new PutCommand({
-                TableName: scrapeURLTable,
-                Item: {
-                    id: scrapeURLId,
-                    url: url,
-                    tournamentId: tournamentId,
-                    entityId: entityId,
-                    status: 'ACTIVE',
-                    doNotScrape: false,
-                    sourceSystem: urlIdMatch ? 'TOURNAMENT' : 'UNKNOWN',
-                    placedIntoDatabase: false,
-                    firstScrapedAt: new Date().toISOString(),
-                    lastScrapedAt: new Date().toISOString(),
-                    timesScraped: 1,
-                    timesSuccessful: 1,
-                    timesFailed: 0,
-                    consecutiveFailures: 0,
-                    etag: responseHeaders.etag || responseHeaders.ETag || null,
-                    lastModifiedHeader: responseHeaders['last-modified'] || responseHeaders['Last-Modified'] || null,
-                    contentHash: contentHashPrefix,
-                    s3StoragePrefix: `entities/${entityId}/html/${tournamentId}`,
-                    latestS3Key: s3StorageResult.s3Key,
-                    s3StorageEnabled: true,
-                    lastContentChangeAt: new Date().toISOString(),
-                    totalContentChanges: 1,
-                    cachedContentUsedCount: 0,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                }
-            }));
-        } else {
-            // Update existing ScrapeURL record
-            const updateExpression = [
-                'SET lastScrapedAt = :now',
-                'updatedAt = :now',
-                'timesScraped = if_not_exists(timesScraped, :zero) + :inc',
-                'timesSuccessful = if_not_exists(timesSuccessful, :zero) + :inc',
-                'consecutiveFailures = :zero',
-                'etag = :etag',
-                'lastModifiedHeader = :lastMod',
-                'contentHash = :hash',
-                'latestS3Key = :s3Key',
-                's3StoragePrefix = :prefix'
-            ];
-            
-            const expressionValues = {
-                ':now': new Date().toISOString(),
-                ':zero': 0,
-                ':inc': 1,
-                ':etag': responseHeaders.etag || responseHeaders.ETag || null,
-                ':lastMod': responseHeaders['last-modified'] || responseHeaders['Last-Modified'] || null,
-                ':hash': contentHashPrefix,
-                ':s3Key': s3StorageResult.s3Key,
-                ':prefix': `html/${entityId}/${tournamentId}`
+        const protocol = urlObj.protocol === 'https:' ? https : http;
+        
+        const req = protocol.request(options, (res) => {
+            const result = {
+                statusCode: res.statusCode,
+                headers: res.headers,
+                notModified: res.statusCode === 304
             };
             
-            if (contentChanged) {
-                updateExpression.push('lastContentChangeAt = :changeAt');
-                updateExpression.push('totalContentChanges = if_not_exists(totalContentChanges, :zero) + :inc');
-                expressionValues[':changeAt'] = new Date().toISOString();
+            if (!result.notModified) {
+                result.newEtag = res.headers.etag || res.headers.ETag;
+                result.newLastModified = res.headers['last-modified'] || res.headers['Last-Modified'];
             }
             
-            await ddbDocClient.send(new UpdateCommand({
-                TableName: scrapeURLTable,
-                Key: { id: scrapeURLId },
-                UpdateExpression: updateExpression.join(', '),
-                ExpressionAttributeValues: expressionValues
-            }));
-        }
-    }
-    
-    // Add additional metadata to scraped data
-    scrapedData.existingGameId = existingGameId;
-    scrapedData.sourceUrl = url;
-    scrapedData.fetchedAt = new Date().toISOString();
-    scrapedData.entityId = entityId;
-    scrapedData.fetchedFromSource = fetchedFromSource;
-    scrapedData.cacheReason = cacheReason;
-    
-    // Process venue matching (existing logic)
-    if (scrapedData.venueMatch) {
-        console.log(`[handleFetch] Venue match found:`, scrapedData.venueMatch);
+            resolve(result);
+        });
         
-        if (scrapedData.venueMatch.autoAssignedVenue) {
-            scrapedData.venueId = scrapedData.venueMatch.autoAssignedVenue.id;
-            scrapedData.venueName = scrapedData.venueMatch.autoAssignedVenue.name;
-            scrapedData.venueAssignmentStatus = 'AUTO_ASSIGNED';
-            scrapedData.venueAssignmentConfidence = scrapedData.venueMatch.autoAssignedVenue.score;
-            scrapedData.requiresVenueAssignment = false;
-        } else if (scrapedData.venueMatch.suggestions && scrapedData.venueMatch.suggestions.length > 0) {
-            scrapedData.venueId = UNASSIGNED_VENUE_ID;
-            scrapedData.venueName = UNASSIGNED_VENUE_NAME;
-            scrapedData.suggestedVenueName = scrapedData.venueName;
-            scrapedData.venueAssignmentStatus = 'PENDING_ASSIGNMENT';
-            scrapedData.requiresVenueAssignment = true;
-            scrapedData.venueAssignmentConfidence = scrapedData.venueMatch.suggestions[0].score;
-        } else {
-            scrapedData.venueId = UNASSIGNED_VENUE_ID;
-            scrapedData.venueName = UNASSIGNED_VENUE_NAME;
-            scrapedData.venueAssignmentStatus = 'PENDING_ASSIGNMENT';
-            scrapedData.requiresVenueAssignment = true;
-            scrapedData.venueAssignmentConfidence = 0;
-        }
-    } else {
-        scrapedData.venueId = UNASSIGNED_VENUE_ID;
-        scrapedData.venueName = UNASSIGNED_VENUE_NAME;
-        scrapedData.venueAssignmentStatus = 'PENDING_ASSIGNMENT';
-        scrapedData.requiresVenueAssignment = true;
-        scrapedData.venueAssignmentConfidence = 0;
-    }
+        req.on('error', (error) => {
+            resolve({
+                notModified: false,
+                error: error.message,
+                failed: true
+            });
+        });
+        
+        req.setTimeout(HEAD_TIMEOUT, () => {
+            req.destroy();
+            resolve({
+                notModified: false,
+                error: 'HEAD request timeout',
+                timeout: true
+            });
+        });
+        
+        req.end();
+    });
+};
+
+/**
+ * Fetch HTML from live website with retry logic
+ */
+const fetchFromLiveSiteWithRetries = async (url, maxRetries = 3) => {
+    let lastError = null;
     
-    console.log(`[handleFetch] Scraped data successfully for ${url}. END handleFetch.`);
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            const result = await fetchFromLiveSite(url);
+            if (result.success) {
+                return result;
+            }
+            lastError = result.error;
+        } catch (error) {
+            lastError = error.message;
+        }
+        
+        if (attempt < maxRetries) {
+            // Exponential backoff
+            const delay = RETRY_DELAY * Math.pow(2, attempt - 1);
+            console.log(`[Fetch] Retry ${attempt}/${maxRetries} after ${delay}ms for ${url}`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }
     
     return {
-        ...scrapedData,
-        existingGameId,
-        scrapedData: scrapedData,
-        originalScrapedData: scrapedData,
-        foundKeys: foundKeys,
-        jobId: jobId,
-        triggerSource: triggerSource
+        success: false,
+        error: lastError || 'All retries exhausted'
     };
 };
 
+/**
+ * Fetch HTML from live website
+ */
+const fetchFromLiveSite = async (url) => {
+    return new Promise((resolve, reject) => {
+        const urlObj = new URL(url);
+        const protocol = urlObj.protocol === 'https:' ? https : http;
+        
+        const options = {
+            hostname: urlObj.hostname,
+            port: urlObj.port,
+            path: urlObj.pathname + urlObj.search,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept-Encoding': 'gzip, deflate',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                'Connection': 'keep-alive'
+            }
+        };
+        
+        const req = protocol.get(options, (res) => {
+            // Handle redirects
+            if (res.statusCode >= 301 && res.statusCode <= 308 && res.headers.location) {
+                const redirectUrl = new URL(res.headers.location, url).href;
+                console.log(`[Fetch] Following redirect: ${res.statusCode} -> ${redirectUrl}`);
+                fetchFromLiveSite(redirectUrl).then(resolve).catch(reject);
+                return;
+            }
+            
+            // Check for non-success status codes
+            if (res.statusCode !== 200) {
+                resolve({
+                    success: false,
+                    error: `HTTP ${res.statusCode}: ${res.statusMessage}`,
+                    statusCode: res.statusCode
+                });
+                return;
+            }
+            
+            const chunks = [];
+            let totalSize = 0;
+            
+            // Determine if response is compressed
+            const encoding = res.headers['content-encoding'];
+            let stream = res;
+            
+            if (encoding === 'gzip') {
+                stream = res.pipe(zlib.createGunzip());
+            } else if (encoding === 'deflate') {
+                stream = res.pipe(zlib.createInflate());
+            }
+            
+            stream.on('data', (chunk) => {
+                totalSize += chunk.length;
+                
+                // Prevent memory issues with large responses
+                if (totalSize > MAX_HTML_SIZE) {
+                    req.destroy();
+                    resolve({
+                        success: false,
+                        error: `Response too large: ${totalSize} bytes`
+                    });
+                    return;
+                }
+                
+                chunks.push(chunk);
+            });
+            
+            stream.on('end', () => {
+                const html = Buffer.concat(chunks).toString('utf-8');
+                resolve({
+                    success: true,
+                    html: html,
+                    headers: res.headers,
+                    statusCode: res.statusCode,
+                    contentLength: totalSize
+                });
+            });
+            
+            stream.on('error', (error) => {
+                resolve({
+                    success: false,
+                    error: `Stream error: ${error.message}`
+                });
+            });
+        });
+        
+        req.on('error', (error) => {
+            resolve({
+                success: false,
+                error: `Request error: ${error.message}`
+            });
+        });
+        
+        req.setTimeout(REQUEST_TIMEOUT, () => {
+            req.destroy();
+            resolve({
+                success: false,
+                error: 'Request timeout'
+            });
+        });
+    });
+};
+
+/**
+ * Update cache hit statistics in ScrapeURL record
+ */
+const updateCacheHitStats = async (scrapeURLId, ddbDocClient, tableName) => {
+    const params = {
+        TableName: tableName,
+        Key: { id: scrapeURLId },
+        UpdateExpression: `
+            SET cachedContentUsedCount = if_not_exists(cachedContentUsedCount, :zero) + :one,
+                lastCacheHitAt = :now,
+                #status = :active
+        `,
+        ExpressionAttributeNames: {
+            '#status': 'status'
+        },
+        ExpressionAttributeValues: {
+            ':zero': 0,
+            ':one': 1,
+            ':now': new Date().toISOString(),
+            ':active': 'ACTIVE'
+        }
+    };
+    
+    await ddbDocClient.send(new UpdateCommand(params));
+};
+
+/**
+ * Update header check statistics
+ */
+const updateHeaderCheckStats = async (scrapeURLId, ddbDocClient, tableName) => {
+    const params = {
+        TableName: tableName,
+        Key: { id: scrapeURLId },
+        UpdateExpression: `
+            SET lastHeaderCheckAt = :now,
+                cachedContentUsedCount = if_not_exists(cachedContentUsedCount, :zero) + :one
+        `,
+        ExpressionAttributeValues: {
+            ':now': new Date().toISOString(),
+            ':zero': 0,
+            ':one': 1
+        }
+    };
+    
+    await ddbDocClient.send(new UpdateCommand(params));
+};
+
+/**
+ * Update ScrapeURL record with new data
+ */
+const updateScrapeURLRecord = async (id, updates, ddbDocClient, tableName) => {
+    const updateExpression = [];
+    const expressionAttributeNames = {};
+    const expressionAttributeValues = {};
+    
+    Object.keys(updates).forEach(key => {
+        const placeholder = `:${key}`;
+        if (key === 'status') {
+            updateExpression.push(`#status = ${placeholder}`);
+            expressionAttributeNames['#status'] = 'status';
+        } else {
+            updateExpression.push(`${key} = ${placeholder}`);
+        }
+        expressionAttributeValues[placeholder] = updates[key];
+    });
+    
+    // Always update the updatedAt timestamp
+    updateExpression.push('updatedAt = :updatedAt');
+    expressionAttributeValues[':updatedAt'] = new Date().toISOString();
+    
+    const params = {
+        TableName: tableName,
+        Key: { id },
+        UpdateExpression: `SET ${updateExpression.join(', ')}`,
+        ExpressionAttributeValues: expressionAttributeValues
+    };
+    
+    if (Object.keys(expressionAttributeNames).length > 0) {
+        params.ExpressionAttributeNames = expressionAttributeNames;
+    }
+    
+    await ddbDocClient.send(new UpdateCommand(params));
+};
+
+/**
+ * Update ScrapeURL record on error
+ */
+const updateScrapeURLError = async (id, errorMessage, ddbDocClient, tableName) => {
+    const params = {
+        TableName: tableName,
+        Key: { id },
+        UpdateExpression: `
+            SET timesFailed = if_not_exists(timesFailed, :zero) + :one,
+                consecutiveFailures = if_not_exists(consecutiveFailures, :zero) + :one,
+                lastScrapeMessage = :error,
+                #status = :errorStatus,
+                updatedAt = :now
+        `,
+        ExpressionAttributeNames: {
+            '#status': 'status'
+        },
+        ExpressionAttributeValues: {
+            ':zero': 0,
+            ':one': 1,
+            ':error': errorMessage.substring(0, 500),
+            ':errorStatus': 'ERROR',
+            ':now': new Date().toISOString()
+        }
+    };
+    
+    await ddbDocClient.send(new UpdateCommand(params));
+};
+
+/**
+ * Validate URL format
+ */
+const isValidUrl = (url) => {
+    try {
+        const urlObj = new URL(url);
+        return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+    } catch {
+        return false;
+    }
+};
+
+/**
+ * Basic HTML validation
+ */
+const isValidHtml = (html) => {
+    if (!html || typeof html !== 'string') return false;
+    if (html.trim().length < 100) return false; // Too short to be valid
+    
+    // Check for basic HTML structure
+    const hasHtmlTag = /<html/i.test(html) || /<\/html>/i.test(html);
+    const hasBodyTag = /<body/i.test(html) || /<\/body>/i.test(html);
+    const hasContent = html.length > 500; // Reasonable minimum
+    
+    return hasContent && (hasHtmlTag || hasBodyTag);
+};
+
+/**
+ * ✅ NEW: Lightweight check for "Tournament Not Found"
+ * Used to skip S3 storage for non-existent tournaments to save space.
+ * Detects: <span class="cw-badge cw-bg-warning">Tournament not found!</span>
+ */
+const isTournamentNotFound = (html) => {
+    if (!html) return false;
+    // Use a regex that matches the specific badge class and text, 
+    // insensitive to case and minor whitespace differences.
+    const notFoundRegex = /class=["']cw-badge\s+cw-bg-warning["'][^>]*>\s*Tournament\s+not\s+found/i;
+    return notFoundRegex.test(html);
+};
+
+/**
+ * Helper to get table name with environment
+ */
+const getTableName = (modelName) => {
+    const apiId = process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT;
+    const env = process.env.ENV;
+    return `${modelName}-${apiId}-${env}`;
+};
+
+// Export all functions for testing and use
 module.exports = {
-    handleFetchEnhanced,
-    checkForChanges
+    handleFetch,
+    checkHTTPHeaders,
+    fetchFromLiveSite,
+    fetchFromLiveSiteWithRetries,
+    updateCacheHitStats,
+    updateHeaderCheckStats,
+    updateScrapeURLRecord,
+    updateScrapeURLError,
+    isValidUrl,
+    isValidHtml,
+    isTournamentNotFound, // Export for testing
+    getTableName
 };

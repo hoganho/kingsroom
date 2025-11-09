@@ -14,7 +14,10 @@ import {
     ErrorAnalyzer,
     ScraperAnalytics
 } from '../../utils/scraperAnalytics';
-import { scraperManagementQueries } from '../../graphql/scraperManagement';
+import { 
+    getScraperJobsReport,
+    searchScrapeURLs 
+} from '../../graphql/queries';
 import type { ScraperJob, ScrapeURL } from '../../API';
 
 // ===================================================================
@@ -43,25 +46,17 @@ export const AnalyticsTab: React.FC = () => {
         try {
             // Load recent jobs for analysis
             const jobsResponse = await client.graphql({
-                query: scraperManagementQueries.getScraperJobsReport,
-                variables: {
-                    limit: 100,
-                    sortDirection: 'DESC'
-                }
-            });
+                query: getScraperJobsReport,
+                variables: { limit: 100 }
+            }) as any;
             
             const jobs = (jobsResponse as GraphQLResult<any>).data.getScraperJobsReport.items;
             
             // Load problematic URLs
             const urlsResponse = await client.graphql({
-                query: scraperManagementQueries.searchScrapeURLs,
-                variables: {
-                    filter: {
-                        status: { eq: 'ERROR' }
-                    },
-                    limit: 50
-                }
-            });
+                query: searchScrapeURLs,
+                variables: { limit: 100 }
+            }) as any;
             
             const problematicUrls = (urlsResponse as GraphQLResult<any>).data.searchScrapeURLs?.items || [];
             

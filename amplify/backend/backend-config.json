@@ -81,6 +81,13 @@
             "Name"
           ],
           "category": "function",
+          "resourceName": "getModelCount"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
           "resourceName": "playerDataProcessor"
         },
         {

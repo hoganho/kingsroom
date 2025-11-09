@@ -200,6 +200,8 @@ export const getScraperJobsReport = /* GraphQL */ `query GetScraperJobsReport(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -345,6 +347,8 @@ export const getScraperJobsReport = /* GraphQL */ `query GetScraperJobsReport(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -640,6 +644,8 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -859,6 +865,8 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -1146,6 +1154,8 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
     totalContentChanges
     lastHeaderCheckAt
     cachedContentUsedCount
+    lastCacheHitAt
+    contentSize
     _version
     _deleted
     _lastChangedAt
@@ -1279,6 +1289,8 @@ export const searchScrapeURLs = /* GraphQL */ `query SearchScrapeURLs(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -1424,6 +1436,8 @@ export const searchScrapeURLs = /* GraphQL */ `query SearchScrapeURLs(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -1551,6 +1565,8 @@ export const searchScrapeURLs = /* GraphQL */ `query SearchScrapeURLs(
       totalContentChanges
       lastHeaderCheckAt
       cachedContentUsedCount
+      lastCacheHitAt
+      contentSize
       _version
       _deleted
       _lastChangedAt
@@ -1766,6 +1782,8 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -1985,6 +2003,8 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -2272,6 +2292,8 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
     totalContentChanges
     lastHeaderCheckAt
     cachedContentUsedCount
+    lastCacheHitAt
+    contentSize
     _version
     _deleted
     _lastChangedAt
@@ -2611,6 +2633,8 @@ export const listEntitiesByDomain = /* GraphQL */ `query ListEntitiesByDomain($d
         totalContentChanges
         lastHeaderCheckAt
         cachedContentUsedCount
+        lastCacheHitAt
+        contentSize
         _version
         _deleted
         _lastChangedAt
@@ -3639,6 +3663,8 @@ export const listScraperJobs = /* GraphQL */ `query ListScraperJobs(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -3784,6 +3810,8 @@ export const listScraperJobs = /* GraphQL */ `query ListScraperJobs(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -4043,6 +4071,8 @@ export const listScrapeURLs = /* GraphQL */ `query ListScrapeURLs(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -4188,6 +4218,8 @@ export const listScrapeURLs = /* GraphQL */ `query ListScrapeURLs(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -4315,6 +4347,8 @@ export const listScrapeURLs = /* GraphQL */ `query ListScrapeURLs(
       totalContentChanges
       lastHeaderCheckAt
       cachedContentUsedCount
+      lastCacheHitAt
+      contentSize
       _version
       _deleted
       _lastChangedAt
@@ -5261,6 +5295,8 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -5998,6 +6034,8 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
         totalContentChanges
         lastHeaderCheckAt
         cachedContentUsedCount
+        lastCacheHitAt
+        contentSize
         _version
         _deleted
         _lastChangedAt
@@ -6949,6 +6987,8 @@ export const listEntities = /* GraphQL */ `query ListEntities(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -7433,6 +7473,8 @@ export const syncEntities = /* GraphQL */ `query SyncEntities(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -8101,6 +8143,8 @@ export const getScraperState = /* GraphQL */ `query GetScraperState($id: ID!) {
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -8532,6 +8576,8 @@ export const listScraperStates = /* GraphQL */ `query ListScraperStates(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -8813,6 +8859,8 @@ export const syncScraperStates = /* GraphQL */ `query SyncScraperStates(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -10673,6 +10721,8 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -11616,6 +11666,8 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -12412,6 +12464,8 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -13206,6 +13260,8 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -15017,6 +15073,8 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -17112,6 +17170,8 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -18787,6 +18847,8 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -20005,6 +20067,8 @@ export const listGames = /* GraphQL */ `query ListGames(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -21073,6 +21137,8 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -22146,6 +22212,8 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -26340,6 +26408,8 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -32696,6 +32766,8 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -36388,6 +36460,8 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -39796,6 +39870,8 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -54551,6 +54627,8 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -54863,6 +54941,8 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -55525,6 +55605,8 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -56040,6 +56122,8 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -56498,6 +56582,8 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -56717,6 +56803,8 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -57004,6 +57092,8 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
     totalContentChanges
     lastHeaderCheckAt
     cachedContentUsedCount
+    lastCacheHitAt
+    contentSize
     _version
     _deleted
     _lastChangedAt
@@ -57139,6 +57229,8 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -57284,6 +57376,8 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -57524,6 +57618,8 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -57669,6 +57765,8 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -57796,6 +57894,8 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
       totalContentChanges
       lastHeaderCheckAt
       cachedContentUsedCount
+      lastCacheHitAt
+      contentSize
       _version
       _deleted
       _lastChangedAt
@@ -58076,6 +58176,8 @@ export const listScrapeAttempts = /* GraphQL */ `query ListScrapeAttempts(
         totalContentChanges
         lastHeaderCheckAt
         cachedContentUsedCount
+        lastCacheHitAt
+        contentSize
         _version
         _deleted
         _lastChangedAt
@@ -58366,6 +58468,8 @@ export const syncScrapeAttempts = /* GraphQL */ `query SyncScrapeAttempts(
         totalContentChanges
         lastHeaderCheckAt
         cachedContentUsedCount
+        lastCacheHitAt
+        contentSize
         _version
         _deleted
         _lastChangedAt
@@ -58723,6 +58827,8 @@ export const entitiesByEntityName = /* GraphQL */ `query EntitiesByEntityName(
           totalContentChanges
           lastHeaderCheckAt
           cachedContentUsedCount
+          lastCacheHitAt
+          contentSize
           _version
           _deleted
           _lastChangedAt
@@ -59159,6 +59265,8 @@ export const scraperStatesByEntityId = /* GraphQL */ `query ScraperStatesByEntit
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -59958,6 +60066,8 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -60758,6 +60868,8 @@ export const venuesByEntityIdAndName = /* GraphQL */ `query VenuesByEntityIdAndN
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -63045,6 +63157,8 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -64118,6 +64232,8 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -65193,6 +65309,8 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -66268,6 +66386,8 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -67343,6 +67463,8 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -82819,6 +82941,8 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -83338,6 +83462,8 @@ export const assetsByEntityIdAndType = /* GraphQL */ `query AssetsByEntityIdAndT
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -83639,6 +83765,8 @@ export const scraperJobsByJobId = /* GraphQL */ `query ScraperJobsByJobId(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -83784,6 +83912,8 @@ export const scraperJobsByJobId = /* GraphQL */ `query ScraperJobsByJobId(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -84048,6 +84178,8 @@ export const scraperJobsByStatusAndStartTime = /* GraphQL */ `query ScraperJobsB
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -84193,6 +84325,8 @@ export const scraperJobsByStatusAndStartTime = /* GraphQL */ `query ScraperJobsB
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -84457,6 +84591,8 @@ export const scraperJobsByEntityIdAndStartTime = /* GraphQL */ `query ScraperJob
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -84602,6 +84738,8 @@ export const scraperJobsByEntityIdAndStartTime = /* GraphQL */ `query ScraperJob
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -84863,6 +85001,8 @@ export const scrapeURLByURL = /* GraphQL */ `query ScrapeURLByURL(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -85008,6 +85148,8 @@ export const scrapeURLByURL = /* GraphQL */ `query ScrapeURLByURL(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -85135,6 +85277,8 @@ export const scrapeURLByURL = /* GraphQL */ `query ScrapeURLByURL(
       totalContentChanges
       lastHeaderCheckAt
       cachedContentUsedCount
+      lastCacheHitAt
+      contentSize
       _version
       _deleted
       _lastChangedAt
@@ -85279,6 +85423,8 @@ export const scrapeURLSByTournamentId = /* GraphQL */ `query ScrapeURLSByTournam
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -85424,6 +85570,8 @@ export const scrapeURLSByTournamentId = /* GraphQL */ `query ScrapeURLSByTournam
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -85551,6 +85699,8 @@ export const scrapeURLSByTournamentId = /* GraphQL */ `query ScrapeURLSByTournam
       totalContentChanges
       lastHeaderCheckAt
       cachedContentUsedCount
+      lastCacheHitAt
+      contentSize
       _version
       _deleted
       _lastChangedAt
@@ -85697,6 +85847,8 @@ export const scrapeURLsBySourceSystem = /* GraphQL */ `query ScrapeURLsBySourceS
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -85842,6 +85994,8 @@ export const scrapeURLsBySourceSystem = /* GraphQL */ `query ScrapeURLsBySourceS
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -85969,6 +86123,8 @@ export const scrapeURLsBySourceSystem = /* GraphQL */ `query ScrapeURLsBySourceS
       totalContentChanges
       lastHeaderCheckAt
       cachedContentUsedCount
+      lastCacheHitAt
+      contentSize
       _version
       _deleted
       _lastChangedAt
@@ -86113,6 +86269,8 @@ export const scrapeURLSByGameId = /* GraphQL */ `query ScrapeURLSByGameId(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -86258,6 +86416,8 @@ export const scrapeURLSByGameId = /* GraphQL */ `query ScrapeURLSByGameId(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -86385,6 +86545,8 @@ export const scrapeURLSByGameId = /* GraphQL */ `query ScrapeURLSByGameId(
       totalContentChanges
       lastHeaderCheckAt
       cachedContentUsedCount
+      lastCacheHitAt
+      contentSize
       _version
       _deleted
       _lastChangedAt
@@ -86529,6 +86691,8 @@ export const scrapeURLSByEntityId = /* GraphQL */ `query ScrapeURLSByEntityId(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -86674,6 +86838,8 @@ export const scrapeURLSByEntityId = /* GraphQL */ `query ScrapeURLSByEntityId(
             totalContentChanges
             lastHeaderCheckAt
             cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
             _version
             _deleted
             _lastChangedAt
@@ -86801,6 +86967,8 @@ export const scrapeURLSByEntityId = /* GraphQL */ `query ScrapeURLSByEntityId(
       totalContentChanges
       lastHeaderCheckAt
       cachedContentUsedCount
+      lastCacheHitAt
+      contentSize
       _version
       _deleted
       _lastChangedAt
@@ -87073,6 +87241,8 @@ export const scrapeAttemptsByScraperJobIdAndAttemptTime = /* GraphQL */ `query S
         totalContentChanges
         lastHeaderCheckAt
         cachedContentUsedCount
+        lastCacheHitAt
+        contentSize
         _version
         _deleted
         _lastChangedAt
@@ -87367,6 +87537,8 @@ export const scrapeAttemptsByScrapeURLIdAndAttemptTime = /* GraphQL */ `query Sc
         totalContentChanges
         lastHeaderCheckAt
         cachedContentUsedCount
+        lastCacheHitAt
+        contentSize
         _version
         _deleted
         _lastChangedAt
@@ -87452,6 +87624,57 @@ export const s3StoragesByScrapeURLIdAndScrapedAt = /* GraphQL */ `query S3Storag
 ` as GeneratedQuery<
   APITypes.S3StoragesByScrapeURLIdAndScrapedAtQueryVariables,
   APITypes.S3StoragesByScrapeURLIdAndScrapedAtQuery
+>;
+export const s3StoragesByUrlAndScrapedAt = /* GraphQL */ `query S3StoragesByUrlAndScrapedAt(
+  $url: AWSURL!
+  $scrapedAt: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelS3StorageFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  s3StoragesByUrlAndScrapedAt(
+    url: $url
+    scrapedAt: $scrapedAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      scrapeURLId
+      url
+      tournamentId
+      entityId
+      s3Key
+      s3Bucket
+      scrapedAt
+      contentSize
+      contentHash
+      etag
+      lastModified
+      headers
+      dataExtracted
+      gameId
+      isManualUpload
+      uploadedBy
+      notes
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.S3StoragesByUrlAndScrapedAtQueryVariables,
+  APITypes.S3StoragesByUrlAndScrapedAtQuery
 >;
 export const s3StoragesByTournamentIdAndScrapedAt = /* GraphQL */ `query S3StoragesByTournamentIdAndScrapedAt(
   $tournamentId: Int!
