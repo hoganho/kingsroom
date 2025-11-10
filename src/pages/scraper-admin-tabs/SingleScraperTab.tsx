@@ -1,9 +1,9 @@
 // src/pages/scraper-admin-tabs/SingleScraperTabEnhanced.tsx
 // Enhanced version with S3 HTML support, cache status display, and modal
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import { Target, Building2, FastForward, HardDrive } from 'lucide-react';
+import { Target, FastForward, HardDrive, ChevronRight } from 'lucide-react';
 import { useGameTracker } from '../../hooks/useGameTracker';
 import { useEntity, buildGameUrl } from '../../contexts/EntityContext';
 import { listVenuesForDropdown } from '../../graphql/customQueries';
@@ -18,6 +18,9 @@ export const SingleScraperTab: React.FC = () => {
     const client = useMemo(() => generateClient(), []);
     const { currentEntity } = useEntity();
     const [inputId, setInputId] = useState('');
+    
+    // Track all IDs that have been tracked in this session
+    const trackedInSessionRef = useRef<Set<string>>(new Set());
     
     // Use enhanced tracker with S3 support
     const { 
@@ -175,10 +178,12 @@ export const SingleScraperTab: React.FC = () => {
 
         if (id) {
             let trackUrl = id;
+            let gameId = id;
             
             // If just an ID was entered, build the full URL using entity config
             if (!id.startsWith('http')) {
                 trackUrl = buildGameUrl(currentEntity, id);
+                gameId = id;
                 console.log(`[SingleScraperTab] Built URL for entity ${currentEntity.entityName}: ${trackUrl}`);
             } else {
                 // Validate that the URL matches the current entity
@@ -187,7 +192,13 @@ export const SingleScraperTab: React.FC = () => {
                     alert(`This URL doesn't match the selected entity (${currentEntity.entityName}). Please select the correct entity or enter just the game ID.`);
                     return;
                 }
+                // Extract ID from URL
+                const pathMatch = id.match(/id=(\d+)/);
+                gameId = pathMatch ? pathMatch[1] : id;
             }
+            
+            // Track this ID in session
+            trackedInSessionRef.current.add(gameId);
             
             // Check cache status for the URL
             trackUrl && checkCacheStatus(trackUrl);
@@ -200,6 +211,52 @@ export const SingleScraperTab: React.FC = () => {
         } else {
             alert('Please enter a game ID or URL');
         }
+    };
+    
+    // Find and track the next untracked tournament ID
+    const handleTrackNext = () => {
+        if (!currentEntity) {
+            alert('Please select an entity first');
+            return;
+        }
+        
+        // Get the highest ID we've tracked in this session
+        let highestId = 0;
+        trackedInSessionRef.current.forEach(id => {
+            const numId = parseInt(id);
+            if (!isNaN(numId) && numId > highestId) {
+                highestId = numId;
+            }
+        });
+        
+        // Also check current tracked games
+        Object.keys(games).forEach(url => {
+            const match = url.match(/id=(\d+)/);
+            if (match) {
+                const numId = parseInt(match[1]);
+                if (numId > highestId) {
+                    highestId = numId;
+                }
+            }
+        });
+        
+        // If we haven't tracked anything, check the input field
+        if (highestId === 0 && inputId) {
+            const inputNum = parseInt(inputId);
+            if (!isNaN(inputNum)) {
+                highestId = inputNum - 1; // We'll increment it next
+            }
+        }
+        
+        // If still no starting point, use a default
+        if (highestId === 0) {
+            highestId = 999; // Will start at 1000
+        }
+        
+        // Set and track the next ID
+        const nextId = (highestId + 1).toString();
+        setInputId(nextId);
+        handleTrackGame(nextId);
     };
     
     const handleScrapeFromModal = async (option: 'S3' | 'LIVE', s3Key?: string) => {
@@ -300,36 +357,20 @@ export const SingleScraperTab: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            {/* Entity Selection */}
-            <div className="bg-white rounded-lg shadow p-6">
-                <div className="mb-4">
-                    <h3 className="text-lg font-semibold flex items-center">
-                        <Building2 className="h-5 w-5 mr-2 text-blue-600" />
-                        Entity Selection
-                    </h3>
-                    <p className="text-sm text-gray-600 mt-1">
-                        Select the entity (business) you want to scrape games for
-                    </p>
-                </div>
-                <EntitySelector />
-                {currentEntity && (
-                    <div className="mt-3 p-3 bg-blue-50 rounded">
-                        <p className="text-sm text-blue-800">
-                            <strong>Active:</strong> {currentEntity.entityName}
-                        </p>
-                        <p className="text-xs text-blue-600 mt-1">
-                            Base URL: {currentEntity.gameUrlDomain}{currentEntity.gameUrlPath}
-                        </p>
-                    </div>
-                )}
-            </div>
-            
-            {/* Manual Scraping */}
+            {/* Combined Entity Selection and Manual Scraping */}
             <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-lg font-semibold mb-4 flex items-center">
                     <Target className="h-5 w-5 mr-2 text-blue-600" />
                     Single Tournament Scraper
                 </h3>
+                
+                {/* Compact Entity Selector */}
+                <div className="mb-4 flex items-center space-x-3">
+                    <span className="text-sm font-medium text-gray-700">Entity:</span>
+                    <div className="flex-1 max-w-md">
+                        <EntitySelector />
+                    </div>
+                </div>
                 
                 {!currentEntity ? (
                     <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -337,25 +378,43 @@ export const SingleScraperTab: React.FC = () => {
                     </div>
                 ) : (
                     <>
-                        <div className="flex space-x-2">
+                        {/* Input field */}
+                        <div className="space-y-3">
                             <input
                                 type="text"
                                 value={inputId}
                                 onChange={(e) => setInputId(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleTrackGame(inputId)}
                                 placeholder="Enter tournament ID (e.g., 12345) or full URL"
-                                className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                             />
-                            <button
-                                onClick={() => handleTrackGame(inputId)}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                            >
-                                Track Game
-                            </button>
-                        </div>
-                        
-                        <div className="mt-2 text-sm text-gray-600">
-                            <p>Enter just the ID (e.g., "12345") or the full URL</p>
+                            
+                            {/* Buttons under the input */}
+                            <div className="flex space-x-2">
+                                <button
+                                    onClick={handleTrackNext}
+                                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center"
+                                    title="Find and track the next sequential ID"
+                                >
+                                    <ChevronRight className="h-4 w-4 mr-1" />
+                                    Track Next
+                                </button>
+                                <button
+                                    onClick={() => handleTrackGame(inputId)}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                                >
+                                    Track
+                                </button>
+                            </div>
+                            
+                            <div className="text-sm text-gray-600">
+                                <p>Enter just the ID (e.g., "12345") or the full URL</p>
+                                {currentEntity && (
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Base URL: {currentEntity.gameUrlDomain}{currentEntity.gameUrlPath}
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </>
                 )}

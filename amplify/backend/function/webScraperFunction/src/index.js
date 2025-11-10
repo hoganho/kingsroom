@@ -435,20 +435,55 @@ const processStructureFingerprint = async (foundKeys, structureLabel, sourceUrl)
 const getOrCreateScrapeURL = async (url, tournamentId, entityId) => {
     const scrapeURLTable = getTableName('ScrapeURL');
     try {
-        const response = await ddbDocClient.send(new GetCommand({ TableName: scrapeURLTable, Key: { id: url } }));
+        const response = await ddbDocClient.send(new GetCommand({ 
+            TableName: scrapeURLTable, 
+            Key: { id: url } 
+        }));
+        
         if (response.Item) return response.Item;
+        
         const now = new Date().toISOString();
+        const timestamp = new Date().getTime(); // For _lastChangedAt
+        
         const newRecord = {
-            id: url, url, tournamentId: parseInt(tournamentId, 10), entityId: entityId || DEFAULT_ENTITY_ID,
-            status: 'ACTIVE', doNotScrape: false, placedIntoDatabase: false, firstScrapedAt: now, lastScrapedAt: now,
-            timesScraped: 0, timesSuccessful: 0, timesFailed: 0, consecutiveFailures: 0, sourceSystem: "KINGSROOM_WEB",
-            s3StorageEnabled: true, createdAt: now, updatedAt: now, __typename: 'ScrapeURL', _version: 1
+            id: url, 
+            url, 
+            tournamentId: parseInt(tournamentId, 10), 
+            entityId: entityId || DEFAULT_ENTITY_ID,
+            status: 'ACTIVE', 
+            doNotScrape: false, 
+            placedIntoDatabase: false, 
+            firstScrapedAt: now, 
+            lastScrapedAt: now,
+            timesScraped: 0, 
+            timesSuccessful: 0, 
+            timesFailed: 0, 
+            consecutiveFailures: 0, 
+            sourceSystem: "KINGSROOM_WEB",
+            s3StorageEnabled: true, 
+            createdAt: now, 
+            updatedAt: now, 
+            __typename: 'ScrapeURL', 
+            
+            // ✅ ADD ALL DataStore sync fields:
+            _version: 1,
+            _lastChangedAt: timestamp,  // Required field - use timestamp in milliseconds
+            _deleted: null  // Optional but good to include
         };
-        await ddbDocClient.send(new PutCommand({ TableName: scrapeURLTable, Item: newRecord }));
+        
+        await ddbDocClient.send(new PutCommand({ 
+            TableName: scrapeURLTable, 
+            Item: newRecord 
+        }));
+        
         return newRecord;
     } catch (error) {
         console.error('[getOrCreateScrapeURL] Error:', error);
-        return { id: url, tournamentId: parseInt(tournamentId, 10), s3StorageEnabled: false };
+        return { 
+            id: url, 
+            tournamentId: parseInt(tournamentId, 10), 
+            s3StorageEnabled: false 
+        };
     }
 };
 

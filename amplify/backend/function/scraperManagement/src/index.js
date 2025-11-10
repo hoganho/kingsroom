@@ -563,16 +563,25 @@ async function cancelScraperJob({ jobId }) {
         // Update the job status
         const jobTable = getTableName('ScraperJob');
         const now = new Date().toISOString();
+        const timestamp = Date.now(); // For _lastChangedAt
         
         const updateParams = {
             TableName: jobTable,
             Key: { id: jobId },
-            UpdateExpression: 'SET #status = :status, endTime = :endTime, updatedAt = :updatedAt',
+            UpdateExpression: `SET 
+                #status = :status, 
+                endTime = :endTime, 
+                updatedAt = :updatedAt,
+                _lastChangedAt = :lastChangedAt,
+                _version = if_not_exists(_version, :zero) + :one`,
             ExpressionAttributeNames: { '#status': 'status' },
             ExpressionAttributeValues: {
                 ':status': 'CANCELLED',
                 ':endTime': now,
-                ':updatedAt': now
+                ':updatedAt': now,
+                ':lastChangedAt': timestamp,  // ✅ Added
+                ':zero': 0,                   // ✅ Added
+                ':one': 1                      // ✅ Added
             },
             ReturnValues: 'ALL_NEW'
         };

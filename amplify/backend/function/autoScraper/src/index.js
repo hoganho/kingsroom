@@ -135,12 +135,17 @@ const updateCacheHitStats = async (scrapeURLId) => {
             UpdateExpression: `
                 SET cachedContentUsedCount = if_not_exists(cachedContentUsedCount, :zero) + :one,
                     lastCacheHitAt = :now,
-                    updatedAt = :now
+                    updatedAt = :now,
+                    _lastChangedAt = :timestamp,
+                    _version = if_not_exists(_version, :versionZero) + :versionOne
             `,
             ExpressionAttributeValues: {
                 ':zero': 0,
                 ':one': 1,
-                ':now': now
+                ':now': now,
+                ':timestamp': Date.now(),      // ✅ Added
+                ':versionZero': 0,              // ✅ Added
+                ':versionOne': 1                // ✅ Added
             }
         }));
         console.log(`[S3-Cache] Updated cache hit stats for ${scrapeURLId}`);
@@ -233,6 +238,10 @@ const updateScraperJob = async (jobId, updates) => {
         }
     }
     
+    updateExpressions.push('_version = if_not_exists(_version, :versionZero) + :versionOne');
+    expressionAttributeValues[':versionZero'] = 0;
+    expressionAttributeValues[':versionOne'] = 1;
+
     await ddbDocClient.send(new UpdateCommand({
         TableName: getTableName('ScraperJob'),
         Key: { id: jobId },
@@ -657,9 +666,9 @@ const processUrlId = async (id, jobId, entityId, triggerSource) => {
 // --- ENTITY ---: Added entityId parameter
 const updateScraperState = async (entityId, updates) => {
     const scraperStateTable = getTableName('ScraperState');
-    // --- ENTITY ---: Use entityId as the state ID (one state per entity)
     const stateId = entityId || DEFAULT_ENTITY_ID;
     const now = new Date().toISOString();
+    const timestamp = Date.now();
     
     const defaultState = {
         id: stateId,
@@ -675,7 +684,7 @@ const updateScraperState = async (entityId, updates) => {
         currentLog: [],
         lastGamesProcessed: [],
         __typename: 'ScraperState',
-        _lastChangedAt: Date.now(),
+        _lastChangedAt: timestamp,
         _version: 1,
         createdAt: now,
         updatedAt: now
@@ -687,23 +696,44 @@ const updateScraperState = async (entityId, updates) => {
             Key: { id: stateId }
         }));
         
-        const current = response.Item || defaultState;
-        const updatedItem = { ...current, ...updates, updatedAt: now };
-        
-        await ddbDocClient.send(new PutCommand({
-            TableName: scraperStateTable,
-            Item: updatedItem
-        }));
-        
-        return updatedItem;
-    } catch (error) {
-        console.error(`[UPDATE-STATE] ERROR: ${error.message}`);
-        if (!updates.id) {
+        if (response.Item) {
+            // Existing record - increment version
+            const current = response.Item;
+            const updatedItem = { 
+                ...current, 
+                ...updates, 
+                updatedAt: now,
+                _lastChangedAt: timestamp,
+                _version: (current._version || 1) + 1  // ✅ Increment version
+            };
+            
             await ddbDocClient.send(new PutCommand({
                 TableName: scraperStateTable,
-                Item: { ...defaultState, ...updates }
+                Item: updatedItem
             }));
+            
+            return updatedItem;
+        } else {
+            // New record - create with version 1
+            const newItem = { ...defaultState, ...updates };
+            await ddbDocClient.send(new PutCommand({
+                TableName: scraperStateTable,
+                Item: newItem
+            }));
+            return newItem;
         }
+    } catch (error) {
+        console.error(`[UPDATE-STATE] ERROR: ${error.message}`);
+        // Fallback for error cases
+        if (!updates.id) {
+            const fallbackItem = { ...defaultState, ...updates };
+            await ddbDocClient.send(new PutCommand({
+                TableName: scraperStateTable,
+                Item: fallbackItem
+            }));
+            return fallbackItem;
+        }
+        throw error;
     }
 };
 

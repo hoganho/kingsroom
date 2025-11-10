@@ -1,7 +1,7 @@
 // enhanced-handleFetch-complete.js
 // Complete S3-first caching implementation for WebScraper Lambda
 // Full production version with all error handling and logging
-
+const axios = require('axios');
 const https = require('https');
 const http = require('http');
 const { URL } = require('url');
@@ -16,6 +16,7 @@ const REQUEST_TIMEOUT = 30000;
 const HEAD_TIMEOUT = 5000;
 const MAX_HTML_SIZE = 10 * 1024 * 1024; // 10MB limit
 const CACHE_DEBUG = process.env.CACHE_DEBUG === 'true';
+const SCRAPERAPI_KEY = "62c905a307da2591dc89f94d193caacf";
 
 /**
  * Main fetch handler with S3-first caching strategy
@@ -462,110 +463,61 @@ const fetchFromLiveSiteWithRetries = async (url, maxRetries = 3) => {
 };
 
 /**
- * Fetch HTML from live website
+ * Fetch HTML from live website - NOW POWERED BY SCRAPERAPI
+ * * This is a drop-in replacement for the original 'fetchFromLiveSite' function.
+ * It uses ScraperAPI to handle proxies, retries, and browser headers,
+ * and returns data in the *exact same format* the rest of the app expects.
  */
 const fetchFromLiveSite = async (url) => {
-    return new Promise((resolve, reject) => {
-        const urlObj = new URL(url);
-        const protocol = urlObj.protocol === 'https:' ? https : http;
-        
-        const options = {
-            hostname: urlObj.hostname,
-            port: urlObj.port,
-            path: urlObj.pathname + urlObj.search,
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Accept-Encoding': 'gzip, deflate',
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache',
-                'Connection': 'keep-alive'
-            }
+    if (!SCRAPERAPI_KEY) {
+        console.error('SCRAPERAPI_KEY environment variable is not set!');
+        return { success: false, error: 'ScraperAPI key is not configured.' };
+    }
+
+    // 1. Construct the ScraperAPI URL.
+    // We include country_code=au as discussed, to appear as a local user.
+    const encodedUrl = encodeURIComponent(url);
+    const scraperApiUrl = `http://api.scraperapi.com?api_key=${SCRAPERAPI_KEY}&url=${encodedUrl}&country_code=au`;
+
+    try {
+        // 2. Make the request using axios
+        const response = await axios.get(scraperApiUrl, {
+            timeout: REQUEST_TIMEOUT, // Uses your existing REQUEST_TIMEOUT constant
+        });
+
+        // 3. Return the data in the SAME format your app expects
+        return {
+            success: true,
+            html: response.data, // ScraperAPI returns the raw HTML as response.data
+            headers: response.headers, // The headers from ScraperAPI's response
+            statusCode: response.status, // e.g., 200
+            contentLength: response.headers['content-length']
         };
-        
-        const req = protocol.get(options, (res) => {
-            // Handle redirects
-            if (res.statusCode >= 301 && res.statusCode <= 308 && res.headers.location) {
-                const redirectUrl = new URL(res.headers.location, url).href;
-                console.log(`[Fetch] Following redirect: ${res.statusCode} -> ${redirectUrl}`);
-                fetchFromLiveSite(redirectUrl).then(resolve).catch(reject);
-                return;
-            }
-            
-            // Check for non-success status codes
-            if (res.statusCode !== 200) {
-                resolve({
-                    success: false,
-                    error: `HTTP ${res.statusCode}: ${res.statusMessage}`,
-                    statusCode: res.statusCode
-                });
-                return;
-            }
-            
-            const chunks = [];
-            let totalSize = 0;
-            
-            // Determine if response is compressed
-            const encoding = res.headers['content-encoding'];
-            let stream = res;
-            
-            if (encoding === 'gzip') {
-                stream = res.pipe(zlib.createGunzip());
-            } else if (encoding === 'deflate') {
-                stream = res.pipe(zlib.createInflate());
-            }
-            
-            stream.on('data', (chunk) => {
-                totalSize += chunk.length;
-                
-                // Prevent memory issues with large responses
-                if (totalSize > MAX_HTML_SIZE) {
-                    req.destroy();
-                    resolve({
-                        success: false,
-                        error: `Response too large: ${totalSize} bytes`
-                    });
-                    return;
-                }
-                
-                chunks.push(chunk);
-            });
-            
-            stream.on('end', () => {
-                const html = Buffer.concat(chunks).toString('utf-8');
-                resolve({
-                    success: true,
-                    html: html,
-                    headers: res.headers,
-                    statusCode: res.statusCode,
-                    contentLength: totalSize
-                });
-            });
-            
-            stream.on('error', (error) => {
-                resolve({
-                    success: false,
-                    error: `Stream error: ${error.message}`
-                });
-            });
-        });
-        
-        req.on('error', (error) => {
-            resolve({
-                success: false,
-                error: `Request error: ${error.message}`
-            });
-        });
-        
-        req.setTimeout(REQUEST_TIMEOUT, () => {
-            req.destroy();
-            resolve({
-                success: false,
-                error: 'Request timeout'
-            });
-        });
-    });
+
+    } catch (error) {
+        // 4. Handle errors and return them in the SAME format
+        let errorMessage = 'ScraperAPI request failed';
+        let errorCode = 500;
+
+        if (error.response) {
+            // The request was made and the server responded with a non-2xx status
+            errorMessage = `ScraperAPI Error ${error.response.status}: ${error.response.data}`;
+            errorCode = error.response.status;
+        } else if (error.request) {
+            // The request was made but no response was received (e.g., timeout)
+            errorMessage = `ScraperAPI No Response: ${error.message}`;
+            errorCode = 504; // Gateway Timeout
+        } else {
+            // Something else happened in setting up the request
+            errorMessage = `Axios Error: ${error.message}`;
+        }
+
+        return {
+            success: false,
+            error: errorMessage,
+            statusCode: errorCode
+        };
+    }
 };
 
 /**
@@ -578,16 +530,16 @@ const updateCacheHitStats = async (scrapeURLId, ddbDocClient, tableName) => {
         UpdateExpression: `
             SET cachedContentUsedCount = if_not_exists(cachedContentUsedCount, :zero) + :one,
                 lastCacheHitAt = :now,
-                #status = :active
+                status = :active,
+                _lastChangedAt = :timestamp,
+                _version = if_not_exists(_version, :zero) + :one
         `,
-        ExpressionAttributeNames: {
-            '#status': 'status'
-        },
         ExpressionAttributeValues: {
             ':zero': 0,
             ':one': 1,
             ':now': new Date().toISOString(),
-            ':active': 'ACTIVE'
+            ':active': 'ACTIVE',
+            ':timestamp': new Date().getTime()  // ✅ Added
         }
     };
     
@@ -603,12 +555,15 @@ const updateHeaderCheckStats = async (scrapeURLId, ddbDocClient, tableName) => {
         Key: { id: scrapeURLId },
         UpdateExpression: `
             SET lastHeaderCheckAt = :now,
-                cachedContentUsedCount = if_not_exists(cachedContentUsedCount, :zero) + :one
+                cachedContentUsedCount = if_not_exists(cachedContentUsedCount, :zero) + :one,
+                _lastChangedAt = :timestamp,
+                _version = if_not_exists(_version, :zero) + :one
         `,
         ExpressionAttributeValues: {
             ':now': new Date().toISOString(),
             ':zero': 0,
-            ':one': 1
+            ':one': 1,
+            ':timestamp': new Date().getTime()  // ✅ Added
         }
     };
     
@@ -638,6 +593,15 @@ const updateScrapeURLRecord = async (id, updates, ddbDocClient, tableName) => {
     updateExpression.push('updatedAt = :updatedAt');
     expressionAttributeValues[':updatedAt'] = new Date().toISOString();
     
+    // ✅ ADD DataStore sync fields on every update:
+    updateExpression.push('_lastChangedAt = :lastChangedAt');
+    expressionAttributeValues[':lastChangedAt'] = new Date().getTime();
+    
+    // Increment version (important for conflict resolution)
+    updateExpression.push('_version = if_not_exists(_version, :zero) + :one');
+    expressionAttributeValues[':zero'] = 0;
+    expressionAttributeValues[':one'] = 1;
+    
     const params = {
         TableName: tableName,
         Key: { id },
@@ -652,6 +616,7 @@ const updateScrapeURLRecord = async (id, updates, ddbDocClient, tableName) => {
     await ddbDocClient.send(new UpdateCommand(params));
 };
 
+
 /**
  * Update ScrapeURL record on error
  */
@@ -660,11 +625,14 @@ const updateScrapeURLError = async (id, errorMessage, ddbDocClient, tableName) =
         TableName: tableName,
         Key: { id },
         UpdateExpression: `
-            SET timesFailed = if_not_exists(timesFailed, :zero) + :one,
-                consecutiveFailures = if_not_exists(consecutiveFailures, :zero) + :one,
-                lastScrapeMessage = :error,
+            SET consecutiveFailures = if_not_exists(consecutiveFailures, :zero) + :one,
+                timesFailed = if_not_exists(timesFailed, :zero) + :one,
+                lastScrapeStatus = :failed,
+                lastScrapeMessage = :errorMessage,
                 #status = :errorStatus,
-                updatedAt = :now
+                updatedAt = :now,
+                _lastChangedAt = :timestamp,
+                _version = if_not_exists(_version, :zero) + :one
         `,
         ExpressionAttributeNames: {
             '#status': 'status'
@@ -672,9 +640,11 @@ const updateScrapeURLError = async (id, errorMessage, ddbDocClient, tableName) =
         ExpressionAttributeValues: {
             ':zero': 0,
             ':one': 1,
-            ':error': errorMessage.substring(0, 500),
+            ':failed': 'FAILED',
+            ':errorMessage': errorMessage.substring(0, 500),
             ':errorStatus': 'ERROR',
-            ':now': new Date().toISOString()
+            ':now': new Date().toISOString(),
+            ':timestamp': new Date().getTime()  // ✅ Added
         }
     };
     

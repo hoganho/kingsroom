@@ -130,9 +130,12 @@ async function handleManualUpload(input) {
     
     // Record in S3Storage table
     const s3StorageTable = getTableName('S3Storage');
+    const now = new Date().toISOString();
+    const timestamp = Date.now();
+    
     const storageRecord = {
         id: generateUUID(),
-        scrapeURLId: null, // Manual uploads may not have associated ScrapeURL
+        scrapeURLId: null,
         url: url,
         tournamentId: tournamentId,
         entityId: entityId,
@@ -145,8 +148,13 @@ async function handleManualUpload(input) {
         uploadedBy: uploadedBy,
         notes: notes,
         dataExtracted: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        createdAt: now,
+        updatedAt: now,
+        // ✅ ADD DataStore sync fields:
+        __typename: 'S3Storage',
+        _lastChangedAt: timestamp,     // Required: timestamp in milliseconds
+        _version: 1,                    // Required: initial version
+        _deleted: null                  // Optional but good practice
     };
     
     await ddbDocClient.send(new PutCommand({
@@ -507,13 +515,12 @@ async function handleClearCache(args) {
     const scrapeURLTable = getTableName('ScrapeURL');
     
     try {
-        // Find ScrapeURL record using scan (since we might not have the right indexes)
-        // Using ExpressionAttributeNames for reserved keyword
+        // Find ScrapeURL record using scan
         const scanResult = await ddbDocClient.send(new ScanCommand({
             TableName: scrapeURLTable,
             FilterExpression: '#url = :url',
             ExpressionAttributeNames: {
-                '#url': 'url'  // Map #url to the actual attribute name
+                '#url': 'url'
             },
             ExpressionAttributeValues: { ':url': url },
             Limit: 1
@@ -522,7 +529,7 @@ async function handleClearCache(args) {
         if (scanResult.Items && scanResult.Items.length > 0) {
             const scrapeURL = scanResult.Items[0];
             
-            // Clear caching fields
+            // Clear caching fields WITH DataStore sync field updates
             await ddbDocClient.send(new UpdateCommand({
                 TableName: scrapeURLTable,
                 Key: { id: scrapeURL.id },
@@ -531,11 +538,18 @@ async function handleClearCache(args) {
                         lastModifiedHeader = :null,
                         contentHash = :null,
                         latestS3Key = :null,
-                        cachedContentUsedCount = :zero
+                        cachedContentUsedCount = :zero,
+                        updatedAt = :now,
+                        _lastChangedAt = :timestamp,
+                        _version = if_not_exists(_version, :versionZero) + :versionOne
                 `,
                 ExpressionAttributeValues: {
                     ':null': null,
-                    ':zero': 0
+                    ':zero': 0,
+                    ':now': new Date().toISOString(),     // ✅ Added
+                    ':timestamp': Date.now(),               // ✅ Added
+                    ':versionZero': 0,                      // ✅ Added
+                    ':versionOne': 1                        // ✅ Added
                 }
             }));
             
