@@ -5697,6 +5697,16 @@ export const uploadManualHTML = /* GraphQL */ `mutation UploadManualHTML($input:
     isManualUpload
     uploadedBy
     notes
+    previousVersions {
+      s3Key
+      scrapedAt
+      contentHash
+      uploadedBy
+      contentSize
+      __typename
+    }
+    gameStatus
+    registrationStatus
     createdAt
     updatedAt
     _version
@@ -98488,6 +98498,16 @@ export const createS3Storage = /* GraphQL */ `mutation CreateS3Storage(
     isManualUpload
     uploadedBy
     notes
+    previousVersions {
+      s3Key
+      scrapedAt
+      contentHash
+      uploadedBy
+      contentSize
+      __typename
+    }
+    gameStatus
+    registrationStatus
     createdAt
     updatedAt
     _version
@@ -98523,6 +98543,16 @@ export const updateS3Storage = /* GraphQL */ `mutation UpdateS3Storage(
     isManualUpload
     uploadedBy
     notes
+    previousVersions {
+      s3Key
+      scrapedAt
+      contentHash
+      uploadedBy
+      contentSize
+      __typename
+    }
+    gameStatus
+    registrationStatus
     createdAt
     updatedAt
     _version
@@ -98558,6 +98588,16 @@ export const deleteS3Storage = /* GraphQL */ `mutation DeleteS3Storage(
     isManualUpload
     uploadedBy
     notes
+    previousVersions {
+      s3Key
+      scrapedAt
+      contentHash
+      uploadedBy
+      contentSize
+      __typename
+    }
+    gameStatus
+    registrationStatus
     createdAt
     updatedAt
     _version

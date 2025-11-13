@@ -93776,6 +93776,16 @@ export const onCreateS3Storage = /* GraphQL */ `subscription OnCreateS3Storage($
     isManualUpload
     uploadedBy
     notes
+    previousVersions {
+      s3Key
+      scrapedAt
+      contentHash
+      uploadedBy
+      contentSize
+      __typename
+    }
+    gameStatus
+    registrationStatus
     createdAt
     updatedAt
     _version
@@ -93808,6 +93818,16 @@ export const onUpdateS3Storage = /* GraphQL */ `subscription OnUpdateS3Storage($
     isManualUpload
     uploadedBy
     notes
+    previousVersions {
+      s3Key
+      scrapedAt
+      contentHash
+      uploadedBy
+      contentSize
+      __typename
+    }
+    gameStatus
+    registrationStatus
     createdAt
     updatedAt
     _version
@@ -93840,6 +93860,16 @@ export const onDeleteS3Storage = /* GraphQL */ `subscription OnDeleteS3Storage($
     isManualUpload
     uploadedBy
     notes
+    previousVersions {
+      s3Key
+      scrapedAt
+      contentHash
+      uploadedBy
+      contentSize
+      __typename
+    }
+    gameStatus
+    registrationStatus
     createdAt
     updatedAt
     _version

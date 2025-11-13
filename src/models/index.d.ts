@@ -353,6 +353,26 @@ export declare type ScrapedGameStatus = LazyLoading extends LazyLoadingDisabled 
 
 export declare const ScrapedGameStatus: (new (init: ModelInit<ScrapedGameStatus>) => ScrapedGameStatus)
 
+type EagerS3VersionHistory = {
+  readonly s3Key: string;
+  readonly scrapedAt: string;
+  readonly contentHash?: string | null;
+  readonly uploadedBy?: string | null;
+  readonly contentSize?: number | null;
+}
+
+type LazyS3VersionHistory = {
+  readonly s3Key: string;
+  readonly scrapedAt: string;
+  readonly contentHash?: string | null;
+  readonly uploadedBy?: string | null;
+  readonly contentSize?: number | null;
+}
+
+export declare type S3VersionHistory = LazyLoading extends LazyLoadingDisabled ? EagerS3VersionHistory : LazyS3VersionHistory
+
+export declare const S3VersionHistory: (new (init: ModelInit<S3VersionHistory>) => S3VersionHistory)
+
 type EagerTournamentLevel = {
   readonly levelNumber: number;
   readonly durationMinutes?: number | null;
@@ -1600,7 +1620,7 @@ type EagerGame = {
   readonly gameStatus: GameStatus | keyof typeof GameStatus;
   readonly gameStartDateTime: string;
   readonly gameEndDateTime?: string | null;
-  readonly registrationStatus?: string | null;
+  readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
   readonly totalDuration?: string | null;
   readonly gameFrequency?: GameFrequency | keyof typeof GameFrequency | null;
   readonly buyIn?: number | null;
@@ -1659,7 +1679,7 @@ type LazyGame = {
   readonly gameStatus: GameStatus | keyof typeof GameStatus;
   readonly gameStartDateTime: string;
   readonly gameEndDateTime?: string | null;
-  readonly registrationStatus?: string | null;
+  readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
   readonly totalDuration?: string | null;
   readonly gameFrequency?: GameFrequency | keyof typeof GameFrequency | null;
   readonly buyIn?: number | null;
@@ -2983,6 +3003,9 @@ type EagerS3Storage = {
   readonly isManualUpload?: boolean | null;
   readonly uploadedBy?: string | null;
   readonly notes?: string | null;
+  readonly previousVersions?: (S3VersionHistory | null)[] | null;
+  readonly gameStatus?: string | null;
+  readonly registrationStatus?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -3009,6 +3032,9 @@ type LazyS3Storage = {
   readonly isManualUpload?: boolean | null;
   readonly uploadedBy?: string | null;
   readonly notes?: string | null;
+  readonly previousVersions?: (S3VersionHistory | null)[] | null;
+  readonly gameStatus?: string | null;
+  readonly registrationStatus?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }

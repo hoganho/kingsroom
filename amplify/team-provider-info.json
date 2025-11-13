@@ -49,7 +49,7 @@
         },
         "s3ManagementFunction": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/s3ManagementFunction-5a49792f52443633425a-build.zip"
+          "s3Key": "amplify-builds/s3ManagementFunction-30427672735870613648-build.zip"
         },
         "scraperManagement": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",

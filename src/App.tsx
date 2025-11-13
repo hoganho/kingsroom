@@ -1,6 +1,8 @@
 // src/App.tsx - UPDATED WITH ENTITY MANAGEMENT
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
+import './authenticator-theme.css';
+
 import { Hub } from 'aws-amplify/utils';
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';

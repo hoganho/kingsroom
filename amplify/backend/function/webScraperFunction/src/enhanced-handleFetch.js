@@ -1,24 +1,24 @@
-// enhanced-handleFetch-unified-proper.js
+// enhanced-handleFetch.js
 // This version KEEPS all original functionality and ADDS unified URL tracking
-// Based on the original enhanced-handleFetch.js with unified ScrapeURL additions
+// Plus S3Storage metadata extraction for GameStatus/RegistrationStatus
 
 const axios = require('axios');
 const https = require('https');
 const http = require('http');
 const { URL } = require('url');
-const zlib = require('zlib');
-const { DynamoDBDocumentClient, UpdateCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, UpdateCommand, GetCommand, PutCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { getHtmlFromS3, storeHtmlInS3, calculateContentHash } = require('./s3-helpers');
-const { getTournamentId } = require('./scraperStrategies');
+// --- CHANGED: Added getStatusAndReg to imports ---
+const { getStatusAndReg } = require('./scraperStrategies');
 const { v4: uuidv4 } = require('uuid');
 
-// Configuration constants (KEEPING ALL ORIGINAL)
+// Configuration constants
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
 const REQUEST_TIMEOUT = 30000;
 const HEAD_TIMEOUT = 5000;
-const MAX_HTML_SIZE = 10 * 1024 * 1024; // 10MB limit
-const CACHE_DEBUG = process.env.CACHE_DEBUG === 'true';
+const VERBOSE_LOGGING = process.env.VERBOSE_LOGGING === 'true';
 const SCRAPERAPI_KEY = process.env.SCRAPERAPI_KEY || "62c905a307da2591dc89f94d193caacf";
 
 /**
@@ -44,7 +44,7 @@ const getOrCreateScrapeURL = async (url, entityId, tournamentId, ddbDocClient, t
         // First try to get existing record
         const getParams = {
             TableName: tableName,
-            Key: { id: url } // Assuming URL is used as ID, adjust if different
+            Key: { id: url }
         };
         
         const existing = await ddbDocClient.send(new GetCommand(getParams));
@@ -111,14 +111,6 @@ const getOrCreateScrapeURL = async (url, entityId, tournamentId, ddbDocClient, t
 /**
  * Enhanced wrapper for simplified usage - includes monitoring
  * This is the main entry point that other Lambda functions call
- * 
- * @param {string} url - URL to fetch
- * @param {object} scrapeURLRecord - The ScrapeURL record
- * @param {string} entityId - Entity ID
- * @param {number} tournamentId - Tournament ID
- * @param {boolean} forceRefresh - CRITICAL: When true, bypasses ALL caching (S3 and HTTP)
- * @param {object} monitoredDdbClient - Monitored DynamoDB client for tracking
- * @returns {object} Fetch result with HTML and metadata
  */
 const enhancedHandleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRefresh = false, monitoredDdbClient = null) => {
     // Use provided client or create new one
@@ -224,15 +216,6 @@ const simplifiedFetch = async (url, entityId, tournamentId) => {
 
 /**
  * Main fetch handler with caching strategy
- * Replace the existing handleFetch function (starting around line 233) with this version:
- * 
- * @param {string} url - URL to fetch
- * @param {object} scrapeURLRecord - Database record for this URL
- * @param {string} entityId - Entity ID for multi-tenancy
- * @param {number} tournamentId - Tournament ID
- * @param {boolean} forceRefresh - When true, skip ALL caching layers
- * @param {object} ddbDocClient - DynamoDB client
- * @returns {object} Result object with HTML and metadata
  */
 const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRefresh = false, ddbDocClient = null) => {
     const startTime = Date.now();
@@ -273,7 +256,7 @@ const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRe
     });
     
     try {
-        // Validate inputs (KEEPING ORIGINAL)
+        // Validate inputs
         if (!url || !isValidUrl(url)) {
             throw new Error(`Invalid URL provided: ${url}`);
         }
@@ -477,12 +460,12 @@ const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRe
             };
         }
         
-        // Store HTML in S3 if enabled (KEEPING ORIGINAL)
+        // Store HTML in S3 if enabled
         let s3Key = null;
-        let s3StorageId = null; // <-- Variable to hold the new DB record ID
+        let s3StorageId = null;
         if (s3Enabled) {
             try {
-                // This function (from s3-helpers) uploads the file to the S3 bucket
+                // 1. Store raw file
                 const s3Result = await storeHtmlInS3(
                     liveResult.html, 
                     url, 
@@ -496,19 +479,31 @@ const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRe
                     size: s3Result.contentSize 
                 });
 
-                // --- 
-                // ✅ FIX: Call createS3StorageRecord to log this S3 file in DynamoDB
-                // ---
+                // 2. Extract status metadata for the DB record
+                let gameStatus = null;
+                let registrationStatus = null;
+                try {
+                    const statusData = getStatusAndReg(liveResult.html);
+                    gameStatus = statusData.gameStatus;
+                    registrationStatus = statusData.registrationStatus;
+                    log('debug', 'Extracted status for S3 metadata', { gameStatus, registrationStatus });
+                } catch (parseError) {
+                    log('warn', 'Failed to extract status from HTML for S3 record', { error: parseError.message });
+                }
+
+                // 3. Create S3Storage DB record
                 try {
                     s3StorageId = await createS3StorageRecord(
-                        scrapeURLRecord.id, // The ID of the ScrapeURL record
+                        scrapeURLRecord.id,
                         s3Key,
                         liveResult.html,
                         url,
                         entityId,
                         tournamentId,
                         liveResult.headers,
-                        ddbDocClient // Pass the DDB client
+                        ddbDocClient,
+                        gameStatus,        // Passed to DB record
+                        registrationStatus // Passed to DB record
                     );
                     log('info', '✅ Created S3Storage record in DynamoDB', { s3StorageId });
                 } catch (s3DbError) {
@@ -578,9 +573,9 @@ const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRe
 };
 
 /**
- * Create S3Storage record (NEW FOR UNIFIED)
+ * Create S3Storage record (NEW FOR UNIFIED + METADATA)
  */
-const createS3StorageRecord = async (scrapeURLId, s3Key, html, url, entityId, tournamentId, headers, ddbDocClient) => {
+const createS3StorageRecord = async (scrapeURLId, s3Key, html, url, entityId, tournamentId, headers, ddbDocClient, gameStatus = null, registrationStatus = null) => {
     const now = new Date().toISOString();
     const s3StorageId = uuidv4();
     const s3StorageTable = getTableName('S3Storage');
@@ -588,9 +583,9 @@ const createS3StorageRecord = async (scrapeURLId, s3Key, html, url, entityId, to
     const s3StorageRecord = {
         id: s3StorageId,
         scrapeURLId,
-        url, // Keep for backward compat
-        tournamentId, // Keep for backward compat
-        entityId, // Keep for backward compat
+        url, 
+        tournamentId, 
+        entityId, 
         s3Key,
         s3Bucket: process.env.S3_BUCKET || 'pokerpro-scraped-content',
         contentSize: Buffer.byteLength(html, 'utf8'),
@@ -603,11 +598,16 @@ const createS3StorageRecord = async (scrapeURLId, s3Key, html, url, entityId, to
         etag: headers?.etag,
         lastModified: headers?.['last-modified'],
         headers: JSON.stringify(headers),
+        
+        // --- NEW STATUS METADATA FIELDS ---
+        gameStatus: gameStatus,
+        registrationStatus: registrationStatus,
+        
         isParsed: false,
         dataExtracted: false,
         wasGameCreated: false,
         wasGameUpdated: false,
-        scrapedAt: now, // Backward compat
+        scrapedAt: now, 
         storedAt: now,
         createdAt: now,
         updatedAt: now,
@@ -768,7 +768,7 @@ const fetchFromLiveSite = async (url) => {
 };
 
 /**
- * Update cache hit statistics in ScrapeURL record (KEEPING ORIGINAL WITH DATASTORE FIELDS)
+ * Update cache hit statistics in ScrapeURL record (KEEPING ORIGINAL)
  */
 const updateCacheHitStats = async (scrapeURLId, ddbDocClient, tableName) => {
     const now = new Date();
@@ -829,7 +829,7 @@ const updateHeaderCheckStats = async (scrapeURLId, ddbDocClient, tableName) => {
 };
 
 /**
- * Update ScrapeURL record with new data (FIXED - prevents duplicate updatedAt)
+ * Update ScrapeURL record with new data (KEEPING ORIGINAL)
  */
 const updateScrapeURLRecord = async (id, updates, ddbDocClient, tableName) => {
     const updateExpression = [];
@@ -895,7 +895,7 @@ const updateScrapeURLRecord = async (id, updates, ddbDocClient, tableName) => {
 };
 
 /**
- * Update ScrapeURL record on error (ENHANCED WITH UNIFIED FIELDS)
+ * Update ScrapeURL record on error (KEEPING ORIGINAL)
  */
 const updateScrapeURLError = async (id, errorMessage, ddbDocClient, tableName) => {
     const now = new Date();

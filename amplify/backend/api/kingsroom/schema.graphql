@@ -172,7 +172,7 @@ type Game @model @auth(rules: [{ allow: private }]) {
   # --- Scheduling & Timestamps ---
   gameStartDateTime: AWSDateTime!
   gameEndDateTime: AWSDateTime
-  registrationStatus: String
+  registrationStatus: RegistrationStatus @index(name: "byRegistrationStatus", queryField: "gamesByRegistrationStatus", sortKeyFields: ["gameStartDateTime"])
   totalDuration: String
   gameFrequency: GameFrequency
 
@@ -665,6 +665,9 @@ type S3Storage @model @auth(rules: [{ allow: private }]) {
   isManualUpload: Boolean @default(value: "false")
   uploadedBy: String                  # User who uploaded (for manual uploads)
   notes: String                       # Notes for manual uploads
+  previousVersions: [S3VersionHistory]
+  gameStatus: String @index(name: "byS3GameStatus", queryField: "s3StorageByGameStatus", sortKeyFields: ["scrapedAt"])
+  registrationStatus: String @index(name: "byS3RegistrationStatus", queryField: "s3StorageByRegistrationStatus", sortKeyFields: ["scrapedAt"])
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -713,6 +716,14 @@ type ScrapedGameStatus {
   id: Int!
   name: String!
   status: String!
+}
+
+type S3VersionHistory {
+  s3Key: String!
+  scrapedAt: AWSDateTime!
+  contentHash: String
+  uploadedBy: String
+  contentSize: Int
 }
 
 type TournamentLevel {

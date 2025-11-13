@@ -226,7 +226,7 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
       {/* Header */}
       <div className="flex-shrink-0 h-16 flex items-center justify-center px-4 bg-black border-b">
         <span className="font-mono text-sm font-semibold text-gray-300 tracking-wider">
-          Prototype v{buildVersion}
+          Concept v{buildVersion}
         </span>
       </div>
 

@@ -1258,7 +1258,9 @@ export const schema = {
                 "registrationStatus": {
                     "name": "registrationStatus",
                     "isArray": false,
-                    "type": "String",
+                    "type": {
+                        "enum": "RegistrationStatus"
+                    },
                     "isRequired": false,
                     "attributes": []
                 },
@@ -1654,6 +1656,17 @@ export const schema = {
                         "queryField": "gamesByStatus",
                         "fields": [
                             "gameStatus",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byRegistrationStatus",
+                        "queryField": "gamesByRegistrationStatus",
+                        "fields": [
+                            "registrationStatus",
                             "gameStartDateTime"
                         ]
                     }
@@ -6002,6 +6015,30 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "previousVersions": {
+                    "name": "previousVersions",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "S3VersionHistory"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "gameStatus": {
+                    "name": "gameStatus",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "registrationStatus": {
+                    "name": "registrationStatus",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -6079,6 +6116,28 @@ export const schema = {
                         "name": "byGameId",
                         "fields": [
                             "gameId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byS3GameStatus",
+                        "queryField": "s3StorageByGameStatus",
+                        "fields": [
+                            "gameStatus",
+                            "scrapedAt"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byS3RegistrationStatus",
+                        "queryField": "s3StorageByRegistrationStatus",
+                        "fields": [
+                            "registrationStatus",
+                            "scrapedAt"
                         ]
                     }
                 },
@@ -6631,6 +6690,46 @@ export const schema = {
                     "isArray": false,
                     "type": "String",
                     "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "S3VersionHistory": {
+            "name": "S3VersionHistory",
+            "fields": {
+                "s3Key": {
+                    "name": "s3Key",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "scrapedAt": {
+                    "name": "scrapedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "contentHash": {
+                    "name": "contentHash",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "uploadedBy": {
+                    "name": "uploadedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "contentSize": {
+                    "name": "contentSize",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
                     "attributes": []
                 }
             }
@@ -8615,5 +8714,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "3ca76bbe2d153615824e53fc2f71006f"
+    "version": "0962aec7c93d7865c394f09539e046bd"
 };
