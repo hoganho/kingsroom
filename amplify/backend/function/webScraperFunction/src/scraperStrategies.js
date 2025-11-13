@@ -23,6 +23,30 @@ const parseDurationToMilliseconds = (durationStr) => {
     return totalMilliseconds;
 };
 
+/**
+ * Extract tournament ID from URL - centralized function
+ */
+const getTournamentId = (url) => {
+    if (!url) return 1; // Default to 1 if no URL
+    
+    try {
+        // Handle both full URLs and just the ID parameter
+        if (url.includes('?id=')) {
+            const match = url.match(/[?&]id=(\d+)/);
+            if (match && match[1]) {
+                return parseInt(match[1], 10);
+            }
+        } else if (/^\d+$/.test(url)) {
+            // If it's just a number, that's the tournament ID
+            return parseInt(url, 10);
+        }
+    } catch (e) {
+        console.warn('Could not extract tournament ID from URL:', e.message);
+    }
+    
+    return 1; // Default fallback
+};
+
 const AUTO_ASSIGN_THRESHOLD = 0.90; // 90% similarity - high confidence
 const SUGGEST_THRESHOLD = 0.60;     // 60% similarity - medium confidence, suggest to user
 const SERIES_MATCH_THRESHOLD = 0.80; // 80% similarity
@@ -59,15 +83,23 @@ const cleanupNameForMatching = (name, context, options = {}) => {
 };
 
 class ScrapeContext {
-    constructor(html) {
+    constructor(html, url = null) {
         this.$ = cheerio.load(html);
+        this.url = url;
         this.data = {};
         this.foundKeys = new Set();
         this.gameData = null;
         this.levelData = null;
-        this.abortScrape = false; // Added flag to stop scraping early
+        this.abortScrape = false;
+        
+        // Initialize with tournament ID from URL
+        if (url) {
+            this.data.tournamentId = getTournamentId(url);
+        }
+        
         this._parseEmbeddedData();
     }
+    
     _parseEmbeddedData() {
         const html = this.$.html();
         try {
@@ -89,6 +121,7 @@ class ScrapeContext {
             console.warn('Could not parse embedded level data (cw_tt_levels):', e.message);
         }
     }
+    
     getText(key, selector) {
         const text = this.$(selector).first().text().trim();
         if (text) {
@@ -98,6 +131,7 @@ class ScrapeContext {
         }
         return undefined;
     }
+    
     parseNumeric(key, selector) {
         const str = this.$(selector).first().text().trim();
         if (!str) return undefined;
@@ -109,6 +143,7 @@ class ScrapeContext {
         }
         return undefined;
     }
+    
     add(key, value) {
         if (value !== undefined && value !== null) {
             this.foundKeys.add(key);
@@ -119,11 +154,12 @@ class ScrapeContext {
 
 const defaultStrategy = {
     /**
-     * ✅ NEW: Robust page state detection.
-     * Uses specific CSS classes (.cw-badge.cw-bg-warning) to identify
-     * "Tournament Not Found" and "Tournament Not Published" states precisely.
+     * Enhanced page state detection with proper tournamentId handling
      */
     detectPageState(ctx) {
+        // Ensure we have tournamentId from the context
+        const tournamentId = ctx.data.tournamentId || getTournamentId(ctx.url) || 1;
+        
         // Look for the specific warning badge used by the platform for errors
         const warningBadge = ctx.$('.cw-badge.cw-bg-warning').first();
         
@@ -131,29 +167,36 @@ const defaultStrategy = {
             const warningText = warningBadge.text().trim().toLowerCase();
             console.log(`[Scraper] Detected warning badge: "${warningText}"`);
 
-            // Case 1: Tournament Not Found (Req #3, #5)
-            // Treat as functionally identical to 'BLANK' for auto-scraper.
-            // Do NOT mark as doNotScrape=true, so it can be retried later.
+            // Case 1: Tournament Not Found
             if (warningText.includes('not found')) {
-                 console.log('[Scraper] State detected: Tournament Not Found');
-                 ctx.add('gameStatus', 'NOT_FOUND');
-                 ctx.add('name', 'Tournament Not Found');
-                 ctx.add('doNotScrape', false); // Important: Allow rescraping later
-                 ctx.abortScrape = true;
-                 return;
+                console.log('[Scraper] State detected: Tournament Not Found');
+                ctx.add('tournamentId', tournamentId); // Ensure tournamentId is set
+                ctx.add('gameStatus', 'NOT_FOUND');
+                ctx.add('name', 'Tournament Not Found');
+                ctx.add('doNotScrape', false); // Allow rescraping later
+                ctx.add('hasGuarantee', false);
+                ctx.add('s3Key', '');
+                ctx.abortScrape = true;
+                return;
             }
 
-            // Case 2: Tournament Not Published (Req #4)
-            // Exists but is hidden by publisher.
-            // MARK as doNotScrape=true to stop wasting resources on it.
+            // Case 2: Tournament Not Published
             if (warningText.includes('not published')) {
-                 console.log('[Scraper] State detected: Tournament Not Published');
-                 ctx.add('gameStatus', 'NOT_PUBLISHED');
-                 ctx.add('name', 'Tournament Not Published');
-                 ctx.add('doNotScrape', true); // Critical: Prevent future scrapes until manual reset
-                 ctx.abortScrape = true;
-                 return;
+                console.log('[Scraper] State detected: Tournament Not Published');
+                ctx.add('tournamentId', tournamentId); // Ensure tournamentId is set
+                ctx.add('gameStatus', 'NOT_PUBLISHED');
+                ctx.add('name', 'Tournament Not Published');
+                ctx.add('doNotScrape', true); // Prevent future scrapes
+                ctx.add('hasGuarantee', false);
+                ctx.add('s3Key', '');
+                ctx.abortScrape = true;
+                return;
             }
+        }
+        
+        // Make sure tournamentId is always set even if no special state
+        if (!ctx.data.tournamentId) {
+            ctx.add('tournamentId', tournamentId);
         }
     },
 
@@ -162,6 +205,8 @@ const defaultStrategy = {
         ctx.add('seriesName', null);
         ctx.add('isSatellite', false);
         ctx.add('isRegular', true);
+        ctx.add('hasGuarantee', false); // Default value for required field
+        ctx.add('doNotScrape', false); // Default value for required field
     },
 
     getName(ctx, seriesTitles = [], venues = []) {
@@ -186,7 +231,7 @@ const defaultStrategy = {
             return; 
         }
 
-        // START: STEP 1 - Exact Substring Match
+        // Series matching logic (unchanged)
         let exactMatchFound = null;
         const upperCaseGameName = gameName.toUpperCase();
 
@@ -209,7 +254,6 @@ const defaultStrategy = {
             return; 
         }
 
-        // STEP 2 - Fallback to Fuzzy Matching
         console.log('[DEBUG-SERIES-MATCH] No exact match found. Falling back to fuzzy matching.');
         const cleanedGameNameForSeriesMatch = cleanupNameForMatching(gameName, 'series', { venues });
         
@@ -236,7 +280,7 @@ const defaultStrategy = {
                 ctx.add('isRegular', false); 
             }
         } else if (bestMatch) {
-             console.log(`[DEBUG-SERIES-MATCH] Low confidence fuzzy match, ignoring: "${bestMatch.target}" with rating ${bestMatch.rating}`);
+            console.log(`[DEBUG-SERIES-MATCH] Low confidence fuzzy match, ignoring: "${bestMatch.target}" with rating ${bestMatch.rating}`);
         }
     },
     
@@ -328,7 +372,7 @@ const defaultStrategy = {
         }
         
         if (registrationStatus !== 'UNKNOWN_REG_STATUS') {
-             ctx.add('registrationStatus', registrationStatus.toUpperCase());
+            ctx.add('registrationStatus', registrationStatus.toUpperCase());
         }
         return registrationStatus.toUpperCase();
     },
@@ -560,15 +604,12 @@ const defaultStrategy = {
             return;
         }
         
-        // Enhanced players remaining detection
         let playersRemaining = 0;
         
-        // Method 1: Try to get from seating data (players with current seats)
         if (ctx.data.seating && ctx.data.seating.length > 0) {
             playersRemaining = ctx.data.seating.length;
         }
         
-        // Method 2: Parse from the playersentries text (format: "remaining/total")
         if (playersRemaining === 0) {
             const selector = '#cw_clock_playersentries';
             const entriesText = ctx.$(selector).first().text().trim();
@@ -582,7 +623,6 @@ const defaultStrategy = {
             }
         }
         
-        // Method 3: If still 0, check if there's embedded game data
         if (playersRemaining === 0 && ctx.gameData) {
             if (ctx.gameData.players_remaining !== undefined) {
                 playersRemaining = ctx.gameData.players_remaining;
@@ -726,7 +766,6 @@ const defaultStrategy = {
     getMatchingVenue(ctx, venues, seriesTitles = []) {
         const gameName = ctx.data.name;
         if (!gameName || !venues || venues.length === 0) {
-            // Return null match instead of undefined
             ctx.add('venueMatch', { 
                 autoAssignedVenue: null, 
                 suggestions: [],
@@ -841,109 +880,237 @@ const defaultStrategy = {
         }
     },
 
+    // This is redundant now since we set tournamentId in context constructor
+    // but keeping for backward compatibility
     getTournamentId(ctx, url) {
-        if (!url) return;
+        if (ctx.data.tournamentId) return; // Already set
         
-        try {
-            // Handle both full URLs and just the ID parameter
-            if (url.includes('?id=')) {
-                const match = url.match(/[?&]id=(\d+)/);
-                if (match && match[1]) {
-                    ctx.add('tournamentId', match[1]);
-                }
-            } else if (/^\d+$/.test(url)) {
-                // If it's just a number, that's the tournament ID
-                ctx.add('tournamentId', url);
-            }
-        } catch (e) {
-            console.warn('Could not extract tournament ID from URL:', e.message);
-        }
+        const tournamentId = getTournamentId(url || ctx.url);
+        ctx.add('tournamentId', tournamentId);
     },
 };
 
-const runScraper = (html, structureLabel, venues = [], seriesTitles = [], url = null) => {
-    const ctx = new ScrapeContext(html);
-    const strategy = defaultStrategy;
-    console.log(`[Scraper] Using unified robust strategy.`);
-
-    // Execution order with detectPageState FIRST
-    const executionOrder = [
-        'detectPageState', // <-- NEW: Runs first to detect special states
-        'initializeDefaultFlags',
-        'getName',
-        'getTournamentFlags',
-        'getGameFrequency',
-        'getStatus',
-        'getGameTags',
-        'getTournamentType',
-        'getGameStartDateTime',
-        'getRegistrationStatus',
-        'getGameVariant',
-        'getPrizepool',
-        'getTotalEntries',
-        'getTotalRebuys',
-        'getTotalAddons',
-        'getBuyIn',
-        'getRake',
-        'getStartingStack',
-        'getGuarantee',
-        'calculateRevenueByBuyIns',
-        'calculateGuaranteeMetrics',
-        'calculateTotalRake',
-        'calculateProfitLoss',
-        'getSeriesName',
-        'getTotalDuration',
-        'getEntries',
-        'getSeating',
-        'getResults',
-        'getTables',
-        'getLevels',
-        'getBreaks',
-        'getMatchingVenue',
-        'getLiveData',
-        'getTournamentId',
-    ];
-
-    for (const key of executionOrder) {
-        // If detectPageState set the abort flag, stop processing immediately
-        if (ctx.abortScrape) {
-            console.log(`[Scraper] Aborting scrape early due to detected page state: ${ctx.data.gameStatus}`);
-            break;
+const runScraper = (html, ctx = null, venues = [], seriesTitles = [], url = '', forceRefresh = false) => {
+    const $ = cheerio.load(html);
+    const tournamentId = getTournamentId(url);
+    
+    // Initialize context if not provided
+    if (!ctx) {
+        ctx = new ScrapingContext(url);
+    }
+    
+    // Always set tournament ID first
+    ctx.add('tournamentId', tournamentId);
+    
+    console.log(`[runScraper] Starting run for tournament ${tournamentId}, forceRefresh: ${forceRefresh}`);
+    
+    // ========================================
+    // CHECK FOR SPECIAL STATES FIRST
+    // ========================================
+    // Look for warning badges that indicate special states
+    const warningBadge = $('.cw-badge.cw-bg-warning').first();
+    
+    if (warningBadge.length) {
+        const warningText = warningBadge.text().trim().toLowerCase();
+        console.log(`[Scraper] Warning badge detected: "${warningText}"`);
+        
+        // Case 1: Tournament Not Found
+        if (warningText.includes('not found')) {
+            console.log('[Scraper] State detected: Tournament Not Found');
+            ctx.add('tournamentId', tournamentId);
+            ctx.add('gameStatus', 'NOT_FOUND');
+            ctx.add('name', 'Tournament Not Found');
+            ctx.add('doNotScrape', true);
+            ctx.add('hasGuarantee', false);
+            ctx.add('s3Key', '');
+            ctx.add('registrationStatus', 'N_A');
+            
+            // Only abort if NOT forcing refresh
+            if (!forceRefresh) {
+                ctx.abortScrape = true;
+                console.log('[Scraper] Aborting scrape due to NOT_FOUND status');
+                return { data: ctx.data, foundKeys: ctx.foundKeys };
+            } else {
+                console.log('[Scraper] NOT_FOUND detected but continuing due to forceRefresh=true');
+            }
         }
 
-        if (typeof strategy[key] === 'function') {
-             try {
-                if (key === 'getName') {
-                    strategy[key](ctx, seriesTitles, venues);
-                } else if (key === 'getMatchingVenue') {
-                    strategy[key](ctx, venues, seriesTitles);
-                } else if (key === 'getTournamentId') {
-                    strategy[key](ctx, url);
-                } else {                    
-                    strategy[key](ctx);
-                }
-            } catch (e) {
-                console.error(`[Scraper] Error running strategy function "${key}":`, e.message);
+        // Case 2: Tournament Not Published
+        else if (warningText.includes('not published')) {
+            console.log('[Scraper] State detected: Tournament Not Published');
+            ctx.add('tournamentId', tournamentId);
+            ctx.add('gameStatus', 'NOT_PUBLISHED');
+            ctx.add('name', 'Tournament Not Published');
+            ctx.add('doNotScrape', true);
+            ctx.add('hasGuarantee', false);
+            ctx.add('s3Key', '');
+            ctx.add('registrationStatus', 'N_A');
+            
+            // Only abort if NOT forcing refresh
+            if (!forceRefresh) {
+                ctx.abortScrape = true;
+                console.log('[Scraper] Aborting scrape due to NOT_PUBLISHED status');
+                return { data: ctx.data, foundKeys: ctx.foundKeys };
+            } else {
+                console.log('[Scraper] NOT_PUBLISHED detected but continuing due to forceRefresh=true');
             }
-        } else {
-             console.warn(`[Scraper] Strategy function "${key}" not found in defaultStrategy.`);
+        }
+        
+        // Case 3: Tournament Not In Use
+        else if (warningText.includes('not in use') || warningText.includes('not available')) {
+            console.log('[Scraper] State detected: Tournament Not In Use');
+            ctx.add('tournamentId', tournamentId);
+            ctx.add('gameStatus', 'NOT_IN_USE');
+            ctx.add('name', 'Tournament Not In Use');
+            ctx.add('doNotScrape', true);
+            ctx.add('hasGuarantee', false);
+            ctx.add('s3Key', '');
+            ctx.add('registrationStatus', 'N_A');
+            
+            // Only abort if NOT forcing refresh
+            if (!forceRefresh) {
+                ctx.abortScrape = true;
+                console.log('[Scraper] Aborting scrape due to NOT_IN_USE status');
+                return { data: ctx.data, foundKeys: ctx.foundKeys };
+            } else {
+                console.log('[Scraper] NOT_IN_USE detected but continuing due to forceRefresh=true');
+            }
+        }
+        
+        // Case 4: Any other warning (generic handler)
+        else {
+            console.log(`[Scraper] Unknown warning state: ${warningText}`);
+            ctx.add('tournamentId', tournamentId);
+            ctx.add('gameStatus', 'UNKNOWN');
+            ctx.add('name', warningText || 'Tournament Status Unknown');
+            ctx.add('doNotScrape', true);
+            ctx.add('hasGuarantee', false);
+            ctx.add('s3Key', '');
+            ctx.add('registrationStatus', 'N_A');
+            
+            if (!forceRefresh) {
+                ctx.abortScrape = true;
+                console.log('[Scraper] Aborting scrape due to unknown warning status');
+                return { data: ctx.data, foundKeys: ctx.foundKeys };
+            } else {
+                console.log('[Scraper] Unknown warning detected but continuing due to forceRefresh=true');
+            }
         }
     }
-
-    ctx.add('rawHtml', html);
-    return { data: ctx.data, foundKeys: Array.from(ctx.foundKeys) };
+    
+    // Check for other indicators even without warning badge
+    // Sometimes the page structure itself indicates special states
+    const pageTitle = $('title').text().toLowerCase();
+    const h1Text = $('h1').first().text().toLowerCase();
+    
+    if (!warningBadge.length) {
+        // Additional checks for special states
+        if (pageTitle.includes('not found') || h1Text.includes('not found')) {
+            console.log('[Scraper] State detected from page title/h1: Not Found');
+            ctx.add('tournamentId', tournamentId);
+            ctx.add('gameStatus', 'NOT_FOUND');
+            ctx.add('name', 'Tournament Not Found');
+            ctx.add('doNotScrape', true);
+            ctx.add('hasGuarantee', false);
+            ctx.add('s3Key', '');
+            ctx.add('registrationStatus', 'N_A');
+            
+            if (!forceRefresh) {
+                ctx.abortScrape = true;
+                return { data: ctx.data, foundKeys: ctx.foundKeys };
+            }
+        }
+        
+        // Check for error pages
+        if (pageTitle.includes('error') || h1Text.includes('error')) {
+            console.log('[Scraper] State detected: Error Page');
+            ctx.add('tournamentId', tournamentId);
+            ctx.add('gameStatus', 'ERROR');
+            ctx.add('name', 'Tournament Error');
+            ctx.add('doNotScrape', true);
+            ctx.add('hasGuarantee', false);
+            ctx.add('s3Key', '');
+            ctx.add('registrationStatus', 'N_A');
+            
+            if (!forceRefresh) {
+                ctx.abortScrape = true;
+                return { data: ctx.data, foundKeys: ctx.foundKeys };
+            }
+        }
+    }
+    
+    // Make sure tournamentId is always set even if no special state
+    if (!ctx.data.tournamentId) {
+        ctx.add('tournamentId', tournamentId);
+    }
+    
+    // ========================================
+    // CONTINUE WITH NORMAL PARSING
+    // ========================================
+    // If we got here, either there's no special state or we're forcing refresh
+    
+    // Parse tournament details
+    parseTournamentName($, ctx);
+    parseGameStatus($, ctx);
+    parseRegistrationStatus($, ctx);
+    parseDates($, ctx);
+    parseGameType($, ctx);
+    parseGameVariant($, ctx);
+    parsePrizepool($, ctx);
+    parseBuyIn($, ctx);
+    parseStartingStack($, ctx);
+    parseGuarantee($, ctx);
+    parseTotalEntries($, ctx);
+    parsePlayersRemaining($, ctx);
+    parseRebuysAndAddons($, ctx);
+    parseTotalDuration($, ctx);
+    parseGameTags($, ctx);
+    parseSeriesName($, ctx, seriesTitles);
+    
+    // Parse structure and players
+    parseLevels($, ctx);
+    parseBreaks($, ctx);
+    parsePlayerEntries($, ctx);
+    parsePlayerSeating($, ctx);
+    parsePlayerResults($, ctx);
+    parseTables($, ctx);
+    
+    // Match venues
+    if (venues && venues.length > 0) {
+        ctx.data.venueMatch = matchVenue(ctx.data.venueName, venues);
+    }
+    
+    // Generate structure label
+    const statusAndReg = getStatusAndReg(ctx.data);
+    ctx.add('structureLabel', `STATUS: ${statusAndReg.status} | REG: ${statusAndReg.registration}`);
+    
+    // Final adjustments
+    if (!ctx.data.tournamentId) {
+        ctx.add('tournamentId', tournamentId);
+    }
+    
+    console.log(`[runScraper] Completed. Found keys: ${ctx.foundKeys.length}, Status: ${ctx.data.gameStatus}, DoNotScrape: ${ctx.data.doNotScrape}`);
+    
+    return { 
+        data: ctx.data, 
+        foundKeys: ctx.foundKeys 
+    };
 };
 
 module.exports = {
     runScraper,
+    getTournamentId, // Export for use in other modules
     getStatusAndReg: (html) => {
         const ctx = new ScrapeContext(html);
-        // Check page state first here too for quick status checks
         defaultStrategy.detectPageState(ctx);
         if (!ctx.abortScrape) {
-             defaultStrategy.getStatus(ctx);
-             defaultStrategy.getRegistrationStatus(ctx);
+            defaultStrategy.getStatus(ctx);
+            defaultStrategy.getRegistrationStatus(ctx);
         }
-        return { gameStatus: ctx.data.gameStatus, registrationStatus: ctx.data.registrationStatus };
+        return { 
+            gameStatus: ctx.data.gameStatus, 
+            registrationStatus: ctx.data.registrationStatus,
+            tournamentId: ctx.data.tournamentId
+        };
     }
 };

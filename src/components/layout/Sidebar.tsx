@@ -13,6 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
 import { EntitySelector } from '../entities/EntitySelector';
+import { Database } from 'lucide-react';
 
 interface SidebarProps {
   onClose?: () => void;
@@ -118,6 +119,12 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
       icon: UserGroupIcon,
       requiredRoles: ['SuperAdmin'],
     },
+    {
+        to: '/debug/database-monitor',
+        label: 'Database Monitor',
+        icon: Database as any, // import { Database } from 'lucide-react'
+        requiredRoles: ['SuperAdmin'],
+    }
   ];
 
   // Auto-expand parent if child is active

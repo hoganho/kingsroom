@@ -1,567 +1,982 @@
-/* Amplify Params - DO NOT EDIT
-	API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
-	API_KINGSROOM_GRAPHQLAPIIDOUTPUT
-	API_KINGSROOM_S3STORAGETABLE_ARN
-	API_KINGSROOM_S3STORAGETABLE_NAME
-	API_KINGSROOM_SCRAPEATTEMPTTABLE_ARN
-	API_KINGSROOM_SCRAPEATTEMPTTABLE_NAME
-	API_KINGSROOM_SCRAPERJOBTABLE_ARN
-	API_KINGSROOM_SCRAPERJOBTABLE_NAME
-	API_KINGSROOM_SCRAPEURLTABLE_ARN
-	API_KINGSROOM_SCRAPEURLTABLE_NAME
-	ENV
-	REGION
-Amplify Params - DO NOT EDIT */
+// s3-management-unified.js
+// Complete S3 management Lambda with unified ScrapeURL approach
+// and restored operational functions.
+// REFACTORED FOR AWS SDK V3
 
-// S3ManagementFunction/index.js
-// Lambda function for S3 HTML management operations
-// FIXED: 1) Removed uuid dependency to avoid ES Module issues
-//        2) Changed 'field' to 'fieldName' for AppSync compatibility
-
-const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
+// const AWS = require('aws-sdk'); // <-- REMOVED V2
 const crypto = require('crypto');
+const { v4: uuidv4 } = require('uuid');
 
-// Use crypto to generate UUIDs instead of the uuid package
-const generateUUID = () => {
-    return crypto.randomUUID();
-};
+// --- AWS Clients (SDK v3) ---
+const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBDocumentClient, QueryCommand, PutCommand, GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 
-// Only require s3-helpers if it exists, otherwise use stub functions
-let s3Helpers;
-try {
-    s3Helpers = require('./s3-helpers');
-} catch (e) {
-    console.warn('s3-helpers.js not found, using stub functions');
-    s3Helpers = {
-        storeHtmlInS3: async () => ({ 
-            s3Key: 'stub-key', 
-            s3Bucket: 'stub-bucket', 
-            timestamp: new Date().toISOString(),
-            contentSize: 0,
-            contentHash: 'stub-hash'
-        }),
-        getHtmlFromS3: async () => null,
-        listHtmlFilesForTournament: async () => [],
-        getStorageStats: async () => ({ totalSizeMB: '0' }),
-        calculateContentHash: (content) => crypto.createHash('md5').update(content).digest('hex')
+// Initialize v3 S3 Client
+const s3 = new S3Client({});
+
+// Initialize v3 DynamoDB Document Client
+const ddbClient = new DynamoDBClient({});
+const dynamodb = DynamoDBDocumentClient.from(ddbClient);
+
+// --- DynamoDB Table Constants ---
+const SCRAPE_URL_TABLE = process.env.API_KINGSROOM_SCRAPEURLTABLE_NAME || process.env.SCRAPE_URL_TABLE || 'ScrapeURL-prod';
+const S3_STORAGE_TABLE = process.env.API_KINGSROOM_S3STORAGETABLE_NAME || process.env.S3_STORAGE_TABLE || 'S3Storage-prod';
+
+// --- S3 Bucket Constant ---
+// Ensure this environment variable is set in your Lambda
+const S3_BUCKET = process.env.S3_BUCKET || 'pokerpro-scraped-content';
+
+/**
+ * Helper to convert S3 GetObject stream to string
+ */
+const streamToString = (stream) =>
+    new Promise((resolve, reject) => {
+        const chunks = [];
+        stream.on("data", (chunk) => chunks.push(chunk));
+        stream.on("error", reject);
+        stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+    });
+
+// ===================================================================
+// 1. HELPER FUNCTIONS
+// ===================================================================
+
+/**
+ * Extract tournament ID from URL or filename
+ */
+function extractTournamentId(url) {
+    const match = url.match(/[?&]id=(\d+)/);
+    return match ? parseInt(match[1], 10) : null;
+}
+
+/**
+ * Calculate content hash
+ */
+function calculateContentHash(content) {
+    return crypto.createHash('sha256').update(content).digest('hex');
+}
+
+/**
+ * Extract metadata from HTML content
+ */
+function extractMetadata(html) {
+    const metadata = {};
+    
+    // Extract title
+    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+    if (titleMatch) {
+        metadata.extractedTitle = titleMatch[1].trim();
+    }
+    
+    // Check for tournament status
+    if (html.includes('Tournament not in use')) {
+        metadata.tournamentStatus = 'NOT_IN_USE';
+    } else if (html.includes('Not Published')) {
+        metadata.tournamentStatus = 'NOT_PUBLISHED';
+    } else if (html.includes('Registration Open')) {
+        metadata.tournamentStatus = 'REGISTERING';
+    } else if (html.includes('Running')) {
+        metadata.tournamentStatus = 'RUNNING';
+    } else if (html.includes('Finished')) {
+        metadata.tournamentStatus = 'FINISHED';
+    }
+    
+    // Extract tournament name if possible
+    const nameMatch = html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
+    if (nameMatch) {
+        metadata.gameName = nameMatch[1].trim();
+    }
+    
+    return metadata;
+}
+
+/**
+ * Find a ScrapeURL item by its URL.
+ * Helper function for clearCache and forceRefresh
+ */
+async function getScrapeURLByUrl(url) {
+    if (!url) {
+        throw new Error('URL is required');
+    }
+    
+    const queryParams = {
+        TableName: SCRAPE_URL_TABLE,
+        IndexName: 'byURL',
+        KeyConditionExpression: '#url = :url',
+        ExpressionAttributeNames: {
+            '#url': 'url'
+        },
+        ExpressionAttributeValues: {
+            ':url': url
+        },
+        Limit: 1
+    };
+    
+    // V3 Change: .promise() -> .send(new Command())
+    const result = await dynamodb.send(new QueryCommand(queryParams));
+    return result.Items?.[0];
+}
+
+/**
+ * Get or create ScrapeURL record for manual upload
+ */
+async function getOrCreateScrapeURLForManualUpload(url, entityId, tournamentId) {
+    // First check if record exists
+    const scrapeURL = await getScrapeURLByUrl(url);
+    if (scrapeURL) {
+        return scrapeURL;
+    }
+    
+    // Create new ScrapeURL record for manual upload
+    const now = new Date().toISOString();
+    const newRecord = {
+        id: uuidv4(),
+        url,
+        tournamentId,
+        entityId,
+        lastInteractionType: 'MANUAL_UPLOAD',
+        lastInteractionAt: now,
+        hasStoredContent: false, // Will be set to true after S3Storage creation
+        status: 'ACTIVE',
+        doNotScrape: false,
+        isActive: true,
+        totalInteractions: 1,
+        successfulScrapes: 0,
+        failedScrapes: 0,
+        manualUploads: 1,
+        contentChangeCount: 0,
+        cacheHits: 0, // Initialize new cache field
+        hasEtag: false, // Initialize new cache field
+        hasLastModified: false, // Initialize new cache field
+        createdAt: now,
+        updatedAt: now,
+        __typename: 'ScrapeURL'
+    };
+    
+    // V3 Change: .promise() -> .send(new Command())
+    await dynamodb.send(new PutCommand({
+        TableName: SCRAPE_URL_TABLE,
+        Item: newRecord
+    }));
+    
+    console.log(`[Manual Upload] Created new ScrapeURL record: ${newRecord.id}`);
+    return newRecord;
+}
+
+/**
+ * Get storage statistics (STUB)
+ * TODO: Implement a performant version of this. A full scan or
+ * N+1 query is not suitable for production. This should ideally
+ * be a value aggregated onto the Entity table.
+ */
+async function getStorageStats(entityId) {
+    console.warn(`[getStorageStats] STUB FUNCTION for ${entityId}. Implement real logic.`);
+    // The query-heavy version from your 'refactored' code
+    // is not performant. A simple stub is safer.
+    return {
+        totalFiles: 0,
+        totalSizeMB: 0,
+        bySource: {
+            WEB_SCRAPER: 0,
+            MANUAL_UPLOAD: 0,
+            API_IMPORT: 0,
+            MIGRATION: 0
+        }
     };
 }
 
-const { 
-    storeHtmlInS3, 
-    getHtmlFromS3, 
-    listHtmlFilesForTournament, 
-    getStorageStats, 
-    calculateContentHash 
-} = s3Helpers;
-
-const client = new DynamoDBClient({});
-const ddbDocClient = DynamoDBDocumentClient.from(client);
-
-// Get table names from environment variables
-const getTableName = (modelName) => {
-    const apiId = process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT;
-    const env = process.env.ENV;
-    return `${modelName}-${apiId}-${env}`;
-};
-
-/**
- * Main handler for S3 management operations
- */
-exports.handler = async (event) => {
-    console.log('[S3Management] Received event:', JSON.stringify(event));
-    
-    // AppSync sends 'fieldName' not 'field'
-    const { fieldName, arguments: args } = event;
-    
-    try {
-        switch (fieldName) {
-            case 'uploadManualHTML':
-                return await handleManualUpload(args.input);
-                
-            case 'viewS3Content':
-                return await handleViewContent(args);
-                
-            case 'getS3StorageHistory':
-                return await handleGetStorageHistory(args);
-                
-            case 'getCachingStats':
-                return await handleGetCachingStats(args);
-                
-            case 'listStoredHTML':
-                return await handleListStoredHTML(args);
-                
-            case 'reScrapeFromCache':
-                return await handleReScrapeFromCache(args.input);
-                
-            case 'forceRefreshScrape':
-                return await handleForceRefresh(args);
-                
-            case 'clearURLCache':
-                return await handleClearCache(args);
-                
-            default:
-                throw new Error(`Unknown field: ${fieldName}`);
-        }
-    } catch (error) {
-        console.error(`[S3Management] Error handling ${fieldName}:`, error);
-        throw error;
-    }
-};
+// ===================================================================
+// 2. MAIN OPERATION HANDLERS
+// ===================================================================
 
 /**
  * Handle manual HTML upload
  */
-async function handleManualUpload(input) {
-    const { htmlContent, url, tournamentId, entityId, notes, uploadedBy } = input;
+async function handleManualUpload(event) {
+    console.log('[handleManualUpload] Processing manual upload');
     
-    console.log(`[ManualUpload] Processing upload for tournament ${tournamentId}`);
-    
-    // Store in S3
-    const s3Result = await storeHtmlInS3(
-        htmlContent,
-        url,
+    const { 
+        fileContent, 
+        fileName, 
+        sourceUrl, 
         entityId,
-        tournamentId,
-        {},
-        true // isManual
-    );
+        tournamentId: providedTournamentId,
+        uploadedBy,
+        notes
+    } = event;
     
-    // Record in S3Storage table
-    const s3StorageTable = getTableName('S3Storage');
+    if (!fileContent || !sourceUrl || !entityId) {
+        throw new Error('fileContent, sourceUrl, and entityId are required');
+    }
+    
+    // Extract tournament ID
+    const tournamentId = providedTournamentId || extractTournamentId(sourceUrl);
+    if (!tournamentId) {
+        throw new Error('Could not determine tournament ID from URL or input');
+    }
+    
+    const contentHash = calculateContentHash(fileContent);
+    const metadata = extractMetadata(fileContent);
     const now = new Date().toISOString();
-    const timestamp = Date.now();
-    
-    const storageRecord = {
-        id: generateUUID(),
-        scrapeURLId: null,
-        url: url,
-        tournamentId: tournamentId,
-        entityId: entityId,
-        s3Key: s3Result.s3Key,
-        s3Bucket: s3Result.s3Bucket,
-        scrapedAt: s3Result.timestamp,
-        contentSize: s3Result.contentSize,
-        contentHash: s3Result.contentHash,
-        isManualUpload: true,
-        uploadedBy: uploadedBy,
-        notes: notes,
-        dataExtracted: false,
-        createdAt: now,
-        updatedAt: now,
-        // ✅ ADD DataStore sync fields:
-        __typename: 'S3Storage',
-        _lastChangedAt: timestamp,     // Required: timestamp in milliseconds
-        _version: 1,                    // Required: initial version
-        _deleted: null                  // Optional but good practice
-    };
-    
-    await ddbDocClient.send(new PutCommand({
-        TableName: s3StorageTable,
-        Item: storageRecord
-    }));
-    
-    console.log(`[ManualUpload] Successfully uploaded HTML to ${s3Result.s3Key}`);
-    
-    return storageRecord;
-}
-
-/**
- * View S3 content
- */
-async function handleViewContent(args) {
-    const { s3Key } = args;
-    
-    if (!s3Key) {
-        throw new Error('s3Key is required');
-    }
-    
-    console.log(`[ViewContent] Retrieving content from ${s3Key}`);
-    
-    const content = await getHtmlFromS3(s3Key);
-    
-    if (!content) {
-        throw new Error(`Content not found at ${s3Key}`);
-    }
-    
-    return {
-        s3Key: s3Key,
-        html: content.html,
-        metadata: content.metadata,
-        size: content.contentLength,
-        lastModified: content.lastModified
-    };
-}
-
-/**
- * Get S3 storage history for a tournament
- */
-async function handleGetStorageHistory(args) {
-    const { tournamentId, entityId, limit = 20 } = args;
-    
-    console.log(`[StorageHistory] Getting history for tournament ${tournamentId}`);
-    
-    const s3StorageTable = getTableName('S3Storage');
     
     try {
-        // Query by tournament ID
-        const queryResult = await ddbDocClient.send(new QueryCommand({
-            TableName: s3StorageTable,
-            IndexName: 'byTournamentId',
-            KeyConditionExpression: 'tournamentId = :tid',
-            FilterExpression: entityId ? 'entityId = :eid' : undefined,
-            ExpressionAttributeValues: {
-                ':tid': tournamentId,
-                ...(entityId ? { ':eid': entityId } : {})
-            },
-            ScanIndexForward: false, // Newest first
-            Limit: limit
-        }));
+        // Step 1: Get or create ScrapeURL record
+        const scrapeURL = await getOrCreateScrapeURLForManualUpload(sourceUrl, entityId, tournamentId);
         
-        return {
-            items: queryResult.Items || [],
-            nextToken: queryResult.LastEvaluatedKey ? 
-                Buffer.from(JSON.stringify(queryResult.LastEvaluatedKey)).toString('base64') : null
-        };
-    } catch (error) {
-        console.error('[StorageHistory] Error:', error);
-        // Return empty result if table doesn't exist
-        return {
-            items: [],
-            nextToken: null
-        };
-    }
-}
-
-/**
- * Get caching statistics
- */
-async function handleGetCachingStats(args) {
-    const { entityId, timeRange } = args;
-    
-    console.log(`[CachingStats] Getting stats for entity ${entityId}`);
-    
-    const scrapeURLTable = getTableName('ScrapeURL');
-    
-    // Calculate time filter
-    let startTime = null;
-    const now = new Date();
-    
-    switch (timeRange) {
-        case 'LAST_HOUR':
-            startTime = new Date(now - 60 * 60 * 1000);
-            break;
-        case 'LAST_24_HOURS':
-            startTime = new Date(now - 24 * 60 * 60 * 1000);
-            break;
-        case 'LAST_7_DAYS':
-            startTime = new Date(now - 7 * 24 * 60 * 60 * 1000);
-            break;
-        case 'LAST_30_DAYS':
-            startTime = new Date(now - 30 * 24 * 60 * 60 * 1000);
-            break;
-        default:
-            startTime = new Date(now - 7 * 24 * 60 * 60 * 1000); // Default to last 7 days
-    }
-    
-    try {
-        // Query ScrapeURL records for entity
-        const scanResult = await ddbDocClient.send(new ScanCommand({
-            TableName: scrapeURLTable,
-            FilterExpression: 'entityId = :eid',
-            ExpressionAttributeValues: {
-                ':eid': entityId
-            }
-        }));
-        
-        const urls = scanResult.Items || [];
-        
-        // Calculate statistics
-        const stats = {
-            totalURLs: urls.length,
-            urlsWithETags: urls.filter(u => u.etag).length,
-            urlsWithLastModified: urls.filter(u => u.lastModifiedHeader).length,
-            totalCacheHits: urls.reduce((sum, u) => sum + (u.cachedContentUsedCount || 0), 0),
-            totalCacheMisses: urls.reduce((sum, u) => sum + (u.timesScraped || 0) - (u.cachedContentUsedCount || 0), 0),
-            averageCacheHitRate: 0,
-            storageUsedMB: 0,
-            recentCacheActivity: []
-        };
-        
-        // Calculate cache hit rate
-        const totalRequests = stats.totalCacheHits + stats.totalCacheMisses;
-        if (totalRequests > 0) {
-            stats.averageCacheHitRate = (stats.totalCacheHits / totalRequests) * 100;
-        }
-        
-        // Get storage statistics from S3
-        const storageStats = await getStorageStats(entityId);
-        stats.storageUsedMB = parseFloat(storageStats.totalSizeMB);
-        
-        // Get recent cache activity (simplified for now)
-        const recentURLs = urls
-            .filter(u => u.lastHeaderCheckAt && new Date(u.lastHeaderCheckAt) > startTime)
-            .sort((a, b) => new Date(b.lastHeaderCheckAt) - new Date(a.lastHeaderCheckAt))
-            .slice(0, 10);
-        
-        stats.recentCacheActivity = recentURLs.map(u => ({
-            url: u.url,
-            timestamp: u.lastHeaderCheckAt,
-            action: u.cachedContentUsedCount > 0 ? 'HIT' : 'MISS',
-            reason: u.etag ? 'etag_check' : u.lastModifiedHeader ? 'last_modified_check' : 'no_headers'
-        }));
-        
-        return stats;
-    } catch (error) {
-        console.error('[CachingStats] Error:', error);
-        // Return default stats if error
-        return {
-            totalURLs: 0,
-            urlsWithETags: 0,
-            urlsWithLastModified: 0,
-            totalCacheHits: 0,
-            totalCacheMisses: 0,
-            averageCacheHitRate: 0,
-            storageUsedMB: 0,
-            recentCacheActivity: []
-        };
-    }
-}
-
-/**
- * List all stored HTML for a URL - WITH BETTER ERROR HANDLING
- */
-async function handleListStoredHTML(args) {
-    const { url, limit = 20 } = args;
-    
-    console.log(`[ListStoredHTML] Listing HTML for ${url}`);
-    
-    try {
-        // First, try to use S3Storage table
-        const s3StorageTable = getTableName('S3Storage');
-        
-        console.log(`[ListStoredHTML] Attempting to scan table: ${s3StorageTable}`);
-        
-        // Query by URL - using ExpressionAttributeNames for reserved keyword
-        const scanResult = await ddbDocClient.send(new ScanCommand({
-            TableName: s3StorageTable,
-            FilterExpression: '#url = :url',
-            ExpressionAttributeNames: {
-                '#url': 'url'  // Map #url to the actual attribute name
-            },
-            ExpressionAttributeValues: {
-                ':url': url
-            },
-            Limit: limit
-        }));
-        
-        // Sort by scrapedAt descending
-        const items = (scanResult.Items || []).sort((a, b) => 
-            new Date(b.scrapedAt || 0) - new Date(a.scrapedAt || 0)
-        );
-        
-        console.log(`[ListStoredHTML] Found ${items.length} items in S3Storage table`);
-        
-        return {
-            items: items,
-            nextToken: scanResult.LastEvaluatedKey ? 
-                Buffer.from(JSON.stringify(scanResult.LastEvaluatedKey)).toString('base64') : null
-        };
-        
-    } catch (error) {
-        console.error('[ListStoredHTML] Error accessing S3Storage table:', error);
-        console.error('Error name:', error.name);
-        console.error('Error message:', error.message);
-        
-        // If S3Storage table doesn't exist, try to use ScrapeURL table's S3 fields
-        if (error.name === 'ResourceNotFoundException' || 
-            error.message?.includes('Requested resource not found') ||
-            error.message?.includes('does not exist')) {
-            
-            console.log('[ListStoredHTML] S3Storage table not found, attempting fallback to ScrapeURL table');
-            
-            try {
-                const scrapeURLTable = getTableName('ScrapeURL');
-                console.log(`[ListStoredHTML] Looking in ScrapeURL table: ${scrapeURLTable}`);
-                
-                // First find the ScrapeURL record - using ExpressionAttributeNames for reserved keyword
-                const scrapeURLResult = await ddbDocClient.send(new ScanCommand({
-                    TableName: scrapeURLTable,
-                    FilterExpression: '#url = :url',
-                    ExpressionAttributeNames: {
-                        '#url': 'url'  // Map #url to the actual attribute name
-                    },
-                    ExpressionAttributeValues: {
-                        ':url': url
-                    },
-                    Limit: 1
-                }));
-                
-                if (scrapeURLResult.Items && scrapeURLResult.Items.length > 0) {
-                    const scrapeURL = scrapeURLResult.Items[0];
-                    console.log('[ListStoredHTML] Found ScrapeURL record:', scrapeURL.id);
-                    
-                    // Check if there's S3 data
-                    if (scrapeURL.latestS3Key) {
-                        // Create a mock S3Storage item from ScrapeURL data
-                        const mockItem = {
-                            id: scrapeURL.id,
-                            scrapeURLId: scrapeURL.id,
-                            url: scrapeURL.url,
-                            tournamentId: scrapeURL.tournamentId,
-                            entityId: scrapeURL.entityId,
-                            s3Key: scrapeURL.latestS3Key,
-                            s3Bucket: process.env.S3_BUCKET_NAME || 'kingsroom-scraper-html-storage',
-                            scrapedAt: scrapeURL.lastScrapedAt || scrapeURL.updatedAt,
-                            contentHash: scrapeURL.contentHash,
-                            isManualUpload: false,
-                            dataExtracted: scrapeURL.placedIntoDatabase
-                        };
-                        
-                        console.log('[ListStoredHTML] Using ScrapeURL data as fallback');
-                        
-                        return {
-                            items: [mockItem],
-                            nextToken: null
-                        };
-                    }
-                }
-                
-                // No S3 data found
-                console.log('[ListStoredHTML] No S3 data found in ScrapeURL table');
-                return {
-                    items: [],
-                    nextToken: null
-                };
-                
-            } catch (fallbackError) {
-                console.error('[ListStoredHTML] Fallback failed:', fallbackError);
-                
-                // Return empty result instead of throwing
-                return {
-                    items: [],
-                    nextToken: null
-                };
-            }
-        }
-        
-        // For other errors, return empty result
-        console.log('[ListStoredHTML] Returning empty result due to error');
-        return {
-            items: [],
-            nextToken: null
-        };
-    }
-}
-
-/**
- * Re-scrape from cached HTML
- */
-async function handleReScrapeFromCache(input) {
-    const { s3Key, saveToDatabase } = input;
-    
-    console.log(`[ReScrapeFromCache] Re-scraping from ${s3Key}`);
-    
-    // Get HTML from S3
-    const s3Content = await getHtmlFromS3(s3Key);
-    
-    if (!s3Content) {
-        throw new Error(`Content not found at ${s3Key}`);
-    }
-    
-    // Get metadata
-    const { url, tournamentid, entityid } = s3Content.metadata;
-    
-    // Return mock data for now since we don't have scraping functions
-    return {
-        gameName: 'Mock Game',
-        gameTime: new Date().toISOString(),
-        gameStatus: 'MOCK',
-        registrationStatus: 'MOCK',
-        currentEntrants: 0,
-        sourceUrl: url,
-        tournamentId: parseInt(tournamentid),
-        entityId: entityid,
-        s3Key: s3Key,
-        reScrapedAt: new Date().toISOString()
-    };
-}
-
-/**
- * Force refresh scrape (bypass cache)
- */
-async function handleForceRefresh(args) {
-    const { url } = args;
-    
-    console.log(`[ForceRefresh] Force refreshing ${url}`);
-    
-    // This would invoke your main WebScraper Lambda with forceRefresh flag
-    // For now, return a placeholder
-    return {
-        message: `Force refresh triggered for ${url}`,
-        status: 'PROCESSING'
-    };
-}
-
-/**
- * Clear cache for a URL
- */
-async function handleClearCache(args) {
-    const { url } = args;
-    
-    console.log(`[ClearCache] Clearing cache for ${url}`);
-    
-    const scrapeURLTable = getTableName('ScrapeURL');
-    
-    try {
-        // Find ScrapeURL record using scan
-        const scanResult = await ddbDocClient.send(new ScanCommand({
-            TableName: scrapeURLTable,
-            FilterExpression: '#url = :url',
-            ExpressionAttributeNames: {
-                '#url': 'url'
-            },
-            ExpressionAttributeValues: { ':url': url },
-            Limit: 1
-        }));
-        
-        if (scanResult.Items && scanResult.Items.length > 0) {
-            const scrapeURL = scanResult.Items[0];
-            
-            // Clear caching fields WITH DataStore sync field updates
-            await ddbDocClient.send(new UpdateCommand({
-                TableName: scrapeURLTable,
-                Key: { id: scrapeURL.id },
-                UpdateExpression: `
-                    SET etag = :null,
-                        lastModifiedHeader = :null,
-                        contentHash = :null,
-                        latestS3Key = :null,
-                        cachedContentUsedCount = :zero,
-                        updatedAt = :now,
-                        _lastChangedAt = :timestamp,
-                        _version = if_not_exists(_version, :versionZero) + :versionOne
-                `,
-                ExpressionAttributeValues: {
-                    ':null': null,
-                    ':zero': 0,
-                    ':now': new Date().toISOString(),     // ✅ Added
-                    ':timestamp': Date.now(),               // ✅ Added
-                    ':versionZero': 0,                      // ✅ Added
-                    ':versionOne': 1                        // ✅ Added
-                }
+        // Step 2: Check for duplicate content
+        if (scrapeURL.latestS3StorageId) {
+            // Get the latest storage record
+            // V3 Change: .promise() -> .send(new Command())
+            const latestStorage = await dynamodb.send(new GetCommand({
+                TableName: S3_STORAGE_TABLE,
+                Key: { id: scrapeURL.latestS3StorageId }
             }));
             
-            console.log(`[ClearCache] Cache cleared for ${url}`);
-            return true;
+            if (latestStorage.Item && latestStorage.Item.contentHash === contentHash) {
+                console.log('[handleManualUpload] Duplicate content detected, skipping upload');
+                return {
+                    statusCode: 200,
+                    body: {
+                        success: true,
+                        message: 'Duplicate content already exists',
+                        isDuplicate: true,
+                        scrapeURLId: scrapeURL.id,
+                        s3StorageId: latestStorage.Item.id,
+                        s3Key: latestStorage.Item.s3Key
+                    }
+                };
+            }
         }
         
-        console.log(`[ClearCache] URL not found: ${url}`);
-        return false;
+        // Step 3: Upload to S3
+        const timestamp = now.replace(/[:.]/g, '-');
+        const s3Key = `manual/${entityId}/${tournamentId}/${timestamp}${fileName ? `-${fileName}` : '.html'}`;
+        
+        // V3 Change: .promise() -> .send(new Command())
+        await s3.send(new PutObjectCommand({
+            Bucket: S3_BUCKET,
+            Key: s3Key,
+            Body: fileContent,
+            ContentType: 'text/html',
+            Metadata: {
+                'source': 'manual-upload',
+                'source-url': sourceUrl,
+                'entity-id': entityId,
+                'tournament-id': String(tournamentId),
+                'uploaded-by': uploadedBy || 'unknown',
+                'content-hash': contentHash
+            }
+        }));
+        
+        console.log(`[handleManualUpload] Uploaded to S3: ${s3Key}`);
+        
+        // Step 4: Create S3Storage record
+        const s3StorageId = uuidv4();
+        const s3StorageItem = {
+            id: s3StorageId,
+            scrapeURLId: scrapeURL.id,
+            s3Key,
+            s3Bucket: S3_BUCKET,
+            contentSize: Buffer.byteLength(fileContent, 'utf8'),
+            contentHash,
+            contentType: 'text/html',
+            source: 'MANUAL_UPLOAD', // From S3StorageSource enum
+            uploadedBy: uploadedBy || 'unknown',
+            extractedTitle: metadata.extractedTitle,
+            extractedGameStatus: metadata.tournamentStatus,
+            extractedData: JSON.stringify(metadata),
+            foundKeys: Object.keys(metadata),
+            isParsed: false,
+            wasGameCreated: false,
+            wasGameUpdated: false,
+            notes: notes || null,
+            storedAt: now,
+            createdAt: now,
+            updatedAt: now,
+            __typename: 'S3Storage'
+        };
+        
+        // V3 Change: .promise() -> .send(new Command())
+        await dynamodb.send(new PutCommand({
+            TableName: S3_STORAGE_TABLE,
+            Item: s3StorageItem
+        }));
+        
+        console.log(`[handleManualUpload] Created S3Storage record: ${s3StorageId}`);
+        
+        // Step 5: Update ScrapeURL record
+        const updateParams = {
+            TableName: SCRAPE_URL_TABLE,
+            Key: { id: scrapeURL.id },
+            UpdateExpression: `
+                SET lastInteractionType = :lit,
+                    lastInteractionAt = :now,
+                    hasStoredContent = :hsc,
+                    latestS3StorageId = :lsid,
+                    manualUploads = :mu,
+                    totalInteractions = totalInteractions + :inc,
+                    updatedAt = :now
+                    ${metadata.gameName ? ', gameName = :gname' : ''}
+                    ${metadata.tournamentStatus ? ', gameStatus = :gstatus' : ''}
+                    ${scrapeURL.manualUploads ? '' : ', contentChangeCount = contentChangeCount + :inc'}
+            `,
+            ExpressionAttributeValues: {
+                ':lit': 'MANUAL_UPLOAD',
+                ':now': now,
+                ':hsc': true,
+                ':lsid': s3StorageId,
+                ':mu': (scrapeURL.manualUploads || 0) + 1,
+                ':inc': 1,
+                ...(metadata.gameName && { ':gname': metadata.gameName }),
+                ...(metadata.tournamentStatus && { ':gstatus': metadata.tournamentStatus })
+            }
+        };
+        
+        // V3 Change: .promise() -> .send(new Command())
+        await dynamodb.send(new UpdateCommand(updateParams));
+        console.log(`[handleManualUpload] Updated ScrapeURL record: ${scrapeURL.id}`);
+        
+        return {
+            statusCode: 200,
+            body: {
+                success: true,
+                message: 'File uploaded successfully',
+                scrapeURLId: scrapeURL.id,
+                s3StorageId: s3StorageId,
+                s3Key: s3Key,
+                metadata: metadata
+            }
+        };
         
     } catch (error) {
-        console.error('[ClearCache] Error:', error);
-        return false;
+        console.error('[handleManualUpload] Error:', error);
+        throw error;
     }
 }
+
+/**
+ * Query URL knowledge - single entry point for all URL queries
+ */
+async function handleQueryURLKnowledge(event) {
+    const { 
+        url,
+        tournamentId,
+        entityId,
+        includeStorageHistory = false,
+        limit = 10
+    } = event;
+    
+    try {
+        let scrapeURLs = [];
+        
+        // Query by URL (most specific)
+        if (url) {
+            const scrapeURL = await getScrapeURLByUrl(url);
+            if (scrapeURL) {
+                 scrapeURLs = [scrapeURL];
+            }
+            
+        // Query by tournament ID
+        } else if (tournamentId) {
+            const queryParams = {
+                TableName: SCRAPE_URL_TABLE,
+                IndexName: 'byTournamentId',
+                KeyConditionExpression: 'tournamentId = :tid',
+                ExpressionAttributeValues: {
+                    ':tid': tournamentId
+                },
+                Limit: limit
+            };
+            
+            // V3 Change: .promise() -> .send(new Command())
+            const result = await dynamodb.send(new QueryCommand(queryParams));
+            scrapeURLs = result.Items || [];
+            
+        // Query by entity (broader search)
+        } else if (entityId) {
+            const queryParams = {
+                TableName: SCRAPE_URL_TABLE,
+                IndexName: 'byEntityScrapeURL',
+                KeyConditionExpression: 'entityId = :eid',
+                ExpressionAttributeValues: {
+                    ':eid': entityId
+                },
+                ScanIndexForward: false, // Most recent first
+                Limit: limit
+            };
+            
+            // V3 Change: .promise() -> .send(new Command())
+            const result = await dynamodb.send(new QueryCommand(queryParams));
+            scrapeURLs = result.Items || [];
+            
+        } else {
+            throw new Error('Must provide url, tournamentId, or entityId');
+        }
+        
+        // Optionally include storage history
+        if (includeStorageHistory && scrapeURLs.length > 0) {
+            for (const scrapeURL of scrapeURLs) {
+                // Get storage history for this URL
+                const storageParams = {
+                    TableName: S3_STORAGE_TABLE,
+                    IndexName: 'byScrapeURL',
+                    KeyConditionExpression: 'scrapeURLId = :suid',
+                    ExpressionAttributeValues: {
+                        ':suid': scrapeURL.id
+                    },
+                    ScanIndexForward: false, // Most recent first
+                    Limit: 5 // Last 5 storage records
+                };
+                
+                // V3 Change: .promise() -> .send(new Command())
+                const storageResult = await dynamodb.send(new QueryCommand(storageParams));
+                scrapeURL.storageHistory = storageResult.Items || [];
+            }
+        }
+        
+        return {
+            statusCode: 200,
+            body: {
+                success: true,
+                items: scrapeURLs,
+                count: scrapeURLs.length
+            }
+        };
+        
+    } catch (error) {
+        console.error('[handleQueryURLKnowledge] Error:', error);
+        throw error;
+    }
+}
+
+/**
+ * Get S3 content by storage ID or S3 Key
+ */
+async function handleGetS3Content(event) {
+    const { s3StorageId, s3Key } = event;
+    
+    try {
+        let storageRecord;
+        
+        // Get storage record by ID or key
+        if (s3StorageId) {
+            // V3 Change: .promise() -> .send(new Command())
+            const result = await dynamodb.send(new GetCommand({
+                TableName: S3_STORAGE_TABLE,
+                Key: { id: s3StorageId }
+            }));
+            
+            storageRecord = result.Item;
+        } else if (s3Key) {
+            const queryParams = {
+                TableName: S3_STORAGE_TABLE,
+                IndexName: 'byS3Key',
+                KeyConditionExpression: 's3Key = :key',
+                ExpressionAttributeValues: {
+                    ':key': s3Key
+                },
+                Limit: 1
+            };
+            
+            // V3 Change: .promise() -> .send(new Command())
+            const result = await dynamodb.send(new QueryCommand(queryParams));
+            storageRecord = result.Items?.[0];
+        } else {
+            throw new Error('Must provide s3StorageId or s3Key');
+        }
+        
+        if (!storageRecord) {
+            throw new Error('Storage record not found');
+        }
+        
+        // Fetch content from S3
+        // V3 Change: .promise() -> .send(new Command())
+        const s3Data = await s3.send(new GetObjectCommand({
+            Bucket: storageRecord.s3Bucket || S3_BUCKET,
+            Key: storageRecord.s3Key
+        }));
+        
+        // V3 Change: Convert S3 body stream to a string
+        const htmlBody = await streamToString(s3Data.Body);
+        
+        return {
+            statusCode: 200,
+            body: {
+                success: true,
+                s3Key: storageRecord.s3Key,
+                html: htmlBody, // <-- CHANGED
+                metadata: JSON.parse(storageRecord.extractedData || '{}'),
+                contentHash: storageRecord.contentHash,
+                source: storageRecord.source,
+                storedAt: storageRecord.storedAt
+            }
+        };
+        
+    } catch (error) {
+        console.error('[handleGetS3Content] Error:', error);
+        throw error;
+    }
+}
+
+/**
+ * Get high-level statistics for URL management
+ */
+async function handleGetURLStatistics(event) {
+    const { entityId } = event;
+    
+    if (!entityId) {
+        throw new Error('entityId is required');
+    }
+    
+    try {
+        // Count different interaction types
+        const stats = {
+            totalURLs: 0,
+            withHTML: 0,
+            notPublished: 0,
+            notInUse: 0,
+            errors: 0,
+            manualUploads: 0,
+            neverChecked: 0
+        };
+        
+        // Query all URLs for entity
+        let lastEvaluatedKey;
+        do {
+            const params = {
+                TableName: SCRAPE_URL_TABLE,
+                IndexName: 'byEntityScrapeURL',
+                KeyConditionExpression: 'entityId = :eid',
+                ExpressionAttributeValues: {
+                    ':eid': entityId
+                },
+                ExclusiveStartKey: lastEvaluatedKey
+            };
+            
+            // V3 Change: .promise() -> .send(new Command())
+            const result = await dynamodb.send(new QueryCommand(params));
+            
+            for (const item of result.Items || []) {
+                stats.totalURLs++;
+                
+                switch (item.lastInteractionType) {
+                    case 'SCRAPED_WITH_HTML':
+                        stats.withHTML++;
+                        break;
+                    case 'SCRAPED_NOT_PUBLISHED':
+                        stats.notPublished++;
+                        break;
+                    case 'SCRAPED_NOT_IN_USE':
+                        stats.notInUse++;
+                        break;
+                    case 'SCRAPED_ERROR':
+                        stats.errors++;
+                        break;
+                    case 'MANUAL_UPLOAD':
+                        stats.manualUploads++;
+                        stats.withHTML++; // Manual uploads also have HTML
+                        break;
+                    case 'NEVER_CHECKED':
+                        stats.neverChecked++;
+                        break;
+                }
+            }
+            
+            lastEvaluatedKey = result.LastEvaluatedKey;
+        } while (lastEvaluatedKey);
+        
+        // Get storage statistics
+        const storageStats = await getStorageStats(entityId);
+        
+        return {
+            statusCode: 200,
+            body: {
+                success: true,
+                urlStats: stats,
+                storageStats: storageStats,
+                summary: {
+                    coverageRate: stats.totalURLs > 0 ? 
+                        ((stats.withHTML / stats.totalURLs) * 100).toFixed(2) + '%' : '0%',
+                    successRate: stats.totalURLs > 0 ? 
+                        (((stats.withHTML + stats.notPublished + stats.notInUse) / stats.totalURLs) * 100).toFixed(2) + '%' : '0%'
+                }
+            }
+        };
+        
+    } catch (error) {
+        console.error('[handleGetURLStatistics] Error:', error);
+        throw error;
+    }
+}
+
+/**
+ * Clear caching headers for a specific URL
+ */
+async function handleClearCache(event) {
+    const { url } = event;
+    
+    console.log(`[handleClearCache] Attempting to clear cache for: ${url}`);
+    
+    try {
+        const scrapeURL = await getScrapeURLByUrl(url);
+        
+        if (!scrapeURL) {
+            console.warn(`[handleClearCache] URL not found: ${url}`);
+            return {
+                statusCode: 404,
+                body: { success: false, message: 'URL not found' }
+            };
+        }
+        
+        // Update the record to clear cache fields
+        const updateParams = {
+            TableName: SCRAPE_URL_TABLE,
+            Key: { id: scrapeURL.id },
+            UpdateExpression: `
+                SET etag = :null,
+                    lastModifiedHeader = :null,
+                    contentHash = :null,
+                    cachedContentUsedCount = :zero,
+                    hasEtag = :false,
+                    hasLastModified = :false,
+                    lastInteractionType = :lit,
+                    lastInteractionAt = :now,
+                    updatedAt = :now
+            `,
+            ExpressionAttributeValues: {
+                ':null': null,
+                ':zero': 0,
+                ':false': false,
+                ':lit': 'CACHE_CLEARED',
+                ':now': new Date().toISOString()
+            },
+            ReturnValues: 'UPDATED_NEW'
+        };
+        
+        // V3 Change: .promise() -> .send(new Command())
+        await dynamodb.send(new UpdateCommand(updateParams));
+        
+        console.log(`[handleClearCache] Cache cleared for ${scrapeURL.id}`);
+        
+        return {
+            statusCode: 200,
+            body: {
+                success: true,
+                message: 'Cache cleared successfully',
+                scrapeURLId: scrapeURL.id
+            }
+        };
+        
+    } catch (error) {
+        console.error('[handleClearCache] Error:', error);
+        throw error;
+    }
+}
+
+/**
+ * Set a 'forceRefreshNext' flag on a ScrapeURL item
+ */
+async function handleForceRefresh(event) {
+    const { url } = event;
+    
+    console.log(`[handleForceRefresh] Setting forceRefreshNext for: ${url}`);
+    
+    try {
+        const scrapeURL = await getScrapeURLByUrl(url);
+        
+        if (!scrapeURL) {
+            console.warn(`[handleForceRefresh] URL not found: ${url}`);
+            return {
+                statusCode: 404,
+                body: { success: false, message: 'URL not found' }
+            };
+        }
+        
+        // Update the record to set the flag
+        // NOTE: 'forceRefreshNext' is not in your schema, 
+        // using 'doNotScrape' as a proxy. A better solution
+        // would be to add 'forceRefreshNext: Boolean' to the schema.
+        // For now, we set doNotScrape to false and clear cache.
+        
+        const updateParams = {
+            TableName: SCRAPE_URL_TABLE,
+            Key: { id: scrapeURL.id },
+            UpdateExpression: `
+                SET doNotScrape = :false,
+                    status = :active,
+                    hasEtag = :false,
+                    hasLastModified = :false,
+                    lastInteractionType = :lit,
+                    lastInteractionAt = :now,
+                    updatedAt = :now
+            `,
+            ExpressionAttributeValues: {
+                ':false': false,
+                ':active': 'ACTIVE',
+                ':lit': 'FORCE_REFRESH_REQUESTED',
+                ':now': new Date().toISOString()
+            },
+            ReturnValues: 'UPDATED_NEW'
+        };
+        
+        // V3 Change: .promise() -> .send(new Command())
+        await dynamodb.send(new UpdateCommand(updateParams));
+        
+        console.log(`[handleForceRefresh] Flag set for ${scrapeURL.id}`);
+        
+        return {
+            statusCode: 200,
+            body: {
+                success: true,
+                message: 'Force refresh flag set successfully',
+                scrapeURLId: scrapeURL.id
+            }
+        };
+        
+    } catch (error) {
+        console.error('[handleForceRefresh] Error:', error);
+        throw error;
+    }
+}
+
+/**
+ * Mark an S3Storage item for re-processing
+ */
+async function handleMarkForReProcess(event) {
+    const { s3StorageId } = event;
+    
+    if (!s3StorageId) {
+        throw new Error('s3StorageId is required');
+    }
+    
+    console.log(`[handleMarkForReProcess] Marking ${s3StorageId} for re-processing`);
+    
+    try {
+        // We set 'isParsed' back to false, which should trigger a re-parse
+        const updateParams = {
+            TableName: S3_STORAGE_TABLE,
+            Key: { id: s3StorageId },
+            UpdateExpression: `
+                SET isParsed = :false,
+                    wasGameCreated = :false,
+                    wasGameUpdated = :false,
+                    notes = :notes,
+                    updatedAt = :now
+            `,
+            ExpressionAttributeValues: {
+                ':false': false,
+                ':notes': 'Marked for re-processing by user.',
+                ':now': new Date().toISOString()
+            },
+            ConditionExpression: 'attribute_exists(id)', // Ensure item exists
+            ReturnValues: 'UPDATED_NEW'
+        };
+        
+        // V3 Change: .promise() -> .send(new Command())
+        const result = await dynamodb.send(new UpdateCommand(updateParams));
+        
+        console.log(`[handleMarkForReProcess] ${s3StorageId} marked.`);
+        
+        return {
+            statusCode: 200,
+            body: {
+                success: true,
+                message: 'Item marked for re-processing',
+                s3StorageId: s3StorageId,
+                updatedAttributes: result.Attributes
+            }
+        };
+        
+    } catch (error) {
+        console.error('[handleMarkForReProcess] Error:', error);
+        // Handle 'ConditionalCheckFailedException' if item doesn't exist
+        if (error.code === 'ConditionalCheckFailedException') {
+             return {
+                statusCode: 404,
+                body: { success: false, message: 'S3Storage item not found' }
+            };
+        }
+        throw error;
+    }
+}
+
+/**
+ * Get caching statistics for an entity
+ * (Assumes ScrapeURL schema is updated with cacheHits, hasEtag, etc.)
+ */
+async function handleGetCachingStats(event) {
+    const { entityId } = event; 
+    
+    if (!entityId) {
+        throw new Error('entityId is required');
+    }
+
+    console.log(`[CachingStats] Getting stats for entity ${entityId}`);
+    
+    // Initialize stats
+    const stats = {
+        totalURLs: 0,
+        urlsWithETags: 0,
+        urlsWithLastModified: 0,
+        totalCacheHits: 0,
+        totalCacheMisses: 0,
+        averageCacheHitRate: 0.0,
+        storageUsedMB: 0.0,
+        totalSuccessfulScrapes: 0
+    };
+
+    let lastEvaluatedKey;
+    
+    try {
+        // Paginate through all ScrapeURL records for the entity
+        do {
+            const params = {
+                TableName: SCRAPE_URL_TABLE,
+                IndexName: 'byEntityScrapeURL',
+                KeyConditionExpression: 'entityId = :eid',
+                ExpressionAttributeValues: {
+                    ':eid': entityId
+                },
+                ExclusiveStartKey: lastEvaluatedKey
+            };
+            
+            // V3 Change: .promise() -> .send(new Command())
+            const result = await dynamodb.send(new QueryCommand(params));
+            
+            if (result.Items) {
+                for (const item of result.Items) {
+                    stats.totalURLs++;
+                    
+                    // Sum the new summary fields
+                    stats.totalSuccessfulScrapes += (item.successfulScrapes || 0);
+                    stats.totalCacheHits += (item.cacheHits || 0);
+                    
+                    if (item.hasEtag) {
+                        stats.urlsWithETags++;
+                    }
+                    if (item.hasLastModified) {
+                        stats.urlsWithLastModified++;
+                    }
+                }
+            }
+            
+            lastEvaluatedKey = result.LastEvaluatedKey;
+        } while (lastEvaluatedKey);
+
+        // Calculate derived stats
+        stats.totalCacheMisses = stats.totalSuccessfulScrapes - stats.totalCacheHits;
+        
+        if (stats.totalSuccessfulScrapes > 0) {
+            stats.averageCacheHitRate = (stats.totalCacheHits / stats.totalSuccessfulScrapes) * 100;
+        }
+
+        // Get storage statistics
+        try {
+            const storageStats = await getStorageStats(entityId);
+            stats.storageUsedMB = storageStats.totalSizeMB;
+        } catch (storageError) {
+            console.warn('[CachingStats] Could not get storage stats:', storageError.message);
+            stats.storageUsedMB = 0; // Default to 0 if sub-function fails
+        }
+        
+        // Return the full stats object
+        return {
+            statusCode: 200,
+            body: {
+                success: true,
+                ...stats
+            }
+        };
+
+    } catch (error) {
+        console.error('[CachingStats] Error:', error);
+        throw error;
+    }
+}
+
+
+// ===================================================================
+// 3. MAIN LAMBDA HANDLER
+// ===================================================================
+
+/**
+ * Main handler
+ */
+exports.handler = async (event) => {
+    console.log('[S3Management] Received event:', JSON.stringify(event, null, 2));
+    
+    // Support AppSync (event.fieldName) and direct invoke (event.operation)
+    const operation = event.operation || event.fieldName;
+    // Support AppSync (event.arguments) and direct invoke (event)
+    const args = event.arguments || event;
+    
+    try {
+        let response;
+        switch (operation) {
+            case 'upload':
+            case 'uploadManualHTML': // Keep old name for AppSync compatibility
+                response = await handleManualUpload(args.input || args);
+                break;
+                
+            case 'query':
+            case 'getS3StorageHistory': // Legacy
+            case 'listStoredHTML': // Legacy
+                response = await handleQueryURLKnowledge(args);
+                break;
+                
+            case 'getContent':
+            case 'viewS3Content': // Keep old name
+                response = await handleGetS3Content(args);
+                break;
+                
+            case 'getStats':
+                response = await handleGetURLStatistics(args);
+                break;
+                
+            // --- RESTORED FUNCTIONS ---
+            
+            case 'getCachingStats':
+                response = await handleGetCachingStats(args);
+                break;
+
+            case 'clearURLCache':
+                response = await handleClearCache(args);
+                break;
+                
+            case 'forceRefreshScrape':
+                response = await handleForceRefresh(args);
+                break;
+                
+            case 'reScrapeFromCache':
+                response = await handleMarkForReProcess(args.input || args);
+                break;
+            
+            // --- END RESTORED FUNCTIONS ---
+                
+            default:
+                throw new Error(`Unknown operation: ${operation}`);
+        }
+        
+        // Return the body from the handler function,
+        // which includes { statusCode, body } for direct invokes,
+        // or just the data for AppSync
+        return response.body || response;
+        
+    } catch (error) {
+        console.error('[S3Management] Error:', error);
+        // AppSync expects errors to be thrown
+        if (event.fieldName) {
+            throw error;
+        }
+        // Direct invoke expects an error object
+        return {
+            statusCode: 500,
+            body: {
+                success: false,
+                error: error.message,
+                stack: error.stack
+            }
+        };
+    }
+};

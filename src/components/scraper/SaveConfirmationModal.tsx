@@ -1,7 +1,12 @@
+// src/components/scraper/SaveConfirmationModal.tsx
+
+import { useEffect, useState } from 'react';
+import { generateClient } from 'aws-amplify/api';
+import { getVenue } from '../../graphql/queries';
 import type { GameData } from '../../types/game';
 
 /**
- * SaveConfirmationModal component
+ * SaveConfirmationModal component - Fixed to display venue information correctly
  */
 export const SaveConfirmationModal: React.FC<{
     isOpen: boolean;
@@ -11,6 +16,38 @@ export const SaveConfirmationModal: React.FC<{
     venueId: string;
     sourceUrl: string;
 }> = ({ isOpen, onClose, onConfirm, gameData, venueId, sourceUrl }) => {
+    const [venueName, setVenueName] = useState<string>('');
+    const [loadingVenue, setLoadingVenue] = useState(false);
+    
+    // Fetch venue name when modal opens
+    useEffect(() => {
+        if (isOpen && venueId && venueId !== 'create_new') {
+            const fetchVenueName = async () => {
+                setLoadingVenue(true);
+                try {
+                    const client = generateClient();
+                    const response = await client.graphql({
+                        query: getVenue,
+                        variables: { id: venueId }
+                    }) as any;
+                    
+                    if (response.data?.getVenue) {
+                        setVenueName(response.data.getVenue.name);
+                    }
+                } catch (error) {
+                    console.error('Error fetching venue:', error);
+                    setVenueName('Unknown Venue');
+                } finally {
+                    setLoadingVenue(false);
+                }
+            };
+            
+            fetchVenueName();
+        } else {
+            setVenueName('');
+        }
+    }, [isOpen, venueId]);
+    
     if (!isOpen || !gameData) return null;
 
     return (
@@ -33,17 +70,19 @@ export const SaveConfirmationModal: React.FC<{
                         <div className="bg-green-50 p-3 rounded">
                             <p className="text-sm font-medium text-green-900">Save Configuration</p>
                             <div className="mt-2 space-y-1 text-xs text-green-700">
+                                <p><strong>Venue:</strong> {loadingVenue ? 'Loading...' : (venueName || 'Venue not found')}</p>
                                 <p><strong>Venue ID:</strong> {venueId}</p>
                                 <p><strong>Type:</strong> Tournament</p>
                             </div>
                         </div>
-                        <div className="bg-yellow-50 p-3 rounded">
-                            <p className="text-sm font-medium text-yellow-900">⚠️ Note</p>
-                            <p className="text-xs text-yellow-700 mt-1">
-                                This will save the tournament data to the database. 
-                                {gameData.gameStatus === 'RUNNING' && ' The tournament is currently RUNNING and can be refreshed later for updates.'}
-                            </p>
-                        </div>
+                        {gameData.gameStatus === 'RUNNING' && (
+                            <div className="bg-yellow-50 p-3 rounded">
+                                <p className="text-sm font-medium text-yellow-900">⚠️ Note</p>
+                                <p className="text-xs text-yellow-700 mt-1">
+                                    The tournament is currently RUNNING and can be refreshed later for updates.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div className="p-4 border-t flex justify-end space-x-2">
@@ -64,4 +103,3 @@ export const SaveConfirmationModal: React.FC<{
         </div>
     );
 };
-

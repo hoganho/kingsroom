@@ -35,7 +35,14 @@ const { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand, GetComm
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
-const { handleFetch: handleFetchEnhanced } = require('./enhanced-handleFetch');
+
+// --- Lambda Monitoring ---
+const { LambdaMonitoring } = require('./lambda-monitoring');
+// --- End Lambda Monitoring ---
+
+// Import the refactored modules
+const { enhancedHandleFetch } = require('./enhanced-handleFetch');
+const { runScraper, getTournamentId, getStatusAndReg } = require('./scraperStrategies');
 
 // VENUE ASSIGNMENT CONSTANTS
 const UNASSIGNED_VENUE_ID = "00000000-0000-0000-0000-000000000000";
@@ -44,14 +51,16 @@ const UNASSIGNED_VENUE_NAME = "Unassigned";
 // DEFAULT ENTITY - Replace with your actual default entity ID
 const DEFAULT_ENTITY_ID = "42101695-1332-48e3-963b-3c6ad4e909a0"; 
 
-const {
-    runScraper,
-    getStatusAndReg
-} = require('./scraperStrategies.js');
-
 const client = new DynamoDBClient({});
-const ddbDocClient = DynamoDBDocumentClient.from(client);
+const ddbDocClient = DynamoDBDocumentClient.from(client); // Original client
 const sqsClient = new SQSClient({});
+
+// --- Lambda Monitoring Initialization ---
+// Initialize monitoring for this function
+const monitoring = new LambdaMonitoring('webScraperFunction', DEFAULT_ENTITY_ID);
+// Wrap the DynamoDB client to automatically track operations
+const monitoredDdbDocClient = monitoring.wrapDynamoDBClient(ddbDocClient);
+// --- End Lambda Monitoring ---
 
 // --- Entity Helper Functions ---
 const getEntityIdFromUrl = async (url) => {
@@ -59,7 +68,7 @@ const getEntityIdFromUrl = async (url) => {
         const urlObj = new URL(url);
         const domain = urlObj.hostname;
         const entityTable = getTableName('Entity');
-        const scanResult = await ddbDocClient.send(new ScanCommand({
+        const scanResult = await monitoredDdbDocClient.send(new ScanCommand({
             TableName: entityTable,
             FilterExpression: 'gameUrlDomain = :domain',
             ExpressionAttributeValues: { ':domain': domain }
@@ -78,17 +87,27 @@ const ensureDefaultEntity = async () => {
     const entityTable = getTableName('Entity');
     const entityId = DEFAULT_ENTITY_ID;
     try {
-        const getResult = await ddbDocClient.send(new GetCommand({
+        const getResult = await monitoredDdbDocClient.send(new GetCommand({
             TableName: entityTable, Key: { id: entityId }
         }));
         if (!getResult.Item) {
+            // ✅ Track business logic: Creating the default entity
+            monitoring.trackOperation('DEFAULT_ENTITY_CREATE', 'Entity', entityId);
             const now = new Date().toISOString();
-            await ddbDocClient.send(new PutCommand({
+            const timestamp = Date.now();
+            await monitoredDdbDocClient.send(new PutCommand({
                 TableName: entityTable,
                 Item: {
-                    id: entityId, entityName: 'Default Entity', gameUrlDomain: 'default.com',
-                    gameUrlPath: '/', isActive: true, createdAt: now, updatedAt: now,
-                    _version: 1, __typename: 'Entity'
+                    id: entityId, 
+                    entityName: 'Default Entity', 
+                    gameUrlDomain: 'default.com',
+                    gameUrlPath: '/', 
+                    isActive: true, 
+                    createdAt: now, 
+                    updatedAt: now,
+                    _version: 1, 
+                    _lastChangedAt: timestamp,
+                    __typename: 'Entity'
                 }
             }));
             console.log('[Entity] Created default entity');
@@ -165,6 +184,7 @@ const getTableName = (modelName) => {
         'PlayerTransaction': process.env.API_KINGSROOM_PLAYERTRANSACTIONTABLE_NAME,
         'PlayerVenue': process.env.API_KINGSROOM_PLAYERVENUETABLE_NAME,
         'ScrapeStructure': process.env.API_KINGSROOM_SCRAPESTRUCTURETABLE_NAME,
+        'S3Storage': process.env.API_KINGSROOM_S3STORAGETABLE_NAME,
     };
     if (specialTables[modelName]) return specialTables[modelName];
     const apiId = process.env.API_KINGSROOM_GRAPHQLAPIIDOUTPUT;
@@ -181,7 +201,7 @@ const getAllVenues = async () => {
             ProjectionExpression: 'id, #name, aliases',
             ExpressionAttributeNames: { '#name': 'name' }
         });
-        const response = await ddbDocClient.send(command);
+        const response = await monitoredDdbDocClient.send(command);
         return response.Items || [];
     } catch (error) {
         console.error('Error fetching venues from DynamoDB:', error);
@@ -196,7 +216,7 @@ const getAllSeriesTitles = async () => {
             TableName: seriesTitleTable,
             ProjectionExpression: 'id, title, aliases'
         });
-        const response = await ddbDocClient.send(command);
+        const response = await monitoredDdbDocClient.send(command);
         return response.Items || [];
     } catch (error) {
         console.error('Error fetching series titles from DynamoDB:', error);
@@ -208,11 +228,12 @@ const getAllSeriesTitles = async () => {
 const upsertLeanPlayerRecord = async (playerId, playerName, gameData) => {
     const playerTable = getTableName('Player');
     const now = new Date().toISOString();
+    const timestamp = Date.now();
     const gameStartDateTime = ensureISODate(gameData.gameStartDateTime);
     const gameDateObj = new Date(gameStartDateTime);
 
     try {
-        const getResult = await ddbDocClient.send(new GetCommand({
+        const getResult = await monitoredDdbDocClient.send(new GetCommand({
             TableName: playerTable, Key: { id: playerId }
         }));
         const existingPlayer = getResult.Item;
@@ -220,8 +241,9 @@ const upsertLeanPlayerRecord = async (playerId, playerName, gameData) => {
         if (existingPlayer) {
             const currentRegDate = new Date(existingPlayer.registrationDate);
             const currentLastPlayed = new Date(existingPlayer.lastPlayedDate || existingPlayer.registrationDate);
-            let updateExpression = 'SET updatedAt = :now';
-            let expressionValues = { ':now': now };
+            let updateExpression = 'SET updatedAt = :now, #lca = :timestamp';
+            let expressionNames = { '#lca': '_lastChangedAt' }; 
+            let expressionValues = { ':now': now, ':timestamp': timestamp };
             let needsUpdate = false;
 
             if (gameDateObj < currentRegDate) {
@@ -241,12 +263,16 @@ const upsertLeanPlayerRecord = async (playerId, playerName, gameData) => {
             }
 
             if (needsUpdate) {
-                await ddbDocClient.send(new UpdateCommand({
+                monitoring.trackOperation('UPSERT_LEAN_PLAYER', 'Player', playerId, { status: 'UPDATE_EXISTING' });
+                await monitoredDdbDocClient.send(new UpdateCommand({
                     TableName: playerTable, Key: { id: playerId },
-                    UpdateExpression: updateExpression, ExpressionAttributeValues: expressionValues
+                    UpdateExpression: updateExpression,
+                    ExpressionAttributeNames: expressionNames,
+                    ExpressionAttributeValues: expressionValues
                 }));
             }
         } else {
+            monitoring.trackOperation('UPSERT_LEAN_PLAYER', 'Player', playerId, { status: 'CREATE_NEW', name: playerName });
             const nameParts = parsePlayerName(playerName);
             const canAssignVenue = gameData.venueId && gameData.venueId !== UNASSIGNED_VENUE_ID;
             const newPlayer = {
@@ -256,9 +282,9 @@ const upsertLeanPlayerRecord = async (playerId, playerName, gameData) => {
                 registrationVenueId: canAssignVenue ? gameData.venueId : null,
                 creditBalance: 0, pointsBalance: 0, status: 'ACTIVE', category: 'NEW',
                 targetingClassification: 'NotPlayed', createdAt: now, updatedAt: now,
-                _version: 1, _lastChangedAt: Date.now(), __typename: 'Player'
+                _version: 1, _lastChangedAt: timestamp, __typename: 'Player'
             };
-            await ddbDocClient.send(new PutCommand({
+            await monitoredDdbDocClient.send(new PutCommand({
                 TableName: playerTable, Item: newPlayer, ConditionExpression: 'attribute_not_exists(id)'
             }));
         }
@@ -273,9 +299,12 @@ const upsertLeanPlayerRecord = async (playerId, playerName, gameData) => {
 const upsertPlayerEntries = async (savedGameItem, scrapedData) => {
     const playerEntryTable = getTableName('PlayerEntry');
     const now = new Date().toISOString();
+    const timestamp = Date.now();
     const { allPlayers } = extractPlayerDataForProcessing(scrapedData);
     if (allPlayers.length === 0) return;
     
+    monitoring.trackOperation('UPSERT_PLAYER_ENTRIES_START', 'PlayerEntry', savedGameItem.id, { gameId: savedGameItem.id, playerCount: allPlayers.length });
+
     const effectiveVenueId = savedGameItem.venueId || UNASSIGNED_VENUE_ID;
     const gameDataForLeanPlayer = {
         gameStartDateTime: savedGameItem.gameStartDateTime,
@@ -295,10 +324,10 @@ const upsertPlayerEntries = async (savedGameItem, scrapedData) => {
             tableNumber: playerData.lastKnownTable || null,
             seatNumber: playerData.lastKnownSeat || null,
             numberOfReEntries: 0, isMultiDayTournament: savedGameItem.isSeries || false,
-            _version: 1, _lastChangedAt: Date.now(), __typename: 'PlayerEntry',
+            _version: 1, _lastChangedAt: timestamp, __typename: 'PlayerEntry',
             createdAt: now, updatedAt: now
         };
-        await ddbDocClient.send(new PutCommand({ TableName: playerEntryTable, Item: playerEntry }));
+        await monitoredDdbDocClient.send(new PutCommand({ TableName: playerEntryTable, Item: playerEntry }));
     });
     await Promise.all(promises);
 };
@@ -393,7 +422,7 @@ const createPlayerProcessingInstructions = (playerData, gameInfo) => {
 // --- SCRAPING & SAVING LOGIC ---
 
 /**
- * Restored: Fingerprinting logic for structural changes.
+ * Process structure fingerprint for detecting new scraping patterns
  */
 const processStructureFingerprint = async (foundKeys, structureLabel, sourceUrl) => {
     if (!foundKeys || foundKeys.length === 0) return { isNewStructure: false, structureLabel: structureLabel };
@@ -402,29 +431,36 @@ const processStructureFingerprint = async (foundKeys, structureLabel, sourceUrl)
     const structureId = crypto.createHash('sha256').update(structureString).digest('hex');
     const structureTable = getTableName('ScrapeStructure');
     const now = new Date().toISOString();
+    const timestamp = Date.now();
+    
     try {
-        const getResponse = await ddbDocClient.send(new QueryCommand({
+        const getResponse = await monitoredDdbDocClient.send(new QueryCommand({
             TableName: structureTable, KeyConditionExpression: 'id = :id', ExpressionAttributeValues: { ':id': structureId }
         }));
         const isNew = getResponse.Items.length === 0;
         if (isNew) {
+            monitoring.trackOperation('FINGERPRINT_NEW', 'ScrapeStructure', structureId, { structureLabel, sourceUrl });
             console.log(`Saving new structure fingerprint: ${structureId}`);
-            await ddbDocClient.send(new PutCommand({
+            await monitoredDdbDocClient.send(new PutCommand({
                 TableName: structureTable,
                 Item: {
                     id: structureId, fields: foundKeys, structureLabel: structureLabel,
                     occurrenceCount: 1, firstSeenAt: now, lastSeenAt: now, exampleUrl: sourceUrl,
-                    __typename: "ScrapeStructure", createdAt: now, updatedAt: now, _version: 1
+                    __typename: "ScrapeStructure", createdAt: now, updatedAt: now, 
+                    _version: 1, _lastChangedAt: timestamp
                 }
             }));
             return { isNewStructure: true, structureLabel };
         } else {
-            await ddbDocClient.send(new UpdateCommand({
+            await monitoredDdbDocClient.send(new UpdateCommand({
                 TableName: structureTable, Key: { id: structureId },
-                UpdateExpression: 'SET lastSeenAt = :now, occurrenceCount = occurrenceCount + :inc, updatedAt = :now',
-                ExpressionAttributeValues: { ':now': now, ':inc': 1 }
+                UpdateExpression: 'SET lastSeenAt = :now, occurrenceCount = occurrenceCount + :inc, updatedAt = :now, #lca = :timestamp',
+                ExpressionAttributeNames: {
+                    '#lca': '_lastChangedAt'
+                },
+                ExpressionAttributeValues: { ':now': now, ':inc': 1, ':timestamp': timestamp }
             }));
-            return { isNewStructure: false, structureLabel }; 
+            return { isNewStructure: false, structureLabel: structureLabel }; 
         }
     } catch (error) {
         console.error('Error processing structure fingerprint:', error);
@@ -432,18 +468,145 @@ const processStructureFingerprint = async (foundKeys, structureLabel, sourceUrl)
     }
 };
 
+/**
+ * Find existing Game by sourceUrl
+ */
+const findGameBySourceUrl = async (sourceUrl, entityId) => {
+    const gameTable = getTableName('Game');
+    console.log(`[findGameBySourceUrl] Looking for existing game with sourceUrl: ${sourceUrl}`);
+    
+    try {
+        const params = {
+            TableName: gameTable,
+            IndexName: 'bySourceUrl',
+            KeyConditionExpression: 'sourceUrl = :url',
+            ExpressionAttributeValues: {
+                ':url': sourceUrl
+            }
+        };
+        
+        const response = await monitoredDdbDocClient.send(new QueryCommand(params));
+        
+        if (response.Items && response.Items.length > 0) {
+            const matchingGames = response.Items.filter(game => 
+                !game._deleted && game.entityId === entityId
+            );
+            
+            if (matchingGames.length > 0) {
+                console.log(`[findGameBySourceUrl] Found existing game: ${matchingGames[0].id}`);
+                return matchingGames[0];
+            }
+        }
+        
+        return null;
+    } catch (error) {
+        console.error(`[findGameBySourceUrl] Error: ${error.message}`);
+        return null;
+    }
+};
+
+/**
+ * Create ScrapeAttempt record
+ */
+const createScrapeAttempt = async (data) => {
+    const scrapeAttemptTable = getTableName('ScrapeAttempt');
+    const now = new Date().toISOString();
+    const timestamp = Date.now();
+    
+    const scrapeAttempt = {
+        id: crypto.randomUUID(),
+        url: data.url,
+        tournamentId: data.tournamentId,
+        attemptTime: now,
+        scraperJobId: data.scraperJobId || 'manual-scrape',
+        scrapeURLId: data.scrapeURLId || data.url,
+        status: data.status,
+        processingTime: data.processingTime || 0,
+        gameName: data.gameName || null,
+        gameStatus: data.gameStatus || null,
+        registrationStatus: data.registrationStatus || null,
+        dataHash: data.dataHash || null,
+        hasChanges: data.hasChanges || false,
+        errorMessage: data.errorMessage || null,
+        errorType: data.errorType || null,
+        gameId: data.gameId || null,
+        wasNewGame: data.wasNewGame || false,
+        fieldsUpdated: data.fieldsUpdated || [],
+        foundKeys: data.foundKeys || [],
+        structureLabel: data.structureLabel || null,
+        createdAt: now,
+        updatedAt: now,
+        __typename: 'ScrapeAttempt',
+        _version: 1,
+        _lastChangedAt: timestamp
+    };
+    
+    try {
+        await monitoredDdbDocClient.send(new PutCommand({
+            TableName: scrapeAttemptTable,
+            Item: scrapeAttempt
+        }));
+        
+        console.log(`[createScrapeAttempt] Created ScrapeAttempt: ${scrapeAttempt.id}`);
+        return scrapeAttempt;
+    } catch (error) {
+        console.error(`[createScrapeAttempt] Error: ${error.message}`);
+        return null;
+    }
+};
+
+/**
+ * Get or create ScrapeURL record
+ */
 const getOrCreateScrapeURL = async (url, tournamentId, entityId) => {
     const scrapeURLTable = getTableName('ScrapeURL');
     try {
-        const response = await ddbDocClient.send(new GetCommand({ 
+        const response = await monitoredDdbDocClient.send(new GetCommand({ 
             TableName: scrapeURLTable, 
             Key: { id: url } 
         }));
         
-        if (response.Item) return response.Item;
+        if (response.Item) {
+            // Check if we need to update the doNotScrape status based on game status
+            const gameTable = getTableName('Game');
+            const gameResponse = await monitoredDdbDocClient.send(new QueryCommand({
+                TableName: gameTable,
+                IndexName: 'bySourceUrl',
+                KeyConditionExpression: 'sourceUrl = :url',
+                ExpressionAttributeValues: { ':url': url },
+                Limit: 1
+            }));
+            
+            if (gameResponse.Items && gameResponse.Items.length > 0) {
+                const game = gameResponse.Items[0];
+                const shouldNotScrape = game.gameStatus === 'NOT_PUBLISHED' || 
+                                       game.gameStatus === 'NOT_IN_USE' ||
+                                       game.doNotScrape === true;
+                
+                // Update ScrapeURL if doNotScrape status has changed
+                if (response.Item.doNotScrape !== shouldNotScrape) {
+                    console.log(`[ScrapeURL] Updating doNotScrape from ${response.Item.doNotScrape} to ${shouldNotScrape}`);
+                    await monitoredDdbDocClient.send(new UpdateCommand({
+                        TableName: scrapeURLTable,
+                        Key: { id: url },
+                        UpdateExpression: 'SET doNotScrape = :dns, gameStatus = :gs, updatedAt = :now',
+                        ExpressionAttributeValues: {
+                            ':dns': shouldNotScrape,
+                            ':gs': game.gameStatus,
+                            ':now': new Date().toISOString()
+                        }
+                    }));
+                    response.Item.doNotScrape = shouldNotScrape;
+                    response.Item.gameStatus = game.gameStatus;
+                }
+            }
+            
+            return response.Item;
+        }
         
+        // Create new record if doesn't exist
         const now = new Date().toISOString();
-        const timestamp = new Date().getTime(); // For _lastChangedAt
+        const timestamp = Date.now();
         
         const newRecord = {
             id: url, 
@@ -451,7 +614,7 @@ const getOrCreateScrapeURL = async (url, tournamentId, entityId) => {
             tournamentId: parseInt(tournamentId, 10), 
             entityId: entityId || DEFAULT_ENTITY_ID,
             status: 'ACTIVE', 
-            doNotScrape: false, 
+            doNotScrape: false, // Will be updated after first scrape if needed
             placedIntoDatabase: false, 
             firstScrapedAt: now, 
             lastScrapedAt: now,
@@ -464,14 +627,12 @@ const getOrCreateScrapeURL = async (url, tournamentId, entityId) => {
             createdAt: now, 
             updatedAt: now, 
             __typename: 'ScrapeURL', 
-            
-            // ✅ ADD ALL DataStore sync fields:
             _version: 1,
-            _lastChangedAt: timestamp,  // Required field - use timestamp in milliseconds
-            _deleted: null  // Optional but good to include
+            _lastChangedAt: timestamp,
+            _deleted: null
         };
         
-        await ddbDocClient.send(new PutCommand({ 
+        await monitoredDdbDocClient.send(new PutCommand({ 
             TableName: scrapeURLTable, 
             Item: newRecord 
         }));
@@ -482,26 +643,26 @@ const getOrCreateScrapeURL = async (url, tournamentId, entityId) => {
         return { 
             id: url, 
             tournamentId: parseInt(tournamentId, 10), 
-            s3StorageEnabled: false 
+            s3StorageEnabled: false,
+            doNotScrape: false
         };
     }
 };
 
-const extractTournamentId = (url) => {
-    if (!url) return 0;
-    const match = url.match(/[?&]id=(\d+)/);
-    return match ? parseInt(match[1], 10) : 0;
-};
-
 /**
- * Restored and Updated: Now async to support fingerprinting.
+ * Scrape data from HTML
  */
-const scrapeDataFromHtml = async (html, venues, seriesTitles, url) => {
-    // Use updated strategies which detect new states (NOT_FOUND, NOT_PUBLISHED)
-    const { data, foundKeys } = runScraper(html, null, venues, seriesTitles, url);
+const scrapeDataFromHtml = async (html, venues, seriesTitles, url, forceRefresh = false) => {
+    // Pass forceRefresh parameter to runScraper
+    const { data, foundKeys } = runScraper(html, null, venues, seriesTitles, url, forceRefresh);
+    
+    // Ensure tournamentId is always set
+    if (!data.tournamentId) {
+        data.tournamentId = getTournamentId(url);
+    }
     
     if (!data.structureLabel) {
-         data.structureLabel = `STATUS: ${data.gameStatus || 'UNKNOWN'} | REG: ${data.registrationStatus || 'UNKNOWN'}`;
+        data.structureLabel = `STATUS: ${data.gameStatus || 'UNKNOWN'} | REG: ${data.registrationStatus || 'UNKNOWN'}`;
     }
     if (!foundKeys.includes('structureLabel')) foundKeys.push('structureLabel');
 
@@ -509,162 +670,453 @@ const scrapeDataFromHtml = async (html, venues, seriesTitles, url) => {
     const { isNewStructure } = await processStructureFingerprint(foundKeys, data.structureLabel, url);
     data.isNewStructure = isNewStructure;
 
-    console.log(`[DEBUG-SCRAPER] Scraped status: ${data.gameStatus}, doNotScrape: ${data.doNotScrape}`);
+    console.log(`[DEBUG-SCRAPER] Scraped status: ${data.gameStatus}, doNotScrape: ${data.doNotScrape}, tournamentId: ${data.tournamentId}, forceRefresh: ${forceRefresh}`);
     return { data, foundKeys };
 };
 
-const handleFetch = handleFetchEnhanced;
-
-// --- MAIN SAVE HANDLER ---
-const handleSave = async (input) => {
-    const jobId = input.jobId || null;
-    const triggerSource = input.triggerSource || null;
-    console.log(`[handleSave] START. Job: ${jobId}, Source: ${triggerSource}`);
+// --- ENHANCEMENT: New function to link S3Storage to Game ---
+/**
+ * Finds the S3Storage record by URL and updates it with the gameId
+ */
+const updateS3StorageWithGameId = async (sourceUrl, gameId) => {
+    const s3StorageTable = getTableName('S3Storage');
+    console.log(`[updateS3Storage] Attempting to link Game ${gameId} to S3Storage records for ${sourceUrl}`);
     
-    const { sourceUrl, existingGameId, data } = input;
-    const venueId = input.venueId || UNASSIGNED_VENUE_ID;
-    const isUnassigned = venueId === UNASSIGNED_VENUE_ID;
-    const entityId = input.entityId || await getEntityIdFromUrl(sourceUrl);
-    const now = new Date().toISOString();
+    try {
+        // Find S3Storage records by URL using the 'byURL' index
+        const queryCommand = new QueryCommand({
+            TableName: s3StorageTable,
+            IndexName: 'byURL', // Use the 'byURL' index from schema.graphql
+            KeyConditionExpression: '#url = :url',
+            ExpressionAttributeNames: { '#url': 'url' },
+            ExpressionAttributeValues: { ':url': sourceUrl },
+            // Get the latest one first in case there are multiple
+            ScanIndexForward: false, 
+            Limit: 1 
+        });
+        
+        const response = await monitoredDdbDocClient.send(queryCommand);
+        
+        if (response.Items && response.Items.length > 0) {
+            const latestS3Record = response.Items[0];
+            
+            // Only update if it's not already set
+            if (latestS3Record.gameId !== gameId) {
+                console.log(`[updateS3Storage] Found record ${latestS3Record.id}. Updating gameId to ${gameId}.`);
+                
+                const updateCommand = new UpdateCommand({
+                    TableName: s3StorageTable,
+                    Key: { id: latestS3Record.id }, // Use the primary key 'id'
+                    UpdateExpression: 'SET #gameId = :gameId, #dataExtracted = :true, #updatedAt = :now, #lca = :lca, #v = if_not_exists(#v, :zero) + :one',
+                    ExpressionAttributeNames: {
+                        '#gameId': 'gameId',
+                        '#dataExtracted': 'dataExtracted',
+                        '#updatedAt': 'updatedAt',
+                        '#lca': '_lastChangedAt',
+                        '#v': '_version'
+                    },
+                    ExpressionAttributeValues: {
+                        ':gameId': gameId,
+                        ':true': true,
+                        ':now': new Date().toISOString(),
+                        ':lca': Date.now(),
+                        ':zero': 0,
+                        ':one': 1
+                    }
+                });
+                
+                await monitoredDdbDocClient.send(updateCommand);
+                console.log(`[updateS3Storage] Successfully linked S3 record ${latestS3Record.id} to Game ${gameId}.`);
+            } else {
+                console.log(`[updateS3Storage] Record ${latestS3Record.id} already linked to Game ${gameId}.`);
+            }
+        } else {
+            console.warn(`[updateS3Storage] No S3Storage record found for URL: ${sourceUrl}`);
+        }
+    } catch (error) {
+        console.error(`[updateS3Storage] Error linking S3 record to game: ${error.message}`);
+        // Do not throw, as this is a non-critical update
+    }
+};
+
+/**
+ * Complete unabridged handleSave function with UPSERT logic and ScrapeAttempt tracking
+ */
+const handleSave = async (sourceUrl, venueId, data, existingGameId, doNotScrape = false, entityId, scraperJobId = null) => {
+    const startTime = Date.now(); // Track processing time
+    const effectiveEntityId = entityId || DEFAULT_ENTITY_ID;
     const gameTable = getTableName('Game');
     const structureTable = getTableName('TournamentStructure');
+    const now = new Date().toISOString();
+    const timestamp = Date.now();
     
-    let savedGameItem = null;
-    let parsedOriginalData = {};
-    const rawOriginalData = input.originalScrapedData || null;
-
-    if (rawOriginalData) {
-        if (typeof rawOriginalData === 'string') {
-            try { parsedOriginalData = JSON.parse(rawOriginalData); } 
-            catch (e) { console.error('[HANDLE-SAVE] Failed to parse original data JSON.', e); }
-        } else if (typeof rawOriginalData === 'object') {
-            parsedOriginalData = rawOriginalData;
+    console.log(`[handleSave] Starting save for ${sourceUrl}`);
+    console.log(`[handleSave] Input - existingGameId: ${existingGameId}, entityId: ${effectiveEntityId}`);
+    
+    let fieldsUpdated = [];
+    let wasNewGame = false;
+    
+    let parsedData;
+    try {
+        parsedData = typeof data === 'string' ? JSON.parse(data) : data;
+    } catch (error) {
+        console.error('[handleSave] Failed to parse data:', error);
+        parsedData = {};
+    }
+    
+    const tournamentId = parsedData.tournamentId || getTournamentId(sourceUrl);
+    
+    if (!existingGameId) {
+        console.log(`[handleSave] No existingGameId provided, checking for game by sourceUrl`);
+        const existingGame = await findGameBySourceUrl(sourceUrl, effectiveEntityId);
+        if (existingGame) {
+            console.log(`[handleSave] Found existing game by sourceUrl: ${existingGame.id}`);
+            existingGameId = existingGame.id;
+        } else {
+            console.log(`[handleSave] No existing game found for sourceUrl: ${sourceUrl}`);
         }
     }
-
-    if (parsedOriginalData) {
-        if (parsedOriginalData.tournamentId !== undefined && !data.tournamentId) data.tournamentId = parsedOriginalData.tournamentId;
-        if (parsedOriginalData.playersRemaining !== undefined && data.playersRemaining === undefined) data.playersRemaining = parsedOriginalData.playersRemaining;
-    }
-
-    const processedLevels = (data.levels || []).map(level => ({
-        levelNumber: level.levelNumber, durationMinutes: level.durationMinutes || 0,
-        smallBlind: level.smallBlind || 0, bigBlind: level.bigBlind || 0, ante: level.ante || 0,
-        isBreak: level.breakMinutes > 0, breakMinutes: level.breakMinutes || 0
-    }));
     
-    const doNotScrape = input.doNotScrape || false;
-
+    const processedLevels = [];
+    if (parsedData.levels && Array.isArray(parsedData.levels)) {
+        parsedData.levels.forEach(level => {
+            if (level && level.levelNumber !== undefined) {
+                processedLevels.push({
+                    levelNumber: level.levelNumber,
+                    durationMinutes: level.durationMinutes || 0,
+                    smallBlind: level.smallBlind || 0,
+                    bigBlind: level.bigBlind || 0,
+                    ante: level.ante || null,
+                    breakMinutes: level.breakMinutes || null
+                });
+            }
+        });
+    }
+    
+    let venueAssignmentStatus = 'PENDING_ASSIGNMENT';
+    if (venueId) {
+        venueAssignmentStatus = 'MANUALLY_ASSIGNED';
+    } else if (parsedData.venueMatch?.autoAssignedVenue?.id) {
+        venueAssignmentStatus = 'AUTO_ASSIGNED';
+        venueId = venueId || parsedData.venueMatch.autoAssignedVenue.id;
+    }
+    
+    const isUnassigned = !venueId;
+    
+    const ensureISODate = (dateValue) => {
+        if (!dateValue) return null;
+        try {
+            return new Date(dateValue).toISOString();
+        } catch (e) {
+            return null;
+        }
+    };
+    
+    let savedGameItem = null;
+    
     if (existingGameId) {
-        const existingGame = await ddbDocClient.send(new GetCommand({ TableName: gameTable, Key: { id: existingGameId } }));
-        if (!existingGame.Item) throw new Error(`No game found with ID: ${existingGameId}`);
+        // ========================================
+        // UPDATE EXISTING GAME
+        // ========================================
+        wasNewGame = false;
+        console.log(`[handleSave] Updating existing game: ${existingGameId}`);
         
-        const newGameStart = data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : null;
-        const authoritativeStart = (newGameStart && newGameStart !== existingGame.Item.gameStartDateTime) ? newGameStart : existingGame.Item.gameStartDateTime;
-
-        const updatedGameItem = {
-            ...existingGame.Item, name: data.name, gameType: data.gameType || existingGame.Item.gameType,
-            gameStatus: data.gameStatus || existingGame.Item.gameStatus, gameVariant: data.gameVariant || existingGame.Item.gameVariant,
-            gameStartDateTime: authoritativeStart, gameEndDateTime: ensureISODate(data.gameEndDateTime),
-            venueId: venueId || existingGame.Item.venueId || UNASSIGNED_VENUE_ID,
-            entityId: entityId || existingGame.Item.entityId || DEFAULT_ENTITY_ID,
-            venueAssignmentStatus: input.venueAssignmentStatus || existingGame.Item.venueAssignmentStatus || (isUnassigned ? 'PENDING_ASSIGNMENT' : 'AUTO_ASSIGNED'),
-            requiresVenueAssignment: isUnassigned || existingGame.Item.requiresVenueAssignment,
-            suggestedVenueName: input.suggestedVenueName || existingGame.Item.suggestedVenueName || data.venueName || null,
-            venueAssignmentConfidence: input.venueAssignmentConfidence || existingGame.Item.venueAssignmentConfidence || 0,
-            tournamentType: data.tournamentType || existingGame.Item.tournamentType,
-            buyIn: data.buyIn !== undefined ? data.buyIn : existingGame.Item.buyIn,
-            rake: data.rake !== undefined ? data.rake : existingGame.Item.rake,
-            startingStack: data.startingStack !== undefined ? data.startingStack : existingGame.Item.startingStack,
-            hasGuarantee: data.hasGuarantee !== undefined ? data.hasGuarantee : existingGame.Item.hasGuarantee,
-            guaranteeAmount: data.guaranteeAmount !== undefined ? data.guaranteeAmount : existingGame.Item.guaranteeAmount,
-            tournamentId: data.tournamentId, registrationStatus: data.registrationStatus, prizepool: data.prizepool,
-            totalEntries: data.totalEntries, playersRemaining: data.playersRemaining, totalRebuys: data.totalRebuys,
-            totalAddons: data.totalAddons, gameTags: data.gameTags, isSatellite: data.isSatellite, isSeries: data.isSeries,
-            isRegular: data.isRegular, gameFrequency: data.gameFrequency, seriesName: data.seriesName,
-            totalDuration: data.totalDuration, revenueByBuyIns: data.revenueByBuyIns, profitLoss: data.profitLoss,
-            guaranteeSurplus: data.guaranteeSurplus, guaranteeOverlay: data.guaranteeOverlay, totalRake: data.totalRake,
-            doNotScrape: doNotScrape, sourceDataIssue: data.sourceDataIssue || false, gameDataVerified: data.gameDataVerified || false,
-            updatedAt: now, _lastChangedAt: Date.now()
+        monitoring.trackOperation('HANDLE_SAVE_UPDATE', 'Game', existingGameId, { sourceUrl, name: parsedData.name });
+        
+        const existingGameResponse = await monitoredDdbDocClient.send(new GetCommand({
+            TableName: gameTable,
+            Key: { id: existingGameId }
+        }));
+        
+        const existingGame = existingGameResponse.Item;
+        if (!existingGame) {
+            throw new Error(`Game ${existingGameId} not found`);
+        }
+        
+        const updateExpressions = [];
+        const expressionAttributeNames = {};
+        const expressionAttributeValues = {};
+        
+        updateExpressions.push('#updatedAt = :updatedAt');
+        updateExpressions.push('#lca = :lca');
+        updateExpressions.push('#version = if_not_exists(#version, :zero) + :one');
+        
+        expressionAttributeNames['#updatedAt'] = 'updatedAt';
+        expressionAttributeNames['#lca'] = '_lastChangedAt';
+        expressionAttributeNames['#version'] = '_version';
+        
+        expressionAttributeValues[':updatedAt'] = now;
+        expressionAttributeValues[':lca'] = timestamp;
+        expressionAttributeValues[':zero'] = 0;
+        expressionAttributeValues[':one'] = 1;
+        
+        const updateFields = {
+            name: parsedData.name,
+            gameStatus: parsedData.gameStatus,
+            registrationStatus: parsedData.registrationStatus,
+            gameEndDateTime: ensureISODate(parsedData.gameEndDateTime),
+            prizepool: parsedData.prizepool,
+            totalEntries: parsedData.totalEntries,
+            playersRemaining: parsedData.playersRemaining,
+            totalRebuys: parsedData.totalRebuys,
+            totalAddons: parsedData.totalAddons,
+            totalDuration: parsedData.totalDuration,
+            gameTags: parsedData.gameTags,
+            venueId: venueId,
+            venueAssignmentStatus: venueAssignmentStatus,
+            requiresVenueAssignment: isUnassigned,
+            suggestedVenueName: parsedData.venueName || null,
+            venueAssignmentConfidence: parsedData.venueMatch?.suggestions?.[0]?.score || 0,
+            doNotScrape: doNotScrape,
+            totalRake: parsedData.totalRake,
+            revenueByBuyIns: parsedData.revenueByBuyIns,
+            profitLoss: parsedData.profitLoss,
+            guaranteeSurplus: parsedData.guaranteeSurplus,
+            guaranteeOverlay: parsedData.guaranteeOverlay
         };
-
-        if (processedLevels.length > 0) {
-            let structureId = existingGame.Item.tournamentStructureId || crypto.randomUUID();
-            updatedGameItem.tournamentStructureId = structureId;
-            await ddbDocClient.send(new PutCommand({
+        
+        Object.entries(updateFields).forEach(([field, newValue]) => {
+            if (newValue !== undefined && newValue !== existingGame[field]) {
+                updateExpressions.push(`#${field} = :${field}`);
+                expressionAttributeNames[`#${field}`] = field;
+                expressionAttributeValues[`:${field}`] = newValue;
+                fieldsUpdated.push(field);
+            }
+        });
+        
+        if (processedLevels.length > 0 && existingGame.tournamentStructureId) {
+            await monitoredDdbDocClient.send(new UpdateCommand({
                 TableName: structureTable,
-                Item: {
-                    id: structureId, name: `${data.name} - Blind Structure`, description: `Blind structure for ${data.name}`,
-                    levels: processedLevels, createdAt: now, updatedAt: now, _version: 1, __typename: "TournamentStructure"
+                Key: { id: existingGame.tournamentStructureId },
+                UpdateExpression: 'SET #levels = :levels, #updatedAt = :updatedAt, #lca = :lca',
+                ExpressionAttributeNames: {
+                    '#levels': 'levels',
+                    '#updatedAt': 'updatedAt',
+                    '#lca': '_lastChangedAt'
+                },
+                ExpressionAttributeValues: {
+                    ':levels': processedLevels,
+                    ':updatedAt': now,
+                    ':lca': timestamp
                 }
             }));
-        } else { delete updatedGameItem.tournamentStructureId; }
+        } else if (processedLevels.length > 0 && !existingGame.tournamentStructureId) {
+            const structureId = crypto.randomUUID();
+            await monitoredDdbDocClient.send(new PutCommand({
+                TableName: structureTable,
+                Item: {
+                    id: structureId,
+                    name: `${parsedData.name} - Blind Structure`,
+                    description: `Blind structure for ${parsedData.name}`,
+                    levels: processedLevels,
+                    createdAt: now,
+                    updatedAt: now,
+                    _version: 1,
+                    _lastChangedAt: timestamp,
+                    __typename: "TournamentStructure"
+                }
+            }));
+            
+            updateExpressions.push('#tournamentStructureId = :tournamentStructureId');
+            expressionAttributeNames['#tournamentStructureId'] = 'tournamentStructureId';
+            expressionAttributeValues[':tournamentStructureId'] = structureId;
+            fieldsUpdated.push('tournamentStructureId');
+        }
         
-        await ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: updatedGameItem }));
-        savedGameItem = updatedGameItem;
+        if (updateExpressions.length > 3) { 
+            const updateCommand = {
+                TableName: gameTable,
+                Key: { id: existingGameId },
+                UpdateExpression: `SET ${updateExpressions.join(', ')}`,
+                ExpressionAttributeNames: expressionAttributeNames,
+                ExpressionAttributeValues: expressionAttributeValues,
+                ReturnValues: 'ALL_NEW'
+            };
+            
+            const updateResult = await monitoredDdbDocClient.send(new UpdateCommand(updateCommand));
+            savedGameItem = updateResult.Attributes;
+            
+            console.log(`[handleSave] Updated game ${existingGameId}, fields changed: ${fieldsUpdated.join(', ')}`);
+        } else {
+            savedGameItem = existingGame;
+            console.log(`[handleSave] No changes detected for game ${existingGameId}`);
+        }
+        
     } else {
+        // ========================================
+        // CREATE NEW GAME
+        // ========================================
+        wasNewGame = true;
         const gameId = crypto.randomUUID();
+        
+        console.log(`[handleSave] Creating new game: ${gameId}`);
+        
+        monitoring.trackOperation('HANDLE_SAVE_CREATE', 'Game', gameId, { sourceUrl, name: parsedData.name });
+        
         let structureId = null;
         if (processedLevels.length > 0) {
             structureId = crypto.randomUUID();
-            await ddbDocClient.send(new PutCommand({
+            await monitoredDdbDocClient.send(new PutCommand({
                 TableName: structureTable,
                 Item: {
-                    id: structureId, name: `${data.name} - Blind Structure`, description: `Blind structure for ${data.name}`,
-                    levels: processedLevels, createdAt: now, updatedAt: now, _version: 1, __typename: "TournamentStructure"
+                    id: structureId,
+                    name: `${parsedData.name} - Blind Structure`,
+                    description: `Blind structure for ${parsedData.name}`,
+                    levels: processedLevels,
+                    createdAt: now,
+                    updatedAt: now,
+                    _version: 1,
+                    _lastChangedAt: timestamp,
+                    __typename: "TournamentStructure"
                 }
             }));
         }
-        const authoritativeStart = data.gameStartDateTime ? new Date(data.gameStartDateTime).toISOString() : now;
+        
+        const authoritativeStart = parsedData.gameStartDateTime ? 
+            new Date(parsedData.gameStartDateTime).toISOString() : now;
+        
         const gameItem = {
-            id: gameId, name: data.name, entityId: entityId, gameType: data.gameType || 'TOURNAMENT',
-            gameStatus: data.gameStatus || 'SCHEDULED', gameVariant: data.gameVariant || 'NLHE',
-            gameStartDateTime: authoritativeStart, gameEndDateTime: ensureISODate(data.gameEndDateTime),
-            sourceUrl, venueId, venueAssignmentStatus: input.venueAssignmentStatus || (isUnassigned ? 'PENDING_ASSIGNMENT' : 'AUTO_ASSIGNED'),
-            requiresVenueAssignment: isUnassigned, suggestedVenueName: input.suggestedVenueName || data.venueName || null,
-            venueAssignmentConfidence: input.venueAssignmentConfidence || 0, tournamentType: data.tournamentType,
-            buyIn: data.buyIn, rake: data.rake || 0, startingStack: data.startingStack, hasGuarantee: data.hasGuarantee,
-            guaranteeAmount: data.guaranteeAmount, revenueByBuyIns: data.revenueByBuyIns, profitLoss: data.profitLoss,
-            guaranteeSurplus: data.guaranteeSurplus, guaranteeOverlay: data.guaranteeOverlay, totalRake: data.totalRake,
-            isSatellite: data.isSatellite, isSeries: data.isSeries, isRegular: data.isRegular, gameFrequency: data.gameFrequency,
-            seriesName: data.seriesName, registrationStatus: data.registrationStatus, prizepool: data.prizepool,
-            totalEntries: data.totalEntries, playersRemaining: data.playersRemaining, totalRebuys: data.totalRebuys,
-            totalAddons: data.totalAddons, totalDuration: data.totalDuration, tournamentId: data.tournamentId,
-            gameTags: data.gameTags, doNotScrape: doNotScrape, sourceDataIssue: data.sourceDataIssue || false,
-            gameDataVerified: data.gameDataVerified || false, createdAt: now, updatedAt: now, _version: 1, __typename: "Game"
+            id: gameId,
+            name: parsedData.name || `Tournament ${tournamentId}`,
+            entityId: effectiveEntityId,
+            sourceUrl: sourceUrl, 
+            gameType: parsedData.gameType || 'TOURNAMENT',
+            gameStatus: parsedData.gameStatus || 'SCHEDULED',
+            gameVariant: parsedData.gameVariant || 'NLHE',
+            gameStartDateTime: authoritativeStart,
+            gameEndDateTime: ensureISODate(parsedData.gameEndDateTime),
+            venueId: venueId || null,
+            venueAssignmentStatus: venueAssignmentStatus,
+            requiresVenueAssignment: isUnassigned,
+            suggestedVenueName: parsedData.venueName || null,
+            venueAssignmentConfidence: parsedData.venueMatch?.suggestions?.[0]?.score || 0,
+            tournamentType: parsedData.tournamentType || null,
+            buyIn: parsedData.buyIn || 0,
+            rake: parsedData.rake || 0,
+            startingStack: parsedData.startingStack || 0,
+            hasGuarantee: parsedData.hasGuarantee || false,
+            guaranteeAmount: parsedData.guaranteeAmount || 0,
+            revenueByBuyIns: parsedData.revenueByBuyIns || null,
+            profitLoss: parsedData.profitLoss || null,
+            guaranteeSurplus: parsedData.guaranteeSurplus || null,
+            guaranteeOverlay: parsedData.guaranteeOverlay || null,
+            totalRake: parsedData.totalRake || null,
+            isSatellite: parsedData.isSatellite || false,
+            isSeries: parsedData.isSeries || false,
+            isRegular: parsedData.isRegular || false,
+            gameFrequency: parsedData.gameFrequency || null,
+            seriesName: parsedData.seriesName || null,
+            registrationStatus: parsedData.registrationStatus || null,
+            prizepool: parsedData.prizepool || 0,
+            totalEntries: parsedData.totalEntries || 0,
+            playersRemaining: parsedData.playersRemaining || null,
+            totalRebuys: parsedData.totalRebuys || 0,
+            totalAddons: parsedData.totalAddons || 0,
+            totalDuration: parsedData.totalDuration || null,
+            tournamentId: tournamentId,
+            gameTags: parsedData.gameTags || [],
+            doNotScrape: doNotScrape,
+            sourceDataIssue: parsedData.sourceDataIssue || false,
+            gameDataVerified: parsedData.gameDataVerified || false,
+            createdAt: now,
+            updatedAt: now,
+            _version: 1,
+            _lastChangedAt: timestamp,
+            __typename: "Game"
         };
-        if (structureId) gameItem.tournamentStructureId = structureId;
-        await ddbDocClient.send(new PutCommand({ TableName: gameTable, Item: gameItem }));
+        
+        if (structureId) {
+            gameItem.tournamentStructureId = structureId;
+        }
+        
+        await monitoredDdbDocClient.send(new PutCommand({
+            TableName: gameTable,
+            Item: gameItem
+        }));
+        
         savedGameItem = gameItem;
+        fieldsUpdated = Object.keys(gameItem).filter(key => !key.startsWith('_') && key !== '__typename');
+        
+        console.log(`[handleSave] Created new game ${gameId}`);
     }
-
+    
+    // --- ENHANCEMENT: Update S3Storage record with this gameId ---
+    if (savedGameItem && savedGameItem.id && sourceUrl) {
+        await updateS3StorageWithGameId(sourceUrl, savedGameItem.id);
+    }
+    
+    // ✅ Create ScrapeAttempt record for audit trail
+    const processingTime = Date.now() - startTime;
+    const dataHash = crypto.createHash('sha256').update(JSON.stringify(parsedData)).digest('hex');
+    
+    await createScrapeAttempt({
+        url: sourceUrl,
+        tournamentId: tournamentId,
+        scraperJobId: scraperJobId || 'manual-save',
+        scrapeURLId: sourceUrl,
+        status: 'SUCCESS',
+        processingTime: processingTime,
+        gameName: parsedData.name,
+        gameStatus: parsedData.gameStatus,
+        registrationStatus: parsedData.registrationStatus,
+        dataHash: dataHash,
+        hasChanges: fieldsUpdated.length > 0,
+        gameId: savedGameItem.id,
+        wasNewGame: wasNewGame,
+        fieldsUpdated: fieldsUpdated,
+        foundKeys: parsedData.foundKeys || [],
+        structureLabel: parsedData.structureLabel || null
+    });
+    
+    console.log(`[handleSave] Created ScrapeAttempt - wasNewGame: ${wasNewGame}, fieldsUpdated: ${fieldsUpdated.length}`);
+    
+    // Handle player processing based on game status
     const liveStatuses = ['RUNNING', 'REGISTERING'];
+    
     if (savedGameItem && savedGameItem.gameStatus === 'FINISHED' && PLAYER_PROCESSOR_QUEUE_URL) {
         try {
-            const sqsPayload = createOptimizedPlayerPayload(savedGameItem, parsedOriginalData, { sourceUrl, venueId, entityId });
-            const tournamentId = savedGameItem.tournamentId || (sourceUrl.match(/id=(\d+)/) ? sourceUrl.match(/id=(\d+)/)[1] : savedGameItem.id);
+            monitoring.trackOperation('SQS_SEND_START', 'PlayerProcessor', savedGameItem.id, { 
+                tournamentId, 
+                gameStatus: 'FINISHED' 
+            });
+            
+            const sqsPayload = createOptimizedPlayerPayload(savedGameItem, parsedData, { 
+                sourceUrl, 
+                venueId, 
+                entityId: effectiveEntityId 
+            });
+            
             await sqsClient.send(new SendMessageCommand({
-                QueueUrl: PLAYER_PROCESSOR_QUEUE_URL, MessageBody: JSON.stringify(sqsPayload),
-                MessageGroupId: String(tournamentId), MessageDeduplicationId: `${tournamentId}-${Date.now()}`
+                QueueUrl: PLAYER_PROCESSOR_QUEUE_URL,
+                MessageBody: JSON.stringify(sqsPayload),
+                MessageGroupId: String(tournamentId),
+                MessageDeduplicationId: `${tournamentId}-${Date.now()}`
             }));
-            console.log(`[handleSave] SQS message sent for ${tournamentId}`);
-        } catch (error) { console.error(`[handleSave] SQS failed: ${error.message}`); }
+            
+            console.log(`[handleSave] SQS message sent for finished tournament ${tournamentId}`);
+        } catch (error) {
+            console.error(`[handleSave] SQS failed: ${error.message}`);
+        }
     } else if (savedGameItem && liveStatuses.includes(savedGameItem.gameStatus)) {
-        await upsertPlayerEntries(savedGameItem, parsedOriginalData);
+        monitoring.trackOperation('UPSERT_ENTRIES_START', 'PlayerEntry', savedGameItem.id, { 
+            gameStatus: savedGameItem.gameStatus 
+        });
+        await upsertPlayerEntries(savedGameItem, parsedData);
     }
+    
     return savedGameItem;
 };
 
 /**
- * Restored: Handle Fetch Range with new enhanced fetcher integration.
+ * Handle Fetch Range
  */
 const handleFetchRange = async (startId, endId, entityId) => {
+    monitoring.trackOperation('FETCH_RANGE_START', 'Game', `${startId}-${endId}`, { entityId });
     console.log(`[handleFetchRange] Processing ${startId} to ${endId}`);
     if (startId > endId || endId - startId + 1 > 100) throw new Error('Invalid range (max 100).');
 
     const allResults = [];
     const chunkSize = 10;
-    // Use provided entityId or default if running manually
     const effectiveEntityId = entityId || DEFAULT_ENTITY_ID;
 
     for (let i = startId; i <= endId; i += chunkSize) {
@@ -672,92 +1124,275 @@ const handleFetchRange = async (startId, endId, entityId) => {
         const chunkPromises = [];
         for (let j = i; j <= chunkEnd; j++) {
             const url = `https://kingsroom.com.au/tournament/?id=${j}`;
-            // Use an async IIFE to allow await for getOrCreateScrapeURL within the loop
             chunkPromises.push((async () => {
                 try {
-                     // Get record for caching
-                     const scrapeURLRecord = await getOrCreateScrapeURL(url, j, effectiveEntityId);
-                     // Call enhanced fetcher
-                     const result = await handleFetchEnhanced(url, scrapeURLRecord, effectiveEntityId, j, false, ddbDocClient);
-                     
-                     if (!result.success) throw new Error(result.error);
-                     
-                     // Scrape the data from the fetched HTML
-                     // We need venues/series for accurate scraping, but for range fetch summary 
-                     // we might skip perfectly accurate venue matching to save time, 
-                     // or we can load them once outside the loop. 
-                     // For now, let's do a quick scrape without them for speed in this admin tool,
-                     // OR you can pass them if you want full fidelity.
-                     // Let's use empty arrays for speed as this is usually just for checking status.
-                     const { data } = await scrapeDataFromHtml(result.html, [], [], url);
-                     
-                     return { ...data, id: j.toString(), rawHtml: null }; // exclude rawHtml from bulk output
+                    const scrapeURLRecord = await getOrCreateScrapeURL(url, j, effectiveEntityId);
+                    const result = await enhancedHandleFetch(url, scrapeURLRecord, effectiveEntityId, j, false, monitoredDdbDocClient);
+                    
+                    if (!result.success) throw new Error(result.error);
+                    
+                    const { data } = await scrapeDataFromHtml(result.html, [], [], url);
+                    
+                    return { ...data, id: j.toString(), rawHtml: null };
                 } catch (error) {
-                     return { id: j.toString(), error: error.message };
+                    return { id: j.toString(), error: error.message };
                 }
             })());
         }
         const settled = await Promise.allSettled(chunkPromises);
         allResults.push(...settled.map(r => r.status === 'fulfilled' ? r.value : { error: r.reason }));
     }
+    
+    monitoring.trackOperation('FETCH_RANGE_COMPLETE', 'Game', `${startId}-${endId}`, { resultsCount: allResults.length, entityId });
     return allResults;
 };
 
 // --- MAIN LAMBDA HANDLER ---
 exports.handler = async (event) => {
-    console.log('Event received:', JSON.stringify(event, null, 2));
+    console.log('[HANDLER] Incoming event:', JSON.stringify(event, null, 2));
+    
+    let entityId = DEFAULT_ENTITY_ID;
+    let jobId = null;
+    let triggerSource = 'MANUAL';
+    
+    const operationName = event.fieldName || event.operationType || event.operation || 'fetchTournamentData';
+    const args = event.arguments || event || {};
+    
+    if (args.jobId) jobId = args.jobId;
+    if (args.triggerSource) triggerSource = args.triggerSource;
+    
     await ensureDefaultEntity();
     
-    const operationName = event.fieldName || event.arguments?.operation || event.field;
-    const jobId = event.arguments?.jobId || null;
-    const triggerSource = event.arguments?.triggerSource || null;
-    const args = event.arguments || event;
-    const entityId = args.entityId || DEFAULT_ENTITY_ID;
-
-    console.log(`[HANDLER] Op: ${operationName}. Job: ${jobId || 'N/A'}, Entity: ${entityId}`);
-    
     try {
-        switch (operationName) {
-            case 'fetchTournamentData':
-            case 'FETCH':
-                const fetchUrl = args.url;
-                if (!fetchUrl) throw new Error('URL required');
-                
-                const tournamentId = extractTournamentId(fetchUrl);
-                const scrapeURLRecord = await getOrCreateScrapeURL(fetchUrl, tournamentId, entityId);
-                const fetchResult = await handleFetchEnhanced(fetchUrl, scrapeURLRecord, entityId, tournamentId, args.forceRefresh, ddbDocClient);
-                if (!fetchResult.success) throw new Error(fetchResult.error || 'Fetch failed');
-
-                const [venues, seriesTitles] = await Promise.all([getAllVenues(), getAllSeriesTitles()]);
-                // NOW AWAITING the async scrapeDataFromHtml
-                const { data: scrapedData, foundKeys } = await scrapeDataFromHtml(fetchResult.html, venues, seriesTitles, fetchUrl);
-
-                return {
-                    ...scrapedData, rawHtml: fetchResult.html, s3Key: fetchResult.s3Key,
-                    source: fetchResult.source, contentHash: fetchResult.contentHash,
-                    fetchedAt: new Date().toISOString(),
-                    doNotScrape: scrapedData.doNotScrape || false,
-                    gameStatus: scrapedData.gameStatus || 'UNKNOWN'
-                };
-
-            case 'saveTournamentData':
-            case 'SAVE':
-                return await handleSave(args.input || {
-                    sourceUrl: args.sourceUrl, venueId: args.venueId, existingGameId: args.existingGameId,
-                    doNotScrape: args.doNotScrape, data: args.scrapedData || args.data,
-                    originalScrapedData: args.originalScrapedData, jobId: jobId,
-                    triggerSource: triggerSource, entityId: args.entityId
-                });
-                
-            case 'fetchTournamentDataRange':
-                // Pass entityId to handleFetchRange
-                return await handleFetchRange(args.startId, args.endId, entityId);
-                
-            default:
-                throw new Error(`Unknown operation: ${operationName}.`);
+        if (operationName === 'fetchTournamentData' || operationName === 'FETCH') {
+            const url = args.url;
+            if (url) {
+                const urlEntityId = await getEntityIdFromUrl(url);
+                if (urlEntityId) entityId = urlEntityId;
+            }
         }
+        
+        entityId = args.entityId || DEFAULT_ENTITY_ID;
+        
+        monitoring.entityId = entityId; 
+        
+        monitoring.trackOperation('HANDLER_START', 'Handler', operationName, { entityId, jobId, triggerSource });
+        console.log(`[HANDLER] Op: ${operationName}. Job: ${jobId || 'N/A'}, Entity: ${entityId}`);
+        
+        try {
+            switch (operationName) {
+                case 'fetchTournamentData':
+                case 'FETCH':
+                    const fetchUrl = args.url;
+                    if (!fetchUrl) throw new Error('URL required');
+                    
+                    const tournamentId = getTournamentId(fetchUrl);
+                    monitoring.trackOperation('FETCH_DATA', 'Game', tournamentId, { url: fetchUrl, entityId });
+                    
+                    const scrapeURLRecord = await getOrCreateScrapeURL(fetchUrl, tournamentId, entityId);
+                    
+                    const forceRefresh = args.forceRefresh || false;
+                    const overrideDoNotScrape = args.overrideDoNotScrape || false;
+                    
+                    console.log(`[HANDLER] Fetch params:`, {
+                        doNotScrape: scrapeURLRecord.doNotScrape,
+                        forceRefresh,
+                        overrideDoNotScrape,
+                        lastScrapeStatus: scrapeURLRecord.lastScrapeStatus
+                    });
+                    
+                    if (scrapeURLRecord.doNotScrape && !forceRefresh && !overrideDoNotScrape) {
+                        console.log('[HANDLER] Tournament marked as doNotScrape, returning status info without scraping');
+                        
+                        monitoring.trackOperation('SKIP_DONOTSCRAPE', 'Game', tournamentId, { 
+                            url: fetchUrl, 
+                            entityId,
+                            lastScrapeStatus: scrapeURLRecord.lastScrapeStatus 
+                        });
+                        
+                        return {
+                            tournamentId: tournamentId,
+                            name: 'Tournament Not Available',
+                            gameStatus: scrapeURLRecord.gameStatus || 'NOT_PUBLISHED',
+                            hasGuarantee: false,
+                            doNotScrape: true,
+                            s3Key: scrapeURLRecord.latestS3Key || '',
+                            error: 'This tournament is marked as do not scrape',
+                            status: 'DO_NOT_SCRAPE',
+                            lastScrapeStatus: scrapeURLRecord.lastScrapeStatus,
+                            lastScrapedAt: scrapeURLRecord.lastScrapedAt,
+                            message: 'This tournament is not available for automatic scraping. Use force refresh to override.',
+                            registrationStatus: 'N_A',
+                            entityId: entityId
+                        };
+                    }
+                    
+                    if (scrapeURLRecord.doNotScrape && (forceRefresh || overrideDoNotScrape)) {
+                        console.log('[HANDLER] OVERRIDE: User forcing scrape of doNotScrape tournament');
+                        monitoring.trackOperation('FORCE_SCRAPE_OVERRIDE', 'Game', tournamentId, { 
+                            url: fetchUrl, 
+                            entityId,
+                            override: true,
+                            previousStatus: scrapeURLRecord.lastScrapeStatus 
+                        });
+                    }
+                    
+                    const fetchResult = await enhancedHandleFetch(
+                        fetchUrl, 
+                        scrapeURLRecord, 
+                        entityId, 
+                        tournamentId, 
+                        forceRefresh, 
+                        monitoredDdbDocClient
+                    );
+                    
+                    monitoring.trackOperation('FETCH_SOURCE', 'Game', tournamentId, { 
+                        source: fetchResult.source, 
+                        s3Key: fetchResult.s3Key, 
+                        success: fetchResult.success, 
+                        entityId,
+                        wasForced: forceRefresh || overrideDoNotScrape
+                    });
+
+                    if (!fetchResult.success) {
+                        console.log('[HANDLER] Fetch failed:', fetchResult.error);
+                        
+                        const isNotFoundError = fetchResult.isNotFound || 
+                                               fetchResult.error?.includes('not found') ||
+                                               fetchResult.error?.includes('not published');
+                        
+                        if (isNotFoundError) {
+                            await updateScrapeURLDoNotScrape(fetchUrl, true, 'NOT_FOUND');
+                        }
+                        
+                        return {
+                            tournamentId: tournamentId,
+                            name: fetchResult.isNotFound ? 'Tournament Not Found' : 'Failed to fetch tournament',
+                            gameStatus: fetchResult.isNotFound ? 'NOT_FOUND' : 'SCHEDULED',
+                            hasGuarantee: false,
+                            doNotScrape: fetchResult.isNotFound,
+                            s3Key: '',
+                            error: fetchResult.error || 'Fetch failed',
+                            status: 'FETCH_ERROR',
+                            registrationStatus: 'N_A',
+                            entityId: entityId
+                        };
+                    }
+
+                    const [venues, seriesTitles] = await Promise.all([getAllVenues(), getAllSeriesTitles()]);
+                    const { data: scrapedData, foundKeys } = await scrapeDataFromHtml(
+                        fetchResult.html, 
+                        venues, 
+                        seriesTitles, 
+                        fetchUrl,
+                        forceRefresh
+                    );
+                    
+                    const shouldMarkDoNotScrape = scrapedData.gameStatus === 'NOT_PUBLISHED' || 
+                                                 scrapedData.gameStatus === 'NOT_IN_USE' ||
+                                                 scrapedData.doNotScrape === true;
+                    
+                    if (shouldMarkDoNotScrape && !scrapeURLRecord.doNotScrape) {
+                        console.log(`[HANDLER] Marking tournament as doNotScrape due to status: ${scrapedData.gameStatus}`);
+                        await updateScrapeURLDoNotScrape(fetchUrl, true, scrapedData.gameStatus);
+                    }
+
+                    const result = {
+                        tournamentId: scrapedData.tournamentId || tournamentId,
+                        name: scrapedData.name || 'Unnamed Tournament',
+                        gameStatus: scrapedData.gameStatus || 'SCHEDULED',
+                        hasGuarantee: scrapedData.hasGuarantee || false,
+                        doNotScrape: scrapedData.doNotScrape || false,
+                        s3Key: fetchResult.s3Key || '',
+                        ...scrapedData,
+                        rawHtml: fetchResult.html,
+                        source: fetchResult.source,
+                        contentHash: fetchResult.contentHash,
+                        fetchedAt: new Date().toISOString(),
+                        entityId: entityId,
+                        wasForced: forceRefresh || overrideDoNotScrape
+                    };
+                    
+                    return result;
+
+                case 'saveTournamentData':
+                case 'SAVE':
+                    monitoring.trackOperation('SAVE_DATA', 'Game', args.input?.existingGameId || args.existingGameId || 'new', { entityId });
+                    
+                    // --- ENHANCEMENT: Extract all args for handleSave ---
+                    const input = args.input || args;
+                    return await handleSave(
+                        input.sourceUrl, 
+                        input.venueId, 
+                        input.scrapedData || input.data,
+                        input.existingGameId,
+                        input.doNotScrape, 
+                        input.entityId || entityId, // Ensure entityId is passed
+                        jobId // Pass jobId
+                    );
+                    
+                case 'fetchTournamentDataRange':
+                    monitoring.trackOperation('FETCH_RANGE', 'Game', `${args.startId}-${args.endId}`, { entityId });
+                    const rangeForceRefresh = args.forceRefresh || false;
+                    return await handleFetchRange(args.startId, args.endId, entityId, rangeForceRefresh);
+                    
+                default:
+                    throw new Error(`Unknown operation: ${operationName}.`);
+            }
+        } catch (error) {
+            console.error('[HANDLER] CRITICAL Error:', error);
+            monitoring.trackOperation('HANDLER_ERROR', 'Handler', 'fatal', { 
+                error: error.message, 
+                operationName, 
+                entityId 
+            });
+
+            if (operationName === 'fetchTournamentData' || operationName === 'FETCH') {
+                const url = args.url || '';
+                const tournamentId = getTournamentId(url) || 1;
+                
+                return {
+                    tournamentId: tournamentId,
+                    name: 'Error processing tournament',
+                    gameStatus: 'SCHEDULED', 
+                    hasGuarantee: false,
+                    doNotScrape: true,
+                    s3Key: '',
+                    error: error.message || 'Internal Lambda Error',
+                    status: 'ERROR',
+                    registrationStatus: 'N_A',
+                    entityId: entityId
+                };
+            }
+            
+            return { errorMessage: error.message || 'Internal Lambda Error' };
+        }
+    } finally {
+        if (monitoring) {
+            console.log('[HANDLER] Flushing monitoring metrics...');
+            await monitoring.flush();
+            console.log('[HANDLER] Monitoring flush complete.');
+        }
+    }
+};
+
+// Helper function to update ScrapeURL doNotScrape status
+const updateScrapeURLDoNotScrape = async (url, doNotScrape, gameStatus) => {
+    const scrapeURLTable = getTableName('ScrapeURL');
+    try {
+        await monitoredDdbDocClient.send(new UpdateCommand({
+            TableName: scrapeURLTable,
+            Key: { id: url },
+            UpdateExpression: 'SET doNotScrape = :dns, gameStatus = :gs, lastScrapeStatus = :lss, updatedAt = :now',
+            ExpressionAttributeValues: {
+                ':dns': doNotScrape,
+                ':gs': gameStatus,
+                ':lss': doNotScrape ? 'SKIPPED_DONOTSCRAPE' : 'SUCCESS',
+                ':now': new Date().toISOString()
+            }
+        }));
+        console.log(`[UpdateScrapeURL] Set doNotScrape=${doNotScrape} for ${url}`);
     } catch (error) {
-        console.error('[HANDLER] CRITICAL Error:', error);
-        return { errorMessage: error.message || 'Internal Lambda Error' };
+        console.error('[UpdateScrapeURL] Error updating doNotScrape:', error);
     }
 };

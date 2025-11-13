@@ -1,5 +1,4 @@
-// src/pages/scraper-admin-tabs/SingleScraperTabEnhanced.tsx
-// Enhanced version with S3 HTML support, cache status display, and modal
+// src/pages/scraper-admin-tabs/SingleScraperTab.tsx
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { generateClient } from 'aws-amplify/api';
@@ -7,22 +6,33 @@ import { Target, FastForward, HardDrive, ChevronRight } from 'lucide-react';
 import { useGameTracker } from '../../hooks/useGameTracker';
 import { useEntity, buildGameUrl } from '../../contexts/EntityContext';
 import { listVenuesForDropdown } from '../../graphql/customQueries';
+import { listGames } from '../../graphql/queries';
+import { createVenue } from '../../graphql/mutations';
 import { Venue, DataSource } from '../../API';
 import { GameDetailsModal } from '../../components/scraper/admin/GameDetailsModal';
 import { SaveConfirmationModal } from '../../components/scraper/SaveConfirmationModal';
 import { GameListItem } from '../../components/scraper/GameListItem';
 import { EntitySelector } from '../../components/entities/EntitySelector';
 import { ScrapeOptionsModal } from '../../components/scraper/ScrapeOptionsModal';
+import { VenueModal } from '../../components/venues/VenueModal';
+import { VenueFormData } from '../../types/venue';
 
-export const SingleScraperTab: React.FC = () => {
+// --- ENHANCEMENT: Added props interface ---
+interface SingleScraperTabProps {
+    urlToReparse: string | null;
+    onReparseComplete: () => void;
+}
+
+export const SingleScraperTab: React.FC<SingleScraperTabProps> = ({ urlToReparse, onReparseComplete }) => {
     const client = useMemo(() => generateClient(), []);
-    const { currentEntity } = useEntity();
+    const { currentEntity, entities } = useEntity();
     const [inputId, setInputId] = useState('');
+    const [findingNext, setFindingNext] = useState(false);
     
     // Track all IDs that have been tracked in this session
     const trackedInSessionRef = useRef<Set<string>>(new Set());
     
-    // Use enhanced tracker with S3 support
+    // Use enhanced tracker with proper signatures
     const { 
         games, 
         trackGame, 
@@ -31,10 +41,13 @@ export const SingleScraperTab: React.FC = () => {
     } = useGameTracker();
     
     const [selectedGame, setSelectedGame] = useState<any>(null);
-    const [trackedIds, setTrackedIds] = useState<Set<string>>(new Set());
     const [venues, setVenues] = useState<Venue[]>([]);
     const [venuesLoading, setVenuesLoading] = useState(false);
     const [selectedVenues, setSelectedVenues] = useState<Record<string, string>>({});
+    
+    // Venue creation modal state
+    const [venueModalOpen, setVenueModalOpen] = useState(false);
+    const [creatingVenueForGame, setCreatingVenueForGame] = useState<string | null>(null);
     
     // S3 cache status state
     const [cacheStatus, setCacheStatus] = useState<Record<string, {
@@ -48,6 +61,10 @@ export const SingleScraperTab: React.FC = () => {
     const [scrapeModalInfo, setScrapeModalInfo] = useState<{
         url: string;
         entityId: string;
+        hasCache?: boolean;
+        doNotScrape?: boolean;
+        gameStatus?: string;
+        warningMessage?: string;
     } | null>(null);
     
     const [confirmModalData, setConfirmModalData] = useState<{
@@ -112,7 +129,6 @@ export const SingleScraperTab: React.FC = () => {
                 // Ignore invalid URLs
             }
         });
-        setTrackedIds(ids);
     }, [games, currentEntity]);
     
     // Effect to auto-select venue
@@ -133,271 +149,434 @@ export const SingleScraperTab: React.FC = () => {
                 }
             }
         });
-    }, [games, venues]);
+    }, [games, venues, selectedVenues]);
 
-    // Check cache status for a URL
-    const checkCacheStatus = async (url: string) => {
+    // --- ENHANCEMENT: useEffect to handle re-parse prop ---
+    useEffect(() => {
+        if (urlToReparse && currentEntity) {
+            console.log(`[SingleScrapeTab] Received URL to re-parse: ${urlToReparse}`);
+            
+            // Extract the ID from the full URL
+            const pathMatch = urlToReparse.match(/id=(\d+)/);
+            if (pathMatch) {
+                const tournamentId = pathMatch[1];
+                setInputId(tournamentId); // Set the ID in the input field
+                
+                // Automatically run the tracking logic
+                // We must use the 'id' (tournamentId) not the full URL
+                handleTrackGame(tournamentId); 
+            } else {
+                console.warn(`[SingleScrapeTab] Could not parse tournament ID from URL: ${urlToReparse}`);
+            }
+            
+            // Clear the prop in the parent component
+            onReparseComplete();
+        }
+    }, [urlToReparse, onReparseComplete, currentEntity]); // handleTrackGame is a useCallback, but it's not stable, so we omit it
+
+
+    // Handle venue change
+    const handleVenueChange = (gameId: string, venueId: string) => {
+        // Special handling for "create_new" option
+        if (venueId === 'create_new') {
+            setCreatingVenueForGame(gameId);
+            setVenueModalOpen(true);
+            return;
+        }
+        
+        setSelectedVenues(prev => ({
+            ...prev,
+            [gameId]: venueId
+        }));
+        console.log(`[Venue Change] Game ${gameId} -> Venue ${venueId}`);
+    };
+
+    // Handle venue creation - get next venue number
+    const getNextVenueNumber = (): number => {
+        const venueNumbers = venues
+            .map(v => v.venueNumber)
+            .filter((num): num is number => num !== undefined && num !== null);
+        
+        if (venueNumbers.length === 0) return 1;
+        return Math.max(...venueNumbers) + 1;
+    };
+
+    // Handle venue creation
+    const handleCreateVenue = async (venueData: VenueFormData) => {
+        if (!currentEntity) {
+            console.error('No current entity selected');
+            return;
+        }
+
+        try {
+            // If no entityId is provided in the form, use the current entity
+            const entityId = venueData.entityId || currentEntity.id;
+            const nextVenueNumber = getNextVenueNumber();
+            
+            const response = await client.graphql({
+                query: createVenue,
+                variables: {
+                    input: {
+                        name: venueData.name,
+                        venueNumber: nextVenueNumber, // Add the required venue number
+                        address: venueData.address || null,
+                        city: venueData.city || null,
+                        country: venueData.country || 'Australia',
+                        aliases: venueData.aliases?.filter(Boolean) || [],
+                        entityId: entityId,
+                        isSpecial: false
+                    }
+                }
+            }) as any;
+            
+            const newVenue = response.data.createVenue;
+            console.log('[Venue Created]', newVenue);
+            
+            // Add new venue to the list
+            setVenues(prev => [...prev, newVenue].sort((a, b) => {
+                if (a.venueNumber !== undefined && b.venueNumber !== undefined) {
+                    return a.venueNumber - b.venueNumber;
+                }
+                return a.name.localeCompare(b.name);
+            }));
+            
+            // If we were creating for a specific game, auto-select the new venue
+            if (creatingVenueForGame) {
+                setSelectedVenues(prev => ({
+                    ...prev,
+                    [creatingVenueForGame]: newVenue.id
+                }));
+            }
+            
+            // Close modal and reset state
+            setVenueModalOpen(false);
+            setCreatingVenueForGame(null);
+        } catch (error) {
+            console.error('Error creating venue:', error);
+            alert('Failed to create venue. Please try again.');
+        }
+    };
+
+    // Get venue badge color based on match confidence
+    const getVenueBadgeColor = (game: any) => {
+        const confidence = game.data?.venueMatch?.confidence || 0;
+        if (confidence >= 80) return 'bg-green-100 text-green-800';
+        if (confidence >= 60) return 'bg-yellow-100 text-yellow-800';
+        return 'bg-orange-100 text-orange-800';
+    };
+
+    // Handle tracking a game - FIXED to show modal when cache exists
+    const handleTrackGame = async (id: string) => {
+        if (!currentEntity) {
+            alert('Please select an entity first');
+            return;
+        }
+        
+        const url = buildGameUrl(currentEntity, id);
+        console.log('[Track] Starting to track:', url);
+        
+        // Track in session
+        const pathMatch = url.match(/id=(\d+)/);
+        if (pathMatch) {
+            trackedInSessionRef.current.add(pathMatch[1]);
+        }
+        
+        // Check if game exists in DB first
+        let existingGameStatus = null;
+        try {
+            const checkResponse = await client.graphql({
+                query: listGames,
+                variables: {
+                    filter: {
+                        sourceUrl: { eq: url }
+                    },
+                    limit: 1
+                }
+            }) as any;
+            
+            const existingGame = checkResponse.data?.listGames?.items?.[0];
+            if (existingGame) {
+                console.log('[Track] Game exists in database:', existingGame.id);
+                console.log('[Track] Game status:', existingGame.gameStatus);
+                console.log('[Track] DoNotScrape:', existingGame.doNotScrape);
+                existingGameStatus = existingGame.gameStatus;
+            }
+        } catch (error) {
+            console.error('[Track] Error checking existing game:', error);
+        }
+        
+        // Check cache status and scrapeURL info
         try {
             const response = await client.graphql({
                 query: /* GraphQL */ `
                     query GetScrapeURL($id: ID!) {
                         getScrapeURL(id: $id) {
+                            id
                             latestS3Key
                             lastCacheHitAt
                             cachedContentUsedCount
                             contentHash
                             lastContentChangeAt
+                            lastScrapedAt
+                            doNotScrape
+                            status
+                            lastScrapeStatus
                         }
                     }
                 `,
                 variables: { id: url }
-            });
+            }) as any;
             
-            if ('data' in response && response.data?.getScrapeURL) {
-                const data = response.data.getScrapeURL;
+            const scrapeURLData = response.data?.getScrapeURL;
+            
+            if (scrapeURLData) {
+                console.log('[Track] ScrapeURL data:', {
+                    doNotScrape: scrapeURLData.doNotScrape,
+                    latestS3Key: scrapeURLData.latestS3Key,
+                    lastScrapeStatus: scrapeURLData.lastScrapeStatus
+                });
+                
+                // Update cache status state
                 setCacheStatus(prev => ({
                     ...prev,
                     [url]: {
-                        hasCache: !!data.latestS3Key,
-                        s3Key: data.latestS3Key,
-                        lastCached: data.lastContentChangeAt,
-                        cacheHits: data.cachedContentUsedCount || 0
+                        hasCache: !!scrapeURLData.latestS3Key,
+                        s3Key: scrapeURLData.latestS3Key,
+                        lastCached: scrapeURLData.lastScrapedAt,
+                        cacheHits: scrapeURLData.cachedContentUsedCount || 0,
+                        doNotScrape: scrapeURLData.doNotScrape
                     }
                 }));
+                
+                // CRITICAL LOGIC FOR MODAL DISPLAY:
+                const isSpecialStatus = existingGameStatus === 'NOT_PUBLISHED' || 
+                                        existingGameStatus === 'NOT_IN_USE' ||
+                                        existingGameStatus === 'NOT_FOUND';
+                
+                const shouldShowModal = !!(
+                    scrapeURLData.latestS3Key || // Has cache
+                    scrapeURLData.doNotScrape ||   // Marked as do not scrape
+                    isSpecialStatus             // Special status tournament
+                );
+                
+                if (shouldShowModal) {
+                    console.log('[Track] Showing modal for user choice:', {
+                        reason: scrapeURLData.latestS3Key ? 'Has cache' : 
+                                scrapeURLData.doNotScrape ? 'DoNotScrape is true' :
+                                'Special status tournament'
+                    });
+                    
+                    // Store additional context for the modal
+                    setScrapeModalInfo({
+                        url: url,
+                        entityId: currentEntity.id,
+                        hasCache: !!scrapeURLData.latestS3Key,
+                        doNotScrape: scrapeURLData.doNotScrape,
+                        gameStatus: existingGameStatus,
+                        warningMessage: scrapeURLData.doNotScrape ?
+                            `This tournament is marked as "Do Not Scrape" (Status: ${existingGameStatus || 'Unknown'}). ` +
+                            `You can still force a scrape if needed.` : undefined
+                    });
+                    
+                    return; // Wait for user's choice in modal
+                }
             }
+            
+            // No special conditions, proceed with normal scrape
+            console.log('[Track] No special conditions, proceeding with normal scrape');
+            
         } catch (error) {
-            console.log('No cache status available');
+            console.log('[Track] Error checking cache/scrapeURL, proceeding normally:', error);
         }
+        
+        // Only reach here if no modal needs to be shown
+        trackGame(url, DataSource.SCRAPE, currentEntity.id);
     };
 
-    const handleTrackGame = (id: string) => {
+    // Handle tracking next game
+    const handleTrackNext = async () => {
         if (!currentEntity) {
             alert('Please select an entity first');
             return;
         }
 
-        if (id) {
-            let trackUrl = id;
-            let gameId = id;
-            
-            // If just an ID was entered, build the full URL using entity config
-            if (!id.startsWith('http')) {
-                trackUrl = buildGameUrl(currentEntity, id);
-                gameId = id;
-                console.log(`[SingleScraperTab] Built URL for entity ${currentEntity.entityName}: ${trackUrl}`);
-            } else {
-                // Validate that the URL matches the current entity
-                const urlDomain = new URL(id).origin;
-                if (urlDomain !== currentEntity.gameUrlDomain) {
-                    alert(`This URL doesn't match the selected entity (${currentEntity.entityName}). Please select the correct entity or enter just the game ID.`);
+        setFindingNext(true);
+
+        try {
+            // Get all tracked IDs (from session, not just visible)
+            const allTrackedIds = Array.from(trackedInSessionRef.current)
+                .map(id => parseInt(id))
+                .filter(id => !isNaN(id));
+
+            if (allTrackedIds.length === 0) {
+                alert('Please track at least one game first to find the next one');
+                return;
+            }
+
+            const highestId = Math.max(...allTrackedIds);
+            const nextId = highestId + 1;
+            const nextIdStr = nextId.toString();
+            const url = buildGameUrl(currentEntity, nextIdStr);
+
+            console.log(`[Track Next] Attempting to track single ID: ${nextId}`);
+
+            // 1. Check if this ID (as a URL) already exists in our database
+            try {
+                const gameCheck = await client.graphql({
+                    query: listGames,
+                    variables: {
+                        filter: { sourceUrl: { eq: url } },
+                        limit: 1
+                    }
+                }) as any;
+
+                // If game exists, don't scrape. Just set input to the next one.
+                if (gameCheck.data?.listGames?.items?.length > 0) {
+                    console.log(`[Track Next] ID ${nextId} already exists in database. Skipping scrape.`);
+                    alert(`ID ${nextId} already exists in the database. No scrape initiated.`);
+                    setInputId((nextId + 1).toString()); // Ready for the next click
                     return;
                 }
-                // Extract ID from URL
-                const pathMatch = id.match(/id=(\d+)/);
-                gameId = pathMatch ? pathMatch[1] : id;
+            } catch (error) {
+                console.error('[Track Next] Error checking game existence:', error);
             }
-            
-            // Track this ID in session
-            trackedInSessionRef.current.add(gameId);
-            
-            // Check cache status for the URL
-            trackUrl && checkCacheStatus(trackUrl);
-            
-            // Show modal for scrape options
-            setScrapeModalInfo({
-                url: trackUrl,
-                entityId: currentEntity.id
-            });
-        } else {
-            alert('Please enter a game ID or URL');
+
+            // 2. Call handleTrackGame with the new ID.
+            console.log(`[Track Next] Calling handleTrackGame for ID ${nextIdStr}`);
+            await handleTrackGame(nextIdStr);
+
+            // 3. Set the input box to the *next* ID, ready for the user's next click
+            setInputId((nextId + 1).toString());
+
+        } catch (error) {
+            console.error('[Track Next] Error finding next game:', error);
+        } finally {
+            setFindingNext(false);
         }
     };
-    
-    // Find and track the next untracked tournament ID
-    const handleTrackNext = () => {
-        if (!currentEntity) {
-            alert('Please select an entity first');
-            return;
-        }
-        
-        // Get the highest ID we've tracked in this session
-        let highestId = 0;
-        trackedInSessionRef.current.forEach(id => {
-            const numId = parseInt(id);
-            if (!isNaN(numId) && numId > highestId) {
-                highestId = numId;
-            }
-        });
-        
-        // Also check current tracked games
-        Object.keys(games).forEach(url => {
-            const match = url.match(/id=(\d+)/);
-            if (match) {
-                const numId = parseInt(match[1]);
-                if (numId > highestId) {
-                    highestId = numId;
-                }
-            }
-        });
-        
-        // If we haven't tracked anything, check the input field
-        if (highestId === 0 && inputId) {
-            const inputNum = parseInt(inputId);
-            if (!isNaN(inputNum)) {
-                highestId = inputNum - 1; // We'll increment it next
-            }
-        }
-        
-        // If still no starting point, use a default
-        if (highestId === 0) {
-            highestId = 999; // Will start at 1000
-        }
-        
-        // Set and track the next ID
-        const nextId = (highestId + 1).toString();
-        setInputId(nextId);
-        handleTrackGame(nextId);
-    };
-    
-    const handleScrapeFromModal = async (option: 'S3' | 'LIVE', s3Key?: string) => {
-        if (!scrapeModalInfo) return;
-        
-        setScrapeModalInfo(null);
-        
-        // Map the modal option to DataSource enum
-        // 'LIVE' means scrape from website, 'S3' means use cached data
-        const dataSource = option === 'LIVE' ? DataSource.SCRAPE : DataSource.API;
-        
-        // TrackOptions from useGameTracker
-        const options = {
-            forceSource: option,
-            s3Key: s3Key
-        };
-        
-        // trackGame expects: (url: string, source: DataSource, entityId: string, options?: TrackOptions)
-        await trackGame(
-            scrapeModalInfo.url, 
-            dataSource, 
-            scrapeModalInfo.entityId,
-            options
-        );
-        
-        // Check cache status after scraping
-        checkCacheStatus(scrapeModalInfo.url);
-    };
-    
-    const handleVenueChange = (gameId: string, venueId: string) => {
-        setSelectedVenues(prev => ({
-            ...prev,
-            [gameId]: venueId
-        }));
-    };
-    
+
+    // Handle save game - FIXED to match expected signature
     const handleSaveGame = async (url: string) => {
-        const gameData = games[url];
-        if (!gameData || !gameData.data) return;
-        
         const venueId = selectedVenues[url];
-        
-        if (!venueId || venueId === '') {
-            alert('Please select a venue before saving');
+        if (!venueId || !currentEntity) {
+            alert('Please select both an entity and a venue');
             return;
         }
         
-        // Show confirmation modal
+        const gameData = games[url];
         setConfirmModalData({
             game: gameData,
-            venueId,
-            entityId: currentEntity?.id || ''
+            venueId: venueId,
+            entityId: currentEntity.id
         });
     };
-    
+
     const handleConfirmSave = async () => {
         if (!confirmModalData) return;
         
         const { game, venueId, entityId } = confirmModalData;
+        // Call saveGame with correct signature (gameId, venueId, entityId)
+        await saveGame(game.id, venueId, entityId);
+        setConfirmModalData(null);
+    };
+
+    // Handle scrape from modal - Enhanced to use cache info
+    const handleScrapeFromModal = (option: 'S3' | 'LIVE' | 'CANCEL') => {
+        if (!scrapeModalInfo || !option || option === 'CANCEL') {
+            setScrapeModalInfo(null);
+            return;
+        }
         
-        try {
-            // saveGame expects (gameId, venueId, entityId)
-            await saveGame(game.id, venueId, entityId);
-            
-            // After successful save
-            setConfirmModalData(null);
-            removeGame(game.id);
-            setSelectedVenues(prev => {
-                const newVenues = { ...prev };
-                delete newVenues[game.id];
-                return newVenues;
+        const { url, entityId, hasCache = false, doNotScrape = false } = scrapeModalInfo;
+        const cachedData = cacheStatus[url];
+        
+        console.log(`[Modal] User selected: ${option}`);
+        console.log(`[Modal] Context:`, { hasCache, doNotScrape, cachedData });
+        
+        setScrapeModalInfo(null);
+        
+        if (option === 'S3' && cachedData?.s3Key) {
+            // User chose to use cached data
+            console.log('[Modal] Using cached S3 data:', cachedData.s3Key);
+            trackGame(url, DataSource.SCRAPE, entityId, { 
+                forceSource: 'S3',
+                s3Key: cachedData.s3Key,
+                forceRefresh: false
+            });
+        } else if (option === 'LIVE') {
+            // User chose to force a fresh scrape
+            console.log('[Modal] User forcing fresh scrape', {
+                doNotScrape,
+                reason: doNotScrape ? 'Overriding doNotScrape flag' : 'User preference'
             });
             
-            // Track the ID as saved
-            const pathMatch = game.id.match(/id=(\d+)/);
-            if (pathMatch) {
-                setTrackedIds(prev => new Set([...prev, pathMatch[1]]));
-            }
-        } catch (error) {
-            console.error('Error saving game:', error);
-            alert('Failed to save game. See console for details.');
+            trackGame(url, DataSource.SCRAPE, entityId, { 
+                forceSource: 'LIVE',
+                forceRefresh: true
+            });
         }
     };
 
-    const getVenueBadgeColor = (gameData: any) => {
-        const match = gameData?.data?.venueMatch;
-        if (!match) return 'bg-gray-100 text-gray-800';
-        
-        if (match.autoAssignedVenue) {
-            const confidence = match.confidence || 0;
-            if (confidence >= 90) return 'bg-green-100 text-green-800';
-            if (confidence >= 70) return 'bg-yellow-100 text-yellow-800';
-            return 'bg-orange-100 text-orange-800';
-        }
-        
-        return 'bg-red-100 text-red-800';
-    };
+    // Filter entities for dropdown
+    const availableEntities = entities || [];
 
     return (
-        <div className="space-y-6">
-            {/* Combined Entity Selection and Manual Scraping */}
+        <div className="space-y-6 px-4">
+            {/* Entity Selector */}
+            <EntitySelector />
+            
+            {/* Single ID Tracker */}
             <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                <h2 className="text-lg font-semibold flex items-center mb-4">
                     <Target className="h-5 w-5 mr-2 text-blue-600" />
-                    Single Tournament Scraper
-                </h3>
-                
-                {/* Compact Entity Selector */}
-                <div className="mb-4 flex items-center space-x-3">
-                    <span className="text-sm font-medium text-gray-700">Entity:</span>
-                    <div className="flex-1 max-w-md">
-                        <EntitySelector />
-                    </div>
-                </div>
+                    Single Tournament Tracker
+                </h2>
                 
                 {!currentEntity ? (
-                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                        <p className="text-yellow-800">Please select an entity first to enable scraping.</p>
-                    </div>
+                    <div className="text-gray-500">Please select an entity to begin tracking</div>
                 ) : (
                     <>
-                        {/* Input field */}
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             <input
                                 type="text"
                                 value={inputId}
                                 onChange={(e) => setInputId(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && handleTrackGame(inputId)}
-                                placeholder="Enter tournament ID (e.g., 12345) or full URL"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        if (e.shiftKey) {
+                                            handleTrackNext();
+                                        } else {
+                                            handleTrackGame(inputId);
+                                        }
+                                    }
+                                }}
+                                placeholder="Enter tournament ID or URL"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             />
                             
                             {/* Buttons under the input */}
                             <div className="flex space-x-2">
                                 <button
                                     onClick={handleTrackNext}
-                                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center"
+                                    disabled={findingNext}
+                                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
                                     title="Find and track the next sequential ID"
                                 >
-                                    <ChevronRight className="h-4 w-4 mr-1" />
-                                    Track Next
+                                    {findingNext ? (
+                                        <>
+                                            <svg className="animate-spin h-4 w-4 mr-1" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                            </svg>
+                                            Finding...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ChevronRight className="h-4 w-4 mr-1" />
+                                            Track Next
+                                        </>
+                                    )}
                                 </button>
                                 <button
                                     onClick={() => handleTrackGame(inputId)}
@@ -439,8 +618,6 @@ export const SingleScraperTab: React.FC = () => {
                             const venueMatch = gameData?.data?.venueMatch;
                             const autoVenue = venueMatch?.autoAssignedVenue;
                             const suggestions = venueMatch?.suggestions || [];
-                            const pathMatch = url.match(/id=(\d+)/);
-                            const gameIdNumber = pathMatch ? pathMatch[1] : null;
                             
                             return (
                                 <div key={url} className="relative border rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -448,10 +625,11 @@ export const SingleScraperTab: React.FC = () => {
                                         game={gameData}
                                         venues={venues}
                                         selectedVenueId={selectedVenues[url]}
-                                        onVenueChange={(venueId) => handleVenueChange(url, venueId)}
+                                        onVenueChange={(venueId: string) => handleVenueChange(url, venueId)}
                                         onSave={() => handleSaveGame(url)}
                                         onViewDetails={() => setSelectedGame(gameData)}
                                         onRemove={() => removeGame(url)}
+                                        enableCreateVenue={true}
                                     />
                                     
                                     {/* S3 Cache Status Badge */}
@@ -462,13 +640,6 @@ export const SingleScraperTab: React.FC = () => {
                                                 S3 Cached
                                                 {cache.cacheHits && cache.cacheHits > 0 && ` (${cache.cacheHits} hits)`}
                                             </span>
-                                        </div>
-                                    )}
-                                    
-                                    {/* Additional indicator if already in database */}
-                                    {trackedIds.has(gameIdNumber || '') && (
-                                        <div className="mt-2 px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded inline-block">
-                                            Already in database
                                         </div>
                                     )}
                                     
@@ -522,6 +693,9 @@ export const SingleScraperTab: React.FC = () => {
                     onSelectOption={handleScrapeFromModal}
                     url={scrapeModalInfo.url}
                     entityId={scrapeModalInfo.entityId}
+                    doNotScrape={scrapeModalInfo.doNotScrape}
+                    gameStatus={scrapeModalInfo.gameStatus}
+                    warningMessage={scrapeModalInfo.warningMessage}
                 />
             )}
             
@@ -542,6 +716,18 @@ export const SingleScraperTab: React.FC = () => {
                     sourceUrl={confirmModalData.game.id}
                 />
             )}
+            
+            {/* Venue Modal */}
+            <VenueModal
+                isOpen={venueModalOpen}
+                onClose={() => {
+                    setVenueModalOpen(false);
+                    setCreatingVenueForGame(null);
+                }}
+                onSave={handleCreateVenue}
+                venue={null}
+                entities={availableEntities}
+            />
         </div>
     );
 };

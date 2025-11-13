@@ -101,6 +101,12 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "getDatabaseMetrics": {
+      "build": true,
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "getModelCount": {
       "build": true,
       "dependsOn": [
@@ -268,6 +274,22 @@
         {
           "category": "function",
           "resourceName": "autoScraper"
+        }
+      ]
+    },
+    "AMPLIFY_function_getDatabaseMetrics_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getDatabaseMetrics"
+        }
+      ]
+    },
+    "AMPLIFY_function_getDatabaseMetrics_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getDatabaseMetrics"
         }
       ]
     },

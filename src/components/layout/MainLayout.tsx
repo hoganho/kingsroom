@@ -1,16 +1,36 @@
-// src/components/layout/MainLayout.tsx - Complete working version
+// src/components/layout/MainLayout.tsx - With Database Monitor
 
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Sidebar } from './Sidebar';
 import { MobileBottomNav } from './MobileBottomNav';
 import { useAuth } from '../../contexts/AuthContext';
+import { DatabaseChangeMonitor } from '../monitoring/DatabaseChangeMonitor';
 import logo from '../../assets/Kings-Room-Logo_web.png';
 
 export const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const [showMonitor, setShowMonitor] = useState(false); // Start hidden by default
+  const { user, signOut, userRole } = useAuth();
+
+  // Only show monitor toggle for SuperAdmin users
+  const canShowMonitor = userRole === 'SuperAdmin';
+
+  // Keyboard shortcut to toggle monitor (Ctrl/Cmd + Shift + D)
+    useEffect(() => {
+        const handleKeyPress = (e: KeyboardEvent) => {
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
+            e.preventDefault();
+            if (canShowMonitor) {
+            setShowMonitor(prev => !prev);
+            }
+        }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [canShowMonitor]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -128,6 +148,16 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
             <img src={logo} alt="Kings Room Logo" className="h-12 object-contain" />
           </div>
           <div className="flex flex-1 items-center justify-end space-x-4">
+            {/* Add monitor toggle button for SuperAdmin */}
+            {canShowMonitor && (
+              <button
+                onClick={() => setShowMonitor(prev => !prev)}
+                className="text-xs text-gray-400 hover:text-gray-200 px-2 py-1 border border-gray-600 rounded"
+                title="Toggle Database Monitor (Ctrl+Shift+D)"
+              >
+                DB Monitor
+              </button>
+            )}
             <span className="text-sm text-gray-300 hidden sm:inline">
               Logged in as: <strong>{user?.email}</strong>
             </span>
@@ -146,6 +176,9 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav />
+      
+      {/* Floating Database Monitor - Only for SuperAdmin */}
+      {canShowMonitor && showMonitor && <DatabaseChangeMonitor />}
     </div>
   );
 };

@@ -13,6 +13,7 @@
     "@aws-amplify/ui-react": "^6.13.0",
     "@aws-sdk/client-cloudwatch": "^3.922.0",
     "@aws-sdk/client-dynamodb": "^3.919.0",
+    "@aws-sdk/client-s3": "^3.930.0",
     "@aws-sdk/lib-dynamodb": "^3.919.0",
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",

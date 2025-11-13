@@ -1,7 +1,7 @@
 // src/pages/ScraperAdminPage.tsx
 // Scraper Administration Panel (CloudWatch removed for performance)
 
-import React, { useState } from 'react';
+import React, { useState } from 'react'; // <-- ENHANCEMENT: Imported useState
 import {
     Database, 
     List, 
@@ -52,9 +52,19 @@ const tabs: Tab[] = [
 export const ScraperAdminPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabKey>('overview');
 
+    // --- ENHANCEMENT: State to pass URL from S3 tab to Scraper tab ---
+    const [urlToReparse, setUrlToReparse] = useState<string | null>(null);
+
     // Simple tab switch handler (no CloudWatch tracking)
     const handleTabSwitch = (newTab: TabKey) => {
         setActiveTab(newTab);
+    };
+
+    // --- ENHANCEMENT: Handler for S3 tab to trigger re-parse ---
+    const handleReparse = (url: string) => {
+        console.log(`[AdminPage] Setting URL to re-parse: ${url}`);
+        setUrlToReparse(url);
+        setActiveTab('manual'); // Switch to the single scraper tab
     };
 
     const renderTabContent = () => {
@@ -64,7 +74,13 @@ export const ScraperAdminPage: React.FC = () => {
             case 'auto':
                 return <AutoScraperTab />;
             case 'manual':
-                return <SingleScraperTab />;
+                // --- ENHANCEMENT: Pass re-parse URL and clear function ---
+                return (
+                    <SingleScraperTab 
+                        urlToReparse={urlToReparse}
+                        onReparseComplete={() => setUrlToReparse(null)}
+                    />
+                );
             case 'bulk':
                 return <BulkScraperTab />;
             case 'jobs':
@@ -72,7 +88,8 @@ export const ScraperAdminPage: React.FC = () => {
             case 'urls':
                 return <URLManagementTab />;
             case 's3':
-                return <S3ManagementTab />;
+                // --- ENHANCEMENT: Pass the re-parse handler ---
+                return <S3ManagementTab onReparse={handleReparse} />;
             //case 'analytics':
             //    return <AnalyticsTab />;
             case 'settings':

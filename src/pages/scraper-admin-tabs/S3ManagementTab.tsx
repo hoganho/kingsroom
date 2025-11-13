@@ -5,27 +5,30 @@ import { generateClient } from 'aws-amplify/api';
 import {
     RefreshCw, 
     HardDrive,
-    Download,
     Eye,
     Trash2,
     Database,
     TrendingUp,
     Clock,
-    Activity
+    Activity,
+    ExternalLink,
+    Cpu // --- ENHANCEMENT: Imported Cpu icon ---
 } from 'lucide-react';
 // Import S3 queries from auto-generated queries
 import { 
-    listS3Storages,
+    s3StoragesByEntityIdAndScrapedAt,
     getS3StorageHistory,
     viewS3Content,
     getCachingStats
 } from '../../graphql/queries';
 // Import mutations from auto-generated files
 import {
-    deleteS3Storage
+    deleteS3Storage,
 } from '../../graphql/mutations';
 // Import TimeRange enum
-import { TimeRange, type S3Storage } from '../../API';
+import { TimeRange, type S3Storage, ModelSortDirection } from '../../API';
+// --- ENHANCEMENT: Corrected import to useEntityContext ---
+import { useEntity } from '../../contexts/EntityContext';
 
 interface CachingStats {
     totalURLs: number;
@@ -52,76 +55,124 @@ interface S3ContentView {
     s3Key: string;
     html: string;
     metadata: any;
-    size: number;
-    lastModified: string;
+    storedAt: string;
+    contentHash: string;
+    source: string;
 }
 
-export const S3ManagementTab: React.FC = () => {
+// --- ENHANCEMENT: Added props interface ---
+interface S3ManagementTabProps {
+    onReparse: (url: string) => void;
+}
+
+export const S3ManagementTab: React.FC<S3ManagementTabProps> = ({ onReparse }) => {
+    console.log('[S3Debug] S3ManagementTab component mounted.'); // 1. Component mount
     const client = useMemo(() => generateClient(), []);
     const [storageItems, setStorageItems] = useState<S3Storage[]>([]);
     const [loading, setLoading] = useState(true);
     const [cachingStats, setCachingStats] = useState<CachingStats | null>(null);
     const [selectedTournamentId, setSelectedTournamentId] = useState<number | null>(null);
     const [viewingContent, setViewingContent] = useState<S3ContentView | null>(null);
-    const entityId = 'default'; // You may want to get this from context
+    
+    // --- ENHANCEMENT: Corrected hook and variable name ---
+    const { currentEntity } = useEntity();
+    const entityId = currentEntity?.id; // This will be the string ID or undefined
+
+    console.log(`[S3Debug] Initial state: entityId = ${entityId}, loading = ${loading}`);
 
     // Load S3 storage items and caching stats
     const loadS3Storage = useCallback(async () => {
+        if (!entityId) {
+            console.warn('[S3Debug] No entity selected, skipping loadS3Storage.');
+            setLoading(false);
+            setStorageItems([]);
+            setCachingStats(null); // Clear stats
+            return;
+        }
+
+        console.log('[S3Debug] loadS3Storage started...'); // 4. Function start
         try {
             setLoading(true);
             
-            // Load S3 storage items using standard query
+            const queryVars = { 
+                entityId: entityId, 
+                sortDirection: ModelSortDirection.DESC,
+                limit: 100 
+            };
+            console.log('[S3Debug] Querying s3StoragesByEntityIdAndScrapedAt with variables:', queryVars); // 5. Query variables
+            
             const response = await client.graphql({
-                query: listS3Storages,
-                variables: { limit: 100 }
+                query: s3StoragesByEntityIdAndScrapedAt, // Use the GSI query
+                variables: queryVars
             }) as any;
             
-            if (response.data?.listS3Storages) {
-                setStorageItems(response.data.listS3Storages.items || []);
+            console.log('[S3Debug] Raw S3 storage response:', JSON.stringify(response, null, 2)); // 6. Raw response
+
+            if (response.data?.s3StoragesByEntityIdAndScrapedAt) {
+                const items = response.data.s3StoragesByEntityIdAndScrapedAt.items || [];
+                console.log(`[S3Debug] Found ${items.length} storage items.`); // 7. Items found
+                setStorageItems(items);
+            } else {
+                console.warn('[S3Debug] No data found in S3 storage response. Check response object.');
+                setStorageItems([]);
             }
+            // --- END FIX ---
 
             // Load caching statistics using the auto-generated query
             try {
+                const statsVars = { 
+                    entityId: entityId, 
+                    timeRange: TimeRange.LAST_24_HOURS
+                };
+                console.log('[S3Debug] Querying getCachingStats with variables:', statsVars); // 8. Stats query
+                
                 const statsResponse = await client.graphql({
                     query: getCachingStats,
-                    variables: { 
-                        entityId: entityId, 
-                        timeRange: TimeRange.LAST_24_HOURS // Use enum value
-                    }
+                    variables: statsVars
                 }) as any;
                 
+                console.log('[S3Debug] Raw caching stats response:', JSON.stringify(statsResponse, null, 2)); // 9. Stats response
+
                 if (statsResponse.data?.getCachingStats) {
+                    console.log('[S3Debug] Caching stats loaded successfully.');
                     setCachingStats(statsResponse.data.getCachingStats);
+                } else {
+                    console.warn('[S3Debug] No data found in caching stats response. Setting defaults.');
+                    // Set default stats if query fails
+                    setCachingStats({
+                        totalURLs: 0, // CRITICAL FIX: Changed from storageItems.length
+                        urlsWithETags: 0,
+                        urlsWithLastModified: 0,
+                        totalCacheHits: 0,
+                        totalCacheMisses: 0,
+                        averageCacheHitRate: 0,
+                        storageUsedMB: 0,
+                        recentCacheActivity: []
+                    });
                 }
-            } catch (statsError) {
-                console.warn('Could not load caching stats:', statsError);
-                // Set default stats if query fails
-                setCachingStats({
-                    totalURLs: storageItems.length,
-                    urlsWithETags: 0,
-                    urlsWithLastModified: 0,
-                    totalCacheHits: 0,
-                    totalCacheMisses: 0,
-                    averageCacheHitRate: 0,
-                    storageUsedMB: 0,
-                    recentCacheActivity: []
-                });
+            } catch (statsError: any) {
+                console.error('[S3Debug] Error loading caching stats:', statsError.message, statsError);
+                setCachingStats(null); // Set to null to show warning
             }
 
-        } catch (error: any) {
-            console.error('Error loading S3 storage:', error);
+        } catch (error: any)
+        {
+            console.error('[S3Debug] CRITICAL Error loading S3 storage:', error.message, error); // 10. Main error
             // Could show error in UI if needed
         } finally {
+            console.log('[S3Debug] loadS3Storage finally block. Setting loading to false.'); // 11. Finally
             setLoading(false);
         }
     }, [client, entityId]);
 
     useEffect(() => {
+        console.log('[S3Debug] useEffect triggered, calling loadS3Storage.'); // 3. useEffect trigger
         loadS3Storage();
     }, [loadS3Storage]);
 
     // View HTML content from S3
     const handleViewContent = useCallback(async (s3Key: string) => {
+        console.log(`[S3Debug] handleViewContent triggered for s3Key: ${s3Key}`);
         try {
             setLoading(true);
             
@@ -130,19 +181,32 @@ export const S3ManagementTab: React.FC = () => {
                 variables: { s3Key }
             }) as any;
             
+            console.log('[S3Debug] Raw viewS3Content response:', JSON.stringify(response, null, 2));
+
             if (response.data?.viewS3Content) {
+                console.log('[S3Debug] Setting viewingContent.');
                 setViewingContent(response.data.viewS3Content);
+            } else {
+                 console.warn('[S3Debug] No data found in viewS3Content response.');
             }
-        } catch (error) {
-            console.error('Error viewing content:', error);
+        } catch (error: any) {
+            console.error('[S3Debug] Error viewing content:', error.message, error);
             alert('Failed to view S3 content: ' + (error as any).message);
         } finally {
+            console.log('[S3Debug] handleViewContent finally block. Setting loading to false.');
             setLoading(false);
         }
     }, [client]);
 
     // Load tournament history
     const handleViewTournamentHistory = useCallback(async (tournamentId: number) => {
+        console.log(`[S3Debug] handleViewTournamentHistory triggered for tournamentId: ${tournamentId}`);
+        if (!entityId) {
+            console.warn('[S3Debug] No entity selected, skipping handleViewTournamentHistory.');
+            alert('Please select an entity first.');
+            return;
+        }
+        
         try {
             setLoading(true);
             setSelectedTournamentId(tournamentId);
@@ -156,20 +220,29 @@ export const S3ManagementTab: React.FC = () => {
                 }
             }) as any;
             
+            console.log('[S3Debug] Raw tournament history response:', JSON.stringify(response, null, 2));
+
             if (response.data?.getS3StorageHistory) {
-                setStorageItems(response.data.getS3StorageHistory.items || []);
+                const items = response.data.getS3StorageHistory.items || [];
+                console.log(`[S3Debug] Found ${items.length} history items.`);
+                setStorageItems(items);
+            } else {
+                console.warn('[S3Debug] No data found in getS3StorageHistory response.');
             }
-        } catch (error) {
-            console.error('Error loading tournament history:', error);
+        } catch (error: any) {
+            console.error('[S3Debug] Error loading tournament history:', error.message, error);
             alert('Failed to load tournament history');
         } finally {
+            console.log('[S3Debug] handleViewTournamentHistory finally block. Setting loading to false.');
             setLoading(false);
         }
     }, [client, entityId]);
 
     // Delete cached item
     const handleDeleteItem = useCallback(async (id: string) => {
+        console.log(`[S3Debug] handleDeleteItem triggered for id: ${id}`);
         if (!confirm('Are you sure you want to delete this cached item?')) {
+            console.log('[S3Debug] Delete cancelled.');
             return;
         }
 
@@ -178,17 +251,17 @@ export const S3ManagementTab: React.FC = () => {
                 query: deleteS3Storage,
                 variables: { input: { id } }
             });
-            
-            // Refresh the list
+            console.log('[S3Debug] Delete successful, reloading storage...');
             loadS3Storage();
-        } catch (error) {
-            console.error('Error deleting item:', error);
+        } catch (error: any) {
+            console.error('[S3Debug] Error deleting item:', error.message, error);
             alert('Failed to delete item');
         }
     }, [client, loadS3Storage]);
 
     // Download HTML content
-    const handleDownloadContent = useCallback(async (s3Key: string, tournamentId: number) => {
+    const handleDownloadContent = useCallback(async (s3Key: string) => {
+        console.log(`[S3Debug] handleDownloadContent (Open in Tab) triggered for s3Key: ${s3Key}`);
         try {
             const response = await client.graphql({
                 query: viewS3Content,
@@ -196,31 +269,42 @@ export const S3ManagementTab: React.FC = () => {
             }) as any;
             
             if (response.data?.viewS3Content) {
+                console.log('[S3Debug] Download content found, creating blob...');
                 const content = response.data.viewS3Content;
                 const blob = new Blob([content.html], { type: 'text/html' });
                 const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `tournament-${tournamentId}-${new Date().getTime()}.html`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                
+                // --- FIX: Open in a new tab instead of downloading ---
+                window.open(url, '_blank');
+                
+                // When opening in a new tab, we don't revoke the URL
+                // The new tab needs to keep it open.
             }
-        } catch (error) {
-            console.error('Error downloading content:', error);
-            alert('Failed to download content');
+        } catch (error: any) {
+            console.error('[S3Debug] Error opening content in new tab:', error.message, error);
+            alert('Failed to open content: ' + error.message);
         }
     }, [client]);
 
+    console.log(`[S3Debug] PRE-RENDER: loading=${loading}, cachingStats=${!!cachingStats}`); // 12. Pre-render check
     if (loading && !cachingStats) {
+        console.log('[S3Debug] RENDER: Showing main loading spinner.'); // 13. Render spinner
         return (
             <div className="flex justify-center items-center h-64">
                 <RefreshCw className="h-8 w-8 animate-spin text-blue-600" />
             </div>
         );
     }
+    
+    if (!entityId) {
+        return (
+            <div className="p-8 text-center text-gray-500">
+                Please select an entity to view S3 storage.
+            </div>
+        );
+    }
 
+    console.log(`[S3Debug] RENDER: Showing main component. storageItems count = ${storageItems.length}`); // 14. Render main
     return (
         <div className="space-y-6">
             {/* Stats Overview */}
@@ -322,6 +406,7 @@ export const S3ManagementTab: React.FC = () => {
                         {selectedTournamentId && (
                             <button
                                 onClick={() => {
+                                    console.log('[S3Debug] "View All" button clicked.');
                                     setSelectedTournamentId(null);
                                     loadS3Storage();
                                 }}
@@ -331,7 +416,10 @@ export const S3ManagementTab: React.FC = () => {
                             </button>
                         )}
                         <button
-                            onClick={loadS3Storage}
+                            onClick={() => {
+                                console.log('[S3Debug] Refresh button clicked.');
+                                loadS3Storage();
+                            }}
                             className="p-2 text-blue-600 hover:bg-blue-50 rounded"
                             disabled={loading}
                         >
@@ -358,8 +446,9 @@ export const S3ManagementTab: React.FC = () => {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                     Cache Headers
                                 </th>
+                                {/* --- ENHANCEMENT: Renamed column --- */}
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                    Status
+                                    Parsed+Saved
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                     Actions
@@ -411,30 +500,39 @@ export const S3ManagementTab: React.FC = () => {
                                             )}
                                         </div>
                                     </td>
+                                    {/* --- ENHANCEMENT: Updated logic for this cell --- */}
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                            item.dataExtracted 
+                                            item.gameId // Check if gameId exists
                                                 ? 'bg-green-100 text-green-800' 
                                                 : 'bg-yellow-100 text-yellow-800'
                                         }`}>
-                                            {item.dataExtracted ? 'PROCESSED' : 'STORED'}
+                                            {item.gameId ? 'TRUE' : 'FALSE'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                                         <div className="flex items-center space-x-2">
+                                            {/* --- ENHANCEMENT: Added "Parse" button --- */}
+                                            <button
+                                                onClick={() => onReparse(item.url)}
+                                                className="text-purple-600 hover:text-purple-800"
+                                                title="Re-Parse (Load in Single Scraper Tab)"
+                                            >
+                                                <Cpu className="h-4 w-4" />
+                                            </button>
                                             <button
                                                 onClick={() => handleViewContent(item.s3Key)}
                                                 className="text-blue-600 hover:text-blue-800"
-                                                title="View HTML"
+                                                title="View Raw HTML"
                                             >
                                                 <Eye className="h-4 w-4" />
                                             </button>
                                             <button
-                                                onClick={() => handleDownloadContent(item.s3Key, item.tournamentId)}
+                                                onClick={() => handleDownloadContent(item.s3Key)}
                                                 className="text-green-600 hover:text-green-800"
-                                                title="Download HTML"
+                                                title="View Rendered HTML in New Tab"
                                             >
-                                                <Download className="h-4 w-4" />
+                                                <ExternalLink className="h-4 w-4" />
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteItem(item.id)}
@@ -457,7 +555,7 @@ export const S3ManagementTab: React.FC = () => {
                 </div>
             </div>
 
-            {/* HTML Content Viewer Modal */}
+            {/* --- FIX: HTML Content Viewer Modal --- */}
             {viewingContent && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-lg max-w-6xl max-h-[90vh] w-full overflow-hidden">
@@ -466,7 +564,10 @@ export const S3ManagementTab: React.FC = () => {
                                 HTML Content Viewer - {viewingContent.s3Key}
                             </h3>
                             <button
-                                onClick={() => setViewingContent(null)}
+                                onClick={() => {
+                                    console.log('[S3Debug] Closing modal.');
+                                    setViewingContent(null);
+                                }}
                                 className="text-gray-400 hover:text-gray-600"
                             >
                                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -475,9 +576,10 @@ export const S3ManagementTab: React.FC = () => {
                             </button>
                         </div>
                         <div className="p-6 overflow-auto max-h-[calc(90vh-120px)]">
-                            <div className="mb-4 text-sm text-gray-600">
-                                <p><strong>Size:</strong> {(viewingContent.size / 1024).toFixed(2)} KB</p>
-                                <p><strong>Last Modified:</strong> {new Date(viewingContent.lastModified).toLocaleString()}</p>
+                            <div className="mb-4 text-sm text-gray-600 space-y-1">
+                                <p><strong>Source:</strong> {viewingContent.source}</p>
+                                <p><strong>Stored At:</strong> {new Date(viewingContent.storedAt).toLocaleString()}</p>
+                                <p><strong>Content Hash:</strong> {viewingContent.contentHash}</p>
                             </div>
                             <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                                 <pre className="text-xs overflow-x-auto whitespace-pre-wrap">
@@ -489,6 +591,7 @@ export const S3ManagementTab: React.FC = () => {
                     </div>
                 </div>
             )}
+            {/* --- END FIX --- */}
         </div>
     );
 };

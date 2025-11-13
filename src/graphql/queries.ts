@@ -87778,6 +87778,55 @@ export const s3StoragesByEntityIdAndScrapedAt = /* GraphQL */ `query S3StoragesB
   APITypes.S3StoragesByEntityIdAndScrapedAtQueryVariables,
   APITypes.S3StoragesByEntityIdAndScrapedAtQuery
 >;
+export const s3StoragesByS3Key = /* GraphQL */ `query S3StoragesByS3Key(
+  $s3Key: String!
+  $sortDirection: ModelSortDirection
+  $filter: ModelS3StorageFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  s3StoragesByS3Key(
+    s3Key: $s3Key
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      scrapeURLId
+      url
+      tournamentId
+      entityId
+      s3Key
+      s3Bucket
+      scrapedAt
+      contentSize
+      contentHash
+      etag
+      lastModified
+      headers
+      dataExtracted
+      gameId
+      isManualUpload
+      uploadedBy
+      notes
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.S3StoragesByS3KeyQueryVariables,
+  APITypes.S3StoragesByS3KeyQuery
+>;
 export const s3StoragesByGameId = /* GraphQL */ `query S3StoragesByGameId(
   $gameId: ID!
   $sortDirection: ModelSortDirection

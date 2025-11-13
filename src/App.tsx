@@ -47,6 +47,8 @@ import { ScraperAdminPage } from './pages/scraper/ScraperAdmin';
 // Debug Pages (SuperAdmin)
 import { GamesDebug } from './pages/debug/GamesDebug';
 import { PlayersDebug } from './pages/debug/PlayersDebug';
+import { DatabaseMonitorPage } from './pages/debug/DatabaseMonitor';
+import { getMonitoring } from './utils/enhanced-monitoring';
 
 // Error Boundary for error tracking
 import React from 'react';
@@ -115,6 +117,17 @@ const ProtectedLayout = () => {
 
 // Main App Component
 function App() {
+
+    const monitoring = getMonitoring({
+        enabled: import.meta.env.VITE_ENABLE_DB_MONITOR !== 'false',
+        sendToCloudWatch: import.meta.env.VITE_CLOUDWATCH_ENABLED !== 'false',
+        logToConsole: import.meta.env.DEV // Only log in development
+    });
+
+    useEffect(() => {
+        monitoring.trackMetric('AppStarted', 1, 'Count');
+    }, []);
+
     useEffect(() => {
         // Listen for auth events (without CloudWatch)
         const unsubscribe = Hub.listen('auth', (data) => {
@@ -204,6 +217,8 @@ function App() {
                                         {/* Debug Pages (SuperAdmin) */}
                                         <Route path="/debug/games" element={<GamesDebug />} />
                                         <Route path="/debug/players" element={<PlayersDebug />} />
+                                        <Route path="/debug/database-monitor" element={<DatabaseMonitorPage />} />
+
                                     </Route>
 
                                     {/* Catch all */}

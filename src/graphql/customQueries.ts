@@ -6,13 +6,19 @@
 
 // Lean query for the Venues dropdown in GameCard
 export const listVenuesForDropdown = /* GraphQL */ `
-  query ListVenuesForDropdown {
-    listVenues {
+  query ListVenuesForDropdown(
+    $filter: ModelVenueFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listVenues(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
         name
         venueNumber
+        entityId
       }
+      nextToken
     }
   }
 `;

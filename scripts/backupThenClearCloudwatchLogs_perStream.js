@@ -28,7 +28,8 @@ const LOG_GROUPS_TO_CLEAR = [
   '/aws/lambda/webScraperFunction-dev',
   '/aws/lambda/getModelCount-dev',
   '/aws/lambda/venueAssignmentService-dev',
-  '/aws/lambda/s3ManagementFunction-dev',  
+  '/aws/lambda/s3ManagementFunction-dev',
+  '/aws/lambda/getDatabaseMetrics-dev',
 ];
 
 // --- Logger (copied from your script) ---

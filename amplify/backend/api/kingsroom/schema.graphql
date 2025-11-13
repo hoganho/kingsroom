@@ -11,7 +11,7 @@ enum DataSource { SCRAPE, API, MANUAL }
 enum AssetCondition { NEW, GOOD, FAIR, POOR, RETIRED }
 enum VenueStatus { ACTIVE, INACTIVE, PENDING }
 enum GameType { TOURNAMENT, CASH_GAME }
-enum GameStatus { INITIATING, SCHEDULED, REGISTERING, RUNNING, CANCELLED, FINISHED, NOT_IN_USE, CLOCK_STOPPED, UNKNOWN }
+enum GameStatus { INITIATING, SCHEDULED, REGISTERING, RUNNING, CANCELLED, FINISHED, NOT_IN_USE, NOT_PUBLISHED, CLOCK_STOPPED, UNKNOWN }
 enum GameVariant { NLHE, PLO, PLOM, PLO5, PLO6 }
 enum GameFrequency { DAILY, WEEKLY, FORTNIGHTLY, MONTHLY, QUARTERLY, YEARLY, UNKNOWN }
 enum RegistrationStatus { SCHEDULED, OPEN, FINAL, CLOSED, N_A }
@@ -652,7 +652,7 @@ type S3Storage @model @auth(rules: [{ allow: private }]) {
   url: AWSURL! @index(name: "byURL", sortKeyFields: ["scrapedAt"])
   tournamentId: Int! @index(name: "byTournamentId", sortKeyFields: ["scrapedAt"])
   entityId: ID! @index(name: "byEntity", sortKeyFields: ["scrapedAt"])
-  s3Key: String!                    # Full S3 key path
+  s3Key: String! @index(name: "byS3Key")
   s3Bucket: String!
   scrapedAt: AWSDateTime!
   contentSize: Int                    # Size in bytes
@@ -1243,7 +1243,7 @@ type Query {
 }
 
 type Mutation {
-  fetchTournamentData(url: AWSURL!): ScrapedGameData @function(name: "webScraperFunction-${env}")
+  fetchTournamentData(url: AWSURL!, forceRefresh: Boolean): ScrapedGameData @function(name: "webScraperFunction-${env}")
   saveTournamentData(input: SaveTournamentInput!): Game @function(name: "webScraperFunction-${env}")
   controlScraperOperation(operation: ScraperOperation!, entityId: ID): ScraperControlResponse @function(name: "autoScraper-${env}")
   triggerAutoScraping(maxGames: Int): ScraperControlResponse @function(name: "autoScraper-${env}")

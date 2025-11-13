@@ -1,22 +1,22 @@
 /* Amplify Params - DO NOT EDIT
-	API_KINGSROOM_GAMETABLE_ARN
-	API_KINGSROOM_GAMETABLE_NAME
-	API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
-	API_KINGSROOM_GRAPHQLAPIIDOUTPUT
-	API_KINGSROOM_SCRAPEATTEMPTTABLE_ARN
-	API_KINGSROOM_SCRAPEATTEMPTTABLE_NAME
-	API_KINGSROOM_SCRAPERJOBTABLE_ARN
-	API_KINGSROOM_SCRAPERJOBTABLE_NAME
-	API_KINGSROOM_SCRAPERSTATETABLE_ARN
-	API_KINGSROOM_SCRAPERSTATETABLE_NAME
-	API_KINGSROOM_SCRAPEURLTABLE_ARN
-	API_KINGSROOM_SCRAPEURLTABLE_NAME
-	API_KINGSROOM_VENUETABLE_ARN
-	API_KINGSROOM_VENUETABLE_NAME
-	ENV
-	FUNCTION_AUTOSCRAPER_NAME
-	FUNCTION_WEBSCRAPERFUNCTION_NAME
-	REGION
+    API_KINGSROOM_GAMETABLE_ARN
+    API_KINGSROOM_GAMETABLE_NAME
+    API_KINGSROOM_GRAPHQLAPIENDPOINTOUTPUT
+    API_KINGSROOM_GRAPHQLAPIIDOUTPUT
+    API_KINGSROOM_SCRAPEATTEMPTTABLE_ARN
+    API_KINGSROOM_SCRAPEATTEMPTTABLE_NAME
+    API_KINGSROOM_SCRAPERJOBTABLE_ARN
+    API_KINGSROOM_SCRAPERJOBTABLE_NAME
+    API_KINGSROOM_SCRAPERSTATETABLE_ARN
+    API_KINGSROOM_SCRAPERSTATETABLE_NAME
+    API_KINGSROOM_SCRAPEURLTABLE_ARN
+    API_KINGSROOM_SCRAPEURLTABLE_NAME
+    API_KINGSROOM_VENUETABLE_ARN
+    API_KINGSROOM_VENUETABLE_NAME
+    ENV
+    FUNCTION_AUTOSCRAPER_NAME
+    FUNCTION_WEBSCRAPERFUNCTION_NAME
+    REGION
 Amplify Params - DO NOT EDIT */
 
 // scraperManagement Lambda Function - Minimal Working Implementation
@@ -26,9 +26,21 @@ const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, QueryCommand, ScanCommand, UpdateCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
 const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');
 
+// --- Lambda Monitoring ---
+const { LambdaMonitoring } = require('./lambda-monitoring');
+// --- End Lambda Monitoring ---
+
 const client = new DynamoDBClient({});
-const ddbDocClient = DynamoDBDocumentClient.from(client);
+const originalDdbDocClient = DynamoDBDocumentClient.from(client); // Renamed original client
 const lambdaClient = new LambdaClient({});
+
+// --- Lambda Monitoring Initialization ---
+// Initialize monitoring for this function. Entity ID will be set from event args.
+const monitoring = new LambdaMonitoring('scraperManagement', null);
+// Wrap the DynamoDB client to automatically track operations
+const monitoredDdbDocClient = monitoring.wrapDynamoDBClient(originalDdbDocClient);
+// --- End Lambda Monitoring ---
+
 
 // Helper function to get table names (matching your autoScraper pattern)
 const getTableName = (modelName) => {
@@ -66,43 +78,66 @@ exports.handler = async (event, context) => {
     const { typeName, fieldName, arguments: args } = event;
     const operation = `${typeName}.${fieldName}`;
     
+    // Set entityId for monitoring, if available in args
+    const entityId = args?.entityId || args?.input?.entityId || null;
+    monitoring.entityId = entityId;
+
+    // ✅ Track business logic: Handler start
+    monitoring.trackOperation('HANDLER_START', 'Handler', operation, { 
+        entityId: entityId, 
+        operation,
+        hasArgs: !!args 
+    });
+
     try {
-        switch (operation) {
-            // ===== QUERIES =====
-            case 'Query.getScraperJobsReport':
-                return await getScraperJobsReport(args);
-                
-            case 'Query.searchScrapeURLs':
-                return await searchScrapeURLs(args);
-                
-            case 'Query.getScraperMetrics':
-                return await getScraperMetrics(args);
-                
-            case 'Query.getUpdateCandidateURLs':
-                return await getUpdateCandidateURLs(args);
-                
-            case 'Query.fetchScrapeURLDetails':
-                return await fetchScrapeURLDetails(args);
-                
-            // ===== MUTATIONS =====
-            case 'Mutation.startScraperJob':
-                return await startScraperJob(args, event);
-                
-            case 'Mutation.cancelScraperJob':
-                return await cancelScraperJob(args);
-                
-            case 'Mutation.modifyScrapeURLStatus':
-                return await modifyScrapeURLStatus(args);
-                
-            case 'Mutation.bulkModifyScrapeURLs':
-                return await bulkModifyScrapeURLs(args);
-                
-            default:
-                throw new Error(`Unknown operation: ${operation}`);
+        // All logic is wrapped in try...finally to ensure metrics are flushed
+        try {
+            switch (operation) {
+                // ===== QUERIES =====
+                case 'Query.getScraperJobsReport':
+                    return await getScraperJobsReport(args);
+                    
+                case 'Query.searchScrapeURLs':
+                    return await searchScrapeURLs(args);
+                    
+                case 'Query.getScraperMetrics':
+                    return await getScraperMetrics(args);
+                    
+                case 'Query.getUpdateCandidateURLs':
+                    return await getUpdateCandidateURLs(args);
+                    
+                case 'Query.fetchScrapeURLDetails':
+                    return await fetchScrapeURLDetails(args);
+                    
+                // ===== MUTATIONS =====
+                case 'Mutation.startScraperJob':
+                    return await startScraperJob(args, event);
+                    
+                case 'Mutation.cancelScraperJob':
+                    return await cancelScraperJob(args);
+                    
+                case 'Mutation.modifyScrapeURLStatus':
+                    return await modifyScrapeURLStatus(args);
+                    
+                case 'Mutation.bulkModifyScrapeURLs':
+                    return await bulkModifyScrapeURLs(args);
+                    
+                default:
+                    throw new Error(`Unknown operation: ${operation}`);
+            }
+        } catch (error) {
+            console.error('ScraperManagement Error:', error);
+            // ✅ Track business logic: A fatal error occurred in the handler
+            monitoring.trackOperation('HANDLER_ERROR', 'Handler', 'fatal', { error: error.message, operationName: operation });
+            throw error;
         }
-    } catch (error) {
-        console.error('ScraperManagement Error:', error);
-        throw error;
+    } finally {
+        // Always flush metrics before the Lambda exits
+        if (monitoring) {
+            console.log('[ScraperManagement] Flushing monitoring metrics...');
+            await monitoring.flush();
+            console.log('[ScraperManagement] Monitoring flush complete.');
+        }
     }
 };
 
@@ -113,6 +148,9 @@ exports.handler = async (event, context) => {
 async function getScraperJobsReport({ status, limit = 20, nextToken }) {
     console.log('Getting scraper jobs report:', { status, limit, nextToken });
     
+    // ✅ Track business logic: Get jobs report
+    monitoring.trackOperation('GET_JOBS_REPORT', 'ScraperJob', status || 'all', { status, limit });
+
     try {
         const tableName = getTableName('ScraperJob');
         
@@ -134,7 +172,7 @@ async function getScraperJobsReport({ status, limit = 20, nextToken }) {
                     params.ExclusiveStartKey = JSON.parse(Buffer.from(nextToken, 'base64').toString());
                 }
                 
-                const result = await ddbDocClient.send(new QueryCommand(params));
+                const result = await monitoredDdbDocClient.send(new QueryCommand(params));
                 
                 return {
                     items: result.Items || [],
@@ -163,7 +201,7 @@ async function getScraperJobsReport({ status, limit = 20, nextToken }) {
             scanParams.ExclusiveStartKey = JSON.parse(Buffer.from(nextToken, 'base64').toString());
         }
         
-        const result = await ddbDocClient.send(new ScanCommand(scanParams));
+        const result = await monitoredDdbDocClient.send(new ScanCommand(scanParams));
         
         // Sort by startTime if available
         const items = (result.Items || []).sort((a, b) => {
@@ -187,6 +225,9 @@ async function getScraperJobsReport({ status, limit = 20, nextToken }) {
 async function searchScrapeURLs({ status, limit = 50, nextToken }) {
     console.log('Searching scrape URLs:', { status, limit, nextToken });
     
+    // ✅ Track business logic: Search ScrapeURLs
+    monitoring.trackOperation('SEARCH_URLS', 'ScrapeURL', status || 'all', { status, limit });
+
     try {
         const tableName = getTableName('ScrapeURL');
         
@@ -205,7 +246,7 @@ async function searchScrapeURLs({ status, limit = 50, nextToken }) {
             params.ExclusiveStartKey = JSON.parse(Buffer.from(nextToken, 'base64').toString());
         }
         
-        const result = await ddbDocClient.send(new ScanCommand(params));
+        const result = await monitoredDdbDocClient.send(new ScanCommand(params));
         
         return {
             items: result.Items || [],
@@ -222,6 +263,9 @@ async function searchScrapeURLs({ status, limit = 50, nextToken }) {
 async function getScraperMetrics({ timeRange }) {
     console.log('Getting scraper metrics for:', timeRange);
     
+    // ✅ Track business logic: Get scraper metrics
+    monitoring.trackOperation('GET_METRICS', 'ScraperJob', timeRange, { timeRange });
+
     try {
         const now = new Date();
         const startTime = getStartTimeForRange(timeRange, now);
@@ -235,8 +279,10 @@ async function getScraperMetrics({ timeRange }) {
             ExpressionAttributeValues: { ':startTime': startTime.toISOString() }
         };
         
-        const jobResult = await ddbDocClient.send(new ScanCommand(jobParams));
+        const jobResult = await monitoredDdbDocClient.send(new ScanCommand(jobParams));
         const jobs = jobResult.Items || [];
+        
+        // ... (rest of the logic is unchanged) ...
         
         // Calculate basic metrics
         const totalJobs = jobs.length;
@@ -349,6 +395,9 @@ async function getScraperMetrics({ timeRange }) {
 async function getUpdateCandidateURLs({ limit = 50 }) {
     console.log('Getting update candidate URLs, limit:', limit);
     
+    // ✅ Track business logic: Get update candidate URLs
+    monitoring.trackOperation('GET_UPDATE_CANDIDATES', 'ScrapeURL', 'running', { limit });
+
     try {
         const tableName = getTableName('ScrapeURL');
         const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
@@ -371,8 +420,10 @@ async function getUpdateCandidateURLs({ limit = 50 }) {
             Limit: limit * 2 // Get extra to allow for sorting
         };
         
-        const result = await ddbDocClient.send(new ScanCommand(params));
+        const result = await monitoredDdbDocClient.send(new ScanCommand(params));
         const urls = result.Items || [];
+        
+        // ... (rest of the logic is unchanged) ...
         
         // Score and sort URLs by priority
         const scoredUrls = urls.map(url => {
@@ -414,6 +465,9 @@ async function getUpdateCandidateURLs({ limit = 50 }) {
 async function fetchScrapeURLDetails({ url }) {
     console.log('Fetching scrape URL details for:', url);
     
+    // ✅ Track business logic: Get ScrapeURL details
+    monitoring.trackOperation('GET_URL_DETAILS', 'ScrapeURL', url, { url });
+
     try {
         const tableName = getTableName('ScrapeURL');
         
@@ -422,7 +476,7 @@ async function fetchScrapeURLDetails({ url }) {
             Key: { id: url }
         };
         
-        const result = await ddbDocClient.send(new GetCommand(params));
+        const result = await monitoredDdbDocClient.send(new GetCommand(params));
         return result.Item || null;
         
     } catch (error) {
@@ -438,6 +492,13 @@ async function fetchScrapeURLDetails({ url }) {
 async function startScraperJob({ input }, event) {
     console.log('Starting scraper job with input:', input);
     
+    // ✅ Track business logic: Request to start a new job
+    monitoring.trackOperation('START_JOB_REQUEST', 'ScraperJob', 'new', { 
+        triggerSource: input.triggerSource, 
+        triggeredBy: input.triggeredBy,
+        entityId: monitoring.entityId 
+    });
+
     try {
         // Create the request for autoScraper
         const payload = {
@@ -463,6 +524,12 @@ async function startScraperJob({ input }, event) {
         
         console.log('Invoking autoScraper with payload:', JSON.stringify(payload));
         
+        // ✅ Track business logic: Invoking autoScraper Lambda
+        monitoring.trackOperation('LAMBDA_INVOKE', 'Lambda', functionName, { 
+            targetFunction: functionName,
+            operation: 'triggerAutoScraping'
+        });
+
         const response = await lambdaClient.send(new InvokeCommand({
             FunctionName: functionName,
             InvocationType: 'RequestResponse',
@@ -474,6 +541,8 @@ async function startScraperJob({ input }, event) {
         
         console.log('AutoScraper response:', result);
         
+        // ... (rest of the logic is unchanged) ...
+
         // Helper function to ensure all required fields are present
         const ensureRequiredFields = (job) => {
             const now = new Date().toISOString();
@@ -507,7 +576,7 @@ async function startScraperJob({ input }, event) {
         // If the autoScraper created a job, fetch and return it
         if (realJobId) {
             const jobTable = getTableName('ScraperJob');
-            const jobResult = await ddbDocClient.send(new GetCommand({
+            const jobResult = await monitoredDdbDocClient.send(new GetCommand({
                 TableName: jobTable,
                 Key: { id: realJobId }
             }));
@@ -559,6 +628,9 @@ async function startScraperJob({ input }, event) {
 async function cancelScraperJob({ jobId }) {
     console.log('Cancelling scraper job:', jobId);
     
+    // ✅ Track business logic: Request to cancel a job
+    monitoring.trackOperation('CANCEL_JOB_REQUEST', 'ScraperJob', jobId, { jobId });
+
     try {
         // Update the job status
         const jobTable = getTableName('ScraperJob');
@@ -572,25 +644,35 @@ async function cancelScraperJob({ jobId }) {
                 #status = :status, 
                 endTime = :endTime, 
                 updatedAt = :updatedAt,
-                _lastChangedAt = :lastChangedAt,
-                _version = if_not_exists(_version, :zero) + :one`,
-            ExpressionAttributeNames: { '#status': 'status' },
+                #lca = :lastChangedAt,
+                #v = if_not_exists(#v, :zero) + :one`,
+            ExpressionAttributeNames: { 
+                '#status': 'status',
+                '#lca': '_lastChangedAt', // <-- Add this
+                '#v': '_version'         // <-- Add this
+            },
             ExpressionAttributeValues: {
                 ':status': 'CANCELLED',
                 ':endTime': now,
                 ':updatedAt': now,
-                ':lastChangedAt': timestamp,  // ✅ Added
-                ':zero': 0,                   // ✅ Added
-                ':one': 1                      // ✅ Added
+                ':lastChangedAt': timestamp,
+                ':zero': 0,
+                ':one': 1
             },
             ReturnValues: 'ALL_NEW'
         };
         
-        const result = await ddbDocClient.send(new UpdateCommand(updateParams));
+        const result = await monitoredDdbDocClient.send(new UpdateCommand(updateParams));
         
         // Also stop the autoScraper
         const functionName = process.env.AUTO_SCRAPER_FUNCTION || `autoScraper-${process.env.ENV}`;
         
+        // ✅ Track business logic: Invoking autoScraper to STOP
+        monitoring.trackOperation('LAMBDA_INVOKE', 'Lambda', functionName, { 
+            targetFunction: functionName,
+            operation: 'controlScraperOperation:STOP'
+        });
+
         await lambdaClient.send(new InvokeCommand({
             FunctionName: functionName,
             InvocationType: 'RequestResponse',
@@ -612,6 +694,9 @@ async function cancelScraperJob({ jobId }) {
 async function modifyScrapeURLStatus({ url, status, doNotScrape }) {
     console.log('Modifying URL status:', { url, status, doNotScrape });
     
+    // ✅ Track business logic: Modifying a single URL's status
+    monitoring.trackOperation('MODIFY_URL_STATUS', 'ScrapeURL', url, { url, status, doNotScrape });
+
     try {
         const tableName = getTableName('ScrapeURL');
         const updates = {};
@@ -630,23 +715,36 @@ async function modifyScrapeURLStatus({ url, status, doNotScrape }) {
         }
         
         updates.updatedAt = now;
-        updates._lastChangedAt = Date.now();
+        // Do NOT add _lastChangedAt to the 'updates' object
+        // updates._lastChangedAt = Date.now();
         
-        const updateExpression = 'SET ' + Object.keys(updates)
-            .map(k => `#${k} = :${k}`).join(', ');
+        const updateExpressionKeys = Object.keys(updates);
         
+        // Start building params
         const params = {
             TableName: tableName,
             Key: { id: url },
-            UpdateExpression: updateExpression,
-            ExpressionAttributeNames: Object.keys(updates)
+            ExpressionAttributeNames: updateExpressionKeys
                 .reduce((acc, k) => ({...acc, [`#${k}`]: k}), {}),
-            ExpressionAttributeValues: Object.keys(updates)
+            ExpressionAttributeValues: updateExpressionKeys
                 .reduce((acc, k) => ({...acc, [`:${k}`]: updates[k]}), {}),
             ReturnValues: 'ALL_NEW'
         };
+
+        // Manually add DataStore sync fields to avoid syntax errors
+        updateExpressionKeys.push('#lca = :lca');
+        params.ExpressionAttributeNames['#lca'] = '_lastChangedAt';
+        params.ExpressionAttributeValues[':lca'] = Date.now();
         
-        const result = await ddbDocClient.send(new UpdateCommand(params));
+        updateExpressionKeys.push('#v = if_not_exists(#v, :zero) + :one');
+        params.ExpressionAttributeNames['#v'] = '_version';
+        params.ExpressionAttributeValues[':zero'] = 0;
+        params.ExpressionAttributeValues[':one'] = 1;
+
+        // Build the final expression
+        params.UpdateExpression = 'SET ' + updateExpressionKeys.join(', ');
+        
+        const result = await monitoredDdbDocClient.send(new UpdateCommand(params));
         return result.Attributes;
         
     } catch (error) {
@@ -658,6 +756,13 @@ async function modifyScrapeURLStatus({ url, status, doNotScrape }) {
 async function bulkModifyScrapeURLs({ urls, status, doNotScrape }) {
     console.log('Bulk modifying URLs:', { urlCount: urls.length, status, doNotScrape });
     
+    // ✅ Track business logic: Modifying URLs in bulk
+    monitoring.trackOperation('BULK_MODIFY_URLS', 'ScrapeURL', 'bulk', { 
+        count: urls.length, 
+        status, 
+        doNotScrape 
+    });
+
     try {
         const results = await Promise.allSettled(
             urls.map(url => modifyScrapeURLStatus({ url, status, doNotScrape }))
@@ -673,6 +778,11 @@ async function bulkModifyScrapeURLs({ urls, status, doNotScrape }) {
         
         if (failed.length > 0) {
             console.warn('Some URLs failed to update:', failed);
+            // ✅ Track business logic: Failures during bulk update
+            monitoring.trackOperation('BULK_MODIFY_PARTIAL_FAILURE', 'ScrapeURL', 'bulk', { 
+                failedCount: failed.length,
+                successCount: successful.length
+            });
         }
         
         return successful;

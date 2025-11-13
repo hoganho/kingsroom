@@ -1,11 +1,14 @@
-
 // src/pages/scraper-admin-tabs/URLManagementTab.tsx
+// Enhanced version with Skipped IDs Analyzer
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import {
     RefreshCw, 
-    ExternalLink
+    ExternalLink,
+    AlertTriangle,
+    ChevronDown,
+    ChevronUp
 } from 'lucide-react';
 import { searchScrapeURLs } from '../../graphql/queries';
 import { 
@@ -13,6 +16,7 @@ import {
 } from '../../graphql/mutations';
 import type { ScrapeURL, ScrapeURLStatus } from '../../API';
 import { URLStatusBadge } from '../../components/scraper/admin/ScraperAdminShared';
+import { SkippedIDsAnalyzer } from '../../components/scraper/admin/SkippedIDsAnalyzer';
 
 export const URLManagementTab: React.FC = () => {
     const client = useMemo(() => generateClient(), []);
@@ -20,6 +24,7 @@ export const URLManagementTab: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState<ScrapeURLStatus | 'ALL'>('ALL');
     const [selectedURLs, setSelectedURLs] = useState<Set<string>>(new Set());
+    const [showSkippedAnalyzer, setShowSkippedAnalyzer] = useState(false);
 
     const loadURLs = useCallback(async () => {
         try {
@@ -90,9 +95,78 @@ export const URLManagementTab: React.FC = () => {
             alert('Failed to update URLs. See console for details.');
         }
     }, [client, selectedURLs, loadURLs]);
+    
+    // Calculate statistics for display
+    const stats = useMemo(() => {
+        const total = urls.length;
+        const active = urls.filter(u => u.status === 'ACTIVE').length;
+        const doNotScrape = urls.filter(u => u.status === 'DO_NOT_SCRAPE').length;
+        const errors = urls.filter(u => u.status === 'ERROR').length;
+        const avgSuccessRate = urls.reduce((sum, u) => {
+            if (u.timesScraped && u.timesSuccessful) {
+                return sum + (u.timesSuccessful / u.timesScraped);
+            }
+            return sum;
+        }, 0) / (urls.filter(u => u.timesScraped).length || 1);
+        
+        return { total, active, doNotScrape, errors, avgSuccessRate };
+    }, [urls]);
 
     return (
         <div className="space-y-6">
+            {/* Statistics Summary */}
+            <div className="grid grid-cols-5 gap-4">
+                <div className="bg-white rounded-lg shadow p-4">
+                    <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
+                    <div className="text-sm text-gray-500">Total URLs</div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-4">
+                    <div className="text-2xl font-bold text-green-600">{stats.active}</div>
+                    <div className="text-sm text-gray-500">Active</div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-4">
+                    <div className="text-2xl font-bold text-yellow-600">{stats.doNotScrape}</div>
+                    <div className="text-sm text-gray-500">Do Not Scrape</div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-4">
+                    <div className="text-2xl font-bold text-red-600">{stats.errors}</div>
+                    <div className="text-sm text-gray-500">Errors</div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-4">
+                    <div className="text-2xl font-bold text-blue-600">
+                        {(stats.avgSuccessRate * 100).toFixed(1)}%
+                    </div>
+                    <div className="text-sm text-gray-500">Avg Success Rate</div>
+                </div>
+            </div>
+            
+            {/* Skipped IDs Analyzer Section */}
+            <div className="bg-white rounded-lg shadow">
+                <button
+                    onClick={() => setShowSkippedAnalyzer(!showSkippedAnalyzer)}
+                    className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                >
+                    <div className="flex items-center">
+                        <AlertTriangle className="h-5 w-5 mr-2 text-yellow-600" />
+                        <span className="font-semibold">Missing IDs Analyzer</span>
+                        <span className="ml-2 text-sm text-gray-500">
+                            Find gaps in tournament ID sequence
+                        </span>
+                    </div>
+                    {showSkippedAnalyzer ? (
+                        <ChevronUp className="h-5 w-5 text-gray-400" />
+                    ) : (
+                        <ChevronDown className="h-5 w-5 text-gray-400" />
+                    )}
+                </button>
+                
+                {showSkippedAnalyzer && (
+                    <div className="border-t p-4">
+                        <SkippedIDsAnalyzer />
+                    </div>
+                )}
+            </div>
+
             {/* Filters and Actions */}
             <div className="bg-white rounded-lg shadow p-4">
                 <div className="flex items-center justify-between">

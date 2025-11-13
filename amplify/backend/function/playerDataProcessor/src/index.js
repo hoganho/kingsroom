@@ -29,11 +29,13 @@ Amplify Params - DO NOT EDIT */
 
 /*
  * ===================================================================
- * FINAL MERGED Player Data Processor Lambda
+ * FINAL MERGED Player Data Processor Lambda with Database Monitoring
  *
  * This version combines the advanced business logic from the original
  * index.js (complex targeting, wasNewVenue, skip logic) with the
  * multi-entity support from PDP-index-enhanced.js.
+ * 
+ * MONITORING ADDED: Complete database operation tracking
  * ===================================================================
  */
 
@@ -49,8 +51,13 @@ const UNASSIGNED_VENUE_NAME = "Unassigned";
 // --- MERGE ---: Added from PDP-index-enhanced.js
 const DEFAULT_ENTITY_ID = "42101695-1332-48e3-963b-3c6ad4e909a0";
 
+// === DATABASE MONITORING ===
+const { LambdaMonitoring } = require('./lambda-monitoring');
+const monitoring = new LambdaMonitoring('playerDataProcessor', DEFAULT_ENTITY_ID);
+
 const client = new DynamoDBClient({});
-const ddbDocClient = DynamoDBDocumentClient.from(client);
+const originalDdbDocClient = DynamoDBDocumentClient.from(client);
+const ddbDocClient = monitoring.wrapDynamoDBClient(originalDdbDocClient);
 
 // ===================================================================
 // HELPER FUNCTIONS (PRESERVED FROM index.js)
@@ -269,6 +276,11 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData, en
             // Player exists globally. Apply conditional updates.
             console.log(`[PLAYER-UPSERT] Existing player ${playerId} found. Applying conditional logic.`);
             
+            monitoring.trackOperation('PLAYER_UPDATE', 'Player', playerId, {
+                entityId,
+                gameId: gameData.game.id
+            });
+            
             const currentRegDate = new Date(existingPlayer.Item.registrationDate);
             const currentLastPlayed = new Date(existingPlayer.Item.lastPlayedDate || existingPlayer.Item.registrationDate);
 
@@ -332,6 +344,12 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData, en
             // This game is by definition the first and last.
             console.log(`[PLAYER-UPSERT] New player ${playerId}. Creating record.`);
             
+            monitoring.trackOperation('PLAYER_CREATE', 'Player', playerId, {
+                entityId,
+                gameId: gameData.game.id,
+                playerName
+            });
+            
             const targetingClassification = await calculatePlayerTargetingClassification(
                 playerId, gameDate, gameDate, true
             );
@@ -372,6 +390,10 @@ const upsertPlayerRecord = async (playerId, playerName, gameData, playerData, en
     } catch (error) {
         if (error.name !== 'ConditionalCheckFailedException') {
             console.error(`[PLAYER-UPSERT] CRITICAL ERROR for ${playerName}:`, error);
+            monitoring.trackOperation('PLAYER_ERROR', 'Player', playerId, {
+                error: error.message,
+                entityId
+            });
         } else {
              console.warn(`[PLAYER-UPSERT] Condition check failed for ${playerName}, likely race condition. Skipping.`);
         }
@@ -410,10 +432,23 @@ const upsertPlayerEntry = async (playerId, gameData, entityId) => {
             ConditionExpression: 'attribute_exists(id)'
         }));
         console.log(`[ENTRY-UPSERT] Updated existing entry for ${playerId}.`);
+        
+        monitoring.trackOperation('ENTRY_UPDATE', 'PlayerEntry', entryId, {
+            playerId,
+            gameId: gameData.game.id,
+            entityId
+        });
     } catch (error) {
         // If update fails, item does not exist, so create it
         if (error.name === 'ConditionalCheckFailedException') {
             console.log(`[ENTRY-UPSERT] Entry not found, creating new COMPLETED entry.`);
+            
+            monitoring.trackOperation('ENTRY_CREATE', 'PlayerEntry', entryId, {
+                playerId,
+                gameId: gameData.game.id,
+                entityId
+            });
+            
             const newEntry = {
                 id: entryId,
                 playerId: playerId,
@@ -439,10 +474,18 @@ const upsertPlayerEntry = async (playerId, gameData, entityId) => {
                 console.log(`[ENTRY-UPSERT] Created new COMPLETED entry for ${playerId}.`);
             } catch (putError) {
                 console.error(`[ENTRY-UPSERT] CRITICAL ERROR creating entry:`, putError);
+                monitoring.trackOperation('ENTRY_ERROR', 'PlayerEntry', entryId, {
+                    error: putError.message,
+                    entityId
+                });
                 throw putError;
             }
         } else {
             console.error(`[ENTRY-UPSERT] Unexpected error:`, error);
+            monitoring.trackOperation('ENTRY_ERROR', 'PlayerEntry', entryId, {
+                error: error.message,
+                entityId
+            });
             throw error;
         }
     }
@@ -458,6 +501,13 @@ const createPlayerResult = async (playerId, gameData, playerData, entityId) => {
     const playerResultTable = getTableName('PlayerResult');
     const resultId = `${playerId}#${gameData.game.id}`;
     const now = new Date().toISOString();
+    
+    monitoring.trackOperation('RESULT_CREATE', 'PlayerResult', resultId, {
+        playerId,
+        gameId: gameData.game.id,
+        finishingPlace: playerData.rank,
+        entityId
+    });
     
     try {
         const playerResult = {
@@ -494,6 +544,10 @@ const createPlayerResult = async (playerId, gameData, playerData, entityId) => {
             return resultId;
         }
         console.error(`[RESULT-CREATE] CRITICAL ERROR creating result:`, error);
+        monitoring.trackOperation('RESULT_ERROR', 'PlayerResult', resultId, {
+            error: error.message,
+            entityId
+        });
         throw error;
     }
 };
@@ -525,6 +579,12 @@ const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue, 
 
         if (existingSummary.Item) {
             
+            monitoring.trackOperation('SUMMARY_UPDATE', 'PlayerSummary', summaryId, {
+                playerId,
+                entityId,
+                wasNewVenue
+            });
+            
             // REFACTOR: Apply conditional date logic to lastPlayed
             const currentLastPlayed = new Date(existingSummary.Item.lastPlayed);
             const gameDateObj = new Date(gameDateTime);
@@ -541,11 +601,11 @@ const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue, 
                     netBalance = netBalance + :profitLoss,
                     venuesVisited = venuesVisited + :venueInc,
                     updatedAt = :updatedAt,
-                    #version = #version + :one,
+                    #v = if_not_exists(#v, :zero) + :one,
                     #ent = :entityId
             `;
             let expressionNames = {
-                '#version': '_version',
+                '#v': '_version', // <-- Changed to #v
                 '#ent': 'entityId'
             };
             let expressionValues = {
@@ -557,7 +617,8 @@ const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue, 
                 ':profitLoss': winningsAmount - buyInAmount,
                 ':venueInc': wasNewVenue ? 1 : 0, 
                 ':updatedAt': now,
-                ':entityId': entityId || existingSummary.Item.entityId || DEFAULT_ENTITY_ID
+                ':entityId': entityId || existingSummary.Item.entityId || DEFAULT_ENTITY_ID,
+                ':zero': 0 // <-- Add this
             };
             
             // REFACTOR RULE: Only update lastPlayed if this game is later
@@ -577,6 +638,12 @@ const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue, 
             }));
             console.log(`[SUMMARY-UPSERT] Updated existing summary.`);
         } else {
+            
+            monitoring.trackOperation('SUMMARY_CREATE', 'PlayerSummary', summaryId, {
+                playerId,
+                entityId
+            });
+            
             const newSummary = {
                 id: summaryId,
                 playerId: playerId,
@@ -611,6 +678,10 @@ const upsertPlayerSummary = async (playerId, gameData, playerData, wasNewVenue, 
         }
     } catch (error) {
         console.error(`[SUMMARY-UPSERT] CRITICAL ERROR processing summary:`, error);
+        monitoring.trackOperation('SUMMARY_ERROR', 'PlayerSummary', summaryId, {
+            error: error.message,
+            entityId
+        });
         throw error;
     }
 };
@@ -654,6 +725,13 @@ const upsertPlayerVenue = async (playerId, gameData, playerData, entityId) => {
         
         if (existingRecord.Item) {
             // PlayerVenue exists. Apply conditional updates.
+            
+            monitoring.trackOperation('PLAYERVENUE_UPDATE', 'PlayerVenue', playerVenueId, {
+                playerId,
+                venueId: gameData.game.venueId,
+                entityId
+            });
+            
             const currentFirstPlayed = new Date(existingRecord.Item.firstPlayedDate);
             const currentLastPlayed = new Date(existingRecord.Item.lastPlayedDate);
 
@@ -712,6 +790,13 @@ const upsertPlayerVenue = async (playerId, gameData, playerData, entityId) => {
         } else {
             // PlayerVenue does NOT exist. Create new.
             // This game is by definition the first and last.
+            
+            monitoring.trackOperation('PLAYERVENUE_CREATE', 'PlayerVenue', playerVenueId, {
+                playerId,
+                venueId: gameData.game.venueId,
+                entityId
+            });
+            
             const targetingClassification = calculatePlayerVenueTargetingClassification(
                 gameDate, // lastActivityDate
                 gameDate  // membershipCreatedDate
@@ -746,6 +831,10 @@ const upsertPlayerVenue = async (playerId, gameData, playerData, entityId) => {
         
     } catch (error) {
         console.error(`[VENUE-UPSERT] CRITICAL ERROR:`, error);
+        monitoring.trackOperation('PLAYERVENUE_ERROR', 'PlayerVenue', playerVenueId, {
+            error: error.message,
+            entityId
+        });
         throw error;
     }
 };
@@ -766,6 +855,12 @@ const createPlayerTransactions = async (playerId, gameData, playerData, processi
     const gameDateTime = gameData.game.gameStartDateTime || gameData.game.gameEndDateTime;
 
     const transactionsToCreate = processingInstructions.requiredActions?.createTransactions || [];
+    
+    monitoring.trackOperation('TRANSACTIONS_BATCH', 'PlayerTransaction', playerId, {
+        count: transactionsToCreate.length,
+        gameId: gameData.game.id,
+        entityId
+    });
     
     try {
         for (const transaction of transactionsToCreate) {
@@ -821,6 +916,10 @@ const createPlayerTransactions = async (playerId, gameData, playerData, processi
         }
     } catch (error) {
         console.error(`[TRANSACTION-CREATE] CRITICAL ERROR creating transactions:`, error);
+        monitoring.trackOperation('TRANSACTIONS_ERROR', 'PlayerTransaction', playerId, {
+            error: error.message,
+            entityId
+        });
         throw error;
     }
 };
@@ -835,12 +934,22 @@ const processPlayer = async (playerData, processingInstructions, gameData) => {
     // --- MERGE ---: Added entityId extraction
     const entityId = gameData.game.entityId || DEFAULT_ENTITY_ID;
     
+    // Update monitoring context
+    monitoring.entityId = entityId;
+    
     try {
         const playerId = generatePlayerId(playerName);
         const resultId = `${playerId}#${gameData.game.id}`;
 
         // --- MERGE ---: Added entityId to log
         console.log(`[PROCESS-PLAYER] Starting processing for player: ${playerName} (ID: ${playerId}) with entity ${entityId}`);
+
+        // Track player processing start
+        monitoring.trackOperation('PLAYER_PROCESS_START', 'PlayerProcessing', playerId, {
+            playerName,
+            gameId: gameData.game.id,
+            entityId
+        });
 
         // Preserved skip logic from index.js
         const existingResult = await ddbDocClient.send(new GetCommand({
@@ -850,6 +959,11 @@ const processPlayer = async (playerData, processingInstructions, gameData) => {
 
         if (existingResult.Item) {
             console.log(`[PROCESS-PLAYER] SKIPPING: Result already exists for game ${gameData.game.id}`);
+            monitoring.trackOperation('PLAYER_SKIPPED', 'PlayerProcessing', playerId, {
+                reason: 'Result exists',
+                gameId: gameData.game.id,
+                entityId
+            });
             // --- MERGE ---: Added entityId to return
             return { success: true, playerName, playerId, entityId, status: 'SKIPPED' };
         }
@@ -875,6 +989,14 @@ const processPlayer = async (playerData, processingInstructions, gameData) => {
         console.log(`[PROCESS-PLAYER] Step 6: upsertPlayerEntry...`);
         await upsertPlayerEntry(playerId, gameData, entityId);
 
+        // Track successful completion
+        monitoring.trackOperation('PLAYER_PROCESS_COMPLETE', 'PlayerProcessing', playerId, {
+            playerName,
+            gameId: gameData.game.id,
+            entityId,
+            wasNewVenue
+        });
+
         // --- MERGE ---: Added entityId to log
         console.log(`[PROCESS-PLAYER] SUCCESS: Player ${playerName} completely processed with entity ${entityId}`);
         // --- MERGE ---: Added entityId to return
@@ -882,6 +1004,13 @@ const processPlayer = async (playerData, processingInstructions, gameData) => {
         
     } catch (error) {
         console.error(`[PROCESS-PLAYER] CRITICAL FAILURE for player ${playerName}:`, error);
+        
+        monitoring.trackOperation('PLAYER_PROCESS_ERROR', 'PlayerProcessing', playerName, {
+            error: error.message,
+            gameId: gameData.game.id,
+            entityId
+        });
+        
         // --- MERGE ---: Added entityId to return
         return { success: false, playerName, entityId, error: error.message };
     }
@@ -895,6 +1024,11 @@ exports.handler = async (event) => {
     console.log('[HANDLER] START: Player Data Processor invoked.');
     console.log('Received Lambda Event (Raw):', JSON.stringify(event, null, 2));
 
+    // Track Lambda invocation
+    monitoring.trackOperation('LAMBDA_START', 'Handler', 'playerDataProcessor', {
+        recordCount: event.Records?.length || 0
+    });
+
     // --- MERGE ---: Added entityId to results object
     const results = {
         successful: [],
@@ -905,6 +1039,7 @@ exports.handler = async (event) => {
     
     if (!event.Records || event.Records.length === 0) {
         console.warn('[HANDLER] WARNING: No records found in event payload.');
+        await monitoring.flush();
         return { statusCode: 204, body: JSON.stringify({ message: 'No records to process.' }) };
     }
 
@@ -926,6 +1061,15 @@ exports.handler = async (event) => {
             if (!results.entityId) {
                 results.entityId = gameData.game.entityId || DEFAULT_ENTITY_ID;
             }
+            
+            // Update monitoring context for this game
+            monitoring.entityId = results.entityId;
+            
+            monitoring.trackOperation('GAME_PROCESS_START', 'Game', gameData.game.id, {
+                entityId: results.entityId,
+                playerCount: gameData.players?.allPlayers?.length || 0,
+                gameStatus: gameData.game.gameStatus
+            });
             
             if (!gameData.players || !gameData.processingInstructions) {
                 console.error('[HANDLER] CRITICAL ERROR: SQS Payload missing required fields (players/instructions).');
@@ -960,11 +1104,26 @@ exports.handler = async (event) => {
                 });
             }
             
+            // Track game completion
+            monitoring.trackOperation('GAME_PROCESS_COMPLETE', 'Game', gameData.game.id, {
+                entityId: results.entityId,
+                successfulPlayers: results.successful.length,
+                failedPlayers: results.failed.length
+            });
+            
             // --- MERGE ---: Added entityId to log
             console.log(`[HANDLER] Game ${gameData.game.id} batch processing completed for entity ${results.entityId}.`);
             
         } catch (error) {
             console.error('[HANDLER] CRITICAL FAILURE: Unhandled error processing SQS message record:', error);
+            
+            monitoring.trackOperation('HANDLER_ERROR', 'Handler', 'fatal', {
+                error: error.message,
+                gameId: gameData?.game?.id,
+                entityId: results.entityId
+            });
+            
+            await monitoring.flush();
             throw error; 
         }
     }
@@ -975,6 +1134,17 @@ exports.handler = async (event) => {
     console.log(`Total Players Processed: ${results.totalProcessed}`);
     console.log(`Successful: ${results.successful.length}`);
     console.log(`Failed: ${results.failed.length}`);
+    
+    // Track final results
+    monitoring.trackOperation('LAMBDA_COMPLETE', 'Handler', 'playerDataProcessor', {
+        entityId: results.entityId,
+        totalProcessed: results.totalProcessed,
+        successful: results.successful.length,
+        failed: results.failed.length
+    });
+    
+    // Flush all metrics before Lambda ends
+    await monitoring.flush();
     
     if (results.failed.length > 0) {
         console.error('Final result contains failures. Triggering SQS redelivery.');

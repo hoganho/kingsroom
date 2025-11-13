@@ -6067,6 +6067,15 @@ export const schema = {
                 {
                     "type": "key",
                     "properties": {
+                        "name": "byS3Key",
+                        "fields": [
+                            "s3Key"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
                         "name": "byGameId",
                         "fields": [
                             "gameId"
@@ -6136,6 +6145,7 @@ export const schema = {
                 "CANCELLED",
                 "FINISHED",
                 "NOT_IN_USE",
+                "NOT_PUBLISHED",
                 "CLOCK_STOPPED",
                 "UNKNOWN"
             ]

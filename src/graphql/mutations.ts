@@ -8,8 +8,8 @@ type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationOutput: OutputType;
 };
 
-export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData($url: AWSURL!) {
-  fetchTournamentData(url: $url) {
+export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData($url: AWSURL!, $forceRefresh: Boolean) {
+  fetchTournamentData(url: $url, forceRefresh: $forceRefresh) {
     name
     gameStartDateTime
     gameEndDateTime
