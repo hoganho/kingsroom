@@ -787,6 +787,22 @@ type CacheActivityLog {
   reason: String
 }
 
+# Database Metrics Types
+type DatabaseMetric {
+    timestamp: AWSDateTime!
+    functionName: String!
+    operation: String!
+    table: String!
+    success: Boolean!
+    duration: Int
+    count: Int
+    entityId: String
+}
+
+type DatabaseMetricsResponse {
+    metrics: [DatabaseMetric!]!
+}
+
 input ManualHTMLUploadInput {
   htmlContent: String!
   url: AWSURL!
@@ -1102,6 +1118,13 @@ type ScrapedGameData {
   doNotScrape: Boolean
   tournamentId: Int!
   entityId: ID
+  sourceUrl: AWSURL
+  s3Key: String
+  source: String
+  contentHash: String
+  fetchedAt: AWSDateTime
+  reScrapedAt: AWSDateTime
+  wasForced: Boolean
 }
 
 type ScrapedTournamentLevel {
@@ -1251,10 +1274,12 @@ type Query {
     listStoredHTML(url: AWSURL!, limit: Int): S3StorageConnection
         @function(name: "s3ManagementFunction-${env}")
 
+    getDatabaseMetrics(timeRange: String): DatabaseMetricsResponse
+        @function(name: "getDatabaseMetrics-${env}")
 }
 
 type Mutation {
-  fetchTournamentData(url: AWSURL!, forceRefresh: Boolean): ScrapedGameData @function(name: "webScraperFunction-${env}")
+  fetchTournamentData(url: AWSURL, s3Key: String, forceRefresh: Boolean): ScrapedGameData @function(name: "webScraperFunction-${env}")
   saveTournamentData(input: SaveTournamentInput!): Game @function(name: "webScraperFunction-${env}")
   controlScraperOperation(operation: ScraperOperation!, entityId: ID): ScraperControlResponse @function(name: "autoScraper-${env}")
   triggerAutoScraping(maxGames: Int): ScraperControlResponse @function(name: "autoScraper-${env}")
@@ -1281,6 +1306,7 @@ type Mutation {
   
   # Re-scrape from cached HTML
   reScrapeFromCache(input: ReScrapeFromCacheInput!): ScrapedGameData
+  @function(name: "webScraperFunction-${env}")
   
   # Force refresh (bypass cache)
   forceRefreshScrape(url: AWSURL!): ScrapedGameData

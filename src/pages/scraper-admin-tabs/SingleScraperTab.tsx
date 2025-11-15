@@ -32,6 +32,9 @@ export const SingleScraperTab: React.FC<SingleScraperTabProps> = ({ urlToReparse
     // Track all IDs that have been tracked in this session
     const trackedInSessionRef = useRef<Set<string>>(new Set());
     
+    // NEW: Track which games were loaded from S3
+    const [s3SourcedGames, setS3SourcedGames] = useState<Set<string>>(new Set());
+    
     // Use enhanced tracker with proper signatures
     const { 
         games, 
@@ -161,6 +164,13 @@ export const SingleScraperTab: React.FC<SingleScraperTabProps> = ({ urlToReparse
             if (pathMatch) {
                 const tournamentId = pathMatch[1];
                 setInputId(tournamentId); // Set the ID in the input field
+                
+                // Build the full game URL to mark as S3-sourced
+                const fullUrl = buildGameUrl(currentEntity, tournamentId);
+                
+                // NEW: Mark this game as coming from S3
+                console.log(`[SingleScrapeTab] Marking game as S3-sourced: ${fullUrl}`);
+                setS3SourcedGames(prev => new Set(prev).add(fullUrl));
                 
                 // Automatically run the tracking logic
                 // We must use the 'id' (tournamentId) not the full URL
@@ -496,18 +506,31 @@ export const SingleScraperTab: React.FC<SingleScraperTabProps> = ({ urlToReparse
         setScrapeModalInfo(null);
         
         if (option === 'S3' && cachedData?.s3Key) {
-            // User chose to use cached data
-            console.log('[Modal] Using cached S3 data:', cachedData.s3Key);
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('📂 [Modal] User selected: USE S3 HTML');
+            console.log('📂 [Modal] S3 Key:', cachedData.s3Key);
+            console.log('📂 [Modal] 🔒 This should NOT create new S3 file');
+            console.log('📂 [Modal] Calling trackGame with forceSource: S3');
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            
+            setS3SourcedGames(prev => new Set(prev).add(url));
+            
             trackGame(url, DataSource.SCRAPE, entityId, { 
                 forceSource: 'S3',
                 s3Key: cachedData.s3Key,
                 forceRefresh: false
             });
         } else if (option === 'LIVE') {
-            // User chose to force a fresh scrape
-            console.log('[Modal] User forcing fresh scrape', {
-                doNotScrape,
-                reason: doNotScrape ? 'Overriding doNotScrape flag' : 'User preference'
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('🌐 [Modal] User selected: SCRAPE LIVE');
+            console.log('🌐 [Modal] 🔒 This WILL create new S3 file');
+            console.log('🌐 [Modal] Calling trackGame with forceSource: LIVE');
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            
+            setS3SourcedGames(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(url);
+                return newSet;
             });
             
             trackGame(url, DataSource.SCRAPE, entityId, { 
@@ -619,6 +642,9 @@ export const SingleScraperTab: React.FC<SingleScraperTabProps> = ({ urlToReparse
                             const autoVenue = venueMatch?.autoAssignedVenue;
                             const suggestions = venueMatch?.suggestions || [];
                             
+                            // NEW: Determine data source for this game
+                            const isFromS3 = s3SourcedGames.has(url);
+                            
                             return (
                                 <div key={url} className="relative border rounded-lg p-4 hover:shadow-md transition-shadow">
                                     <GameListItem
@@ -630,6 +656,7 @@ export const SingleScraperTab: React.FC<SingleScraperTabProps> = ({ urlToReparse
                                         onViewDetails={() => setSelectedGame(gameData)}
                                         onRemove={() => removeGame(url)}
                                         enableCreateVenue={true}
+                                        dataSource={isFromS3 ? 's3' : undefined} // NEW: Pass data source
                                     />
                                     
                                     {/* S3 Cache Status Badge */}
@@ -637,7 +664,7 @@ export const SingleScraperTab: React.FC<SingleScraperTabProps> = ({ urlToReparse
                                         <div className="absolute top-2 right-2 flex items-center gap-2">
                                             <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full flex items-center gap-1">
                                                 <HardDrive className="w-3 h-3" />
-                                                S3 Cached
+                                                S3 Cached: 
                                                 {cache.cacheHits && cache.cacheHits > 0 && ` (${cache.cacheHits} hits)`}
                                             </span>
                                         </div>

@@ -35,6 +35,8 @@ const { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand, GetComm
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
+// ✅ NEW: S3 Client for downloading cached HTML
+const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
 
 // --- Lambda Monitoring ---
 const { LambdaMonitoring } = require('./lambda-monitoring');
@@ -54,6 +56,9 @@ const DEFAULT_ENTITY_ID = "42101695-1332-48e3-963b-3c6ad4e909a0";
 const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client); // Original client
 const sqsClient = new SQSClient({});
+// ✅ NEW: S3 Client for cache operations
+const s3Client = new S3Client({});
+const S3_BUCKET = process.env.S3_BUCKET || 'pokerpro-scraper-storage';
 
 // --- Lambda Monitoring Initialization ---
 // Initialize monitoring for this function
@@ -674,6 +679,39 @@ const scrapeDataFromHtml = async (html, venues, seriesTitles, url, forceRefresh 
     return { data, foundKeys };
 };
 
+// ✅ NEW: Helper function to download HTML from S3
+/**
+ * Downloads HTML content from S3 given an s3Key
+ * @param {string} s3Key - The S3 object key
+ * @returns {Promise<string>} The HTML content
+ */
+const downloadHtmlFromS3 = async (s3Key) => {
+    console.log(`[S3_CACHE] Downloading HTML from S3: ${s3Key}`);
+    
+    try {
+        const command = new GetObjectCommand({
+            Bucket: S3_BUCKET,
+            Key: s3Key
+        });
+        
+        const response = await s3Client.send(command);
+        
+        // Convert stream to string
+        const chunks = [];
+        for await (const chunk of response.Body) {
+            chunks.push(chunk);
+        }
+        const html = Buffer.concat(chunks).toString('utf8');
+        
+        console.log(`[S3_CACHE] Downloaded ${html.length} bytes of HTML from S3`);
+        return html;
+        
+    } catch (error) {
+        console.error(`[S3_CACHE] Error downloading from S3:`, error);
+        throw new Error(`Failed to download HTML from S3: ${error.message}`);
+    }
+};
+
 // --- ENHANCEMENT: New function to link S3Storage to Game ---
 /**
  * Finds the S3Storage record by URL and updates it with the gameId
@@ -1184,6 +1222,96 @@ exports.handler = async (event) => {
                 case 'fetchTournamentData':
                 case 'FETCH':
                     const fetchUrl = args.url;
+                    const s3KeyParam = args.s3Key; // ✅ NEW: Accept s3Key parameter
+                    
+                    // ✅ NEW: Handle S3 cache scenario
+                    if (s3KeyParam) {
+                        console.log(`[FETCH] 🔒 S3 CACHE MODE - Using cached HTML`);
+                        console.log(`[FETCH] 🔒 S3 key: ${s3KeyParam}`);
+                        console.log(`[FETCH] 🔒 This path should NEVER create new S3 files`);
+                        
+                        monitoring.trackOperation('FETCH_FROM_CACHE', 'Game', 'cached', { 
+                            s3Key: s3KeyParam, 
+                            entityId 
+                        });
+                        
+                        try {
+                            // Download HTML from S3
+                            const cachedHtml = await downloadHtmlFromS3(s3KeyParam);
+                            
+                            // Get venues and series titles for parsing
+                            const [venues, seriesTitles] = await Promise.all([
+                                getAllVenues(), 
+                                getAllSeriesTitles()
+                            ]);
+                            
+                            // Parse using existing scrapeDataFromHtml function
+                            const { data: scrapedData, foundKeys } = await scrapeDataFromHtml(
+                                cachedHtml,
+                                venues,
+                                seriesTitles,
+                                fetchUrl || 'cached',
+                                false
+                            );
+                            
+                            // Get S3Storage metadata
+                            let s3StorageRecord = null;
+                            try {
+                                const s3StorageTable = getTableName('S3Storage');
+                                const queryCommand = new QueryCommand({
+                                    TableName: s3StorageTable,
+                                    IndexName: 'byS3Key',
+                                    KeyConditionExpression: 's3Key = :key',
+                                    ExpressionAttributeValues: { ':key': s3KeyParam },
+                                    Limit: 1
+                                });
+                                const result = await monitoredDdbDocClient.send(queryCommand);
+                                s3StorageRecord = result.Items?.[0];
+                                
+                                if (!s3StorageRecord) {
+                                    console.warn('[FETCH] ⚠️ No S3Storage record found for s3Key:', s3KeyParam);
+                                }
+                            } catch (metadataError) {
+                                console.warn('[FETCH] Could not fetch S3Storage metadata:', metadataError.message);
+                            }
+                            
+                            // Build response with S3_CACHE source
+                            const result = {
+                                tournamentId: scrapedData.tournamentId || s3StorageRecord?.tournamentId || 1,
+                                name: scrapedData.name || 'Unnamed Tournament',
+                                gameStatus: scrapedData.gameStatus || 'SCHEDULED',
+                                hasGuarantee: scrapedData.hasGuarantee || false,
+                                doNotScrape: scrapedData.doNotScrape || false,
+                                s3Key: s3KeyParam,
+                                ...scrapedData,
+                                source: 'S3_CACHE',
+                                sourceUrl: s3StorageRecord?.url || fetchUrl || null,  // ✅ null not ''
+                                reScrapedAt: new Date().toISOString(),
+                                contentHash: s3StorageRecord?.contentHash || null,
+                                entityId: entityId || s3StorageRecord?.entityId || DEFAULT_ENTITY_ID
+                            };
+                            
+                            console.log(`[FETCH] ✅ Successfully parsed cached HTML for tournament ${result.tournamentId}`);
+                            console.log(`[FETCH] ✅ NO NEW S3 FILE CREATED (cache mode)`);
+                            
+                            monitoring.trackOperation('CACHE_PARSE_SUCCESS', 'Game', result.tournamentId, {
+                                s3Key: s3KeyParam,
+                                entityId: result.entityId
+                            });
+                            
+                            // CRITICAL: Return here to prevent falling through to live fetch
+                            return result;
+                            
+                        } catch (cacheError) {
+                            console.error('[FETCH] Error processing S3 cache:', cacheError);
+                            throw new Error(`Failed to process cached HTML: ${cacheError.message}`);
+                        }
+                    }
+
+                    // LIVE FETCH PATH - only executed if s3KeyParam is NOT provided
+                    console.log('[FETCH] 🌐 LIVE FETCH MODE - Will create new S3 file');
+                    
+                    // ✅ EXISTING: Normal fetch/scrape flow (when no s3Key provided)
                     if (!fetchUrl) throw new Error('URL required');
                     
                     const tournamentId = getTournamentId(fetchUrl);
@@ -1316,7 +1444,7 @@ exports.handler = async (event) => {
                     return result;
 
                 case 'saveTournamentData':
-                case 'SAVE':
+                case 'SAVE': {
                     monitoring.trackOperation('SAVE_DATA', 'Game', args.input?.existingGameId || args.existingGameId || 'new', { entityId });
                     
                     // --- ENHANCEMENT: Extract all args for handleSave ---
@@ -1330,12 +1458,33 @@ exports.handler = async (event) => {
                         input.entityId || entityId, // Ensure entityId is passed
                         jobId // Pass jobId
                     );
-                    
-                case 'fetchTournamentDataRange':
+                }
+                case 'fetchTournamentDataRange': {
                     monitoring.trackOperation('FETCH_RANGE', 'Game', `${args.startId}-${args.endId}`, { entityId });
                     const rangeForceRefresh = args.forceRefresh || false;
                     return await handleFetchRange(args.startId, args.endId, entityId, rangeForceRefresh);
+                }
+                case 'reScrapeFromCache': {
+                    // ✅ NEW: Alias for fetching from S3 cache
+                    // Routes to the same logic as fetchTournamentData with s3Key
+                    console.log('[HANDLER] reScrapeFromCache invoked');
+                    monitoring.trackOperation('RESCRAPE_CACHE', 'Game', 'cached', { entityId });
                     
+                    const input = args.input || args;
+                    if (!input.s3Key) {
+                        throw new Error('s3Key is required for reScrapeFromCache');
+                    }
+                    
+                    // Use fetchTournamentData logic with s3Key
+                    return await exports.handler({
+                        operation: 'fetchTournamentData',
+                        arguments: {
+                            s3Key: input.s3Key,
+                            url: input.url || null // Optional URL for context
+                        },
+                        identity: event.identity
+                    });
+                }
                 default:
                     throw new Error(`Unknown operation: ${operationName}.`);
             }

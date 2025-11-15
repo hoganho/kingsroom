@@ -3,7 +3,7 @@
 
 import { generateClient } from 'aws-amplify/api';
 import type { GraphQLResult } from '@aws-amplify/api';
-import { fetchTournamentData, saveTournamentData } from '../graphql/mutations';
+import { fetchTournamentData } from '../graphql/mutations';
 import { fetchTournamentDataRange } from '../graphql/queries'; 
 import * as APITypes from '../API';
 import type { GameData, EntityConfig } from '../types/game';
@@ -11,6 +11,51 @@ import { VenueAssignmentStatus, ScrapedGameData } from '../API';
 
 // Default entity ID - should be fetched from Entity table or configured
 const DEFAULT_ENTITY_ID = '42101695-1332-48e3-963b-3c6ad4e909a0';
+
+// Custom saveTournamentData mutation that only returns essential fields
+// This avoids fetching problematic nested scrapeURLs relationships
+const saveTournamentDataCustom = /* GraphQL */ `
+    mutation SaveTournamentData($input: SaveTournamentInput!) {
+        saveTournamentData(input: $input) {
+            id
+            name
+            gameStartDateTime
+            gameEndDateTime
+            gameStatus
+            registrationStatus
+            gameVariant
+            gameType
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            totalDuration
+            gameTags
+            tournamentType
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            venueId
+            entityId
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            createdAt
+            updatedAt
+            venue {
+                id
+                name
+            }
+            entity {
+                id
+                entityName
+            }
+        }
+    }
+`;
 
 /**
  * Get the current active entity from local storage or use default
@@ -55,12 +100,11 @@ export const fetchEntities = async (): Promise<EntityConfig[]> => {
                     }
                 }
             `
-        });
+        }) as GraphQLResult<any>;
         
-        // Fix: Cast to GraphQLResult to access data property
-        const responseData = (response as GraphQLResult<any>).data;
-        if (responseData?.listEntities?.items) {
-            return responseData.listEntities.items as EntityConfig[];
+        // Access data property directly after casting
+        if (response.data?.listEntities?.items) {
+            return response.data.listEntities.items as EntityConfig[];
         }
         return [];
     } catch (error) {
@@ -133,7 +177,7 @@ export const fetchGameDataFromBackend = async (
             variables: { 
                 url
             }
-        });
+        }) as GraphQLResult<any>;
 
         if (response.errors) {
             // Handle the custom error from the backend for "Do Not Scrape"
@@ -247,10 +291,11 @@ export const saveGameDataToBackend = async (
             },
         };
 
+        // Use custom mutation to avoid problematic nested fields
         const response = await client.graphql({
-            query: saveTournamentData,
+            query: saveTournamentDataCustom,
             variables: { input }
-        });
+        }) as GraphQLResult<any>;
         
         if (response.errors) {
             throw new Error(JSON.stringify(response.errors));
@@ -300,7 +345,7 @@ export const fetchGameDataRangeFromBackend = async (
                 endId
                 // Removed entityId - add it back if your query supports it
             }
-        });
+        }) as GraphQLResult<any>;
 
         if (response.errors) {
             throw new Error(response.errors[0].message);

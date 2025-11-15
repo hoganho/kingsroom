@@ -1,7 +1,8 @@
 // src/components/monitoring/DatabaseChangeMonitor.tsx
-// Real-time database monitor - Fixed TypeScript errors (removed unused imports)
+// FIXED VERSION - Now calls the Lambda and displays both client and Lambda operations
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { generateClient } from 'aws-amplify/api';
 import { getMonitoring } from '../../utils/enhanced-monitoring';
 import type { DatabaseOperation } from '../../utils/enhanced-monitoring';
 import { 
@@ -13,26 +14,43 @@ import {
     Download,
     Eye,
     EyeOff,
-    BarChart2
+    BarChart2,
+    Server,
+    Monitor
 } from 'lucide-react';
 
 interface FilterOptions {
     tables: string[];
     operations: string[];
     showQueries: boolean;
+    source: 'ALL' | 'CLIENT' | 'LAMBDA';
+}
+
+interface LambdaMetric {
+    functionName: string;
+    operation: string;
+    table: string;
+    timestamp: string;
+    success: boolean;
+    duration?: number;
+    count?: number;
 }
 
 export const DatabaseChangeMonitor: React.FC = () => {
-    const [operations, setOperations] = useState<DatabaseOperation[]>([]);
+    const [clientOperations, setClientOperations] = useState<DatabaseOperation[]>([]);
+    const [lambdaMetrics, setLambdaMetrics] = useState<LambdaMetric[]>([]);
     const [isVisible, setIsVisible] = useState(true);
     const [isMinimized, setIsMinimized] = useState(false);
     const [filters, setFilters] = useState<FilterOptions>({
         tables: [],
         operations: [],
-        showQueries: false
+        showQueries: false,
+        source: 'ALL'
     });
     const [stats, setStats] = useState<Record<string, Record<string, number>>>({});
     const [showStats, setShowStats] = useState(false);
+    const [isLoadingMetrics, setIsLoadingMetrics] = useState(false);
+    const [lastFetch, setLastFetch] = useState<Date | null>(null);
     
     const monitoring = getMonitoring({
         logToConsole: true,
@@ -40,18 +58,71 @@ export const DatabaseChangeMonitor: React.FC = () => {
         showUIMonitor: true
     });
 
+    const client = generateClient();
+
+    // Fetch Lambda metrics from CloudWatch
+    const fetchLambdaMetrics = async () => {
+        setIsLoadingMetrics(true);
+        try {
+            console.log('[Monitor] Fetching Lambda metrics...');
+            
+            const query = /* GraphQL */ `
+                query GetDatabaseMetrics($timeRange: String) {
+                    getDatabaseMetrics(timeRange: $timeRange) {
+                        metrics {
+                            timestamp
+                            functionName
+                            operation
+                            table
+                            success
+                            duration
+                            count
+                        }
+                    }
+                }
+            `;
+            
+            const result = await client.graphql({
+                query: query,
+                variables: { timeRange: 'LAST_24_HOURS' }
+            }) as any;
+            
+            console.log('[Monitor] Lambda metrics response:', result);
+            
+            if (result.data?.getDatabaseMetrics?.metrics) {
+                const metrics = result.data.getDatabaseMetrics.metrics;
+                setLambdaMetrics(metrics);
+                setLastFetch(new Date());
+                console.log(`[Monitor] Loaded ${metrics.length} Lambda metrics`);
+            } else {
+                console.warn('[Monitor] No metrics in response');
+            }
+            
+        } catch (error) {
+            console.error('[Monitor] Failed to fetch Lambda metrics:', error);
+        } finally {
+            setIsLoadingMetrics(false);
+        }
+    };
+
     useEffect(() => {
-        // Subscribe to database operations
+        // Subscribe to client-side database operations
         const unsubscribe = monitoring.subscribe((operation) => {
-            setOperations(prev => {
+            setClientOperations(prev => {
                 const updated = [operation, ...prev].slice(0, 500); // Keep last 500
                 return updated;
             });
         });
 
-        // Load existing operations
+        // Load existing client operations
         const existing = monitoring.getOperations();
-        setOperations(existing);
+        setClientOperations(existing);
+
+        // Initial fetch of Lambda metrics
+        fetchLambdaMetrics();
+
+        // Refresh Lambda metrics every 30 seconds
+        const metricsInterval = setInterval(fetchLambdaMetrics, 30000);
 
         // Update stats every second
         const statsInterval = setInterval(() => {
@@ -60,12 +131,47 @@ export const DatabaseChangeMonitor: React.FC = () => {
 
         return () => {
             unsubscribe();
+            clearInterval(metricsInterval);
             clearInterval(statsInterval);
         };
     }, []);
 
+    // Combine client operations and Lambda metrics for display
+    const getCombinedOperations = useCallback(() => {
+        const combined: any[] = [];
+        
+        // Add client operations
+        if (filters.source === 'ALL' || filters.source === 'CLIENT') {
+            combined.push(...clientOperations.map(op => ({
+                ...op,
+                source: 'CLIENT',
+                displayOperation: op.operation
+            })));
+        }
+        
+        // Add Lambda metrics
+        if (filters.source === 'ALL' || filters.source === 'LAMBDA') {
+            combined.push(...lambdaMetrics.map(metric => ({
+                operation: metric.operation,
+                table: metric.table,
+                timestamp: metric.timestamp,
+                success: metric.success,
+                duration: metric.duration,
+                count: metric.count,
+                functionName: metric.functionName,
+                source: 'LAMBDA',
+                displayOperation: metric.operation
+            })));
+        }
+        
+        // Sort by timestamp
+        return combined.sort((a, b) => 
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+    }, [clientOperations, lambdaMetrics, filters.source]);
+
     const getFilteredOperations = useCallback(() => {
-        let filtered = operations;
+        let filtered = getCombinedOperations();
         
         // Filter by operation type
         if (!filters.showQueries) {
@@ -86,17 +192,18 @@ export const DatabaseChangeMonitor: React.FC = () => {
         }
         
         return filtered;
-    }, [operations, filters]);
+    }, [getCombinedOperations, filters]);
 
     const clearOperations = () => {
         monitoring.clear();
-        setOperations([]);
+        setClientOperations([]);
     };
 
     const exportToJSON = () => {
         const data = {
             timestamp: new Date().toISOString(),
-            operations: getFilteredOperations(),
+            clientOperations: clientOperations,
+            lambdaMetrics: lambdaMetrics,
             stats
         };
         
@@ -141,9 +248,18 @@ export const DatabaseChangeMonitor: React.FC = () => {
         }
     };
 
-    // Get unique tables from operations
+    const getSourceIcon = (source: string) => {
+        return source === 'LAMBDA' 
+            ? <Server className="w-4 h-4 text-purple-500" />
+            : <Monitor className="w-4 h-4 text-blue-500" />;
+    };
+
+    // Get unique tables from all operations
     const availableTables = Array.from(
-        new Set(operations.map(op => op.table))
+        new Set([
+            ...clientOperations.map(op => op.table),
+            ...lambdaMetrics.map(m => m.table)
+        ])
     );
 
     const filteredOperations = getFilteredOperations();
@@ -185,6 +301,9 @@ export const DatabaseChangeMonitor: React.FC = () => {
                     <div className="flex items-center gap-2">
                         <Database className="w-5 h-5" />
                         <h3 className="font-semibold">Database Monitor</h3>
+                        {isLoadingMetrics && (
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                        )}
                     </div>
                     <div className="flex gap-1">
                         <button
@@ -193,6 +312,13 @@ export const DatabaseChangeMonitor: React.FC = () => {
                             title="Toggle Stats"
                         >
                             <BarChart2 className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={fetchLambdaMetrics}
+                            className="p-1.5 hover:bg-gray-700 rounded transition-colors"
+                            title="Refresh Lambda Metrics"
+                        >
+                            <RefreshCw className="w-4 h-4" />
                         </button>
                         <button
                             onClick={exportToJSON}
@@ -204,9 +330,9 @@ export const DatabaseChangeMonitor: React.FC = () => {
                         <button
                             onClick={clearOperations}
                             className="p-1.5 hover:bg-gray-700 rounded transition-colors"
-                            title="Clear"
+                            title="Clear Client Operations"
                         >
-                            <RefreshCw className="w-4 h-4" />
+                            <XCircle className="w-4 h-4" />
                         </button>
                         <button
                             onClick={() => setIsMinimized(true)}
@@ -225,10 +351,27 @@ export const DatabaseChangeMonitor: React.FC = () => {
                     </div>
                 </div>
                 
+                {/* Source Filter */}
+                <div className="flex gap-2 mb-2">
+                    {(['ALL', 'CLIENT', 'LAMBDA'] as const).map(source => (
+                        <button
+                            key={source}
+                            onClick={() => setFilters(prev => ({ ...prev, source }))}
+                            className={`px-2 py-1 text-xs rounded transition-colors ${
+                                filters.source === source
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                            }`}
+                        >
+                            {source}
+                        </button>
+                    ))}
+                </div>
+                
                 {/* Filter Bar */}
                 <div className="flex gap-2 text-xs">
                     <select
-                        className="bg-gray-700 rounded px-2 py-1 text-white"
+                        className="bg-gray-700 rounded px-2 py-1 text-white flex-1"
                         onChange={(e) => {
                             const value = e.target.value;
                             setFilters(prev => ({
@@ -244,7 +387,7 @@ export const DatabaseChangeMonitor: React.FC = () => {
                     </select>
                     
                     <select
-                        className="bg-gray-700 rounded px-2 py-1 text-white"
+                        className="bg-gray-700 rounded px-2 py-1 text-white flex-1"
                         onChange={(e) => {
                             const value = e.target.value;
                             setFilters(prev => ({
@@ -269,14 +412,20 @@ export const DatabaseChangeMonitor: React.FC = () => {
                             }))}
                             className="rounded"
                         />
-                        Show Queries
+                        Queries
                     </label>
                 </div>
+                
+                {lastFetch && (
+                    <div className="mt-2 text-xs text-gray-400">
+                        Last fetch: {lastFetch.toLocaleTimeString()}
+                    </div>
+                )}
             </div>
 
             {/* Stats Panel */}
             {showStats && (
-                <div className="border-b border-gray-200 p-3 bg-gray-50">
+                <div className="border-b border-gray-200 p-3 bg-gray-50 max-h-32 overflow-y-auto">
                     <div className="grid grid-cols-2 gap-2 text-xs">
                         {Object.entries(stats).map(([table, counts]) => (
                             <div key={table} className="bg-white p-2 rounded border">
@@ -315,6 +464,7 @@ export const DatabaseChangeMonitor: React.FC = () => {
                         >
                             <div className="flex justify-between items-start mb-1">
                                 <div className="flex items-center gap-2">
+                                    {getSourceIcon(op.source)}
                                     {getOperationIcon(op.operation)}
                                     <span className="font-semibold text-sm">
                                         {op.operation}
@@ -328,9 +478,30 @@ export const DatabaseChangeMonitor: React.FC = () => {
                                 </span>
                             </div>
                             
+                            {op.source === 'LAMBDA' && (
+                                <div className="text-xs text-gray-600 mt-1 flex items-center gap-2">
+                                    <span>λ {op.functionName || 'Lambda'}</span>
+                                    {op.duration && <span>• {op.duration}ms</span>}
+                                    {op.count && <span>• Count: {op.count}</span>}
+                                </div>
+                            )}
+                            
                             {op.recordId && (
                                 <div className="text-xs text-gray-600 mt-1">
                                     ID: {op.recordId}
+                                </div>
+                            )}
+                            
+                            {op.success !== undefined && (
+                                <div className="flex items-center gap-1 mt-1">
+                                    {op.success ? (
+                                        <CheckCircle className="w-3 h-3 text-green-500" />
+                                    ) : (
+                                        <XCircle className="w-3 h-3 text-red-500" />
+                                    )}
+                                    <span className={`text-xs ${op.success ? 'text-green-600' : 'text-red-600'}`}>
+                                        {op.success ? 'Success' : 'Failed'}
+                                    </span>
                                 </div>
                             )}
                             
@@ -339,7 +510,7 @@ export const DatabaseChangeMonitor: React.FC = () => {
                                     <summary className="text-xs text-gray-600 cursor-pointer hover:text-gray-800">
                                         View Data
                                     </summary>
-                                    <pre className="text-xs mt-1 p-2 bg-gray-50 rounded overflow-x-auto">
+                                    <pre className="text-xs mt-1 p-2 bg-gray-50 rounded overflow-x-auto max-h-32">
                                         {JSON.stringify(op.data, null, 2)}
                                     </pre>
                                 </details>
@@ -353,10 +524,10 @@ export const DatabaseChangeMonitor: React.FC = () => {
             <div className="border-t border-gray-200 p-2 bg-gray-50 text-xs text-gray-600">
                 <div className="flex justify-between">
                     <span>
-                        Showing {filteredOperations.length} of {operations.length} operations
+                        Showing {filteredOperations.length} operations
                     </span>
                     <span>
-                        CloudWatch: {monitoring ? 'Connected' : 'Disconnected'}
+                        Client: {clientOperations.length} | Lambda: {lambdaMetrics.length}
                     </span>
                 </div>
             </div>

@@ -3505,6 +3505,13 @@ export const scrapeGame = /* GraphQL */ `query ScrapeGame(
     doNotScrape
     tournamentId
     entityId
+    sourceUrl
+    s3Key
+    source
+    contentHash
+    fetchedAt
+    reScrapedAt
+    wasForced
     __typename
   }
 }
@@ -5724,6 +5731,26 @@ export const listStoredHTML = /* GraphQL */ `query ListStoredHTML($url: AWSURL!,
 ` as GeneratedQuery<
   APITypes.ListStoredHTMLQueryVariables,
   APITypes.ListStoredHTMLQuery
+>;
+export const getDatabaseMetrics = /* GraphQL */ `query GetDatabaseMetrics($timeRange: String) {
+  getDatabaseMetrics(timeRange: $timeRange) {
+    metrics {
+      timestamp
+      functionName
+      operation
+      table
+      success
+      duration
+      count
+      entityId
+      __typename
+    }
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetDatabaseMetricsQueryVariables,
+  APITypes.GetDatabaseMetricsQuery
 >;
 export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
   getEntity(id: $id) {

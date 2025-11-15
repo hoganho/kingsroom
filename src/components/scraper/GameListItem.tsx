@@ -13,6 +13,8 @@ import {
     DollarSign,
     ChevronDown,
     Database,
+    HardDrive,
+    Zap,
 } from 'lucide-react';
 import type { GameState } from '../../types/game';
 import type { Venue } from '../../API';
@@ -75,6 +77,7 @@ interface GameListItemProps {
     showActions?: boolean;
     onClick?: () => void;
     enableCreateVenue?: boolean;
+    dataSource?: 'live' | 's3'; // NEW: Indicates where HTML came from
 }
 
 export const GameListItem: React.FC<GameListItemProps> = ({
@@ -90,7 +93,8 @@ export const GameListItem: React.FC<GameListItemProps> = ({
     showVenueSelector = true,
     showActions = true,
     onClick,
-    enableCreateVenue = false
+    enableCreateVenue = false,
+    dataSource // NEW
 }) => {
     const [countdown, setCountdown] = useState('');
     
@@ -170,81 +174,95 @@ export const GameListItem: React.FC<GameListItemProps> = ({
                 <div className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold ${hasDoNotScrape ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-green-100 text-green-800 border border-green-300'}`}>
                     <Database className="h-3.5 w-3.5" />
                     <span>IN DATABASE</span>
-                    {hasDoNotScrape && (
-                        <AlertCircle className="h-3.5 w-3.5" />
-                    )}
                 </div>
             );
         }
-        return (
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-300">
-                <Database className="h-3.5 w-3.5" />
-                <span>NOT IN DATABASE</span>
-            </div>
-        );
+        return null;
+    };
+
+    // NEW: Data Source Badge Component
+    const DataSourceBadge = () => {
+        if (!dataSource) return null;
+        
+        if (dataSource === 's3') {
+            return (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 border border-purple-300">
+                    <HardDrive className="h-3.5 w-3.5" />
+                    <span>LOADED FROM S3</span>
+                </div>
+            );
+        }
+        
+        if (dataSource === 'live') {
+            return (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-300">
+                    <Zap className="h-3.5 w-3.5" />
+                    <span>LIVE SCRAPE</span>
+                </div>
+            );
+        }
+        
+        return null;
     };
 
     return (
-        <div className={`border ${needsVenueSelection ? 'border-2' : ''} rounded-lg transition-all ${colorClass} ${isClickable ? 'cursor-pointer' : ''}`}>
-            <div onClick={isClickable ? onClick : undefined} className="p-3 sm:p-4 space-y-3">
-                {/* Top Row - ID/URL, DB Status, and Actions */}
-                <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2 flex-wrap flex-1">
-                        {/* URL/ID Display */}
-                        <a
-                            href={game.id}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-1 text-xs sm:text-sm font-mono text-blue-600 hover:text-blue-800 hover:underline"
-                        >
-                            <ExternalLink className="h-3.5 w-3.5" />
-                            {getDisplayId(game.id)}
-                        </a>
-                        
-                        {/* Database Status Badge */}
+        <div className={`border rounded-lg overflow-hidden ${colorClass} ${isClickable ? 'cursor-pointer' : ''}`}>
+            {/* Main Content */}
+            <div 
+                className="p-3 sm:p-4"
+                onClick={isClickable ? onClick : undefined}
+            >
+                {/* Header Row */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <h4 className="font-semibold text-sm sm:text-base truncate">
+                            {data?.name || 'Loading...'}
+                        </h4>
+                        {/* NEW: Show data source badge */}
+                        <DataSourceBadge />
                         <DatabaseStatus />
                     </div>
                     
                     {/* Action Buttons */}
                     {showActions && (
                         <div className="flex items-center gap-2">
-                            {onViewDetails && (
+                            {onViewDetails && data && (
                                 <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onViewDetails();
+                                    onClick={(e) => { 
+                                        e.stopPropagation(); 
+                                        onViewDetails(); 
                                     }}
-                                    className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg flex-shrink-0"
                                     title="View Details"
                                 >
                                     <Eye className="h-4 w-4" />
                                 </button>
                             )}
                             
-                            {onRefresh && !hasDoNotScrape && (
+                            {game.id.startsWith('http') && (
+                                <a
+                                    href={game.id}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg flex-shrink-0"
+                                    title="Open Source URL"
+                                >
+                                    <ExternalLink className="h-4 w-4" />
+                                </a>
+                            )}
+                            
+                            {onRefresh && !hasDoNotScrape && !hasError && (
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         onRefresh();
                                     }}
-                                    className="p-1.5 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors"
-                                    title="Refresh"
+                                    disabled={game.jobStatus === 'FETCHING' || game.jobStatus === 'SCRAPING' || game.jobStatus === 'PARSING'}
+                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                                    title="Refresh Data"
                                 >
-                                    <RefreshCw className="h-4 w-4" />
-                                </button>
-                            )}
-                            
-                            {onRemove && (
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onRemove();
-                                    }}
-                                    className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                                    title="Remove"
-                                >
-                                    <XCircle className="h-4 w-4" />
+                                    <RefreshCw className={`h-4 w-4 ${(game.jobStatus === 'FETCHING' || game.jobStatus === 'SCRAPING' || game.jobStatus === 'PARSING') ? 'animate-spin' : ''}`} />
                                 </button>
                             )}
                             
@@ -255,11 +273,24 @@ export const GameListItem: React.FC<GameListItemProps> = ({
                                         onSave();
                                     }}
                                     disabled={isSaveDisabled}
-                                    className={`px-2.5 py-1 rounded text-xs font-medium inline-flex items-center gap-1.5 transition-colors ${isSaveDisabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700 shadow-sm'}`}
-                                    title={isSaveDisabled ? 'Select a venue first' : 'Save to Database'}
+                                    className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium flex items-center gap-1.5 flex-shrink-0"
+                                    title={!selectedVenueId ? 'Select a venue first' : 'Save to Database'}
                                 >
                                     <Save className="h-3.5 w-3.5" />
-                                    Save
+                                    <span className="hidden sm:inline">Save</span>
+                                </button>
+                            )}
+                            
+                            {onRemove && (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onRemove();
+                                    }}
+                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg flex-shrink-0"
+                                    title="Remove from List"
+                                >
+                                    <XCircle className="h-4 w-4" />
                                 </button>
                             )}
                             
@@ -269,28 +300,24 @@ export const GameListItem: React.FC<GameListItemProps> = ({
                                     e.stopPropagation();
                                     setIsExpanded(!isExpanded);
                                 }}
-                                className="p-1.5 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
+                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg flex-shrink-0"
                                 title={isExpanded ? "Collapse" : "Expand"}
                             >
-                                <ChevronDown className={`h-5 w-5 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                                <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                             </button>
                         </div>
                     )}
                 </div>
 
-                {/* Tournament Name */}
-                <div>
-                    <h3 className={`font-medium text-sm sm:text-base ${hasError ? 'text-red-700' : 'text-gray-900'} break-words`}>
-                        {data?.name || 'Loading...'}
-                    </h3>
-                </div>
-
-                {/* Status Badges and Tournament Details Row */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                    {/* Status Badges */}
-                    <div className="flex items-center flex-wrap gap-2">
+                {/* ID and Status Row */}
+                <div className="flex flex-col sm:flex-row items-start gap-2 mb-2">
+                    <p className="text-xs sm:text-sm text-gray-500 font-mono truncate max-w-full">
+                        ID: {getDisplayId(game.id)}
+                    </p>
+                    
+                    <div className="flex flex-wrap items-center gap-2">
                         {game.jobStatus && (
-                            <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded ${getJobStatusColor(game.jobStatus)}`}>
+                            <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium border rounded ${getJobStatusColor(game.jobStatus)}`}>
                                 {game.jobStatus.replace(/_/g, ' ')}
                             </span>
                         )}
@@ -316,66 +343,72 @@ export const GameListItem: React.FC<GameListItemProps> = ({
                             </span>
                         )}
                     </div>
-
-                    {/* Tournament Details */}
-                    {data && (
-                        <div className="flex flex-wrap gap-3 text-xs sm:text-sm text-gray-600">
-                            {data.gameStartDateTime && (
-                                <div className="flex items-center">
-                                    <Clock className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
-                                    <span className="truncate">
-                                        {new Date(data.gameStartDateTime).toLocaleDateString()} {new Date(data.gameStartDateTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                                    </span>
-                                </div>
-                            )}
-                            
-                            {data.buyIn && (
-                                <div className="flex items-center">
-                                    <DollarSign className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
-                                    <span className="truncate">${data.buyIn}</span>
-                                </div>
-                            )}
-                            
-                            {data.totalEntries !== undefined && (
-                                <div className="flex items-center">
-                                    <Users className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
-                                    <span className="truncate">{data.totalEntries}</span>
-                                </div>
-                            )}
-                            
-                            {countdown && (
-                                <div className="flex items-center text-blue-600 font-medium">
-                                    <RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-pulse flex-shrink-0" />
-                                    <span>{countdown}</span>
-                                </div>
-                            )}
-                        </div>
-                    )}
                 </div>
 
-                {/* Error Message */}
-                {hasError && (
+                {/* Tournament Details */}
+                {data && (
+                    <div className="flex flex-wrap gap-3 text-xs sm:text-sm text-gray-600">
+                        {data.gameStartDateTime && (
+                            <div className="flex items-center">
+                                <Clock className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
+                                <span className="truncate">
+                                    {new Date(data.gameStartDateTime).toLocaleDateString()} {new Date(data.gameStartDateTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                </span>
+                            </div>
+                        )}
+                        
+                        {data.buyIn && (
+                            <div className="flex items-center">
+                                <DollarSign className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
+                                <span className="truncate">${data.buyIn}</span>
+                            </div>
+                        )}
+                        
+                        {data.totalEntries !== undefined && (
+                            <div className="flex items-center">
+                                <Users className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
+                                <span className="truncate">{data.totalEntries}</span>
+                            </div>
+                        )}
+                        
+                        {countdown && (
+                            <div className="flex items-center text-blue-600 font-medium">
+                                <RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-pulse flex-shrink-0" />
+                                <span>{countdown}</span>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {/* Error Message */}
+            {hasError && (
+                <div className="px-3 sm:px-4 pb-3">
                     <p className="text-xs sm:text-sm text-red-600 break-words">
                         Error: {game.errorMessage}
                     </p>
-                )}
+                </div>
+            )}
 
-                {/* Do Not Scrape Warning */}
-                {hasDoNotScrape && (
+            {/* Do Not Scrape Warning */}
+            {hasDoNotScrape && (
+                <div className="px-3 sm:px-4 pb-3">
                     <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-amber-50 text-amber-700 rounded text-xs">
                         <AlertCircle className="h-3.5 w-3.5" />
                         <span className="font-medium">Do Not Scrape flag active</span>
                     </div>
-                )}
-                
-                {/* Venue Selection Required Indicator (only when collapsed) */}
-                {!isExpanded && needsVenueSelection && (
+                </div>
+            )}
+            
+            {/* Venue Selection Required Indicator (only when collapsed) */}
+            {!isExpanded && needsVenueSelection && (
+                <div className="px-3 sm:px-4 pb-3">
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded text-xs font-medium animate-pulse">
                         <AlertCircle className="h-3.5 w-3.5" />
                         <span>Venue selection required</span>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
 
             {/* Expandable Section */}
             {isExpanded && (

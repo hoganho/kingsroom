@@ -1,43 +1,37 @@
 // populateS3Storage.js
-// This script scans an S3 bucket prefix and populates the S3Storage DynamoDB
-// table with records for all found objects.
+// Populates S3Storage table from existing S3 files with version history
 //
-// ‼️ WARNING: THIS SCRIPT WRITES DATA TO YOUR DATABASE.
-// ‼️ RUN WITH `DRY_RUN = true` FIRST TO VERIFY THE LOGIC.
+// Logic:
+// - Scans S3 bucket and groups files by tournament ID
+// - Creates ONE S3Storage record per tournament
+// - Main record fields point to LATEST version (most recent LastModified)
+// - All older versions are stored in previousVersions array
+// - Links ScrapeURL.latestS3StorageId to the S3Storage record
+//
+// ⚠️ WARNING: THIS SCRIPT WRITES DATA TO YOUR DATABASE.
+// ⚠️ RUN WITH `DRY_RUN = true` FIRST TO VERIFY THE LOGIC.
 
-import { S3Client, paginateListObjectsV2 } from '@aws-sdk/client-s3';
+import { S3Client, paginateListObjectsV2, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
   DynamoDBDocumentClient,
   BatchWriteCommand,
+  GetCommand,
+  PutCommand,
 } from '@aws-sdk/lib-dynamodb';
 import * as readline from 'readline';
 import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 
 // --- CONFIGURATION ---
-// ‼️ UPDATE THESE VALUES TO MATCH YOUR ENVIRONMENT ‼️
-
-// Set to false to perform actual database writes.
 const DRY_RUN = false; 
-
-// The S3 bucket where your HTML files are stored.
-const S3_BUCKET = 'pokerpro-scraper-storage'; // <-- Updated
-
-// The S3 prefix to scan (e.g., 'public/scrape-data/').
-const S3_PREFIX = 'entities/'; // <-- Updated
-
-// The base URL of your site to reconstruct the 'url' field.
-const URL_BASE = 'https://kingsroom.com.au/tournament/?id=';
-
-// Your S3Storage DynamoDB table name.
-// Verify this name is correct in your AWS console.
-const DYNAMODB_TABLE = 'S3Storage-oi5oitkajrgtzm7feellfluriy-dev';
-
-// --- End Configuration ---
-
+const S3_BUCKET = 'pokerpro-scraper-storage';
+const S3_PREFIX = 'entities/';
+const S3_STORAGE_TABLE = 'S3Storage-oi5oitkajrgtzm7feellfluriy-dev';
+const SCRAPE_URL_TABLE = 'ScrapeURL-oi5oitkajrgtzm7feellfluriy-dev';
 const REGION = process.env.AWS_REGION || 'ap-southeast-2';
 
-// --- Logger (copied from your script) ---
+// --- Logger ---
 const logger = {
   info: (msg) => console.log(`[INFO] ${msg}`),
   warn: (msg) => console.log(`[WARN] ⚠️  ${msg}`),
@@ -45,18 +39,12 @@ const logger = {
   success: (msg) => console.log(`[SUCCESS] ✅ ${msg}`),
 };
 
-// --- Setup DynamoDB Clients ---
+// --- Setup Clients ---
 const ddbClient = new DynamoDBClient({ region: REGION });
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 const s3Client = new S3Client({ region: REGION });
 
-/**
- * Creates a readline interface to ask the user a question.
- * @param {string} query The question to ask the user.
- * @returns {Promise<string>} The user's answer.
- */
 function askQuestion(query) {
-  // ... (copied from your script)
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -70,18 +58,10 @@ function askQuestion(query) {
 }
 
 /**
- * ‼️ CRITICAL ‼️ - This function parses your S3 key.
- * You MUST edit this to match your S3 key structure.
- *
- * @param {string} s3Key The S3 object key (e.g., 'public/scrape-data/default/12345-1678886400000.html')
- * @returns {Promise<{entityId: string, tournamentId: number, url: string}> | null}
+ * Parse S3 key to extract metadata
  */
 function parseS3Key(s3Key) {
-  // This regex assumes: <PREFIX><entityId>/html/<tournamentId>/<filename>
-  // Example: entities/42101695-1332-48e3-963b-3c6ad4e909a0/html/1/2025...html
-  // Group 1: ([^/]+)  -> '42101695-1332-48e3-963b-3c6ad4e909a0' (entityId)
-  // Group 2: (\\d+)    -> '1' (tournamentId)
-  const regex = new RegExp(`^${S3_PREFIX}([^/]+)/html/(\\d+)/.+\\.html$`);
+  const regex = new RegExp(`^${S3_PREFIX}([^/]+)/html/(\\d+)/(.+\\.html)$`);
   const match = s3Key.match(regex);
 
   if (!match) {
@@ -91,158 +71,450 @@ function parseS3Key(s3Key) {
 
   const entityId = match[1];
   const tournamentId = parseInt(match[2], 10);
-  const url = `${URL_BASE}${tournamentId}`;
+  const filename = match[3];
+
+  // Try to extract timestamp from filename
+  // Format: 2025-11-14T09-45-48-4582_tid1_03514ee2.html
+  const timestampMatch = filename.match(/^(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{4})/);
+  const filenameTimestamp = timestampMatch ? timestampMatch[1] : null;
 
   if (isNaN(tournamentId)) {
     logger.warn(`Parsed non-numeric tournamentId from key: ${s3Key}`);
     return null;
   }
 
-  return { entityId, tournamentId, url };
+  return { entityId, tournamentId, filename, filenameTimestamp };
 }
 
 /**
- * Sends a batch of write requests to DynamoDB.
- * @param {Array} requests The array of PutRequest objects.
+ * Build URL from entity and tournament ID
  */
-async function sendBatch(requests) {
+function buildUrl(entityId, tournamentId) {
+  const entityDomains = {
+    '42101695-1332-48e3-963b-3c6ad4e909a0': 'https://kingsroom.com.au/tournament/?id=',
+  };
+  
+  const urlBase = entityDomains[entityId] || 'https://kingsroom.com.au/tournament/?id=';
+  return `${urlBase}${tournamentId}`;
+}
+
+/**
+ * Get S3 object metadata
+ */
+async function getS3Metadata(s3Key) {
+  try {
+    const headResult = await s3Client.send(new HeadObjectCommand({
+      Bucket: S3_BUCKET,
+      Key: s3Key
+    }));
+
+    return {
+      etag: headResult.ETag ? headResult.ETag.replace(/"/g, '') : null,
+      lastModified: headResult.LastModified ? headResult.LastModified.toISOString() : null,
+      contentType: headResult.ContentType || 'text/html',
+      contentLength: headResult.ContentLength || 0,
+      metadata: headResult.Metadata || {},
+    };
+  } catch (error) {
+    logger.warn(`Could not get metadata for ${s3Key}: ${error.message}`);
+    return {
+      etag: null,
+      lastModified: null,
+      contentType: 'text/html',
+      contentLength: 0,
+      metadata: {},
+    };
+  }
+}
+
+/**
+ * Get or create ScrapeURL record
+ */
+async function ensureScrapeURL(url, tournamentId, entityId) {
   if (DRY_RUN) {
-    logger.info(`[DRY_RUN] Would have written ${requests.length} items.`);
-    return;
+    return url;
+  }
+
+  try {
+    const getResult = await ddbDocClient.send(new GetCommand({
+      TableName: SCRAPE_URL_TABLE,
+      Key: { id: url }
+    }));
+
+    if (getResult.Item) {
+      return getResult.Item.id;
+    }
+
+    const now = new Date().toISOString();
+    const scrapeURLItem = {
+      id: url,
+      url: url,
+      tournamentId: tournamentId,
+      entityId: entityId,
+      status: 'ACTIVE',
+      placedIntoDatabase: false,
+      firstScrapedAt: now,
+      lastScrapedAt: now,
+      timesScraped: 0,
+      timesSuccessful: 0,
+      timesFailed: 0,
+      lastScrapeStatus: 'SUCCESS',
+      doNotScrape: false,
+      createdAt: now,
+      updatedAt: now,
+      __typename: 'ScrapeURL',
+      _version: 1,
+      _lastChangedAt: new Date().getTime(),
+    };
+
+    await ddbDocClient.send(new PutCommand({
+      TableName: SCRAPE_URL_TABLE,
+      Item: scrapeURLItem
+    }));
+
+    logger.success(`Created ScrapeURL: ${url}`);
+    return url;
+  } catch (error) {
+    logger.error(`Error ensuring ScrapeURL for ${url}: ${error.message}`);
+    throw error;
+  }
+}
+
+/**
+ * Build version history from array of S3 objects for the same tournament
+ * @param {Array} versions - Array of version objects sorted by lastModified (oldest first)
+ * @param {number} currentIndex - Index of current version in the array
+ * @returns {Array} previousVersions array for the current version
+ */
+function buildVersionHistory(versions, currentIndex) {
+  // For the current version, all earlier versions are "previous"
+  const previousVersions = [];
+  
+  for (let i = 0; i < currentIndex; i++) {
+    const version = versions[i];
+    const prevVersion = {
+      versionNumber: i + 1,
+      s3Key: version.s3Key,
+      scrapedAt: version.scrapedAt,
+      contentSize: version.contentSize,
+      contentHash: version.contentHash,
+      etag: version.etag,
+    };
+    
+    // Only include fields if they have values (to avoid GSI issues)
+    if (version.gameId !== null && version.gameId !== undefined) {
+      prevVersion.gameId = version.gameId;
+    }
+    if (version.gameStatus !== null && version.gameStatus !== undefined) {
+      prevVersion.gameStatus = version.gameStatus;
+    }
+    if (version.registrationStatus !== null && version.registrationStatus !== undefined) {
+      prevVersion.registrationStatus = version.registrationStatus;
+    }
+    
+    previousVersions.push(prevVersion);
   }
   
-  const batchWriteParams = {
-    RequestItems: {
-      [DYNAMODB_TABLE]: requests,
-    },
-  };
-
-  let unprocessedItems = batchWriteParams.RequestItems;
-  let attempt = 0;
-  while (Object.keys(unprocessedItems).length > 0 && attempt < 5) {
-    if (attempt > 0) {
-        logger.warn(`Retrying ${Object.keys(unprocessedItems[DYNAMODB_TABLE]).length} unprocessed items...`);
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Wait 1s, 2s, ...
-    }
-    const batchWriteResult = await ddbDocClient.send(new BatchWriteCommand({ RequestItems: unprocessedItems }));
-    unprocessedItems = batchWriteResult.UnprocessedItems || {};
-    attempt++;
-  }
-
-  if (Object.keys(unprocessedItems).length > 0) {
-    logger.error(`Failed to process ${Object.keys(unprocessedItems[DYNAMODB_TABLE]).length} items.`);
-  } else {
-    logger.success(`Successfully wrote batch of ${requests.length} items.`);
-  }
+  return previousVersions;
 }
 
 /**
- * Main execution function.
+ * Main execution function
  */
 async function main() {
-  logger.warn('--- S3Storage Table Populator ---');
+  logger.warn('========================================');
+  logger.warn('  S3Storage Populator (One Per Game)   ');
+  logger.warn('========================================');
+  
   if (DRY_RUN) {
     logger.warn('*** DRY_RUN IS ENABLED. NO DATA WILL BE WRITTEN. ***');
   } else {
     logger.warn('*** DRY_RUN IS DISABLED. SCRIPT WILL WRITE TO DYNAMODB. ***');
   }
-  logger.warn('This script will scan S3 and create new items in DynamoDB.');
-  logger.warn('It will NOT delete or overwrite anything, but duplicates are possible if run twice.');
   
-  if (!S3_BUCKET || S3_BUCKET === 'your-bucket-name-here') {
-     logger.error('Please configure S3_BUCKET in the script. Aborting.');
-     return;
-  }
+  logger.warn('This script will:');
+  logger.warn('1. Scan S3 bucket and group files by tournament');
+  logger.warn('2. Sort versions by timestamp (oldest to newest)');
+  logger.warn('3. Create ONE S3Storage record per tournament');
+  logger.warn('4. Use latest version for main fields');
+  logger.warn('5. Store older versions in previousVersions array');
+  logger.warn('6. Create/update ScrapeURL records');
+  logger.warn('7. Link latest version to ScrapeURL.latestS3StorageId');
 
-  console.log('\nConfiguration:');
-  console.log(`- S3 Bucket:       ${S3_BUCKET}`);
-  console.log(`- S3 Prefix:       ${S3_PREFIX}`);
-  console.log(`- DynamoDB Table:  ${DYNAMODB_TABLE}`);
-  console.log(`- URL Base:        ${URL_BASE}`);
+  console.log('\n📋 Configuration:');
+  console.log(`   S3 Bucket:         ${S3_BUCKET}`);
+  console.log(`   S3 Prefix:         ${S3_PREFIX}`);
+  console.log(`   S3Storage Table:   ${S3_STORAGE_TABLE}`);
+  console.log(`   ScrapeURL Table:   ${SCRAPE_URL_TABLE}`);
+  console.log(`   Region:            ${REGION}`);
+  console.log(`   Dry Run:           ${DRY_RUN ? 'YES' : 'NO'}`);
   
-  const confirmation = await askQuestion('\nType "proceed" to continue: ');
+  const confirmation = await askQuestion('\n⚠️  Type "proceed" to continue: ');
   if (confirmation.toLowerCase() !== 'proceed') {
     logger.info('Aborted by user.');
     return;
   }
 
-  const paginator = paginateListObjectsV2({ client: s3Client }, { 
-    Bucket: S3_BUCKET, 
-    Prefix: S3_PREFIX 
-  });
+  logger.info('\n🔍 Step 1: Scanning S3 bucket and grouping by tournament...');
   
-  let batchWriteRequests = [];
-  let totalProcessed = 0;
+  const paginator = paginateListObjectsV2(
+    { client: s3Client }, 
+    { Bucket: S3_BUCKET, Prefix: S3_PREFIX }
+  );
+  
+  // Group files by URL (entityId + tournamentId)
+  const tournamentVersions = new Map(); // url -> array of version objects
+  let totalScanned = 0;
+  let totalSkipped = 0;
 
   for await (const page of paginator) {
     const objects = page.Contents || [];
 
     for (const obj of objects) {
-      // Skip "folders" and zero-byte files
       if (obj.Key.endsWith('/') || obj.Size === 0) {
+        totalSkipped++;
         continue;
       }
       
       const metadata = parseS3Key(obj.Key);
       if (!metadata) {
-        continue; // Warning already logged in parseS3Key
+        totalSkipped++;
+        continue;
       }
 
-      const now = new Date();
-      const item = {
-        id: uuidv4(),
+      const { entityId, tournamentId, filename, filenameTimestamp } = metadata;
+      const url = buildUrl(entityId, tournamentId);
+      
+      totalScanned++;
+
+      // Get S3 metadata
+      const s3Metadata = await getS3Metadata(obj.Key);
+
+      // Create version object
+      const versionObj = {
         s3Key: obj.Key,
-        s3Bucket: S3_BUCKET,
-        entityId: metadata.entityId,
-        tournamentId: metadata.tournamentId,
-        url: metadata.url,
+        url: url,
+        entityId: entityId,
+        tournamentId: tournamentId,
+        filename: filename,
+        filenameTimestamp: filenameTimestamp,
         scrapedAt: obj.LastModified.toISOString(),
+        lastModified: s3Metadata.lastModified,
         contentSize: obj.Size,
-        etag: obj.ETag ? obj.ETag.replace(/"/g, '') : null, // S3 ETags are quoted
-        lastModified: obj.LastModified.toISOString(),
-        dataExtracted: false,
-        isManualUpload: false,
-        // Amplify system fields
-        createdAt: now.toISOString(),
-        updatedAt: now.toISOString(),
-        _version: 1,
-        _lastChangedAt: now.getTime(),
-        __typename: 'S3Storage',
+        etag: s3Metadata.etag,
+        contentHash: null, // Would need to download to calculate
+        gameId: null,
+        gameStatus: null,
+        registrationStatus: null,
       };
 
-      if (DRY_RUN) {
-        logger.info(`[DRY_RUN] Would create item for key: ${item.s3Key}`);
-        console.log(JSON.stringify(item, null, 2));
+      // Group by URL
+      if (!tournamentVersions.has(url)) {
+        tournamentVersions.set(url, []);
       }
+      tournamentVersions.get(url).push(versionObj);
+    }
+  }
 
-      batchWriteRequests.push({ PutRequest: { Item: item } });
-      totalProcessed++;
+  logger.success(`Found ${tournamentVersions.size} unique tournaments`);
+  logger.success(`Total versions: ${totalScanned}`);
 
-      // Send batch when it's full
-      if (batchWriteRequests.length === 25) {
-        await sendBatch(batchWriteRequests);
-        batchWriteRequests = []; // Clear the batch
+  // Sort each tournament's versions by scrapedAt (oldest first)
+  for (const [url, versions] of tournamentVersions) {
+    versions.sort((a, b) => new Date(a.scrapedAt) - new Date(b.scrapedAt));
+  }
+
+  logger.info('\n🔍 Step 2: Creating S3Storage records with version history...');
+
+  let totalCreated = 0;
+  const s3StorageBatch = [];
+
+  for (const [url, versions] of tournamentVersions) {
+    const { entityId, tournamentId } = versions[0];
+    
+    logger.info(`\n📦 Processing tournament: ${tournamentId} (${versions.length} versions)`);
+
+    // Ensure ScrapeURL exists
+    const scrapeURLId = await ensureScrapeURL(url, tournamentId, entityId);
+
+    // Get the latest version (last in sorted array)
+    const latestVersion = versions[versions.length - 1];
+    const latestIndex = versions.length - 1;
+    
+    // Build previousVersions array (all versions except the latest)
+    const previousVersions = buildVersionHistory(versions, latestIndex);
+
+    const now = new Date();
+    const s3StorageId = uuidv4();
+    
+    // Create ONE S3Storage record per tournament with latest version as main data
+    const s3StorageItem = {
+      id: s3StorageId,
+      scrapeURLId: scrapeURLId,
+      url: url,
+      tournamentId: tournamentId,
+      entityId: entityId,
+      s3Key: latestVersion.s3Key,
+      s3Bucket: S3_BUCKET,
+      scrapedAt: latestVersion.scrapedAt,
+      contentSize: latestVersion.contentSize,
+      contentHash: latestVersion.contentHash,
+      etag: latestVersion.etag,
+      lastModified: latestVersion.lastModified,
+      headers: null,
+      dataExtracted: false,
+      isManualUpload: false,
+      uploadedBy: null,
+      notes: null,
+      previousVersions: previousVersions, // ✅ All older versions
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+      _version: 1,
+      _lastChangedAt: now.getTime(),
+      __typename: 'S3Storage',
+    };
+
+    // Only include GSI fields if they have non-null values to avoid DynamoDB validation errors
+    // GSI byGameId requires gameId to be a String, not NULL
+    // GSI byS3GameStatus requires gameStatus to be a String, not NULL
+    if (latestVersion.gameId !== null && latestVersion.gameId !== undefined) {
+      s3StorageItem.gameId = latestVersion.gameId;
+    }
+    if (latestVersion.gameStatus !== null && latestVersion.gameStatus !== undefined) {
+      s3StorageItem.gameStatus = latestVersion.gameStatus;
+    }
+    if (latestVersion.registrationStatus !== null && latestVersion.registrationStatus !== undefined) {
+      s3StorageItem.registrationStatus = latestVersion.registrationStatus;
+    }
+
+    if (DRY_RUN) {
+      logger.info(`   [DRY_RUN] Latest version: ${latestVersion.filename}`);
+      logger.info(`             Previous versions: ${previousVersions.length}`);
+      logger.info(`             S3Storage ID: ${s3StorageId}`);
+      
+      if (versions.length > 1) {
+        console.log('\n📄 S3Storage item (latest + version history):');
+        console.log(JSON.stringify({
+          ...s3StorageItem,
+          previousVersions: s3StorageItem.previousVersions.map((v, idx) => ({
+            versionNumber: v.versionNumber,
+            s3Key: v.s3Key,
+            scrapedAt: v.scrapedAt,
+            contentSize: v.contentSize,
+          }))
+        }, null, 2));
+      }
+    }
+
+    s3StorageBatch.push({ PutRequest: { Item: s3StorageItem } });
+    totalCreated++;
+
+    // Send batch when full
+    if (s3StorageBatch.length === 25) {
+      await sendBatch(s3StorageBatch, S3_STORAGE_TABLE);
+      s3StorageBatch.length = 0;
+    }
+
+    // Update ScrapeURL.latestS3StorageId
+    if (!DRY_RUN) {
+      try {
+        await ddbDocClient.send(new PutCommand({
+          TableName: SCRAPE_URL_TABLE,
+          Item: {
+            ...(await ddbDocClient.send(new GetCommand({
+              TableName: SCRAPE_URL_TABLE,
+              Key: { id: scrapeURLId }
+            }))).Item,
+            latestS3StorageId: s3StorageId,
+            updatedAt: new Date().toISOString(),
+          }
+        }));
+        logger.success(`   Updated ScrapeURL.latestS3StorageId → ${s3StorageId}`);
+      } catch (error) {
+        logger.warn(`   Could not update ScrapeURL: ${error.message}`);
       }
     }
   }
 
-  // Send any remaining items
-  if (batchWriteRequests.length > 0) {
-    await sendBatch(batchWriteRequests);
+  // Send remaining batch
+  if (s3StorageBatch.length > 0) {
+    await sendBatch(s3StorageBatch, S3_STORAGE_TABLE);
   }
 
-  logger.success(`\n--- COMPLETED ---`);
-  logger.success(`Total S3 objects processed: ${totalProcessed}`);
+  logger.success('\n========================================');
+  logger.success('           COMPLETED                    ');
+  logger.success('========================================');
+  logger.success(`Tournaments processed:    ${tournamentVersions.size}`);
+  logger.success(`Total versions found:     ${totalScanned}`);
+  logger.success(`S3Storage records created: ${totalCreated} (one per tournament)`);
+  
+  // Show version statistics
+  const versionStats = Array.from(tournamentVersions.values())
+    .map(v => v.length)
+    .reduce((acc, count) => {
+      acc[count] = (acc[count] || 0) + 1;
+      return acc;
+    }, {});
+  
+  console.log('\n📊 Version Statistics:');
+  Object.entries(versionStats)
+    .sort(([a], [b]) => parseInt(a) - parseInt(b))
+    .forEach(([count, tournaments]) => {
+      const oldVersions = count > 1 ? `(${count - 1} in previousVersions)` : '(no previous versions)';
+      console.log(`   ${count} version${count > 1 ? 's' : ''}: ${tournaments} tournament${tournaments > 1 ? 's' : ''} ${oldVersions}`);
+    });
+  
   if (DRY_RUN) {
-    logger.warn('*** DRY_RUN WAS ENABLED. NO DATA WAS WRITTEN. ***');
+    logger.warn('\n*** DRY_RUN WAS ENABLED. NO DATA WAS WRITTEN. ***');
+    logger.info('Review the output above, then set DRY_RUN = false to write data.');
   } else {
-    logger.success('All items have been written to DynamoDB.');
+    logger.success('\n✅ All items have been written to DynamoDB.');
+    logger.success('✅ Each tournament has ONE S3Storage record');
+    logger.success('✅ Latest version is in main fields, older versions in previousVersions array');
+    logger.success('✅ ScrapeURL.latestS3StorageId updated for all tournaments');
   }
 }
 
-// --- Execute ---
+async function sendBatch(requests, tableName) {
+  if (DRY_RUN) {
+    logger.info(`[DRY_RUN] Would write ${requests.length} items to ${tableName}`);
+    return;
+  }
+  
+  const batchWriteParams = {
+    RequestItems: {
+      [tableName]: requests,
+    },
+  };
+
+  let unprocessedItems = batchWriteParams.RequestItems;
+  let attempt = 0;
+  
+  while (Object.keys(unprocessedItems).length > 0 && attempt < 5) {
+    if (attempt > 0) {
+      const itemCount = unprocessedItems[tableName]?.length || 0;
+      logger.warn(`Retrying ${itemCount} unprocessed items (attempt ${attempt + 1})...`);
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+    }
+    
+    const batchWriteResult = await ddbDocClient.send(new BatchWriteCommand({ 
+      RequestItems: unprocessedItems 
+    }));
+    
+    unprocessedItems = batchWriteResult.UnprocessedItems || {};
+    attempt++;
+  }
+
+  if (Object.keys(unprocessedItems).length > 0) {
+    const itemCount = unprocessedItems[tableName]?.length || 0;
+    logger.error(`Failed to process ${itemCount} items after ${attempt} attempts.`);
+  } else {
+    logger.success(`Wrote batch of ${requests.length} items to ${tableName}`);
+  }
+}
+
 main().catch((err) => {
-  logger.error('Script failed due to an unhandled error: ' + err.message);
+  logger.error('Script failed: ' + err.message);
   console.error(err.stack);
   process.exit(1);
 });

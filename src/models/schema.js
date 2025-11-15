@@ -6992,6 +6992,82 @@ export const schema = {
                 }
             }
         },
+        "DatabaseMetric": {
+            "name": "DatabaseMetric",
+            "fields": {
+                "timestamp": {
+                    "name": "timestamp",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "functionName": {
+                    "name": "functionName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "operation": {
+                    "name": "operation",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "table": {
+                    "name": "table",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "duration": {
+                    "name": "duration",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "count": {
+                    "name": "count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "DatabaseMetricsResponse": {
+            "name": "DatabaseMetricsResponse",
+            "fields": {
+                "metrics": {
+                    "name": "metrics",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "DatabaseMetric"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                }
+            }
+        },
         "S3StorageHistoryResponse": {
             "name": "S3StorageHistoryResponse",
             "fields": {
@@ -8340,6 +8416,55 @@ export const schema = {
                     "type": "ID",
                     "isRequired": false,
                     "attributes": []
+                },
+                "sourceUrl": {
+                    "name": "sourceUrl",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "s3Key": {
+                    "name": "s3Key",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "source": {
+                    "name": "source",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "contentHash": {
+                    "name": "contentHash",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "fetchedAt": {
+                    "name": "fetchedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reScrapedAt": {
+                    "name": "reScrapedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "wasForced": {
+                    "name": "wasForced",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
                 }
             }
         },
@@ -8714,5 +8839,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "0962aec7c93d7865c394f09539e046bd"
+    "version": "15bba30dfdcf69fb95ab974fc7838a24"
 };

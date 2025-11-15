@@ -131,6 +131,7 @@ export const useGameTracker = (): UseGameTrackerReturn => {
     } | null>(null);
     
     const autoRefreshTimers = useRef<Record<string, NodeJS.Timeout>>({});
+    const activeRequests = useRef<Set<string>>(new Set());
     const clientRef = useRef<any>(null);
     
     useEffect(() => {
@@ -237,27 +238,36 @@ export const useGameTracker = (): UseGameTrackerReturn => {
         entityId: string,
         options?: TrackOptions
     ) => {
-        console.log(`[useGameTracker] Tracking: ${url}, source: ${options?.forceSource || 'AUTO'}`);
+        // ============================================
+        // ✅ ADD ONLY THESE 5 LINES:
+        // ============================================
+        const reqKey = `${url}-${options?.forceSource || 'auto'}`;
+        if (activeRequests.current.has(reqKey)) return;
+        activeRequests.current.add(reqKey);
+        const cleanup = () => activeRequests.current.delete(reqKey);
         
-        // 1. Set initial state
-        setGames(prev => ({
-            ...prev,
-            [url]: {
-                id: url,
-                source,
-                jobStatus: 'FETCHING',
-                fetchCount: (prev[url]?.fetchCount || 0) + 1,
-                entityId,
-                existingGameId: prev[url]?.existingGameId || null,
-                autoRefresh: false
-            }
-        }));
-
         try {
+            // ============================================
+            // ✅ KEEP ALL YOUR EXISTING CODE BELOW:
+            // ============================================
+            console.log(`[useGameTracker] Tracking: ${url}, source: ${options?.forceSource || 'AUTO'}`);
+            
+            setGames(prev => ({
+                ...prev,
+                [url]: {
+                    id: url,
+                    source,
+                    jobStatus: 'FETCHING',
+                    fetchCount: (prev[url]?.fetchCount || 0) + 1,
+                    entityId,
+                    existingGameId: prev[url]?.existingGameId || null,
+                    autoRefresh: false
+                }
+            }));
+
             let scrapedData: ScrapedGameData;
             let knowledgeInfo: { id: string; lastScrapeStatus: ScrapeAttemptStatus; lastScrapedAt: string; [key: string]: any; } | null = null;
 
-            // 2. Check Knowledge Base (Unified System)
             if (!options?.s3Key && options?.forceSource !== 'LIVE') {
                 knowledgeInfo = await checkKnowledgeBase(url);
                 if (knowledgeInfo) {
@@ -274,13 +284,9 @@ export const useGameTracker = (): UseGameTrackerReturn => {
                 }
             }
 
-            // 3. Decide Fetch Strategy
             if (options?.forceSource === 'S3' && options.s3Key) {
                 scrapedData = await fetchFromS3(url, options.s3Key);
             } else {
-                // Unified Fetch: This backend mutation now handles the logic
-                // of checking ScrapeURL, using S3 cache, or fetching live.
-                // We just pass forceRefresh if needed.
                 const response = await clientRef.current.graphql({
                     query: /* GraphQL */ `
                         mutation FetchTournamentData($url: AWSURL!, $forceRefresh: Boolean) {
@@ -411,6 +417,12 @@ export const useGameTracker = (): UseGameTrackerReturn => {
                     refreshGame(url, { forceSource: 'LIVE' });
                 }, POLLING_INTERVAL);
             }
+            
+            // ============================================
+            // ✅ ADD CLEANUP at the end of try block:
+            // ============================================
+            cleanup();
+            
         } catch (error) {
             console.error('[useGameTracker] Error:', error);
             setGames(prev => ({
@@ -421,8 +433,13 @@ export const useGameTracker = (): UseGameTrackerReturn => {
                     errorMessage: error instanceof Error ? error.message : 'Failed to fetch game data'
                 }
             }));
+            
+            // ============================================
+            // ✅ ADD CLEANUP in catch block too:
+            // ============================================
+            cleanup();
         }
-    }, []);
+    }, []); // Keep your existing dependency array
 
     const trackGameWithModal = useCallback((url: string, source: DataSource, entityId: string) => {
         setModalGameInfo({ url, source, entityId });

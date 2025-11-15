@@ -1,0 +1,37 @@
+[
+  {
+    "timestamp": 1763110949888,
+    "message": "INIT_START Runtime Version: nodejs:22.v65\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:32854065d48ca9c5e6b3046b96919e02f1be0a9623e600f07b963bb7f531b7d5\n",
+    "ingestionTime": 1763110955828
+  },
+  {
+    "timestamp": 1763110950323,
+    "message": "START RequestId: fcc36d83-16a1-4594-ba55-f944e5b6aa33 Version: $LATEST\n",
+    "ingestionTime": 1763110955828
+  },
+  {
+    "timestamp": 1763110950337,
+    "message": "2025-11-14T09:02:30.337Z\tfcc36d83-16a1-4594-ba55-f944e5b6aa33\tINFO\t[S3Management] Received event: {\n  \"typeName\": \"Query\",\n  \"fieldName\": \"getCachingStats\",\n  \"arguments\": {\n    \"entityId\": \"2e782b28-06b9-42e6-a66e-bfc17d68704f\",\n    \"timeRange\": \"LAST_24_HOURS\"\n  },\n  \"identity\": {\n    \"claims\": {\n      \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n      \"cognito:groups\": [\n        \"Admin\"\n      ],\n      \"iss\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n      \"client_id\": \"4sth21dgrh3rjjnsl63ka32k4q\",\n      \"origin_jti\": \"86dedf2c-097d-445f-82cc-027b2b42056f\",\n      \"event_id\": \"5811889b-396f-4f84-abea-79bbf98be8e2\",\n      \"token_use\": \"access\",\n      \"scope\": \"aws.cognito.signin.user.admin\",\n      \"auth_time\": 1763067971,\n      \"exp\": 1763113021,\n      \"iat\": 1763109421,\n      \"jti\": \"2416cdbc-c92b-4b48-b0e9-da278fabfd31\",\n      \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n    },\n    \"defaultAuthStrategy\": \"ALLOW\",\n    \"groups\": [\n      \"Admin\"\n    ],\n    \"issuer\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n    \"sourceIp\": [\n      \"194.107.160.202\"\n    ],\n    \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n    \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n  },\n  \"source\": null,\n  \"request\": {\n    \"headers\": {\n      \"x-forwarded-for\": \"194.107.160.202,15.158.196.69\",\n      \"sec-ch-ua-mobile\": \"?0\",\n      \"cloudfront-viewer-country\": \"AU\",\n      \"cloudfront-is-tablet-viewer\": \"false\",\n      \"x-amzn-requestid\": \"56183ca7-bbc5-4adc-b9d2-41a206a67933\",\n      \"via\": \"2.0 c4682a07be5015c8378e0b701a19324c.cloudfront.net (CloudFront)\",\n      \"cloudfront-forwarded-proto\": \"https\",\n      \"origin\": \"http://localhost:5173\",\n      \"content-length\": \"511\",\n      \"x-forwarded-proto\": \"https\",\n      \"accept-language\": \"en-GB,en;q=0.8\",\n      \"host\": \"moi5t5e25vbajg2funkwklyhqq.appsync-api.ap-southeast-2.amazonaws.com\",\n      \"sec-gpc\": \"1\",\n      \"user-agent\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36\",\n      \"cloudfront-is-mobile-viewer\": \"false\",\n      \"accept\": \"*/*\",\n      \"priority\": \"u=1, i\",\n      \"cloudfront-viewer-asn\": \"136787\",\n      \"cloudfront-is-smarttv-viewer\": \"false\",\n      \"x-amzn-appsync-is-vpce-request\": \"false\",\n      \"accept-encoding\": \"gzip, deflate, br, zstd\",\n      \"x-amzn-account-id\": \"495599763953\",\n      \"referer\": \"http://localhost:5173/\",\n      \"x-amzn-remote-ip\": \"194.107.160.202\",\n      \"content-type\": \"application/json; charset=UTF-8\",\n      \"sec-fetch-mode\": \"cors\",\n      \"x-amzn-trace-id\": \"Root=1-6916f025-73dec8e7779944b77b2fe6b6\",\n      \"x-amz-cf-id\": \"r52mTIe13LnhNerOq2dNJXGKY11mDr8Mos1Q5wyeKUHRXS5HoFVNhw==\",\n      \"authorization\": \"eyJraWQiOiI0ZjE0SDRUWituNW01dUN4UzV6Tkh0VlBVN0x6TU9PS3VnZ1ppandhWlwvVT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYiLCJjb2duaXRvOmdyb3VwcyI6WyJBZG1pbiJdLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfajJrQWQ0a3BPIiwiY2xpZW50X2lkIjoiNHN0aDIxZGdyaDNyampuc2w2M2thMzJrNHEiLCJvcmlnaW5fanRpIjoiODZkZWRmMmMtMDk3ZC00NDVmLTgyY2MtMDI3YjJiNDIwNTZmIiwiZXZlbnRfaWQiOiI1ODExODg5Yi0zOTZmLTRmODQtYWJlYS03OWJiZjk4YmU4ZTIiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzYzMDY3OTcxLCJleHAiOjE3NjMxMTMwMjEsImlhdCI6MTc2MzEwOTQyMSwianRpIjoiMjQxNmNkYmMtYzkyYi00YjQ4LWIwZTktZGEyNzhmYWJmZDMxIiwidXNlcm5hbWUiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYifQ.hlaEV21UMPmNuXELAZr-ynzFG-Aeb0fxJRHHlWJCxuipSe6ZA_xDLS6KspDAzR097vsvnCT5Wp3x_JnWkbGn6wEbgsxzAU_UVBrns5re65K14MlBNo_NPDukgLoD766YqaXcePwZa9SRgz5cK0gGYOD_tyGWlybmjqjULpkEUK4Fldj3aVols1iKKYg6qt74CMX1XsAQGxRgt6vzOhlczZX18wmYxBV8HuGiMUBCTOdPc3ET9iou9yLeXK3SA7hQc4UE0eP4sz1IIR2DXiR9FFY7clBXxQAjYbJnUgoYM5P4RN4KIedP5zIYIxYoBCvD0VcjbVEf5kkdUkPk_4-ZOg\",\n      \"sec-fetch-dest\": \"empty\",\n      \"x-amz-user-agent\": \"aws-amplify/6.15.7 api/1 framework/1\",\n      \"sec-ch-ua-platform\": \"\\\"macOS\\\"\",\n      \"cloudfront-is-desktop-viewer\": \"true\",\n      \"sec-fetch-site\": \"cross-site\",\n      \"sec-ch-ua\": \"\\\"Chromium\\\";v=\\\"142\\\", \\\"Brave\\\";v=\\\"142\\\", \\\"Not_A Brand\\\";v=\\\"99\\\"\",\n      \"x-forwarded-port\": \"443\"\n    },\n    \"domainName\": null\n  },\n  \"prev\": {\n    \"result\": {}\n  }\n}\n",
+    "ingestionTime": 1763110955828
+  },
+  {
+    "timestamp": 1763110950359,
+    "message": "2025-11-14T09:02:30.359Z\tfcc36d83-16a1-4594-ba55-f944e5b6aa33\tINFO\t[CachingStats] Getting stats for entity 2e782b28-06b9-42e6-a66e-bfc17d68704f\n",
+    "ingestionTime": 1763110955828
+  },
+  {
+    "timestamp": 1763110951180,
+    "message": "2025-11-14T09:02:31.180Z\tfcc36d83-16a1-4594-ba55-f944e5b6aa33\tWARN\t[getStorageStats] STUB FUNCTION for 2e782b28-06b9-42e6-a66e-bfc17d68704f. Implement real logic.\n",
+    "ingestionTime": 1763110955828
+  },
+  {
+    "timestamp": 1763110951219,
+    "message": "END RequestId: fcc36d83-16a1-4594-ba55-f944e5b6aa33\n",
+    "ingestionTime": 1763110955828
+  },
+  {
+    "timestamp": 1763110951220,
+    "message": "REPORT RequestId: fcc36d83-16a1-4594-ba55-f944e5b6aa33\tDuration: 895.96 ms\tBilled Duration: 1328 ms\tMemory Size: 128 MB\tMax Memory Used: 100 MB\tInit Duration: 431.33 ms\t\n",
+    "ingestionTime": 1763110955828
+  }
+]

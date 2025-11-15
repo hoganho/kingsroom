@@ -80,6 +80,31 @@ export const S3ManagementTab: React.FC<S3ManagementTabProps> = ({ onReparse }) =
 
     console.log(`[S3Debug] Initial state: entityId = ${entityId}, loading = ${loading}`);
 
+    // Filter and sort storage items into two arrays
+    const notSavedItems = useMemo(() => {
+        // Items where gameId is null/undefined (Parsed+Saved = FALSE)
+        // Sort by scrapedAt ASCENDING
+        return storageItems
+            .filter(item => !item.gameId)
+            .sort((a, b) => {
+                const dateA = new Date(a.scrapedAt || a.createdAt).getTime();
+                const dateB = new Date(b.scrapedAt || b.createdAt).getTime();
+                return dateA - dateB; // Ascending order
+            });
+    }, [storageItems]);
+
+    const savedItems = useMemo(() => {
+        // Items where gameId exists (Parsed+Saved = TRUE)
+        // Sort by scrapedAt DESCENDING
+        return storageItems
+            .filter(item => !!item.gameId)
+            .sort((a, b) => {
+                const dateA = new Date(a.scrapedAt || a.createdAt).getTime();
+                const dateB = new Date(b.scrapedAt || b.createdAt).getTime();
+                return dateB - dateA; // Descending order
+            });
+    }, [storageItems]);
+
     // Load S3 storage items and caching stats
     const loadS3Storage = useCallback(async () => {
         if (!entityId) {
@@ -394,14 +419,19 @@ export const S3ManagementTab: React.FC<S3ManagementTabProps> = ({ onReparse }) =
                 </div>
             )}
 
-            {/* Storage Items Table */}
+            {/* Cached HTML Storage (Not Saved) Table */}
             <div className="bg-white rounded-lg shadow">
                 <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">
-                        {selectedTournamentId 
-                            ? `Tournament ${selectedTournamentId} History` 
-                            : 'Cached HTML Storage'}
-                    </h3>
+                    <div>
+                        <h3 className="text-lg font-semibold">
+                            {selectedTournamentId 
+                                ? `Tournament ${selectedTournamentId} History (Not Saved)` 
+                                : 'Cached HTML Storage (Not Saved)'}
+                        </h3>
+                        <p className="text-sm text-gray-500 mt-1">
+                            Records sorted by Scraped At (oldest first) • Parsed+Saved = FALSE
+                        </p>
+                    </div>
                     <div className="flex items-center space-x-2">
                         {selectedTournamentId && (
                             <button
@@ -446,7 +476,6 @@ export const S3ManagementTab: React.FC<S3ManagementTabProps> = ({ onReparse }) =
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                     Cache Headers
                                 </th>
-                                {/* --- ENHANCEMENT: Renamed column --- */}
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                     Parsed+Saved
                                 </th>
@@ -456,7 +485,7 @@ export const S3ManagementTab: React.FC<S3ManagementTabProps> = ({ onReparse }) =
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                            {storageItems.map((item) => (
+                            {notSavedItems.map((item) => (
                                 <tr key={item.id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <button
@@ -500,19 +529,13 @@ export const S3ManagementTab: React.FC<S3ManagementTabProps> = ({ onReparse }) =
                                             )}
                                         </div>
                                     </td>
-                                    {/* --- ENHANCEMENT: Updated logic for this cell --- */}
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                            item.gameId // Check if gameId exists
-                                                ? 'bg-green-100 text-green-800' 
-                                                : 'bg-yellow-100 text-yellow-800'
-                                        }`}>
-                                            {item.gameId ? 'TRUE' : 'FALSE'}
+                                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                            FALSE
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                                         <div className="flex items-center space-x-2">
-                                            {/* --- ENHANCEMENT: Added "Parse" button --- */}
                                             <button
                                                 onClick={() => onReparse(item.url)}
                                                 className="text-purple-600 hover:text-purple-800"
@@ -547,9 +570,168 @@ export const S3ManagementTab: React.FC<S3ManagementTabProps> = ({ onReparse }) =
                             ))}
                         </tbody>
                     </table>
-                    {storageItems.length === 0 && (
+                    {notSavedItems.length === 0 && (
                         <div className="p-8 text-center text-gray-500">
-                            No cached HTML documents found.
+                            No unsaved cached HTML documents found.
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Cached HTML Storage (Saved) Table */}
+            <div className="bg-white rounded-lg shadow mt-6">
+                <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <div>
+                        <h3 className="text-lg font-semibold">
+                            {selectedTournamentId 
+                                ? `Tournament ${selectedTournamentId} History (Saved)` 
+                                : 'Cached HTML Storage (Saved)'}
+                        </h3>
+                        <p className="text-sm text-gray-500 mt-1">
+                            Records sorted by Scraped At (newest first) • Parsed+Saved = TRUE
+                        </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        {selectedTournamentId && (
+                            <button
+                                onClick={() => {
+                                    console.log('[S3Debug] "View All" button clicked.');
+                                    setSelectedTournamentId(null);
+                                    loadS3Storage();
+                                }}
+                                className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
+                            >
+                                View All
+                            </button>
+                        )}
+                        <button
+                            onClick={() => {
+                                console.log('[S3Debug] Refresh button clicked.');
+                                loadS3Storage();
+                            }}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                            disabled={loading}
+                        >
+                            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                        </button>
+                    </div>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    Tournament ID
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    URL
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    Scraped At
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    Size
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    Cache Headers
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    Parsed+Saved
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                            {savedItems.map((item) => (
+                                <tr key={item.id} className="hover:bg-gray-50">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button
+                                            onClick={() => handleViewTournamentHistory(item.tournamentId)}
+                                            className="text-blue-600 hover:text-blue-800 hover:underline"
+                                        >
+                                            {item.tournamentId}
+                                        </button>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <a 
+                                            href={item.url || '#'}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 hover:text-blue-800"
+                                            title={item.url || ''}
+                                        >
+                                            {item.url ? item.url.substring(item.url.lastIndexOf('/') + 1).substring(0, 20) + '...' : '-'}
+                                        </a>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {new Date(item.scrapedAt || item.createdAt).toLocaleString()}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {item.contentSize ? `${(item.contentSize / 1024).toFixed(2)} KB` : '-'}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                        <div className="flex items-center space-x-1">
+                                            {item.etag && (
+                                                <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">
+                                                    ETag
+                                                </span>
+                                            )}
+                                            {item.lastModified && (
+                                                <span className="px-2 py-0.5 text-xs bg-green-100 text-green-800 rounded">
+                                                    Modified
+                                                </span>
+                                            )}
+                                            {!item.etag && !item.lastModified && (
+                                                <span className="text-gray-400">None</span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            TRUE
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                        <div className="flex items-center space-x-2">
+                                            <button
+                                                onClick={() => onReparse(item.url)}
+                                                className="text-purple-600 hover:text-purple-800"
+                                                title="Re-Parse (Load in Single Scraper Tab)"
+                                            >
+                                                <Cpu className="h-4 w-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleViewContent(item.s3Key)}
+                                                className="text-blue-600 hover:text-blue-800"
+                                                title="View Raw HTML"
+                                            >
+                                                <Eye className="h-4 w-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDownloadContent(item.s3Key)}
+                                                className="text-green-600 hover:text-green-800"
+                                                title="View Rendered HTML in New Tab"
+                                            >
+                                                <ExternalLink className="h-4 w-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteItem(item.id)}
+                                                className="text-red-600 hover:text-red-800"
+                                                title="Delete"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    {savedItems.length === 0 && (
+                        <div className="p-8 text-center text-gray-500">
+                            No saved cached HTML documents found.
                         </div>
                     )}
                 </div>

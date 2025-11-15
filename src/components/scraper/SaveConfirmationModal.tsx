@@ -2,8 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import { getVenue } from '../../graphql/queries';
 import type { GameData } from '../../types/game';
+
+// Custom query that only fetches the venue name - avoids problematic nested fields
+const getVenueName = /* GraphQL */ `
+    query GetVenueName($id: ID!) {
+        getVenue(id: $id) {
+            id
+            name
+        }
+    }
+`;
 
 /**
  * SaveConfirmationModal component - Fixed to display venue information correctly
@@ -27,7 +36,7 @@ export const SaveConfirmationModal: React.FC<{
                 try {
                     const client = generateClient();
                     const response = await client.graphql({
-                        query: getVenue,
+                        query: getVenueName,
                         variables: { id: venueId }
                     }) as any;
                     

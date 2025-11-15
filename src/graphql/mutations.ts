@@ -8,8 +8,12 @@ type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationOutput: OutputType;
 };
 
-export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData($url: AWSURL!, $forceRefresh: Boolean) {
-  fetchTournamentData(url: $url, forceRefresh: $forceRefresh) {
+export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData(
+  $url: AWSURL
+  $s3Key: String
+  $forceRefresh: Boolean
+) {
+  fetchTournamentData(url: $url, s3Key: $s3Key, forceRefresh: $forceRefresh) {
     name
     gameStartDateTime
     gameEndDateTime
@@ -108,6 +112,13 @@ export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData($
     doNotScrape
     tournamentId
     entityId
+    sourceUrl
+    s3Key
+    source
+    contentHash
+    fetchedAt
+    reScrapedAt
+    wasForced
     __typename
   }
 }
@@ -5819,6 +5830,13 @@ export const reScrapeFromCache = /* GraphQL */ `mutation ReScrapeFromCache($inpu
     doNotScrape
     tournamentId
     entityId
+    sourceUrl
+    s3Key
+    source
+    contentHash
+    fetchedAt
+    reScrapedAt
+    wasForced
     __typename
   }
 }
@@ -5926,6 +5944,13 @@ export const forceRefreshScrape = /* GraphQL */ `mutation ForceRefreshScrape($ur
     doNotScrape
     tournamentId
     entityId
+    sourceUrl
+    s3Key
+    source
+    contentHash
+    fetchedAt
+    reScrapedAt
+    wasForced
     __typename
   }
 }

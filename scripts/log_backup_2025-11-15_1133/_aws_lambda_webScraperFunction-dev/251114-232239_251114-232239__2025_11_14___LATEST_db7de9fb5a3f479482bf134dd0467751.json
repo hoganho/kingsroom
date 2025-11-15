@@ -1,0 +1,42 @@
+[
+  {
+    "timestamp": 1763162559582,
+    "message": "INIT_START Runtime Version: nodejs:22.v65\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:32854065d48ca9c5e6b3046b96919e02f1be0a9623e600f07b963bb7f531b7d5\n",
+    "ingestionTime": 1763162559793
+  },
+  {
+    "timestamp": 1763162559715,
+    "message": "2025-11-14T23:22:39.715Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.ImportModuleError\",\"errorMessage\":\"Error: Cannot find module 'index'\\nRequire stack:\\n- /var/runtime/index.mjs\",\"stack\":[\"Runtime.ImportModuleError: Error: Cannot find module 'index'\",\"Require stack:\",\"- /var/runtime/index.mjs\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1192:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1763162559793
+  },
+  {
+    "timestamp": 1763162559731,
+    "message": "INIT_REPORT Init Duration: 148.81 ms\tPhase: init\tStatus: error\tError Type: Runtime.ImportModuleError\n",
+    "ingestionTime": 1763162559814
+  },
+  {
+    "timestamp": 1763162559815,
+    "message": "2025-11-14T23:22:39.815Z\tundefined\tERROR\tUncaught Exception \t{\"errorType\":\"Runtime.ImportModuleError\",\"errorMessage\":\"Error: Cannot find module 'index'\\nRequire stack:\\n- /var/runtime/index.mjs\",\"stack\":[\"Runtime.ImportModuleError: Error: Cannot find module 'index'\",\"Require stack:\",\"- /var/runtime/index.mjs\",\"    at _loadUserApp (file:///var/runtime/index.mjs:1192:17)\",\"    at async UserFunction.js.module.exports.load (file:///var/runtime/index.mjs:1235:21)\",\"    at async start (file:///var/runtime/index.mjs:1454:23)\",\"    at async file:///var/runtime/index.mjs:1464:1\"]}\n",
+    "ingestionTime": 1763162559826
+  },
+  {
+    "timestamp": 1763162559828,
+    "message": "INIT_REPORT Init Duration: 80.90 ms\tPhase: invoke\tStatus: error\tError Type: Runtime.ImportModuleError\n",
+    "ingestionTime": 1763162559837
+  },
+  {
+    "timestamp": 1763162559828,
+    "message": "START RequestId: 5c13cb45-8d5d-4f3f-875b-67a016d9dea4 Version: $LATEST\n",
+    "ingestionTime": 1763162559837
+  },
+  {
+    "timestamp": 1763162559833,
+    "message": "END RequestId: 5c13cb45-8d5d-4f3f-875b-67a016d9dea4\n",
+    "ingestionTime": 1763162559837
+  },
+  {
+    "timestamp": 1763162559834,
+    "message": "REPORT RequestId: 5c13cb45-8d5d-4f3f-875b-67a016d9dea4\tDuration: 94.39 ms\tBilled Duration: 95 ms\tMemory Size: 1024 MB\tMax Memory Used: 75 MB\tStatus: error\tError Type: Runtime.ImportModuleError\n",
+    "ingestionTime": 1763162559837
+  }
+]

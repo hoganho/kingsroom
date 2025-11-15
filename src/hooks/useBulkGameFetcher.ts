@@ -25,7 +25,7 @@ export const useBulkGameFetcher = () => {
         try {
             const results = await fetchGameDataRangeFromBackend(startId, endId);
             
-            const typedSummaries: BulkGameSummary[] = results?.map(res => ({
+            const typedSummaries: BulkGameSummary[] = results?.map((res: any) => ({
                 id: res.id,
                 name: res.name || null,
                 gameStatus: isValidGameStatus(res.gameStatus) ? res.gameStatus : undefined,

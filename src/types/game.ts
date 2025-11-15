@@ -121,7 +121,7 @@ export type GameData = {
     foundKeys?: string[];
     doNotScrape?: boolean;
     venueMatch?: ScrapedVenueMatch | null;
-    s3Key: string;
+    s3Key?: string;
 };
 
 export type MissingField = {

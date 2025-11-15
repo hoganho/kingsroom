@@ -505,6 +505,44 @@ export declare type CacheActivityLog = LazyLoading extends LazyLoadingDisabled ?
 
 export declare const CacheActivityLog: (new (init: ModelInit<CacheActivityLog>) => CacheActivityLog)
 
+type EagerDatabaseMetric = {
+  readonly timestamp: string;
+  readonly functionName: string;
+  readonly operation: string;
+  readonly table: string;
+  readonly success: boolean;
+  readonly duration?: number | null;
+  readonly count?: number | null;
+  readonly entityId?: string | null;
+}
+
+type LazyDatabaseMetric = {
+  readonly timestamp: string;
+  readonly functionName: string;
+  readonly operation: string;
+  readonly table: string;
+  readonly success: boolean;
+  readonly duration?: number | null;
+  readonly count?: number | null;
+  readonly entityId?: string | null;
+}
+
+export declare type DatabaseMetric = LazyLoading extends LazyLoadingDisabled ? EagerDatabaseMetric : LazyDatabaseMetric
+
+export declare const DatabaseMetric: (new (init: ModelInit<DatabaseMetric>) => DatabaseMetric)
+
+type EagerDatabaseMetricsResponse = {
+  readonly metrics: DatabaseMetric[];
+}
+
+type LazyDatabaseMetricsResponse = {
+  readonly metrics: DatabaseMetric[];
+}
+
+export declare type DatabaseMetricsResponse = LazyLoading extends LazyLoadingDisabled ? EagerDatabaseMetricsResponse : LazyDatabaseMetricsResponse
+
+export declare const DatabaseMetricsResponse: (new (init: ModelInit<DatabaseMetricsResponse>) => DatabaseMetricsResponse)
+
 type EagerS3StorageHistoryResponse = {
   readonly items?: (S3Storage | null)[] | null;
   readonly nextToken?: string | null;
@@ -999,6 +1037,13 @@ type EagerScrapedGameData = {
   readonly doNotScrape?: boolean | null;
   readonly tournamentId: number;
   readonly entityId?: string | null;
+  readonly sourceUrl?: string | null;
+  readonly s3Key?: string | null;
+  readonly source?: string | null;
+  readonly contentHash?: string | null;
+  readonly fetchedAt?: string | null;
+  readonly reScrapedAt?: string | null;
+  readonly wasForced?: boolean | null;
 }
 
 type LazyScrapedGameData = {
@@ -1049,6 +1094,13 @@ type LazyScrapedGameData = {
   readonly doNotScrape?: boolean | null;
   readonly tournamentId: number;
   readonly entityId?: string | null;
+  readonly sourceUrl?: string | null;
+  readonly s3Key?: string | null;
+  readonly source?: string | null;
+  readonly contentHash?: string | null;
+  readonly fetchedAt?: string | null;
+  readonly reScrapedAt?: string | null;
+  readonly wasForced?: boolean | null;
 }
 
 export declare type ScrapedGameData = LazyLoading extends LazyLoadingDisabled ? EagerScrapedGameData : LazyScrapedGameData

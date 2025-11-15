@@ -1,15 +1,17 @@
 // enhanced-handleFetch.js
-// This version KEEPS all original functionality and ADDS unified URL tracking
-// Plus S3Storage metadata extraction for GameStatus/RegistrationStatus
+// HYBRID SOLUTION - Best of both approaches
+// - Follows executive summary's UPSERT logic (works with existing schema)
+// - Uses existing byURL index (no schema changes needed)
+// - Incorporates clean code patterns (helper functions)
+// - Keeps UUID primary keys (less invasive)
 
 const axios = require('axios');
 const https = require('https');
 const http = require('http');
 const { URL } = require('url');
-const { DynamoDBDocumentClient, UpdateCommand, GetCommand, PutCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, UpdateCommand, GetCommand, PutCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { getHtmlFromS3, storeHtmlInS3, calculateContentHash } = require('./s3-helpers');
-// --- CHANGED: Added getStatusAndReg to imports ---
 const { getStatusAndReg } = require('./scraperStrategies');
 const { v4: uuidv4 } = require('uuid');
 
@@ -34,6 +36,59 @@ const mapInteractionTypeToScrapeStatus = (interactionType) => {
         case 'NEVER_CHECKED': return null;
         default: return null;
     }
+};
+
+/**
+ * ✅ NEW HELPER: Build updates object from scrape data
+ * Centralizes logic for creating update parameters
+ */
+const buildScrapeUpdates = (html, headers, status, interactionType, s3Key = null) => {
+    const now = new Date().toISOString();
+    const timestamp = Date.now();
+    
+    // Extract status and registration from HTML if available
+    let gameStatus = null;
+    let registrationStatus = null;
+    
+    if (html && status === 'SUCCESS') {
+        try {
+            const statusResult = getStatusAndReg(html);
+            gameStatus = statusResult.gameStatus || null;
+            registrationStatus = statusResult.registrationStatus || null;
+        } catch (error) {
+            console.log('[BuildUpdates] Could not extract status from HTML:', error.message);
+        }
+    }
+    
+    // Build updates object
+    const updates = {
+        lastInteractionType: interactionType,
+        lastInteractionAt: now,
+        lastScrapedAt: now,
+        lastScrapeStatus: status,
+        updatedAt: now,
+        _lastChangedAt: timestamp
+    };
+    
+    if (status === 'SUCCESS') {
+        updates.lastSuccessfulScrapeAt = now;
+        updates.consecutiveFailures = 0;
+    }
+    
+    if (s3Key) {
+        updates.latestS3Key = s3Key;
+    }
+    
+    if (gameStatus) {
+        updates.gameStatus = gameStatus;
+    }
+    
+    if (registrationStatus) {
+        updates.registrationStatus = registrationStatus;
+    }
+    
+    // Return both updates and extracted metadata
+    return { updates, gameStatus, registrationStatus };
 };
 
 /**
@@ -109,6 +164,41 @@ const getOrCreateScrapeURL = async (url, entityId, tournamentId, ddbDocClient, t
 };
 
 /**
+ * ✅ NEW: Get existing S3Storage record by scrapeURLId or URL
+ * Uses the existing byURL index from your schema
+ */
+const getExistingS3StorageRecord = async (scrapeURLId, url, ddbDocClient) => {
+    const s3StorageTable = getTableName('S3Storage');
+    
+    try {
+        // Query by URL using the byURL index (remove the wrong scrapeURLId lookup)
+        const queryParams = {
+            TableName: s3StorageTable,
+            IndexName: 'byURL',
+            KeyConditionExpression: '#url = :url',
+            ExpressionAttributeNames: { '#url': 'url' },
+            ExpressionAttributeValues: { ':url': url },
+            Limit: 1,
+            ScanIndexForward: false
+        };
+        
+        const queryResult = await ddbDocClient.send(new QueryCommand(queryParams));
+        
+        if (queryResult.Items && queryResult.Items.length > 0) {
+            console.log(`[S3Storage] Found existing record by URL: ${url}`);
+            return queryResult.Items[0];
+        }
+        
+        console.log(`[S3Storage] No existing record found for URL: ${url}`);
+        return null;
+        
+    } catch (error) {
+        console.error(`[S3Storage] Error checking for existing record:`, error);
+        return null;
+    }
+};
+
+/**
  * Enhanced wrapper for simplified usage - includes monitoring
  * This is the main entry point that other Lambda functions call
  */
@@ -127,7 +217,7 @@ const enhancedHandleFetch = async (url, scrapeURLRecord, entityId, tournamentId,
             scrapeURLRecord,
             entityId,
             tournamentId,
-            forceRefresh,  // Pass through the forceRefresh parameter
+            forceRefresh,
             ddbDocClient
         );
         
@@ -149,7 +239,7 @@ const enhancedHandleFetch = async (url, scrapeURLRecord, entityId, tournamentId,
 };
 
 /**
- * Simplified fetch for when we don't have database access (KEEPING ORIGINAL)
+ * Simplified fetch for when we don't have database access
  */
 const simplifiedFetch = async (url, entityId, tournamentId) => {
     const startTime = Date.now();
@@ -394,7 +484,7 @@ const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRe
         }
         
         // ========================================
-        // STEP 3: FETCH FROM LIVE SITE (ALWAYS REACHED IF forceRefresh OR NO CACHE)
+        // STEP 3: FETCH FROM LIVE SITE
         // ========================================
         log('info', '🌐 Fetching from live website', { 
             reason: forceRefresh ? 'Force refresh requested' : 'No valid cache found' 
@@ -430,24 +520,16 @@ const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRe
         });
         
         // ========================================
-        // STEP 4: VALIDATE AND STORE (KEEPING ORIGINAL)
+        // STEP 4: VALIDATE AND STORE
         // ========================================
         
-        // Check for "Tournament Not Found" (KEEPING ORIGINAL)
+        // Check for "Tournament Not Found"
         if (isTournamentNotFound(liveResult.html)) {
             log('info', 'Tournament not found (404 equivalent)');
             
-            // Update ScrapeURL to mark as not found
-            await updateScrapeURLRecord(
-                scrapeURLRecord, 
-                liveResult.html,
-                liveResult.headers,
-                'NOT_FOUND',
-                'NOT_FOUND',
-                null,
-                ddbDocClient,
-                scrapeURLTable
-            );
+            // ✅ REFACTORED: Use helper to build updates
+            const { updates } = buildScrapeUpdates(liveResult.html, liveResult.headers, 'NOT_FOUND', 'NOT_FOUND', null);
+            await updateScrapeURLRecord(scrapeURLRecord.id, updates, ddbDocClient, scrapeURLTable);
             
             return {
                 success: false,
@@ -465,7 +547,7 @@ const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRe
         let s3StorageId = null;
         if (s3Enabled) {
             try {
-                // 1. Store raw file
+                // 1. Store raw file in S3
                 const s3Result = await storeHtmlInS3(
                     liveResult.html, 
                     url, 
@@ -479,22 +561,19 @@ const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRe
                     size: s3Result.contentSize 
                 });
 
-                // 2. Extract status metadata for the DB record
-                let gameStatus = null;
-                let registrationStatus = null;
-                try {
-                    const statusData = getStatusAndReg(liveResult.html);
-                    gameStatus = statusData.gameStatus;
-                    registrationStatus = statusData.registrationStatus;
-                    log('debug', 'Extracted status for S3 metadata', { gameStatus, registrationStatus });
-                } catch (parseError) {
-                    log('warn', 'Failed to extract status from HTML for S3 record', { error: parseError.message });
-                }
+                // 2. Extract status metadata
+                const { gameStatus, registrationStatus } = buildScrapeUpdates(
+                    liveResult.html, 
+                    liveResult.headers, 
+                    'SUCCESS', 
+                    'SCRAPED_SUCCESS', 
+                    s3Key
+                );
 
-                // 3. Create S3Storage DB record
+                // 3. ✅ UPSERT S3Storage record (following executive summary approach)
                 try {
-                    s3StorageId = await createS3StorageRecord(
-                        scrapeURLRecord.id,
+                    s3StorageId = await upsertS3StorageRecord(
+                        scrapeURLRecord.id,  // scrapeURLId
                         s3Key,
                         liveResult.html,
                         url,
@@ -502,12 +581,18 @@ const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRe
                         tournamentId,
                         liveResult.headers,
                         ddbDocClient,
-                        gameStatus,        // Passed to DB record
-                        registrationStatus // Passed to DB record
+                        gameStatus,
+                        registrationStatus
                     );
-                    log('info', '✅ Created S3Storage record in DynamoDB', { s3StorageId });
+                    log('info', '✅ Upserted S3Storage record in DynamoDB', { s3StorageId });
+                    
+                    // 4. Update ScrapeURL with latest S3Storage ID
+                    if (s3StorageId) {
+                        await updateScrapeURLWithS3StorageId(scrapeURLRecord.id, s3StorageId, ddbDocClient, scrapeURLTable);
+                    }
+                    
                 } catch (s3DbError) {
-                    log('warn', 'Failed to create S3Storage record in DynamoDB', { error: s3DbError.message });
+                    log('warn', 'Failed to upsert S3Storage record in DynamoDB', { error: s3DbError.message });
                     fetchStats.errors.push(`S3Storage DB error: ${s3DbError.message}`);
                 }
 
@@ -517,23 +602,16 @@ const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRe
             }
         }
         
-        // Update ScrapeURL record with new fetch info (KEEPING ORIGINAL)
-        await updateScrapeURLRecord(
-            scrapeURLRecord,
-            liveResult.html,
-            liveResult.headers,
-            'SUCCESS',
-            'SCRAPED_SUCCESS',
-            s3Key,
-            ddbDocClient,
-            scrapeURLTable
-        );
+        // ✅ REFACTORED: Use helper to build updates
+        const { updates } = buildScrapeUpdates(liveResult.html, liveResult.headers, 'SUCCESS', 'SCRAPED_SUCCESS', s3Key);
+        await updateScrapeURLRecord(scrapeURLRecord.id, updates, ddbDocClient, scrapeURLTable);
         
         return {
             success: true,
             html: liveResult.html,
             source: 'LIVE',
             s3Key,
+            s3StorageId,  // Include for reference
             headers: liveResult.headers,
             usedCache: false,
             cacheType: null,
@@ -573,60 +651,209 @@ const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRe
 };
 
 /**
- * Create S3Storage record (NEW FOR UNIFIED + METADATA)
+ * ✅ EXECUTIVE SUMMARY APPROACH: UPSERT S3Storage record
+ * - Uses existing byURL index to find record
+ * - Reuses same UUID across updates (no new ID each time!)
+ * - Maintains version history in previousVersions array
+ * - Works with existing DynamoDB schema
  */
-const createS3StorageRecord = async (scrapeURLId, s3Key, html, url, entityId, tournamentId, headers, ddbDocClient, gameStatus = null, registrationStatus = null) => {
+const upsertS3StorageRecord = async (
+    scrapeURLId, 
+    s3Key, 
+    html, 
+    url, 
+    entityId, 
+    tournamentId, 
+    headers, 
+    ddbDocClient, 
+    gameStatus = null, 
+    registrationStatus = null
+) => {
     const now = new Date().toISOString();
-    const s3StorageId = uuidv4();
-    const s3StorageTable = getTableName('S3Storage');
+    const timestamp = Date.now();
+    const contentHash = calculateContentHash(html);
+    const contentSize = Buffer.byteLength(html, 'utf8');
     
-    const s3StorageRecord = {
-        id: s3StorageId,
-        scrapeURLId,
-        url, 
-        tournamentId, 
-        entityId, 
-        s3Key,
-        s3Bucket: process.env.S3_BUCKET || 'pokerpro-scraped-content',
-        contentSize: Buffer.byteLength(html, 'utf8'),
-        contentHash: calculateContentHash(html),
-        contentType: 'text/html',
-        source: 'WEB_SCRAPER',
-        uploadedBy: 'system',
-        isManualUpload: false,
-        httpStatus: headers?.statusCode || 200,
-        etag: headers?.etag,
-        lastModified: headers?.['last-modified'],
-        headers: JSON.stringify(headers),
+    // Check for existing record
+    const existingRecord = await getExistingS3StorageRecord(scrapeURLId, url, ddbDocClient);
+    
+    if (existingRecord) {
+        // ✅ RECORD EXISTS - UPDATE IT
+        console.log(`[UPSERT] Updating existing S3Storage record: ${existingRecord.id}`);
         
-        // --- NEW STATUS METADATA FIELDS ---
-        gameStatus: gameStatus,
-        registrationStatus: registrationStatus,
+        // Check if content actually changed
+        if (existingRecord.contentHash === contentHash) {
+            console.log(`[UPSERT] Content unchanged (hash match), skipping update`);
+            return existingRecord.id;
+        }
         
-        isParsed: false,
-        dataExtracted: false,
-        wasGameCreated: false,
-        wasGameUpdated: false,
-        scrapedAt: now, 
-        storedAt: now,
-        createdAt: now,
-        updatedAt: now,
-        _lastChangedAt: Date.now(),
-        _version: 1,
-        __typename: 'S3Storage'
-    };
-    
-    const putParams = {
-        TableName: s3StorageTable,
-        Item: s3StorageRecord
-    };
-    
-    await ddbDocClient.send(new PutCommand(putParams));
-    return s3StorageId;
+        // Build previous version object from current data
+        const previousVersion = {
+            s3Key: existingRecord.s3Key,
+            s3Bucket: existingRecord.s3Bucket,
+            scrapedAt: existingRecord.scrapedAt,
+            contentHash: existingRecord.contentHash,
+            contentSize: existingRecord.contentSize,
+            gameStatus: existingRecord.gameStatus,
+            registrationStatus: existingRecord.registrationStatus,
+            wasGameCreated: existingRecord.wasGameCreated || false,
+            wasGameUpdated: existingRecord.wasGameUpdated || false,
+            versionNumber: existingRecord.versionNumber || 1
+        };
+        
+        // Get existing previous versions array or create new one
+        const previousVersions = existingRecord.previousVersions || [];
+        previousVersions.push(previousVersion);
+        
+        // Calculate new version number
+        const newVersionNumber = (existingRecord.versionNumber || 1) + 1;
+        
+        const s3StorageTable = getTableName('S3Storage');
+        
+        // Update the record with new data
+        const updateParams = {
+            TableName: s3StorageTable,
+            Key: { id: existingRecord.id },
+            UpdateExpression: `
+                SET s3Key = :s3Key,
+                    s3Bucket = :s3Bucket,
+                    contentHash = :contentHash,
+                    contentSize = :contentSize,
+                    gameStatus = :gameStatus,
+                    registrationStatus = :registrationStatus,
+                    httpStatus = :httpStatus,
+                    etag = :etag,
+                    lastModified = :lastModified,
+                    headers = :headers,
+                    scrapedAt = :scrapedAt,
+                    storedAt = :storedAt,
+                    updatedAt = :updatedAt,
+                    previousVersions = :previousVersions,
+                    versionNumber = :versionNumber,
+                    totalVersions = :totalVersions,
+                    #lca = :timestamp,
+                    #v = if_not_exists(#v, :zero) + :one
+            `,
+            ExpressionAttributeNames: {
+                '#lca': '_lastChangedAt',
+                '#v': '_version'
+            },
+            ExpressionAttributeValues: {
+                ':s3Key': s3Key,
+                ':s3Bucket': process.env.S3_BUCKET || 'pokerpro-scraper-storage',
+                ':contentHash': contentHash,
+                ':contentSize': contentSize,
+                ':gameStatus': gameStatus,
+                ':registrationStatus': registrationStatus,
+                ':httpStatus': headers?.statusCode || 200,
+                ':etag': headers?.etag || null,
+                ':lastModified': headers?.['last-modified'] || null,
+                ':headers': JSON.stringify(headers),
+                ':scrapedAt': now,
+                ':storedAt': now,
+                ':updatedAt': now,
+                ':previousVersions': previousVersions,
+                ':versionNumber': newVersionNumber,
+                ':totalVersions': previousVersions.length + 1,
+                ':timestamp': timestamp,
+                ':zero': 0,
+                ':one': 1
+            }
+        };
+        
+        await ddbDocClient.send(new UpdateCommand(updateParams));
+        console.log(`[UPSERT] ✅ Updated record to version ${newVersionNumber}, ${previousVersions.length} previous versions stored`);
+        
+        return existingRecord.id;  // Return SAME ID
+        
+    } else {
+        // ✅ RECORD DOESN'T EXIST - CREATE NEW ONE
+        console.log(`[UPSERT] Creating new S3Storage record for URL: ${url}`);
+        
+        const s3StorageTable = getTableName('S3Storage');
+        const s3StorageId = uuidv4();  // Generate NEW UUID only for first creation
+        
+        const newRecord = {
+            id: s3StorageId,
+            scrapeURLId,
+            url,
+            tournamentId,
+            entityId,
+            s3Key,
+            s3Bucket: process.env.S3_BUCKET || 'pokerpro-scraper-storage',
+            contentSize,
+            contentHash,
+            contentType: 'text/html',
+            source: 'WEB_SCRAPER',
+            uploadedBy: 'system',
+            isManualUpload: false,
+            httpStatus: headers?.statusCode || 200,
+            etag: headers?.etag || null,
+            lastModified: headers?.['last-modified'] || null,
+            headers: JSON.stringify(headers),
+            gameStatus,
+            registrationStatus,
+            isParsed: false,
+            dataExtracted: false,
+            wasGameCreated: false,
+            wasGameUpdated: false,
+            scrapedAt: now,
+            storedAt: now,
+            versionNumber: 1,
+            totalVersions: 1,
+            previousVersions: [],  // Empty array for first version
+            createdAt: now,
+            updatedAt: now,
+            _lastChangedAt: timestamp,
+            _version: 1,
+            __typename: 'S3Storage'
+        };
+        
+        const putParams = {
+            TableName: s3StorageTable,
+            Item: newRecord
+        };
+        
+        await ddbDocClient.send(new PutCommand(putParams));
+        console.log(`[UPSERT] ✅ Created new record version 1`);
+        
+        return s3StorageId;
+    }
 };
 
 /**
- * Check HTTP headers to determine if content has changed (KEEPING ORIGINAL)
+ * ✅ NEW: Update ScrapeURL record with latest S3Storage ID
+ */
+const updateScrapeURLWithS3StorageId = async (scrapeURLId, s3StorageId, ddbDocClient, tableName) => {
+    const now = new Date();
+    const params = {
+        TableName: tableName,
+        Key: { id: scrapeURLId },
+        UpdateExpression: `
+            SET latestS3StorageId = :s3StorageId,
+                updatedAt = :now,
+                #lca = :timestamp,
+                #v = if_not_exists(#v, :zero) + :one
+        `,
+        ExpressionAttributeNames: {
+            '#lca': '_lastChangedAt',
+            '#v': '_version'
+        },
+        ExpressionAttributeValues: {
+            ':s3StorageId': s3StorageId,
+            ':now': now.toISOString(),
+            ':timestamp': now.getTime(),
+            ':zero': 0,
+            ':one': 1
+        }
+    };
+    
+    await ddbDocClient.send(new UpdateCommand(params));
+    console.log(`[ScrapeURL] Updated latestS3StorageId to: ${s3StorageId}`);
+};
+
+/**
+ * Check HTTP headers to determine if content has changed
  */
 const checkHTTPHeaders = async (url, scrapeURLRecord) => {
     return new Promise((resolve) => {
@@ -689,7 +916,7 @@ const checkHTTPHeaders = async (url, scrapeURLRecord) => {
 };
 
 /**
- * Fetch HTML from live website with retry logic (KEEPING ORIGINAL)
+ * Fetch HTML from live website with retry logic
  */
 const fetchFromLiveSiteWithRetries = async (url, maxRetries = 3) => {
     let lastError = null;
@@ -720,7 +947,7 @@ const fetchFromLiveSiteWithRetries = async (url, maxRetries = 3) => {
 };
 
 /**
- * Fetch HTML from live website using ScraperAPI (KEEPING ORIGINAL)
+ * Fetch HTML from live website using ScraperAPI
  */
 const fetchFromLiveSite = async (url) => {
     if (!SCRAPERAPI_KEY) {
@@ -768,7 +995,7 @@ const fetchFromLiveSite = async (url) => {
 };
 
 /**
- * Update cache hit statistics in ScrapeURL record (KEEPING ORIGINAL)
+ * Update cache hit statistics in ScrapeURL record
  */
 const updateCacheHitStats = async (scrapeURLId, ddbDocClient, tableName) => {
     const now = new Date();
@@ -800,7 +1027,7 @@ const updateCacheHitStats = async (scrapeURLId, ddbDocClient, tableName) => {
 };
 
 /**
- * Update header check statistics (KEEPING ORIGINAL)
+ * Update header check statistics
  */
 const updateHeaderCheckStats = async (scrapeURLId, ddbDocClient, tableName) => {
     const now = new Date();
@@ -829,7 +1056,8 @@ const updateHeaderCheckStats = async (scrapeURLId, ddbDocClient, tableName) => {
 };
 
 /**
- * Update ScrapeURL record with new data (KEEPING ORIGINAL)
+ * ✅ REFACTORED: Update ScrapeURL record - simplified signature
+ * Expects an updates object built by buildScrapeUpdates()
  */
 const updateScrapeURLRecord = async (id, updates, ddbDocClient, tableName) => {
     const updateExpression = [];
@@ -841,6 +1069,12 @@ const updateScrapeURLRecord = async (id, updates, ddbDocClient, tableName) => {
     
     Object.keys(updates).forEach(key => {
         const placeholder = `:${key}`;
+        
+        // Skip fields that will be handled specially
+        if (key === 'timesScraped' || key === 'timesSuccessful') {
+            return; // These will be incremented
+        }
+        
         if (key === 'status') {
             updateExpression.push(`#status = ${placeholder}`);
             expressionAttributeNames['#status'] = 'status';
@@ -857,8 +1091,19 @@ const updateScrapeURLRecord = async (id, updates, ddbDocClient, tableName) => {
         } else {
             updateExpression.push(`${key} = ${placeholder}`);
         }
-        expressionAttributeValues[placeholder] = updates[key];
+        
+        if (updates[key] !== null && updates[key] !== undefined) {
+            expressionAttributeValues[placeholder] = updates[key];
+        }
     });
+    
+    // Always increment timesScraped counter
+    updateExpression.push('timesScraped = if_not_exists(timesScraped, :zero) + :one');
+    
+    // Increment timesSuccessful if this was a successful scrape
+    if (updates.lastScrapeStatus === 'SUCCESS') {
+        updateExpression.push('timesSuccessful = if_not_exists(timesSuccessful, :zero) + :one');
+    }
     
     // Only add updatedAt if it wasn't already in the updates
     const now = new Date();
@@ -895,7 +1140,7 @@ const updateScrapeURLRecord = async (id, updates, ddbDocClient, tableName) => {
 };
 
 /**
- * Update ScrapeURL record on error (KEEPING ORIGINAL)
+ * Update ScrapeURL record on error
  */
 const updateScrapeURLError = async (id, errorMessage, ddbDocClient, tableName) => {
     const now = new Date();
@@ -937,7 +1182,7 @@ const updateScrapeURLError = async (id, errorMessage, ddbDocClient, tableName) =
 };
 
 /**
- * Validate URL format (KEEPING ORIGINAL)
+ * Validate URL format
  */
 const isValidUrl = (url) => {
     try {
@@ -949,7 +1194,7 @@ const isValidUrl = (url) => {
 };
 
 /**
- * Basic HTML validation (KEEPING ORIGINAL)
+ * Basic HTML validation
  */
 const isValidHtml = (html) => {
     if (!html || typeof html !== 'string') return false;
@@ -964,7 +1209,7 @@ const isValidHtml = (html) => {
 };
 
 /**
- * Lightweight check for "Tournament Not Found" (KEEPING ORIGINAL)
+ * Lightweight check for "Tournament Not Found"
  */
 const isTournamentNotFound = (html) => {
     if (!html) return false;
@@ -974,7 +1219,7 @@ const isTournamentNotFound = (html) => {
 };
 
 /**
- * Helper to get table name with environment (KEEPING ORIGINAL)
+ * Helper to get table name with environment
  */
 const getTableName = (modelName) => {
     // Check for environment-specific table name variables first
@@ -992,10 +1237,11 @@ const getTableName = (modelName) => {
     return `${modelName}-${apiId}-${env}`;
 };
 
-// Export all functions for testing and use (KEEPING ORIGINAL EXPORTS)
+// Export all functions for testing and use
 module.exports = {
-    enhancedHandleFetch, // Main export for simple usage
-    handleFetch,         // Full featured handler
+    enhancedHandleFetch,
+    handleFetch,
+    simplifiedFetch,
     checkHTTPHeaders,
     fetchFromLiveSite,
     fetchFromLiveSiteWithRetries,
@@ -1003,6 +1249,10 @@ module.exports = {
     updateHeaderCheckStats,
     updateScrapeURLRecord,
     updateScrapeURLError,
+    getExistingS3StorageRecord,  // NEW
+    upsertS3StorageRecord,       // NEW (replaces createS3StorageRecord)
+    updateScrapeURLWithS3StorageId,  // NEW
+    buildScrapeUpdates,          // NEW: Helper function
     isValidUrl,
     isValidHtml,
     isTournamentNotFound,
