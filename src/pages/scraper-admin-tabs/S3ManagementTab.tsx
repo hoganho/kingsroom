@@ -462,19 +462,19 @@ export const S3ManagementTab: React.FC<S3ManagementTabProps> = ({ onReparse }) =
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                    Tournament ID
+                                    Game Id
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                    URL
+                                    Game Status
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                    Scraped At
+                                    Rego Status
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                    Size
+                                    Updated
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                    Cache Headers
+                                    Headers
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                     Parsed+Saved
@@ -496,21 +496,13 @@ export const S3ManagementTab: React.FC<S3ManagementTabProps> = ({ onReparse }) =
                                         </button>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <a 
-                                            href={item.url || '#'}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-blue-600 hover:text-blue-800"
-                                            title={item.url || ''}
-                                        >
-                                            {item.url ? item.url.substring(item.url.lastIndexOf('/') + 1).substring(0, 20) + '...' : '-'}
-                                        </a>
+                                        {item.gameStatus || '-'}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {new Date(item.scrapedAt || item.createdAt).toLocaleString()}
+                                        {item.registrationStatus || '-'}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {item.contentSize ? `${(item.contentSize / 1024).toFixed(2)} KB` : '-'}
+                                        {new Date(item.updatedAt || item.scrapedAt || item.createdAt).toLocaleString()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                                         <div className="flex items-center space-x-1">
@@ -621,19 +613,19 @@ export const S3ManagementTab: React.FC<S3ManagementTabProps> = ({ onReparse }) =
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                    Tournament ID
+                                    Game Id
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                    URL
+                                    Game Status
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                    Scraped At
+                                    Rego Status
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                    Size
+                                    Updated
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                    Cache Headers
+                                    Headers
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                     Parsed+Saved
@@ -655,21 +647,13 @@ export const S3ManagementTab: React.FC<S3ManagementTabProps> = ({ onReparse }) =
                                         </button>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <a 
-                                            href={item.url || '#'}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-blue-600 hover:text-blue-800"
-                                            title={item.url || ''}
-                                        >
-                                            {item.url ? item.url.substring(item.url.lastIndexOf('/') + 1).substring(0, 20) + '...' : '-'}
-                                        </a>
+                                        {item.gameStatus || '-'}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {new Date(item.scrapedAt || item.createdAt).toLocaleString()}
+                                        {item.registrationStatus || '-'}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {item.contentSize ? `${(item.contentSize / 1024).toFixed(2)} KB` : '-'}
+                                        {new Date(item.updatedAt || item.scrapedAt || item.createdAt).toLocaleString()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                                         <div className="flex items-center space-x-1">

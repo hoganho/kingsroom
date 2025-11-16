@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { X, Database, Globe, AlertCircle, RefreshCw, CheckCircle, HardDrive } from 'lucide-react';
 import { generateClient } from 'aws-amplify/api';
-import { getScrapeURL } from '../../graphql/queries';
+import { getScrapeURLForCache } from '../../graphql/customQueries';
 
 interface ScrapeOptionsModalProps {
     isOpen: boolean;
@@ -119,7 +119,7 @@ export const ScrapeOptionsModal: React.FC<ScrapeOptionsModalProps> = ({
                 // Then, get ScrapeURL record for cache metadata
                 try {
                     const scrapeUrlResponse = await client.graphql({
-                        query: getScrapeURL,
+                        query: getScrapeURLForCache,
                         variables: { id: url }
                     });
                     

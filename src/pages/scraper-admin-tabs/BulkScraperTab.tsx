@@ -1,14 +1,15 @@
 // src/pages/scraper-admin-tabs/BulkScraperTabEnhanced.tsx
-// Enhanced version with batch processing support and S3 cache statistics
+// Enhanced version with batch processing support, S3 cache statistics, and gap-based scraping
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import { Database, AlertCircle, CheckCircle, XCircle, Building2, HardDrive } from 'lucide-react';
+import { Database, AlertCircle, CheckCircle, XCircle, Building2, HardDrive, TrendingUp, Zap } from 'lucide-react';
 import { listVenuesForDropdown } from '../../graphql/customQueries';
 import { GameStatus, Venue } from '../../API';
-import { useEntity, buildGameUrl } from '../../contexts/EntityContext';
+import { useEntity } from '../../contexts/EntityContext';
 import { EntitySelector } from '../../components/entities/EntitySelector';
 import { fetchGameDataFromBackend, saveGameDataToBackend } from '../../services/gameService';
+import { useGameIdTracking, formatGapRanges } from '../../hooks/useGameIdTracking';
 
 interface BulkScrapeResult {
     id: number;
@@ -40,6 +41,12 @@ export const BulkScraperTab: React.FC = () => {
     const client = useMemo(() => generateClient(), []);
     const { currentEntity } = useEntity();
     
+    // Initialize the gap tracking hook
+    const {
+        scrapingStatus,
+        getScrapingStatus,
+    } = useGameIdTracking(currentEntity?.id);
+    
     const [startId, setStartId] = useState('');
     const [endId, setEndId] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
@@ -50,6 +57,8 @@ export const BulkScraperTab: React.FC = () => {
     const [skipExisting, setSkipExisting] = useState(true);
     const [forceRefresh, setForceRefresh] = useState(false);
     const [batchSize, setBatchSize] = useState(5);
+    const [scrapeMode, setScrapeMode] = useState<'range' | 'gaps'>('range');
+    const [selectedGapIndex, setSelectedGapIndex] = useState<number>(0);
     
     // S3 Cache statistics
     const [cacheStats, setCacheStats] = useState<{
@@ -67,6 +76,23 @@ export const BulkScraperTab: React.FC = () => {
         skipped: 0,
         pending: 0
     });
+
+    // Load gap analysis on entity change
+    useEffect(() => {
+        if (currentEntity?.id) {
+            loadGapAnalysis();
+        }
+    }, [currentEntity?.id]);
+
+    const loadGapAnalysis = async () => {
+        if (!currentEntity?.id) return;
+        
+        try {
+            await getScrapingStatus({ entityId: currentEntity.id });
+        } catch (error) {
+            console.error('Error loading gap analysis:', error);
+        }
+    };
 
     // Fetch venues filtered by entity
     useEffect(() => {
@@ -166,29 +192,26 @@ export const BulkScraperTab: React.FC = () => {
                 if (fetchResult.source === 'S3_CACHE' || fetchResult.usedCache) {
                     setCacheStats(prev => ({
                         ...prev,
+                        enabled: true,
                         hits: prev.hits + 1,
-                        rate: Math.round(((prev.hits + 1) / (id - parseInt(startId) + 1)) * 100)
+                        rate: Math.round(((prev.hits + 1) / (prev.hits + prev.misses + 1)) * 100)
                     }));
-                } else if (fetchResult.source === 'LIVE') {
+                } else {
                     setCacheStats(prev => ({
                         ...prev,
+                        enabled: true,
                         misses: prev.misses + 1,
-                        rate: Math.round((prev.hits / (id - parseInt(startId) + 1)) * 100)
+                        rate: Math.round((prev.hits / (prev.hits + prev.misses + 1)) * 100)
                     }));
                 }
             }
             
-            // Check for inactive or error states
-            if (fetchResult.gameStatus === 'NOT_IN_USE' || ('isInactive' in fetchResult && fetchResult.isInactive)) {
+            // Check if game is inactive or missing required data
+            if (fetchResult.isInactive) {
                 setResults(prev => {
                     const newResults = [...prev];
-                    newResults[resultIndex] = {
-                        ...newResults[resultIndex],
-                        status: 'skipped',
-                        message: 'Tournament not in use',
-                        source: fetchResult.source,
-                        usedCache: fetchResult.usedCache
-                    };
+                    newResults[resultIndex].status = 'skipped';
+                    newResults[resultIndex].message = 'Game is inactive';
                     return newResults;
                 });
                 return;
@@ -197,135 +220,115 @@ export const BulkScraperTab: React.FC = () => {
             // Update status to saving
             setResults(prev => {
                 const newResults = [...prev];
-                newResults[resultIndex] = {
-                    ...newResults[resultIndex],
-                    status: 'saving',
-                    gameName: fetchResult.name,
-                    gameStatus: fetchResult.gameStatus as GameStatus,
-                    source: fetchResult.source,
-                    usedCache: fetchResult.usedCache
-                };
+                newResults[resultIndex].status = 'saving';
+                newResults[resultIndex].gameName = fetchResult.name;
+                newResults[resultIndex].gameStatus = fetchResult.gameStatus as GameStatus;
+                newResults[resultIndex].source = fetchResult.source || 'LIVE';
                 return newResults;
             });
             
-            // Save to database if we have a venue selected
-            if (selectedVenueId) {
-                // Convert to the expected GameData format
-                const gameData = {
-                    ...fetchResult,
-                    s3Key: fetchResult.s3Key || '', // Provide default if missing
-                } as any;
-                
+            // Save the game data - convert to expected format
+            const gameData = {
+                ...fetchResult,
+                s3Key: fetchResult.s3Key || '',
+            } as any;
+            
+            try {
                 await saveGameDataToBackend(
                     url,
                     selectedVenueId,
                     gameData,
-                    null,
-                    currentEntity?.id
+                    null, // options parameter
+                    currentEntity?.id || ''
                 );
                 
                 setResults(prev => {
                     const newResults = [...prev];
-                    newResults[resultIndex] = {
-                        ...newResults[resultIndex],
-                        status: 'success',
-                        message: 'Saved successfully'
-                    };
+                    newResults[resultIndex].status = 'success';
+                    newResults[resultIndex].message = 'Saved successfully';
                     return newResults;
                 });
-            } else {
-                setResults(prev => {
-                    const newResults = [...prev];
-                    newResults[resultIndex] = {
-                        ...newResults[resultIndex],
-                        status: 'success',
-                        message: 'Fetched successfully (not saved - no venue selected)'
-                    };
-                    return newResults;
-                });
+            } catch (saveError) {
+                throw new Error(saveError instanceof Error ? saveError.message : 'Failed to save');
             }
             
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
             setResults(prev => {
                 const newResults = [...prev];
-                newResults[resultIndex] = {
-                    ...newResults[resultIndex],
-                    status: 'error',
-                    message: errorMessage
-                };
+                newResults[resultIndex].status = 'error';
+                newResults[resultIndex].message = error instanceof Error ? error.message : 'Unknown error';
                 return newResults;
             });
         }
     };
 
     const handleBulkScrape = async () => {
-        if (!currentEntity) {
-            alert('Please select an entity first');
+        if (!currentEntity || !selectedVenueId) {
+            alert('Please select both an entity and a venue');
             return;
         }
         
-        const start = parseInt(startId);
-        const end = parseInt(endId);
+        let idsToProcess: number[] = [];
         
-        if (isNaN(start) || isNaN(end)) {
-            alert('Please enter valid start and end IDs');
-            return;
-        }
-        
-        if (start > end) {
-            alert('Start ID must be less than or equal to End ID');
-            return;
-        }
-        
-        if (end - start > 500) {
-            if (!confirm(`This will process ${end - start + 1} games. Are you sure you want to continue?`)) {
+        if (scrapeMode === 'gaps' && scrapingStatus?.gaps && scrapingStatus.gaps.length > 0) {
+            // Use selected gap
+            const selectedGap = scrapingStatus.gaps[selectedGapIndex];
+            if (!selectedGap) {
+                alert('No gap selected');
                 return;
+            }
+            
+            // Generate IDs from gap range
+            for (let id = selectedGap.start; id <= selectedGap.end; id++) {
+                idsToProcess.push(id);
+            }
+            
+            console.log(`Processing gap ${selectedGap.start}-${selectedGap.end} (${idsToProcess.length} IDs)`);
+        } else {
+            // Use manual range
+            const start = parseInt(startId);
+            const end = parseInt(endId);
+            
+            if (isNaN(start) || isNaN(end) || start < 1 || end < start) {
+                alert('Please enter a valid ID range');
+                return;
+            }
+            
+            for (let id = start; id <= end; id++) {
+                idsToProcess.push(id);
             }
         }
         
         setIsProcessing(true);
         setResults([]);
-        setCacheStats({ 
-            enabled: !forceRefresh, 
-            hits: 0, 
-            misses: 0, 
-            rate: 0 
-        });
+        setCacheStats({ enabled: false, hits: 0, misses: 0, rate: 0 });
         
-        // Initialize results array
-        const initialResults: BulkScrapeResult[] = [];
-        for (let id = start; id <= end; id++) {
-            initialResults.push({
-                id,
-                url: buildGameUrl(currentEntity, id.toString()),
-                status: 'pending'
-            });
-        }
+        // Initialize results
+        const initialResults: BulkScrapeResult[] = idsToProcess.map(id => ({
+            id,
+            url: `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}?id=${id}`,
+            status: 'pending'
+        }));
         setResults(initialResults);
         
         // Process in batches
-        for (let i = 0; i < initialResults.length; i += batchSize) {
-            const batch = initialResults.slice(i, Math.min(i + batchSize, initialResults.length));
+        for (let i = 0; i < idsToProcess.length; i += batchSize) {
+            const batch = idsToProcess.slice(i, i + batchSize);
             
-            // Process batch in parallel
             await Promise.all(
-                batch.map(async (item) => {
-                    setCurrentProcessingId(item.id);
+                batch.map(async (id) => {
+                    setCurrentProcessingId(id);
                     
-                    // Check if game exists and should be skipped
+                    // Check if game already exists
                     if (skipExisting) {
-                        const exists = await checkExistingGame(item.id);
+                        const exists = await checkExistingGame(id);
                         if (exists) {
                             setResults(prev => {
                                 const newResults = [...prev];
-                                const index = newResults.findIndex(r => r.id === item.id);
-                                if (index !== -1) {
-                                    newResults[index] = {
-                                        ...newResults[index],
-                                        status: 'skipped',
-                                        message: 'Game already exists in database'
-                                    };
+                                const idx = newResults.findIndex(r => r.id === id);
+                                if (idx >= 0) {
+                                    newResults[idx].status = 'skipped';
+                                    newResults[idx].message = 'Already exists';
                                 }
                                 return newResults;
                             });
@@ -333,191 +336,276 @@ export const BulkScraperTab: React.FC = () => {
                         }
                     }
                     
-                    await processGame(item.id, item.url);
+                    const url = `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}?id=${id}`;
+                    await processGame(id, url);
                 })
             );
             
-            // Small delay between batches to avoid rate limiting
-            if (i + batchSize < initialResults.length) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
+            // Small delay between batches
+            if (i + batchSize < idsToProcess.length) {
+                await new Promise(resolve => setTimeout(resolve, 500));
             }
         }
         
         setIsProcessing(false);
         setCurrentProcessingId(null);
+        
+        // Reload gap analysis after completion
+        await loadGapAnalysis();
+    };
+
+    const getStatusColor = (status: BulkScrapeResult['status']) => {
+        switch (status) {
+            case 'success': return 'bg-green-50 border-green-200';
+            case 'error': return 'bg-red-50 border-red-200';
+            case 'skipped': return 'bg-yellow-50 border-yellow-200';
+            case 'pending': return 'bg-gray-50 border-gray-200';
+            case 'fetching': return 'bg-blue-50 border-blue-200';
+            case 'saving': return 'bg-purple-50 border-purple-200';
+            default: return 'bg-white border-gray-200';
+        }
     };
 
     const getStatusIcon = (status: BulkScrapeResult['status']) => {
         switch (status) {
             case 'success':
-                return <CheckCircle className="h-4 w-4 text-green-500" />;
+                return <CheckCircle className="h-5 w-5 text-green-600" />;
             case 'error':
-                return <XCircle className="h-4 w-4 text-red-500" />;
+                return <XCircle className="h-5 w-5 text-red-600" />;
             case 'skipped':
-                return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+                return <AlertCircle className="h-5 w-5 text-yellow-600" />;
             case 'fetching':
             case 'saving':
-                return <div className="h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />;
+                return (
+                    <div className="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full" />
+                );
             default:
-                return <div className="h-4 w-4 border-2 border-gray-300 rounded-full" />;
-        }
-    };
-
-    const getStatusColor = (status: BulkScrapeResult['status']) => {
-        switch (status) {
-            case 'success':
-                return 'bg-green-50 border-green-200';
-            case 'error':
-                return 'bg-red-50 border-red-200';
-            case 'skipped':
-                return 'bg-yellow-50 border-yellow-200';
-            case 'fetching':
-            case 'saving':
-                return 'bg-blue-50 border-blue-200 animate-pulse';
-            default:
-                return 'bg-gray-50 border-gray-200';
+                return <div className="h-5 w-5 rounded-full border-2 border-gray-300" />;
         }
     };
 
     return (
         <div className="space-y-6">
-            {/* Entity Selection */}
+            {/* Entity Selector */}
             <div className="bg-white rounded-lg shadow p-6">
-                <div className="mb-4">
-                    <h3 className="text-lg font-semibold flex items-center">
-                        <Building2 className="h-5 w-5 mr-2 text-blue-600" />
-                        Entity Selection
-                    </h3>
-                    <p className="text-sm text-gray-600 mt-1">
-                        Select the entity (business) for bulk scraping
-                    </p>
+                <div className="flex items-center mb-4">
+                    <Building2 className="h-5 w-5 mr-2 text-blue-600" />
+                    <h3 className="text-lg font-semibold">Entity Selection</h3>
                 </div>
                 <EntitySelector />
-                {currentEntity && (
-                    <div className="mt-3 p-3 bg-blue-50 rounded">
-                        <p className="text-sm text-blue-800">
-                            <strong>Active:</strong> {currentEntity.entityName}
-                        </p>
-                        <p className="text-xs text-blue-600 mt-1">
-                            Base URL: {currentEntity.gameUrlDomain}{currentEntity.gameUrlPath}
-                        </p>
-                    </div>
-                )}
             </div>
 
-            {/* Bulk Scrape Configuration */}
+            {/* Gap Analysis Section */}
+            {currentEntity && scrapingStatus && (
+                <div className="bg-white rounded-lg shadow p-6">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center">
+                        <TrendingUp className="h-5 w-5 mr-2 text-purple-600" />
+                        Coverage Analysis for {currentEntity.entityName}
+                    </h3>
+                    
+                    <div className="grid grid-cols-4 gap-4 mb-4">
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                            <p className="text-sm text-blue-600 font-medium">Total Games</p>
+                            <p className="text-2xl font-bold text-blue-900">{scrapingStatus.totalGamesStored}</p>
+                        </div>
+                        <div className="bg-green-50 p-4 rounded-lg">
+                            <p className="text-sm text-green-600 font-medium">Coverage</p>
+                            <p className="text-2xl font-bold text-green-900">{scrapingStatus.gapSummary.coveragePercentage.toFixed(1)}%</p>
+                        </div>
+                        <div className="bg-orange-50 p-4 rounded-lg">
+                            <p className="text-sm text-orange-600 font-medium">Missing IDs</p>
+                            <p className="text-2xl font-bold text-orange-900">{scrapingStatus.gapSummary.totalMissingIds}</p>
+                        </div>
+                        <div className="bg-purple-50 p-4 rounded-lg">
+                            <p className="text-sm text-purple-600 font-medium">Total Gaps</p>
+                            <p className="text-2xl font-bold text-purple-900">{scrapingStatus.gapSummary.totalGaps}</p>
+                        </div>
+                    </div>
+                    
+                    {scrapingStatus.gaps.length > 0 && (
+                        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p className="text-sm text-blue-800 mb-2">
+                                <strong>Gap ranges available:</strong> {formatGapRanges(scrapingStatus.gaps)}
+                            </p>
+                            {scrapingStatus.gapSummary.largestGapStart && (
+                                <p className="text-sm text-blue-700">
+                                    Largest gap: {scrapingStatus.gapSummary.largestGapStart}-{scrapingStatus.gapSummary.largestGapEnd} 
+                                    ({scrapingStatus.gapSummary.largestGapCount} IDs)
+                                </p>
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Control Panel */}
             <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-lg font-semibold mb-4 flex items-center">
                     <Database className="h-5 w-5 mr-2 text-blue-600" />
-                    Bulk Tournament Scraper
+                    Bulk Scraper Controls
                 </h3>
                 
                 {!currentEntity ? (
-                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                        <p className="text-yellow-800">Please select an entity first to enable bulk scraping.</p>
-                    </div>
+                    <p className="text-gray-500">Please select an entity to continue</p>
                 ) : (
                     <>
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Start Tournament ID
-                                </label>
-                                <input
-                                    type="number"
-                                    value={startId}
-                                    onChange={(e) => setStartId(e.target.value)}
-                                    disabled={isProcessing}
-                                    placeholder="e.g., 100"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
-                                />
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    End Tournament ID
-                                </label>
-                                <input
-                                    type="number"
-                                    value={endId}
-                                    onChange={(e) => setEndId(e.target.value)}
-                                    disabled={isProcessing}
-                                    placeholder="e.g., 200"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
-                                />
-                            </div>
-                        </div>
-                        
+                        {/* Scrape Mode Selection */}
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Default Venue
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Scrape Mode
                             </label>
-                            <select
-                                value={selectedVenueId}
-                                onChange={(e) => setSelectedVenueId(e.target.value)}
-                                disabled={isProcessing || venues.length === 0}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
-                            >
-                                <option value="">Select a venue (optional)</option>
-                                {venues.map((venue) => (
-                                    <option key={venue.id} value={venue.id}>
-                                        {venue.venueNumber !== undefined 
-                                            ? `${venue.venueNumber}. ${venue.name}`
-                                            : venue.name
-                                        }
-                                    </option>
-                                ))}
-                            </select>
-                            <p className="text-xs text-gray-500 mt-1">
-                                If selected, all games will be saved with this venue
-                            </p>
+                            <div className="flex space-x-4">
+                                <button
+                                    onClick={() => setScrapeMode('range')}
+                                    disabled={isProcessing}
+                                    className={`flex-1 px-4 py-2 rounded-md border-2 transition-colors ${
+                                        scrapeMode === 'range'
+                                            ? 'border-blue-600 bg-blue-50 text-blue-700'
+                                            : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                                    } disabled:opacity-50`}
+                                >
+                                    <div className="flex items-center justify-center">
+                                        <Database className="h-4 w-4 mr-2" />
+                                        Manual Range
+                                    </div>
+                                </button>
+                                <button
+                                    onClick={() => setScrapeMode('gaps')}
+                                    disabled={isProcessing || !scrapingStatus?.gaps || scrapingStatus.gaps.length === 0}
+                                    className={`flex-1 px-4 py-2 rounded-md border-2 transition-colors ${
+                                        scrapeMode === 'gaps'
+                                            ? 'border-purple-600 bg-purple-50 text-purple-700'
+                                            : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                                    } disabled:opacity-50`}
+                                >
+                                    <div className="flex items-center justify-center">
+                                        <Zap className="h-4 w-4 mr-2" />
+                                        Fill Gaps ({scrapingStatus?.gaps?.length || 0})
+                                    </div>
+                                </button>
+                            </div>
                         </div>
-                        
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Batch Size
+
+                        {scrapeMode === 'range' ? (
+                            <div className="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Start ID
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={startId}
+                                        onChange={(e) => setStartId(e.target.value)}
+                                        disabled={isProcessing}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
+                                        placeholder="e.g., 1"
+                                        min="1"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        End ID
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={endId}
+                                        onChange={(e) => setEndId(e.target.value)}
+                                        disabled={isProcessing}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
+                                        placeholder="e.g., 100"
+                                        min="1"
+                                    />
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Select Gap to Fill
                                 </label>
                                 <select
-                                    value={batchSize}
-                                    onChange={(e) => setBatchSize(parseInt(e.target.value))}
+                                    value={selectedGapIndex}
+                                    onChange={(e) => setSelectedGapIndex(parseInt(e.target.value))}
                                     disabled={isProcessing}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
                                 >
-                                    <option value="1">1 (Sequential)</option>
-                                    <option value="5">5 (Moderate)</option>
-                                    <option value="10">10 (Fast)</option>
-                                    <option value="20">20 (Very Fast)</option>
+                                    {scrapingStatus?.gaps?.map((gap, index) => (
+                                        <option key={index} value={index}>
+                                            Gap {index + 1}: {gap.start}-{gap.end} ({gap.count} IDs)
+                                        </option>
+                                    ))}
+                                </select>
+                                {scrapingStatus?.gaps && scrapingStatus.gaps[selectedGapIndex] && (
+                                    <p className="text-sm text-gray-600 mt-1">
+                                        Will scrape {scrapingStatus.gaps[selectedGapIndex].count} tournament IDs
+                                    </p>
+                                )}
+                            </div>
+                        )}
+                        
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Default Venue
+                                </label>
+                                <select
+                                    value={selectedVenueId}
+                                    onChange={(e) => setSelectedVenueId(e.target.value)}
+                                    disabled={isProcessing}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
+                                >
+                                    <option value="">Select a venue</option>
+                                    {venues.map((venue) => (
+                                        <option key={venue.id} value={venue.id}>
+                                            {venue.name}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                             
-                            <div className="space-y-2">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Batch Size
+                                </label>
+                                <input
+                                    type="number"
+                                    value={batchSize}
+                                    onChange={(e) => setBatchSize(parseInt(e.target.value))}
+                                    disabled={isProcessing}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
+                                    min="1"
+                                    max="20"
+                                />
+                            </div>
+                        </div>
+                        
+                        <div className="mb-4 space-y-2">
+                            <div className="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    id="skipExisting"
+                                    checked={skipExisting}
+                                    onChange={(e) => setSkipExisting(e.target.checked)}
+                                    disabled={isProcessing}
+                                    className="h-4 w-4 text-blue-600 border-gray-300 rounded disabled:opacity-50"
+                                />
+                                <label htmlFor="skipExisting" className="ml-2 text-sm text-gray-700">
+                                    Skip existing games
+                                </label>
+                            </div>
+                            
+                            <div className="flex items-center">
                                 <div className="flex items-center">
                                     <input
                                         type="checkbox"
-                                        id="skipExisting"
-                                        checked={skipExisting}
-                                        onChange={(e) => setSkipExisting(e.target.checked)}
+                                        id="forceRefresh"
+                                        checked={forceRefresh}
+                                        onChange={(e) => setForceRefresh(e.target.checked)}
                                         disabled={isProcessing}
-                                        className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                                        className="h-4 w-4 text-blue-600 border-gray-300 rounded disabled:opacity-50"
                                     />
-                                    <label htmlFor="skipExisting" className="ml-2 text-sm text-gray-700">
-                                        Skip existing games
-                                    </label>
-                                </div>
-                                
-                                {/* Cache toggle */}
-                                <div className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        id="useCache"
-                                        checked={!forceRefresh}
-                                        onChange={(e) => setForceRefresh(!e.target.checked)}
-                                        disabled={isProcessing}
-                                        className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                                    />
-                                    <label htmlFor="useCache" className="ml-2 text-sm text-gray-700">
-                                        Use S3 cache when available
+                                    <label htmlFor="forceRefresh" className="ml-2 text-sm text-gray-700">
+                                        Force refresh (bypass S3 cache)
                                     </label>
                                 </div>
                             </div>
@@ -540,10 +628,10 @@ export const BulkScraperTab: React.FC = () => {
                         
                         <button
                             onClick={handleBulkScrape}
-                            disabled={isProcessing || !startId || !endId}
+                            disabled={isProcessing || !selectedVenueId || (scrapeMode === 'range' && (!startId || !endId))}
                             className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                         >
-                            {isProcessing ? 'Processing...' : 'Start Bulk Scrape'}
+                            {isProcessing ? 'Processing...' : `Start ${scrapeMode === 'gaps' ? 'Gap' : 'Bulk'} Scrape`}
                         </button>
                     </>
                 )}
@@ -615,13 +703,22 @@ export const BulkScraperTab: React.FC = () => {
                             <div className="mb-2">
                                 <div className="flex justify-between text-sm text-gray-600 mb-1">
                                     <span>Processing ID: {currentProcessingId}</span>
-                                    <span>{Math.round(((currentProcessingId - parseInt(startId)) / (parseInt(endId) - parseInt(startId) + 1)) * 100)}%</span>
+                                    <span>
+                                        {scrapeMode === 'range' && startId && endId
+                                            ? Math.round(((currentProcessingId - parseInt(startId)) / (parseInt(endId) - parseInt(startId) + 1)) * 100)
+                                            : Math.round((summary.success + summary.errors + summary.skipped) / summary.total * 100)
+                                        }%
+                                    </span>
                                 </div>
                                 <div className="w-full bg-gray-200 rounded-full h-2">
                                     <div 
                                         className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                                         style={{
-                                            width: `${((currentProcessingId - parseInt(startId)) / (parseInt(endId) - parseInt(startId) + 1)) * 100}%`
+                                            width: `${
+                                                scrapeMode === 'range' && startId && endId
+                                                    ? ((currentProcessingId - parseInt(startId)) / (parseInt(endId) - parseInt(startId) + 1)) * 100
+                                                    : (summary.success + summary.errors + summary.skipped) / summary.total * 100
+                                            }%`
                                         }}
                                     />
                                 </div>

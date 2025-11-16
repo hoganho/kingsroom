@@ -98,6 +98,11 @@ type ScraperState @model @auth(rules: [{ allow: private }]) {
   totalErrors: Int!
   enabled: Boolean!
   currentLog: [ScraperLogData]
+  highestStoredId: Int
+  lowestStoredId: Int
+  knownGapRanges: AWSJSON  # Array of {start, end, count}
+  lastGapScanAt: AWSDateTime
+  totalGamesInDatabase: Int
   lastGamesProcessed: [ScrapedGameStatus]
   entityId: ID @index(name: "byEntityScraperState")
   entity: Entity @belongsTo(fields: ["entityId"])
@@ -213,7 +218,6 @@ type Game @model @auth(rules: [{ allow: private }]) {
   # --- Data Source (SIMPLE REFERENCE ONLY - NO SCRAPER FIELDS) ---
   sourceUrl: AWSURL @index(name: "bySourceUrl", queryField: "gameBySourceUrl")
   tournamentId: Int
-  dataSource: DataSource
   originalScrapedData: AWSJSON
 
   # --- NEW: Venue Assignment Tracking ---
@@ -231,6 +235,7 @@ type Game @model @auth(rules: [{ allow: private }]) {
   playerEntries: [PlayerEntry] @hasMany(indexName: "byGame", fields: ["id"])
   playerResults: [PlayerResult] @hasMany(indexName: "byGame", fields: ["id"])
   entityId: ID @index(name: "byEntityGame", sortKeyFields: ["gameStartDateTime"])
+            @index(name: "byEntityAndTournamentId", sortKeyFields: ["tournamentId"], queryField: "gamesByEntityAndTournamentId")
   entity: Entity @belongsTo(fields: ["entityId"])
 
   createdAt: AWSDateTime!
@@ -670,6 +675,22 @@ type S3Storage @model @auth(rules: [{ allow: private }]) {
   registrationStatus: String @index(name: "byS3RegistrationStatus", queryField: "s3StorageByRegistrationStatus", sortKeyFields: ["scrapedAt"])
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
+  
+  # === NEW PARSED DATA TRACKING ===
+  isParsed: Boolean @default(value: "false")
+  parsedDataHash: String
+  extractedFields: [String]
+  lastParsedAt: AWSDateTime
+  parseCount: Int @default(value: "0")
+  
+  # === RE-SCRAPE TRACKING ===
+  rescrapeCount: Int @default(value: "0")
+  lastRescrapeAt: AWSDateTime
+  
+  # === DATA CHANGE TRACKING ===
+  dataChangedAt: AWSDateTime
+  dataChangeCount: Int @default(value: "0")
+
 }
 
 # ===================================================================
@@ -794,7 +815,7 @@ type DatabaseMetric {
     operation: String!
     table: String!
     success: Boolean!
-    duration: Int
+    duration: Float
     count: Int
     entityId: String
 }
@@ -1204,6 +1225,52 @@ type VenueMatch {
 }
 
 # ===================================================================
+# GAP DETECTION & GAME ID TRACKING TYPES
+# ===================================================================
+
+type GapRange {
+  start: Int!
+  end: Int!
+  count: Int!
+}
+
+type EntityScrapingStatus {
+  entityId: ID!
+  entityName: String
+  lowestTournamentId: Int
+  highestTournamentId: Int
+  totalGamesStored: Int!
+  unfinishedGameCount: Int!
+  gaps: [GapRange!]!
+  gapSummary: GapSummary!
+  lastUpdated: AWSDateTime!
+  cacheAge: Int  # seconds since last calculation
+}
+
+type GapSummary {
+  totalGaps: Int!
+  totalMissingIds: Int!
+  largestGapStart: Int
+  largestGapEnd: Int
+  largestGapCount: Int
+  coveragePercentage: Float!  # % of IDs that exist
+}
+
+type UnfinishedGamesConnection {
+  items: [Game!]!
+  nextToken: String
+  totalCount: Int!
+}
+
+type TournamentIdBounds {
+  entityId: ID!
+  lowestId: Int
+  highestId: Int
+  totalCount: Int!
+  lastUpdated: AWSDateTime!
+}
+
+# ===================================================================
 # 4. ROOT OPERATIONS (QUERY, MUTATION, SUBSCRIPTION)
 # ===================================================================
 
@@ -1276,6 +1343,50 @@ type Query {
 
     getDatabaseMetrics(timeRange: String): DatabaseMetricsResponse
         @function(name: "getDatabaseMetrics-${env}")
+
+    # ===================================================================
+    # GAME ID TRACKING & GAP DETECTION QUERIES
+    # ===================================================================
+    
+    # Get highest and lowest tournament IDs for an entity
+    getTournamentIdBounds(entityId: ID!): TournamentIdBounds
+        @function(name: "gameIdTracker-${env}")
+    
+    # Get comprehensive scraping status with gaps
+    getEntityScrapingStatus(
+        entityId: ID!
+        forceRefresh: Boolean
+        startId: Int
+        endId: Int
+    ): EntityScrapingStatus
+        @function(name: "gameIdTracker-${env}")
+    
+    # Get all gaps in tournament ID sequence
+    findTournamentIdGaps(
+        entityId: ID!
+        startId: Int
+        endId: Int
+        maxGapsToReturn: Int
+    ): [GapRange!]
+        @function(name: "gameIdTracker-${env}")
+    
+    # Get unfinished games for specific entity
+    getUnfinishedGamesByEntity(
+        entityId: ID!
+        limit: Int
+        nextToken: String
+    ): UnfinishedGamesConnection
+        @function(name: "gameIdTracker-${env}")
+    
+    # Get list of tournament IDs that exist (for verification)
+    listExistingTournamentIds(
+        entityId: ID!
+        startId: Int
+        endId: Int
+        limit: Int
+    ): [Int!]
+        @function(name: "gameIdTracker-${env}")
+
 }
 
 type Mutation {

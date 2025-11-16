@@ -45,6 +45,7 @@ const { LambdaMonitoring } = require('./lambda-monitoring');
 // Import the refactored modules
 const { enhancedHandleFetch } = require('./enhanced-handleFetch');
 const { runScraper, getTournamentId, getStatusAndReg } = require('./scraperStrategies');
+const { updateS3StorageWithParsedData } = require('./update-s3storage-with-parsed-data');
 
 // VENUE ASSIGNMENT CONSTANTS
 const UNASSIGNED_VENUE_ID = "00000000-0000-0000-0000-000000000000";
@@ -1291,6 +1292,35 @@ exports.handler = async (event) => {
                                 entityId: entityId || s3StorageRecord?.entityId || DEFAULT_ENTITY_ID
                             };
                             
+                            // ✅ NEW: Update S3Storage with parsed data (even if HTML unchanged)
+                            // This captures improvements from evolved scraper strategies
+                            try {
+                                const s3StorageTable = getTableName('S3Storage');
+                                const updateResult = await updateS3StorageWithParsedData(
+                                    s3KeyParam,
+                                    scrapedData,
+                                    foundKeys,
+                                    monitoredDdbDocClient,
+                                    s3StorageTable,
+                                    true, // isRescrape = true (from cache)
+                                    s3StorageRecord?.url || fetchUrl // URL for fallback lookup
+                                );
+                                
+                                console.log(`[FETCH] S3Storage update result:`, {
+                                    source: 'S3_CACHE',
+                                    dataChanged: updateResult.dataChanged,
+                                    fieldsExtracted: updateResult.extractedFields?.length
+                                });
+                                
+                                // Add update info to result
+                                result.s3StorageUpdated = updateResult.success;
+                                result.dataChanged = updateResult.dataChanged;
+                                
+                            } catch (s3UpdateError) {
+                                console.warn('[FETCH] Failed to update S3Storage with parsed data:', s3UpdateError.message);
+                                // Don't fail the whole operation if S3Storage update fails
+                            }
+                            
                             console.log(`[FETCH] ✅ Successfully parsed cached HTML for tournament ${result.tournamentId}`);
                             console.log(`[FETCH] ✅ NO NEW S3 FILE CREATED (cache mode)`);
                             
@@ -1440,6 +1470,37 @@ exports.handler = async (event) => {
                         entityId: entityId,
                         wasForced: forceRefresh || overrideDoNotScrape
                     };
+                    
+                    // ✅ NEW: Update S3Storage with parsed data (for both live and cache)
+                    // This ensures S3Storage always has the latest extracted data
+                    if (fetchResult.s3Key) {
+                        try {
+                            const s3StorageTable = getTableName('S3Storage');
+                            const updateResult = await updateS3StorageWithParsedData(
+                                fetchResult.s3Key,
+                                scrapedData,
+                                foundKeys,
+                                monitoredDdbDocClient,
+                                s3StorageTable,
+                                false, // isRescrape = false (live fetch)
+                                fetchUrl // URL for fallback lookup
+                            );
+                            
+                            console.log(`[FETCH] S3Storage update result:`, {
+                                source: fetchResult.source,
+                                dataChanged: updateResult.dataChanged,
+                                fieldsExtracted: updateResult.extractedFields?.length
+                            });
+                            
+                            // Add update info to result
+                            result.s3StorageUpdated = updateResult.success;
+                            result.dataChanged = updateResult.dataChanged;
+                            
+                        } catch (s3UpdateError) {
+                            console.warn('[FETCH] Failed to update S3Storage with parsed data:', s3UpdateError.message);
+                            // Don't fail the whole operation if S3Storage update fails
+                        }
+                    }
                     
                     return result;
 

@@ -163,7 +163,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
     gameTags
     sourceUrl
     tournamentId
-    dataSource
     originalScrapedData
     venueAssignmentStatus
     requiresVenueAssignment
@@ -358,7 +357,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -728,6 +726,11 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -892,7 +895,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -1100,7 +1102,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -1285,7 +1286,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -1438,7 +1438,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -1626,7 +1625,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -1934,7 +1932,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -2209,7 +2206,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -2338,6 +2334,11 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -2624,7 +2625,6 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -3103,6 +3103,11 @@ export const startScraperJob = /* GraphQL */ `mutation StartScraperJob($input: S
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -3389,7 +3394,6 @@ export const startScraperJob = /* GraphQL */ `mutation StartScraperJob($input: S
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -3779,6 +3783,11 @@ export const cancelScraperJob = /* GraphQL */ `mutation CancelScraperJob($jobId:
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -4065,7 +4074,6 @@ export const cancelScraperJob = /* GraphQL */ `mutation CancelScraperJob($jobId:
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -4458,6 +4466,11 @@ export const modifyScrapeURLStatus = /* GraphQL */ `mutation ModifyScrapeURLStat
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -4744,7 +4757,6 @@ export const modifyScrapeURLStatus = /* GraphQL */ `mutation ModifyScrapeURLStat
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -5153,6 +5165,11 @@ export const bulkModifyScrapeURLs = /* GraphQL */ `mutation BulkModifyScrapeURLs
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -5439,7 +5456,6 @@ export const bulkModifyScrapeURLs = /* GraphQL */ `mutation BulkModifyScrapeURLs
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -5720,6 +5736,15 @@ export const uploadManualHTML = /* GraphQL */ `mutation UploadManualHTML($input:
     registrationStatus
     createdAt
     updatedAt
+    isParsed
+    parsedDataHash
+    extractedFields
+    lastParsedAt
+    parseCount
+    rescrapeCount
+    lastRescrapeAt
+    dataChangedAt
+    dataChangeCount
     _version
     _deleted
     _lastChangedAt
@@ -5996,6 +6021,11 @@ export const createEntity = /* GraphQL */ `mutation CreateEntity(
           details
           __typename
         }
+        highestStoredId
+        lowestStoredId
+        knownGapRanges
+        lastGapScanAt
+        totalGamesInDatabase
         lastGamesProcessed {
           id
           name
@@ -6409,7 +6439,6 @@ export const createEntity = /* GraphQL */ `mutation CreateEntity(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -6598,7 +6627,6 @@ export const createEntity = /* GraphQL */ `mutation CreateEntity(
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -6786,7 +6814,6 @@ export const createEntity = /* GraphQL */ `mutation CreateEntity(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -7090,6 +7117,11 @@ export const updateEntity = /* GraphQL */ `mutation UpdateEntity(
           details
           __typename
         }
+        highestStoredId
+        lowestStoredId
+        knownGapRanges
+        lastGapScanAt
+        totalGamesInDatabase
         lastGamesProcessed {
           id
           name
@@ -7503,7 +7535,6 @@ export const updateEntity = /* GraphQL */ `mutation UpdateEntity(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -7692,7 +7723,6 @@ export const updateEntity = /* GraphQL */ `mutation UpdateEntity(
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -7880,7 +7910,6 @@ export const updateEntity = /* GraphQL */ `mutation UpdateEntity(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -8184,6 +8213,11 @@ export const deleteEntity = /* GraphQL */ `mutation DeleteEntity(
           details
           __typename
         }
+        highestStoredId
+        lowestStoredId
+        knownGapRanges
+        lastGapScanAt
+        totalGamesInDatabase
         lastGamesProcessed {
           id
           name
@@ -8597,7 +8631,6 @@ export const deleteEntity = /* GraphQL */ `mutation DeleteEntity(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -8786,7 +8819,6 @@ export const deleteEntity = /* GraphQL */ `mutation DeleteEntity(
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -8974,7 +9006,6 @@ export const deleteEntity = /* GraphQL */ `mutation DeleteEntity(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -9409,6 +9440,11 @@ export const createScraperState = /* GraphQL */ `mutation CreateScraperState(
       details
       __typename
     }
+    highestStoredId
+    lowestStoredId
+    knownGapRanges
+    lastGapScanAt
+    totalGamesInDatabase
     lastGamesProcessed {
       id
       name
@@ -9443,6 +9479,11 @@ export const createScraperState = /* GraphQL */ `mutation CreateScraperState(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -9729,7 +9770,6 @@ export const createScraperState = /* GraphQL */ `mutation CreateScraperState(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -9914,6 +9954,11 @@ export const updateScraperState = /* GraphQL */ `mutation UpdateScraperState(
       details
       __typename
     }
+    highestStoredId
+    lowestStoredId
+    knownGapRanges
+    lastGapScanAt
+    totalGamesInDatabase
     lastGamesProcessed {
       id
       name
@@ -9948,6 +9993,11 @@ export const updateScraperState = /* GraphQL */ `mutation UpdateScraperState(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -10234,7 +10284,6 @@ export const updateScraperState = /* GraphQL */ `mutation UpdateScraperState(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -10419,6 +10468,11 @@ export const deleteScraperState = /* GraphQL */ `mutation DeleteScraperState(
       details
       __typename
     }
+    highestStoredId
+    lowestStoredId
+    knownGapRanges
+    lastGapScanAt
+    totalGamesInDatabase
     lastGamesProcessed {
       id
       name
@@ -10453,6 +10507,11 @@ export const deleteScraperState = /* GraphQL */ `mutation DeleteScraperState(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -10739,7 +10798,6 @@ export const deleteScraperState = /* GraphQL */ `mutation DeleteScraperState(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -11026,7 +11084,6 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -11354,7 +11411,6 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -11542,7 +11598,6 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -11810,7 +11865,6 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -12474,6 +12528,11 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -12760,7 +12819,6 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -13048,7 +13106,6 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -13376,7 +13433,6 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -13564,7 +13620,6 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -13832,7 +13887,6 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -14496,6 +14550,11 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -14782,7 +14841,6 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -15070,7 +15128,6 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -15398,7 +15455,6 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -15586,7 +15642,6 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -15854,7 +15909,6 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -16518,6 +16572,11 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -16804,7 +16863,6 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -17170,7 +17228,6 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -17540,6 +17597,11 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -17704,7 +17766,6 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -17972,7 +18033,6 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -18342,6 +18402,11 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -18506,7 +18571,6 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -18774,7 +18838,6 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -19144,6 +19207,11 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -19308,7 +19376,6 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -19524,7 +19591,6 @@ export const createTournamentSeriesTitle = /* GraphQL */ `mutation CreateTournam
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -19717,7 +19783,6 @@ export const updateTournamentSeriesTitle = /* GraphQL */ `mutation UpdateTournam
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -19910,7 +19975,6 @@ export const deleteTournamentSeriesTitle = /* GraphQL */ `mutation DeleteTournam
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -20231,7 +20295,6 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -20601,6 +20664,11 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -20765,7 +20833,6 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -20857,7 +20924,6 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -21045,7 +21111,6 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -21461,7 +21526,6 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -21831,6 +21895,11 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -21995,7 +22064,6 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -22087,7 +22155,6 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -22275,7 +22342,6 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -22691,7 +22757,6 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -23061,6 +23126,11 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -23225,7 +23295,6 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -23317,7 +23386,6 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -23505,7 +23573,6 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -23684,7 +23751,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
     gameTags
     sourceUrl
     tournamentId
-    dataSource
     originalScrapedData
     venueAssignmentStatus
     requiresVenueAssignment
@@ -23879,7 +23945,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -24249,6 +24314,11 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -24413,7 +24483,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -24621,7 +24690,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -24806,7 +24874,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -24959,7 +25026,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -25147,7 +25213,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -25455,7 +25520,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -25730,7 +25794,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -25859,6 +25922,11 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -26145,7 +26213,6 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -26350,7 +26417,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
     gameTags
     sourceUrl
     tournamentId
-    dataSource
     originalScrapedData
     venueAssignmentStatus
     requiresVenueAssignment
@@ -26545,7 +26611,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -26915,6 +26980,11 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -27079,7 +27149,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -27287,7 +27356,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -27472,7 +27540,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -27625,7 +27692,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -27813,7 +27879,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -28121,7 +28186,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -28396,7 +28460,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -28525,6 +28588,11 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -28811,7 +28879,6 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -29016,7 +29083,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
     gameTags
     sourceUrl
     tournamentId
-    dataSource
     originalScrapedData
     venueAssignmentStatus
     requiresVenueAssignment
@@ -29211,7 +29277,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -29581,6 +29646,11 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -29745,7 +29815,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -29953,7 +30022,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -30138,7 +30206,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -30291,7 +30358,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -30479,7 +30545,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -30787,7 +30852,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -31062,7 +31126,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -31191,6 +31254,11 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -31477,7 +31545,6 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -31698,7 +31765,6 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -31806,7 +31872,6 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -32095,7 +32160,6 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -32175,7 +32239,6 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -32347,7 +32410,6 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -32446,7 +32508,6 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -32495,6 +32556,11 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -32659,7 +32725,6 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -32782,7 +32847,6 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -32890,7 +32954,6 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -33179,7 +33242,6 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -33259,7 +33321,6 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -33431,7 +33492,6 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -33530,7 +33590,6 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -33579,6 +33638,11 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -33743,7 +33807,6 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -33866,7 +33929,6 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -33974,7 +34036,6 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -34263,7 +34324,6 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -34343,7 +34403,6 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -34515,7 +34574,6 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -34614,7 +34672,6 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -34663,6 +34720,11 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -34827,7 +34889,6 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -36481,7 +36542,6 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -36756,7 +36816,6 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -37663,7 +37722,6 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -38033,6 +38091,11 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -38197,7 +38260,6 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -39641,7 +39703,6 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -39916,7 +39977,6 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -40823,7 +40883,6 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -41193,6 +41252,11 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -41357,7 +41421,6 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -42801,7 +42864,6 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -43076,7 +43138,6 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -43983,7 +44044,6 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -44353,6 +44413,11 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -44517,7 +44582,6 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -45103,7 +45167,6 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -45202,7 +45265,6 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -45532,7 +45594,6 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -46231,7 +46292,6 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -46330,7 +46390,6 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -46660,7 +46719,6 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -47359,7 +47417,6 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -47458,7 +47515,6 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -47788,7 +47844,6 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -48493,7 +48548,6 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -48592,7 +48646,6 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -48922,7 +48975,6 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -49113,7 +49165,6 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -49221,7 +49272,6 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -49510,7 +49560,6 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -49590,7 +49639,6 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -49762,7 +49810,6 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -49861,7 +49908,6 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -49910,6 +49956,11 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -50074,7 +50125,6 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -50666,7 +50716,6 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -50765,7 +50814,6 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -51095,7 +51143,6 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -51286,7 +51333,6 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -51394,7 +51440,6 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -51683,7 +51728,6 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -51763,7 +51807,6 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -51935,7 +51978,6 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -52034,7 +52076,6 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -52083,6 +52124,11 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -52247,7 +52293,6 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -52839,7 +52884,6 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -52938,7 +52982,6 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -53268,7 +53311,6 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -53459,7 +53501,6 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -53567,7 +53608,6 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -53856,7 +53896,6 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -53936,7 +53975,6 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -54108,7 +54146,6 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -54207,7 +54244,6 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -54256,6 +54292,11 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -54420,7 +54461,6 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -55007,7 +55047,6 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -55106,7 +55145,6 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -55436,7 +55474,6 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -55628,7 +55665,6 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -55736,7 +55772,6 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -56025,7 +56060,6 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -56105,7 +56139,6 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -56277,7 +56310,6 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -56376,7 +56408,6 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -56425,6 +56456,11 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -56589,7 +56625,6 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -57176,7 +57211,6 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -57275,7 +57309,6 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -57605,7 +57638,6 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -57797,7 +57829,6 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -57905,7 +57936,6 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -58194,7 +58224,6 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -58274,7 +58303,6 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -58446,7 +58474,6 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -58545,7 +58572,6 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -58594,6 +58620,11 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -58758,7 +58789,6 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -59345,7 +59375,6 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -59444,7 +59473,6 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -59774,7 +59802,6 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -59966,7 +59993,6 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -60074,7 +60100,6 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -60363,7 +60388,6 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -60443,7 +60467,6 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -60615,7 +60638,6 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -60714,7 +60736,6 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -60763,6 +60784,11 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -60927,7 +60953,6 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -61513,7 +61538,6 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -61612,7 +61636,6 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -61942,7 +61965,6 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -62286,7 +62308,6 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -62656,6 +62677,11 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -62820,7 +62846,6 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -63406,7 +63431,6 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -63505,7 +63529,6 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -63835,7 +63858,6 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -64179,7 +64201,6 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -64549,6 +64570,11 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -64713,7 +64739,6 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -65299,7 +65324,6 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -65398,7 +65422,6 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -65728,7 +65751,6 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -66072,7 +66094,6 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -66442,6 +66463,11 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -66606,7 +66632,6 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -67193,7 +67218,6 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -67292,7 +67316,6 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -67622,7 +67645,6 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -68310,7 +68332,6 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -68409,7 +68430,6 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -68739,7 +68759,6 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -69427,7 +69446,6 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -69526,7 +69544,6 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -69856,7 +69873,6 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -70544,7 +70560,6 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -70643,7 +70658,6 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -70973,7 +70987,6 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -71662,7 +71675,6 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -71761,7 +71773,6 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -72091,7 +72102,6 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -72780,7 +72790,6 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -72879,7 +72888,6 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -73209,7 +73217,6 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -73898,7 +73905,6 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -73997,7 +74003,6 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -74327,7 +74332,6 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -75016,7 +75020,6 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -75115,7 +75118,6 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -75445,7 +75447,6 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -76134,7 +76135,6 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -76233,7 +76233,6 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -76563,7 +76562,6 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -77249,7 +77247,6 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -77348,7 +77345,6 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -77678,7 +77674,6 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -78362,7 +78357,6 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -78461,7 +78455,6 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -78791,7 +78784,6 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -79475,7 +79467,6 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -79574,7 +79565,6 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -79904,7 +79894,6 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -81162,7 +81151,6 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -81261,7 +81249,6 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -81591,7 +81578,6 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -82351,7 +82337,6 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -82450,7 +82435,6 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -82780,7 +82764,6 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -83540,7 +83523,6 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -83639,7 +83621,6 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -83969,7 +83950,6 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -84913,7 +84893,6 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -85012,7 +84991,6 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -85342,7 +85320,6 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -86025,7 +86002,6 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -86124,7 +86100,6 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -86454,7 +86429,6 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -87137,7 +87111,6 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -87236,7 +87209,6 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -87566,7 +87538,6 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -88182,7 +88153,6 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -88552,6 +88522,11 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -88716,7 +88691,6 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -88799,6 +88773,11 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -89085,7 +89064,6 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -89449,7 +89427,6 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -89819,6 +89796,11 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -89983,7 +89965,6 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -90066,6 +90047,11 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -90352,7 +90338,6 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -90716,7 +90701,6 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -91086,6 +91070,11 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -91250,7 +91239,6 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -91333,6 +91321,11 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -91619,7 +91612,6 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -92144,6 +92136,11 @@ export const createScraperJob = /* GraphQL */ `mutation CreateScraperJob(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -92430,7 +92427,6 @@ export const createScraperJob = /* GraphQL */ `mutation CreateScraperJob(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -92823,6 +92819,11 @@ export const updateScraperJob = /* GraphQL */ `mutation UpdateScraperJob(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -93109,7 +93110,6 @@ export const updateScraperJob = /* GraphQL */ `mutation UpdateScraperJob(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -93502,6 +93502,11 @@ export const deleteScraperJob = /* GraphQL */ `mutation DeleteScraperJob(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -93788,7 +93793,6 @@ export const deleteScraperJob = /* GraphQL */ `mutation DeleteScraperJob(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -94180,6 +94184,11 @@ export const createScrapeURL = /* GraphQL */ `mutation CreateScrapeURL(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -94466,7 +94475,6 @@ export const createScrapeURL = /* GraphQL */ `mutation CreateScrapeURL(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -94870,6 +94878,11 @@ export const updateScrapeURL = /* GraphQL */ `mutation UpdateScrapeURL(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -95156,7 +95169,6 @@ export const updateScrapeURL = /* GraphQL */ `mutation UpdateScrapeURL(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -95560,6 +95572,11 @@ export const deleteScrapeURL = /* GraphQL */ `mutation DeleteScrapeURL(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -95846,7 +95863,6 @@ export const deleteScrapeURL = /* GraphQL */ `mutation DeleteScrapeURL(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -96203,6 +96219,11 @@ export const createScrapeAttempt = /* GraphQL */ `mutation CreateScrapeAttempt(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -96367,7 +96388,6 @@ export const createScrapeAttempt = /* GraphQL */ `mutation CreateScrapeAttempt(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -96592,6 +96612,11 @@ export const createScrapeAttempt = /* GraphQL */ `mutation CreateScrapeAttempt(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -96756,7 +96781,6 @@ export const createScrapeAttempt = /* GraphQL */ `mutation CreateScrapeAttempt(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -97029,6 +97053,11 @@ export const updateScrapeAttempt = /* GraphQL */ `mutation UpdateScrapeAttempt(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -97193,7 +97222,6 @@ export const updateScrapeAttempt = /* GraphQL */ `mutation UpdateScrapeAttempt(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -97418,6 +97446,11 @@ export const updateScrapeAttempt = /* GraphQL */ `mutation UpdateScrapeAttempt(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -97582,7 +97615,6 @@ export const updateScrapeAttempt = /* GraphQL */ `mutation UpdateScrapeAttempt(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -97855,6 +97887,11 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -98019,7 +98056,6 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -98244,6 +98280,11 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -98408,7 +98449,6 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -98535,6 +98575,15 @@ export const createS3Storage = /* GraphQL */ `mutation CreateS3Storage(
     registrationStatus
     createdAt
     updatedAt
+    isParsed
+    parsedDataHash
+    extractedFields
+    lastParsedAt
+    parseCount
+    rescrapeCount
+    lastRescrapeAt
+    dataChangedAt
+    dataChangeCount
     _version
     _deleted
     _lastChangedAt
@@ -98580,6 +98629,15 @@ export const updateS3Storage = /* GraphQL */ `mutation UpdateS3Storage(
     registrationStatus
     createdAt
     updatedAt
+    isParsed
+    parsedDataHash
+    extractedFields
+    lastParsedAt
+    parseCount
+    rescrapeCount
+    lastRescrapeAt
+    dataChangedAt
+    dataChangeCount
     _version
     _deleted
     _lastChangedAt
@@ -98625,6 +98683,15 @@ export const deleteS3Storage = /* GraphQL */ `mutation DeleteS3Storage(
     registrationStatus
     createdAt
     updatedAt
+    isParsed
+    parsedDataHash
+    extractedFields
+    lastParsedAt
+    parseCount
+    rescrapeCount
+    lastRescrapeAt
+    dataChangedAt
+    dataChangeCount
     _version
     _deleted
     _lastChangedAt

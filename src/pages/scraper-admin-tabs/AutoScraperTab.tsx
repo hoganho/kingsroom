@@ -1,13 +1,14 @@
 // src/pages/scraper-admin-tabs/AutoScraperTabEnhanced.tsx
 // Enhanced version that checks for updates before scraping and respects DO NOT SCRAPE/FINISHED states
-// Now includes S3 cache statistics tracking
+// Now includes S3 cache statistics tracking and gap analysis using useGameIdTracking
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import { PlayCircle, StopCircle, RefreshCw, Building2, HardDrive } from 'lucide-react';
+import { PlayCircle, StopCircle, RefreshCw, Building2, HardDrive, TrendingUp, AlertTriangle } from 'lucide-react';
 import { useEntity } from '../../contexts/EntityContext';
 import { EntitySelector } from '../../components/entities/EntitySelector';
 import { GameStatus } from '../../API';
+import { useGameIdTracking, formatGapRanges } from '../../hooks/useGameIdTracking';
 
 interface AutoScraperState {
     isRunning: boolean;
@@ -42,6 +43,14 @@ export const AutoScraperTab: React.FC = () => {
     const client = useMemo(() => generateClient(), []);
     const { currentEntity } = useEntity();
     
+    // Initialize the gap tracking hook
+    const {
+        loading: gapLoading,
+        scrapingStatus,
+        getScrapingStatus,
+        getUnfinishedGames,
+    } = useGameIdTracking(currentEntity?.id);
+    
     const [state, setState] = useState<AutoScraperState>({
         isRunning: false,
         currentId: 1,
@@ -63,9 +72,46 @@ export const AutoScraperTab: React.FC = () => {
     const [checkInterval, setCheckInterval] = useState('2'); // seconds between checks
     const [logs, setLogs] = useState<string[]>([]);
     const [useCache, setUseCache] = useState(true); // Toggle for using S3 cache
+    const [showGapAnalysis, setShowGapAnalysis] = useState(false);
+    const [unfinishedCount, setUnfinishedCount] = useState<number>(0);
     
     const abortControllerRef = useRef<AbortController | null>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Load gap analysis on entity change
+    useEffect(() => {
+        if (currentEntity?.id) {
+            loadGapAnalysis();
+            loadUnfinishedGames();
+        }
+    }, [currentEntity?.id]);
+
+    const loadGapAnalysis = async () => {
+        if (!currentEntity?.id) return;
+        
+        try {
+            addLog('Loading gap analysis...', 'info');
+            await getScrapingStatus({ entityId: currentEntity.id });
+            addLog('Gap analysis loaded successfully', 'success');
+        } catch (error) {
+            console.error('Error loading gap analysis:', error);
+            addLog('Failed to load gap analysis', 'error');
+        }
+    };
+
+    const loadUnfinishedGames = async () => {
+        if (!currentEntity?.id) return;
+        
+        try {
+            const result = await getUnfinishedGames({ entityId: currentEntity.id, limit: 1 });
+            setUnfinishedCount(result.totalCount);
+            if (result.totalCount > 0) {
+                addLog(`Found ${result.totalCount} unfinished games`, 'warning');
+            }
+        } catch (error) {
+            console.error('Error loading unfinished games:', error);
+        }
+    };
 
     // Add log entry
     const addLog = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
@@ -168,7 +214,7 @@ export const AutoScraperTab: React.FC = () => {
                             url,
                             tournamentId,
                             shouldScrape: false,
-                            reason: 'NO_UPDATES',
+                            reason: 'NO_UPDATES_RECENTLY_SCRAPED',
                             hasUpdates: false,
                             hasCache
                         };
@@ -176,77 +222,58 @@ export const AutoScraperTab: React.FC = () => {
                 }
             }
             
-            // Default: should scrape
+            // If no record exists or it should be scraped
             return {
                 url,
                 tournamentId,
                 shouldScrape: true,
-                hasUpdates: true,
                 hasCache: false
             };
             
         } catch (error) {
             console.error(`Error checking URL ${url}:`, error);
-            // If we can't check, assume we should scrape
             return {
                 url,
                 tournamentId,
-                shouldScrape: true,
+                shouldScrape: true, // On error, assume we should scrape
                 hasCache: false
             };
         }
     };
 
-    // Scrape a single tournament
-    const scrapeTournament = async (url: string, tournamentId: number): Promise<boolean> => {
+    // Trigger a scrape via Lambda
+    const triggerScrape = async (url: string): Promise<boolean> => {
         try {
             const response = await client.graphql({
                 query: /* GraphQL */ `
-                    mutation FetchTournamentData($url: String!) {
-                        fetchTournamentData(url: $url) {
-                            id
-                            name
-                            gameStatus
-                            registrationStatus
-                            prizepool
-                            totalEntries
-                            source
-                            s3Key
-                            usedCache
+                    mutation TriggerWebScrape($url: String!, $forceRefresh: Boolean) {
+                        triggerWebScrape(url: $url, forceRefresh: $forceRefresh) {
+                            success
+                            message
+                            gameId
                         }
                     }
                 `,
                 variables: { 
                     url,
-                    forceRefresh: !useCache // Control cache usage
+                    forceRefresh: !useCache
                 }
             });
             
-            if ('data' in response && response.data?.fetchTournamentData) {
-                const data = response.data.fetchTournamentData;
-                
-                // Track cache usage from response
-                if (data.source === 'S3_CACHE' || data.usedCache) {
-                    addLog(`#${tournamentId} scraped using S3 cache`, 'success');
-                } else {
-                    addLog(`#${tournamentId} scraped from live site`, 'info');
-                }
-                
+            if ('data' in response && response.data?.triggerWebScrape?.success) {
                 return true;
             }
             
             return false;
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            addLog(`Error scraping #${tournamentId}: ${errorMessage}`, 'error');
+            console.error(`Error triggering scrape for ${url}:`, error);
             return false;
         }
     };
 
-    // Main auto-scraping loop
     const runAutoScraper = async () => {
         if (!currentEntity) {
-            addLog('No entity selected', 'error');
+            addLog('Please select an entity first', 'error');
             return;
         }
         
@@ -254,110 +281,103 @@ export const AutoScraperTab: React.FC = () => {
         const end = parseInt(endId);
         const interval = parseInt(checkInterval) * 1000;
         
-        addLog(`Starting auto-scraper from ID ${start} to ${end} (Cache: ${useCache ? 'Enabled' : 'Disabled'})`, 'info');
+        if (isNaN(start) || isNaN(end) || start < 1 || end < start) {
+            addLog('Invalid ID range', 'error');
+            return;
+        }
         
-        setState(prev => ({
-            ...prev,
-            isRunning: true,
-            currentId: start,
-            stats: {
-                totalChecked: 0,
-                skippedFinished: 0,
-                skippedDoNotScrape: 0,
-                skippedNoUpdates: 0,
-                scraped: 0,
-                errors: 0,
-                cacheHits: 0,
-                cacheMisses: 0,
-                cacheHitRate: 0
-            }
-        }));
-        
+        setState(prev => ({ ...prev, isRunning: true, currentId: start }));
         abortControllerRef.current = new AbortController();
         
-        let currentId = start;
+        addLog(`Starting auto-scraper: IDs ${start} to ${end}`, 'info');
         
-        const processNext = async () => {
-            if (!abortControllerRef.current?.signal.aborted && currentId <= end) {
-                const url = `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}${currentId}`;
+        const processNext = async (id: number) => {
+            if (abortControllerRef.current?.signal.aborted || id > end) {
+                setState(prev => ({ ...prev, isRunning: false }));
+                addLog(`Auto-scraper ${id > end ? 'completed' : 'stopped'}`, 'info');
                 
-                setState(prev => ({
-                    ...prev,
-                    currentId,
-                    currentStatus: `Checking tournament #${currentId}...`
-                }));
-                
-                // Check if we should scrape this URL
-                const checkResult = await checkURL(url, currentId);
-                
-                setState(prev => {
-                    const newStats = { ...prev.stats };
-                    newStats.totalChecked++;
-                    
-                    if (checkResult.shouldScrape) {
-                        // Scrape the tournament
-                        scrapeTournament(url, currentId).then(success => {
-                            setState(p => ({
-                                ...p,
-                                stats: {
-                                    ...p.stats,
-                                    scraped: success ? p.stats.scraped + 1 : p.stats.scraped,
-                                    errors: success ? p.stats.errors : p.stats.errors + 1
-                                }
-                            }));
-                        });
-                        newStats.scraped++;
-                        const cacheStatus = checkResult.hasCache ? ' (cache available)' : ' (no cache)';
-                        addLog(`Scraping #${currentId} (updates detected)${cacheStatus}`, 'info');
-                    } else {
-                        // Skip based on reason
-                        switch (checkResult.reason) {
-                            case 'DO_NOT_SCRAPE':
-                                newStats.skippedDoNotScrape++;
-                                addLog(`Skipped #${currentId} (DO NOT SCRAPE)`, 'warning');
-                                break;
-                            case 'FINISHED':
-                                newStats.skippedFinished++;
-                                addLog(`Skipped #${currentId} (FINISHED)`, 'info');
-                                break;
-                            case 'NO_UPDATES':
-                                newStats.skippedNoUpdates++;
-                                const cacheInfo = checkResult.hasCache ? ' [cached]' : '';
-                                addLog(`Skipped #${currentId} (no updates)${cacheInfo}`, 'info');
-                                break;
-                            default:
-                                addLog(`Skipped #${currentId}`, 'info');
-                        }
-                    }
-                    
-                    return {
-                        ...prev,
-                        stats: newStats
-                    };
-                });
-                
-                currentId++;
-                
-                // Schedule next check
-                intervalRef.current = setTimeout(processNext, interval);
-            } else {
-                // Finished
-                setState(prev => ({
-                    ...prev,
-                    isRunning: false,
-                    currentStatus: 'Completed'
-                }));
-                
-                const finalStats = state.stats;
-                addLog(
-                    `Auto-scraping completed. Scraped: ${finalStats.scraped}, Skipped: ${finalStats.totalChecked - finalStats.scraped}, Cache Hits: ${finalStats.cacheHits}`,
-                    'success'
-                );
+                // Reload gap analysis after completion
+                if (id > end) {
+                    await loadGapAnalysis();
+                }
+                return;
             }
+            
+            setState(prev => ({ 
+                ...prev, 
+                currentId: id,
+                currentStatus: `Checking tournament #${id}...`
+            }));
+            
+            const url = `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}?id=${id}`;
+            
+            try {
+                // Check if URL should be scraped
+                const checkResult = await checkURL(url, id);
+                
+                setState(prev => ({
+                    ...prev,
+                    stats: {
+                        ...prev.stats,
+                        totalChecked: prev.stats.totalChecked + 1
+                    }
+                }));
+                
+                if (!checkResult.shouldScrape) {
+                    // Log why it was skipped
+                    if (checkResult.reason === 'DO_NOT_SCRAPE') {
+                        setState(prev => ({
+                            ...prev,
+                            stats: { ...prev.stats, skippedDoNotScrape: prev.stats.skippedDoNotScrape + 1 }
+                        }));
+                        addLog(`Skipped #${id}: DO NOT SCRAPE flag`, 'warning');
+                    } else if (checkResult.reason === 'FINISHED') {
+                        setState(prev => ({
+                            ...prev,
+                            stats: { ...prev.stats, skippedFinished: prev.stats.skippedFinished + 1 }
+                        }));
+                        addLog(`Skipped #${id}: Game FINISHED`, 'info');
+                    } else if (checkResult.reason === 'NO_UPDATES_RECENTLY_SCRAPED') {
+                        setState(prev => ({
+                            ...prev,
+                            stats: { ...prev.stats, skippedNoUpdates: prev.stats.skippedNoUpdates + 1 }
+                        }));
+                        addLog(`Skipped #${id}: No updates (recently scraped)`, 'info');
+                    }
+                } else {
+                    // Trigger scrape
+                    setState(prev => ({ ...prev, currentStatus: `Scraping tournament #${id}...` }));
+                    const success = await triggerScrape(url);
+                    
+                    if (success) {
+                        setState(prev => ({
+                            ...prev,
+                            stats: { ...prev.stats, scraped: prev.stats.scraped + 1 }
+                        }));
+                        addLog(`Successfully scraped #${id}`, 'success');
+                    } else {
+                        setState(prev => ({
+                            ...prev,
+                            stats: { ...prev.stats, errors: prev.stats.errors + 1 }
+                        }));
+                        addLog(`Failed to scrape #${id}`, 'error');
+                    }
+                }
+            } catch (error) {
+                setState(prev => ({
+                    ...prev,
+                    stats: { ...prev.stats, errors: prev.stats.errors + 1 },
+                    lastError: error instanceof Error ? error.message : 'Unknown error'
+                }));
+                addLog(`Error processing #${id}: ${error instanceof Error ? error.message : 'Unknown'}`, 'error');
+            }
+            
+            // Schedule next ID
+            intervalRef.current = setTimeout(() => processNext(id + 1), interval);
         };
         
         // Start processing
-        processNext();
+        processNext(start);
     };
 
     const stopAutoScraper = () => {
@@ -367,13 +387,11 @@ export const AutoScraperTab: React.FC = () => {
         if (intervalRef.current) {
             clearTimeout(intervalRef.current);
         }
-        
-        setState(prev => ({
-            ...prev,
+        setState(prev => ({ 
+            ...prev, 
             isRunning: false,
-            currentStatus: 'Stopped'
+            currentStatus: undefined
         }));
-        
         addLog('Auto-scraper stopped by user', 'warning');
     };
 
@@ -391,50 +409,108 @@ export const AutoScraperTab: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            {/* Entity Selection */}
+            {/* Entity Selector */}
             <div className="bg-white rounded-lg shadow p-6">
-                <div className="mb-4">
-                    <h3 className="text-lg font-semibold flex items-center">
-                        <Building2 className="h-5 w-5 mr-2 text-blue-600" />
-                        Entity Selection
-                    </h3>
-                    <p className="text-sm text-gray-600 mt-1">
-                        Select the entity (business) for auto-scraping
-                    </p>
+                <div className="flex items-center mb-4">
+                    <Building2 className="h-5 w-5 mr-2 text-blue-600" />
+                    <h3 className="text-lg font-semibold">Entity Selection</h3>
                 </div>
                 <EntitySelector />
-                {currentEntity && (
-                    <div className="mt-3 p-3 bg-blue-50 rounded">
-                        <p className="text-sm text-blue-800">
-                            <strong>Active:</strong> {currentEntity.entityName}
-                        </p>
-                        <p className="text-xs text-blue-600 mt-1">
-                            Base URL: {currentEntity.gameUrlDomain}{currentEntity.gameUrlPath}
-                        </p>
-                    </div>
-                )}
             </div>
 
-            {/* Auto Scraper Configuration */}
+            {/* Gap Analysis Section */}
+            {currentEntity && scrapingStatus && (
+                <div className="bg-white rounded-lg shadow p-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold flex items-center">
+                            <TrendingUp className="h-5 w-5 mr-2 text-purple-600" />
+                            Coverage Analysis for {currentEntity.entityName}
+                        </h3>
+                        <button
+                            onClick={loadGapAnalysis}
+                            disabled={gapLoading}
+                            className="px-3 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50 flex items-center"
+                        >
+                            <RefreshCw className={`h-4 w-4 mr-1 ${gapLoading ? 'animate-spin' : ''}`} />
+                            Refresh
+                        </button>
+                    </div>
+                    
+                    <div className="grid grid-cols-4 gap-4 mb-4">
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                            <p className="text-sm text-blue-600 font-medium">Total Games</p>
+                            <p className="text-2xl font-bold text-blue-900">{scrapingStatus.totalGamesStored}</p>
+                        </div>
+                        <div className="bg-green-50 p-4 rounded-lg">
+                            <p className="text-sm text-green-600 font-medium">Coverage</p>
+                            <p className="text-2xl font-bold text-green-900">{scrapingStatus.gapSummary.coveragePercentage.toFixed(1)}%</p>
+                        </div>
+                        <div className="bg-orange-50 p-4 rounded-lg">
+                            <p className="text-sm text-orange-600 font-medium">Missing IDs</p>
+                            <p className="text-2xl font-bold text-orange-900">{scrapingStatus.gapSummary.totalMissingIds}</p>
+                        </div>
+                        <div className="bg-purple-50 p-4 rounded-lg">
+                            <p className="text-sm text-purple-600 font-medium">ID Range</p>
+                            <p className="text-lg font-bold text-purple-900">
+                                {scrapingStatus.lowestTournamentId} - {scrapingStatus.highestTournamentId}
+                            </p>
+                        </div>
+                    </div>
+
+                    {unfinishedCount > 0 && (
+                        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center">
+                            <AlertTriangle className="h-5 w-5 mr-2 text-yellow-600" />
+                            <span className="text-sm text-yellow-800">
+                                <strong>{unfinishedCount}</strong> unfinished games require attention
+                            </span>
+                        </div>
+                    )}
+                    
+                    {scrapingStatus.gaps.length > 0 && (
+                        <div>
+                            <button
+                                onClick={() => setShowGapAnalysis(!showGapAnalysis)}
+                                className="text-sm text-purple-600 hover:text-purple-700 font-medium mb-2"
+                            >
+                                {showGapAnalysis ? '▼' : '▶'} View Gap Details ({scrapingStatus.gapSummary.totalGaps} gaps)
+                            </button>
+                            
+                            {showGapAnalysis && (
+                                <div className="mt-2 p-3 bg-gray-50 rounded text-sm">
+                                    <p className="font-medium text-gray-700 mb-2">Gap Ranges:</p>
+                                    <p className="text-gray-600">{formatGapRanges(scrapingStatus.gaps)}</p>
+                                    {scrapingStatus.gapSummary.largestGapStart && (
+                                        <p className="mt-2 text-gray-600">
+                                            Largest gap: {scrapingStatus.gapSummary.largestGapStart}-{scrapingStatus.gapSummary.largestGapEnd} 
+                                            ({scrapingStatus.gapSummary.largestGapCount} IDs)
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    
+                    <p className="text-xs text-gray-500 mt-2">
+                        Last updated: {new Date(scrapingStatus.lastUpdated).toLocaleString()} 
+                        (Cache age: {Math.round(scrapingStatus.cacheAge / 60)} minutes)
+                    </p>
+                </div>
+            )}
+
+            {/* Control Panel */}
             <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    {state.isRunning ? (
-                        <StopCircle className="h-5 w-5 mr-2 text-red-600 animate-pulse" />
-                    ) : (
-                        <PlayCircle className="h-5 w-5 mr-2 text-green-600" />
-                    )}
-                    Auto-Scraper Configuration
+                    <PlayCircle className="h-5 w-5 mr-2 text-green-600" />
+                    Auto-Scraper Controls
                 </h3>
                 
                 {!currentEntity ? (
-                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                        <p className="text-yellow-800">Please select an entity first to enable auto-scraping.</p>
-                    </div>
+                    <p className="text-gray-500">Please select an entity to continue</p>
                 ) : (
                     <>
-                        <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="grid grid-cols-3 gap-4 mb-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Start ID
                                 </label>
                                 <input
@@ -442,12 +518,14 @@ export const AutoScraperTab: React.FC = () => {
                                     value={startId}
                                     onChange={(e) => setStartId(e.target.value)}
                                     disabled={state.isRunning}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
+                                    placeholder="1"
+                                    min="1"
                                 />
                             </div>
                             
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
                                     End ID
                                 </label>
                                 <input
@@ -455,32 +533,31 @@ export const AutoScraperTab: React.FC = () => {
                                     value={endId}
                                     onChange={(e) => setEndId(e.target.value)}
                                     disabled={state.isRunning}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
+                                    placeholder="100"
+                                    min="1"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Check Interval (seconds)
+                                </label>
+                                <input
+                                    type="number"
+                                    value={checkInterval}
+                                    onChange={(e) => setCheckInterval(e.target.value)}
+                                    disabled={state.isRunning}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
+                                    placeholder="2"
+                                    min="0.5"
+                                    step="0.5"
                                 />
                             </div>
                         </div>
                         
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Check Interval (seconds)
-                            </label>
-                            <select
-                                value={checkInterval}
-                                onChange={(e) => setCheckInterval(e.target.value)}
-                                disabled={state.isRunning}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
-                            >
-                                <option value="1">1 second</option>
-                                <option value="2">2 seconds</option>
-                                <option value="5">5 seconds</option>
-                                <option value="10">10 seconds</option>
-                                <option value="30">30 seconds</option>
-                            </select>
-                        </div>
-                        
-                        {/* Cache Toggle */}
-                        <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
                                 <div className="flex items-center">
                                     <input
                                         type="checkbox"

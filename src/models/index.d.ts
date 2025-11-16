@@ -1303,6 +1303,110 @@ export declare type VenueMatch = LazyLoading extends LazyLoadingDisabled ? Eager
 
 export declare const VenueMatch: (new (init: ModelInit<VenueMatch>) => VenueMatch)
 
+type EagerGapRange = {
+  readonly start: number;
+  readonly end: number;
+  readonly count: number;
+}
+
+type LazyGapRange = {
+  readonly start: number;
+  readonly end: number;
+  readonly count: number;
+}
+
+export declare type GapRange = LazyLoading extends LazyLoadingDisabled ? EagerGapRange : LazyGapRange
+
+export declare const GapRange: (new (init: ModelInit<GapRange>) => GapRange)
+
+type EagerEntityScrapingStatus = {
+  readonly entityId: string;
+  readonly entityName?: string | null;
+  readonly lowestTournamentId?: number | null;
+  readonly highestTournamentId?: number | null;
+  readonly totalGamesStored: number;
+  readonly unfinishedGameCount: number;
+  readonly gaps: GapRange[];
+  readonly gapSummary: GapSummary;
+  readonly lastUpdated: string;
+  readonly cacheAge?: number | null;
+}
+
+type LazyEntityScrapingStatus = {
+  readonly entityId: string;
+  readonly entityName?: string | null;
+  readonly lowestTournamentId?: number | null;
+  readonly highestTournamentId?: number | null;
+  readonly totalGamesStored: number;
+  readonly unfinishedGameCount: number;
+  readonly gaps: GapRange[];
+  readonly gapSummary: GapSummary;
+  readonly lastUpdated: string;
+  readonly cacheAge?: number | null;
+}
+
+export declare type EntityScrapingStatus = LazyLoading extends LazyLoadingDisabled ? EagerEntityScrapingStatus : LazyEntityScrapingStatus
+
+export declare const EntityScrapingStatus: (new (init: ModelInit<EntityScrapingStatus>) => EntityScrapingStatus)
+
+type EagerGapSummary = {
+  readonly totalGaps: number;
+  readonly totalMissingIds: number;
+  readonly largestGapStart?: number | null;
+  readonly largestGapEnd?: number | null;
+  readonly largestGapCount?: number | null;
+  readonly coveragePercentage: number;
+}
+
+type LazyGapSummary = {
+  readonly totalGaps: number;
+  readonly totalMissingIds: number;
+  readonly largestGapStart?: number | null;
+  readonly largestGapEnd?: number | null;
+  readonly largestGapCount?: number | null;
+  readonly coveragePercentage: number;
+}
+
+export declare type GapSummary = LazyLoading extends LazyLoadingDisabled ? EagerGapSummary : LazyGapSummary
+
+export declare const GapSummary: (new (init: ModelInit<GapSummary>) => GapSummary)
+
+type EagerUnfinishedGamesConnection = {
+  readonly items: Game[];
+  readonly nextToken?: string | null;
+  readonly totalCount: number;
+}
+
+type LazyUnfinishedGamesConnection = {
+  readonly items: AsyncCollection<Game>;
+  readonly nextToken?: string | null;
+  readonly totalCount: number;
+}
+
+export declare type UnfinishedGamesConnection = LazyLoading extends LazyLoadingDisabled ? EagerUnfinishedGamesConnection : LazyUnfinishedGamesConnection
+
+export declare const UnfinishedGamesConnection: (new (init: ModelInit<UnfinishedGamesConnection>) => UnfinishedGamesConnection)
+
+type EagerTournamentIdBounds = {
+  readonly entityId: string;
+  readonly lowestId?: number | null;
+  readonly highestId?: number | null;
+  readonly totalCount: number;
+  readonly lastUpdated: string;
+}
+
+type LazyTournamentIdBounds = {
+  readonly entityId: string;
+  readonly lowestId?: number | null;
+  readonly highestId?: number | null;
+  readonly totalCount: number;
+  readonly lastUpdated: string;
+}
+
+export declare type TournamentIdBounds = LazyLoading extends LazyLoadingDisabled ? EagerTournamentIdBounds : LazyTournamentIdBounds
+
+export declare const TournamentIdBounds: (new (init: ModelInit<TournamentIdBounds>) => TournamentIdBounds)
+
 type EagerEntity = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<Entity, 'id'>;
@@ -1438,6 +1542,11 @@ type EagerScraperState = {
   readonly totalErrors: number;
   readonly enabled: boolean;
   readonly currentLog?: (ScraperLogData | null)[] | null;
+  readonly highestStoredId?: number | null;
+  readonly lowestStoredId?: number | null;
+  readonly knownGapRanges?: string | null;
+  readonly lastGapScanAt?: string | null;
+  readonly totalGamesInDatabase?: number | null;
   readonly lastGamesProcessed?: (ScrapedGameStatus | null)[] | null;
   readonly entityId?: string | null;
   readonly entity?: Entity | null;
@@ -1460,6 +1569,11 @@ type LazyScraperState = {
   readonly totalErrors: number;
   readonly enabled: boolean;
   readonly currentLog?: (ScraperLogData | null)[] | null;
+  readonly highestStoredId?: number | null;
+  readonly lowestStoredId?: number | null;
+  readonly knownGapRanges?: string | null;
+  readonly lastGapScanAt?: string | null;
+  readonly totalGamesInDatabase?: number | null;
   readonly lastGamesProcessed?: (ScrapedGameStatus | null)[] | null;
   readonly entityId?: string | null;
   readonly entity: AsyncItem<Entity | undefined>;
@@ -1700,7 +1814,6 @@ type EagerGame = {
   readonly gameTags?: (string | null)[] | null;
   readonly sourceUrl?: string | null;
   readonly tournamentId?: number | null;
-  readonly dataSource?: DataSource | keyof typeof DataSource | null;
   readonly originalScrapedData?: string | null;
   readonly venueAssignmentStatus?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
   readonly requiresVenueAssignment?: boolean | null;
@@ -1759,7 +1872,6 @@ type LazyGame = {
   readonly gameTags?: (string | null)[] | null;
   readonly sourceUrl?: string | null;
   readonly tournamentId?: number | null;
-  readonly dataSource?: DataSource | keyof typeof DataSource | null;
   readonly originalScrapedData?: string | null;
   readonly venueAssignmentStatus?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
   readonly requiresVenueAssignment?: boolean | null;
@@ -3060,6 +3172,15 @@ type EagerS3Storage = {
   readonly registrationStatus?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly isParsed?: boolean | null;
+  readonly parsedDataHash?: string | null;
+  readonly extractedFields?: (string | null)[] | null;
+  readonly lastParsedAt?: string | null;
+  readonly parseCount?: number | null;
+  readonly rescrapeCount?: number | null;
+  readonly lastRescrapeAt?: string | null;
+  readonly dataChangedAt?: string | null;
+  readonly dataChangeCount?: number | null;
 }
 
 type LazyS3Storage = {
@@ -3089,6 +3210,15 @@ type LazyS3Storage = {
   readonly registrationStatus?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly isParsed?: boolean | null;
+  readonly parsedDataHash?: string | null;
+  readonly extractedFields?: (string | null)[] | null;
+  readonly lastParsedAt?: string | null;
+  readonly parseCount?: number | null;
+  readonly rescrapeCount?: number | null;
+  readonly lastRescrapeAt?: string | null;
+  readonly dataChangedAt?: string | null;
+  readonly dataChangeCount?: number | null;
 }
 
 export declare type S3Storage = LazyLoading extends LazyLoadingDisabled ? EagerS3Storage : LazyS3Storage

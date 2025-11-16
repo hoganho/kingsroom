@@ -30,6 +30,7 @@ const LOG_GROUPS_TO_CLEAR = [
   '/aws/lambda/venueAssignmentService-dev',
   '/aws/lambda/s3ManagementFunction-dev',
   '/aws/lambda/getDatabaseMetrics-dev',
+  '/aws/lambda/gameIdTracker-dev',
 ];
 
 // --- Logger (copied from your script) ---

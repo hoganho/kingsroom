@@ -651,6 +651,19 @@ const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRe
 };
 
 /**
+ * Remove undefined values from an object (required for DynamoDB)
+ * DynamoDB doesn't support undefined values in arrays/objects
+ */
+const removeUndefinedValues = (obj) => {
+    return Object.entries(obj).reduce((acc, [key, value]) => {
+        if (value !== undefined) {
+            acc[key] = value;
+        }
+        return acc;
+    }, {});
+};
+
+/**
  * ✅ EXECUTIVE SUMMARY APPROACH: UPSERT S3Storage record
  * - Uses existing byURL index to find record
  * - Reuses same UUID across updates (no new ID each time!)
@@ -681,14 +694,37 @@ const upsertS3StorageRecord = async (
         // ✅ RECORD EXISTS - UPDATE IT
         console.log(`[UPSERT] Updating existing S3Storage record: ${existingRecord.id}`);
         
-        // Check if content actually changed
-        if (existingRecord.contentHash === contentHash) {
+        // CRITICAL CHECK 1: If s3Key is the same, we're re-storing the EXACT same HTML
+        // This shouldn't happen in normal flow, but if it does, definitely skip versioning
+        if (existingRecord.s3Key === s3Key) {
+            console.log(`[UPSERT] Same s3Key detected - skipping update (same HTML file)`);
+            return existingRecord.id;
+        }
+        
+        // CRITICAL CHECK 2: Compare content hashes
+        // If both hashes exist and match, content is identical
+        if (existingRecord.contentHash && contentHash && existingRecord.contentHash === contentHash) {
             console.log(`[UPSERT] Content unchanged (hash match), skipping update`);
             return existingRecord.id;
         }
         
+        // FALLBACK CHECK 3: If old record has NULL hash but same size, likely identical
+        // (This handles migration from old records without hashes)
+        if (!existingRecord.contentHash && contentSize === existingRecord.contentSize) {
+            console.log(`[UPSERT] Content likely unchanged (same size, old record has NULL hash), skipping update`);
+            return existingRecord.id;
+        }
+        
+        // If we reach here, content has actually changed - create new version
+        console.log(`[UPSERT] Content changed - creating new version`, {
+            oldHash: existingRecord.contentHash || 'NULL',
+            newHash: contentHash,
+            oldSize: existingRecord.contentSize,
+            newSize: contentSize
+        });
+        
         // Build previous version object from current data
-        const previousVersion = {
+        const previousVersionRaw = {
             s3Key: existingRecord.s3Key,
             s3Bucket: existingRecord.s3Bucket,
             scrapedAt: existingRecord.scrapedAt,
@@ -700,6 +736,9 @@ const upsertS3StorageRecord = async (
             wasGameUpdated: existingRecord.wasGameUpdated || false,
             versionNumber: existingRecord.versionNumber || 1
         };
+        
+        // Remove undefined values to prevent DynamoDB errors
+        const previousVersion = removeUndefinedValues(previousVersionRaw);
         
         // Get existing previous versions array or create new one
         const previousVersions = existingRecord.previousVersions || [];
@@ -743,12 +782,12 @@ const upsertS3StorageRecord = async (
                 ':s3Bucket': process.env.S3_BUCKET || 'pokerpro-scraper-storage',
                 ':contentHash': contentHash,
                 ':contentSize': contentSize,
-                ':gameStatus': gameStatus,
-                ':registrationStatus': registrationStatus,
+                ':gameStatus': gameStatus || null,
+                ':registrationStatus': registrationStatus || null,
                 ':httpStatus': headers?.statusCode || 200,
                 ':etag': headers?.etag || null,
                 ':lastModified': headers?.['last-modified'] || null,
-                ':headers': JSON.stringify(headers),
+                ':headers': JSON.stringify(headers || {}),
                 ':scrapedAt': now,
                 ':storedAt': now,
                 ':updatedAt': now,
@@ -790,9 +829,9 @@ const upsertS3StorageRecord = async (
             httpStatus: headers?.statusCode || 200,
             etag: headers?.etag || null,
             lastModified: headers?.['last-modified'] || null,
-            headers: JSON.stringify(headers),
-            gameStatus,
-            registrationStatus,
+            headers: JSON.stringify(headers || {}),
+            gameStatus: gameStatus || null,
+            registrationStatus: registrationStatus || null,
             isParsed: false,
             dataExtracted: false,
             wasGameCreated: false,

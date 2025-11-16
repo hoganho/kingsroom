@@ -101,6 +101,21 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "gameIdTracker": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "getDatabaseMetrics": {
       "build": true,
       "dependsOn": [],
@@ -274,6 +289,22 @@
         {
           "category": "function",
           "resourceName": "autoScraper"
+        }
+      ]
+    },
+    "AMPLIFY_function_gameIdTracker_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "gameIdTracker"
+        }
+      ]
+    },
+    "AMPLIFY_function_gameIdTracker_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "gameIdTracker"
         }
       ]
     },

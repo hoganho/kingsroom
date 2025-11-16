@@ -450,6 +450,41 @@ export const schema = {
                     "attributes": [],
                     "isArrayNullable": true
                 },
+                "highestStoredId": {
+                    "name": "highestStoredId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lowestStoredId": {
+                    "name": "lowestStoredId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "knownGapRanges": {
+                    "name": "knownGapRanges",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastGapScanAt": {
+                    "name": "lastGapScanAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalGamesInDatabase": {
+                    "name": "totalGamesInDatabase",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "lastGamesProcessed": {
                     "name": "lastGamesProcessed",
                     "isArray": true,
@@ -1458,15 +1493,6 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "dataSource": {
-                    "name": "dataSource",
-                    "isArray": false,
-                    "type": {
-                        "enum": "DataSource"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                },
                 "originalScrapedData": {
                     "name": "originalScrapedData",
                     "isArray": false,
@@ -1708,6 +1734,17 @@ export const schema = {
                         "fields": [
                             "entityId",
                             "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityAndTournamentId",
+                        "queryField": "gamesByEntityAndTournamentId",
+                        "fields": [
+                            "entityId",
+                            "tournamentId"
                         ]
                     }
                 },
@@ -6052,6 +6089,70 @@ export const schema = {
                     "type": "AWSDateTime",
                     "isRequired": true,
                     "attributes": []
+                },
+                "isParsed": {
+                    "name": "isParsed",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "parsedDataHash": {
+                    "name": "parsedDataHash",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "extractedFields": {
+                    "name": "extractedFields",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "lastParsedAt": {
+                    "name": "lastParsedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "parseCount": {
+                    "name": "parseCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rescrapeCount": {
+                    "name": "rescrapeCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastRescrapeAt": {
+                    "name": "lastRescrapeAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dataChangedAt": {
+                    "name": "dataChangedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dataChangeCount": {
+                    "name": "dataChangeCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
                 }
             },
             "syncable": true,
@@ -7033,7 +7134,7 @@ export const schema = {
                 "duration": {
                     "name": "duration",
                     "isArray": false,
-                    "type": "Int",
+                    "type": "Float",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -8836,8 +8937,230 @@ export const schema = {
                     "isArrayNullable": true
                 }
             }
+        },
+        "GapRange": {
+            "name": "GapRange",
+            "fields": {
+                "start": {
+                    "name": "start",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "end": {
+                    "name": "end",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "count": {
+                    "name": "count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "EntityScrapingStatus": {
+            "name": "EntityScrapingStatus",
+            "fields": {
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "entityName": {
+                    "name": "entityName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lowestTournamentId": {
+                    "name": "lowestTournamentId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "highestTournamentId": {
+                    "name": "highestTournamentId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalGamesStored": {
+                    "name": "totalGamesStored",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "unfinishedGameCount": {
+                    "name": "unfinishedGameCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gaps": {
+                    "name": "gaps",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "GapRange"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "gapSummary": {
+                    "name": "gapSummary",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "GapSummary"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastUpdated": {
+                    "name": "lastUpdated",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "cacheAge": {
+                    "name": "cacheAge",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "GapSummary": {
+            "name": "GapSummary",
+            "fields": {
+                "totalGaps": {
+                    "name": "totalGaps",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalMissingIds": {
+                    "name": "totalMissingIds",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "largestGapStart": {
+                    "name": "largestGapStart",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "largestGapEnd": {
+                    "name": "largestGapEnd",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "largestGapCount": {
+                    "name": "largestGapCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "coveragePercentage": {
+                    "name": "coveragePercentage",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "UnfinishedGamesConnection": {
+            "name": "UnfinishedGamesConnection",
+            "fields": {
+                "items": {
+                    "name": "items",
+                    "isArray": true,
+                    "type": {
+                        "model": "Game"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "nextToken": {
+                    "name": "nextToken",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCount": {
+                    "name": "totalCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "TournamentIdBounds": {
+            "name": "TournamentIdBounds",
+            "fields": {
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lowestId": {
+                    "name": "lowestId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "highestId": {
+                    "name": "highestId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCount": {
+                    "name": "totalCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastUpdated": {
+                    "name": "lastUpdated",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "15bba30dfdcf69fb95ab974fc7838a24"
+    "version": "66d2ec07a1df97555c42f5ddafdf7e06"
 };

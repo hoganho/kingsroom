@@ -547,3 +547,27 @@ export const getTournamentStructureCount = /* GraphQL */ `
     tournamentStructureCount
   }
 `;
+
+/*
+ * ===================================================================
+ * LEAN SCRAPE URL QUERIES FOR CACHING
+ * ===================================================================
+ */
+
+// Lean query for ScrapeOptionsModal - only fetches cache-related fields
+export const getScrapeURLForCache = /* GraphQL */ `
+  query GetScrapeURLForCache($id: ID!) {
+    getScrapeURL(id: $id) {
+      id
+      url
+      latestS3Key
+      lastScrapedAt
+      contentHash
+      etag
+      lastModifiedHeader
+      s3StorageEnabled
+      lastContentChangeAt
+      lastCacheHitAt
+    }
+  }
+`;

@@ -253,6 +253,11 @@ export const getScraperJobsReport = /* GraphQL */ `query GetScraperJobsReport(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -417,7 +422,6 @@ export const getScraperJobsReport = /* GraphQL */ `query GetScraperJobsReport(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -704,6 +708,11 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -990,7 +999,6 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -1342,6 +1350,11 @@ export const searchScrapeURLs = /* GraphQL */ `query SearchScrapeURLs(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -1506,7 +1519,6 @@ export const searchScrapeURLs = /* GraphQL */ `query SearchScrapeURLs(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -1842,6 +1854,11 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -2128,7 +2145,6 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -2332,6 +2348,11 @@ export const listEntitiesByDomain = /* GraphQL */ `query ListEntitiesByDomain($d
           details
           __typename
         }
+        highestStoredId
+        lowestStoredId
+        knownGapRanges
+        lastGapScanAt
+        totalGamesInDatabase
         lastGamesProcessed {
           id
           name
@@ -2745,7 +2766,6 @@ export const listEntitiesByDomain = /* GraphQL */ `query ListEntitiesByDomain($d
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -2934,7 +2954,6 @@ export const listEntitiesByDomain = /* GraphQL */ `query ListEntitiesByDomain($d
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -3122,7 +3141,6 @@ export const listEntitiesByDomain = /* GraphQL */ `query ListEntitiesByDomain($d
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -3723,6 +3741,11 @@ export const listScraperJobs = /* GraphQL */ `query ListScraperJobs(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -3887,7 +3910,6 @@ export const listScraperJobs = /* GraphQL */ `query ListScraperJobs(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -4131,6 +4153,11 @@ export const listScrapeURLs = /* GraphQL */ `query ListScrapeURLs(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -4295,7 +4322,6 @@ export const listScrapeURLs = /* GraphQL */ `query ListScrapeURLs(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -4411,7 +4437,6 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -4519,7 +4544,6 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -4808,7 +4832,6 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -4888,7 +4911,6 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -5060,7 +5082,6 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -5159,7 +5180,6 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -5208,6 +5228,11 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -5372,7 +5397,6 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -5636,6 +5660,15 @@ export const getS3StorageHistory = /* GraphQL */ `query GetS3StorageHistory($tou
       registrationStatus
       createdAt
       updatedAt
+      isParsed
+      parsedDataHash
+      extractedFields
+      lastParsedAt
+      parseCount
+      rescrapeCount
+      lastRescrapeAt
+      dataChangedAt
+      dataChangeCount
       _version
       _deleted
       _lastChangedAt
@@ -5719,6 +5752,15 @@ export const listStoredHTML = /* GraphQL */ `query ListStoredHTML($url: AWSURL!,
       registrationStatus
       createdAt
       updatedAt
+      isParsed
+      parsedDataHash
+      extractedFields
+      lastParsedAt
+      parseCount
+      rescrapeCount
+      lastRescrapeAt
+      dataChangedAt
+      dataChangeCount
       _version
       _deleted
       _lastChangedAt
@@ -5752,6 +5794,1170 @@ export const getDatabaseMetrics = /* GraphQL */ `query GetDatabaseMetrics($timeR
   APITypes.GetDatabaseMetricsQueryVariables,
   APITypes.GetDatabaseMetricsQuery
 >;
+export const getTournamentIdBounds = /* GraphQL */ `query GetTournamentIdBounds($entityId: ID!) {
+  getTournamentIdBounds(entityId: $entityId) {
+    entityId
+    lowestId
+    highestId
+    totalCount
+    lastUpdated
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetTournamentIdBoundsQueryVariables,
+  APITypes.GetTournamentIdBoundsQuery
+>;
+export const getEntityScrapingStatus = /* GraphQL */ `query GetEntityScrapingStatus(
+  $entityId: ID!
+  $forceRefresh: Boolean
+  $startId: Int
+  $endId: Int
+) {
+  getEntityScrapingStatus(
+    entityId: $entityId
+    forceRefresh: $forceRefresh
+    startId: $startId
+    endId: $endId
+  ) {
+    entityId
+    entityName
+    lowestTournamentId
+    highestTournamentId
+    totalGamesStored
+    unfinishedGameCount
+    gaps {
+      start
+      end
+      count
+      __typename
+    }
+    gapSummary {
+      totalGaps
+      totalMissingIds
+      largestGapStart
+      largestGapEnd
+      largestGapCount
+      coveragePercentage
+      __typename
+    }
+    lastUpdated
+    cacheAge
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetEntityScrapingStatusQueryVariables,
+  APITypes.GetEntityScrapingStatusQuery
+>;
+export const findTournamentIdGaps = /* GraphQL */ `query FindTournamentIdGaps(
+  $entityId: ID!
+  $startId: Int
+  $endId: Int
+  $maxGapsToReturn: Int
+) {
+  findTournamentIdGaps(
+    entityId: $entityId
+    startId: $startId
+    endId: $endId
+    maxGapsToReturn: $maxGapsToReturn
+  ) {
+    start
+    end
+    count
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.FindTournamentIdGapsQueryVariables,
+  APITypes.FindTournamentIdGapsQuery
+>;
+export const getUnfinishedGamesByEntity = /* GraphQL */ `query GetUnfinishedGamesByEntity(
+  $entityId: ID!
+  $limit: Int
+  $nextToken: String
+) {
+  getUnfinishedGamesByEntity(
+    entityId: $entityId
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      name
+      gameType
+      gameVariant
+      gameStatus
+      gameStartDateTime
+      gameEndDateTime
+      registrationStatus
+      totalDuration
+      gameFrequency
+      buyIn
+      rake
+      startingStack
+      hasGuarantee
+      guaranteeAmount
+      prizepool
+      totalEntries
+      totalRebuys
+      totalAddons
+      revenueByBuyIns
+      totalRake
+      profitLoss
+      guaranteeOverlay
+      guaranteeSurplus
+      playersRemaining
+      totalChipsInPlay
+      averagePlayerStack
+      tournamentType
+      isRegular
+      isSeries
+      isSatellite
+      seriesName
+      gameTags
+      sourceUrl
+      tournamentId
+      originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
+      venueId
+      venue {
+        id
+        venueNumber
+        name
+        aliases
+        address
+        city
+        country
+        isSpecial
+        details {
+          id
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        series {
+          items {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        registeredPlayers {
+          items {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
+      tournamentSeriesId
+      tournamentSeries {
+        id
+        name
+        year
+        status
+        startDate
+        endDate
+        events
+        numberOfEvents
+        guaranteedPrizepool
+        estimatedPrizepool
+        actualPrizepool
+        tournamentSeriesTitleId
+        title {
+          id
+          title
+          aliases
+          seriesInstances {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        venueId
+        venue {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      structure {
+        id
+        levels {
+          levelNumber
+          durationMinutes
+          smallBlind
+          bigBlind
+          ante
+          __typename
+        }
+        breaks {
+          levelNumberBeforeBreak
+          durationMinutes
+          __typename
+        }
+        gameId
+        game {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          tournamentId
+          originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          structure {
+            id
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          gameStructureId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      playerEntries {
+        items {
+          id
+          playerId
+          gameId
+          venueId
+          status
+          registrationTime
+          eliminationTime
+          gameStartDateTime
+          lastKnownStackSize
+          tableNumber
+          seatNumber
+          numberOfReEntries
+          isMultiDayTournament
+          player {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerResults {
+        items {
+          id
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          pointsEarned
+          playerId
+          player {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      gameStructureId
+      __typename
+    }
+    nextToken
+    totalCount
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetUnfinishedGamesByEntityQueryVariables,
+  APITypes.GetUnfinishedGamesByEntityQuery
+>;
+export const listExistingTournamentIds = /* GraphQL */ `query ListExistingTournamentIds(
+  $entityId: ID!
+  $startId: Int
+  $endId: Int
+  $limit: Int
+) {
+  listExistingTournamentIds(
+    entityId: $entityId
+    startId: $startId
+    endId: $endId
+    limit: $limit
+  )
+}
+` as GeneratedQuery<
+  APITypes.ListExistingTournamentIdsQueryVariables,
+  APITypes.ListExistingTournamentIdsQuery
+>;
 export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
   getEntity(id: $id) {
     id
@@ -5780,6 +6986,11 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
           details
           __typename
         }
+        highestStoredId
+        lowestStoredId
+        knownGapRanges
+        lastGapScanAt
+        totalGamesInDatabase
         lastGamesProcessed {
           id
           name
@@ -6193,7 +7404,6 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -6382,7 +7592,6 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -6570,7 +7779,6 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -6873,6 +8081,11 @@ export const listEntities = /* GraphQL */ `query ListEntities(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -7159,7 +8372,6 @@ export const listEntities = /* GraphQL */ `query ListEntities(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -7359,6 +8571,11 @@ export const syncEntities = /* GraphQL */ `query SyncEntities(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -7645,7 +8862,6 @@ export const syncEntities = /* GraphQL */ `query SyncEntities(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -7995,6 +9211,11 @@ export const getScraperState = /* GraphQL */ `query GetScraperState($id: ID!) {
       details
       __typename
     }
+    highestStoredId
+    lowestStoredId
+    knownGapRanges
+    lastGapScanAt
+    totalGamesInDatabase
     lastGamesProcessed {
       id
       name
@@ -8029,6 +9250,11 @@ export const getScraperState = /* GraphQL */ `query GetScraperState($id: ID!) {
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -8315,7 +9541,6 @@ export const getScraperState = /* GraphQL */ `query GetScraperState($id: ID!) {
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -8502,6 +9727,11 @@ export const listScraperStates = /* GraphQL */ `query ListScraperStates(
         details
         __typename
       }
+      highestStoredId
+      lowestStoredId
+      knownGapRanges
+      lastGapScanAt
+      totalGamesInDatabase
       lastGamesProcessed {
         id
         name
@@ -8529,6 +9759,11 @@ export const listScraperStates = /* GraphQL */ `query ListScraperStates(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -8693,7 +9928,6 @@ export const listScraperStates = /* GraphQL */ `query ListScraperStates(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -8785,6 +10019,11 @@ export const syncScraperStates = /* GraphQL */ `query SyncScraperStates(
         details
         __typename
       }
+      highestStoredId
+      lowestStoredId
+      knownGapRanges
+      lastGapScanAt
+      totalGamesInDatabase
       lastGamesProcessed {
         id
         name
@@ -8812,6 +10051,11 @@ export const syncScraperStates = /* GraphQL */ `query SyncScraperStates(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -8976,7 +10220,6 @@ export const syncScraperStates = /* GraphQL */ `query SyncScraperStates(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -9159,7 +10402,6 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -9487,7 +10729,6 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -9675,7 +10916,6 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -9943,7 +11183,6 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -10607,6 +11846,11 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -10893,7 +12137,6 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -11249,7 +12492,6 @@ export const listVenues = /* GraphQL */ `query ListVenues(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -11619,6 +12861,11 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -11783,7 +13030,6 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -12047,7 +13293,6 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -12417,6 +13662,11 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -12581,7 +13831,6 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -12843,7 +14092,6 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -13213,6 +14461,11 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -13377,7 +14630,6 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -13560,7 +14812,6 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -13846,7 +15097,6 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -14156,7 +15406,6 @@ export const getTournamentSeriesTitle = /* GraphQL */ `query GetTournamentSeries
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -14656,7 +15905,6 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -15026,6 +16274,11 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -15190,7 +16443,6 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -15282,7 +16534,6 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -15470,7 +16721,6 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -15767,7 +17017,6 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -15952,7 +17201,6 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -16226,7 +17474,6 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -16411,7 +17658,6 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -16558,7 +17804,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
     gameTags
     sourceUrl
     tournamentId
-    dataSource
     originalScrapedData
     venueAssignmentStatus
     requiresVenueAssignment
@@ -16753,7 +17998,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -17123,6 +18367,11 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -17287,7 +18536,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -17495,7 +18743,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -17680,7 +18927,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -17833,7 +19079,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -18021,7 +19266,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -18329,7 +19573,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -18604,7 +19847,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -18733,6 +19975,11 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -19019,7 +20266,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -19223,7 +20469,6 @@ export const listGames = /* GraphQL */ `query ListGames(
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -19331,7 +20576,6 @@ export const listGames = /* GraphQL */ `query ListGames(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -19620,7 +20864,6 @@ export const listGames = /* GraphQL */ `query ListGames(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -19700,7 +20943,6 @@ export const listGames = /* GraphQL */ `query ListGames(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -19872,7 +21114,6 @@ export const listGames = /* GraphQL */ `query ListGames(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -19971,7 +21212,6 @@ export const listGames = /* GraphQL */ `query ListGames(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -20020,6 +21260,11 @@ export const listGames = /* GraphQL */ `query ListGames(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -20184,7 +21429,6 @@ export const listGames = /* GraphQL */ `query ListGames(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -20293,7 +21537,6 @@ export const syncGames = /* GraphQL */ `query SyncGames(
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -20401,7 +21644,6 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -20690,7 +21932,6 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -20770,7 +22011,6 @@ export const syncGames = /* GraphQL */ `query SyncGames(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -20942,7 +22182,6 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -21041,7 +22280,6 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -21090,6 +22328,11 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -21254,7 +22497,6 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -21368,7 +22610,6 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -21476,7 +22717,6 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -21765,7 +23005,6 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -21845,7 +23084,6 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -22017,7 +23255,6 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -22116,7 +23353,6 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -22165,6 +23401,11 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -22329,7 +23570,6 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -22458,7 +23698,6 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -22646,7 +23885,6 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -22849,7 +24087,6 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -23037,7 +24274,6 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -24809,7 +26045,6 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -25084,7 +26319,6 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -25991,7 +27225,6 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -26361,6 +27594,11 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -26525,7 +27763,6 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -27102,7 +28339,6 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -27201,7 +28437,6 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -27531,7 +28766,6 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -28214,7 +29448,6 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -28313,7 +29546,6 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -28643,7 +29875,6 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -29323,7 +30554,6 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -29422,7 +30652,6 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -29752,7 +30981,6 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -31302,7 +32530,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -31401,7 +32628,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -31731,7 +32957,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -31922,7 +33147,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -32030,7 +33254,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -32319,7 +33542,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -32399,7 +33621,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -32571,7 +33792,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -32670,7 +33890,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -32719,6 +33938,11 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -32883,7 +34107,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -33384,7 +34607,6 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -33572,7 +34794,6 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -34151,7 +35372,6 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -34339,7 +35559,6 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -34995,7 +36214,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -35094,7 +36312,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -35424,7 +36641,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -35616,7 +36832,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -35724,7 +36939,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -36013,7 +37227,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -36093,7 +37306,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -36265,7 +37477,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -36364,7 +37575,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -36413,6 +37623,11 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -36577,7 +37792,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -37074,7 +38288,6 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -37262,7 +38475,6 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -37837,7 +39049,6 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -38025,7 +39236,6 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -38680,7 +39890,6 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -38779,7 +39988,6 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -39109,7 +40317,6 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -39453,7 +40660,6 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -39823,6 +41029,11 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -39987,7 +41198,6 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -40548,7 +41758,6 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -41212,7 +42421,6 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -41893,7 +43101,6 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -41992,7 +43199,6 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -42322,7 +43528,6 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -43837,7 +45042,6 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -43936,7 +45140,6 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -44266,7 +45469,6 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -45780,7 +46982,6 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -45879,7 +47080,6 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -46209,7 +47409,6 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -47720,7 +48919,6 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -47819,7 +49017,6 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -48149,7 +49346,6 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -50025,7 +51221,6 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -50124,7 +51319,6 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -50454,7 +51648,6 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -52321,7 +53514,6 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -52420,7 +53612,6 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -52750,7 +53941,6 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -54210,7 +55400,6 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -54580,6 +55769,11 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -54744,7 +55938,6 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -54827,6 +56020,11 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -55113,7 +56311,6 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -55389,7 +56586,6 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -55558,6 +56754,11 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -55722,7 +56923,6 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -55906,7 +57106,6 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -56075,6 +57274,11 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -56239,7 +57443,6 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -56689,6 +57892,11 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -56975,7 +58183,6 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -57329,6 +58536,11 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -57493,7 +58705,6 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -57718,6 +58929,11 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -57882,7 +59098,6 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -58584,6 +59799,15 @@ export const getS3Storage = /* GraphQL */ `query GetS3Storage($id: ID!) {
     registrationStatus
     createdAt
     updatedAt
+    isParsed
+    parsedDataHash
+    extractedFields
+    lastParsedAt
+    parseCount
+    rescrapeCount
+    lastRescrapeAt
+    dataChangedAt
+    dataChangeCount
     _version
     _deleted
     _lastChangedAt
@@ -58631,6 +59855,15 @@ export const listS3Storages = /* GraphQL */ `query ListS3Storages(
       registrationStatus
       createdAt
       updatedAt
+      isParsed
+      parsedDataHash
+      extractedFields
+      lastParsedAt
+      parseCount
+      rescrapeCount
+      lastRescrapeAt
+      dataChangedAt
+      dataChangeCount
       _version
       _deleted
       _lastChangedAt
@@ -58688,6 +59921,15 @@ export const syncS3Storages = /* GraphQL */ `query SyncS3Storages(
       registrationStatus
       createdAt
       updatedAt
+      isParsed
+      parsedDataHash
+      extractedFields
+      lastParsedAt
+      parseCount
+      rescrapeCount
+      lastRescrapeAt
+      dataChangedAt
+      dataChangeCount
       _version
       _deleted
       _lastChangedAt
@@ -58743,6 +59985,11 @@ export const entitiesByEntityName = /* GraphQL */ `query EntitiesByEntityName(
             details
             __typename
           }
+          highestStoredId
+          lowestStoredId
+          knownGapRanges
+          lastGapScanAt
+          totalGamesInDatabase
           lastGamesProcessed {
             id
             name
@@ -59029,7 +60276,6 @@ export const entitiesByEntityName = /* GraphQL */ `query EntitiesByEntityName(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -59221,6 +60467,11 @@ export const scraperStatesByEntityId = /* GraphQL */ `query ScraperStatesByEntit
         details
         __typename
       }
+      highestStoredId
+      lowestStoredId
+      knownGapRanges
+      lastGapScanAt
+      totalGamesInDatabase
       lastGamesProcessed {
         id
         name
@@ -59248,6 +60499,11 @@ export const scraperStatesByEntityId = /* GraphQL */ `query ScraperStatesByEntit
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -59412,7 +60668,6 @@ export const scraperStatesByEntityId = /* GraphQL */ `query ScraperStatesByEntit
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -59679,7 +60934,6 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -60049,6 +61303,11 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -60213,7 +61472,6 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -60481,7 +61739,6 @@ export const venuesByEntityIdAndName = /* GraphQL */ `query VenuesByEntityIdAndN
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -60851,6 +62108,11 @@ export const venuesByEntityIdAndName = /* GraphQL */ `query VenuesByEntityIdAndN
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -61015,7 +62277,6 @@ export const venuesByEntityIdAndName = /* GraphQL */ `query VenuesByEntityIdAndN
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -61203,7 +62464,6 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -61535,7 +62795,6 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -61720,7 +62979,6 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -61996,7 +63254,6 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -62181,7 +63438,6 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -62343,7 +63599,6 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -62451,7 +63706,6 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -62740,7 +63994,6 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -62820,7 +64073,6 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -62992,7 +64244,6 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -63091,7 +64342,6 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -63140,6 +64390,11 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -63304,7 +64559,6 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -63420,7 +64674,6 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -63528,7 +64781,6 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -63817,7 +65069,6 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -63897,7 +65148,6 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -64069,7 +65319,6 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -64168,7 +65417,6 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -64217,6 +65465,11 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -64381,7 +65634,6 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -64495,7 +65747,6 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -64603,7 +65854,6 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -64892,7 +66142,6 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -64972,7 +66221,6 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -65144,7 +66392,6 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -65243,7 +66490,6 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -65292,6 +66538,11 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -65456,7 +66707,6 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -65572,7 +66822,6 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -65680,7 +66929,6 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -65969,7 +67217,6 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -66049,7 +67296,6 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -66221,7 +67467,6 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -66320,7 +67565,6 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -66369,6 +67613,11 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -66533,7 +67782,6 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -66649,7 +67897,6 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -66757,7 +68004,6 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -67046,7 +68292,6 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -67126,7 +68371,6 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -67298,7 +68542,6 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -67397,7 +68640,6 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -67446,6 +68688,11 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -67610,7 +68857,6 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -67726,7 +68972,6 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
       gameTags
       sourceUrl
       tournamentId
-      dataSource
       originalScrapedData
       venueAssignmentStatus
       requiresVenueAssignment
@@ -67834,7 +69079,6 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -68123,7 +69367,6 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -68203,7 +69446,6 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
           gameTags
           sourceUrl
           tournamentId
-          dataSource
           originalScrapedData
           venueAssignmentStatus
           requiresVenueAssignment
@@ -68375,7 +69617,6 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -68474,7 +69715,6 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -68523,6 +69763,11 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -68687,7 +69932,6 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -68750,6 +69994,1081 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
 ` as GeneratedQuery<
   APITypes.GamesByEntityIdAndGameStartDateTimeQueryVariables,
   APITypes.GamesByEntityIdAndGameStartDateTimeQuery
+>;
+export const gamesByEntityAndTournamentId = /* GraphQL */ `query GamesByEntityAndTournamentId(
+  $entityId: ID!
+  $tournamentId: ModelIntKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelGameFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  gamesByEntityAndTournamentId(
+    entityId: $entityId
+    tournamentId: $tournamentId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      name
+      gameType
+      gameVariant
+      gameStatus
+      gameStartDateTime
+      gameEndDateTime
+      registrationStatus
+      totalDuration
+      gameFrequency
+      buyIn
+      rake
+      startingStack
+      hasGuarantee
+      guaranteeAmount
+      prizepool
+      totalEntries
+      totalRebuys
+      totalAddons
+      revenueByBuyIns
+      totalRake
+      profitLoss
+      guaranteeOverlay
+      guaranteeSurplus
+      playersRemaining
+      totalChipsInPlay
+      averagePlayerStack
+      tournamentType
+      isRegular
+      isSeries
+      isSatellite
+      seriesName
+      gameTags
+      sourceUrl
+      tournamentId
+      originalScrapedData
+      venueAssignmentStatus
+      requiresVenueAssignment
+      suggestedVenueName
+      venueAssignmentConfidence
+      venueId
+      venue {
+        id
+        venueNumber
+        name
+        aliases
+        address
+        city
+        country
+        isSpecial
+        details {
+          id
+          startDate
+          status
+          lastCustomerSuccessVisit
+          totalGamesHeld
+          averagePlayersPerGame
+          gameNights
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        series {
+          items {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        playerMemberships {
+          items {
+            id
+            totalGamesPlayed
+            averageBuyIn
+            firstPlayedDate
+            lastPlayedDate
+            targetingClassification
+            playerId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        registeredPlayers {
+          items {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        entityId
+        entity {
+          id
+          entityName
+          gameUrlDomain
+          gameUrlPath
+          entityLogo
+          isActive
+          createdAt
+          updatedAt
+          scraperStates {
+            nextToken
+            startedAt
+            __typename
+          }
+          scraperJobs {
+            nextToken
+            __typename
+          }
+          scrapeURLs {
+            nextToken
+            __typename
+          }
+          venues {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        venueDetailsId
+        __typename
+      }
+      tournamentSeriesId
+      tournamentSeries {
+        id
+        name
+        year
+        status
+        startDate
+        endDate
+        events
+        numberOfEvents
+        guaranteedPrizepool
+        estimatedPrizepool
+        actualPrizepool
+        tournamentSeriesTitleId
+        title {
+          id
+          title
+          aliases
+          seriesInstances {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        venueId
+        venue {
+          id
+          venueNumber
+          name
+          aliases
+          address
+          city
+          country
+          isSpecial
+          details {
+            id
+            startDate
+            status
+            lastCustomerSuccessVisit
+            totalGamesHeld
+            averagePlayersPerGame
+            gameNights
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          assets {
+            nextToken
+            startedAt
+            __typename
+          }
+          games {
+            nextToken
+            startedAt
+            __typename
+          }
+          series {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerMemberships {
+            nextToken
+            startedAt
+            __typename
+          }
+          registeredPlayers {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          venueDetailsId
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      structure {
+        id
+        levels {
+          levelNumber
+          durationMinutes
+          smallBlind
+          bigBlind
+          ante
+          __typename
+        }
+        breaks {
+          levelNumberBeforeBreak
+          durationMinutes
+          __typename
+        }
+        gameId
+        game {
+          id
+          name
+          gameType
+          gameVariant
+          gameStatus
+          gameStartDateTime
+          gameEndDateTime
+          registrationStatus
+          totalDuration
+          gameFrequency
+          buyIn
+          rake
+          startingStack
+          hasGuarantee
+          guaranteeAmount
+          prizepool
+          totalEntries
+          totalRebuys
+          totalAddons
+          revenueByBuyIns
+          totalRake
+          profitLoss
+          guaranteeOverlay
+          guaranteeSurplus
+          playersRemaining
+          totalChipsInPlay
+          averagePlayerStack
+          tournamentType
+          isRegular
+          isSeries
+          isSatellite
+          seriesName
+          gameTags
+          sourceUrl
+          tournamentId
+          originalScrapedData
+          venueAssignmentStatus
+          requiresVenueAssignment
+          suggestedVenueName
+          venueAssignmentConfidence
+          venueId
+          venue {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          tournamentSeriesId
+          tournamentSeries {
+            id
+            name
+            year
+            status
+            startDate
+            endDate
+            events
+            numberOfEvents
+            guaranteedPrizepool
+            estimatedPrizepool
+            actualPrizepool
+            tournamentSeriesTitleId
+            venueId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          structure {
+            id
+            gameId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          playerEntries {
+            nextToken
+            startedAt
+            __typename
+          }
+          playerResults {
+            nextToken
+            startedAt
+            __typename
+          }
+          entityId
+          entity {
+            id
+            entityName
+            gameUrlDomain
+            gameUrlPath
+            entityLogo
+            isActive
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          gameStructureId
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      playerEntries {
+        items {
+          id
+          playerId
+          gameId
+          venueId
+          status
+          registrationTime
+          eliminationTime
+          gameStartDateTime
+          lastKnownStackSize
+          tableNumber
+          seatNumber
+          numberOfReEntries
+          isMultiDayTournament
+          player {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      playerResults {
+        items {
+          id
+          finishingPlace
+          isMultiDayQualification
+          prizeWon
+          amountWon
+          totalRunners
+          pointsEarned
+          playerId
+          player {
+            id
+            primaryEntityId
+            firstName
+            lastName
+            phone
+            email
+            status
+            category
+            targetingClassification
+            registrationDate
+            firstGamePlayed
+            lastPlayedDate
+            creditBalance
+            pointsBalance
+            venueAssignmentStatus
+            registrationVenueId
+            updatedAt
+            createdAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          gameId
+          game {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      entityId
+      entity {
+        id
+        entityName
+        gameUrlDomain
+        gameUrlPath
+        entityLogo
+        isActive
+        createdAt
+        updatedAt
+        scraperStates {
+          items {
+            id
+            isRunning
+            lastScannedId
+            lastRunStartTime
+            lastRunEndTime
+            consecutiveBlankCount
+            totalScraped
+            totalErrors
+            enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        scraperJobs {
+          items {
+            id
+            jobId
+            triggerSource
+            triggeredBy
+            startTime
+            endTime
+            durationSeconds
+            maxGames
+            targetURLs
+            isFullScan
+            startId
+            endId
+            status
+            totalURLsProcessed
+            newGamesScraped
+            gamesUpdated
+            gamesSkipped
+            errors
+            blanks
+            averageScrapingTime
+            successRate
+            errorMessages
+            failedURLs
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        scrapeURLs {
+          items {
+            id
+            url
+            tournamentId
+            doNotScrape
+            sourceDataIssue
+            gameDataVerified
+            missingKeysFromScrape
+            sourceSystem
+            status
+            placedIntoDatabase
+            firstScrapedAt
+            lastScrapedAt
+            lastSuccessfulScrapeAt
+            timesScraped
+            timesSuccessful
+            timesFailed
+            consecutiveFailures
+            lastScrapeStatus
+            lastScrapeMessage
+            lastScrapeJobId
+            gameId
+            gameName
+            gameStatus
+            venueId
+            venueName
+            lastDataHash
+            hasDataChanges
+            lastFoundKeys
+            lastStructureLabel
+            averageScrapingTime
+            lastScrapingTime
+            entityId
+            createdAt
+            updatedAt
+            etag
+            lastModifiedHeader
+            contentHash
+            s3StoragePrefix
+            latestS3Key
+            s3StorageEnabled
+            lastContentChangeAt
+            totalContentChanges
+            lastHeaderCheckAt
+            cachedContentUsedCount
+            lastCacheHitAt
+            contentSize
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        venues {
+          items {
+            id
+            venueNumber
+            name
+            aliases
+            address
+            city
+            country
+            isSpecial
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            venueDetailsId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        games {
+          items {
+            id
+            name
+            gameType
+            gameVariant
+            gameStatus
+            gameStartDateTime
+            gameEndDateTime
+            registrationStatus
+            totalDuration
+            gameFrequency
+            buyIn
+            rake
+            startingStack
+            hasGuarantee
+            guaranteeAmount
+            prizepool
+            totalEntries
+            totalRebuys
+            totalAddons
+            revenueByBuyIns
+            totalRake
+            profitLoss
+            guaranteeOverlay
+            guaranteeSurplus
+            playersRemaining
+            totalChipsInPlay
+            averagePlayerStack
+            tournamentType
+            isRegular
+            isSeries
+            isSatellite
+            seriesName
+            gameTags
+            sourceUrl
+            tournamentId
+            originalScrapedData
+            venueAssignmentStatus
+            requiresVenueAssignment
+            suggestedVenueName
+            venueAssignmentConfidence
+            venueId
+            tournamentSeriesId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            gameStructureId
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        assets {
+          items {
+            id
+            name
+            type
+            condition
+            acquiredDate
+            lastCheckedDate
+            venueId
+            entityId
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      gameStructureId
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GamesByEntityAndTournamentIdQueryVariables,
+  APITypes.GamesByEntityAndTournamentIdQuery
 >;
 export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStructuresByGameId(
   $gameId: ID!
@@ -68817,7 +71136,6 @@ export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStruc
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -69005,7 +71323,6 @@ export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStruc
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -69777,7 +72094,6 @@ export const playersByPrimaryEntityId = /* GraphQL */ `query PlayersByPrimaryEnt
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -69876,7 +72192,6 @@ export const playersByPrimaryEntityId = /* GraphQL */ `query PlayersByPrimaryEnt
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -70206,7 +72521,6 @@ export const playersByPrimaryEntityId = /* GraphQL */ `query PlayersByPrimaryEnt
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -70891,7 +73205,6 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -70990,7 +73303,6 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -71320,7 +73632,6 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -72005,7 +74316,6 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -72104,7 +74414,6 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -72434,7 +74743,6 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -73119,7 +75427,6 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -73218,7 +75525,6 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -73548,7 +75854,6 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -74585,7 +76890,6 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -74773,7 +77077,6 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -75354,7 +77657,6 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -75542,7 +77844,6 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -76123,7 +78424,6 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -76311,7 +78611,6 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -76888,7 +79187,6 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -77076,7 +79374,6 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -77653,7 +79950,6 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
         gameTags
         sourceUrl
         tournamentId
-        dataSource
         originalScrapedData
         venueAssignmentStatus
         requiresVenueAssignment
@@ -77841,7 +80137,6 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -78484,7 +80779,6 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -79152,7 +81446,6 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -83832,7 +86125,6 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -84001,6 +86293,11 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -84165,7 +86462,6 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -84353,7 +86649,6 @@ export const assetsByEntityIdAndType = /* GraphQL */ `query AssetsByEntityIdAndT
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -84522,6 +86817,11 @@ export const assetsByEntityIdAndType = /* GraphQL */ `query AssetsByEntityIdAndT
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -84686,7 +86986,6 @@ export const assetsByEntityIdAndType = /* GraphQL */ `query AssetsByEntityIdAndT
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -84972,6 +87271,11 @@ export const scraperJobsByJobId = /* GraphQL */ `query ScraperJobsByJobId(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -85136,7 +87440,6 @@ export const scraperJobsByJobId = /* GraphQL */ `query ScraperJobsByJobId(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -85385,6 +87688,11 @@ export const scraperJobsByStatusAndStartTime = /* GraphQL */ `query ScraperJobsB
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -85549,7 +87857,6 @@ export const scraperJobsByStatusAndStartTime = /* GraphQL */ `query ScraperJobsB
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -85798,6 +88105,11 @@ export const scraperJobsByEntityIdAndStartTime = /* GraphQL */ `query ScraperJob
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -85962,7 +88274,6 @@ export const scraperJobsByEntityIdAndStartTime = /* GraphQL */ `query ScraperJob
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -86208,6 +88519,11 @@ export const scrapeURLByURL = /* GraphQL */ `query ScrapeURLByURL(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -86372,7 +88688,6 @@ export const scrapeURLByURL = /* GraphQL */ `query ScrapeURLByURL(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -86630,6 +88945,11 @@ export const scrapeURLSByTournamentId = /* GraphQL */ `query ScrapeURLSByTournam
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -86794,7 +89114,6 @@ export const scrapeURLSByTournamentId = /* GraphQL */ `query ScrapeURLSByTournam
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -87054,6 +89373,11 @@ export const scrapeURLsBySourceSystem = /* GraphQL */ `query ScrapeURLsBySourceS
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -87218,7 +89542,6 @@ export const scrapeURLsBySourceSystem = /* GraphQL */ `query ScrapeURLsBySourceS
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -87476,6 +89799,11 @@ export const scrapeURLSByGameId = /* GraphQL */ `query ScrapeURLSByGameId(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -87640,7 +89968,6 @@ export const scrapeURLSByGameId = /* GraphQL */ `query ScrapeURLSByGameId(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -87898,6 +90225,11 @@ export const scrapeURLSByEntityId = /* GraphQL */ `query ScrapeURLSByEntityId(
             totalScraped
             totalErrors
             enabled
+            highestStoredId
+            lowestStoredId
+            knownGapRanges
+            lastGapScanAt
+            totalGamesInDatabase
             entityId
             createdAt
             updatedAt
@@ -88062,7 +90394,6 @@ export const scrapeURLSByEntityId = /* GraphQL */ `query ScrapeURLSByEntityId(
             gameTags
             sourceUrl
             tournamentId
-            dataSource
             originalScrapedData
             venueAssignmentStatus
             requiresVenueAssignment
@@ -88775,6 +91106,15 @@ export const s3StoragesByScrapeURLIdAndScrapedAt = /* GraphQL */ `query S3Storag
       registrationStatus
       createdAt
       updatedAt
+      isParsed
+      parsedDataHash
+      extractedFields
+      lastParsedAt
+      parseCount
+      rescrapeCount
+      lastRescrapeAt
+      dataChangedAt
+      dataChangeCount
       _version
       _deleted
       _lastChangedAt
@@ -88836,6 +91176,15 @@ export const s3StoragesByUrlAndScrapedAt = /* GraphQL */ `query S3StoragesByUrlA
       registrationStatus
       createdAt
       updatedAt
+      isParsed
+      parsedDataHash
+      extractedFields
+      lastParsedAt
+      parseCount
+      rescrapeCount
+      lastRescrapeAt
+      dataChangedAt
+      dataChangeCount
       _version
       _deleted
       _lastChangedAt
@@ -88897,6 +91246,15 @@ export const s3StoragesByTournamentIdAndScrapedAt = /* GraphQL */ `query S3Stora
       registrationStatus
       createdAt
       updatedAt
+      isParsed
+      parsedDataHash
+      extractedFields
+      lastParsedAt
+      parseCount
+      rescrapeCount
+      lastRescrapeAt
+      dataChangedAt
+      dataChangeCount
       _version
       _deleted
       _lastChangedAt
@@ -88958,6 +91316,15 @@ export const s3StoragesByEntityIdAndScrapedAt = /* GraphQL */ `query S3StoragesB
       registrationStatus
       createdAt
       updatedAt
+      isParsed
+      parsedDataHash
+      extractedFields
+      lastParsedAt
+      parseCount
+      rescrapeCount
+      lastRescrapeAt
+      dataChangedAt
+      dataChangeCount
       _version
       _deleted
       _lastChangedAt
@@ -89017,6 +91384,15 @@ export const s3StoragesByS3Key = /* GraphQL */ `query S3StoragesByS3Key(
       registrationStatus
       createdAt
       updatedAt
+      isParsed
+      parsedDataHash
+      extractedFields
+      lastParsedAt
+      parseCount
+      rescrapeCount
+      lastRescrapeAt
+      dataChangedAt
+      dataChangeCount
       _version
       _deleted
       _lastChangedAt
@@ -89076,6 +91452,15 @@ export const s3StoragesByGameId = /* GraphQL */ `query S3StoragesByGameId(
       registrationStatus
       createdAt
       updatedAt
+      isParsed
+      parsedDataHash
+      extractedFields
+      lastParsedAt
+      parseCount
+      rescrapeCount
+      lastRescrapeAt
+      dataChangedAt
+      dataChangeCount
       _version
       _deleted
       _lastChangedAt
@@ -89137,6 +91522,15 @@ export const s3StorageByGameStatus = /* GraphQL */ `query S3StorageByGameStatus(
       registrationStatus
       createdAt
       updatedAt
+      isParsed
+      parsedDataHash
+      extractedFields
+      lastParsedAt
+      parseCount
+      rescrapeCount
+      lastRescrapeAt
+      dataChangedAt
+      dataChangeCount
       _version
       _deleted
       _lastChangedAt
@@ -89198,6 +91592,15 @@ export const s3StorageByRegistrationStatus = /* GraphQL */ `query S3StorageByReg
       registrationStatus
       createdAt
       updatedAt
+      isParsed
+      parsedDataHash
+      extractedFields
+      lastParsedAt
+      parseCount
+      rescrapeCount
+      lastRescrapeAt
+      dataChangedAt
+      dataChangeCount
       _version
       _deleted
       _lastChangedAt
