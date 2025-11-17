@@ -171,7 +171,7 @@ const defaultStrategy = {
             if (warningText.includes('not found')) {
                 console.log('[Scraper] State detected: Tournament Not Found');
                 ctx.add('tournamentId', tournamentId);
-                ctx.add('gameStatus', 'NOT_FOUND');
+                ctx.add('gameStatus', 'UNKNOWN');
                 ctx.add('name', 'Tournament Not Found');
                 ctx.add('doNotScrape', true); // Set to true, as "not found" is usually permanent
                 ctx.add('hasGuarantee', false);
@@ -180,7 +180,7 @@ const defaultStrategy = {
                 
                 if (!forceRefresh) {
                     ctx.abortScrape = true;
-                    console.log('[Scraper] Aborting scrape due to NOT_FOUND status');
+                    console.log('[Scraper] Aborting scrape due to UNKNOWN Game status');
                 }
                 return;
             }
@@ -244,7 +244,7 @@ const defaultStrategy = {
         if (pageTitle.includes('not found') || h1Text.includes('not found')) {
             console.log('[Scraper] State detected from page title/h1: Not Found');
             ctx.add('tournamentId', tournamentId);
-            ctx.add('gameStatus', 'NOT_FOUND');
+            ctx.add('gameStatus', 'UNKNOWN');
             ctx.add('name', 'Tournament Not Found');
             ctx.add('doNotScrape', true);
             ctx.add('hasGuarantee', false);

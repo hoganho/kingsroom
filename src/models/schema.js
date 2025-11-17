@@ -5296,7 +5296,7 @@ export const schema = {
                     "name": "sourceSystem",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "status": {
@@ -5361,7 +5361,7 @@ export const schema = {
                     "name": "consecutiveFailures",
                     "isArray": false,
                     "type": "Int",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "lastScrapeStatus": {
@@ -9162,5 +9162,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "66d2ec07a1df97555c42f5ddafdf7e06"
+    "version": "a7d8b32ad1421efd31279838257c20f9"
 };

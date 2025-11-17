@@ -2976,7 +2976,7 @@ type EagerScrapeURL = {
   readonly sourceDataIssue?: boolean | null;
   readonly gameDataVerified?: boolean | null;
   readonly missingKeysFromScrape?: (string | null)[] | null;
-  readonly sourceSystem: string;
+  readonly sourceSystem?: string | null;
   readonly status: ScrapeURLStatus | keyof typeof ScrapeURLStatus;
   readonly placedIntoDatabase: boolean;
   readonly firstScrapedAt: string;
@@ -2985,7 +2985,7 @@ type EagerScrapeURL = {
   readonly timesScraped: number;
   readonly timesSuccessful: number;
   readonly timesFailed: number;
-  readonly consecutiveFailures: number;
+  readonly consecutiveFailures?: number | null;
   readonly lastScrapeStatus?: ScrapeAttemptStatus | keyof typeof ScrapeAttemptStatus | null;
   readonly lastScrapeMessage?: string | null;
   readonly lastScrapeJobId?: string | null;
@@ -3030,7 +3030,7 @@ type LazyScrapeURL = {
   readonly sourceDataIssue?: boolean | null;
   readonly gameDataVerified?: boolean | null;
   readonly missingKeysFromScrape?: (string | null)[] | null;
-  readonly sourceSystem: string;
+  readonly sourceSystem?: string | null;
   readonly status: ScrapeURLStatus | keyof typeof ScrapeURLStatus;
   readonly placedIntoDatabase: boolean;
   readonly firstScrapedAt: string;
@@ -3039,7 +3039,7 @@ type LazyScrapeURL = {
   readonly timesScraped: number;
   readonly timesSuccessful: number;
   readonly timesFailed: number;
-  readonly consecutiveFailures: number;
+  readonly consecutiveFailures?: number | null;
   readonly lastScrapeStatus?: ScrapeAttemptStatus | keyof typeof ScrapeAttemptStatus | null;
   readonly lastScrapeMessage?: string | null;
   readonly lastScrapeJobId?: string | null;

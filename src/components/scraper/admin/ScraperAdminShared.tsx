@@ -10,12 +10,19 @@ import {
     AlertTriangle, 
     AlertCircle,
     Pause,
-    Database
+    Database,
+    Calendar,
+    PlayCircle,
+    Users,
+    StopCircle,
+    MinusCircle,
+    HelpCircle
 } from 'lucide-react';
 
 import type { 
     ScraperJobStatus,
-    ScrapeURLStatus
+    ScrapeURLStatus,
+    GameStatus
 } from '../../../../src/API'; // Adjusted path
 
 // ===================================================================
@@ -57,6 +64,88 @@ export const URLStatusBadge: React.FC<{ status: ScrapeURLStatus }> = ({ status }
         <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${color}`}>
             {icon}
             {status}
+        </span>
+    );
+};
+
+export const GameStatusBadge: React.FC<{ 
+    status: GameStatus | null | undefined;
+    showUnparsed?: boolean;
+}> = ({ status, showUnparsed = true }) => {
+    // Handle null/undefined - not yet parsed
+    if (!status) {
+        if (!showUnparsed) return null;
+        return (
+            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-gray-50 text-gray-400 border border-gray-200">
+                <HelpCircle className="w-3 h-3" />
+                Not Parsed
+            </span>
+        );
+    }
+    
+    const config: Record<GameStatus, { color: string; icon: React.ReactNode; label?: string }> = {
+        'SCHEDULED': { 
+            color: 'bg-blue-100 text-blue-800', 
+            icon: <Calendar className="w-3 h-3" />,
+            label: 'Scheduled'
+        },
+        'REGISTERING': { 
+            color: 'bg-cyan-100 text-cyan-800', 
+            icon: <Users className="w-3 h-3" />,
+            label: 'Registering'
+        },
+        'RUNNING': { 
+            color: 'bg-green-100 text-green-800', 
+            icon: <PlayCircle className="w-3 h-3" />,
+            label: 'Running'
+        },
+        'FINISHED': { 
+            color: 'bg-gray-100 text-gray-800', 
+            icon: <CheckCircle className="w-3 h-3" />,
+            label: 'Finished'
+        },
+        'CANCELLED': { 
+            color: 'bg-red-100 text-red-800', 
+            icon: <XCircle className="w-3 h-3" />,
+            label: 'Cancelled'
+        },
+        'INITIATING': { 
+            color: 'bg-purple-100 text-purple-800', 
+            icon: <Activity className="w-3 h-3" />,
+            label: 'Initiating'
+        },
+        'NOT_IN_USE': { 
+            color: 'bg-gray-100 text-gray-600', 
+            icon: <MinusCircle className="w-3 h-3" />,
+            label: 'Not In Use'
+        },
+        'NOT_PUBLISHED': { 
+            color: 'bg-yellow-100 text-yellow-800', 
+            icon: <AlertTriangle className="w-3 h-3" />,
+            label: 'Not Published'
+        },
+        'CLOCK_STOPPED': { 
+            color: 'bg-orange-100 text-orange-800', 
+            icon: <StopCircle className="w-3 h-3" />,
+            label: 'Clock Stopped'
+        },
+        'UNKNOWN': { 
+            color: 'bg-gray-100 text-gray-600', 
+            icon: <HelpCircle className="w-3 h-3" />,
+            label: 'Unknown'
+        }
+    };
+    
+    const statusConfig = config[status] || { 
+        color: 'bg-gray-100 text-gray-800', 
+        icon: <HelpCircle className="w-3 h-3" />,
+        label: status
+    };
+    
+    return (
+        <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${statusConfig.color}`}>
+            {statusConfig.icon}
+            {statusConfig.label || status}
         </span>
     );
 };

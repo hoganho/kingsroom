@@ -1303,12 +1303,16 @@ exports.handler = async (event) => {
                                     monitoredDdbDocClient,
                                     s3StorageTable,
                                     true, // isRescrape = true (from cache)
-                                    s3StorageRecord?.url || fetchUrl // URL for fallback lookup
+                                    s3StorageRecord?.url || fetchUrl, // URL for fallback lookup
+                                    scrapedData.tournamentId || s3StorageRecord?.tournamentId, // tournamentId for primary lookup
+                                    entityId || s3StorageRecord?.entityId // entityId for primary lookup
                                 );
                                 
                                 console.log(`[FETCH] S3Storage update result:`, {
                                     source: 'S3_CACHE',
                                     dataChanged: updateResult.dataChanged,
+                                    gameStatus: updateResult.gameStatus,
+                                    registrationStatus: updateResult.registrationStatus,
                                     fieldsExtracted: updateResult.extractedFields?.length
                                 });
                                 
@@ -1420,13 +1424,13 @@ exports.handler = async (event) => {
                                                fetchResult.error?.includes('not published');
                         
                         if (isNotFoundError) {
-                            await updateScrapeURLDoNotScrape(fetchUrl, true, 'NOT_FOUND');
+                            await updateScrapeURLDoNotScrape(fetchUrl, true, 'UNKNOWN');
                         }
                         
                         return {
                             tournamentId: tournamentId,
                             name: fetchResult.isNotFound ? 'Tournament Not Found' : 'Failed to fetch tournament',
-                            gameStatus: fetchResult.isNotFound ? 'NOT_FOUND' : 'SCHEDULED',
+                            gameStatus: fetchResult.isNotFound ? 'UNKNOWN' : 'SCHEDULED',
                             hasGuarantee: false,
                             doNotScrape: fetchResult.isNotFound,
                             s3Key: '',
@@ -1483,12 +1487,16 @@ exports.handler = async (event) => {
                                 monitoredDdbDocClient,
                                 s3StorageTable,
                                 false, // isRescrape = false (live fetch)
-                                fetchUrl // URL for fallback lookup
+                                fetchUrl, // URL for fallback lookup
+                                scrapedData.tournamentId || tournamentId, // tournamentId for primary lookup
+                                entityId // entityId for primary lookup
                             );
                             
                             console.log(`[FETCH] S3Storage update result:`, {
                                 source: fetchResult.source,
                                 dataChanged: updateResult.dataChanged,
+                                gameStatus: updateResult.gameStatus,
+                                registrationStatus: updateResult.registrationStatus,
                                 fieldsExtracted: updateResult.extractedFields?.length
                             });
                             

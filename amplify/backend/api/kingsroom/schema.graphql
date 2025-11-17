@@ -575,7 +575,7 @@ type ScrapeURL @model(queries: { get: "getScrapeURL", list: null }) @auth(rules:
   sourceDataIssue: Boolean
   gameDataVerified: Boolean
   missingKeysFromScrape: [String]
-  sourceSystem: String! @index(name: "bySourceSystem", queryField: "scrapeURLsBySourceSystem", sortKeyFields: ["tournamentId"])
+  sourceSystem: String @index(name: "bySourceSystem", queryField: "scrapeURLsBySourceSystem", sortKeyFields: ["tournamentId"])
 
   # === ORIGINAL SCRAPEURL FIELDS ===
   status: ScrapeURLStatus!
@@ -586,7 +586,7 @@ type ScrapeURL @model(queries: { get: "getScrapeURL", list: null }) @auth(rules:
   timesScraped: Int!
   timesSuccessful: Int!
   timesFailed: Int!
-  consecutiveFailures: Int!
+  consecutiveFailures: Int @default(value: "0")
   lastScrapeStatus: ScrapeAttemptStatus
   lastScrapeMessage: String
   lastScrapeJobId: String
