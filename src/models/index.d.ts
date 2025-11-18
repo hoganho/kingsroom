@@ -118,10 +118,10 @@ export enum PlayerVenueTargetingClassification {
   ACTIVE = "Active",
   RETAIN_INACTIVE31_60D = "Retain_Inactive31_60d",
   RETAIN_INACTIVE61_90D = "Retain_Inactive61_90d",
-  CHURN_91_120D = "Churn_91_120d",
-  CHURN_121_180D = "Churn_121_180d",
-  CHURN_181_360D = "Churn_181_360d",
-  CHURN_361D = "Churn_361d"
+  CHURNED_91_120D = "Churned_91_120d",
+  CHURNED_121_180D = "Churned_121_180d",
+  CHURNED_181_360D = "Churned_181_360d",
+  CHURNED_361D = "Churned_361d"
 }
 
 export enum TransactionType {
@@ -1303,6 +1303,52 @@ export declare type VenueMatch = LazyLoading extends LazyLoadingDisabled ? Eager
 
 export declare const VenueMatch: (new (init: ModelInit<VenueMatch>) => VenueMatch)
 
+type EagerSaveGameResult = {
+  readonly success: boolean;
+  readonly gameId?: string | null;
+  readonly action: string;
+  readonly message?: string | null;
+  readonly warnings?: (string | null)[] | null;
+  readonly playerProcessingQueued?: boolean | null;
+  readonly playerProcessingReason?: string | null;
+  readonly venueAssignment?: SaveVenueAssignmentInfo | null;
+  readonly fieldsUpdated?: (string | null)[] | null;
+}
+
+type LazySaveGameResult = {
+  readonly success: boolean;
+  readonly gameId?: string | null;
+  readonly action: string;
+  readonly message?: string | null;
+  readonly warnings?: (string | null)[] | null;
+  readonly playerProcessingQueued?: boolean | null;
+  readonly playerProcessingReason?: string | null;
+  readonly venueAssignment?: SaveVenueAssignmentInfo | null;
+  readonly fieldsUpdated?: (string | null)[] | null;
+}
+
+export declare type SaveGameResult = LazyLoading extends LazyLoadingDisabled ? EagerSaveGameResult : LazySaveGameResult
+
+export declare const SaveGameResult: (new (init: ModelInit<SaveGameResult>) => SaveGameResult)
+
+type EagerSaveVenueAssignmentInfo = {
+  readonly venueId?: string | null;
+  readonly venueName?: string | null;
+  readonly status?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
+  readonly confidence?: number | null;
+}
+
+type LazySaveVenueAssignmentInfo = {
+  readonly venueId?: string | null;
+  readonly venueName?: string | null;
+  readonly status?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
+  readonly confidence?: number | null;
+}
+
+export declare type SaveVenueAssignmentInfo = LazyLoading extends LazyLoadingDisabled ? EagerSaveVenueAssignmentInfo : LazySaveVenueAssignmentInfo
+
+export declare const SaveVenueAssignmentInfo: (new (init: ModelInit<SaveVenueAssignmentInfo>) => SaveVenueAssignmentInfo)
+
 type EagerGapRange = {
   readonly start: number;
   readonly end: number;
@@ -2239,6 +2285,7 @@ type EagerPlayerResult = {
   readonly amountWon?: number | null;
   readonly totalRunners?: number | null;
   readonly pointsEarned?: number | null;
+  readonly gameStartDateTime: string;
   readonly playerId: string;
   readonly player?: Player | null;
   readonly gameId: string;
@@ -2259,6 +2306,7 @@ type LazyPlayerResult = {
   readonly amountWon?: number | null;
   readonly totalRunners?: number | null;
   readonly pointsEarned?: number | null;
+  readonly gameStartDateTime: string;
   readonly playerId: string;
   readonly player: AsyncItem<Player | undefined>;
   readonly gameId: string;

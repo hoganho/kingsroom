@@ -74,6 +74,10 @@
     {
       "cloudFormationParameterName": "scraperS3Bucket",
       "environmentVariableName": "SCRAPER_S3_BUCKET"
+    },
+    {
+      "cloudFormationParameterName": "saveGameFunctionName",
+      "environmentVariableName": "SAVE_GAME_FUNCTION_NAME"
     }
   ]
 }

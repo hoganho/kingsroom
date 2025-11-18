@@ -2258,6 +2258,7 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -3351,6 +3352,7 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -4444,6 +4446,7 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -7018,6 +7021,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -7675,6 +7679,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -9037,6 +9042,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -9694,6 +9700,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -11056,6 +11063,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -11713,6 +11721,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -16518,6 +16527,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -17748,6 +17758,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -18978,6 +18989,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -20615,6 +20627,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -20973,6 +20986,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
         amountWon
         totalRunners
         pointsEarned
+        gameStartDateTime
         playerId
         player {
           id
@@ -23278,6 +23292,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -23636,6 +23651,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
         amountWon
         totalRunners
         pointsEarned
+        gameStartDateTime
         playerId
         player {
           id
@@ -25941,6 +25957,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -26299,6 +26316,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
         amountWon
         totalRunners
         pointsEarned
+        gameStartDateTime
         playerId
         player {
           id
@@ -27783,6 +27801,7 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -28864,6 +28883,7 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -29945,6 +29965,7 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -30710,6 +30731,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -31258,6 +31280,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -31974,6 +31997,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
         amountWon
         totalRunners
         pointsEarned
+        gameStartDateTime
         playerId
         player {
           id
@@ -33868,6 +33892,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -34416,6 +34441,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -35132,6 +35158,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
         amountWon
         totalRunners
         pointsEarned
+        gameStartDateTime
         playerId
         player {
           id
@@ -37026,6 +37053,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -37574,6 +37602,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -38290,6 +38319,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
         amountWon
         totalRunners
         pointsEarned
+        gameStartDateTime
         playerId
         player {
           id
@@ -40519,6 +40549,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -41643,6 +41674,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -42767,6 +42799,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -43897,6 +43930,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -45159,6 +45193,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -46064,6 +46099,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -47326,6 +47362,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -48231,6 +48268,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -49493,6 +49531,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -49849,6 +49888,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
     amountWon
     totalRunners
     pointsEarned
+    gameStartDateTime
     playerId
     player {
       id
@@ -50393,6 +50433,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -51656,6 +51697,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -52012,6 +52054,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
     amountWon
     totalRunners
     pointsEarned
+    gameStartDateTime
     playerId
     player {
       id
@@ -52556,6 +52599,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -53819,6 +53863,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -54175,6 +54220,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
     amountWon
     totalRunners
     pointsEarned
+    gameStartDateTime
     playerId
     player {
       id
@@ -54719,6 +54765,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -55982,6 +56029,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -56881,6 +56929,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -58773,6 +58822,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -60665,6 +60715,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -62558,6 +62609,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -63671,6 +63723,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -64784,6 +64837,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -65897,6 +65951,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -67011,6 +67066,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -68125,6 +68181,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -69239,6 +69296,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -70353,6 +70411,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -71467,6 +71526,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -72578,6 +72638,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -73687,6 +73748,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -74796,6 +74858,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -76476,6 +76539,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -77661,6 +77725,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -78846,6 +78911,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -80209,6 +80275,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -81317,6 +81384,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -82425,6 +82493,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id

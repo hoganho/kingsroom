@@ -523,6 +523,7 @@ const createPlayerResult = async (playerId, gameData, playerData, entityId) => {
             pointsEarned: playerData.points || 0,
             isMultiDayQualification: playerData.isQualification || false,
             totalRunners: gameData.game.totalEntries || gameData.players.totalPlayers,
+            gameStartDateTime: gameData.game.gameStartDateTime || gameData.game.gameEndDateTime || now, // Added for sorting support
             createdAt: now,
             updatedAt: now,
             _version: 1,
@@ -844,8 +845,8 @@ const upsertPlayerVenue = async (playerId, gameData, playerData, entityId) => {
  * Create PlayerTransaction records
  * (Merged: Preserved index.js logic [uuidv4, BatchWrite], added entityId)
  */
-// --- MERGE ---: Added entityId parameter
-const createPlayerTransactions = async (playerId, gameData, playerData, processingInstructions, entityId) => {
+// --- MERGE ---: Added entityId parameter, REFACTOR: Removed processingInstructions dependency
+const createPlayerTransactions = async (playerId, gameData, playerData, entityId) => {
     console.log(`[TRANSACTION-CREATE] Starting creation for player ${playerId}.`);
     const playerTransactionTable = getTableName('PlayerTransaction');
     const transactions = [];
@@ -854,7 +855,27 @@ const createPlayerTransactions = async (playerId, gameData, playerData, processi
     // Use gameStartDateTime as the authoritative timestamp
     const gameDateTime = gameData.game.gameStartDateTime || gameData.game.gameEndDateTime;
 
-    const transactionsToCreate = processingInstructions.requiredActions?.createTransactions || [];
+    // Build transactions directly from gameData and playerData
+    const transactionsToCreate = [];
+    
+    // Always create BUY_IN transaction
+    const buyInAmount = (gameData.game.buyIn || 0) + (gameData.game.rake || 0);
+    transactionsToCreate.push({
+        type: 'BUY_IN',
+        amount: buyInAmount,
+        rake: gameData.game.rake || 0,
+        paymentSource: 'CASH'
+    });
+    
+    // Add QUALIFICATION transaction if player qualified
+    if (playerData.isQualification) {
+        transactionsToCreate.push({
+            type: 'QUALIFICATION',
+            amount: 0,
+            rake: 0,
+            paymentSource: 'UNKNOWN'
+        });
+    }
     
     monitoring.trackOperation('TRANSACTIONS_BATCH', 'PlayerTransaction', playerId, {
         count: transactionsToCreate.length,
@@ -876,7 +897,7 @@ const createPlayerTransactions = async (playerId, gameData, playerData, processi
                 type: transaction.type,
                 amount: transaction.amount,
                 paymentSource: transaction.paymentSource,
-                transactionDate: gameDateTime, // REFACTOR: Use authoritative date
+                transactionDate: gameDateTime, // Use authoritative date
                 notes: `SYSTEM insert from scraped data`,
                 createdAt: now,
                 updatedAt: now,
@@ -928,7 +949,7 @@ const createPlayerTransactions = async (playerId, gameData, playerData, processi
  * Process a single player
  * (Merged: Preserved index.js logic [skip, call order], added entityId)
  */
-const processPlayer = async (playerData, processingInstructions, gameData) => {
+const processPlayer = async (playerData, gameData) => {
     const playerName = playerData.name;
     const playerResultTable = getTableName('PlayerResult');
     // --- MERGE ---: Added entityId extraction
@@ -984,7 +1005,7 @@ const processPlayer = async (playerData, processingInstructions, gameData) => {
         await upsertPlayerSummary(playerId, gameData, playerData, wasNewVenue, entityId);
         
         console.log(`[PROCESS-PLAYER] Step 5: createPlayerTransactions...`);
-        await createPlayerTransactions(playerId, gameData, playerData, processingInstructions, entityId);
+        await createPlayerTransactions(playerId, gameData, playerData, entityId);
         
         console.log(`[PROCESS-PLAYER] Step 6: upsertPlayerEntry...`);
         await upsertPlayerEntry(playerId, gameData, entityId);
@@ -1071,8 +1092,8 @@ exports.handler = async (event) => {
                 gameStatus: gameData.game.gameStatus
             });
             
-            if (!gameData.players || !gameData.processingInstructions) {
-                console.error('[HANDLER] CRITICAL ERROR: SQS Payload missing required fields (players/instructions).');
+            if (!gameData.players) {
+                console.error('[HANDLER] CRITICAL ERROR: SQS Payload missing required fields (players).');
                 throw new Error('SQS Payload validation failed.');
             }
 
@@ -1080,10 +1101,9 @@ exports.handler = async (event) => {
             
             for (let i = 0; i < gameData.players.allPlayers.length; i++) {
                 const playerData = gameData.players.allPlayers[i];
-                const processingInstructions = gameData.processingInstructions[i];
                 
                 playerPromises.push(
-                    processPlayer(playerData, processingInstructions, gameData)
+                    processPlayer(playerData, gameData)
                 );
             }
             

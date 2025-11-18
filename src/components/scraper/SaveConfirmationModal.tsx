@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import type { GameData } from '../../types/game';
+import type { ScrapedGameData } from '../../API';
 
 // Custom query that only fetches the venue name - avoids problematic nested fields
 const getVenueName = /* GraphQL */ `
@@ -14,14 +14,25 @@ const getVenueName = /* GraphQL */ `
     }
 `;
 
+// Type for game data that can be passed to this modal
+// Accepts ScrapedGameData or a compatible shape from other sources
+type ModalGameData = ScrapedGameData | {
+    name?: string | null;
+    gameStatus?: string | null;
+    gameStartDateTime?: string | null;
+    tournamentId?: number | null;
+    sourceUrl?: string | null;
+};
+
 /**
  * SaveConfirmationModal component - Fixed to display venue information correctly
+ * Updated to accept ScrapedGameData or compatible game data shape
  */
 export const SaveConfirmationModal: React.FC<{
     isOpen: boolean;
     onClose: () => void;
     onConfirm: () => void;
-    gameData?: GameData;
+    gameData?: ModalGameData; // Accept ScrapedGameData or compatible shape
     venueId: string;
     sourceUrl: string;
 }> = ({ isOpen, onClose, onConfirm, gameData, venueId, sourceUrl }) => {

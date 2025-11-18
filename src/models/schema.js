@@ -2972,6 +2972,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "gameStartDateTime": {
+                    "name": "gameStartDateTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
                 "playerId": {
                     "name": "playerId",
                     "isArray": false,
@@ -3045,7 +3052,8 @@ export const schema = {
                     "properties": {
                         "name": "byPlayer",
                         "fields": [
-                            "playerId"
+                            "playerId",
+                            "gameStartDateTime"
                         ]
                     }
                 },
@@ -6408,10 +6416,10 @@ export const schema = {
                 "Active",
                 "Retain_Inactive31_60d",
                 "Retain_Inactive61_90d",
-                "Churn_91_120d",
-                "Churn_121_180d",
-                "Churn_181_360d",
-                "Churn_361d"
+                "Churned_91_120d",
+                "Churned_121_180d",
+                "Churned_181_360d",
+                "Churned_361d"
             ]
         },
         "TransactionType": {
@@ -8938,6 +8946,113 @@ export const schema = {
                 }
             }
         },
+        "SaveGameResult": {
+            "name": "SaveGameResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "action": {
+                    "name": "action",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "warnings": {
+                    "name": "warnings",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "playerProcessingQueued": {
+                    "name": "playerProcessingQueued",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerProcessingReason": {
+                    "name": "playerProcessingReason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueAssignment": {
+                    "name": "venueAssignment",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "SaveVenueAssignmentInfo"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "fieldsUpdated": {
+                    "name": "fieldsUpdated",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                }
+            }
+        },
+        "SaveVenueAssignmentInfo": {
+            "name": "SaveVenueAssignmentInfo",
+            "fields": {
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueName": {
+                    "name": "venueName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "VenueAssignmentStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "confidence": {
+                    "name": "confidence",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
         "GapRange": {
             "name": "GapRange",
             "fields": {
@@ -9162,5 +9277,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "a7d8b32ad1421efd31279838257c20f9"
+    "version": "5e4da41c951aec9a151244e66f5c402c"
 };

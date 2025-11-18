@@ -33,40 +33,12 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
   }, [canShowMonitor]);
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="h-screen flex overflow-hidden bg-gray-100">
       {/* Desktop Sidebar - Always visible on md+ screens */}
-      <div className="hidden md:block">
-        <div className="fixed inset-y-0 left-0 w-64 z-30">
+      <div className="hidden md:flex md:flex-shrink-0">
+        <div className="w-64 flex flex-col">
           <Sidebar />
         </div>
-      </div>
-
-      {/* Mobile Top Bar - Visible only on mobile */}
-      <div className="md:hidden sticky top-0 z-10 flex h-16 flex-shrink-0 items-center justify-between border-b border-gray-800 bg-black px-4">
-        {/* Hamburger Button to open sidebar */}
-        <button
-          type="button"
-          className="rounded-md p-2 text-gray-300 hover:bg-gray-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
-          onClick={() => setSidebarOpen(true)}
-        >
-          <span className="sr-only">Open sidebar</span>
-          <Bars3Icon className="h-6 w-6" aria-hidden="true" />
-        </button>
-
-        {/* Logo */}
-        <img 
-          src={logo} 
-          alt="Kings Room Logo" 
-          className="h-12 object-contain" 
-        />
-
-        {/* Sign Out Button */}
-        <button
-          onClick={signOut}
-          className="text-sm font-medium text-red-500 hover:text-red-400"
-        >
-          Sign Out
-        </button>
       </div>
 
       {/* Mobile Sidebar - Sliding Panel (Dialog) */}
@@ -139,10 +111,38 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
         </Dialog>
       </Transition.Root>
 
-      {/* Main Content Area */}
-      <main className="flex-1 md:pl-64">
-        {/* Desktop Top Bar */}
-        <header className="sticky top-0 z-10 hidden h-16 flex-shrink-0 items-center justify-between border-b border-gray-800 bg-black px-4 sm:px-6 lg:px-8 md:flex">
+      {/* Main Content Area - This is the key change */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Mobile Top Bar - Visible only on mobile */}
+        <div className="md:hidden flex-shrink-0 flex h-16 items-center justify-between border-b border-gray-800 bg-black px-4">
+          {/* Hamburger Button to open sidebar */}
+          <button
+            type="button"
+            className="rounded-md p-2 text-gray-300 hover:bg-gray-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <span className="sr-only">Open sidebar</span>
+            <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+          </button>
+
+          {/* Logo */}
+          <img 
+            src={logo} 
+            alt="Kings Room Logo" 
+            className="h-12 object-contain" 
+          />
+
+          {/* Sign Out Button */}
+          <button
+            onClick={signOut}
+            className="text-sm font-medium text-red-500 hover:text-red-400"
+          >
+            Sign Out
+          </button>
+        </div>
+
+        {/* Desktop Top Bar - Now truly fixed within the flex container */}
+        <header className="flex-shrink-0 hidden h-16 items-center justify-between border-b border-gray-800 bg-black px-4 sm:px-6 lg:px-8 md:flex">
           <div className="flex-1"></div>
           <div className="flex flex-1 items-center justify-center">
             <img src={logo} alt="Kings Room Logo" className="h-12 object-contain" />
@@ -170,9 +170,12 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </header>
 
-        {/* Page content with padding for mobile bottom nav */}
-        <div className="pb-20 md:pb-6">{children}</div>
-      </main>
+        {/* Scrollable content area - This is the key fix */}
+        <main className="flex-1 overflow-y-auto">
+          {/* Page content with padding for mobile bottom nav */}
+          <div className="pb-20 md:pb-6">{children}</div>
+        </main>
+      </div>
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav />

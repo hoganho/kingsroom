@@ -2320,1099 +2320,6 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
   APITypes.GetUpdateCandidateURLsQueryVariables,
   APITypes.GetUpdateCandidateURLsQuery
 >;
-export const listEntitiesByDomain = /* GraphQL */ `query ListEntitiesByDomain($domain: String!) {
-  listEntitiesByDomain(domain: $domain) {
-    id
-    entityName
-    gameUrlDomain
-    gameUrlPath
-    entityLogo
-    isActive
-    createdAt
-    updatedAt
-    scraperStates {
-      items {
-        id
-        isRunning
-        lastScannedId
-        lastRunStartTime
-        lastRunEndTime
-        consecutiveBlankCount
-        totalScraped
-        totalErrors
-        enabled
-        currentLog {
-          timestamp
-          level
-          message
-          details
-          __typename
-        }
-        highestStoredId
-        lowestStoredId
-        knownGapRanges
-        lastGapScanAt
-        totalGamesInDatabase
-        lastGamesProcessed {
-          id
-          name
-          status
-          __typename
-        }
-        entityId
-        entity {
-          id
-          entityName
-          gameUrlDomain
-          gameUrlPath
-          entityLogo
-          isActive
-          createdAt
-          updatedAt
-          scraperStates {
-            nextToken
-            startedAt
-            __typename
-          }
-          scraperJobs {
-            nextToken
-            __typename
-          }
-          scrapeURLs {
-            nextToken
-            __typename
-          }
-          venues {
-            nextToken
-            startedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          assets {
-            nextToken
-            startedAt
-            __typename
-          }
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      nextToken
-      startedAt
-      __typename
-    }
-    scraperJobs {
-      items {
-        id
-        jobId
-        triggerSource
-        triggeredBy
-        startTime
-        endTime
-        durationSeconds
-        maxGames
-        targetURLs
-        isFullScan
-        startId
-        endId
-        status
-        totalURLsProcessed
-        newGamesScraped
-        gamesUpdated
-        gamesSkipped
-        errors
-        blanks
-        averageScrapingTime
-        successRate
-        errorMessages
-        failedURLs
-        urlResults {
-          url
-          tournamentId
-          status
-          gameName
-          processingTime
-          error
-          __typename
-        }
-        scrapeAttempts {
-          items {
-            id
-            url
-            tournamentId
-            attemptTime
-            scraperJobId
-            scrapeURLId
-            status
-            processingTime
-            gameName
-            gameStatus
-            registrationStatus
-            dataHash
-            hasChanges
-            errorMessage
-            errorType
-            gameId
-            wasNewGame
-            fieldsUpdated
-            foundKeys
-            structureLabel
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        entityId
-        entity {
-          id
-          entityName
-          gameUrlDomain
-          gameUrlPath
-          entityLogo
-          isActive
-          createdAt
-          updatedAt
-          scraperStates {
-            nextToken
-            startedAt
-            __typename
-          }
-          scraperJobs {
-            nextToken
-            __typename
-          }
-          scrapeURLs {
-            nextToken
-            __typename
-          }
-          venues {
-            nextToken
-            startedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          assets {
-            nextToken
-            startedAt
-            __typename
-          }
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-    scrapeURLs {
-      items {
-        id
-        url
-        tournamentId
-        doNotScrape
-        sourceDataIssue
-        gameDataVerified
-        missingKeysFromScrape
-        sourceSystem
-        status
-        placedIntoDatabase
-        firstScrapedAt
-        lastScrapedAt
-        lastSuccessfulScrapeAt
-        timesScraped
-        timesSuccessful
-        timesFailed
-        consecutiveFailures
-        lastScrapeStatus
-        lastScrapeMessage
-        lastScrapeJobId
-        gameId
-        gameName
-        gameStatus
-        venueId
-        venueName
-        lastDataHash
-        hasDataChanges
-        lastFoundKeys
-        lastStructureLabel
-        averageScrapingTime
-        lastScrapingTime
-        attempts {
-          items {
-            id
-            url
-            tournamentId
-            attemptTime
-            scraperJobId
-            scrapeURLId
-            status
-            processingTime
-            gameName
-            gameStatus
-            registrationStatus
-            dataHash
-            hasChanges
-            errorMessage
-            errorType
-            gameId
-            wasNewGame
-            fieldsUpdated
-            foundKeys
-            structureLabel
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        entityId
-        entity {
-          id
-          entityName
-          gameUrlDomain
-          gameUrlPath
-          entityLogo
-          isActive
-          createdAt
-          updatedAt
-          scraperStates {
-            nextToken
-            startedAt
-            __typename
-          }
-          scraperJobs {
-            nextToken
-            __typename
-          }
-          scrapeURLs {
-            nextToken
-            __typename
-          }
-          venues {
-            nextToken
-            startedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          assets {
-            nextToken
-            startedAt
-            __typename
-          }
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        etag
-        lastModifiedHeader
-        contentHash
-        s3StoragePrefix
-        latestS3Key
-        s3StorageEnabled
-        lastContentChangeAt
-        totalContentChanges
-        lastHeaderCheckAt
-        cachedContentUsedCount
-        lastCacheHitAt
-        contentSize
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-    venues {
-      items {
-        id
-        venueNumber
-        name
-        aliases
-        address
-        city
-        country
-        isSpecial
-        details {
-          id
-          startDate
-          status
-          lastCustomerSuccessVisit
-          totalGamesHeld
-          averagePlayersPerGame
-          gameNights
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            isSpecial
-            entityId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        assets {
-          items {
-            id
-            name
-            type
-            condition
-            acquiredDate
-            lastCheckedDate
-            venueId
-            entityId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            registrationStatus
-            totalDuration
-            gameFrequency
-            buyIn
-            rake
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            prizepool
-            totalEntries
-            totalRebuys
-            totalAddons
-            revenueByBuyIns
-            totalRake
-            profitLoss
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentType
-            isRegular
-            isSeries
-            isSatellite
-            seriesName
-            gameTags
-            sourceUrl
-            tournamentId
-            originalScrapedData
-            venueAssignmentStatus
-            requiresVenueAssignment
-            suggestedVenueName
-            venueAssignmentConfidence
-            venueId
-            tournamentSeriesId
-            entityId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            gameStructureId
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        series {
-          items {
-            id
-            name
-            year
-            status
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        playerMemberships {
-          items {
-            id
-            totalGamesPlayed
-            averageBuyIn
-            firstPlayedDate
-            lastPlayedDate
-            targetingClassification
-            playerId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        registeredPlayers {
-          items {
-            id
-            primaryEntityId
-            firstName
-            lastName
-            phone
-            email
-            status
-            category
-            targetingClassification
-            registrationDate
-            firstGamePlayed
-            lastPlayedDate
-            creditBalance
-            pointsBalance
-            venueAssignmentStatus
-            registrationVenueId
-            updatedAt
-            createdAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        entityId
-        entity {
-          id
-          entityName
-          gameUrlDomain
-          gameUrlPath
-          entityLogo
-          isActive
-          createdAt
-          updatedAt
-          scraperStates {
-            nextToken
-            startedAt
-            __typename
-          }
-          scraperJobs {
-            nextToken
-            __typename
-          }
-          scrapeURLs {
-            nextToken
-            __typename
-          }
-          venues {
-            nextToken
-            startedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          assets {
-            nextToken
-            startedAt
-            __typename
-          }
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        venueDetailsId
-        __typename
-      }
-      nextToken
-      startedAt
-      __typename
-    }
-    games {
-      items {
-        id
-        name
-        gameType
-        gameVariant
-        gameStatus
-        gameStartDateTime
-        gameEndDateTime
-        registrationStatus
-        totalDuration
-        gameFrequency
-        buyIn
-        rake
-        startingStack
-        hasGuarantee
-        guaranteeAmount
-        prizepool
-        totalEntries
-        totalRebuys
-        totalAddons
-        revenueByBuyIns
-        totalRake
-        profitLoss
-        guaranteeOverlay
-        guaranteeSurplus
-        playersRemaining
-        totalChipsInPlay
-        averagePlayerStack
-        tournamentType
-        isRegular
-        isSeries
-        isSatellite
-        seriesName
-        gameTags
-        sourceUrl
-        tournamentId
-        originalScrapedData
-        venueAssignmentStatus
-        requiresVenueAssignment
-        suggestedVenueName
-        venueAssignmentConfidence
-        venueId
-        venue {
-          id
-          venueNumber
-          name
-          aliases
-          address
-          city
-          country
-          isSpecial
-          details {
-            id
-            startDate
-            status
-            lastCustomerSuccessVisit
-            totalGamesHeld
-            averagePlayersPerGame
-            gameNights
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          assets {
-            nextToken
-            startedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          series {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          registeredPlayers {
-            nextToken
-            startedAt
-            __typename
-          }
-          entityId
-          entity {
-            id
-            entityName
-            gameUrlDomain
-            gameUrlPath
-            entityLogo
-            isActive
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          venueDetailsId
-          __typename
-        }
-        tournamentSeriesId
-        tournamentSeries {
-          id
-          name
-          year
-          status
-          startDate
-          endDate
-          events
-          numberOfEvents
-          guaranteedPrizepool
-          estimatedPrizepool
-          actualPrizepool
-          tournamentSeriesTitleId
-          title {
-            id
-            title
-            aliases
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            isSpecial
-            entityId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        structure {
-          id
-          levels {
-            levelNumber
-            durationMinutes
-            smallBlind
-            bigBlind
-            ante
-            __typename
-          }
-          breaks {
-            levelNumberBeforeBreak
-            durationMinutes
-            __typename
-          }
-          gameId
-          game {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            registrationStatus
-            totalDuration
-            gameFrequency
-            buyIn
-            rake
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            prizepool
-            totalEntries
-            totalRebuys
-            totalAddons
-            revenueByBuyIns
-            totalRake
-            profitLoss
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentType
-            isRegular
-            isSeries
-            isSatellite
-            seriesName
-            gameTags
-            sourceUrl
-            tournamentId
-            originalScrapedData
-            venueAssignmentStatus
-            requiresVenueAssignment
-            suggestedVenueName
-            venueAssignmentConfidence
-            venueId
-            tournamentSeriesId
-            entityId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            gameStructureId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        playerEntries {
-          items {
-            id
-            playerId
-            gameId
-            venueId
-            status
-            registrationTime
-            eliminationTime
-            gameStartDateTime
-            lastKnownStackSize
-            tableNumber
-            seatNumber
-            numberOfReEntries
-            isMultiDayTournament
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        playerResults {
-          items {
-            id
-            finishingPlace
-            isMultiDayQualification
-            prizeWon
-            amountWon
-            totalRunners
-            pointsEarned
-            playerId
-            gameId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        entityId
-        entity {
-          id
-          entityName
-          gameUrlDomain
-          gameUrlPath
-          entityLogo
-          isActive
-          createdAt
-          updatedAt
-          scraperStates {
-            nextToken
-            startedAt
-            __typename
-          }
-          scraperJobs {
-            nextToken
-            __typename
-          }
-          scrapeURLs {
-            nextToken
-            __typename
-          }
-          venues {
-            nextToken
-            startedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          assets {
-            nextToken
-            startedAt
-            __typename
-          }
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        gameStructureId
-        __typename
-      }
-      nextToken
-      startedAt
-      __typename
-    }
-    assets {
-      items {
-        id
-        name
-        type
-        condition
-        acquiredDate
-        lastCheckedDate
-        venueId
-        venue {
-          id
-          venueNumber
-          name
-          aliases
-          address
-          city
-          country
-          isSpecial
-          details {
-            id
-            startDate
-            status
-            lastCustomerSuccessVisit
-            totalGamesHeld
-            averagePlayersPerGame
-            gameNights
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          assets {
-            nextToken
-            startedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          series {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          registeredPlayers {
-            nextToken
-            startedAt
-            __typename
-          }
-          entityId
-          entity {
-            id
-            entityName
-            gameUrlDomain
-            gameUrlPath
-            entityLogo
-            isActive
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          venueDetailsId
-          __typename
-        }
-        entityId
-        entity {
-          id
-          entityName
-          gameUrlDomain
-          gameUrlPath
-          entityLogo
-          isActive
-          createdAt
-          updatedAt
-          scraperStates {
-            nextToken
-            startedAt
-            __typename
-          }
-          scraperJobs {
-            nextToken
-            __typename
-          }
-          scrapeURLs {
-            nextToken
-            __typename
-          }
-          venues {
-            nextToken
-            startedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          assets {
-            nextToken
-            startedAt
-            __typename
-          }
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      nextToken
-      startedAt
-      __typename
-    }
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.ListEntitiesByDomainQueryVariables,
-  APITypes.ListEntitiesByDomainQuery
->;
 export const scrapeGame = /* GraphQL */ `query ScrapeGame(
   $url: AWSURL!
   $entityId: ID
@@ -5118,6 +4025,7 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -6599,6 +5507,7 @@ export const getUnfinishedGamesByEntity = /* GraphQL */ `query GetUnfinishedGame
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -7837,6 +6746,7 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -10974,6 +9884,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -11631,6 +10542,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -16779,6 +15691,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -19324,6 +18237,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -19682,6 +18596,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
         amountWon
         totalRunners
         pointsEarned
+        gameStartDateTime
         playerId
         player {
           id
@@ -21150,6 +20065,7 @@ export const listGames = /* GraphQL */ `query ListGames(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -22218,6 +21134,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -23291,6 +22208,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -23943,6 +22861,7 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -24332,6 +23251,7 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -24890,6 +23810,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -25438,6 +24359,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -26154,6 +25076,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
         amountWon
         totalRunners
         pointsEarned
+        gameStartDateTime
         playerId
         player {
           id
@@ -28375,6 +27298,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -29484,6 +28408,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -30590,6 +29515,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -31369,6 +30295,7 @@ export const listPlayerSummaries = /* GraphQL */ `query ListPlayerSummaries(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -31796,6 +30723,7 @@ export const syncPlayerSummaries = /* GraphQL */ `query SyncPlayerSummaries(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -32566,6 +31494,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -33828,6 +32757,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -34388,6 +33318,7 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -34852,6 +33783,7 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -35153,6 +34085,7 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -35617,6 +34550,7 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -35706,6 +34640,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
     amountWon
     totalRunners
     pointsEarned
+    gameStartDateTime
     playerId
     player {
       id
@@ -36250,6 +35185,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -37513,6 +36449,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -37872,6 +36809,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
       amountWon
       totalRunners
       pointsEarned
+      gameStartDateTime
       playerId
       player {
         id
@@ -38068,6 +37006,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -38533,6 +37472,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -38633,6 +37573,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
       amountWon
       totalRunners
       pointsEarned
+      gameStartDateTime
       playerId
       player {
         id
@@ -38829,6 +37770,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -39294,6 +38236,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -39926,6 +38869,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -41473,6 +40417,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -42136,6 +41081,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -43137,6 +42083,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -43909,6 +42856,7 @@ export const listPlayerTransactions = /* GraphQL */ `query ListPlayerTransaction
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -44325,6 +43273,7 @@ export const syncPlayerTransactions = /* GraphQL */ `query SyncPlayerTransaction
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -45078,6 +44027,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -45847,6 +44797,7 @@ export const listPlayerCredits = /* GraphQL */ `query ListPlayerCredits(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -46264,6 +45215,7 @@ export const syncPlayerCredits = /* GraphQL */ `query SyncPlayerCredits(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -47018,6 +45970,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -47787,6 +46740,7 @@ export const listPlayerPoints = /* GraphQL */ `query ListPlayerPoints(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -48204,6 +47158,7 @@ export const syncPlayerPoints = /* GraphQL */ `query SyncPlayerPoints(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -48955,6 +47910,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -49723,6 +48679,7 @@ export const listKnownPlayerIdentities = /* GraphQL */ `query ListKnownPlayerIde
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -50135,6 +49092,7 @@ export const syncKnownPlayerIdentities = /* GraphQL */ `query SyncKnownPlayerIde
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -51257,6 +50215,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -52097,6 +51056,7 @@ export const listPlayerTickets = /* GraphQL */ `query ListPlayerTickets(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -52546,6 +51506,7 @@ export const syncPlayerTickets = /* GraphQL */ `query SyncPlayerTickets(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -53550,6 +52511,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -54317,6 +53279,7 @@ export const listPlayerMarketingPreferences = /* GraphQL */ `query ListPlayerMar
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -54728,6 +53691,7 @@ export const syncPlayerMarketingPreferences = /* GraphQL */ `query SyncPlayerMar
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -64280,6 +63244,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -65355,6 +64320,7 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -66428,6 +65394,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -67503,6 +66470,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -68578,6 +67546,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -69653,6 +68622,7 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -70728,6 +69698,7 @@ export const gamesByEntityAndTournamentId = /* GraphQL */ `query GamesByEntityAn
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -71381,6 +70352,7 @@ export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStruc
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -72130,6 +71102,7 @@ export const playersByPrimaryEntityId = /* GraphQL */ `query PlayersByPrimaryEnt
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -73241,6 +72214,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -74352,6 +73326,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -75463,6 +74438,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -76234,6 +75210,7 @@ export const playerSummariesByPlayerId = /* GraphQL */ `query PlayerSummariesByP
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -76671,6 +75648,7 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -77135,6 +76113,7 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -77438,6 +76417,7 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -77902,6 +76882,7 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -78205,6 +77186,7 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -78669,6 +77651,7 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -78749,15 +77732,17 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
   APITypes.PlayerEntriesByVenueIdQueryVariables,
   APITypes.PlayerEntriesByVenueIdQuery
 >;
-export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlayerId(
+export const playerResultsByPlayerIdAndGameStartDateTime = /* GraphQL */ `query PlayerResultsByPlayerIdAndGameStartDateTime(
   $playerId: ID!
+  $gameStartDateTime: ModelStringKeyConditionInput
   $sortDirection: ModelSortDirection
   $filter: ModelPlayerResultFilterInput
   $limit: Int
   $nextToken: String
 ) {
-  playerResultsByPlayerId(
+  playerResultsByPlayerIdAndGameStartDateTime(
     playerId: $playerId
+    gameStartDateTime: $gameStartDateTime
     sortDirection: $sortDirection
     filter: $filter
     limit: $limit
@@ -78771,6 +77756,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
       amountWon
       totalRunners
       pointsEarned
+      gameStartDateTime
       playerId
       player {
         id
@@ -78967,6 +77953,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -79432,6 +78419,7 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -79509,8 +78497,8 @@ export const playerResultsByPlayerId = /* GraphQL */ `query PlayerResultsByPlaye
   }
 }
 ` as GeneratedQuery<
-  APITypes.PlayerResultsByPlayerIdQueryVariables,
-  APITypes.PlayerResultsByPlayerIdQuery
+  APITypes.PlayerResultsByPlayerIdAndGameStartDateTimeQueryVariables,
+  APITypes.PlayerResultsByPlayerIdAndGameStartDateTimeQuery
 >;
 export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
   $gameId: ID!
@@ -79534,6 +78522,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
       amountWon
       totalRunners
       pointsEarned
+      gameStartDateTime
       playerId
       player {
         id
@@ -79730,6 +78719,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -80195,6 +79185,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -80494,6 +79485,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -81161,6 +80153,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -81829,6 +80822,7 @@ export const playerTransactionsByPlayerIdAndTransactionDate = /* GraphQL */ `que
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -82247,6 +81241,7 @@ export const playerTransactionsByGameId = /* GraphQL */ `query PlayerTransaction
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -82667,6 +81662,7 @@ export const playerCreditsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pl
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -83086,6 +82082,7 @@ export const playerCreditsByRelatedGameId = /* GraphQL */ `query PlayerCreditsBy
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -83507,6 +82504,7 @@ export const playerPointsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pla
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -83926,6 +82924,7 @@ export const playerPointsByRelatedGameId = /* GraphQL */ `query PlayerPointsByRe
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -84342,6 +83341,7 @@ export const knownPlayerIdentitiesByPlayerId = /* GraphQL */ `query KnownPlayerI
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -84757,6 +83757,7 @@ export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlaye
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -85208,6 +84209,7 @@ export const playerTicketsByTicketTemplateId = /* GraphQL */ `query PlayerTicket
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -85731,6 +84733,7 @@ export const playerMarketingPreferencesByPlayerId = /* GraphQL */ `query PlayerM
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt

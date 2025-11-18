@@ -64,7 +64,7 @@ export const DatabaseChangeMonitor: React.FC = () => {
     const fetchLambdaMetrics = async () => {
         setIsLoadingMetrics(true);
         try {
-            console.log('[Monitor] Fetching Lambda metrics...');
+            //console.log('[Monitor] Fetching Lambda metrics...');
             
             const query = /* GraphQL */ `
                 query GetDatabaseMetrics($timeRange: String) {
@@ -87,13 +87,13 @@ export const DatabaseChangeMonitor: React.FC = () => {
                 variables: { timeRange: 'LAST_24_HOURS' }
             }) as any;
             
-            console.log('[Monitor] Lambda metrics response:', result);
+            //console.log('[Monitor] Lambda metrics response:', result);
             
             if (result.data?.getDatabaseMetrics?.metrics) {
                 const metrics = result.data.getDatabaseMetrics.metrics;
                 setLambdaMetrics(metrics);
                 setLastFetch(new Date());
-                console.log(`[Monitor] Loaded ${metrics.length} Lambda metrics`);
+                //console.log(`[Monitor] Loaded ${metrics.length} Lambda metrics`);
             } else {
                 console.warn('[Monitor] No metrics in response');
             }

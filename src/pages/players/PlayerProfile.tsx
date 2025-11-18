@@ -55,7 +55,7 @@ export const PlayerProfile = () => {
               firstName
               lastName
               email
-              phoneNumber
+              phone
               registrationDate
               lastPlayedDate
               targetingClassification
@@ -102,15 +102,15 @@ export const PlayerProfile = () => {
       });
 
       // Fetch recent results
-      const resultsResponse = await client.graphql({
+        const resultsResponse = await client.graphql({
         query: /* GraphQL */ `
-          query GetPlayerResults($playerId: ID!) {
-            listPlayerResults(
-              filter: { playerId: { eq: $playerId } }
-              limit: 20
-              sortDirection: DESC
+            query GetPlayerResults($playerId: ID!) {
+            playerResultsByPlayerIdAndGameStartDateTime(
+                playerId: $playerId
+                sortDirection: DESC
+                limit: 20
             ) {
-              items {
+                items {
                 id
                 finishingPlace
                 prizeWon
@@ -118,45 +118,46 @@ export const PlayerProfile = () => {
                 totalRunners
                 pointsEarned
                 game {
-                  id
-                  name
-                  buyIn
-                  gameStartDateTime
-                  venue {
+                    id
                     name
-                  }
+                    buyIn
+                    gameStartDateTime
+                    venue {
+                    name
+                    }
                 }
-              }
+                }
             }
-          }
+            }
         `,
         variables: { playerId: id }
-      });
+        });
 
       // Fetch recent entries
-      const entriesResponse = await client.graphql({
+        const entriesResponse = await client.graphql({
         query: /* GraphQL */ `
-          query GetPlayerEntries($playerId: ID!) {
-            listPlayerEntries(
-              filter: { playerId: { eq: $playerId } }
-              limit: 10
-              sortDirection: DESC
+            query GetPlayerEntries($playerId: ID!) {
+            playerEntriesByPlayerIdAndGameStartDateTime(
+                playerId: $playerId
+                sortDirection: DESC
+                limit: 10
             ) {
-              items {
+                items {
                 id
                 status
                 registrationTime
                 game {
-                  id
-                  name
-                  gameStartDateTime
+                    id
+                    name
+                    gameStartDateTime
                 }
-              }
+                }
             }
-          }
+            }
         `,
         variables: { playerId: id }
-      });
+        });
+
 
       // Fetch venues visited
       const venuesResponse = await client.graphql({
@@ -186,8 +187,8 @@ export const PlayerProfile = () => {
         setPlayerData({
           player: playerResponse.data.getPlayer,
           summary: ('data' in summaryResponse && summaryResponse.data?.listPlayerSummaries?.items?.[0]) || null,
-          recentResults: ('data' in resultsResponse && resultsResponse.data?.listPlayerResults?.items) || [],
-          recentEntries: ('data' in entriesResponse && entriesResponse.data?.listPlayerEntries?.items) || [],
+          recentResults: ('data' in resultsResponse && resultsResponse.data?.playerResultsByPlayerIdAndGameStartDateTime?.items) || [],
+          recentEntries: ('data' in entriesResponse && entriesResponse.data?.playerEntriesByPlayerIdAndGameStartDateTime?.items) || [],
           venues: ('data' in venuesResponse && venuesResponse.data?.listPlayerVenues?.items) || [],
           transactions: [],
           credits: null,

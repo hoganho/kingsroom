@@ -1,4 +1,5 @@
 // src/pages/scraper-admin-tabs/OverviewTab.tsx
+// REFACTORED: Added Coverage Info block to the top
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
@@ -7,7 +8,8 @@ import {
     AlertCircle, 
     Activity,
     CheckCircle,
-    Database
+    Database,
+    TrendingUp, // <-- NEW: Icon for Coverage Info
 } from 'lucide-react';
 // Import from auto-generated queries
 import { 
@@ -17,6 +19,10 @@ import {
 // Import TimeRange enum from API types
 import { TimeRange, type ScraperJob } from '../../API';
 import { MetricCard, JobStatusBadge } from '../../components/scraper/admin/ScraperAdminShared';
+// --- NEW: Imports for Coverage Info ---
+import { useEntity } from '../../contexts/EntityContext';
+import { useGameIdTracking } from '../../hooks/useGameIdTracking';
+
 
 // Define ScraperMetrics if not in API types
 interface ScraperMetrics {
@@ -39,6 +45,105 @@ interface ScraperMetrics {
     }>;
 }
 
+// ===================================================================
+// NEW: Coverage Info Component
+// ===================================================================
+const CoverageInfo: React.FC = () => {
+    const { currentEntity } = useEntity();
+    const {
+      loading: gapLoading,
+      scrapingStatus,
+      getScrapingStatus,
+    } = useGameIdTracking(currentEntity?.id);
+  
+    useEffect(() => {
+      if (currentEntity?.id) {
+        loadGapAnalysis();
+      }
+    }, [currentEntity?.id, getScrapingStatus]); // Added getScrapingStatus to dep array
+  
+    const loadGapAnalysis = useCallback(async () => {
+      if (!currentEntity?.id) return;
+      try {
+        await getScrapingStatus({ entityId: currentEntity.id });
+      } catch (error) {
+        console.error('Error loading gap analysis:', error);
+      }
+    }, [currentEntity?.id, getScrapingStatus]);
+  
+    if (!currentEntity) {
+      return (
+        <div className="bg-white rounded-lg shadow p-6">
+          <p className="text-gray-500 text-center">Select an entity to view coverage details.</p>
+        </div>
+      );
+    }
+
+    if (gapLoading && !scrapingStatus) {
+        return (
+            <div className="bg-white rounded-lg shadow p-6 text-center">
+                <RefreshCw className="h-6 w-6 animate-spin text-blue-600 mx-auto" />
+                <p className="text-sm text-gray-500 mt-2">Loading Coverage Info...</p>
+            </div>
+        );
+    }
+  
+    if (!scrapingStatus) {
+      return (
+        <div className="bg-white rounded-lg shadow p-6">
+          <p className="text-gray-500 text-center">Could not load coverage data for {currentEntity.entityName}.</p>
+        </div>
+      );
+    }
+  
+    return (
+      <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg shadow p-6 border border-purple-200">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-semibold flex items-center text-purple-900">
+            <TrendingUp className="h-5 w-5 mr-2 text-purple-600" />
+            {currentEntity.entityName} Coverage
+          </h3>
+          <button
+            onClick={loadGapAnalysis}
+            disabled={gapLoading}
+            className="text-sm text-purple-600 hover:text-purple-700 disabled:opacity-50"
+          >
+            {gapLoading ? 'Refreshing...' : 'Refresh'}
+          </button>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="bg-white bg-opacity-60 p-3 rounded">
+            <p className="text-xs text-gray-600">Total Games</p>
+            <p className="text-xl font-bold text-gray-900">{scrapingStatus.totalGamesStored}</p>
+          </div>
+          <div className="bg-white bg-opacity-60 p-3 rounded">
+            <p className="text-xs text-gray-600">Coverage</p>
+            <p className="text-xl font-bold text-green-600">{scrapingStatus.gapSummary.coveragePercentage.toFixed(1)}%</p>
+          </div>
+          <div className="bg-white bg-opacity-60 p-3 rounded">
+            <p className="text-xs text-gray-600">Missing</p>
+            <p className="text-xl font-bold text-orange-600">{scrapingStatus.gapSummary.totalMissingIds}</p>
+          </div>
+          <div className="bg-white bg-opacity-60 p-3 rounded">
+            <p className="text-xs text-gray-600">Gaps</p>
+            <p className="text-xl font-bold text-purple-600">{scrapingStatus.gapSummary.totalGaps}</p>
+          </div>
+        </div>
+        
+        {scrapingStatus.gaps && scrapingStatus.gaps.length > 0 && (
+          <p className="text-xs text-purple-700 mt-3">
+            💡 Go to the **Scrape** tab to fill {scrapingStatus.gapSummary.totalGaps} detected gap(s).
+          </p>
+        )}
+      </div>
+    );
+};
+
+// ===================================================================
+// MAIN OVERVIEW TAB
+// ===================================================================
+
 export const OverviewTab: React.FC = () => {
     const client = useMemo(() => generateClient(), []);
     const [metrics, setMetrics] = useState<ScraperMetrics | null>(null);
@@ -51,10 +156,10 @@ export const OverviewTab: React.FC = () => {
             setLoading(true);
             setError(null);
             
-            // Load metrics using the correctly imported query and TimeRange enum
+            // Load metrics
             const metricsResponse = await client.graphql({
                 query: getScraperMetrics,
-                variables: { timeRange: TimeRange.LAST_24_HOURS } // Use enum value
+                variables: { timeRange: TimeRange.LAST_24_HOURS }
             }) as any;
             
             if (metricsResponse.errors) {
@@ -66,7 +171,7 @@ export const OverviewTab: React.FC = () => {
                 setMetrics(metricsResponse.data.getScraperMetrics);
             }
 
-            // Load recent jobs using the correctly imported query
+            // Load recent jobs
             const jobsResponse = await client.graphql({
                 query: getScraperJobsReport,
                 variables: { limit: 5 }
@@ -125,7 +230,10 @@ export const OverviewTab: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            {/* Metrics Cards */}
+            {/* --- 1. COVERAGE INFO (Moved from old tabs) --- */}
+            <CoverageInfo />
+
+            {/* --- 2. Metrics Cards --- */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <MetricCard
                     title="Total Jobs (24h)"
@@ -153,7 +261,7 @@ export const OverviewTab: React.FC = () => {
                 />
             </div>
 
-            {/* Recent Jobs Table */}
+            {/* --- 3. Recent Jobs Table --- */}
             <div className="bg-white rounded-lg shadow">
                 <div className="px-6 py-4 border-b border-gray-200">
                     <h3 className="text-lg font-semibold">Recent Jobs</h3>

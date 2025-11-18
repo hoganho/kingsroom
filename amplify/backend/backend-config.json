@@ -215,6 +215,21 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "saveGameFunction": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "scraperManagement": {
       "build": true,
       "dependsOn": [
@@ -444,6 +459,30 @@
         }
       ]
     },
+    "AMPLIFY_function_saveGameFunction_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "saveGameFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_saveGameFunction_playerProcessorQueueUrl": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "saveGameFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_saveGameFunction_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "saveGameFunction"
+        }
+      ]
+    },
     "AMPLIFY_function_scraperManagement_deploymentBucketName": {
       "usedBy": [
         {
@@ -493,6 +532,14 @@
       ]
     },
     "AMPLIFY_function_webScraperFunction_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "webScraperFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_webScraperFunction_saveGameFunctionName": {
       "usedBy": [
         {
           "category": "function",

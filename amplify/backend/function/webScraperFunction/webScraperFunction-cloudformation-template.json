@@ -29,6 +29,9 @@
     },
     "scraperS3Bucket": {
       "Type": "String"
+    },
+    "saveGameFunctionName": {
+      "Type": "String"
     }
   },
   "Conditions": {
@@ -407,6 +410,9 @@
             },
             "SCRAPER_S3_BUCKET": {
               "Ref": "scraperS3Bucket"
+            },
+            "SAVE_GAME_FUNCTION_NAME": {
+              "Ref": "saveGameFunctionName"
             }
           }
         },

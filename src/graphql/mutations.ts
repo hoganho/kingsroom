@@ -1683,6 +1683,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -2041,6 +2042,7 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
         amountWon
         totalRunners
         pointsEarned
+        gameStartDateTime
         playerId
         player {
           id
@@ -5990,6 +5992,30 @@ export const clearURLCache = /* GraphQL */ `mutation ClearURLCache($url: AWSURL!
   APITypes.ClearURLCacheMutationVariables,
   APITypes.ClearURLCacheMutation
 >;
+export const saveGame = /* GraphQL */ `mutation SaveGame($input: SaveGameInput!) {
+  saveGame(input: $input) {
+    success
+    gameId
+    action
+    message
+    warnings
+    playerProcessingQueued
+    playerProcessingReason
+    venueAssignment {
+      venueId
+      venueName
+      status
+      confidence
+      __typename
+    }
+    fieldsUpdated
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.SaveGameMutationVariables,
+  APITypes.SaveGameMutation
+>;
 export const createEntity = /* GraphQL */ `mutation CreateEntity(
   $input: CreateEntityInput!
   $condition: ModelEntityConditionInput
@@ -6872,6 +6898,7 @@ export const createEntity = /* GraphQL */ `mutation CreateEntity(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -7968,6 +7995,7 @@ export const updateEntity = /* GraphQL */ `mutation UpdateEntity(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -9064,6 +9092,7 @@ export const deleteEntity = /* GraphQL */ `mutation DeleteEntity(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -11656,6 +11685,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -12313,6 +12343,7 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -13678,6 +13709,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -14335,6 +14367,7 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -15700,6 +15733,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -16357,6 +16391,7 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -21169,6 +21204,7 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -22400,6 +22436,7 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -23631,6 +23668,7 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -25271,6 +25309,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -25629,6 +25668,7 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
         amountWon
         totalRunners
         pointsEarned
+        gameStartDateTime
         playerId
         player {
           id
@@ -27937,6 +27977,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -28295,6 +28336,7 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
         amountWon
         totalRunners
         pointsEarned
+        gameStartDateTime
         playerId
         player {
           id
@@ -30603,6 +30645,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -30961,6 +31004,7 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
         amountWon
         totalRunners
         pointsEarned
+        gameStartDateTime
         playerId
         player {
           id
@@ -32446,6 +32490,7 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -33528,6 +33573,7 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -34610,6 +34656,7 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -35387,6 +35434,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -35935,6 +35983,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -36651,6 +36700,7 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
         amountWon
         totalRunners
         pointsEarned
+        gameStartDateTime
         playerId
         player {
           id
@@ -38548,6 +38598,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -39096,6 +39147,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -39812,6 +39864,7 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
         amountWon
         totalRunners
         pointsEarned
+        gameStartDateTime
         playerId
         player {
           id
@@ -41709,6 +41762,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -42257,6 +42311,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             amountWon
             totalRunners
             pointsEarned
+            gameStartDateTime
             playerId
             gameId
             createdAt
@@ -42973,6 +43028,7 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
         amountWon
         totalRunners
         pointsEarned
+        gameStartDateTime
         playerId
         player {
           id
@@ -45203,6 +45259,7 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -46328,6 +46385,7 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -47453,6 +47511,7 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -48584,6 +48643,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -49846,6 +49906,7 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -50752,6 +50813,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -52014,6 +52076,7 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -52920,6 +52983,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -54182,6 +54246,7 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -54539,6 +54604,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
     amountWon
     totalRunners
     pointsEarned
+    gameStartDateTime
     playerId
     player {
       id
@@ -55083,6 +55149,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -56346,6 +56413,7 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -56703,6 +56771,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
     amountWon
     totalRunners
     pointsEarned
+    gameStartDateTime
     playerId
     player {
       id
@@ -57247,6 +57316,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -58510,6 +58580,7 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -58867,6 +58938,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
     amountWon
     totalRunners
     pointsEarned
+    gameStartDateTime
     playerId
     player {
       id
@@ -59411,6 +59483,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -60674,6 +60747,7 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -61574,6 +61648,7 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -63467,6 +63542,7 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -65360,6 +65436,7 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -67254,6 +67331,7 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -68368,6 +68446,7 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -69482,6 +69561,7 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -70596,6 +70676,7 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -71711,6 +71792,7 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -72826,6 +72908,7 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -73941,6 +74024,7 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -75056,6 +75140,7 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -76171,6 +76256,7 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -77283,6 +77369,7 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -78393,6 +78480,7 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -79503,6 +79591,7 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -81187,6 +81276,7 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -82373,6 +82463,7 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -83559,6 +83650,7 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -84929,6 +85021,7 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -86038,6 +86131,7 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id
@@ -87147,6 +87241,7 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
           amountWon
           totalRunners
           pointsEarned
+          gameStartDateTime
           playerId
           player {
             id

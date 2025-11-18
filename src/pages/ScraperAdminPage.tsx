@@ -1,31 +1,27 @@
 // src/pages/ScraperAdminPage.tsx
-// Scraper Administration Panel (CloudWatch removed for performance)
+// REFACTORED: Consolidated Auto, Manual, and Bulk tabs into a single "Scrape" tab.
 
-import React, { useState } from 'react'; // <-- ENHANCEMENT: Imported useState
+import React, { useState } from 'react';
 import {
-    Database, 
     List, 
     Activity, 
     Clock, 
-    Target, 
     Settings,
-    RefreshCw,
     HardDrive,
+    Zap, // New Icon for the unified Scrape tab
 } from 'lucide-react';
 
 // Import the tab components
 import { OverviewTab } from './scraper-admin-tabs/OverviewTab';
-import { AutoScraperTab } from './scraper-admin-tabs/AutoScraperTab';
-import { SingleScraperTab } from './scraper-admin-tabs/SingleScraperTab';
-import { BulkScraperTab } from './scraper-admin-tabs/BulkScraperTab';
+import { ScrapeTab } from './scraper-admin-tabs/ScraperTab'; // <-- FIXED: Correct import path
 import { JobHistoryTab } from './scraper-admin-tabs/JobHistoryTab';
 import { URLManagementTab } from './scraper-admin-tabs/URLManagementTab';
-//import { AnalyticsTab } from './scraper-admin-tabs/AnalyticsTab';
 import { SettingsTab } from './scraper-admin-tabs/SettingsTab';
 import { S3ManagementTab } from './scraper-admin-tabs/S3ManagementTab';
+// --- REMOVED: Old tab imports (AutoScraperTab, SingleScraperTab, BulkScraperTab) ---
 
 // Tab definitions
-type TabKey = 'overview' | 'auto' | 'manual' | 'bulk' | 'jobs' | 'urls' | 'analytics' | 's3' | 'settings';
+type TabKey = 'overview' | 'scrape' | 'jobs' | 'urls' | 's3' | 'settings';
 
 interface Tab {
     key: TabKey;
@@ -34,64 +30,56 @@ interface Tab {
     description: string;
 }
 
+// --- REFACTORED: tabs array ---
 const tabs: Tab[] = [
     { key: 'overview', label: 'Overview', icon: <Activity className="h-4 w-4" />, description: 'System metrics and health' },
-    { key: 'manual', label: 'Manual Scrape', icon: <Target className="h-4 w-4" />, description: 'Scrape specific games' },
-    { key: 'bulk', label: 'Bulk Scrape', icon: <Database className="h-4 w-4" />, description: 'Scrape range of games' },
-    { key: 'auto', label: 'Auto Scrape', icon: <RefreshCw className="h-4 w-4" />, description: 'Automated scraping' },
+    { key: 'scrape', label: 'Scrape', icon: <Zap className="h-4 w-4" />, description: 'Run scraper jobs' },
     { key: 'jobs', label: 'Job History', icon: <Clock className="h-4 w-4" />, description: 'View all scraping jobs' },
     { key: 'urls', label: 'URL Management', icon: <List className="h-4 w-4" />, description: 'Manage scraped URLs' },
-    //{ key: 'analytics', label: 'Analytics', icon: <BarChart3 className="h-4 w-4" />, description: 'Performance metrics' },
     { key: 's3', label: 'S3 Storage', icon: <HardDrive className="h-4 w-4" />, description: 'Manage HTML storage' },    
     { key: 'settings', label: 'Settings', icon: <Settings className="h-4 w-4" />, description: 'Configuration and preferences' }
 ];
+// --- REMOVED: 'auto', 'manual', 'bulk' keys ---
 
 // ===================================================================
-// MAIN COMPONENT WITHOUT CLOUDWATCH
+// MAIN COMPONENT
 // ===================================================================
 export const ScraperAdminPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabKey>('overview');
-
-    // --- ENHANCEMENT: State to pass URL from S3 tab to Scraper tab ---
     const [urlToReparse, setUrlToReparse] = useState<string | null>(null);
 
-    // Simple tab switch handler (no CloudWatch tracking)
     const handleTabSwitch = (newTab: TabKey) => {
         setActiveTab(newTab);
     };
 
-    // --- ENHANCEMENT: Handler for S3 tab to trigger re-parse ---
+    // This function is passed to S3ManagementTab.
+    // When called, it sets the URL and switches to the new 'scrape' tab.
     const handleReparse = (url: string) => {
         console.log(`[AdminPage] Setting URL to re-parse: ${url}`);
         setUrlToReparse(url);
-        setActiveTab('manual'); // Switch to the single scraper tab
+        setActiveTab('scrape'); // Switch to the NEW unified scraper tab
     };
 
+    // --- REFACTORED: renderTabContent ---
     const renderTabContent = () => {
         switch (activeTab) {
             case 'overview':
                 return <OverviewTab />;
-            case 'auto':
-                return <AutoScraperTab />;
-            case 'manual':
-                // --- ENHANCEMENT: Pass re-parse URL and clear function ---
+            case 'scrape':
+                // Pass re-parse URL and clear function to the new consolidated tab
                 return (
-                    <SingleScraperTab 
+                    <ScrapeTab 
                         urlToReparse={urlToReparse}
                         onReparseComplete={() => setUrlToReparse(null)}
                     />
                 );
-            case 'bulk':
-                return <BulkScraperTab />;
             case 'jobs':
                 return <JobHistoryTab />;
             case 'urls':
                 return <URLManagementTab />;
             case 's3':
-                // --- ENHANCEMENT: Pass the re-parse handler ---
+                // Pass the re-parse handler to the S3 tab
                 return <S3ManagementTab onReparse={handleReparse} />;
-            //case 'analytics':
-            //    return <AnalyticsTab />;
             case 'settings':
                 return <SettingsTab />;
             default:
@@ -139,7 +127,7 @@ export const ScraperAdminPage: React.FC = () => {
                 {/* Footer */}
                 <div className="mt-8 text-center text-sm text-gray-500">
                     <p>
-                        Scraper system operational. Check the Analytics tab for performance metrics.
+                        Scraper system operational.
                     </p>
                 </div>
             </div>

@@ -135,8 +135,10 @@ export const S3ManagementTab: React.FC<S3ManagementTabProps> = ({ onReparse }) =
 
             if (response.data?.s3StoragesByEntityIdAndScrapedAt) {
                 const items = response.data.s3StoragesByEntityIdAndScrapedAt.items || [];
-                console.log(`[S3Debug] Found ${items.length} storage items.`); // 7. Items found
-                setStorageItems(items);
+                // Filter out soft-deleted items
+                const activeItems = items.filter((item: S3Storage) => !item._deleted);
+                console.log(`[S3Debug] Found ${items.length} storage items (${activeItems.length} active).`);
+                setStorageItems(activeItems);
             } else {
                 console.warn('[S3Debug] No data found in S3 storage response. Check response object.');
                 setStorageItems([]);
@@ -271,10 +273,23 @@ export const S3ManagementTab: React.FC<S3ManagementTabProps> = ({ onReparse }) =
             return;
         }
 
+        // Find the item to get its _version
+        const itemToDelete = storageItems.find(item => item.id === id);
+        if (!itemToDelete) {
+            console.error('[S3Debug] Item not found in storageItems');
+            alert('Item not found');
+            return;
+        }
+
         try {
             await client.graphql({
                 query: deleteS3Storage,
-                variables: { input: { id } }
+                variables: { 
+                    input: { 
+                        id,
+                        _version: itemToDelete._version  // Required for conflict resolution
+                    } 
+                }
             });
             console.log('[S3Debug] Delete successful, reloading storage...');
             loadS3Storage();
@@ -282,7 +297,7 @@ export const S3ManagementTab: React.FC<S3ManagementTabProps> = ({ onReparse }) =
             console.error('[S3Debug] Error deleting item:', error.message, error);
             alert('Failed to delete item');
         }
-    }, [client, loadS3Storage]);
+    }, [client, loadS3Storage, storageItems]);
 
     // Download HTML content
     const handleDownloadContent = useCallback(async (s3Key: string) => {
