@@ -1,5 +1,5 @@
 // scraperStrategies.js
-// MERGED VERSION: Combines robust state detection with the correct strategy pattern
+// ENHANCED VERSION: Adds database-aware matching while preserving all existing functionality
 
 const cheerio = require('cheerio');
 const stringSimilarity = require('string-similarity');
@@ -83,6 +83,341 @@ const cleanupNameForMatching = (name, context, options = {}) => {
     return cleanedName.replace(/\s+/g, ' ').trim();
 };
 
+// ===================================================================
+// ENHANCED SERIES MATCHING FUNCTIONS (NEW)
+// ===================================================================
+
+/**
+ * Extract series details from tournament name
+ * @param {string} tournamentName - Tournament name
+ * @returns {Object} Series details (day, flight, main event, year)
+ */
+const extractSeriesDetails = (tournamentName) => {
+    const details = {};
+    
+    // Extract year
+    const yearMatch = tournamentName.match(/20\d{2}/);
+    if (yearMatch) {
+        details.seriesYear = parseInt(yearMatch[0]);
+    }
+    
+    // Check if main event
+    details.isMainEvent = /\bmain\s*event\b/i.test(tournamentName);
+    
+    // Extract day number
+    const dayPatterns = [
+        /\bDay\s*(\d+)/i,
+        /\bD(\d+)\b/,
+        /\b(\d+)[A-Z]\b/  // Matches "1A", "2B", etc.
+    ];
+    
+    for (const pattern of dayPatterns) {
+        const match = tournamentName.match(pattern);
+        if (match) {
+            details.dayNumber = parseInt(match[1]);
+            break;
+        }
+    }
+    
+    // Extract flight letter
+    const flightPatterns = [
+        /\bFlight\s*([A-Z])/i,
+        /\b\d+([A-Z])\b/,  // Matches letter part of "1A", "2B"
+        /\b([A-Z])\b(?=\s*(?:Flight|Starting))/i
+    ];
+    
+    for (const pattern of flightPatterns) {
+        const match = tournamentName.match(pattern);
+        if (match) {
+            details.flightLetter = match[1];
+            break;
+        }
+    }
+    
+    // Handle "Final Day" or "Final Table"
+    if (/\bFinal\s*(Day|Table)?\b/i.test(tournamentName)) {
+        details.dayNumber = details.dayNumber || 99;  // Use 99 to indicate final
+        details.isFinalDay = true;
+    }
+    
+    return details;
+};
+
+/**
+ * Enhanced series matching that checks database first, then patterns
+ * @param {string} gameName - Tournament name
+ * @param {Array} seriesTitles - Database series titles
+ * @param {Array} venues - Database venues (for cleanup)
+ * @returns {Object|null} Series match info
+ */
+const matchSeriesWithDatabase = (gameName, seriesTitles = [], venues = []) => {
+    if (!gameName) return null;
+    
+    // First, check database series titles
+    if (seriesTitles && seriesTitles.length > 0) {
+        // Try exact substring match first
+        let exactMatchFound = null;
+        const upperCaseGameName = gameName.toUpperCase();
+        
+        for (const series of seriesTitles) {
+            const allSeriesNames = [series.title, ...(series.aliases || [])];
+            for (const seriesName of allSeriesNames) {
+                if (upperCaseGameName.includes(seriesName.toUpperCase())) {
+                    exactMatchFound = series;
+                    break;
+                }
+            }
+            if (exactMatchFound) break;
+        }
+        
+        if (exactMatchFound) {
+            console.log(`[Series Match] Database exact match: "${exactMatchFound.title}"`);
+            const details = extractSeriesDetails(gameName);
+            return {
+                isSeries: true,
+                seriesName: exactMatchFound.title,
+                seriesId: exactMatchFound.id,
+                isRegular: false,
+                ...details
+            };
+        }
+        
+        // Try fuzzy matching
+        console.log('[Series Match] No exact match, trying fuzzy matching');
+        const cleanedGameName = cleanupNameForMatching(gameName, 'series', { venues });
+        
+        const allSeriesNamesToMatch = seriesTitles.flatMap(series => {
+            const names = [series.title, ...(series.aliases || [])];
+            return names.map(name => ({
+                seriesId: series.id,
+                seriesTitle: series.title,
+                matchName: name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
+            }));
+        });
+        
+        const { bestMatch } = stringSimilarity.findBestMatch(
+            cleanedGameName,
+            allSeriesNamesToMatch.map(s => s.matchName)
+        );
+        
+        if (bestMatch && bestMatch.rating >= SERIES_MATCH_THRESHOLD) {
+            console.log(`[Series Match] Database fuzzy match: "${bestMatch.target}" (score: ${bestMatch.rating})`);
+            const matchedSeries = allSeriesNamesToMatch.find(s => s.matchName === bestMatch.target);
+            
+            if (matchedSeries) {
+                const details = extractSeriesDetails(gameName);
+                return {
+                    isSeries: true,
+                    seriesName: matchedSeries.seriesTitle,
+                    seriesId: matchedSeries.seriesId,
+                    isRegular: false,
+                    ...details
+                };
+            }
+        }
+    }
+    
+    // Fall back to pattern matching
+    console.log('[Series Match] No database match, trying patterns');
+    const seriesPatterns = [
+        /Spring\s+Championship\s+Series/i,
+        /Summer\s+Series/i,
+        /Fall\s+Series/i,
+        /Winter\s+Series/i,
+        /Autumn\s+Series/i,
+        /Championship\s+Series/i,
+        /Festival\s+of\s+Poker/i,
+        /Poker\s+Championships?/i,
+        /\bWSOP\b/i,
+        /\bWPT\b/i,
+        /\bEPT\b/i,
+        /\bAPT\b/i,
+        /\bANZPT\b/i,
+        /\bAPPT\b/i,
+        /\b(Mini|Mega|Grand)\s+Series/i,
+        /Masters\s+Series/i,
+        /High\s+Roller\s+Series/i,
+        /Super\s+Series/i,
+    ];
+    
+    for (const pattern of seriesPatterns) {
+        if (pattern.test(gameName)) {
+            // Extract clean series name
+            let seriesName = gameName
+                .replace(/\s*[-–]\s*Day\s*\d+[A-Z]?/gi, '')
+                .replace(/\s*[-–]\s*Flight\s*[A-Z]/gi, '')
+                .replace(/\s*\bDay\s*\d+[A-Z]?\b/gi, '')
+                .replace(/\s*\bFlight\s*[A-Z]\b/gi, '')
+                .replace(/\s*\b\d+[A-Z]\b/g, '')
+                .replace(/\s*[-–]\s*Final/gi, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+            
+            const match = gameName.match(pattern);
+            if (match) {
+                seriesName = match[0];
+            }
+            
+            console.log(`[Series Match] Pattern match: "${seriesName}"`);
+            const details = extractSeriesDetails(gameName);
+            return {
+                isSeries: true,
+                seriesName: seriesName,
+                seriesId: null,
+                isRegular: false,
+                ...details
+            };
+        }
+    }
+    
+    return null;
+};
+
+// ===================================================================
+// ENHANCED VENUE MATCHING (UPDATED)
+// ===================================================================
+
+/**
+ * Enhanced venue matching that checks database first
+ * @param {Object} ctx - Scraping context
+ * @param {Array} venues - Database venues
+ * @param {Array} seriesTitles - Series titles for cleanup
+ * @returns {Object} Venue match result
+ */
+const getMatchingVenueEnhanced = (gameName, venues = [], seriesTitles = []) => {
+    if (!gameName) {
+        return { 
+            autoAssignedVenue: null, 
+            suggestions: [],
+            extractedVenueName: null,
+            matchingFailed: true 
+        };
+    }
+    
+    // First, try database venues
+    if (venues && venues.length > 0) {
+        // Try exact substring match
+        let exactVenueMatch = null;
+        const upperCaseGameName = gameName.toUpperCase();
+        
+        for (const venue of venues) {
+            const allVenueNames = [venue.name, ...(venue.aliases || [])];
+            for (const venueName of allVenueNames) {
+                if (upperCaseGameName.includes(venueName.toUpperCase())) {
+                    exactVenueMatch = venue;
+                    break;
+                }
+            }
+            if (exactVenueMatch) break;
+        }
+        
+        if (exactVenueMatch) {
+            console.log(`[Venue Match] Database exact match: "${exactVenueMatch.name}"`);
+            const matchResult = { 
+                id: exactVenueMatch.id, 
+                name: exactVenueMatch.name, 
+                score: 1.0 
+            };
+            return { 
+                autoAssignedVenue: matchResult, 
+                suggestions: [matchResult],
+                extractedVenueName: gameName,
+                matchingFailed: false
+            };
+        }
+        
+        // Try fuzzy matching with database venues
+        console.log('[Venue Match] No exact match, trying fuzzy matching');
+        const cleanedScrapedName = cleanupNameForMatching(gameName, 'venue', { seriesTitles });
+        
+        const allNamesToMatch = venues.flatMap(venue => {
+            const names = [venue.name, ...(venue.aliases || [])];
+            return names.map(name => ({
+                venueId: venue.id,
+                venueName: venue.name,
+                matchName: name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
+            }));
+        });
+        
+        const { ratings } = stringSimilarity.findBestMatch(
+            cleanedScrapedName,
+            allNamesToMatch.map(item => item.matchName)
+        );
+        
+        const bestScoresByVenue = new Map();
+        ratings.forEach((rating, index) => {
+            const { venueId, venueName } = allNamesToMatch[index];
+            const score = rating.rating;
+            if (!bestScoresByVenue.has(venueId) || score > bestScoresByVenue.get(venueId).score) {
+                bestScoresByVenue.set(venueId, { id: venueId, name: venueName, score: score });
+            }
+        });
+        
+        const sortedSuggestions = Array.from(bestScoresByVenue.values())
+            .sort((a, b) => b.score - a.score)
+            .filter(v => v.score > 0)
+            .slice(0, 3);
+        
+        if (sortedSuggestions.length > 0) {
+            let autoAssignedVenue = null;
+            if (sortedSuggestions[0].score >= AUTO_ASSIGN_THRESHOLD) {
+                autoAssignedVenue = sortedSuggestions[0];
+                console.log(`[Venue Match] Database fuzzy match: "${autoAssignedVenue.name}" (score: ${autoAssignedVenue.score})`);
+            }
+            
+            return { 
+                autoAssignedVenue, 
+                suggestions: sortedSuggestions,
+                extractedVenueName: gameName,
+                matchingFailed: autoAssignedVenue === null
+            };
+        }
+    }
+    
+    // Fall back to pattern matching
+    console.log('[Venue Match] No database match, trying patterns');
+    const venuePatterns = [
+        { pattern: /The Star/i, venue: 'The Star' },
+        { pattern: /Crown/i, venue: 'Crown' },
+        { pattern: /Sky City/i, venue: 'Sky City' },
+        { pattern: /Treasury/i, venue: 'Treasury' },
+        { pattern: /Reef/i, venue: 'The Reef' },
+        { pattern: /Adelaide Casino/i, venue: 'Adelaide Casino' },
+        { pattern: /Perth Casino/i, venue: 'Perth Casino' },
+        { pattern: /Gold Coast/i, venue: 'Gold Coast Casino' },
+        { pattern: /Townsville/i, venue: 'Townsville Casino' },
+        { pattern: /Darwin/i, venue: 'Darwin Casino' },
+    ];
+    
+    for (const { pattern, venue } of venuePatterns) {
+        if (pattern.test(gameName)) {
+            console.log(`[Venue Match] Pattern match: "${venue}"`);
+            return {
+                autoAssignedVenue: null,
+                suggestions: [{
+                    id: null,
+                    name: venue,
+                    score: 0.6
+                }],
+                extractedVenueName: gameName,
+                matchingFailed: true  // Pattern matches don't auto-assign
+            };
+        }
+    }
+    
+    // No match at all
+    return { 
+        autoAssignedVenue: null,
+        suggestions: [],
+        extractedVenueName: gameName,
+        matchingFailed: true
+    };
+};
+
+// ===================================================================
+// SCRAPE CONTEXT (UNCHANGED)
+// ===================================================================
+
 class ScrapeContext {
     constructor(html, url = null) {
         this.$ = cheerio.load(html);
@@ -153,9 +488,13 @@ class ScrapeContext {
     }
 }
 
+// ===================================================================
+// DEFAULT STRATEGY (ENHANCED WITH DATABASE MATCHING)
+// ===================================================================
+
 const defaultStrategy = {
     /**
-     * MERGED: Robust page state detection
+     * UNCHANGED: Robust page state detection
      */
     detectPageState(ctx, forceRefresh = false) {
         const tournamentId = ctx.data.tournamentId || getTournamentId(ctx.url) || 1;
@@ -288,6 +627,9 @@ const defaultStrategy = {
         ctx.add('doNotScrape', false); // Default value for required field
     },
 
+    /**
+     * ENHANCED: getName now also handles series detection using database
+     */
     getName(ctx, seriesTitles = [], venues = []) {
         const mainTitle = ctx.$('.cw-game-title').first().text().trim();
         const subTitle = ctx.$('.cw-game-shortdesc').first().text().trim();
@@ -306,63 +648,25 @@ const defaultStrategy = {
         
         ctx.add('name', gameName);
 
-        if (!seriesTitles || seriesTitles.length === 0) {
-            return; 
-        }
-
-        // Series matching logic
-        let exactMatchFound = null;
-        const upperCaseGameName = gameName.toUpperCase();
-
-        for (const series of seriesTitles) {
-            const allSeriesNames = [series.title, ...(series.aliases || [])];
-            for (const seriesName of allSeriesNames) {
-                if (upperCaseGameName.includes(seriesName.toUpperCase())) {
-                    exactMatchFound = series;
-                    break;
-                }
-            }
-            if (exactMatchFound) break;
-        }
-
-        if (exactMatchFound) {
-            console.log(`[DEBUG-SERIES-MATCH] Found exact substring match: "${exactMatchFound.title}"`);
-            ctx.add('seriesName', exactMatchFound.title);
-            ctx.add('isSeries', true);
-            ctx.add('isRegular', false); 
-            return; 
-        }
-
-        console.log('[DEBUG-SERIES-MATCH] No exact match found. Falling back to fuzzy matching.');
-        const cleanedGameNameForSeriesMatch = cleanupNameForMatching(gameName, 'series', { venues });
+        // ENHANCED: Use database-aware series matching
+        const seriesInfo = matchSeriesWithDatabase(gameName, seriesTitles, venues);
         
-        const allSeriesNamesToMatch = seriesTitles.flatMap(series => {
-            const names = [series.title, ...(series.aliases || [])];
-            return names.map(name => ({
-                seriesTitle: series.title,
-                matchName: name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
-            }));
-        });
-
-        const { bestMatch } = stringSimilarity.findBestMatch(
-            cleanedGameNameForSeriesMatch,
-            allSeriesNamesToMatch.map(s => s.matchName)
-        );
-
-        if (bestMatch && bestMatch.rating >= SERIES_MATCH_THRESHOLD) {
-            console.log(`[DEBUG-SERIES-MATCH] High confidence fuzzy match found: "${bestMatch.target}" with rating ${bestMatch.rating}`);
-            const matchedSeries = allSeriesNamesToMatch.find(s => s.matchName === bestMatch.target);
+        if (seriesInfo) {
+            ctx.add('isSeries', seriesInfo.isSeries);
+            ctx.add('seriesName', seriesInfo.seriesName);
+            ctx.add('isRegular', !seriesInfo.isSeries);
             
-            if (matchedSeries) {
-                ctx.add('seriesName', matchedSeries.seriesTitle);
-                ctx.add('isSeries', true);
-                ctx.add('isRegular', false); 
-            }
-        } else if (bestMatch) {
-            console.log(`[DEBUG-SERIES-MATCH] Low confidence fuzzy match, ignoring: "${bestMatch.target}" with rating ${bestMatch.rating}`);
+            // Add additional series fields if present
+            if (seriesInfo.seriesId) ctx.add('seriesId', seriesInfo.seriesId);
+            if (seriesInfo.dayNumber) ctx.add('dayNumber', seriesInfo.dayNumber);
+            if (seriesInfo.flightLetter) ctx.add('flightLetter', seriesInfo.flightLetter);
+            if (seriesInfo.isMainEvent) ctx.add('isMainEvent', seriesInfo.isMainEvent);
+            if (seriesInfo.seriesYear) ctx.add('seriesYear', seriesInfo.seriesYear);
+            if (seriesInfo.isFinalDay) ctx.add('isFinalDay', seriesInfo.isFinalDay);
         }
     },
     
+    // All other methods remain UNCHANGED
     getGameTags(ctx) {
         const tags = [];
         const selector = '.cw-game-buyins .cw-badge';
@@ -577,8 +881,7 @@ const defaultStrategy = {
     },
 
     getSeriesName(ctx) {
-        // This is handled by getName, but we keep the stub
-        // to avoid breaking the execution order.
+        // This is now handled by getName with enhanced matching
     },
 
     calculateGuaranteeMetrics(ctx) {
@@ -846,91 +1149,30 @@ const defaultStrategy = {
         if (breaks.length > 0) ctx.add('breaks', breaks);
     },
 
+    /**
+     * ENHANCED: Now uses database venues first, then falls back to fuzzy/pattern matching
+     */
     getMatchingVenue(ctx, venues, seriesTitles = []) {
         const gameName = ctx.data.name;
-        if (!gameName || !venues || venues.length === 0) {
+        
+        if (!gameName) {
             ctx.add('venueMatch', { 
                 autoAssignedVenue: null, 
                 suggestions: [],
-                extractedVenueName: gameName || null,
+                extractedVenueName: null,
                 matchingFailed: true 
             });
             return;
         }
-        let exactVenueMatch = null;
-        const upperCaseGameName = gameName.toUpperCase();
-        for (const venue of venues) {
-            const allVenueNames = [venue.name, ...(venue.aliases || [])];
-            for (const venueName of allVenueNames) {
-                if (upperCaseGameName.includes(venueName.toUpperCase())) {
-                    exactVenueMatch = venue;
-                    break;
-                }
-            }
-            if (exactVenueMatch) break;
-        }
-        if (exactVenueMatch) {
-            console.log(`[DEBUG-VENUE-MATCH] Found exact substring match: "${exactVenueMatch.name}"`);
-            const matchResult = { id: exactVenueMatch.id, name: exactVenueMatch.name, score: 1.0 };
-            const venueMatch = { 
-                autoAssignedVenue: matchResult, 
-                suggestions: [matchResult],
-                extractedVenueName: gameName,
-                matchingFailed: false
-            };
-            ctx.add('venueMatch', venueMatch);
-            ctx.add('venueName', exactVenueMatch.name);
-            return;
-        }
-        console.log('[DEBUG-VENUE-MATCH] No exact match found. Falling back to fuzzy matching.');
-        const cleanedScrapedName = cleanupNameForMatching(gameName, 'venue', { seriesTitles });
-        const allNamesToMatch = venues.flatMap(venue => {
-            const names = [venue.name, ...(venue.aliases || [])];
-            return names.map(name => ({
-                venueId: venue.id,
-                venueName: venue.name,
-                matchName: name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
-            }));
-        });
-        const { ratings } = stringSimilarity.findBestMatch(
-            cleanedScrapedName,
-            allNamesToMatch.map(item => item.matchName)
-        );
-        const bestScoresByVenue = new Map();
-        ratings.forEach((rating, index) => {
-            const { venueId, venueName } = allNamesToMatch[index];
-            const score = rating.rating;
-            if (!bestScoresByVenue.has(venueId) || score > bestScoresByVenue.get(venueId).score) {
-                bestScoresByVenue.set(venueId, { id: venueId, name: venueName, score: score });
-            }
-        });
-        const sortedSuggestions = Array.from(bestScoresByVenue.values())
-            .sort((a, b) => b.score - a.score)
-            .filter(v => v.score > 0)
-            .slice(0, 3);
-        if (sortedSuggestions.length === 0) {
-            ctx.add('venueMatch', { 
-                autoAssignedVenue: null,
-                suggestions: [],
-                extractedVenueName: gameName,
-                matchingFailed: true
-            });
-            return;
-        }
-        let autoAssignedVenue = null;
-        if (sortedSuggestions[0].score >= AUTO_ASSIGN_THRESHOLD) {
-            autoAssignedVenue = sortedSuggestions[0];
-            if (autoAssignedVenue) {
-                ctx.add('venueName', autoAssignedVenue.name);
-            }
-        }
-        const venueMatch = { 
-            autoAssignedVenue, 
-            suggestions: sortedSuggestions,
-            extractedVenueName: gameName,
-            matchingFailed: autoAssignedVenue === null
-        };
+        
+        // Use enhanced venue matching
+        const venueMatch = getMatchingVenueEnhanced(gameName, venues, seriesTitles);
         ctx.add('venueMatch', venueMatch);
+        
+        // Also set venueName if we have an auto-assigned venue
+        if (venueMatch && venueMatch.autoAssignedVenue) {
+            ctx.add('venueName', venueMatch.autoAssignedVenue.name);
+        }
     },
 
     getTournamentFlags(ctx) {
@@ -973,6 +1215,10 @@ const defaultStrategy = {
     },
 };
 
+// ===================================================================
+// MAIN SCRAPER FUNCTION (UNCHANGED EXCEPT PARAMETERS)
+// ===================================================================
+
 const runScraper = (html, ctx = null, venues = [], seriesTitles = [], url = '', forceRefresh = false) => {
     
     // 1. Initialize context if not provided
@@ -981,6 +1227,7 @@ const runScraper = (html, ctx = null, venues = [], seriesTitles = [], url = '', 
     }
     
     console.log(`[runScraper] Starting run for tournament ${ctx.data.tournamentId}, forceRefresh: ${forceRefresh}`);
+    console.log(`[runScraper] Database data: ${venues.length} venues, ${seriesTitles.length} series titles`);
 
     // 2. Run the strategy steps
     // Pass forceRefresh to detectPageState
@@ -995,7 +1242,7 @@ const runScraper = (html, ctx = null, venues = [], seriesTitles = [], url = '', 
 
     // 3. Run all other parsers from the strategy
     defaultStrategy.initializeDefaultFlags(ctx);
-    defaultStrategy.getName(ctx, seriesTitles, venues);
+    defaultStrategy.getName(ctx, seriesTitles, venues);  // Enhanced with database series matching
     defaultStrategy.getGameTags(ctx);
     defaultStrategy.getTournamentType(ctx);
     defaultStrategy.getGameStartDateTime(ctx);
@@ -1026,7 +1273,7 @@ const runScraper = (html, ctx = null, venues = [], seriesTitles = [], url = '', 
     defaultStrategy.getLevels(ctx);
     defaultStrategy.getBreaks(ctx);
 
-    // Venue Matching
+    // Venue Matching - Enhanced with database matching
     defaultStrategy.getMatchingVenue(ctx, venues, seriesTitles);
 
     // Calculations (run last)

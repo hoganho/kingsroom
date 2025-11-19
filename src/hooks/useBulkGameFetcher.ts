@@ -1,10 +1,11 @@
 // src/hooks/useBulkGameFetcher.ts
 
 import { useCallback } from 'react';
-import { useGameContext } from '../contexts/GameContext'; // 👈 Import your context hook
+import { useGameContext } from '../contexts/GameContext';
 import { fetchGameDataRangeFromBackend } from '../services/gameService';
 import type { BulkGameSummary } from '../types/game';
 import { GameStatus, RegistrationStatus } from '../API';
+import { useEntity } from '../contexts/EntityContext';
 
 // Type guards remain the same
 const isValidGameStatus = (value: any): value is GameStatus => {
@@ -16,14 +17,28 @@ const isValidRegistrationStatus = (value: any): value is RegistrationStatus => {
 };
 
 export const useBulkGameFetcher = () => {
-    // ✅ Get state and dispatch from the global context
     const { state, dispatch } = useGameContext();
+    const { currentEntity } = useEntity();
 
     const fetchGames = useCallback(async (startId: number, endId: number) => {
-        // ✅ Dispatch action to show loading spinner
         dispatch({ type: 'FETCH_SUMMARIES_START' });
+        
         try {
-            const results = await fetchGameDataRangeFromBackend(startId, endId);
+            // Build the base URL from current entity
+            const baseUrl = currentEntity 
+                ? `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}`
+                : '';
+            
+            if (!baseUrl) {
+                throw new Error('No entity selected or invalid entity URL');
+            }
+            
+            // Now pass all required arguments
+            const results = await fetchGameDataRangeFromBackend(
+                baseUrl,
+                startId, 
+                endId,
+            );
             
             const typedSummaries: BulkGameSummary[] = results?.map((res: any) => ({
                 id: res.id,
@@ -36,17 +51,14 @@ export const useBulkGameFetcher = () => {
                 error: res.error || null,
             })) || [];
 
-            // ✅ Dispatch action with the fetched data on success
             dispatch({ type: 'FETCH_SUMMARIES_SUCCESS', payload: typedSummaries });
 
         } catch (err: any) {
             console.error("Failed to fetch game range:", err);
-            // ✅ Dispatch action with the error message on failure
             dispatch({ type: 'FETCH_SUMMARIES_ERROR', payload: err.message || 'An unknown error occurred.' });
         }
-    }, [dispatch]); // Dependency array now only needs dispatch
+    }, [dispatch, currentEntity]);
 
-    // ✅ Return the state from the global context
     return { 
         summaries: state.summaries, 
         loading: state.bulkLoading, 

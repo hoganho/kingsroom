@@ -7,6 +7,7 @@ import { PageWrapper } from '../../components/layout/PageWrapper';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 import { debounce } from 'lodash';
+import { formatCurrency } from '../../utils/generalHelpers';
 
 
 interface Game {
@@ -174,16 +175,6 @@ export const GameSearch = () => {
     } catch {
       return 'Invalid Date';
     }
-  };
-
-  const formatCurrency = (amount?: number) => {
-    if (!amount) return '-';
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
   };
 
   const getStatusBadgeClass = (status: string) => {

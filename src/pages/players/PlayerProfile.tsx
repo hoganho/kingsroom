@@ -12,6 +12,7 @@ import {
   StarIcon
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
+import { formatCurrency } from '../../utils/generalHelpers';
 
 
 interface PlayerData {
@@ -211,15 +212,6 @@ export const PlayerProfile = () => {
     } catch {
       return '-';
     }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
   };
 
   const calculateROI = (winnings: number, buyIns: number) => {

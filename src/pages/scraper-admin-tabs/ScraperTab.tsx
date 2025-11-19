@@ -19,7 +19,7 @@ import {
   saveGameDataToBackend
 } from '../../services/gameService';
 import { ScrapedGameData } from '../../API';
-import type { GameState } from '../../types/game';
+import type { GameState, GameData } from '../../types/game';
 
 // --- Types ---
 
@@ -58,7 +58,7 @@ interface GameForReview {
 
 interface ModalResolverValue {
   action: 'save' | 'cancel';
-  gameData?: ScrapedGameData;
+  gameData?: ScrapedGameData | GameData;
   venueId?: string;
 }
 
@@ -466,6 +466,7 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
         ));
 
         let venueIdToUse = '';
+        let modalResult: ModalResolverValue | undefined; // Declare here
         const autoVenueId = parsedData.venueMatch?.autoAssignedVenue?.id;
 
         if (options.skipManualReviews) {
@@ -476,24 +477,24 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
             ));
           }
         } else {
-          setIsPaused(true);
-          setProcessingResults(prev => prev.map(r =>
-            r.id === tournamentId ? { ...r, status: 'review', message: 'Awaiting review...' } : r
-          ));
-
-          const suggestedVenueId = autoVenueId || defaultVenueId || '';
-          const modalResult = await showSaveConfirmationModal(parsedData, suggestedVenueId, currentEntity?.id || '');
-          
-          setIsPaused(false);
-
-          if (modalResult.action === 'cancel' || signal.aborted) {
+            setIsPaused(true);
             setProcessingResults(prev => prev.map(r =>
-              r.id === tournamentId ? { ...r, status: 'skipped', message: 'User cancelled' } : r
+                r.id === tournamentId ? { ...r, status: 'review', message: 'Awaiting review...' } : r
             ));
-            continue;
-          }
 
-          venueIdToUse = modalResult.venueId || '';
+            const suggestedVenueId = autoVenueId || defaultVenueId || '';
+            modalResult = await showSaveConfirmationModal(parsedData, suggestedVenueId, currentEntity?.id || '');
+            
+            setIsPaused(false);
+
+            if (modalResult.action === 'cancel' || signal.aborted) {
+                setProcessingResults(prev => prev.map(r =>
+                r.id === tournamentId ? { ...r, status: 'skipped', message: 'User cancelled' } : r
+                ));
+                continue;
+            }
+
+            venueIdToUse = modalResult.venueId || '';
         }
 
         if (!venueIdToUse) {
@@ -519,21 +520,24 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
           r.id === tournamentId ? { ...r, status: 'saving', message: 'Saving to Game...' } : r
         ));
 
-        const sourceUrl = parsedData.sourceUrl || 
-          (currentEntity ? `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}${parsedData.tournamentId}` : 
-           `Tournament ID: ${parsedData.tournamentId}`);
+        // Use edited data from modal if available
+        const dataToSave = modalResult?.gameData || parsedData;
+
+        const sourceUrl = (dataToSave as any).sourceUrl || 
+        (currentEntity ? `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}${dataToSave.tournamentId}` : 
+        `Tournament ID: ${dataToSave.tournamentId}`);
 
         const sanitizedData = {
-          ...parsedData,
-          gameStartDateTime: parsedData.gameStartDateTime ?? undefined
+        ...dataToSave,  // Use dataToSave instead of parsedData
+        gameStartDateTime: dataToSave.gameStartDateTime ?? undefined
         } as any;
 
         await saveGameDataToBackend(
-          sourceUrl,
-          venueIdToUse,
-          sanitizedData,
-          parsedData.existingGameId,
-          currentEntity?.id || ''
+            sourceUrl,
+            venueIdToUse,
+            sanitizedData,
+            (dataToSave as any).existingGameId || null,
+            currentEntity?.id || ''
         );
 
         setProcessingResults(prev => prev.map(r =>
@@ -559,40 +563,67 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
 
   // --- Manual Save from Results ---
 
-  const handleManualSave = async (result: ProcessingResult) => {
-    if (!result.parsedData || !result.selectedVenueId || !currentEntity) return;
-
+const handleManualSave = async (result: ProcessingResult) => {
+    if (!result.parsedData || !currentEntity) return;
+    
+    // Instead of saving directly, show the modal
+    setIsPaused(true);
     setProcessingResults(prev => prev.map(r =>
-      r.id === result.id ? { ...r, status: 'saving', message: 'Saving to Game...' } : r
+        r.id === result.id ? { ...r, status: 'review', message: 'Opening for review...' } : r
     ));
-
-    try {
-      const sourceUrl = result.parsedData.sourceUrl || 
-        `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}${result.parsedData.tournamentId}`;
-
-      const sanitizedData = {
-        ...result.parsedData,
-        gameStartDateTime: result.parsedData.gameStartDateTime ?? undefined
-      } as any;
-
-      await saveGameDataToBackend(
-        sourceUrl,
-        result.selectedVenueId,
-        sanitizedData,
-        result.parsedData.existingGameId,
+    
+    const modalResult = await showSaveConfirmationModal(
+        result.parsedData, 
+        result.selectedVenueId || defaultVenueId || '',
         currentEntity.id
-      );
-
-      setProcessingResults(prev => prev.map(r =>
-        r.id === result.id ? { ...r, status: 'success', message: 'Successfully saved' } : r
-      ));
-
-    } catch (error: any) {
-      setProcessingResults(prev => prev.map(r =>
-        r.id === result.id ? { ...r, status: 'error', message: error.message || 'Save failed' } : r
-      ));
+    );
+    
+    setIsPaused(false);
+    
+    if (modalResult.action === 'cancel') {
+        setProcessingResults(prev => prev.map(r =>
+            r.id === result.id ? { ...r, status: 'pending', message: 'Save cancelled' } : r
+        ));
+        return;
     }
-  };
+    
+    // Now save with the potentially edited data
+    setProcessingResults(prev => prev.map(r =>
+        r.id === result.id ? { ...r, status: 'saving', message: 'Saving to Game...' } : r
+    ));
+    
+    try {
+        const dataToSave = modalResult.gameData || result.parsedData;
+        const sourceUrl = (dataToSave as any).sourceUrl || 
+            `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}${dataToSave.tournamentId}`;
+        
+        const sanitizedData = {
+            ...dataToSave,
+            gameStartDateTime: dataToSave.gameStartDateTime ?? undefined
+        } as any;
+        
+        await saveGameDataToBackend(
+            sourceUrl,
+            modalResult.venueId || result.selectedVenueId || '',
+            sanitizedData,
+            (dataToSave as any).existingGameId || null,
+            currentEntity.id,
+            {
+                wasEdited: modalResult.gameData ? true : false,
+                originalData: modalResult.gameData ? result.parsedData : undefined
+            }
+        );
+        
+        setProcessingResults(prev => prev.map(r =>
+            r.id === result.id ? { ...r, status: 'success', message: 'Successfully saved' } : r
+        ));
+        
+    } catch (error: any) {
+        setProcessingResults(prev => prev.map(r =>
+            r.id === result.id ? { ...r, status: 'error', message: error.message || 'Save failed' } : r
+        ));
+    }
+};
 
   const handleResultVenueChange = (resultId: number, venueId: string) => {
     setProcessingResults(prev => prev.map(r =>
@@ -612,9 +643,9 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
     });
   };
 
-  const handleModalConfirm = (game: ScrapedGameData, venueId: string) => {
+  const handleModalConfirm = (editedGame: GameData, venueId: string) => {
     if ((window as any).__modalResolver) {
-      (window as any).__modalResolver({ action: 'save', gameData: game, venueId });
+        (window as any).__modalResolver({ action: 'save', gameData: editedGame, venueId });
     }
   };
 
@@ -932,20 +963,23 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
         />
       )}
 
-      {gameForReview && (
+        {gameForReview && (
         <SaveConfirmationModal
-          isOpen={true}
-          onClose={handleModalClose}
-          onConfirm={() => handleModalConfirm(gameForReview.game, gameForReview.venueId)}
-          gameData={gameForReview.game}
-          venueId={gameForReview.venueId}
-          sourceUrl={
+            isOpen={true}
+            onClose={handleModalClose}
+            onConfirm={(editedData) => handleModalConfirm(editedData, gameForReview.venueId)}
+            gameData={gameForReview.game}
+            venueId={gameForReview.venueId}
+            sourceUrl={
             gameForReview.game.sourceUrl || 
             (currentEntity ? `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}${gameForReview.game.tournamentId}` : 
-             `Tournament ID: ${gameForReview.game.tournamentId}`)
-          }
+            `Tournament ID: ${gameForReview.game.tournamentId}`)
+            }
+            entityId={currentEntity?.id}                    // ADD THIS
+            autoMode={idSelectionMode === 'auto'}           // ADD THIS
+            skipConfirmation={options.skipManualReviews}    // ADD THIS
         />
-      )}
+        )}
 
       {venueModalOpen && (
         <VenueModal

@@ -536,6 +536,56 @@ const handleSave = async (sourceUrl, venueId, data, existingGameId, doNotScrape 
         if (!responsePayload.success) {
             throw new Error(responsePayload.message || 'saveGameFunction failed');
         }
+
+        if (responsePayload.success && responsePayload.gameId && parsedData.s3Key) {
+            try {
+                const s3StorageTable = getTableName('S3Storage');
+                
+                // Find the S3Storage record by tournamentId + entityId
+                const queryResult = await monitoredDdbDocClient.send(new QueryCommand({
+                    TableName: s3StorageTable,
+                    IndexName: 'byTournamentId',
+                    KeyConditionExpression: 'tournamentId = :tid',
+                    FilterExpression: 'entityId = :eid',
+                    ExpressionAttributeValues: { 
+                        ':tid': tournamentId,
+                        ':eid': effectiveEntityId
+                    },
+                    ScanIndexForward: false,
+                    Limit: 1
+                }));
+            
+                if (queryResult.Items && queryResult.Items.length > 0) {
+                    const s3Record = queryResult.Items[0];
+                    const now = new Date().toISOString();
+                    const timestamp = Date.now();
+                    
+                    await monitoredDdbDocClient.send(new UpdateCommand({
+                        TableName: s3StorageTable,
+                        Key: { id: s3Record.id },
+                        UpdateExpression: `
+                            SET gameId = :gameId,
+                                wasGameCreated = :created,
+                                wasGameUpdated = :updated,
+                                updatedAt = :now,
+                                #lca = :timestamp
+                        `,
+                        ExpressionAttributeNames: { '#lca': '_lastChangedAt' },
+                        ExpressionAttributeValues: {
+                            ':gameId': responsePayload.gameId,
+                            ':created': responsePayload.action === 'CREATED',
+                            ':updated': responsePayload.action === 'UPDATED',
+                            ':now': now,
+                            ':timestamp': timestamp
+                        }
+                    }));
+                    
+                    console.log(`[handleSave] Linked S3Storage ${s3Record.id} to game ${responsePayload.gameId}`);
+                }
+            } catch (linkError) {
+                console.warn('[handleSave] Failed to link S3Storage to game:', linkError.message);
+            }
+        }
         
         // Return a compatible response structure
         return {

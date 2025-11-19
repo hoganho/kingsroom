@@ -9,6 +9,7 @@ import {
   ChevronRightIcon,
   BuildingOffice2Icon,
 } from '@heroicons/react/24/outline';
+import { formatCurrency } from '../../utils/generalHelpers';
 
 /**
  * Props for the GameCard component.
@@ -41,20 +42,6 @@ const getStatusBadgeClass = (status: string | null | undefined) => {
     default:
       return 'bg-yellow-100 text-yellow-800';
   }
-};
-
-/**
- * Formats a number as currency.
- * Uses $ to match the new dashboard's stats section.
- */
-const formatCurrency = (amount?: number | null) => {
-  if (amount === null || amount === undefined) return '$0';
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
 };
 
 export const GameCard: React.FC<GameCardProps> = ({

@@ -19,13 +19,18 @@ Amplify Params - DO NOT EDIT */
 
 /**
  * ===================================================================
- * SAVEGAME LAMBDA FUNCTION
+ * SAVEGAME LAMBDA FUNCTION - ENHANCED VERSION
  * 
  * Single interface for saving game data from any source:
- * - Web scraping
+ * - Web scraping (original and edited)
  * - API integrations
  * - Manual entry
  * - Bulk imports
+ * 
+ * Enhanced Features:
+ * - Support for edited data with audit trails
+ * - Improved validation and field tracking
+ * - Better change detection
  * 
  * Responsibilities:
  * 1. Validate input
@@ -34,6 +39,7 @@ Amplify Params - DO NOT EDIT */
  * 4. Track scrape attempts
  * 5. Determine if game is finished
  * 6. Queue for PDP only if finished with results
+ * 7. Handle audit trails for edited data
  * ===================================================================
  */
 
@@ -109,12 +115,34 @@ const ensureISODate = (dateValue, fallback = null) => {
     return fallback || new Date().toISOString();
 };
 
+/**
+ * Parse and store audit trail
+ */
+const parseAuditTrail = (auditTrailString) => {
+    if (!auditTrailString) return null;
+    
+    try {
+        const parsed = JSON.parse(auditTrailString);
+        return {
+            editedAt: parsed.editedAt,
+            editedBy: parsed.editedBy,
+            changedFields: parsed.changedFields || [],
+            changes: parsed.changes || {},
+            validationWarnings: parsed.validationWarnings || [],
+            originalData: parsed.originalData
+        };
+    } catch (error) {
+        console.error('[SAVE-GAME] Failed to parse audit trail:', error);
+        return null;
+    }
+};
+
 // ===================================================================
 // VALIDATION
 // ===================================================================
 
 /**
- * Validate SaveGameInput
+ * Validate SaveGameInput - Enhanced with edit tracking
  */
 const validateInput = (input) => {
     const warnings = [];
@@ -171,6 +199,14 @@ const validateInput = (input) => {
     const validStatuses = [...FINISHED_STATUSES, ...LIVE_STATUSES, ...SCHEDULED_STATUSES, ...INACTIVE_STATUSES, 'UNKNOWN'];
     if (input.game.gameStatus && !validStatuses.includes(input.game.gameStatus)) {
         warnings.push(`Unknown gameStatus: ${input.game.gameStatus}`);
+    }
+    
+    // === Check for edited data ===
+    if (input.source?.wasEdited) {
+        console.log('[SAVE-GAME] Processing edited data');
+        if (!input.auditTrail) {
+            warnings.push('Edited data flagged but no audit trail provided');
+        }
     }
     
     return { 
@@ -373,7 +409,7 @@ const findExistingGame = async (input) => {
 };
 
 /**
- * Create new game in DynamoDB
+ * Create new game in DynamoDB - Enhanced with audit support
  */
 const createGame = async (input, venueResolution) => {
     const gameId = uuidv4();
@@ -382,7 +418,8 @@ const createGame = async (input, venueResolution) => {
     
     monitoring.trackOperation('CREATE', 'Game', gameId, { 
         entityId: input.source.entityId,
-        tournamentId: input.game.tournamentId 
+        tournamentId: input.game.tournamentId,
+        wasEdited: input.source.wasEdited 
     });
     
     const game = {
@@ -403,8 +440,11 @@ const createGame = async (input, venueResolution) => {
         // Financials
         buyIn: input.game.buyIn || 0,
         rake: input.game.rake || 0,
+        totalRake: input.game.totalRake || 0,
         hasGuarantee: input.game.hasGuarantee || false,
         guaranteeAmount: input.game.guaranteeAmount || 0,
+        guaranteeOverlay: input.game.guaranteeOverlay || null,
+        guaranteeSurplus: input.game.guaranteeSurplus || null,
         startingStack: input.game.startingStack || 0,
         
         // Results
@@ -412,17 +452,28 @@ const createGame = async (input, venueResolution) => {
         totalEntries: input.game.totalEntries || 0,
         totalRebuys: input.game.totalRebuys || 0,
         totalAddons: input.game.totalAddons || 0,
+        playersRemaining: input.game.playersRemaining || null,
+        totalChipsInPlay: input.game.totalChipsInPlay || null,
+        averagePlayerStack: input.game.averagePlayerStack || null,
         
         // Categorization
         tournamentType: input.game.tournamentType,
         isSeries: input.game.isSeries || false,
         seriesName: input.game.seriesName,
         isSatellite: input.game.isSatellite || false,
+        isRegular: input.game.isRegular || false,
         gameTags: input.game.gameTags || [],
+        totalDuration: input.game.totalDuration || null,
+        revenueByBuyIns: input.game.revenueByBuyIns || null,
+        profitLoss: input.game.profitLoss || null,
+        
+        // Structure data (levels)
+        levels: input.game.levels || [],
         
         // Source tracking
         sourceUrl: input.source.type === 'SCRAPE' ? input.source.sourceId : null,
         tournamentId: input.game.tournamentId,
+        wasEdited: input.source.wasEdited || false,
         
         // Venue assignment
         venueId: venueResolution.venueId,
@@ -442,17 +493,27 @@ const createGame = async (input, venueResolution) => {
         __typename: 'Game'
     };
     
+    // Store audit trail if this was edited data
+    if (input.auditTrail) {
+        const auditInfo = parseAuditTrail(input.auditTrail);
+        if (auditInfo) {
+            game.lastEditedAt = auditInfo.editedAt;
+            game.lastEditedBy = auditInfo.editedBy;
+            game.editHistory = JSON.stringify([auditInfo]); // Start with first edit
+        }
+    }
+    
     await monitoredDdbDocClient.send(new PutCommand({
         TableName: getTableName('Game'),
         Item: game
     }));
     
-    console.log(`[SAVE-GAME] Created new game: ${gameId}`);
+    console.log(`[SAVE-GAME] Created new game: ${gameId}${input.source.wasEdited ? ' (with edits)' : ''}`);
     return { gameId, game, wasNewGame: true, fieldsUpdated: [] };
 };
 
 /**
- * Update existing game in DynamoDB
+ * Update existing game in DynamoDB - Enhanced with audit trail
  */
 const updateGame = async (existingGame, input, venueResolution) => {
     const now = new Date().toISOString();
@@ -461,7 +522,8 @@ const updateGame = async (existingGame, input, venueResolution) => {
     
     monitoring.trackOperation('UPDATE', 'Game', existingGame.id, { 
         entityId: input.source.entityId,
-        tournamentId: input.game.tournamentId 
+        tournamentId: input.game.tournamentId,
+        wasEdited: input.source.wasEdited
     });
     
     // Build update expression dynamically
@@ -469,7 +531,7 @@ const updateGame = async (existingGame, input, venueResolution) => {
     
     // Only update fields that have changed or have values
     const checkAndUpdate = (field, newValue, existingValue) => {
-        if (newValue !== undefined && newValue !== existingValue) {
+        if (newValue !== undefined && newValue !== null && newValue !== existingValue) {
             updateFields[field] = newValue;
             fieldsUpdated.push(field);
         }
@@ -483,8 +545,11 @@ const updateGame = async (existingGame, input, venueResolution) => {
     // Financials
     checkAndUpdate('buyIn', input.game.buyIn, existingGame.buyIn);
     checkAndUpdate('rake', input.game.rake, existingGame.rake);
+    checkAndUpdate('totalRake', input.game.totalRake, existingGame.totalRake);
     checkAndUpdate('hasGuarantee', input.game.hasGuarantee, existingGame.hasGuarantee);
     checkAndUpdate('guaranteeAmount', input.game.guaranteeAmount, existingGame.guaranteeAmount);
+    checkAndUpdate('guaranteeOverlay', input.game.guaranteeOverlay, existingGame.guaranteeOverlay);
+    checkAndUpdate('guaranteeSurplus', input.game.guaranteeSurplus, existingGame.guaranteeSurplus);
     checkAndUpdate('startingStack', input.game.startingStack, existingGame.startingStack);
     
     // Results
@@ -492,6 +557,23 @@ const updateGame = async (existingGame, input, venueResolution) => {
     checkAndUpdate('totalEntries', input.game.totalEntries, existingGame.totalEntries);
     checkAndUpdate('totalRebuys', input.game.totalRebuys, existingGame.totalRebuys);
     checkAndUpdate('totalAddons', input.game.totalAddons, existingGame.totalAddons);
+    checkAndUpdate('playersRemaining', input.game.playersRemaining, existingGame.playersRemaining);
+    checkAndUpdate('totalChipsInPlay', input.game.totalChipsInPlay, existingGame.totalChipsInPlay);
+    checkAndUpdate('averagePlayerStack', input.game.averagePlayerStack, existingGame.averagePlayerStack);
+    
+    // Additional fields
+    checkAndUpdate('totalDuration', input.game.totalDuration, existingGame.totalDuration);
+    checkAndUpdate('revenueByBuyIns', input.game.revenueByBuyIns, existingGame.revenueByBuyIns);
+    checkAndUpdate('profitLoss', input.game.profitLoss, existingGame.profitLoss);
+    checkAndUpdate('isRegular', input.game.isRegular, existingGame.isRegular);
+    checkAndUpdate('isSeries', input.game.isSeries, existingGame.isSeries);
+    checkAndUpdate('seriesName', input.game.seriesName, existingGame.seriesName);
+    checkAndUpdate('isSatellite', input.game.isSatellite, existingGame.isSatellite);
+    
+    // Structure (levels)
+    if (input.game.levels) {
+        checkAndUpdate('levels', input.game.levels, existingGame.levels);
+    }
     
     // Dates
     if (input.game.gameEndDateTime) {
@@ -505,6 +587,38 @@ const updateGame = async (existingGame, input, venueResolution) => {
         checkAndUpdate('venueAssignmentStatus', venueResolution.status, existingGame.venueAssignmentStatus);
         checkAndUpdate('venueAssignmentConfidence', venueResolution.confidence, existingGame.venueAssignmentConfidence);
         checkAndUpdate('requiresVenueAssignment', venueResolution.venueId === UNASSIGNED_VENUE_ID, existingGame.requiresVenueAssignment);
+    }
+    
+    // Track if this was edited data
+    if (input.source.wasEdited) {
+        updateFields.wasEdited = true;
+        
+        // Handle audit trail
+        if (input.auditTrail) {
+            const auditInfo = parseAuditTrail(input.auditTrail);
+            if (auditInfo) {
+                updateFields.lastEditedAt = auditInfo.editedAt;
+                updateFields.lastEditedBy = auditInfo.editedBy;
+                
+                // Append to edit history
+                let editHistory = [];
+                try {
+                    if (existingGame.editHistory) {
+                        editHistory = JSON.parse(existingGame.editHistory);
+                    }
+                } catch (e) {
+                    console.warn('[SAVE-GAME] Could not parse existing edit history');
+                }
+                editHistory.push(auditInfo);
+                
+                // Keep only last 10 edits
+                if (editHistory.length > 10) {
+                    editHistory = editHistory.slice(-10);
+                }
+                
+                updateFields.editHistory = JSON.stringify(editHistory);
+            }
+        }
     }
     
     // Always update timestamps
@@ -533,7 +647,7 @@ const updateGame = async (existingGame, input, venueResolution) => {
             ExpressionAttributeValues: expressionAttributeValues
         }));
         
-        console.log(`[SAVE-GAME] Updated game ${existingGame.id}, fields: ${fieldsUpdated.join(', ')}`);
+        console.log(`[SAVE-GAME] Updated game ${existingGame.id}, fields: ${fieldsUpdated.join(', ')}${input.source.wasEdited ? ' (edited data)' : ''}`);
     } else {
         console.log(`[SAVE-GAME] No changes detected for game ${existingGame.id}`);
     }
@@ -550,7 +664,7 @@ const updateGame = async (existingGame, input, venueResolution) => {
 /**
  * Update ScrapeURL tracking (for scrape sources)
  */
-const updateScrapeURL = async (sourceUrl, gameId, gameStatus, doNotScrape = false) => {
+const updateScrapeURL = async (sourceUrl, gameId, gameStatus, doNotScrape = false, wasEdited = false) => {
     if (!sourceUrl) return;
     
     const now = new Date().toISOString();
@@ -567,14 +681,16 @@ const updateScrapeURL = async (sourceUrl, gameId, gameStatus, doNotScrape = fals
                     lastScrapeStatus = :status,
                     lastScrapedAt = :now,
                     doNotScrape = :dns,
+                    wasEdited = :wasEdited,
                     updatedAt = :now
             `,
             ExpressionAttributeValues: {
                 ':gameId': gameId,
                 ':gameStatus': gameStatus,
-                ':status': doNotScrape ? 'SKIPPED_DONOTSCRAPE' : 'SUCCESS',
+                ':status': doNotScrape ? 'SKIPPED_DONOTSCRAPE' : (wasEdited ? 'EDITED' : 'SUCCESS'),
                 ':now': now,
-                ':dns': doNotScrape
+                ':dns': doNotScrape,
+                ':wasEdited': wasEdited
             }
         }));
         
@@ -585,7 +701,7 @@ const updateScrapeURL = async (sourceUrl, gameId, gameStatus, doNotScrape = fals
 };
 
 /**
- * Create ScrapeAttempt record
+ * Create ScrapeAttempt record - Enhanced with edit tracking
  */
 const createScrapeAttempt = async (input, gameId, wasNewGame, fieldsUpdated) => {
     const attemptId = uuidv4();
@@ -599,6 +715,11 @@ const createScrapeAttempt = async (input, gameId, wasNewGame, fieldsUpdated) => 
     else if (fieldsUpdated.length > 0) status = 'UPDATED';
     else status = 'NO_CHANGES';
     
+    // If edited data, append to status
+    if (input.source.wasEdited) {
+        status = status + '_EDITED';
+    }
+    
     const attempt = {
         id: attemptId,
         url: input.source.sourceId,
@@ -608,6 +729,7 @@ const createScrapeAttempt = async (input, gameId, wasNewGame, fieldsUpdated) => 
         fieldsExtracted: Object.keys(input.game).filter(k => input.game[k] !== null && input.game[k] !== undefined),
         fieldsUpdated: fieldsUpdated,
         wasNewGame: wasNewGame,
+        wasEdited: input.source.wasEdited || false,
         gameId: gameId,
         entityId: input.source.entityId,
         contentHash: input.source.contentHash,
@@ -717,7 +839,8 @@ const queueForPDP = async (game, input) => {
             isSeries: game.isSeries,
             seriesName: game.seriesName,
             isSatellite: game.isSatellite,
-            gameFrequency: game.gameFrequency
+            gameFrequency: game.gameFrequency,
+            wasEdited: game.wasEdited || false
         },
         players: input.players,
         metadata: {
@@ -727,7 +850,8 @@ const queueForPDP = async (game, input) => {
             entityId: game.entityId,
             hasCompleteResults: input.players.hasCompleteResults,
             totalPlayersProcessed: input.players.allPlayers.length,
-            totalPrizesPaid: input.players.totalPrizesPaid || 0
+            totalPrizesPaid: input.players.totalPrizesPaid || 0,
+            wasEdited: input.source.wasEdited || false
         }
     };
     
@@ -828,7 +952,8 @@ exports.handler = async (event) => {
     }
     
     monitoring.trackOperation('HANDLER_START', 'Handler', 'saveGame', { 
-        entityId: input.source?.entityId 
+        entityId: input.source?.entityId,
+        wasEdited: input.source?.wasEdited 
     });
     
     try {
@@ -869,7 +994,8 @@ exports.handler = async (event) => {
             // Check if we should skip or update
             const hasChanges = input.game.gameStatus !== existingGame.gameStatus ||
                                input.game.totalEntries !== existingGame.totalEntries ||
-                               input.game.prizepool !== existingGame.prizepool;
+                               input.game.prizepool !== existingGame.prizepool ||
+                               input.source.wasEdited; // Always update if edited
             
             if (!hasChanges) {
                 console.log(`[SAVE-GAME] Game exists with no changes, skipping`);
@@ -896,7 +1022,8 @@ exports.handler = async (event) => {
                 input.source.sourceId, 
                 gameId, 
                 game.gameStatus,
-                input.options?.doNotScrape
+                input.options?.doNotScrape,
+                input.source.wasEdited
             );
             await createScrapeAttempt(input, gameId, wasNewGame, fieldsUpdated);
         }
@@ -913,20 +1040,25 @@ exports.handler = async (event) => {
             await updatePlayerEntries(game, input);
         }
         
-        // === 8. RETURN RESULT ===
+        // === 8. BUILD RESPONSE ===
         const action = wasNewGame ? 'CREATED' : 
                        fieldsUpdated.length > 0 ? 'UPDATED' : 'SKIPPED';
         
+        // Add note if this was edited data
+        const messageDetail = input.source.wasEdited ? ' (with edited data)' : '';
+        
         monitoring.trackOperation('HANDLER_COMPLETE', 'Handler', action, { 
             gameId, 
-            entityId: input.source.entityId 
+            entityId: input.source.entityId,
+            wasEdited: input.source.wasEdited,
+            fieldsUpdated: fieldsUpdated.length
         });
         
         return {
             success: true,
             gameId: gameId,
             action: action,
-            message: `Game ${action.toLowerCase()} successfully`,
+            message: `Game ${action.toLowerCase()} successfully${messageDetail}`,
             warnings: validation.warnings,
             playerProcessingQueued: playerProcessingQueued,
             playerProcessingReason: pdpDecision.reason,
@@ -936,7 +1068,8 @@ exports.handler = async (event) => {
                 status: venueResolution.status,
                 confidence: venueResolution.confidence
             },
-            fieldsUpdated: fieldsUpdated
+            fieldsUpdated: fieldsUpdated,
+            wasEdited: input.source.wasEdited || false
         };
         
     } catch (error) {

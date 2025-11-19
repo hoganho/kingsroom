@@ -6,6 +6,7 @@ import { getClient } from '../../utils/apiClient';
 import { PageWrapper } from '../../components/layout/PageWrapper';
 import { listGamesForDebug, listTournamentStructuresForDebug } from '../../graphql/customQueries';
 import { getAllCounts } from '../../graphql/queries';
+import { formatCurrency } from '../../utils/generalHelpers';
 
 type TabType = 'games' | 'structures';
 
@@ -72,12 +73,6 @@ export const GamesDebug = () => {
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     return `${day}-${month}-${year} @ ${hours}:${minutes}`;
-  };
-
-  // Format currency
-  const formatCurrency = (amount: number | null) => {
-    if (amount === null || amount === undefined) return '-';
-    return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   // Fetch all counts using getAllCounts query

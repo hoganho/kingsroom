@@ -157,10 +157,15 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
     averagePlayerStack
     tournamentType
     isRegular
-    isSeries
     isSatellite
-    seriesName
     gameTags
+    isSeries
+    seriesName
+    isMainEvent
+    eventNumber
+    dayNumber
+    flightLetter
+    finalDay
     sourceUrl
     tournamentId
     originalScrapedData
@@ -351,10 +356,15 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -889,10 +899,15 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -1096,10 +1111,15 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -1280,10 +1300,15 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -1432,10 +1457,15 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
         averagePlayerStack
         tournamentType
         isRegular
-        isSeries
         isSatellite
-        seriesName
         gameTags
+        isSeries
+        seriesName
+        isMainEvent
+        eventNumber
+        dayNumber
+        flightLetter
+        finalDay
         sourceUrl
         tournamentId
         originalScrapedData
@@ -1619,10 +1649,15 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -1927,10 +1962,15 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -2202,10 +2242,15 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -2621,10 +2666,15 @@ export const saveTournamentData = /* GraphQL */ `mutation SaveTournamentData($in
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -3390,10 +3440,15 @@ export const startScraperJob = /* GraphQL */ `mutation StartScraperJob($input: S
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -4070,10 +4125,15 @@ export const cancelScraperJob = /* GraphQL */ `mutation CancelScraperJob($jobId:
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -4753,10 +4813,15 @@ export const modifyScrapeURLStatus = /* GraphQL */ `mutation ModifyScrapeURLStat
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -5452,10 +5517,15 @@ export const bulkModifyScrapeURLs = /* GraphQL */ `mutation BulkModifyScrapeURLs
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -6459,10 +6529,15 @@ export const createEntity = /* GraphQL */ `mutation CreateEntity(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -6647,10 +6722,15 @@ export const createEntity = /* GraphQL */ `mutation CreateEntity(
         averagePlayerStack
         tournamentType
         isRegular
-        isSeries
         isSatellite
-        seriesName
         gameTags
+        isSeries
+        seriesName
+        isMainEvent
+        eventNumber
+        dayNumber
+        flightLetter
+        finalDay
         sourceUrl
         tournamentId
         originalScrapedData
@@ -6834,10 +6914,15 @@ export const createEntity = /* GraphQL */ `mutation CreateEntity(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -7556,10 +7641,15 @@ export const updateEntity = /* GraphQL */ `mutation UpdateEntity(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -7744,10 +7834,15 @@ export const updateEntity = /* GraphQL */ `mutation UpdateEntity(
         averagePlayerStack
         tournamentType
         isRegular
-        isSeries
         isSatellite
-        seriesName
         gameTags
+        isSeries
+        seriesName
+        isMainEvent
+        eventNumber
+        dayNumber
+        flightLetter
+        finalDay
         sourceUrl
         tournamentId
         originalScrapedData
@@ -7931,10 +8026,15 @@ export const updateEntity = /* GraphQL */ `mutation UpdateEntity(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -8653,10 +8753,15 @@ export const deleteEntity = /* GraphQL */ `mutation DeleteEntity(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -8841,10 +8946,15 @@ export const deleteEntity = /* GraphQL */ `mutation DeleteEntity(
         averagePlayerStack
         tournamentType
         isRegular
-        isSeries
         isSatellite
-        seriesName
         gameTags
+        isSeries
+        seriesName
+        isMainEvent
+        eventNumber
+        dayNumber
+        flightLetter
+        finalDay
         sourceUrl
         tournamentId
         originalScrapedData
@@ -9028,10 +9138,15 @@ export const deleteEntity = /* GraphQL */ `mutation DeleteEntity(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -9793,10 +9908,15 @@ export const createScraperState = /* GraphQL */ `mutation CreateScraperState(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -10307,10 +10427,15 @@ export const updateScraperState = /* GraphQL */ `mutation UpdateScraperState(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -10821,10 +10946,15 @@ export const deleteScraperState = /* GraphQL */ `mutation DeleteScraperState(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -11107,10 +11237,15 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -11434,10 +11569,15 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
         averagePlayerStack
         tournamentType
         isRegular
-        isSeries
         isSatellite
-        seriesName
         gameTags
+        isSeries
+        seriesName
+        isMainEvent
+        eventNumber
+        dayNumber
+        flightLetter
+        finalDay
         sourceUrl
         tournamentId
         originalScrapedData
@@ -11621,10 +11761,15 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -11889,10 +12034,15 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -12844,10 +12994,15 @@ export const createVenue = /* GraphQL */ `mutation CreateVenue(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -13131,10 +13286,15 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -13458,10 +13618,15 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
         averagePlayerStack
         tournamentType
         isRegular
-        isSeries
         isSatellite
-        seriesName
         gameTags
+        isSeries
+        seriesName
+        isMainEvent
+        eventNumber
+        dayNumber
+        flightLetter
+        finalDay
         sourceUrl
         tournamentId
         originalScrapedData
@@ -13645,10 +13810,15 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -13913,10 +14083,15 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -14868,10 +15043,15 @@ export const updateVenue = /* GraphQL */ `mutation UpdateVenue(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -15155,10 +15335,15 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -15482,10 +15667,15 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
         averagePlayerStack
         tournamentType
         isRegular
-        isSeries
         isSatellite
-        seriesName
         gameTags
+        isSeries
+        seriesName
+        isMainEvent
+        eventNumber
+        dayNumber
+        flightLetter
+        finalDay
         sourceUrl
         tournamentId
         originalScrapedData
@@ -15669,10 +15859,15 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -15937,10 +16132,15 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -16892,10 +17092,15 @@ export const deleteVenue = /* GraphQL */ `mutation DeleteVenue(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -17257,10 +17462,15 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -17795,10 +18005,15 @@ export const createVenueDetails = /* GraphQL */ `mutation CreateVenueDetails(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -18062,10 +18277,15 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -18600,10 +18820,15 @@ export const updateVenueDetails = /* GraphQL */ `mutation UpdateVenueDetails(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -18867,10 +19092,15 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -19405,10 +19635,15 @@ export const deleteVenueDetails = /* GraphQL */ `mutation DeleteVenueDetails(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -19620,10 +19855,15 @@ export const createTournamentSeriesTitle = /* GraphQL */ `mutation CreateTournam
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -19812,10 +20052,15 @@ export const updateTournamentSeriesTitle = /* GraphQL */ `mutation UpdateTournam
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -20004,10 +20249,15 @@ export const deleteTournamentSeriesTitle = /* GraphQL */ `mutation DeleteTournam
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -20324,10 +20574,15 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -20862,10 +21117,15 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -20953,10 +21213,15 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
         averagePlayerStack
         tournamentType
         isRegular
-        isSeries
         isSatellite
-        seriesName
         gameTags
+        isSeries
+        seriesName
+        isMainEvent
+        eventNumber
+        dayNumber
+        flightLetter
+        finalDay
         sourceUrl
         tournamentId
         originalScrapedData
@@ -21140,10 +21405,15 @@ export const createTournamentSeries = /* GraphQL */ `mutation CreateTournamentSe
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -21556,10 +21826,15 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -22094,10 +22369,15 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -22185,10 +22465,15 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
         averagePlayerStack
         tournamentType
         isRegular
-        isSeries
         isSatellite
-        seriesName
         gameTags
+        isSeries
+        seriesName
+        isMainEvent
+        eventNumber
+        dayNumber
+        flightLetter
+        finalDay
         sourceUrl
         tournamentId
         originalScrapedData
@@ -22372,10 +22657,15 @@ export const updateTournamentSeries = /* GraphQL */ `mutation UpdateTournamentSe
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -22788,10 +23078,15 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -23326,10 +23621,15 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -23417,10 +23717,15 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
         averagePlayerStack
         tournamentType
         isRegular
-        isSeries
         isSatellite
-        seriesName
         gameTags
+        isSeries
+        seriesName
+        isMainEvent
+        eventNumber
+        dayNumber
+        flightLetter
+        finalDay
         sourceUrl
         tournamentId
         originalScrapedData
@@ -23604,10 +23909,15 @@ export const deleteTournamentSeries = /* GraphQL */ `mutation DeleteTournamentSe
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -23783,10 +24093,15 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
     averagePlayerStack
     tournamentType
     isRegular
-    isSeries
     isSatellite
-    seriesName
     gameTags
+    isSeries
+    seriesName
+    isMainEvent
+    eventNumber
+    dayNumber
+    flightLetter
+    finalDay
     sourceUrl
     tournamentId
     originalScrapedData
@@ -23977,10 +24292,15 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -24515,10 +24835,15 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -24722,10 +25047,15 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -24906,10 +25236,15 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -25058,10 +25393,15 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
         averagePlayerStack
         tournamentType
         isRegular
-        isSeries
         isSatellite
-        seriesName
         gameTags
+        isSeries
+        seriesName
+        isMainEvent
+        eventNumber
+        dayNumber
+        flightLetter
+        finalDay
         sourceUrl
         tournamentId
         originalScrapedData
@@ -25245,10 +25585,15 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -25553,10 +25898,15 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -25828,10 +26178,15 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -26247,10 +26602,15 @@ export const createGame = /* GraphQL */ `mutation CreateGame(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -26451,10 +26811,15 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
     averagePlayerStack
     tournamentType
     isRegular
-    isSeries
     isSatellite
-    seriesName
     gameTags
+    isSeries
+    seriesName
+    isMainEvent
+    eventNumber
+    dayNumber
+    flightLetter
+    finalDay
     sourceUrl
     tournamentId
     originalScrapedData
@@ -26645,10 +27010,15 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -27183,10 +27553,15 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -27390,10 +27765,15 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -27574,10 +27954,15 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -27726,10 +28111,15 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
         averagePlayerStack
         tournamentType
         isRegular
-        isSeries
         isSatellite
-        seriesName
         gameTags
+        isSeries
+        seriesName
+        isMainEvent
+        eventNumber
+        dayNumber
+        flightLetter
+        finalDay
         sourceUrl
         tournamentId
         originalScrapedData
@@ -27913,10 +28303,15 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -28221,10 +28616,15 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -28496,10 +28896,15 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -28915,10 +29320,15 @@ export const updateGame = /* GraphQL */ `mutation UpdateGame(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -29119,10 +29529,15 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
     averagePlayerStack
     tournamentType
     isRegular
-    isSeries
     isSatellite
-    seriesName
     gameTags
+    isSeries
+    seriesName
+    isMainEvent
+    eventNumber
+    dayNumber
+    flightLetter
+    finalDay
     sourceUrl
     tournamentId
     originalScrapedData
@@ -29313,10 +29728,15 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -29851,10 +30271,15 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -30058,10 +30483,15 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -30242,10 +30672,15 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -30394,10 +30829,15 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
         averagePlayerStack
         tournamentType
         isRegular
-        isSeries
         isSatellite
-        seriesName
         gameTags
+        isSeries
+        seriesName
+        isMainEvent
+        eventNumber
+        dayNumber
+        flightLetter
+        finalDay
         sourceUrl
         tournamentId
         originalScrapedData
@@ -30581,10 +31021,15 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -30889,10 +31334,15 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -31164,10 +31614,15 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -31583,10 +32038,15 @@ export const deleteGame = /* GraphQL */ `mutation DeleteGame(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -31803,10 +32263,15 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
       averagePlayerStack
       tournamentType
       isRegular
-      isSeries
       isSatellite
-      seriesName
       gameTags
+      isSeries
+      seriesName
+      isMainEvent
+      eventNumber
+      dayNumber
+      flightLetter
+      finalDay
       sourceUrl
       tournamentId
       originalScrapedData
@@ -31910,10 +32375,15 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -32198,10 +32668,15 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -32277,10 +32752,15 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -32448,10 +32928,15 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -32547,10 +33032,15 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -32764,10 +33254,15 @@ export const createTournamentStructure = /* GraphQL */ `mutation CreateTournamen
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -32886,10 +33381,15 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
       averagePlayerStack
       tournamentType
       isRegular
-      isSeries
       isSatellite
-      seriesName
       gameTags
+      isSeries
+      seriesName
+      isMainEvent
+      eventNumber
+      dayNumber
+      flightLetter
+      finalDay
       sourceUrl
       tournamentId
       originalScrapedData
@@ -32993,10 +33493,15 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -33281,10 +33786,15 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -33360,10 +33870,15 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -33531,10 +34046,15 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -33630,10 +34150,15 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -33847,10 +34372,15 @@ export const updateTournamentStructure = /* GraphQL */ `mutation UpdateTournamen
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -33969,10 +34499,15 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
       averagePlayerStack
       tournamentType
       isRegular
-      isSeries
       isSatellite
-      seriesName
       gameTags
+      isSeries
+      seriesName
+      isMainEvent
+      eventNumber
+      dayNumber
+      flightLetter
+      finalDay
       sourceUrl
       tournamentId
       originalScrapedData
@@ -34076,10 +34611,15 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -34364,10 +34904,15 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -34443,10 +34988,15 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -34614,10 +35164,15 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -34713,10 +35268,15 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -34930,10 +35490,15 @@ export const deleteTournamentStructure = /* GraphQL */ `mutation DeleteTournamen
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -36585,10 +37150,15 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -36860,10 +37430,15 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -37766,10 +38341,15 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -38304,10 +38884,15 @@ export const createPlayer = /* GraphQL */ `mutation CreatePlayer(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -39749,10 +40334,15 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -40024,10 +40614,15 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -40930,10 +41525,15 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -41468,10 +42068,15 @@ export const updatePlayer = /* GraphQL */ `mutation UpdatePlayer(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -42913,10 +43518,15 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -43188,10 +43798,15 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -44094,10 +44709,15 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -44632,10 +45252,15 @@ export const deletePlayer = /* GraphQL */ `mutation DeletePlayer(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -45217,10 +45842,15 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -45316,10 +45946,15 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -45645,10 +46280,15 @@ export const createPlayerSummary = /* GraphQL */ `mutation CreatePlayerSummary(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -46343,10 +46983,15 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -46442,10 +47087,15 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -46771,10 +47421,15 @@ export const updatePlayerSummary = /* GraphQL */ `mutation UpdatePlayerSummary(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -47469,10 +48124,15 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -47568,10 +48228,15 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -47897,10 +48562,15 @@ export const deletePlayerSummary = /* GraphQL */ `mutation DeletePlayerSummary(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -48601,10 +49271,15 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -48700,10 +49375,15 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -49029,10 +49709,15 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -49219,10 +49904,15 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
       averagePlayerStack
       tournamentType
       isRegular
-      isSeries
       isSatellite
-      seriesName
       gameTags
+      isSeries
+      seriesName
+      isMainEvent
+      eventNumber
+      dayNumber
+      flightLetter
+      finalDay
       sourceUrl
       tournamentId
       originalScrapedData
@@ -49326,10 +50016,15 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -49614,10 +50309,15 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -49693,10 +50393,15 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -49864,10 +50569,15 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -49963,10 +50673,15 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -50180,10 +50895,15 @@ export const createPlayerEntry = /* GraphQL */ `mutation CreatePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -50771,10 +51491,15 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -50870,10 +51595,15 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -51199,10 +51929,15 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -51389,10 +52124,15 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
       averagePlayerStack
       tournamentType
       isRegular
-      isSeries
       isSatellite
-      seriesName
       gameTags
+      isSeries
+      seriesName
+      isMainEvent
+      eventNumber
+      dayNumber
+      flightLetter
+      finalDay
       sourceUrl
       tournamentId
       originalScrapedData
@@ -51496,10 +52236,15 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -51784,10 +52529,15 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -51863,10 +52613,15 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -52034,10 +52789,15 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -52133,10 +52893,15 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -52350,10 +53115,15 @@ export const updatePlayerEntry = /* GraphQL */ `mutation UpdatePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -52941,10 +53711,15 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -53040,10 +53815,15 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -53369,10 +54149,15 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -53559,10 +54344,15 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
       averagePlayerStack
       tournamentType
       isRegular
-      isSeries
       isSatellite
-      seriesName
       gameTags
+      isSeries
+      seriesName
+      isMainEvent
+      eventNumber
+      dayNumber
+      flightLetter
+      finalDay
       sourceUrl
       tournamentId
       originalScrapedData
@@ -53666,10 +54456,15 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -53954,10 +54749,15 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -54033,10 +54833,15 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -54204,10 +55009,15 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -54303,10 +55113,15 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -54520,10 +55335,15 @@ export const deletePlayerEntry = /* GraphQL */ `mutation DeletePlayerEntry(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -55107,10 +55927,15 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -55206,10 +56031,15 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -55535,10 +56365,15 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -55726,10 +56561,15 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
       averagePlayerStack
       tournamentType
       isRegular
-      isSeries
       isSatellite
-      seriesName
       gameTags
+      isSeries
+      seriesName
+      isMainEvent
+      eventNumber
+      dayNumber
+      flightLetter
+      finalDay
       sourceUrl
       tournamentId
       originalScrapedData
@@ -55833,10 +56673,15 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -56121,10 +56966,15 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -56200,10 +57050,15 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -56371,10 +57226,15 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -56470,10 +57330,15 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -56687,10 +57552,15 @@ export const createPlayerResult = /* GraphQL */ `mutation CreatePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -57274,10 +58144,15 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -57373,10 +58248,15 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -57702,10 +58582,15 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -57893,10 +58778,15 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
       averagePlayerStack
       tournamentType
       isRegular
-      isSeries
       isSatellite
-      seriesName
       gameTags
+      isSeries
+      seriesName
+      isMainEvent
+      eventNumber
+      dayNumber
+      flightLetter
+      finalDay
       sourceUrl
       tournamentId
       originalScrapedData
@@ -58000,10 +58890,15 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -58288,10 +59183,15 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -58367,10 +59267,15 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -58538,10 +59443,15 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -58637,10 +59547,15 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -58854,10 +59769,15 @@ export const updatePlayerResult = /* GraphQL */ `mutation UpdatePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -59441,10 +60361,15 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -59540,10 +60465,15 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -59869,10 +60799,15 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -60060,10 +60995,15 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
       averagePlayerStack
       tournamentType
       isRegular
-      isSeries
       isSatellite
-      seriesName
       gameTags
+      isSeries
+      seriesName
+      isMainEvent
+      eventNumber
+      dayNumber
+      flightLetter
+      finalDay
       sourceUrl
       tournamentId
       originalScrapedData
@@ -60167,10 +61107,15 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -60455,10 +61400,15 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -60534,10 +61484,15 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -60705,10 +61660,15 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -60804,10 +61764,15 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -61021,10 +61986,15 @@ export const deletePlayerResult = /* GraphQL */ `mutation DeletePlayerResult(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -61606,10 +62576,15 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -61705,10 +62680,15 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -62034,10 +63014,15 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -62377,10 +63362,15 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -62915,10 +63905,15 @@ export const createPlayerVenue = /* GraphQL */ `mutation CreatePlayerVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -63500,10 +64495,15 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -63599,10 +64599,15 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -63928,10 +64933,15 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -64271,10 +65281,15 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -64809,10 +65824,15 @@ export const updatePlayerVenue = /* GraphQL */ `mutation UpdatePlayerVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -65394,10 +66414,15 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -65493,10 +66518,15 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -65822,10 +66852,15 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -66165,10 +67200,15 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -66703,10 +67743,15 @@ export const deletePlayerVenue = /* GraphQL */ `mutation DeletePlayerVenue(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -67289,10 +68334,15 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -67388,10 +68438,15 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -67717,10 +68772,15 @@ export const createPlayerTransaction = /* GraphQL */ `mutation CreatePlayerTrans
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -68404,10 +69464,15 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -68503,10 +69568,15 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -68832,10 +69902,15 @@ export const updatePlayerTransaction = /* GraphQL */ `mutation UpdatePlayerTrans
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -69519,10 +70594,15 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -69618,10 +70698,15 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -69947,10 +71032,15 @@ export const deletePlayerTransaction = /* GraphQL */ `mutation DeletePlayerTrans
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -70634,10 +71724,15 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -70733,10 +71828,15 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -71062,10 +72162,15 @@ export const createPlayerCredits = /* GraphQL */ `mutation CreatePlayerCredits(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -71750,10 +72855,15 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -71849,10 +72959,15 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -72178,10 +73293,15 @@ export const updatePlayerCredits = /* GraphQL */ `mutation UpdatePlayerCredits(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -72866,10 +73986,15 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -72965,10 +74090,15 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -73294,10 +74424,15 @@ export const deletePlayerCredits = /* GraphQL */ `mutation DeletePlayerCredits(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -73982,10 +75117,15 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -74081,10 +75221,15 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -74410,10 +75555,15 @@ export const createPlayerPoints = /* GraphQL */ `mutation CreatePlayerPoints(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -75098,10 +76248,15 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -75197,10 +76352,15 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -75526,10 +76686,15 @@ export const updatePlayerPoints = /* GraphQL */ `mutation UpdatePlayerPoints(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -76214,10 +77379,15 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -76313,10 +77483,15 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -76642,10 +77817,15 @@ export const deletePlayerPoints = /* GraphQL */ `mutation DeletePlayerPoints(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -77327,10 +78507,15 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -77426,10 +78611,15 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -77755,10 +78945,15 @@ export const createKnownPlayerIdentity = /* GraphQL */ `mutation CreateKnownPlay
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -78438,10 +79633,15 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -78537,10 +79737,15 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -78866,10 +80071,15 @@ export const updateKnownPlayerIdentity = /* GraphQL */ `mutation UpdateKnownPlay
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -79549,10 +80759,15 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -79648,10 +80863,15 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -79977,10 +81197,15 @@ export const deleteKnownPlayerIdentity = /* GraphQL */ `mutation DeleteKnownPlay
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -81234,10 +82459,15 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -81333,10 +82563,15 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -81662,10 +82897,15 @@ export const createPlayerTicket = /* GraphQL */ `mutation CreatePlayerTicket(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -82421,10 +83661,15 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -82520,10 +83765,15 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -82849,10 +84099,15 @@ export const updatePlayerTicket = /* GraphQL */ `mutation UpdatePlayerTicket(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -83608,10 +84863,15 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -83707,10 +84967,15 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -84036,10 +85301,15 @@ export const deletePlayerTicket = /* GraphQL */ `mutation DeletePlayerTicket(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -84979,10 +86249,15 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -85078,10 +86353,15 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -85407,10 +86687,15 @@ export const createPlayerMarketingPreferences = /* GraphQL */ `mutation CreatePl
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -86089,10 +87374,15 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -86188,10 +87478,15 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -86517,10 +87812,15 @@ export const updatePlayerMarketingPreferences = /* GraphQL */ `mutation UpdatePl
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -87199,10 +88499,15 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -87298,10 +88603,15 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -87627,10 +88937,15 @@ export const deletePlayerMarketingPreferences = /* GraphQL */ `mutation DeletePl
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -88242,10 +89557,15 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -88780,10 +90100,15 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -89153,10 +90478,15 @@ export const createAsset = /* GraphQL */ `mutation CreateAsset(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -89516,10 +90846,15 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -90054,10 +91389,15 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -90427,10 +91767,15 @@ export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -90790,10 +92135,15 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -91328,10 +92678,15 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -91701,10 +93056,15 @@ export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -92516,10 +93876,15 @@ export const createScraperJob = /* GraphQL */ `mutation CreateScraperJob(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -93199,10 +94564,15 @@ export const updateScraperJob = /* GraphQL */ `mutation UpdateScraperJob(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -93882,10 +95252,15 @@ export const deleteScraperJob = /* GraphQL */ `mutation DeleteScraperJob(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -94564,10 +95939,15 @@ export const createScrapeURL = /* GraphQL */ `mutation CreateScrapeURL(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -95258,10 +96638,15 @@ export const updateScrapeURL = /* GraphQL */ `mutation UpdateScrapeURL(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -95952,10 +97337,15 @@ export const deleteScrapeURL = /* GraphQL */ `mutation DeleteScrapeURL(
           averagePlayerStack
           tournamentType
           isRegular
-          isSeries
           isSatellite
-          seriesName
           gameTags
+          isSeries
+          seriesName
+          isMainEvent
+          eventNumber
+          dayNumber
+          flightLetter
+          finalDay
           sourceUrl
           tournamentId
           originalScrapedData
@@ -96477,10 +97867,15 @@ export const createScrapeAttempt = /* GraphQL */ `mutation CreateScrapeAttempt(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -96870,10 +98265,15 @@ export const createScrapeAttempt = /* GraphQL */ `mutation CreateScrapeAttempt(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -97311,10 +98711,15 @@ export const updateScrapeAttempt = /* GraphQL */ `mutation UpdateScrapeAttempt(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -97704,10 +99109,15 @@ export const updateScrapeAttempt = /* GraphQL */ `mutation UpdateScrapeAttempt(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -98145,10 +99555,15 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData
@@ -98538,10 +99953,15 @@ export const deleteScrapeAttempt = /* GraphQL */ `mutation DeleteScrapeAttempt(
             averagePlayerStack
             tournamentType
             isRegular
-            isSeries
             isSatellite
-            seriesName
             gameTags
+            isSeries
+            seriesName
+            isMainEvent
+            eventNumber
+            dayNumber
+            flightLetter
+            finalDay
             sourceUrl
             tournamentId
             originalScrapedData

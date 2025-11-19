@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { getClient } from '../utils/apiClient';
 import { PageWrapper } from '../components/layout/PageWrapper';
 import { format } from 'date-fns';
-
+import { formatCurrency } from '../utils/generalHelpers';
 
 interface Tournament {
   id: string;
@@ -160,15 +160,6 @@ export const HomePage = () => {
     } catch {
       return 'Invalid Date';
     }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
   };
 
   const TournamentTable = ({ 

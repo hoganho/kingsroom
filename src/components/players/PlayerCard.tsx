@@ -11,6 +11,7 @@ import {
   TrophyIcon,
   MapPinIcon
 } from '@heroicons/react/24/outline';
+import { formatCurrency } from '../../utils/generalHelpers';
 
 // Import enums as VALUES (not types)
 import { 
@@ -116,18 +117,6 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
       month: 'short',
       day: 'numeric'
     });
-  };
-
-  const formatCurrency = (amount?: number | null): string => {
-    if (amount === undefined || amount === null) return '$0';
-    const isNegative = amount < 0;
-    const formatted = Math.abs(amount).toLocaleString('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    });
-    return isNegative ? `-${formatted}` : formatted;
   };
 
   const status = formatStatus(player.status);

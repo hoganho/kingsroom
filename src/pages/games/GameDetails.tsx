@@ -15,6 +15,7 @@ import {
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
+import { formatCurrency } from '../../utils/generalHelpers';
 
 
 interface GameData {
@@ -197,16 +198,6 @@ export const GameDetails = () => {
     } catch {
       return '-';
     }
-  };
-
-  const formatCurrency = (amount?: number) => {
-    if (!amount) return '-';
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
   };
 
   const getStatusBadgeClass = (status: string) => {

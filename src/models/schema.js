@@ -1450,15 +1450,23 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "isSeries": {
-                    "name": "isSeries",
+                "isSatellite": {
+                    "name": "isSatellite",
                     "isArray": false,
                     "type": "Boolean",
                     "isRequired": false,
                     "attributes": []
                 },
-                "isSatellite": {
-                    "name": "isSatellite",
+                "gameTags": {
+                    "name": "gameTags",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "isSeries": {
+                    "name": "isSeries",
                     "isArray": false,
                     "type": "Boolean",
                     "isRequired": false,
@@ -1471,13 +1479,40 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "gameTags": {
-                    "name": "gameTags",
-                    "isArray": true,
+                "isMainEvent": {
+                    "name": "isMainEvent",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "eventNumber": {
+                    "name": "eventNumber",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dayNumber": {
+                    "name": "dayNumber",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "flightLetter": {
+                    "name": "flightLetter",
+                    "isArray": false,
                     "type": "String",
                     "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
+                    "attributes": []
+                },
+                "finalDay": {
+                    "name": "finalDay",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
                 },
                 "sourceUrl": {
                     "name": "sourceUrl",
@@ -9277,5 +9312,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "5e4da41c951aec9a151244e66f5c402c"
+    "version": "0fa69f564b38a34ac083461d33c1e379"
 };

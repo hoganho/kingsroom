@@ -71,10 +71,18 @@ export type GameData = {
     entityId?: string | null; // ✅ Added entity ID
     gameVariant?: GameVariant;
     gameFrequency?: GameFrequency;
-    isSeries?: boolean;
     isRegular?: boolean;
     isSatellite?: boolean;
     
+    // Series state and metadata
+    isSeries?: boolean;
+    tournamentSeriesId?: string | null;
+    isMainEvent?: boolean;
+    eventNumber?: number | null;     // Links all flights/days (e.g., Event 8)
+    dayNumber?: number | null;       // Day 1, Day 2, etc.
+    flightLetter?: string | null;    // A, B, C...
+    finalDay?: boolean;              // Final day has prize results
+
     // Game state and metadata
     registrationStatus?: RegistrationStatus;
     prizepool?: number | null;
@@ -234,4 +242,17 @@ export interface EntityConfig {
     gameUrlPath: string;
     entityLogo?: string | null;
     isActive: boolean;
+}
+
+// Series reference fields - these describe how a Game relates to a Series
+// These should be added to the Game model in schema.graphql
+export interface SeriesReferenceData {
+  tournamentSeriesId?: string | null;
+  seriesName?: string | null;
+  isSeries?: boolean;
+  isMainEvent?: boolean;
+  eventNumber?: number | null;    // Links all flights/days for this event (e.g., Event 8)
+  dayNumber?: number | null;      // Which day of the event (1, 2, 3...)
+  flightLetter?: string | null;   // Flight designation (A, B, C...)
+  finalDay?: boolean;             // Is this the final day with prize payouts?
 }

@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { BuildingOffice2Icon, TrophyIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import { format, subDays } from 'date-fns';
 import { GameData } from '../../types/game';
+import { formatCurrency } from '../../utils/generalHelpers';
 
 
 interface Venue {
@@ -166,16 +167,6 @@ export const VenuesDashboard = () => {
     } catch {
       return '-';
     }
-  };
-
-  const formatCurrency = (amount?: number) => {
-    if (!amount) return '-';
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
   };
 
   const handleVenueClick = (venueId: string) => {

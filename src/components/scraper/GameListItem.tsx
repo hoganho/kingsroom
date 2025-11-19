@@ -414,7 +414,7 @@ export const GameListItem: React.FC<GameListItemProps> = ({
                                     className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
                                 >
                                     <Save className="h-3 w-3" />
-                                    Save to Database
+                                    Review & Save
                                 </button>
                             )}
 

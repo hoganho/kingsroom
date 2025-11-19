@@ -410,7 +410,7 @@ export const useGameTracker = (): UseGameTrackerReturn => {
                 }
             }));
 
-            if (options?.forceSource !== 'S3' && shouldAutoRefreshTournament(data)) {
+            if (options?.forceSource !== 'S3' && shouldAutoRefreshTournament(data.gameStatus)) {
                 setGames(prev => ({ ...prev, [url]: { ...prev[url], autoRefresh: true } }));
                 if (autoRefreshTimers.current[url]) clearInterval(autoRefreshTimers.current[url]);
                 autoRefreshTimers.current[url] = setInterval(() => {

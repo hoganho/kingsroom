@@ -18,6 +18,7 @@ import {
   listPlayerMarketingMessagesForDebug,
 } from '../../graphql/customQueries';
 import { getAllCounts } from '../../graphql/queries';
+import { formatCurrency } from '../../utils/generalHelpers';
 
 type TabType = 
   | 'players' 
@@ -179,11 +180,6 @@ export const PlayersDebug = () => {
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString();
-  };
-
-  const formatCurrency = (amount: number | null) => {
-    if (amount === null || amount === undefined) return '-';
-    return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   const calculateDaysFromNow = (dateString: string | null) => {

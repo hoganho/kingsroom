@@ -5,6 +5,7 @@ import { getClient } from '../../utils/apiClient';
 import { PageWrapper } from '../../components/layout/PageWrapper';
 import { TrophyIcon, CalendarIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
+import { formatCurrency } from '../../utils/generalHelpers';
 
 
 interface Series {
@@ -107,15 +108,6 @@ export const SeriesDashboard = () => {
       default:
         return 'bg-gray-100 text-gray-800';
     }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
   };
 
   const formatDate = (dateString?: string) => {
