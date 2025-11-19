@@ -443,9 +443,28 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
       try {
         const parsedData = await fetchGameDataFromBackend(url);
 
+        // Debug logging to trace doNotScrape detection
+        console.log('[ScraperTab] Received data for tournament', tournamentId, {
+          name: parsedData.name,
+          doNotScrape: parsedData.doNotScrape,
+          gameStatus: parsedData.gameStatus,
+          skipped: (parsedData as any).skipped,
+          skipReason: (parsedData as any).skipReason
+        });
+
         // Check for doNotScrape skip - show options modal unless ignoreDoNotScrape is set
-        // Note: skipped and skipReason come from backend but aren't in ScrapedGameData type
-        const isSkippedDoNotScrape = (parsedData as any).skipped && (parsedData as any).skipReason === 'DO_NOT_SCRAPE';
+        // Multiple ways to detect a skipped tournament:
+        // 1. Backend explicitly returns skipped: true and skipReason
+        // 2. Backend returns doNotScrape: true with the skip name pattern
+        // 3. Name matches the skip pattern
+        const isSkippedDoNotScrape = 
+          ((parsedData as any).skipped && (parsedData as any).skipReason === 'DO_NOT_SCRAPE') ||
+          (parsedData.doNotScrape && parsedData.name?.includes('Skipped')) ||
+          (parsedData.name === 'Skipped - Do Not Scrape');
+        
+        console.log('[ScraperTab] isSkippedDoNotScrape:', isSkippedDoNotScrape, 
+          'ignoreDoNotScrape:', options.ignoreDoNotScrape,
+          'willShowModal:', isSkippedDoNotScrape && !options.ignoreDoNotScrape);
         
         if (isSkippedDoNotScrape && !options.ignoreDoNotScrape) {
           setIsPaused(true);
@@ -1016,7 +1035,9 @@ const handleManualSave = async (result: ProcessingResult) => {
                 tournamentId={result.id}
                 sourceUrl={result.url}
                 dataSource={
-                  (result.parsedData as any)?.skipped ? 'skipped' :
+                  ((result.parsedData as any)?.skipped || 
+                   (result.parsedData?.doNotScrape && result.parsedData?.name?.includes('Skipped')) ||
+                   result.parsedData?.name === 'Skipped - Do Not Scrape') ? 'skipped' :
                   result.parsedData?.s3Key ? 's3' : 
                   (result.parsedData as any)?.source === 'S3_CACHE' ? 's3' :
                   'live'
