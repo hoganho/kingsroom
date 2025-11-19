@@ -60,6 +60,12 @@ export const QuickDataEditor: React.FC<QuickDataEditorProps> = ({
                 defaultOpen: false
             },
             {
+                title: '🎯 Series Details',
+                fields: ['isSeries', 'seriesName', 'tournamentSeriesId', 'isMainEvent', 'eventNumber', 'dayNumber', 'flightLetter', 'finalDay'],
+                priority: 'standard',
+                defaultOpen: false
+            },
+            {
                 title: '📊 Statistics',
                 fields: ['totalRebuys', 'totalAddons', 'playersRemaining', 'totalChipsInPlay', 'averagePlayerStack'],
                 priority: 'standard',

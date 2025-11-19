@@ -8,6 +8,7 @@ import type { ScrapedGameData, SeriesStatus } from '../../API';
 import { GameVariant } from '../../API';
 import { useGameDataEditor } from '../../hooks/useGameDataEditor';
 import { QuickDataEditor } from './SaveConfirmation/QuickDataEditor';
+import { SeriesDetailsEditor } from './SaveConfirmation/SeriesDetailsEditor';
 import { VenueFormData } from '../../types/venue';
 
 // GraphQL Queries
@@ -355,6 +356,35 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                 `Do you want to save anyway?`
             );
             if (!shouldProceed) return;
+        }
+        
+        // *** ADD THE SERIES VALIDATION HERE (after line 358) ***
+        // Series validation - add warnings but don't block save
+        if (editedData.isSeries) {
+            // Validate series fields when it's marked as a series
+            if (!editedData.seriesName && !editedData.tournamentSeriesId) {
+                console.warn('[Series Validation] Series game without series name or ID');
+            }
+            
+            // If it's marked as final day, ensure we have results
+            if (editedData.finalDay && (!editedData.results || editedData.results.length === 0)) {
+                console.warn('[Series Validation] Final day series event should have prize results');
+            }
+            
+            // If multiple flights, ensure flight letter is set
+            if (editedData.dayNumber === 1 && !editedData.flightLetter && 
+                editedData.name && /\b(Flight|Day\s*1[A-Z])\b/i.test(editedData.name)) {
+                console.warn('[Series Validation] Appears to be a flight but flightLetter not set');
+            }
+            
+            // Optional: Show a warning dialog if critical series data is missing
+            if (editedData.finalDay && !editedData.eventNumber && !autoMode) {
+                const proceed = window.confirm(
+                    'This is marked as a final day but has no event number. ' +
+                    'This may affect series reporting. Continue anyway?'
+                );
+                if (!proceed) return;
+            }
         }
         
         setIsSaving(true);
@@ -887,6 +917,19 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                             )}
                         </div>
                         
+                        {editedData.isSeries && (
+                            <SeriesDetailsEditor 
+                                editor={editor}
+                                series={series}
+                                onSeriesChange={(seriesId) => {
+                                    // Update the editor's tournamentSeriesId
+                                    if (seriesId) {
+                                        editor.updateField('tournamentSeriesId', seriesId);
+                                    }
+                                }}
+                            />
+                        )}
+
                         {/* Additional Series Flags */}
                         <div className="border rounded-lg p-4">
                             <h3 className="font-semibold text-sm mb-3">🏷️ Additional Flags</h3>

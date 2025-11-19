@@ -363,80 +363,90 @@ export const saveGameDataToBackend = async (
     
     // Build SaveGameInput
     const saveGameInput = {
-        source: {
-            type: DataSource.SCRAPE,
-            sourceId: sourceUrl,
-            entityId: finalEntityId || getCurrentEntityId(),
-            fetchedAt: new Date().toISOString(),
-            contentHash: (finalData as any).contentHash || null,
-            wasEdited: options?.wasEdited || false
-        },
-        game: {
-            tournamentId: finalData.tournamentId || null,
-            existingGameId: existingGameId || null,
-            name: finalData.name || `Tournament ${finalData.tournamentId}`,
-            gameType: mapToGameType(finalData.gameType),
-            gameVariant: mapToGameVariant(finalData.gameVariant),
-            gameStatus: mapToGameStatus(finalData.gameStatus),
-            gameStartDateTime: finalData.gameStartDateTime || new Date().toISOString(),
-            gameEndDateTime: finalData.gameEndDateTime || null,
-            registrationStatus: mapToRegistrationStatus(finalData.registrationStatus),
-            gameFrequency: mapToGameFrequency((finalData as any).gameFrequency),
-            
-            // Financial fields
-            buyIn: finalData.buyIn || 0,
-            rake: finalData.rake || 0,
-            totalRake: (finalData as any).totalRake || 0,
-            guaranteeAmount: finalData.guaranteeAmount || 0,
-            hasGuarantee: finalData.hasGuarantee || false,
-            guaranteeOverlay: (finalData as any).guaranteeOverlay || null,
-            guaranteeSurplus: (finalData as any).guaranteeSurplus || null,
-            
-            // Game details
-            startingStack: finalData.startingStack || 0,
-            prizepool: finalData.prizepool || 0,
-            totalEntries: finalData.totalEntries || 0,
-            totalRebuys: finalData.totalRebuys || 0,
-            totalAddons: finalData.totalAddons || 0,
-            playersRemaining: (finalData as any).playersRemaining || null,
-            totalChipsInPlay: (finalData as any).totalChipsInPlay || null,
-            averagePlayerStack: (finalData as any).averagePlayerStack || null,
-            
-            // Tournament specifics
-            tournamentType: mapToTournamentType(finalData.tournamentType),
-            isSeries: (finalData as any).isSeries || false,
-            seriesName: (finalData as any).seriesName || null,
-            isSatellite: (finalData as any).isSatellite || false,
-            isRegular: (finalData as any).isRegular || false,
-            
-            // Other
-            gameTags: finalData.gameTags?.filter((tag): tag is string => tag !== null) || [],
-            totalDuration: (finalData as any).totalDuration || null,
-            revenueByBuyIns: (finalData as any).revenueByBuyIns || null,
-            profitLoss: (finalData as any).profitLoss || null
-        },
-        players: playerData,
-        venue: {
-            venueId: venueId || null,
-            venueName: (finalData as any).venueName || null,
-            suggestedVenueId: (finalData as any).venueMatch?.autoAssignedVenue?.id || null,
-            confidence: (finalData as any).venueMatch?.autoAssignedVenue?.score || 0
-        },
-        series: (finalData as any).isSeries && (finalData as any).seriesName ? {
-            seriesId: (finalData as any).seriesId || null,
-            seriesName: (finalData as any).seriesName,
-            year: (finalData as any).seriesYear || new Date(finalData.gameStartDateTime || new Date()).getFullYear(),
-            isMainEvent: (finalData as any).isMainEvent || false,
-            dayNumber: (finalData as any).dayNumber || null,
-            flightLetter: (finalData as any).flightLetter || null
-        } : null,
-        options: {
-            skipPlayerProcessing: false,
-            forceUpdate: !!existingGameId || options?.wasEdited,
-            validateOnly: false,
-            doNotScrape: (finalData as any).doNotScrape || false
-        },
-    };
+    source: {
+        type: DataSource.SCRAPE,
+        sourceId: sourceUrl,
+        entityId: finalEntityId || getCurrentEntityId(),
+        fetchedAt: new Date().toISOString(),
+        contentHash: (finalData as any).contentHash || null,
+        wasEdited: options?.wasEdited || false
+    },
+    game: {
+        tournamentId: finalData.tournamentId || null,
+        existingGameId: existingGameId || null,
+        name: finalData.name || `Tournament ${finalData.tournamentId}`,
+        gameType: mapToGameType(finalData.gameType),
+        gameVariant: mapToGameVariant(finalData.gameVariant),
+        gameStatus: mapToGameStatus(finalData.gameStatus),
+        gameStartDateTime: finalData.gameStartDateTime || new Date().toISOString(),
+        gameEndDateTime: finalData.gameEndDateTime || null,
+        registrationStatus: mapToRegistrationStatus(finalData.registrationStatus),
+        gameFrequency: mapToGameFrequency((finalData as any).gameFrequency),
+        
+        // Financial fields
+        buyIn: finalData.buyIn || 0,
+        rake: finalData.rake || 0,
+        totalRake: (finalData as any).totalRake || 0,
+        guaranteeAmount: finalData.guaranteeAmount || 0,
+        hasGuarantee: finalData.hasGuarantee || false,
+        guaranteeOverlay: (finalData as any).guaranteeOverlay || null,
+        guaranteeSurplus: (finalData as any).guaranteeSurplus || null,
+        
+        // Game details
+        startingStack: finalData.startingStack || 0,
+        prizepool: finalData.prizepool || 0,
+        totalEntries: finalData.totalEntries || 0,
+        totalRebuys: finalData.totalRebuys || 0,
+        totalAddons: finalData.totalAddons || 0,
+        playersRemaining: (finalData as any).playersRemaining || null,
+        totalChipsInPlay: (finalData as any).totalChipsInPlay || null,
+        averagePlayerStack: (finalData as any).averagePlayerStack || null,
+        
+        // Tournament specifics
+        tournamentType: mapToTournamentType(finalData.tournamentType),
+        isSeries: (finalData as any).isSeries || false,
+        seriesName: (finalData as any).seriesName || null,
+        isSatellite: (finalData as any).isSatellite || false,
+        isRegular: (finalData as any).isRegular || false,
+        
+        // *** SERIES REFERENCE FIELDS - ADD THESE ***
+        tournamentSeriesId: (finalData as any).tournamentSeriesId || null,
+        isMainEvent: (finalData as any).isMainEvent || false,
+        eventNumber: (finalData as any).eventNumber || null,
+        dayNumber: (finalData as any).dayNumber || null,
+        flightLetter: (finalData as any).flightLetter || null,
+        finalDay: (finalData as any).finalDay || false,
+        
+        // Other
+        gameTags: finalData.gameTags?.filter((tag): tag is string => tag !== null) || [],
+        totalDuration: (finalData as any).totalDuration || null,
+        revenueByBuyIns: (finalData as any).revenueByBuyIns || null,
+        profitLoss: (finalData as any).profitLoss || null
+    },
+    players: playerData,
+    venue: {
+        venueId: venueId || null,
+        venueName: (finalData as any).venueName || null,
+        suggestedVenueId: (finalData as any).venueMatch?.autoAssignedVenue?.id || null,
+        confidence: (finalData as any).venueMatch?.autoAssignedVenue?.score || 0
+    },
+    series: (finalData as any).isSeries && (finalData as any).seriesName ? {
+        seriesId: (finalData as any).tournamentSeriesId || (finalData as any).seriesId || null,
+        seriesName: (finalData as any).seriesName,
+        year: (finalData as any).seriesYear || new Date(finalData.gameStartDateTime || new Date()).getFullYear(),
+        isMainEvent: (finalData as any).isMainEvent || false,
+        eventNumber: (finalData as any).eventNumber || null,  // ADD THIS
+        dayNumber: (finalData as any).dayNumber || null,
+        flightLetter: (finalData as any).flightLetter || null,
+        finalDay: (finalData as any).finalDay || false  // ADD THIS
+    } : null,
+    options: {
+        skipPlayerProcessing: false,
+        forceUpdate: !!existingGameId || options?.wasEdited,
+        validateOnly: false,
+        doNotScrape: (finalData as any).doNotScrape || false
+    },
+};
     
     // Add levels if present
     if (finalData.levels && finalData.levels.length > 0) {

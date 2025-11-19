@@ -467,6 +467,14 @@ const createGame = async (input, venueResolution) => {
         revenueByBuyIns: input.game.revenueByBuyIns || null,
         profitLoss: input.game.profitLoss || null,
         
+        // Series
+        tournamentSeriesId: input.game.tournamentSeriesId || input.series?.seriesId || null,
+        isMainEvent: input.game.isMainEvent || input.series?.isMainEvent || false,
+        eventNumber: input.game.eventNumber || input.series?.eventNumber || null,
+        dayNumber: input.game.dayNumber || input.series?.dayNumber || null,
+        flightLetter: input.game.flightLetter || input.series?.flightLetter || null,
+        finalDay: input.game.finalDay || input.series?.finalDay || false,
+
         // Structure data (levels)
         levels: input.game.levels || [],
         
@@ -570,6 +578,14 @@ const updateGame = async (existingGame, input, venueResolution) => {
     checkAndUpdate('seriesName', input.game.seriesName, existingGame.seriesName);
     checkAndUpdate('isSatellite', input.game.isSatellite, existingGame.isSatellite);
     
+    // Series fields
+    checkAndUpdate('tournamentSeriesId', input.game.tournamentSeriesId || input.series?.seriesId, existingGame.tournamentSeriesId);
+    checkAndUpdate('isMainEvent', input.game.isMainEvent || input.series?.isMainEvent, existingGame.isMainEvent);
+    checkAndUpdate('eventNumber', input.game.eventNumber || input.series?.eventNumber, existingGame.eventNumber);
+    checkAndUpdate('dayNumber', input.game.dayNumber || input.series?.dayNumber, existingGame.dayNumber);
+    checkAndUpdate('flightLetter', input.game.flightLetter || input.series?.flightLetter, existingGame.flightLetter);
+    checkAndUpdate('finalDay', input.game.finalDay || input.series?.finalDay, existingGame.finalDay);
+
     // Structure (levels)
     if (input.game.levels) {
         checkAndUpdate('levels', input.game.levels, existingGame.levels);

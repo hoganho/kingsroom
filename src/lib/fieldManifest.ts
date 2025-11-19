@@ -53,6 +53,38 @@ export const fieldManifest: Record<string, FieldDefinition> = {
   startingStack: { label: 'Starting Stack', group: 'Tournament Setup', isBaselineExpected: true },
   hasGuarantee: { label: 'Has Guarantee', group: 'Tournament Setup', isBaselineExpected: true },
   guaranteeAmount: { label: 'Guarantee Amt', group: 'Tournament Setup', isBaselineOptional: true },
+
+    // --- Series Reference Fields (ADD THIS SECTION) ---
+  tournamentSeriesId: { 
+    label: 'Tournament Series', 
+    group: 'Series Reference', 
+    isProfileOptional: ["STATUS: SCHEDULED | REG: OPEN", "STATUS: RUNNING | REG: CLOSED", "STATUS: FINISHED | REG: CLOSED"] 
+  },
+  isMainEvent: { 
+    label: 'Main Event', 
+    group: 'Series Reference', 
+    isBaselineOptional: true 
+  },
+  eventNumber: { 
+    label: 'Event Number', 
+    group: 'Series Reference', 
+    isBaselineOptional: true 
+  },
+  dayNumber: { 
+    label: 'Day Number', 
+    group: 'Series Reference', 
+    isBaselineOptional: true 
+  },
+  flightLetter: { 
+    label: 'Flight Letter', 
+    group: 'Series Reference', 
+    isBaselineOptional: true 
+  },
+  finalDay: { 
+    label: 'Final Day', 
+    group: 'Series Reference', 
+    isBaselineOptional: true 
+  },
   
   // Structure & Player Data
   levels: { label: 'Levels', group: 'Structure & Player Data', isBaselineExpected: true },
