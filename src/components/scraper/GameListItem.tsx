@@ -101,7 +101,7 @@ interface GameListItemProps {
     showActions?: boolean;
     onClick?: () => void;
     enableCreateVenue?: boolean;
-    dataSource?: 'live' | 's3';
+    dataSource?: 'live' | 's3' | 'skipped';
     // NEW: Compact mode props
     compact?: boolean;
     processingStatus?: ProcessingStatus;
@@ -275,12 +275,19 @@ export const GameListItem: React.FC<GameListItemProps> = ({
                             <span className={`hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium rounded ${
                                 dataSource === 's3' 
                                     ? 'bg-purple-100 text-purple-700 border border-purple-200' 
+                                    : dataSource === 'skipped'
+                                    ? 'bg-yellow-100 text-yellow-700 border border-yellow-200'
                                     : 'bg-cyan-100 text-cyan-700 border border-cyan-200'
                             }`}>
                                 {dataSource === 's3' ? (
                                     <>
                                         <HardDrive className="h-3 w-3" />
                                         S3
+                                    </>
+                                ) : dataSource === 'skipped' ? (
+                                    <>
+                                        <AlertCircle className="h-3 w-3" />
+                                        Skipped
                                     </>
                                 ) : (
                                     <>

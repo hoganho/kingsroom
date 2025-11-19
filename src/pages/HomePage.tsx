@@ -294,7 +294,7 @@ export const HomePage = () => {
       </div>
 
       {/* Grid layout for finished and upcoming */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="mb-8">
         {/* Recently Finished */}
         <TournamentTable
           tournaments={finishedTournaments}
@@ -302,7 +302,9 @@ export const HomePage = () => {
           showPrizepool={true}
           showTotalEntries={true}
         />
+      </div>
 
+      <div className="mb-8">
         {/* Upcoming Tournaments */}
         <TournamentTable
           tournaments={upcomingTournaments}

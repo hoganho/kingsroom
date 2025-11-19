@@ -12,6 +12,7 @@ import { Venue } from '../../API';
 import { listVenuesForDropdown } from '../../graphql/customQueries';
 import { GameDetailsModal } from '../../components/scraper/admin/GameDetailsModal';
 import { SaveConfirmationModal } from '../../components/scraper/SaveConfirmationModal';
+import { ScrapeOptionsModal } from '../../components/scraper/ScrapeOptionsModal';
 import { VenueModal } from '../../components/venues/VenueModal';
 import { GameListItem } from '../../components/scraper/GameListItem';
 import {
@@ -250,6 +251,14 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
   const [gameForReview, setGameForReview] = useState<GameForReview | null>(null);
   const [selectedGameDetails, setSelectedGameDetails] = useState<ScrapedGameData | null>(null);
   const [venueModalOpen, setVenueModalOpen] = useState(false);
+  
+  // Scrape Options Modal (for doNotScrape handling)
+  const [scrapeOptionsModal, setScrapeOptionsModal] = useState<{
+    isOpen: boolean;
+    tournamentId: number;
+    url: string;
+    gameStatus?: string;
+  } | null>(null);
 
   // Gap Tracker
   const {
@@ -433,6 +442,64 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
 
       try {
         const parsedData = await fetchGameDataFromBackend(url);
+
+        // Check for doNotScrape skip - show options modal unless ignoreDoNotScrape is set
+        // Note: skipped and skipReason come from backend but aren't in ScrapedGameData type
+        const isSkippedDoNotScrape = (parsedData as any).skipped && (parsedData as any).skipReason === 'DO_NOT_SCRAPE';
+        
+        if (isSkippedDoNotScrape && !options.ignoreDoNotScrape) {
+          setIsPaused(true);
+          setProcessingResults(prev => prev.map(r =>
+            r.id === tournamentId ? {
+              ...r,
+              status: 'review',
+              message: 'Tournament marked as Do Not Scrape - awaiting decision...',
+              parsedData
+            } : r
+          ));
+
+          // Show ScrapeOptionsModal and wait for user decision
+          const modalResult = await new Promise<{ action: 'S3' | 'LIVE' | 'SKIP', s3Key?: string }>((resolve) => {
+            setScrapeOptionsModal({
+              isOpen: true,
+              tournamentId,
+              url,
+              gameStatus: parsedData.gameStatus || undefined
+            });
+            (window as any).__scrapeOptionsResolver = resolve;
+          });
+
+          setScrapeOptionsModal(null);
+          setIsPaused(false);
+
+          if (modalResult.action === 'SKIP' || signal.aborted) {
+            setProcessingResults(prev => prev.map(r =>
+              r.id === tournamentId ? {
+                ...r,
+                status: 'skipped',
+                message: `Skipped (${parsedData.gameStatus || 'Do Not Scrape'})`,
+                parsedData
+              } : r
+            ));
+            continue;
+          }
+
+          // User chose to fetch from S3 or Live - refetch with override
+          setProcessingResults(prev => prev.map(r =>
+            r.id === tournamentId ? { ...r, status: 'scraping', message: `Fetching from ${modalResult.action}...` } : r
+          ));
+
+          // Refetch with the chosen option
+          // Pass s3Key for S3 option, or use forceRefresh approach for Live
+          const refetchedData = await fetchGameDataFromBackend(
+            modalResult.action === 'S3' && modalResult.s3Key 
+              ? url // TODO: Update fetchGameDataFromBackend to support s3Key parameter
+              : url
+          );
+          
+          // Replace parsedData with refetched data
+          Object.assign(parsedData, refetchedData);
+        }
 
         if (options.skipInProgress && (parsedData.gameStatus === 'RUNNING' || parsedData.gameStatus === 'SCHEDULED')) {
           setProcessingResults(prev => prev.map(r =>
@@ -948,7 +1015,12 @@ const handleManualSave = async (result: ProcessingResult) => {
                 processingMessage={result.message}
                 tournamentId={result.id}
                 sourceUrl={result.url}
-                dataSource={result.parsedData?.s3Key ? 's3' : 'live'}
+                dataSource={
+                  (result.parsedData as any)?.skipped ? 'skipped' :
+                  result.parsedData?.s3Key ? 's3' : 
+                  (result.parsedData as any)?.source === 'S3_CACHE' ? 's3' :
+                  'live'
+                }
               />
             ))}
           </div>
@@ -988,6 +1060,30 @@ const handleManualSave = async (result: ProcessingResult) => {
           onSave={async () => console.log('Venue save triggered')}
           venue={null}
           entities={currentEntity ? [currentEntity] : []}
+        />
+      )}
+
+      {/* Scrape Options Modal for doNotScrape handling */}
+      {scrapeOptionsModal && (
+        <ScrapeOptionsModal
+          isOpen={scrapeOptionsModal.isOpen}
+          onClose={() => {
+            if ((window as any).__scrapeOptionsResolver) {
+              (window as any).__scrapeOptionsResolver({ action: 'SKIP' });
+            }
+            setScrapeOptionsModal(null);
+          }}
+          onSelectOption={(option, s3Key) => {
+            if ((window as any).__scrapeOptionsResolver) {
+              (window as any).__scrapeOptionsResolver({ action: option, s3Key });
+            }
+            setScrapeOptionsModal(null);
+          }}
+          url={scrapeOptionsModal.url}
+          entityId={currentEntity?.id || ''}
+          doNotScrape={true}
+          gameStatus={scrapeOptionsModal.gameStatus}
+          warningMessage="This tournament is marked as 'Do Not Scrape'. You can use cached S3 data or force a live scrape."
         />
       )}
     </div>

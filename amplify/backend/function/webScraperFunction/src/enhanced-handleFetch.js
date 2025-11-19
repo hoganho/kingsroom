@@ -365,19 +365,38 @@ const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRe
         // ========================================
         // STEP 1: CHECK S3 STORAGE FIRST (SKIP IF forceRefresh)
         // ========================================
-        if (!forceRefresh && s3Enabled && scrapeURLRecord.latestS3Key) {
+        let s3KeyToUse = scrapeURLRecord.latestS3Key;
+        
+        // If no latestS3Key on ScrapeURL, check S3Storage table directly by URL
+        if (!forceRefresh && s3Enabled && !s3KeyToUse) {
+            log('info', '🔍 No latestS3Key on ScrapeURL, checking S3Storage by URL');
+            try {
+                const existingS3Storage = await getExistingS3StorageRecord(scrapeURLRecord.id, url, ddbDocClient);
+                if (existingS3Storage && existingS3Storage.s3Key) {
+                    s3KeyToUse = existingS3Storage.s3Key;
+                    log('info', '✅ Found S3Storage record by URL', { 
+                        s3Key: s3KeyToUse,
+                        s3StorageId: existingS3Storage.id 
+                    });
+                }
+            } catch (lookupError) {
+                log('warn', 'S3Storage lookup by URL failed', { error: lookupError.message });
+            }
+        }
+        
+        if (!forceRefresh && s3Enabled && s3KeyToUse) {
             fetchStats.s3Checked = true;
             
             try {
-                log('debug', 'Checking S3 cache', { s3Key: scrapeURLRecord.latestS3Key });
+                log('debug', 'Checking S3 cache', { s3Key: s3KeyToUse });
                 
-                const s3Content = await getHtmlFromS3(scrapeURLRecord.latestS3Key);
+                const s3Content = await getHtmlFromS3(s3KeyToUse);
                 
                 if (s3Content && s3Content.html) {
                     // Validate the HTML content
                     if (isValidHtml(s3Content.html)) {
                         log('info', '✅ S3 cache hit - using cached content', {
-                            s3Key: scrapeURLRecord.latestS3Key,
+                            s3Key: s3KeyToUse,
                             contentLength: s3Content.html.length,
                             metadata: s3Content.metadata
                         });
@@ -391,7 +410,7 @@ const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRe
                             success: true,
                             html: s3Content.html,
                             source: 'S3_CACHE',
-                            s3Key: scrapeURLRecord.latestS3Key,
+                            s3Key: s3KeyToUse,
                             headers: s3Content.metadata || {},
                             usedCache: true,
                             cacheType: 'S3',
@@ -402,20 +421,20 @@ const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRe
                             timestamp: new Date().toISOString()
                         };
                     } else {
-                        log('warn', 'S3 content failed validation', { s3Key: scrapeURLRecord.latestS3Key });
+                        log('warn', 'S3 content failed validation', { s3Key: s3KeyToUse });
                         fetchStats.errors.push('S3 content validation failed');
                     }
                 }
             } catch (s3Error) {
                 log('warn', 'S3 retrieval failed', { 
                     error: s3Error.message,
-                    s3Key: scrapeURLRecord.latestS3Key 
+                    s3Key: s3KeyToUse 
                 });
                 fetchStats.errors.push(`S3 error: ${s3Error.message}`);
             }
-        } else if (forceRefresh && scrapeURLRecord.latestS3Key) {
+        } else if (forceRefresh && (scrapeURLRecord.latestS3Key || s3KeyToUse)) {
             log('info', '⚠️ Skipping S3 cache due to forceRefresh=true', { 
-                s3Key: scrapeURLRecord.latestS3Key 
+                s3Key: s3KeyToUse || scrapeURLRecord.latestS3Key 
             });
         }
         
@@ -586,9 +605,9 @@ const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRe
                     );
                     log('info', '✅ Upserted S3Storage record in DynamoDB', { s3StorageId });
                     
-                    // 4. Update ScrapeURL with latest S3Storage ID
+                    // 4. Update ScrapeURL with latest S3Storage ID and S3 Key
                     if (s3StorageId) {
-                        await updateScrapeURLWithS3StorageId(scrapeURLRecord.id, s3StorageId, ddbDocClient, scrapeURLTable);
+                        await updateScrapeURLWithS3StorageId(scrapeURLRecord.id, s3StorageId, s3Key, ddbDocClient, scrapeURLTable);
                     }
                     
                 } catch (s3DbError) {
@@ -863,13 +882,14 @@ const upsertS3StorageRecord = async (
 /**
  * ✅ NEW: Update ScrapeURL record with latest S3Storage ID
  */
-const updateScrapeURLWithS3StorageId = async (scrapeURLId, s3StorageId, ddbDocClient, tableName) => {
+const updateScrapeURLWithS3StorageId = async (scrapeURLId, s3StorageId, s3Key, ddbDocClient, tableName) => {
     const now = new Date();
     const params = {
         TableName: tableName,
         Key: { id: scrapeURLId },
         UpdateExpression: `
             SET latestS3StorageId = :s3StorageId,
+                latestS3Key = :s3Key,
                 updatedAt = :now,
                 #lca = :timestamp,
                 #v = if_not_exists(#v, :zero) + :one
@@ -880,6 +900,7 @@ const updateScrapeURLWithS3StorageId = async (scrapeURLId, s3StorageId, ddbDocCl
         },
         ExpressionAttributeValues: {
             ':s3StorageId': s3StorageId,
+            ':s3Key': s3Key,
             ':now': now.toISOString(),
             ':timestamp': now.getTime(),
             ':zero': 0,
@@ -888,7 +909,7 @@ const updateScrapeURLWithS3StorageId = async (scrapeURLId, s3StorageId, ddbDocCl
     };
     
     await ddbDocClient.send(new UpdateCommand(params));
-    console.log(`[ScrapeURL] Updated latestS3StorageId to: ${s3StorageId}`);
+    console.log(`[ScrapeURL] Updated latestS3StorageId to: ${s3StorageId}, latestS3Key to: ${s3Key}`);
 };
 
 /**

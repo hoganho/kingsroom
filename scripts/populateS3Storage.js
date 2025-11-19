@@ -415,7 +415,7 @@ async function main() {
       s3StorageBatch.length = 0;
     }
 
-    // Update ScrapeURL.latestS3StorageId
+    // Update ScrapeURL.latestS3StorageId and latestS3Key
     if (!DRY_RUN) {
       try {
         await ddbDocClient.send(new PutCommand({
@@ -426,10 +426,12 @@ async function main() {
               Key: { id: scrapeURLId }
             }))).Item,
             latestS3StorageId: s3StorageId,
+            latestS3Key: latestVersion.s3Key,
             updatedAt: new Date().toISOString(),
           }
         }));
         logger.success(`   Updated ScrapeURL.latestS3StorageId → ${s3StorageId}`);
+        logger.success(`   Updated ScrapeURL.latestS3Key → ${latestVersion.s3Key}`);
       } catch (error) {
         logger.warn(`   Could not update ScrapeURL: ${error.message}`);
       }
