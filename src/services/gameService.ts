@@ -498,10 +498,9 @@ export const saveGameDataToBackend = async (
     };
     
     // Add levels if present
-    if (finalData.levels && finalData.levels.length > 0) {
-        console.log('[GameService] Raw levels data:', JSON.stringify(finalData.levels, null, 2));
-        (saveGameInput.game as any).levels = finalData.levels
-            .filter((level: any) => level && level.levelNumber != null)  // Filter out invalid levels
+    if (finalData.levels && Array.isArray(finalData.levels) && finalData.levels.length > 0) {
+        const validLevels = finalData.levels
+            .filter((level: any) => level && level.levelNumber != null)
             .map((level: any) => ({
                 levelNumber: parseInt(level.levelNumber) || 0,
                 durationMinutes: parseInt(level.durationMinutes) || 0,
@@ -509,6 +508,11 @@ export const saveGameDataToBackend = async (
                 bigBlind: parseInt(level.bigBlind) || 0,
                 ante: level.ante != null ? parseInt(level.ante) : null
             }));
+        
+        // Only add to input if we have valid levels
+        if (validLevels.length > 0) {
+            (saveGameInput.game as any).levels = validLevels;
+        }
     }
     
     console.log('[GameService] Calling saveGame mutation with input:', {
