@@ -1293,6 +1293,7 @@ input SaveGameDataInput {
   tournamentType: TournamentType
   isSeries: Boolean
   seriesName: String
+  tournamentSeriesId: ID
   isMainEvent: Boolean
   eventNumber: Int
   dayNumber: Int

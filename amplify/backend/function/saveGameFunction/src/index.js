@@ -11,6 +11,10 @@
 	API_KINGSROOM_SCRAPEATTEMPTTABLE_NAME
 	API_KINGSROOM_SCRAPEURLTABLE_ARN
 	API_KINGSROOM_SCRAPEURLTABLE_NAME
+	API_KINGSROOM_TOURNAMENTSERIESTABLE_ARN
+	API_KINGSROOM_TOURNAMENTSERIESTABLE_NAME
+	API_KINGSROOM_TOURNAMENTSERIESTITLETABLE_ARN
+	API_KINGSROOM_TOURNAMENTSERIESTITLETABLE_NAME
 	API_KINGSROOM_VENUETABLE_ARN
 	API_KINGSROOM_VENUETABLE_NAME
 	ENV
@@ -378,11 +382,17 @@ const extractYearFromDate = (dateValue) => {
 
 /**
  * Resolve tournament series from input
+ * Priority:
+ * 1. Explicit seriesId (manual assignment)
+ * 2. Match by seriesTitleId + year + venueId
+ * 3. Match by seriesName + year
+ * 
  * @param {Object} seriesRef - Series reference from input
  * @param {string} entityId - Entity ID for context
  * @param {string} gameStartDateTime - Game start date to extract year from
+ * @param {string} venueId - Resolved venue ID for better matching
  */
-const resolveSeries = async (seriesRef, entityId, gameStartDateTime) => {
+const resolveSeries = async (seriesRef, entityId, gameStartDateTime, venueId = null) => {
     // No series reference or not a series game
     if (!seriesRef || !seriesRef.seriesName) {
         return {
@@ -393,26 +403,19 @@ const resolveSeries = async (seriesRef, entityId, gameStartDateTime) => {
         };
     }
     
-    // Explicit seriesId provided - use it directly (manual assignment)
+    // Explicit seriesId provided - use it directly (manual assignment from dropdown)
     if (seriesRef.seriesId) {
         const series = await getSeriesById(seriesRef.seriesId);
-        return {
-            tournamentSeriesId: seriesRef.seriesId,
-            seriesName: series?.name || seriesRef.seriesName,
-            status: 'MANUALLY_ASSIGNED',
-            confidence: 1.0
-        };
-    }
-    
-    // Suggested series from auto-detection
-    if (seriesRef.suggestedSeriesId) {
-        const series = await getSeriesById(seriesRef.suggestedSeriesId);
-        return {
-            tournamentSeriesId: seriesRef.suggestedSeriesId,
-            seriesName: series?.name || seriesRef.seriesName,
-            status: 'AUTO_ASSIGNED',
-            confidence: seriesRef.confidence || 0.8
-        };
+        if (series) {
+            return {
+                tournamentSeriesId: seriesRef.seriesId,
+                seriesName: series.name,
+                status: 'MANUALLY_ASSIGNED',
+                confidence: 1.0
+            };
+        }
+        // If series not found, fall through to other matching
+        console.warn(`[SAVE-GAME] Provided seriesId ${seriesRef.seriesId} not found, falling back to name matching`);
     }
     
     // Extract year from gameStartDateTime if not provided in seriesRef
@@ -429,7 +432,26 @@ const resolveSeries = async (seriesRef, entityId, gameStartDateTime) => {
         };
     }
     
-    // Try to match by name and year
+    // NEW: Try to match by seriesTitleId + year + venueId (most accurate)
+    if (seriesRef.seriesTitleId) {
+        console.log(`[SAVE-GAME] Matching series by titleId: ${seriesRef.seriesTitleId}, year: ${year}, venue: ${venueId}`);
+        const matched = await matchSeriesByTitleAndYear(
+            seriesRef.seriesTitleId,
+            year,
+            venueId
+        );
+        if (matched) {
+            return {
+                tournamentSeriesId: matched.id,
+                seriesName: matched.name,
+                status: 'AUTO_ASSIGNED',
+                confidence: matched.confidence
+            };
+        }
+        console.log(`[SAVE-GAME] No TournamentSeries found for titleId ${seriesRef.seriesTitleId} in ${year}`);
+    }
+    
+    // Fallback: Try to match by name and year
     if (seriesRef.seriesName && year) {
         const matched = await matchSeriesByNameAndYear(
             seriesRef.seriesName, 
@@ -452,7 +474,7 @@ const resolveSeries = async (seriesRef, entityId, gameStartDateTime) => {
             status: 'PENDING_ASSIGNMENT',
             confidence: 0,
             suggestedName: seriesRef.seriesName,
-            year: year // Include year in response for debugging
+            year: year
         };
     }
     
@@ -463,6 +485,94 @@ const resolveSeries = async (seriesRef, entityId, gameStartDateTime) => {
         status: 'UNASSIGNED',
         confidence: 0
     };
+};
+
+/**
+ * NEW: Match series by TournamentSeriesTitle ID, year, and optionally venue
+ * This is the most accurate matching method
+ */
+const matchSeriesByTitleAndYear = async (seriesTitleId, year, venueId = null) => {
+    if (!seriesTitleId || !year) {
+        return null;
+    }
+    
+    try {
+        console.log(`[SAVE-GAME] Querying TournamentSeries for titleId: ${seriesTitleId}, year: ${year}`);
+        
+        // Query by tournamentSeriesTitleId and year using the byTournamentSeriesTitle index
+        const result = await monitoredDdbDocClient.send(new QueryCommand({
+            TableName: getTableName('TournamentSeries'),
+            IndexName: 'byTournamentSeriesTitle',
+            KeyConditionExpression: 'tournamentSeriesTitleId = :titleId AND #year = :year',
+            ExpressionAttributeNames: {
+                '#year': 'year'
+            },
+            ExpressionAttributeValues: {
+                ':titleId': seriesTitleId,
+                ':year': year
+            }
+        }));
+        
+        if (!result.Items || result.Items.length === 0) {
+            console.log(`[SAVE-GAME] No TournamentSeries found for title ${seriesTitleId} in ${year}`);
+            return null;
+        }
+        
+        // If we have a venueId, prefer the series at that venue
+        if (venueId && result.Items.length > 1) {
+            const venueMatch = result.Items.find(s => s.venueId === venueId);
+            if (venueMatch) {
+                console.log(`[SAVE-GAME] Found series at matching venue: ${venueMatch.name}`);
+                return {
+                    id: venueMatch.id,
+                    name: venueMatch.name,
+                    confidence: 1.0
+                };
+            }
+        }
+        
+        // Return first match (or only match)
+        const series = result.Items[0];
+        console.log(`[SAVE-GAME] Found series: ${series.name} (${year})`);
+        
+        return {
+            id: series.id,
+            name: series.name,
+            confidence: result.Items.length === 1 ? 0.95 : 0.85
+        };
+        
+    } catch (error) {
+        console.error('[SAVE-GAME] Error matching series by title and year:', error);
+        
+        // If index query fails, fall back to scan
+        try {
+            console.log('[SAVE-GAME] Falling back to scan for series matching');
+            const scanResult = await monitoredDdbDocClient.send(new ScanCommand({
+                TableName: getTableName('TournamentSeries'),
+                FilterExpression: 'tournamentSeriesTitleId = :titleId AND #year = :year',
+                ExpressionAttributeNames: {
+                    '#year': 'year'
+                },
+                ExpressionAttributeValues: {
+                    ':titleId': seriesTitleId,
+                    ':year': year
+                }
+            }));
+            
+            if (scanResult.Items && scanResult.Items.length > 0) {
+                const series = scanResult.Items[0];
+                return {
+                    id: series.id,
+                    name: series.name,
+                    confidence: 0.9
+                };
+            }
+        } catch (scanError) {
+            console.error('[SAVE-GAME] Scan fallback also failed:', scanError);
+        }
+        
+        return null;
+    }
 };
 
 /**
@@ -717,7 +827,7 @@ const createGame = async (input, venueResolution, seriesResolution) => {
         requiresVenueAssignment: venueResolution.venueId === UNASSIGNED_VENUE_ID,
         
         // Series assignment
-        tournamentSeriesId: seriesResolution.tournamentSeriesId,
+        ...(seriesResolution.tournamentSeriesId ? { tournamentSeriesId: seriesResolution.tournamentSeriesId } : {}),
         seriesName: seriesResolution.seriesName || input.game.seriesName,
         seriesAssignmentStatus: seriesResolution.status,
         seriesAssignmentConfidence: seriesResolution.confidence,
@@ -1257,7 +1367,12 @@ exports.handler = async (event) => {
         // === 4. RESOLVE SERIES ===
         // Pass gameStartDateTime so we can extract the year for matching
         const seriesResolution = input.game.isSeries && input.series 
-            ? await resolveSeries(input.series, input.source.entityId, input.game.gameStartDateTime)
+            ? await resolveSeries(
+                input.series, 
+                input.source.entityId, 
+                input.game.gameStartDateTime,
+                venueResolution.venueId  // Pass the resolved venue for better matching
+            )
             : { tournamentSeriesId: null, seriesName: null, status: 'NOT_SERIES', confidence: 0 };
         console.log(`[SAVE-GAME] Series resolved:`, seriesResolution);
 

@@ -19,7 +19,7 @@ export const fieldManifest: Record<string, FieldDefinition> = {
   // Core Game Details
   name: { label: 'Name', group: 'Core Game Details', isBaselineExpected: true },
   gameStartDateTime: { label: 'Start Time', group: 'Core Game Details', isBaselineExpected: true },
-  gameEndDateTime: { label: 'End Time', group: 'Core Game Details', isProfileExpected: ["STATUS: FINISHED | REG: CLOSED"] },
+  gameEndDateTime: { label: 'End Time', group: 'Core Game Details', isProfileOptional: ["STATUS: FINISHED | REG: CLOSED"] },
   gameStatus: { label: 'Game Status', group: 'Core Game Details', isBaselineExpected: true },
   registrationStatus: { label: 'Registration', group: 'Core Game Details', isBaselineExpected: true },
   structureLabel: { label: 'Structure Label', group: 'Core Game Details', isBaselineExpected: true },
@@ -87,7 +87,7 @@ export const fieldManifest: Record<string, FieldDefinition> = {
   },
   
   // Structure & Player Data
-  levels: { label: 'Levels', group: 'Structure & Player Data', isBaselineExpected: true },
+  levels: { label: 'Levels', group: 'Structure & Player Data', isBaselineOptional: true },
   breaks: { label: 'Breaks', group: 'Structure & Player Data', isBaselineOptional: true },
   entries: { label: 'Entries', group: 'Structure & Player Data', isBaselineOptional: true },
   seating: { label: 'Seating', group: 'Structure & Player Data', isProfileExpected: ["STATUS: RUNNING | REG: CLOSED"] },

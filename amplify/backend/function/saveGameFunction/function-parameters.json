@@ -17,6 +17,16 @@
         "read",
         "update"
       ],
+      "TournamentSeriesTitle:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "TournamentSeries:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
       "Game:@model(appsync)": [
         "create",
         "read",

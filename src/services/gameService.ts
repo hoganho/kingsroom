@@ -5,7 +5,6 @@ import { generateClient } from 'aws-amplify/api';
 import type { GraphQLResult } from '@aws-amplify/api';
 import { fetchTournamentData } from '../graphql/mutations';
 import { fetchTournamentDataRange, listEntities } from '../graphql/queries';
-import * as APITypes from '../API';
 import type { GameData } from '../types/game';
 import type { Entity } from '../API';
 import { 
@@ -47,50 +46,6 @@ const saveGameMutation = /* GraphQL */ `
                 confidence
             }
             fieldsUpdated
-        }
-    }
-`;
-
-// LEGACY: Custom saveTournamentData mutation (deprecated, kept for backward compatibility)
-const saveTournamentDataCustom = /* GraphQL */ `
-    mutation SaveTournamentData($input: SaveTournamentInput!) {
-        saveTournamentData(input: $input) {
-            id
-            name
-            gameStartDateTime
-            gameEndDateTime
-            gameStatus
-            registrationStatus
-            gameVariant
-            gameType
-            prizepool
-            totalEntries
-            totalRebuys
-            totalAddons
-            totalDuration
-            gameTags
-            tournamentType
-            buyIn
-            rake
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            venueId
-            entityId
-            venueAssignmentStatus
-            requiresVenueAssignment
-            suggestedVenueName
-            venueAssignmentConfidence
-            createdAt
-            updatedAt
-            venue {
-                id
-                name
-            }
-            entity {
-                id
-                entityName
-            }
         }
     }
 `;
@@ -176,40 +131,121 @@ const mapToTournamentType = (value: any): TournamentType | null => {
     return value as TournamentType;
 };
 
-// Extract player data for save input
-const extractPlayersForSaveInput = (data: GameData | ScrapedGameData) => {
-    const players: any = {
-        totalPlayers: data.totalEntries || 0,
-        results: [],
-        entries: [],
-        seating: []
+/**
+ * Create placeholder data for NOT_PUBLISHED games
+ * These games need to be saved to track the tournament ID but have minimal actual data
+ */
+const createNotPublishedPlaceholder = (
+    data: GameData | ScrapedGameData,
+    sourceUrl: string,
+    entityId: string
+): GameData | ScrapedGameData => {
+    // Build the placeholder object - we use 'any' cast because some fields
+    // will be mapped to Game model fields by saveGameDataToBackend
+    const placeholder: any = {
+        ...data,
+        // Required fields with placeholders
+        name: data.name || `Tournament ${data.tournamentId} - Not Published`,
+        gameType: data.gameType || 'TOURNAMENT',
+        gameVariant: data.gameVariant || 'NLHE',
+        gameStatus: 'NOT_PUBLISHED',
+        gameStartDateTime: data.gameStartDateTime || new Date().toISOString(),
+        registrationStatus: data.registrationStatus || 'N_A',
+        
+        // Tracking fields
+        tournamentId: data.tournamentId,
+        sourceUrl: sourceUrl,
+        entityId: entityId,
+        
+        // Set defaults for numeric fields
+        buyIn: data.buyIn || 0,
+        rake: data.rake || 0,
+        startingStack: data.startingStack || 0,
+        prizepool: data.prizepool || 0,
+        totalEntries: data.totalEntries || 0,
+        totalRebuys: data.totalRebuys || 0,
+        totalAddons: data.totalAddons || 0,
+        guaranteeAmount: data.guaranteeAmount || 0,
+        hasGuarantee: data.hasGuarantee || false,
+        
+        // Series not applicable
+        isSeries: false,
     };
     
+    return placeholder as GameData | ScrapedGameData;
+};
+
+// Extract player data for save input
+const extractPlayersForSaveInput = (data: GameData | ScrapedGameData) => {
+    const allPlayers: any[] = [];
+    let totalPrizesPaid = 0;
+    
+    // Add results (players with rankings/winnings)
     if (data.results && data.results.length > 0) {
-        players.results = data.results.map(r => ({
-            rank: r.rank,
-            name: r.name,
-            winnings: r.winnings || 0,
-            points: r.points || null
-        }));
+        data.results.forEach(r => {
+            allPlayers.push({
+                name: r.name,
+                rank: r.rank || null,
+                winnings: r.winnings || 0,
+                points: r.points || null,
+                isQualification: null,
+                rebuys: null,
+                addons: null
+            });
+            if (r.winnings) {
+                totalPrizesPaid += r.winnings;
+            }
+        });
     }
     
+    // Add entries (players without results yet) - avoid duplicates
     if (data.entries && data.entries.length > 0) {
-        players.entries = data.entries.map(e => ({
-            name: e.name
-        }));
+        const existingNames = new Set(allPlayers.map(p => p.name.toLowerCase()));
+        data.entries.forEach(e => {
+            if (!existingNames.has(e.name.toLowerCase())) {
+                allPlayers.push({
+                    name: e.name,
+                    rank: null,
+                    winnings: null,
+                    points: null,
+                    isQualification: null,
+                    rebuys: null,
+                    addons: null
+                });
+            }
+        });
     }
     
+    // Add seating data - merge with existing or add new
     if (data.seating && data.seating.length > 0) {
-        players.seating = data.seating.map(s => ({
-            name: s.name,
-            table: s.table,
-            seat: s.seat,
-            playerStack: s.playerStack || null
-        }));
+        const existingNames = new Set(allPlayers.map(p => p.name.toLowerCase()));
+        data.seating.forEach(s => {
+            if (!existingNames.has(s.name.toLowerCase())) {
+                allPlayers.push({
+                    name: s.name,
+                    rank: null,
+                    winnings: null,
+                    points: null,
+                    isQualification: null,
+                    rebuys: null,
+                    addons: null
+                });
+            }
+        });
     }
     
-    return players;
+    // Determine hasCompleteResults - must be a boolean
+    const hasResults = data.results && data.results.length > 0;
+    const isFinished = data.gameStatus === 'FINISHED';
+    
+    return {
+        allPlayers: allPlayers,  // Will be empty array [] for NOT_PUBLISHED games
+        totalPlayers: data.totalEntries || allPlayers.length || 0,
+        hasCompleteResults: Boolean(hasResults && isFinished),  // Required boolean
+        totalPrizesPaid: totalPrizesPaid > 0 ? totalPrizesPaid : null,
+        hasEntryList: Boolean(data.entries && data.entries.length > 0),  // Ensure boolean
+        hasSeatingData: Boolean(data.seating && data.seating.length > 0)  // Ensure boolean
+    };
 };
 
 // Get entity ID from URL (placeholder implementation)
@@ -323,6 +359,18 @@ export const saveGameDataToBackend = async (
     let auditTrail = null;
     let validationWarnings: string[] = [];
     
+    // Determine entity ID early for NOT_PUBLISHED placeholder
+    const finalEntityId = entityId || (data as any).entityId || await getEntityIdFromUrl(sourceUrl) || getCurrentEntityId();
+    
+    // Handle NOT_PUBLISHED games - populate with placeholder values
+    if (data.gameStatus === 'NOT_PUBLISHED') {
+        console.log('[GameService] NOT_PUBLISHED game detected, applying placeholder values');
+        finalData = createNotPublishedPlaceholder(data, sourceUrl, finalEntityId);
+        
+        // Skip validation for placeholder data
+        options = { ...options, skipValidation: true };
+    }
+    
     if (options?.wasEdited && !options.skipValidation) {
         const preparation = prepareGameDataForSave(
             data as GameData,
@@ -345,14 +393,11 @@ export const saveGameDataToBackend = async (
             warnings: validationWarnings,
             changedFields: auditTrail?.changedFields
         });
-    } else if (!options?.wasEdited) {
+    } else if (!options?.wasEdited && data.gameStatus !== 'NOT_PUBLISHED') {
         // For non-edited data (ScrapedGameData), don't calculate derived fields
         // to avoid type incompatibility issues
         finalData = data;
     }
-    
-    // Determine entity ID
-    const finalEntityId = entityId || (data as any).entityId || await getEntityIdFromUrl(sourceUrl);
     
     if (!finalEntityId) {
         console.warn('[GameService] No entity ID provided or detected, using default');
@@ -363,101 +408,107 @@ export const saveGameDataToBackend = async (
     
     // Build SaveGameInput
     const saveGameInput = {
-    source: {
-        type: DataSource.SCRAPE,
-        sourceId: sourceUrl,
-        entityId: finalEntityId || getCurrentEntityId(),
-        fetchedAt: new Date().toISOString(),
-        contentHash: (finalData as any).contentHash || null,
-        wasEdited: options?.wasEdited || false
-    },
-    game: {
-        tournamentId: finalData.tournamentId || null,
-        existingGameId: existingGameId || null,
-        name: finalData.name || `Tournament ${finalData.tournamentId}`,
-        gameType: mapToGameType(finalData.gameType),
-        gameVariant: mapToGameVariant(finalData.gameVariant),
-        gameStatus: mapToGameStatus(finalData.gameStatus),
-        gameStartDateTime: finalData.gameStartDateTime || new Date().toISOString(),
-        gameEndDateTime: finalData.gameEndDateTime || null,
-        registrationStatus: mapToRegistrationStatus(finalData.registrationStatus),
-        gameFrequency: mapToGameFrequency((finalData as any).gameFrequency),
-        
-        // Financial fields
-        buyIn: finalData.buyIn || 0,
-        rake: finalData.rake || 0,
-        totalRake: (finalData as any).totalRake || 0,
-        guaranteeAmount: finalData.guaranteeAmount || 0,
-        hasGuarantee: finalData.hasGuarantee || false,
-        guaranteeOverlay: (finalData as any).guaranteeOverlay || null,
-        guaranteeSurplus: (finalData as any).guaranteeSurplus || null,
-        
-        // Game details
-        startingStack: finalData.startingStack || 0,
-        prizepool: finalData.prizepool || 0,
-        totalEntries: finalData.totalEntries || 0,
-        totalRebuys: finalData.totalRebuys || 0,
-        totalAddons: finalData.totalAddons || 0,
-        playersRemaining: (finalData as any).playersRemaining || null,
-        totalChipsInPlay: (finalData as any).totalChipsInPlay || null,
-        averagePlayerStack: (finalData as any).averagePlayerStack || null,
-        
-        // Tournament specifics
-        tournamentType: mapToTournamentType(finalData.tournamentType),
-        isSeries: (finalData as any).isSeries || false,
-        seriesName: (finalData as any).seriesName || null,
-        isSatellite: (finalData as any).isSatellite || false,
-        isRegular: (finalData as any).isRegular || false,
-        
-        // *** SERIES REFERENCE FIELDS - ADD THESE ***
-        tournamentSeriesId: (finalData as any).tournamentSeriesId || null,
-        isMainEvent: (finalData as any).isMainEvent || false,
-        eventNumber: (finalData as any).eventNumber || null,
-        dayNumber: (finalData as any).dayNumber || null,
-        flightLetter: (finalData as any).flightLetter || null,
-        finalDay: (finalData as any).finalDay || false,
-        
-        // Other
-        gameTags: finalData.gameTags?.filter((tag): tag is string => tag !== null) || [],
-        totalDuration: (finalData as any).totalDuration || null,
-        revenueByBuyIns: (finalData as any).revenueByBuyIns || null,
-        profitLoss: (finalData as any).profitLoss || null
-    },
-    players: playerData,
-    venue: {
-        venueId: venueId || null,
-        venueName: (finalData as any).venueName || null,
-        suggestedVenueId: (finalData as any).venueMatch?.autoAssignedVenue?.id || null,
-        confidence: (finalData as any).venueMatch?.autoAssignedVenue?.score || 0
-    },
-    series: (finalData as any).isSeries && (finalData as any).seriesName ? {
-        seriesId: (finalData as any).tournamentSeriesId || (finalData as any).seriesId || null,
-        seriesName: (finalData as any).seriesName,
-        year: (finalData as any).seriesYear || new Date(finalData.gameStartDateTime || new Date()).getFullYear(),
-        isMainEvent: (finalData as any).isMainEvent || false,
-        eventNumber: (finalData as any).eventNumber || null,  // ADD THIS
-        dayNumber: (finalData as any).dayNumber || null,
-        flightLetter: (finalData as any).flightLetter || null,
-        finalDay: (finalData as any).finalDay || false  // ADD THIS
-    } : null,
-    options: {
-        skipPlayerProcessing: false,
-        forceUpdate: !!existingGameId || options?.wasEdited,
-        validateOnly: false,
-        doNotScrape: (finalData as any).doNotScrape || false
-    },
-};
+        source: {
+            type: DataSource.SCRAPE,
+            sourceId: sourceUrl,
+            entityId: finalEntityId || getCurrentEntityId(),
+            fetchedAt: new Date().toISOString(),
+            contentHash: (finalData as any).contentHash || null,
+            wasEdited: options?.wasEdited || false
+        },
+        game: {
+            tournamentId: finalData.tournamentId || null,
+            existingGameId: existingGameId || null,
+            name: finalData.name || `Tournament ${finalData.tournamentId}`,
+            gameType: mapToGameType(finalData.gameType) || GameType.TOURNAMENT,
+            gameVariant: mapToGameVariant(finalData.gameVariant),
+            gameStatus: mapToGameStatus(finalData.gameStatus),
+            gameStartDateTime: finalData.gameStartDateTime || new Date().toISOString(),
+            gameEndDateTime: finalData.gameEndDateTime || null,
+            registrationStatus: mapToRegistrationStatus(finalData.registrationStatus),
+            gameFrequency: mapToGameFrequency((finalData as any).gameFrequency),
+            
+            // Financial fields
+            buyIn: finalData.buyIn || 0,
+            rake: finalData.rake || 0,
+            totalRake: (finalData as any).totalRake || 0,
+            guaranteeAmount: finalData.guaranteeAmount || 0,
+            hasGuarantee: finalData.hasGuarantee || false,
+            guaranteeOverlay: (finalData as any).guaranteeOverlay || null,
+            guaranteeSurplus: (finalData as any).guaranteeSurplus || null,
+            
+            // Game details
+            startingStack: finalData.startingStack || 0,
+            prizepool: finalData.prizepool || 0,
+            totalEntries: finalData.totalEntries || 0,
+            totalRebuys: finalData.totalRebuys || 0,
+            totalAddons: finalData.totalAddons || 0,
+            playersRemaining: (finalData as any).playersRemaining || null,
+            totalChipsInPlay: (finalData as any).totalChipsInPlay || null,
+            averagePlayerStack: (finalData as any).averagePlayerStack || null,
+            
+            // Tournament specifics
+            tournamentType: mapToTournamentType(finalData.tournamentType),
+            isSeries: (finalData as any).isSeries || false,
+            seriesName: (finalData as any).seriesName || null,
+            isSatellite: (finalData as any).isSatellite || false,
+            isRegular: (finalData as any).isRegular || false,
+            
+            // Series reference fields
+            tournamentSeriesId: (finalData as any).tournamentSeriesId || null,
+            isMainEvent: (finalData as any).isMainEvent || false,
+            eventNumber: (finalData as any).eventNumber || null,
+            dayNumber: (finalData as any).dayNumber || null,
+            flightLetter: (finalData as any).flightLetter || null,
+            finalDay: (finalData as any).finalDay || false,
+            
+            // Other
+            gameTags: finalData.gameTags?.filter((tag): tag is string => tag !== null) || [],
+            totalDuration: (finalData as any).totalDuration || null,
+            revenueByBuyIns: (finalData as any).revenueByBuyIns || null,
+            profitLoss: (finalData as any).profitLoss || null
+        },
+        players: playerData,
+        venue: {
+            venueId: venueId || null,
+            venueName: (finalData as any).venueName || null,
+            suggestedVenueId: (finalData as any).venueMatch?.autoAssignedVenue?.id || null,
+            confidence: (finalData as any).venueMatch?.autoAssignedVenue?.score || 0
+        },
+        series: (finalData as any).isSeries && (finalData as any).seriesName ? {
+            seriesId: null,
+            suggestedSeriesId: (finalData as any).seriesMatch?.seriesTitleId ||
+                        (finalData as any).seriesTitleId || null,
+            seriesName: (finalData as any).seriesName,
+            year: (finalData as any).seriesYear || 
+                new Date(finalData.gameStartDateTime || new Date()).getFullYear(),
+            isMainEvent: (finalData as any).isMainEvent || false,
+            eventNumber: (finalData as any).eventNumber || null,
+            dayNumber: (finalData as any).dayNumber || null,
+            flightLetter: (finalData as any).flightLetter || null,
+            finalDay: (finalData as any).finalDay || false,
+            confidence: (finalData as any).seriesMatch?.score || 0.8
+        } : null,
+        options: {
+            skipPlayerProcessing: data.gameStatus === 'NOT_PUBLISHED' ? true : false,
+            forceUpdate: !!existingGameId || options?.wasEdited,
+            validateOnly: false,
+            doNotScrape: (finalData as any).doNotScrape || false
+        },
+    };
     
     // Add levels if present
     if (finalData.levels && finalData.levels.length > 0) {
-        (saveGameInput.game as any).levels = finalData.levels.map((level: any) => ({
-            levelNumber: level.levelNumber,
-            durationMinutes: level.durationMinutes || 0,
-            smallBlind: level.smallBlind || 0,
-            bigBlind: level.bigBlind || 0,
-            ante: level.ante || null
-            // Note: breakMinutes removed as it doesn't exist on ScrapedTournamentLevel
-        }));
+        console.log('[GameService] Raw levels data:', JSON.stringify(finalData.levels, null, 2));
+        (saveGameInput.game as any).levels = finalData.levels
+            .filter((level: any) => level && level.levelNumber != null)  // Filter out invalid levels
+            .map((level: any) => ({
+                levelNumber: parseInt(level.levelNumber) || 0,
+                durationMinutes: parseInt(level.durationMinutes) || 0,
+                smallBlind: parseInt(level.smallBlind) || 0,
+                bigBlind: parseInt(level.bigBlind) || 0,
+                ante: level.ante != null ? parseInt(level.ante) : null
+            }));
     }
     
     console.log('[GameService] Calling saveGame mutation with input:', {
@@ -467,7 +518,8 @@ export const saveGameDataToBackend = async (
         playerCount: saveGameInput.players?.totalPlayers || 0,
         existingGameId,
         wasEdited: options?.wasEdited,
-        changedFields: auditTrail?.changedFields
+        changedFields: auditTrail?.changedFields,
+        isNotPublished: data.gameStatus === 'NOT_PUBLISHED'
     });
     
     try {
@@ -504,82 +556,6 @@ export const saveGameDataToBackend = async (
         return result;
     } catch (error) {
         console.error('[GameService] Error saving game data:', error);
-        throw error;
-    }
-};
-
-/**
- * LEGACY: Save using the old saveTournamentData mutation
- * @deprecated Use saveGameDataToBackend instead
- */
-export const saveGameDataToBackendLegacy = async (
-    sourceUrl: string,
-    venueId: string | null | undefined,
-    data: GameData | ScrapedGameData,
-    existingGameId: string | null | undefined,
-    entityId?: string | null
-): Promise<any> => {
-    const client = generateClient();
-    console.log(`[GameService] Saving tournament data (LEGACY) for ${sourceUrl}...`);
-    
-    const saveTournamentInput: APITypes.SaveTournamentInput = {
-        sourceUrl: sourceUrl,
-        venueId: venueId || null,
-        existingGameId: existingGameId || null,
-        doNotScrape: (data as any).doNotScrape || false,
-        data: {
-            name: data.name || `Tournament ${data.tournamentId}`,
-            gameStartDateTime: data.gameStartDateTime || new Date().toISOString(),
-            gameEndDateTime: data.gameEndDateTime || null,
-            gameStatus: data.gameStatus as APITypes.GameStatus || APITypes.GameStatus.UNKNOWN,
-            registrationStatus: data.registrationStatus as APITypes.RegistrationStatus || null,
-            gameVariant: data.gameVariant as APITypes.GameVariant || null,
-            gameType: data.gameType as APITypes.GameType || APITypes.GameType.TOURNAMENT,
-            prizepool: data.prizepool || null,
-            totalEntries: data.totalEntries || null,
-            totalRebuys: data.totalRebuys || null,
-            totalAddons: data.totalAddons || null,
-            totalDuration: (data as any).totalDuration || null,
-            gameTags: data.gameTags?.filter((tag): tag is string => tag !== null) || null,
-            tournamentType: data.tournamentType as APITypes.TournamentType || null,
-            buyIn: data.buyIn || null,
-            rake: data.rake || null,
-            startingStack: data.startingStack || null,
-            hasGuarantee: data.hasGuarantee || false,
-            guaranteeAmount: data.guaranteeAmount || null,
-            levels: data.levels?.map((level: any) => ({
-                levelNumber: level.levelNumber,
-                durationMinutes: level.durationMinutes || null,
-                smallBlind: level.smallBlind || null,
-                bigBlind: level.bigBlind || null,
-                ante: level.ante || null
-                // Note: breakMinutes removed as it doesn't exist on ScrapedTournamentLevel
-            })) || null
-        },
-        originalScrapedData: JSON.stringify(data),
-        venueAssignmentStatus: (data as any).venueAssignmentStatus || null,
-        requiresVenueAssignment: (data as any).requiresVenueAssignment || null,
-        suggestedVenueName: (data as any).suggestedVenueName || null,
-        venueAssignmentConfidence: (data as any).venueAssignmentConfidence || null,
-        entityId: entityId || (data as any).entityId || null
-    };
-    
-    try {
-        const response = await client.graphql({
-            query: saveTournamentDataCustom,
-            variables: { input: saveTournamentInput }
-        }) as GraphQLResult<any>;
-        
-        if (response.errors) {
-            console.error('[GameService] GraphQL errors:', response.errors);
-            throw new Error(response.errors[0]?.message || 'Failed to save tournament data');
-        }
-        
-        const savedGame = response.data.saveTournamentData;
-        console.log('[GameService] Tournament data saved (LEGACY):', savedGame.id);
-        return savedGame;
-    } catch (error) {
-        console.error('[GameService] Error saving tournament data (LEGACY):', error);
         throw error;
     }
 };

@@ -176,7 +176,8 @@ const matchSeriesWithDatabase = (gameName, seriesTitles = [], venues = []) => {
             return {
                 isSeries: true,
                 seriesName: exactMatchFound.title,
-                seriesId: exactMatchFound.id,
+                seriesTitleId: exactMatchFound.id,    // This is TournamentSeriesTitle.id
+                tournamentSeriesId: null,              // Will be resolved by saveGameFunction
                 isRegular: false,
                 ...details
             };
@@ -209,7 +210,8 @@ const matchSeriesWithDatabase = (gameName, seriesTitles = [], venues = []) => {
                 return {
                     isSeries: true,
                     seriesName: matchedSeries.seriesTitle,
-                    seriesId: matchedSeries.seriesId,
+                    seriesTitleId: matchedSeries.seriesId,  // This is TournamentSeriesTitle.id
+                    tournamentSeriesId: null,                // Will be resolved by saveGameFunction
                     isRegular: false,
                     ...details
                 };
@@ -673,6 +675,18 @@ const defaultStrategy = {
                 ctx.add('tournamentSeriesId', seriesInfo.seriesId);  // Add this!
             }
             
+            if (seriesInfo.seriesTitleId) {
+                ctx.add('seriesMatch', {
+                    seriesTitleId: seriesInfo.seriesTitleId,  // TournamentSeriesTitle.id
+                    seriesName: seriesInfo.seriesName,
+                    score: seriesInfo.confidence || 0.85
+                });
+                
+                // Keep individual fields for backward compatibility
+                ctx.add('seriesTitleId', seriesInfo.seriesTitleId);
+                // DO NOT set tournamentSeriesId here - let saveGameFunction resolve it
+            }
+
             // Add series structure fields
             if (seriesInfo.dayNumber) ctx.add('dayNumber', seriesInfo.dayNumber);
             if (seriesInfo.flightLetter) ctx.add('flightLetter', seriesInfo.flightLetter);

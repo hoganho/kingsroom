@@ -1,15 +1,16 @@
 // Complete enhanced ScrapeOptionsModal.tsx with ALL original functionality preserved
 // This keeps the sophisticated S3 storage checking, update detection, and adds doNotScrape handling
+// UPDATED: Added "Save as Placeholder" option for NOT_PUBLISHED games
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { X, Database, Globe, AlertCircle, RefreshCw, CheckCircle, HardDrive } from 'lucide-react';
+import { X, Database, Globe, AlertCircle, RefreshCw, CheckCircle, HardDrive, Save } from 'lucide-react';
 import { generateClient } from 'aws-amplify/api';
 import { getScrapeURLForCache } from '../../graphql/customQueries';
 
 interface ScrapeOptionsModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSelectOption: (option: 'S3' | 'LIVE', s3Key?: string) => void;
+    onSelectOption: (option: 'S3' | 'LIVE' | 'SKIP' | 'SAVE_PLACEHOLDER', s3Key?: string) => void;
     url: string;
     entityId: string;
     doNotScrape?: boolean;
@@ -211,6 +212,10 @@ export const ScrapeOptionsModal: React.FC<ScrapeOptionsModalProps> = ({
         }
     };
 
+    const handleSaveAsPlaceholder = () => {
+        onSelectOption('SAVE_PLACEHOLDER');
+    };
+
     const formatDate = (dateStr?: string) => {
         if (!dateStr) return 'N/A';
         return new Date(dateStr).toLocaleString();
@@ -249,6 +254,7 @@ export const ScrapeOptionsModal: React.FC<ScrapeOptionsModalProps> = ({
     };
 
     const statusDisplay = getStatusDisplay();
+    const isNotPublished = gameStatus === 'NOT_PUBLISHED';
 
     if (!isOpen) return null;
 
@@ -377,6 +383,17 @@ export const ScrapeOptionsModal: React.FC<ScrapeOptionsModalProps> = ({
 
                                 {/* Action Buttons */}
                                 <div className="space-y-3 pt-2">
+                                    {/* Save as Placeholder Button - Only for NOT_PUBLISHED games */}
+                                    {isNotPublished && (
+                                        <button
+                                            onClick={handleSaveAsPlaceholder}
+                                            className="w-full px-4 py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors bg-purple-600 text-white hover:bg-purple-700"
+                                        >
+                                            <Save className="h-4 w-4" />
+                                            <span>Save as Placeholder</span>
+                                        </button>
+                                    )}
+
                                     {/* Use S3 HTML Button */}
                                     <button
                                         onClick={handleUseS3}
@@ -420,7 +437,9 @@ export const ScrapeOptionsModal: React.FC<ScrapeOptionsModalProps> = ({
                                 {doNotScrape && (
                                     <div className="mt-4 pt-4 border-t border-gray-200">
                                         <p className="text-xs text-gray-500 text-center">
-                                            Force scraping restricted tournaments is logged for audit purposes
+                                            {isNotPublished 
+                                                ? 'Saving as placeholder will create a record to track this tournament ID'
+                                                : 'Force scraping restricted tournaments is logged for audit purposes'}
                                         </p>
                                     </div>
                                 )}
