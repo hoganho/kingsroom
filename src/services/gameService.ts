@@ -511,7 +511,7 @@ export const saveGameDataToBackend = async (
         
         // Only add to input if we have valid levels
         if (validLevels.length > 0) {
-            (saveGameInput.game as any).levels = validLevels;
+            (saveGameInput.game as any).levels = JSON.stringify(validLevels);  // <-- STRINGIFY IT
         }
     }
     

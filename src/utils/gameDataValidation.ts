@@ -108,7 +108,6 @@ export const validateEditedGameData = (data: GameData): ValidationResult => {
     // Validate and fix levels
     if (correctedData.levels && correctedData.levels.length > 0) {
         correctedData.levels = correctedData.levels.map(level => ({
-            ...level,
             levelNumber: Math.max(1, level.levelNumber),
             smallBlind: Math.max(0, level.smallBlind),
             bigBlind: Math.max(0, level.bigBlind),
