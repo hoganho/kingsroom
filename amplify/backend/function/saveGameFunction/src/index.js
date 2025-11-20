@@ -31,20 +31,22 @@ Amplify Params - DO NOT EDIT */
  * - Support for edited data with audit trails
  * - Improved validation and field tracking
  * - Better change detection
+ * - Series assignment tracking (similar to venue assignment)
  * 
  * Responsibilities:
  * 1. Validate input
  * 2. Resolve venue
- * 3. Save/update game in DynamoDB
- * 4. Track scrape attempts
- * 5. Determine if game is finished
- * 6. Queue for PDP only if finished with results
- * 7. Handle audit trails for edited data
+ * 3. Resolve tournament series
+ * 4. Save/update game in DynamoDB
+ * 5. Track scrape attempts
+ * 6. Determine if game is finished
+ * 7. Queue for PDP only if finished with results
+ * 8. Handle audit trails for edited data
  * ===================================================================
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, PutCommand, UpdateCommand, GetCommand, QueryCommand, BatchWriteCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, PutCommand, UpdateCommand, GetCommand, QueryCommand, BatchWriteCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
 const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
 const { v4: uuidv4 } = require('uuid');
 
@@ -354,6 +356,239 @@ const matchVenueByName = async (venueName, entityId) => {
 };
 
 // ===================================================================
+// SERIES RESOLUTION
+// ===================================================================
+
+/**
+ * Extract year from date string or Date object
+ */
+const extractYearFromDate = (dateValue) => {
+    if (!dateValue) return null;
+    
+    try {
+        const date = new Date(dateValue);
+        if (!isNaN(date.getTime())) {
+            return date.getFullYear();
+        }
+    } catch (error) {
+        console.error('[SAVE-GAME] Error extracting year from date:', error);
+    }
+    return null;
+};
+
+/**
+ * Resolve tournament series from input
+ * @param {Object} seriesRef - Series reference from input
+ * @param {string} entityId - Entity ID for context
+ * @param {string} gameStartDateTime - Game start date to extract year from
+ */
+const resolveSeries = async (seriesRef, entityId, gameStartDateTime) => {
+    // No series reference or not a series game
+    if (!seriesRef || !seriesRef.seriesName) {
+        return {
+            tournamentSeriesId: null,
+            seriesName: null,
+            status: 'NOT_SERIES',
+            confidence: 0
+        };
+    }
+    
+    // Explicit seriesId provided - use it directly (manual assignment)
+    if (seriesRef.seriesId) {
+        const series = await getSeriesById(seriesRef.seriesId);
+        return {
+            tournamentSeriesId: seriesRef.seriesId,
+            seriesName: series?.name || seriesRef.seriesName,
+            status: 'MANUALLY_ASSIGNED',
+            confidence: 1.0
+        };
+    }
+    
+    // Suggested series from auto-detection
+    if (seriesRef.suggestedSeriesId) {
+        const series = await getSeriesById(seriesRef.suggestedSeriesId);
+        return {
+            tournamentSeriesId: seriesRef.suggestedSeriesId,
+            seriesName: series?.name || seriesRef.seriesName,
+            status: 'AUTO_ASSIGNED',
+            confidence: seriesRef.confidence || 0.8
+        };
+    }
+    
+    // Extract year from gameStartDateTime if not provided in seriesRef
+    const year = seriesRef.year || extractYearFromDate(gameStartDateTime);
+    
+    if (!year) {
+        console.warn('[SAVE-GAME] Could not determine year for series matching');
+        return {
+            tournamentSeriesId: null,
+            seriesName: seriesRef.seriesName,
+            status: 'PENDING_ASSIGNMENT',
+            confidence: 0,
+            suggestedName: seriesRef.seriesName
+        };
+    }
+    
+    // Try to match by name and year
+    if (seriesRef.seriesName && year) {
+        const matched = await matchSeriesByNameAndYear(
+            seriesRef.seriesName, 
+            year, 
+            entityId
+        );
+        if (matched) {
+            return {
+                tournamentSeriesId: matched.id,
+                seriesName: matched.name,
+                status: 'AUTO_ASSIGNED',
+                confidence: matched.confidence
+            };
+        }
+        
+        // No match found - game is series but not linked
+        return {
+            tournamentSeriesId: null,
+            seriesName: seriesRef.seriesName,
+            status: 'PENDING_ASSIGNMENT',
+            confidence: 0,
+            suggestedName: seriesRef.seriesName,
+            year: year // Include year in response for debugging
+        };
+    }
+    
+    // Series game but no series identified
+    return {
+        tournamentSeriesId: null,
+        seriesName: seriesRef.seriesName || 'Unknown Series',
+        status: 'UNASSIGNED',
+        confidence: 0
+    };
+};
+
+/**
+ * Get series by ID
+ */
+const getSeriesById = async (seriesId) => {
+    try {
+        const result = await monitoredDdbDocClient.send(new GetCommand({
+            TableName: getTableName('TournamentSeries'),
+            Key: { id: seriesId }
+        }));
+        return result.Item;
+    } catch (error) {
+        console.error(`[SAVE-GAME] Error fetching series ${seriesId}:`, error);
+        return null;
+    }
+};
+
+/**
+ * Match series by name and year
+ * This function matches TournamentSeries based on:
+ * 1. Series name (exact or contains match)
+ * 2. Year must match exactly
+ * 3. Entity context (if available through venue relationship)
+ */
+const matchSeriesByNameAndYear = async (seriesName, year, entityId) => {
+    if (!seriesName || !year) {
+        console.error('[SAVE-GAME] Series name and year are required for matching');
+        return null;
+    }
+    
+    const normalizedName = seriesName.toLowerCase().trim();
+    
+    try {
+        console.log(`[SAVE-GAME] Searching for series: "${seriesName}" in year ${year}`);
+        
+        // First, try to get all TournamentSeries and filter
+        // Note: This might need optimization with proper indexes in production
+        const result = await monitoredDdbDocClient.send(new QueryCommand({
+            TableName: getTableName('TournamentSeries'),
+            IndexName: 'byYear', // Assuming we have or will create this index
+            KeyConditionExpression: '#year = :year',
+            ExpressionAttributeNames: {
+                '#year': 'year'
+            },
+            ExpressionAttributeValues: {
+                ':year': year
+            }
+        }));
+        
+        if (!result.Items || result.Items.length === 0) {
+            // Fallback: Scan with filter (less efficient but works without index)
+            const scanResult = await monitoredDdbDocClient.send(new ScanCommand({
+                TableName: getTableName('TournamentSeries'),
+                FilterExpression: '#year = :year',
+                ExpressionAttributeNames: {
+                    '#year': 'year'
+                },
+                ExpressionAttributeValues: {
+                    ':year': year
+                }
+            }));
+            
+            result.Items = scanResult.Items || [];
+        }
+        
+        // Now filter by name
+        let bestMatch = null;
+        let bestConfidence = 0;
+        
+        for (const series of result.Items) {
+            const seriesNameLower = series.name.toLowerCase().trim();
+            
+            // Exact match
+            if (seriesNameLower === normalizedName) {
+                return {
+                    id: series.id,
+                    name: series.name,
+                    confidence: 1.0
+                };
+            }
+            
+            // Check if series name contains the search term or vice versa
+            if (seriesNameLower.includes(normalizedName) || normalizedName.includes(seriesNameLower)) {
+                const confidence = 0.85;
+                if (confidence > bestConfidence) {
+                    bestMatch = series;
+                    bestConfidence = confidence;
+                }
+            }
+            
+            // Check aliases if available
+            if (series.aliases && Array.isArray(series.aliases)) {
+                for (const alias of series.aliases) {
+                    if (alias.toLowerCase().trim() === normalizedName) {
+                        return {
+                            id: series.id,
+                            name: series.name,
+                            confidence: 0.95
+                        };
+                    }
+                }
+            }
+        }
+        
+        if (bestMatch) {
+            console.log(`[SAVE-GAME] Found series match: ${bestMatch.name} (${year}) with confidence ${bestConfidence}`);
+            return {
+                id: bestMatch.id,
+                name: bestMatch.name,
+                confidence: bestConfidence
+            };
+        }
+        
+        console.log(`[SAVE-GAME] No series found matching "${seriesName}" in year ${year}`);
+        return null;
+        
+    } catch (error) {
+        console.error('[SAVE-GAME] Error matching series by name and year:', error);
+        // Add the missing import at the top of the file if needed
+        const { ScanCommand } = require('@aws-sdk/lib-dynamodb');
+        return null;
+    }
+};
+
+// ===================================================================
 // GAME OPERATIONS
 // ===================================================================
 
@@ -409,9 +644,9 @@ const findExistingGame = async (input) => {
 };
 
 /**
- * Create new game in DynamoDB - Enhanced with audit support
+ * Create new game in DynamoDB - Enhanced with audit and series support
  */
-const createGame = async (input, venueResolution) => {
+const createGame = async (input, venueResolution, seriesResolution) => {
     const gameId = uuidv4();
     const now = new Date().toISOString();
     const timestamp = Date.now();
@@ -459,7 +694,6 @@ const createGame = async (input, venueResolution) => {
         // Categorization
         tournamentType: input.game.tournamentType,
         isSeries: input.game.isSeries || false,
-        seriesName: input.game.seriesName,
         isSatellite: input.game.isSatellite || false,
         isRegular: input.game.isRegular || false,
         gameTags: input.game.gameTags || [],
@@ -467,14 +701,6 @@ const createGame = async (input, venueResolution) => {
         revenueByBuyIns: input.game.revenueByBuyIns || null,
         profitLoss: input.game.profitLoss || null,
         
-        // Series
-        tournamentSeriesId: input.game.tournamentSeriesId || input.series?.seriesId || null,
-        isMainEvent: input.game.isMainEvent || input.series?.isMainEvent || false,
-        eventNumber: input.game.eventNumber || input.series?.eventNumber || null,
-        dayNumber: input.game.dayNumber || input.series?.dayNumber || null,
-        flightLetter: input.game.flightLetter || input.series?.flightLetter || null,
-        finalDay: input.game.finalDay || input.series?.finalDay || false,
-
         // Structure data (levels)
         levels: input.game.levels || [],
         
@@ -490,6 +716,20 @@ const createGame = async (input, venueResolution) => {
         venueAssignmentConfidence: venueResolution.confidence,
         requiresVenueAssignment: venueResolution.venueId === UNASSIGNED_VENUE_ID,
         
+        // Series assignment
+        tournamentSeriesId: seriesResolution.tournamentSeriesId,
+        seriesName: seriesResolution.seriesName || input.game.seriesName,
+        seriesAssignmentStatus: seriesResolution.status,
+        seriesAssignmentConfidence: seriesResolution.confidence,
+        suggestedSeriesName: seriesResolution.suggestedName,
+        
+        // Series structure fields
+        isMainEvent: input.series?.isMainEvent || input.game.isMainEvent || false,
+        eventNumber: input.series?.eventNumber || input.game.eventNumber || null,
+        dayNumber: input.series?.dayNumber || input.game.dayNumber || null,
+        flightLetter: input.series?.flightLetter || input.game.flightLetter || null,
+        finalDay: input.series?.finalDay || input.game.finalDay || false,
+
         // Entity
         entityId: input.source.entityId,
         
@@ -507,7 +747,7 @@ const createGame = async (input, venueResolution) => {
         if (auditInfo) {
             game.lastEditedAt = auditInfo.editedAt;
             game.lastEditedBy = auditInfo.editedBy;
-            game.editHistory = JSON.stringify([auditInfo]); // Start with first edit
+            game.editHistory = JSON.stringify([auditInfo]);
         }
     }
     
@@ -521,9 +761,9 @@ const createGame = async (input, venueResolution) => {
 };
 
 /**
- * Update existing game in DynamoDB - Enhanced with audit trail
+ * Update existing game in DynamoDB - Enhanced with audit trail and series
  */
-const updateGame = async (existingGame, input, venueResolution) => {
+const updateGame = async (existingGame, input, venueResolution, seriesResolution) => {
     const now = new Date().toISOString();
     const timestamp = Date.now();
     const fieldsUpdated = [];
@@ -575,17 +815,8 @@ const updateGame = async (existingGame, input, venueResolution) => {
     checkAndUpdate('profitLoss', input.game.profitLoss, existingGame.profitLoss);
     checkAndUpdate('isRegular', input.game.isRegular, existingGame.isRegular);
     checkAndUpdate('isSeries', input.game.isSeries, existingGame.isSeries);
-    checkAndUpdate('seriesName', input.game.seriesName, existingGame.seriesName);
     checkAndUpdate('isSatellite', input.game.isSatellite, existingGame.isSatellite);
     
-    // Series fields
-    checkAndUpdate('tournamentSeriesId', input.game.tournamentSeriesId || input.series?.seriesId, existingGame.tournamentSeriesId);
-    checkAndUpdate('isMainEvent', input.game.isMainEvent || input.series?.isMainEvent, existingGame.isMainEvent);
-    checkAndUpdate('eventNumber', input.game.eventNumber || input.series?.eventNumber, existingGame.eventNumber);
-    checkAndUpdate('dayNumber', input.game.dayNumber || input.series?.dayNumber, existingGame.dayNumber);
-    checkAndUpdate('flightLetter', input.game.flightLetter || input.series?.flightLetter, existingGame.flightLetter);
-    checkAndUpdate('finalDay', input.game.finalDay || input.series?.finalDay, existingGame.finalDay);
-
     // Structure (levels)
     if (input.game.levels) {
         checkAndUpdate('levels', input.game.levels, existingGame.levels);
@@ -603,8 +834,30 @@ const updateGame = async (existingGame, input, venueResolution) => {
         checkAndUpdate('venueAssignmentStatus', venueResolution.status, existingGame.venueAssignmentStatus);
         checkAndUpdate('venueAssignmentConfidence', venueResolution.confidence, existingGame.venueAssignmentConfidence);
         checkAndUpdate('requiresVenueAssignment', venueResolution.venueId === UNASSIGNED_VENUE_ID, existingGame.requiresVenueAssignment);
+        if (venueResolution.suggestedName) {
+            checkAndUpdate('suggestedVenueName', venueResolution.suggestedName, existingGame.suggestedVenueName);
+        }
     }
     
+    // Series (only update if better confidence or explicit assignment)
+    if (seriesResolution.confidence > (existingGame.seriesAssignmentConfidence || 0) ||
+        seriesResolution.status === 'MANUALLY_ASSIGNED') {
+        checkAndUpdate('tournamentSeriesId', seriesResolution.tournamentSeriesId, existingGame.tournamentSeriesId);
+        checkAndUpdate('seriesName', seriesResolution.seriesName, existingGame.seriesName);
+        checkAndUpdate('seriesAssignmentStatus', seriesResolution.status, existingGame.seriesAssignmentStatus);
+        checkAndUpdate('seriesAssignmentConfidence', seriesResolution.confidence, existingGame.seriesAssignmentConfidence);
+        if (seriesResolution.suggestedName) {
+            checkAndUpdate('suggestedSeriesName', seriesResolution.suggestedName, existingGame.suggestedSeriesName);
+        }
+    }
+    
+    // Series structure fields (always check for updates)
+    checkAndUpdate('isMainEvent', input.series?.isMainEvent || input.game.isMainEvent, existingGame.isMainEvent);
+    checkAndUpdate('eventNumber', input.series?.eventNumber || input.game.eventNumber, existingGame.eventNumber);
+    checkAndUpdate('dayNumber', input.series?.dayNumber || input.game.dayNumber, existingGame.dayNumber);
+    checkAndUpdate('flightLetter', input.series?.flightLetter || input.game.flightLetter, existingGame.flightLetter);
+    checkAndUpdate('finalDay', input.series?.finalDay || input.game.finalDay, existingGame.finalDay);
+
     // Track if this was edited data
     if (input.source.wasEdited) {
         updateFields.wasEdited = true;
@@ -703,7 +956,7 @@ const updateScrapeURL = async (sourceUrl, gameId, gameStatus, doNotScrape = fals
             ExpressionAttributeValues: {
                 ':gameId': gameId,
                 ':gameStatus': gameStatus,
-                ':status': doNotScrape ? 'SKIPPED_DONOTSCRAPE' : (wasEdited ? 'EDITED' : 'SUCCESS'),
+                ':status': doNotScrape ? 'SKIPPED_DONOTSCRAPE' : (wasEdited ? 'SUCCESS_EDITED' : 'SUCCESS'),
                 ':now': now,
                 ':dns': doNotScrape,
                 ':wasEdited': wasEdited
@@ -854,6 +1107,7 @@ const queueForPDP = async (game, input) => {
             entityId: game.entityId,
             isSeries: game.isSeries,
             seriesName: game.seriesName,
+            tournamentSeriesId: game.tournamentSeriesId,
             isSatellite: game.isSatellite,
             gameFrequency: game.gameFrequency,
             wasEdited: game.wasEdited || false
@@ -1000,10 +1254,17 @@ exports.handler = async (event) => {
         const venueResolution = await resolveVenue(input.venue, input.source.entityId);
         console.log(`[SAVE-GAME] Venue resolved:`, venueResolution);
         
-        // === 4. FIND EXISTING GAME ===
+        // === 4. RESOLVE SERIES ===
+        // Pass gameStartDateTime so we can extract the year for matching
+        const seriesResolution = input.game.isSeries && input.series 
+            ? await resolveSeries(input.series, input.source.entityId, input.game.gameStartDateTime)
+            : { tournamentSeriesId: null, seriesName: null, status: 'NOT_SERIES', confidence: 0 };
+        console.log(`[SAVE-GAME] Series resolved:`, seriesResolution);
+
+        // === 5. FIND EXISTING GAME ===
         const existingGame = await findExistingGame(input);
         
-        // === 5. CREATE OR UPDATE GAME ===
+        // === 6. CREATE OR UPDATE GAME ===
         let saveResult;
         
         if (existingGame && !input.options?.forceUpdate) {
@@ -1022,17 +1283,17 @@ exports.handler = async (event) => {
                     fieldsUpdated: []
                 };
             } else {
-                saveResult = await updateGame(existingGame, input, venueResolution);
+                saveResult = await updateGame(existingGame, input, venueResolution, seriesResolution);
             }
         } else if (existingGame && input.options?.forceUpdate) {
-            saveResult = await updateGame(existingGame, input, venueResolution);
+            saveResult = await updateGame(existingGame, input, venueResolution, seriesResolution);
         } else {
-            saveResult = await createGame(input, venueResolution);
+            saveResult = await createGame(input, venueResolution, seriesResolution);
         }
         
         const { gameId, game, wasNewGame, fieldsUpdated } = saveResult;
         
-        // === 6. TRACK SCRAPE (for scrape sources) ===
+        // === 7. TRACK SCRAPE (for scrape sources) ===
         if (input.source.type === 'SCRAPE') {
             await updateScrapeURL(
                 input.source.sourceId, 
@@ -1044,7 +1305,7 @@ exports.handler = async (event) => {
             await createScrapeAttempt(input, gameId, wasNewGame, fieldsUpdated);
         }
         
-        // === 7. DETERMINE IF FINISHED AND QUEUE FOR PDP ===
+        // === 8. DETERMINE IF FINISHED AND QUEUE FOR PDP ===
         const pdpDecision = shouldQueueForPDP(input, game);
         let playerProcessingQueued = false;
         
@@ -1056,7 +1317,7 @@ exports.handler = async (event) => {
             await updatePlayerEntries(game, input);
         }
         
-        // === 8. BUILD RESPONSE ===
+        // === 9. BUILD RESPONSE ===
         const action = wasNewGame ? 'CREATED' : 
                        fieldsUpdated.length > 0 ? 'UPDATED' : 'SKIPPED';
         
@@ -1083,6 +1344,12 @@ exports.handler = async (event) => {
                 venueName: venueResolution.venueName,
                 status: venueResolution.status,
                 confidence: venueResolution.confidence
+            },
+            seriesAssignment: {
+                tournamentSeriesId: seriesResolution.tournamentSeriesId,
+                seriesName: seriesResolution.seriesName,
+                status: seriesResolution.status,
+                confidence: seriesResolution.confidence
             },
             fieldsUpdated: fieldsUpdated,
             wasEdited: input.source.wasEdited || false

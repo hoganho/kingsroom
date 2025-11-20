@@ -1198,6 +1198,26 @@ export const schema = {
                 {
                     "type": "key",
                     "properties": {
+                        "name": "byName",
+                        "fields": [
+                            "name",
+                            "year"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byYear",
+                        "fields": [
+                            "year",
+                            "name"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
                         "name": "byTournamentSeriesTitle",
                         "fields": [
                             "tournamentSeriesTitleId",
@@ -1535,6 +1555,34 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "wasEdited": {
+                    "name": "wasEdited",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastEditedAt": {
+                    "name": "lastEditedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastEditedBy": {
+                    "name": "lastEditedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "editHistory": {
+                    "name": "editHistory",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "venueAssignmentStatus": {
                     "name": "venueAssignmentStatus",
                     "isArray": false,
@@ -1562,6 +1610,36 @@ export const schema = {
                     "name": "venueAssignmentConfidence",
                     "isArray": false,
                     "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesAssignmentStatus": {
+                    "name": "seriesAssignmentStatus",
+                    "isArray": false,
+                    "type": {
+                        "enum": "SeriesAssignmentStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesAssignmentConfidence": {
+                    "name": "seriesAssignmentConfidence",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "suggestedSeriesName": {
+                    "name": "suggestedSeriesName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "levels": {
+                    "name": "levels",
+                    "isArray": false,
+                    "type": "AWSJSON",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -5645,6 +5723,13 @@ export const schema = {
                     "type": "Int",
                     "isRequired": false,
                     "attributes": []
+                },
+                "wasEdited": {
+                    "name": "wasEdited",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
                 }
             },
             "syncable": true,
@@ -5901,6 +5986,42 @@ export const schema = {
                 },
                 "structureLabel": {
                     "name": "structureLabel",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "wasEdited": {
+                    "name": "wasEdited",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "scrapedAt": {
+                    "name": "scrapedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "fieldsExtracted": {
+                    "name": "fieldsExtracted",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "contentHash": {
+                    "name": "contentHash",
                     "isArray": false,
                     "type": "String",
                     "isRequired": false,
@@ -6546,6 +6667,16 @@ export const schema = {
                 "RETROACTIVE_ASSIGNED"
             ]
         },
+        "SeriesAssignmentStatus": {
+            "name": "SeriesAssignmentStatus",
+            "values": [
+                "AUTO_ASSIGNED",
+                "MANUALLY_ASSIGNED",
+                "PENDING_ASSIGNMENT",
+                "UNASSIGNED",
+                "NOT_SERIES"
+            ]
+        },
         "ScraperJobTriggerSource": {
             "name": "ScraperJobTriggerSource",
             "values": [
@@ -6588,7 +6719,10 @@ export const schema = {
                 "BLANK",
                 "NO_CHANGES",
                 "UPDATED",
-                "SAVED"
+                "SAVED",
+                "SUCCESS_EDITED",
+                "SAVED_EDITED",
+                "UPDATED_EDITED"
             ]
         },
         "TimeRange": {
@@ -9043,6 +9177,15 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "seriesAssignment": {
+                    "name": "seriesAssignment",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "SaveSeriesAssignmentInfo"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "fieldsUpdated": {
                     "name": "fieldsUpdated",
                     "isArray": true,
@@ -9050,6 +9193,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": [],
                     "isArrayNullable": true
+                },
+                "wasEdited": {
+                    "name": "wasEdited",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
                 }
             }
         },
@@ -9075,6 +9225,41 @@ export const schema = {
                     "isArray": false,
                     "type": {
                         "enum": "VenueAssignmentStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "confidence": {
+                    "name": "confidence",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "SaveSeriesAssignmentInfo": {
+            "name": "SaveSeriesAssignmentInfo",
+            "fields": {
+                "tournamentSeriesId": {
+                    "name": "tournamentSeriesId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesName": {
+                    "name": "seriesName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "SeriesAssignmentStatus"
                     },
                     "isRequired": false,
                     "attributes": []
@@ -9312,5 +9497,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "0fa69f564b38a34ac083461d33c1e379"
+    "version": "5dd661d6499b3b8ac7792b1eccbcba2e"
 };

@@ -195,6 +195,14 @@ export enum VenueAssignmentStatus {
   RETROACTIVE_ASSIGNED = "RETROACTIVE_ASSIGNED"
 }
 
+export enum SeriesAssignmentStatus {
+  AUTO_ASSIGNED = "AUTO_ASSIGNED",
+  MANUALLY_ASSIGNED = "MANUALLY_ASSIGNED",
+  PENDING_ASSIGNMENT = "PENDING_ASSIGNMENT",
+  UNASSIGNED = "UNASSIGNED",
+  NOT_SERIES = "NOT_SERIES"
+}
+
 export enum ScraperJobTriggerSource {
   SCHEDULED = "SCHEDULED",
   MANUAL = "MANUAL",
@@ -229,7 +237,10 @@ export enum ScrapeAttemptStatus {
   BLANK = "BLANK",
   NO_CHANGES = "NO_CHANGES",
   UPDATED = "UPDATED",
-  SAVED = "SAVED"
+  SAVED = "SAVED",
+  SUCCESS_EDITED = "SUCCESS_EDITED",
+  SAVED_EDITED = "SAVED_EDITED",
+  UPDATED_EDITED = "UPDATED_EDITED"
 }
 
 export enum TimeRange {
@@ -1312,7 +1323,9 @@ type EagerSaveGameResult = {
   readonly playerProcessingQueued?: boolean | null;
   readonly playerProcessingReason?: string | null;
   readonly venueAssignment?: SaveVenueAssignmentInfo | null;
+  readonly seriesAssignment?: SaveSeriesAssignmentInfo | null;
   readonly fieldsUpdated?: (string | null)[] | null;
+  readonly wasEdited?: boolean | null;
 }
 
 type LazySaveGameResult = {
@@ -1324,7 +1337,9 @@ type LazySaveGameResult = {
   readonly playerProcessingQueued?: boolean | null;
   readonly playerProcessingReason?: string | null;
   readonly venueAssignment?: SaveVenueAssignmentInfo | null;
+  readonly seriesAssignment?: SaveSeriesAssignmentInfo | null;
   readonly fieldsUpdated?: (string | null)[] | null;
+  readonly wasEdited?: boolean | null;
 }
 
 export declare type SaveGameResult = LazyLoading extends LazyLoadingDisabled ? EagerSaveGameResult : LazySaveGameResult
@@ -1348,6 +1363,24 @@ type LazySaveVenueAssignmentInfo = {
 export declare type SaveVenueAssignmentInfo = LazyLoading extends LazyLoadingDisabled ? EagerSaveVenueAssignmentInfo : LazySaveVenueAssignmentInfo
 
 export declare const SaveVenueAssignmentInfo: (new (init: ModelInit<SaveVenueAssignmentInfo>) => SaveVenueAssignmentInfo)
+
+type EagerSaveSeriesAssignmentInfo = {
+  readonly tournamentSeriesId?: string | null;
+  readonly seriesName?: string | null;
+  readonly status?: SeriesAssignmentStatus | keyof typeof SeriesAssignmentStatus | null;
+  readonly confidence?: number | null;
+}
+
+type LazySaveSeriesAssignmentInfo = {
+  readonly tournamentSeriesId?: string | null;
+  readonly seriesName?: string | null;
+  readonly status?: SeriesAssignmentStatus | keyof typeof SeriesAssignmentStatus | null;
+  readonly confidence?: number | null;
+}
+
+export declare type SaveSeriesAssignmentInfo = LazyLoading extends LazyLoadingDisabled ? EagerSaveSeriesAssignmentInfo : LazySaveSeriesAssignmentInfo
+
+export declare const SaveSeriesAssignmentInfo: (new (init: ModelInit<SaveSeriesAssignmentInfo>) => SaveSeriesAssignmentInfo)
 
 type EagerGapRange = {
   readonly start: number;
@@ -1866,10 +1899,18 @@ type EagerGame = {
   readonly sourceUrl?: string | null;
   readonly tournamentId?: number | null;
   readonly originalScrapedData?: string | null;
+  readonly wasEdited?: boolean | null;
+  readonly lastEditedAt?: string | null;
+  readonly lastEditedBy?: string | null;
+  readonly editHistory?: string | null;
   readonly venueAssignmentStatus?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
   readonly requiresVenueAssignment?: boolean | null;
   readonly suggestedVenueName?: string | null;
   readonly venueAssignmentConfidence?: number | null;
+  readonly seriesAssignmentStatus?: SeriesAssignmentStatus | keyof typeof SeriesAssignmentStatus | null;
+  readonly seriesAssignmentConfidence?: number | null;
+  readonly suggestedSeriesName?: string | null;
+  readonly levels?: string | null;
   readonly venueId?: string | null;
   readonly venue?: Venue | null;
   readonly tournamentSeriesId?: string | null;
@@ -1929,10 +1970,18 @@ type LazyGame = {
   readonly sourceUrl?: string | null;
   readonly tournamentId?: number | null;
   readonly originalScrapedData?: string | null;
+  readonly wasEdited?: boolean | null;
+  readonly lastEditedAt?: string | null;
+  readonly lastEditedBy?: string | null;
+  readonly editHistory?: string | null;
   readonly venueAssignmentStatus?: VenueAssignmentStatus | keyof typeof VenueAssignmentStatus | null;
   readonly requiresVenueAssignment?: boolean | null;
   readonly suggestedVenueName?: string | null;
   readonly venueAssignmentConfidence?: number | null;
+  readonly seriesAssignmentStatus?: SeriesAssignmentStatus | keyof typeof SeriesAssignmentStatus | null;
+  readonly seriesAssignmentConfidence?: number | null;
+  readonly suggestedSeriesName?: string | null;
+  readonly levels?: string | null;
   readonly venueId?: string | null;
   readonly venue: AsyncItem<Venue | undefined>;
   readonly tournamentSeriesId?: string | null;
@@ -3075,6 +3124,7 @@ type EagerScrapeURL = {
   readonly cachedContentUsedCount?: number | null;
   readonly lastCacheHitAt?: string | null;
   readonly contentSize?: number | null;
+  readonly wasEdited?: boolean | null;
 }
 
 type LazyScrapeURL = {
@@ -3129,6 +3179,7 @@ type LazyScrapeURL = {
   readonly cachedContentUsedCount?: number | null;
   readonly lastCacheHitAt?: string | null;
   readonly contentSize?: number | null;
+  readonly wasEdited?: boolean | null;
 }
 
 export declare type ScrapeURL = LazyLoading extends LazyLoadingDisabled ? EagerScrapeURL : LazyScrapeURL
@@ -3163,6 +3214,11 @@ type EagerScrapeAttempt = {
   readonly fieldsUpdated?: (string | null)[] | null;
   readonly foundKeys?: (string | null)[] | null;
   readonly structureLabel?: string | null;
+  readonly wasEdited?: boolean | null;
+  readonly scrapedAt?: string | null;
+  readonly fieldsExtracted?: (string | null)[] | null;
+  readonly entityId?: string | null;
+  readonly contentHash?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -3193,6 +3249,11 @@ type LazyScrapeAttempt = {
   readonly fieldsUpdated?: (string | null)[] | null;
   readonly foundKeys?: (string | null)[] | null;
   readonly structureLabel?: string | null;
+  readonly wasEdited?: boolean | null;
+  readonly scrapedAt?: string | null;
+  readonly fieldsExtracted?: (string | null)[] | null;
+  readonly entityId?: string | null;
+  readonly contentHash?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }

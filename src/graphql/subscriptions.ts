@@ -176,6 +176,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -195,6 +196,11 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
         fieldsUpdated
         foundKeys
         structureLabel
+        wasEdited
+        scrapedAt
+        fieldsExtracted
+        entityId
+        contentHash
         createdAt
         updatedAt
         _version
@@ -402,6 +408,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -531,10 +538,18 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -860,6 +875,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -879,6 +895,11 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
         fieldsUpdated
         foundKeys
         structureLabel
+        wasEdited
+        scrapedAt
+        fieldsExtracted
+        entityId
+        contentHash
         createdAt
         updatedAt
         _version
@@ -1086,6 +1107,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -1215,10 +1237,18 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -1379,6 +1409,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
     cachedContentUsedCount
     lastCacheHitAt
     contentSize
+    wasEdited
     _version
     _deleted
     _lastChangedAt
@@ -1538,6 +1569,11 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
             fieldsUpdated
             foundKeys
             structureLabel
+            wasEdited
+            scrapedAt
+            fieldsExtracted
+            entityId
+            contentHash
             createdAt
             updatedAt
             _version
@@ -1657,6 +1693,11 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
             fieldsUpdated
             foundKeys
             structureLabel
+            wasEdited
+            scrapedAt
+            fieldsExtracted
+            entityId
+            contentHash
             createdAt
             updatedAt
             _version
@@ -1725,6 +1766,7 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
         cachedContentUsedCount
         lastCacheHitAt
         contentSize
+        wasEdited
         _version
         _deleted
         _lastChangedAt
@@ -1841,10 +1883,18 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -2034,10 +2084,18 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
         sourceUrl
         tournamentId
         originalScrapedData
+        wasEdited
+        lastEditedAt
+        lastEditedBy
+        editHistory
         venueAssignmentStatus
         requiresVenueAssignment
         suggestedVenueName
         venueAssignmentConfidence
+        seriesAssignmentStatus
+        seriesAssignmentConfidence
+        suggestedSeriesName
+        levels
         venueId
         venue {
           id
@@ -2226,10 +2284,18 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -2647,6 +2713,11 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
             fieldsUpdated
             foundKeys
             structureLabel
+            wasEdited
+            scrapedAt
+            fieldsExtracted
+            entityId
+            contentHash
             createdAt
             updatedAt
             _version
@@ -2766,6 +2837,11 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
             fieldsUpdated
             foundKeys
             structureLabel
+            wasEdited
+            scrapedAt
+            fieldsExtracted
+            entityId
+            contentHash
             createdAt
             updatedAt
             _version
@@ -2834,6 +2910,7 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
         cachedContentUsedCount
         lastCacheHitAt
         contentSize
+        wasEdited
         _version
         _deleted
         _lastChangedAt
@@ -2950,10 +3027,18 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -3143,10 +3228,18 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
         sourceUrl
         tournamentId
         originalScrapedData
+        wasEdited
+        lastEditedAt
+        lastEditedBy
+        editHistory
         venueAssignmentStatus
         requiresVenueAssignment
         suggestedVenueName
         venueAssignmentConfidence
+        seriesAssignmentStatus
+        seriesAssignmentConfidence
+        suggestedSeriesName
+        levels
         venueId
         venue {
           id
@@ -3335,10 +3428,18 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -3756,6 +3857,11 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
             fieldsUpdated
             foundKeys
             structureLabel
+            wasEdited
+            scrapedAt
+            fieldsExtracted
+            entityId
+            contentHash
             createdAt
             updatedAt
             _version
@@ -3875,6 +3981,11 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
             fieldsUpdated
             foundKeys
             structureLabel
+            wasEdited
+            scrapedAt
+            fieldsExtracted
+            entityId
+            contentHash
             createdAt
             updatedAt
             _version
@@ -3943,6 +4054,7 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
         cachedContentUsedCount
         lastCacheHitAt
         contentSize
+        wasEdited
         _version
         _deleted
         _lastChangedAt
@@ -4059,10 +4171,18 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -4252,10 +4372,18 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
         sourceUrl
         tournamentId
         originalScrapedData
+        wasEdited
+        lastEditedAt
+        lastEditedBy
+        editHistory
         venueAssignmentStatus
         requiresVenueAssignment
         suggestedVenueName
         venueAssignmentConfidence
+        seriesAssignmentStatus
+        seriesAssignmentConfidence
+        suggestedSeriesName
+        levels
         venueId
         venue {
           id
@@ -4444,10 +4572,18 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -5072,6 +5208,7 @@ export const onCreateScraperState = /* GraphQL */ `subscription OnCreateScraperS
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -5201,10 +5338,18 @@ export const onCreateScraperState = /* GraphQL */ `subscription OnCreateScraperS
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -5590,6 +5735,7 @@ export const onUpdateScraperState = /* GraphQL */ `subscription OnUpdateScraperS
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -5719,10 +5865,18 @@ export const onUpdateScraperState = /* GraphQL */ `subscription OnUpdateScraperS
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -6108,6 +6262,7 @@ export const onDeleteScraperState = /* GraphQL */ `subscription OnDeleteScraperS
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -6237,10 +6392,18 @@ export const onDeleteScraperState = /* GraphQL */ `subscription OnDeleteScraperS
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -6525,10 +6688,18 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -6857,10 +7028,18 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
         sourceUrl
         tournamentId
         originalScrapedData
+        wasEdited
+        lastEditedAt
+        lastEditedBy
+        editHistory
         venueAssignmentStatus
         requiresVenueAssignment
         suggestedVenueName
         venueAssignmentConfidence
+        seriesAssignmentStatus
+        seriesAssignmentConfidence
+        suggestedSeriesName
+        levels
         venueId
         venue {
           id
@@ -7049,10 +7228,18 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -7322,10 +7509,18 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -8153,6 +8348,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -8282,10 +8478,18 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -8571,10 +8775,18 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -8903,10 +9115,18 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
         sourceUrl
         tournamentId
         originalScrapedData
+        wasEdited
+        lastEditedAt
+        lastEditedBy
+        editHistory
         venueAssignmentStatus
         requiresVenueAssignment
         suggestedVenueName
         venueAssignmentConfidence
+        seriesAssignmentStatus
+        seriesAssignmentConfidence
+        suggestedSeriesName
+        levels
         venueId
         venue {
           id
@@ -9095,10 +9315,18 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -9368,10 +9596,18 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -10199,6 +10435,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -10328,10 +10565,18 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -10617,10 +10862,18 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -10949,10 +11202,18 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
         sourceUrl
         tournamentId
         originalScrapedData
+        wasEdited
+        lastEditedAt
+        lastEditedBy
+        editHistory
         venueAssignmentStatus
         requiresVenueAssignment
         suggestedVenueName
         venueAssignmentConfidence
+        seriesAssignmentStatus
+        seriesAssignmentConfidence
+        suggestedSeriesName
+        levels
         venueId
         venue {
           id
@@ -11141,10 +11402,18 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -11414,10 +11683,18 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -12245,6 +12522,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -12374,10 +12652,18 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -12743,10 +13029,18 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -13212,6 +13506,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -13286,10 +13581,18 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -13557,10 +13860,18 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -14026,6 +14337,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -14100,10 +14412,18 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -14371,10 +14691,18 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -14840,6 +15168,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -14914,10 +15243,18 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -15133,10 +15470,18 @@ export const onCreateTournamentSeriesTitle = /* GraphQL */ `subscription OnCreat
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -15329,10 +15674,18 @@ export const onUpdateTournamentSeriesTitle = /* GraphQL */ `subscription OnUpdat
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -15525,10 +15878,18 @@ export const onDeleteTournamentSeriesTitle = /* GraphQL */ `subscription OnDelet
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -15849,10 +16210,18 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -16318,6 +16687,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -16392,10 +16762,18 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -16488,10 +16866,18 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
         sourceUrl
         tournamentId
         originalScrapedData
+        wasEdited
+        lastEditedAt
+        lastEditedBy
+        editHistory
         venueAssignmentStatus
         requiresVenueAssignment
         suggestedVenueName
         venueAssignmentConfidence
+        seriesAssignmentStatus
+        seriesAssignmentConfidence
+        suggestedSeriesName
+        levels
         venueId
         venue {
           id
@@ -16680,10 +17066,18 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -17100,10 +17494,18 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -17569,6 +17971,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -17643,10 +18046,18 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -17739,10 +18150,18 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
         sourceUrl
         tournamentId
         originalScrapedData
+        wasEdited
+        lastEditedAt
+        lastEditedBy
+        editHistory
         venueAssignmentStatus
         requiresVenueAssignment
         suggestedVenueName
         venueAssignmentConfidence
+        seriesAssignmentStatus
+        seriesAssignmentConfidence
+        suggestedSeriesName
+        levels
         venueId
         venue {
           id
@@ -17931,10 +18350,18 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -18351,10 +18778,18 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -18820,6 +19255,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -18894,10 +19330,18 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -18990,10 +19434,18 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
         sourceUrl
         tournamentId
         originalScrapedData
+        wasEdited
+        lastEditedAt
+        lastEditedBy
+        editHistory
         venueAssignmentStatus
         requiresVenueAssignment
         suggestedVenueName
         venueAssignmentConfidence
+        seriesAssignmentStatus
+        seriesAssignmentConfidence
+        suggestedSeriesName
+        levels
         venueId
         venue {
           id
@@ -19182,10 +19634,18 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -19363,10 +19823,18 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
     sourceUrl
     tournamentId
     originalScrapedData
+    wasEdited
+    lastEditedAt
+    lastEditedBy
+    editHistory
     venueAssignmentStatus
     requiresVenueAssignment
     suggestedVenueName
     venueAssignmentConfidence
+    seriesAssignmentStatus
+    seriesAssignmentConfidence
+    suggestedSeriesName
+    levels
     venueId
     venue {
       id
@@ -19562,10 +20030,18 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -20031,6 +20507,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -20105,10 +20582,18 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -20317,10 +20802,18 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -20506,10 +20999,18 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -20663,10 +21164,18 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
         sourceUrl
         tournamentId
         originalScrapedData
+        wasEdited
+        lastEditedAt
+        lastEditedBy
+        editHistory
         venueAssignmentStatus
         requiresVenueAssignment
         suggestedVenueName
         venueAssignmentConfidence
+        seriesAssignmentStatus
+        seriesAssignmentConfidence
+        suggestedSeriesName
+        levels
         venueId
         venue {
           id
@@ -20855,10 +21364,18 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -21168,10 +21685,18 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -21448,10 +21973,18 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -21743,6 +22276,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -21872,10 +22406,18 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -22078,10 +22620,18 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
     sourceUrl
     tournamentId
     originalScrapedData
+    wasEdited
+    lastEditedAt
+    lastEditedBy
+    editHistory
     venueAssignmentStatus
     requiresVenueAssignment
     suggestedVenueName
     venueAssignmentConfidence
+    seriesAssignmentStatus
+    seriesAssignmentConfidence
+    suggestedSeriesName
+    levels
     venueId
     venue {
       id
@@ -22277,10 +22827,18 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -22746,6 +23304,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -22820,10 +23379,18 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -23032,10 +23599,18 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -23221,10 +23796,18 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -23378,10 +23961,18 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
         sourceUrl
         tournamentId
         originalScrapedData
+        wasEdited
+        lastEditedAt
+        lastEditedBy
+        editHistory
         venueAssignmentStatus
         requiresVenueAssignment
         suggestedVenueName
         venueAssignmentConfidence
+        seriesAssignmentStatus
+        seriesAssignmentConfidence
+        suggestedSeriesName
+        levels
         venueId
         venue {
           id
@@ -23570,10 +24161,18 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -23883,10 +24482,18 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -24163,10 +24770,18 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -24458,6 +25073,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -24587,10 +25203,18 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -24793,10 +25417,18 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
     sourceUrl
     tournamentId
     originalScrapedData
+    wasEdited
+    lastEditedAt
+    lastEditedBy
+    editHistory
     venueAssignmentStatus
     requiresVenueAssignment
     suggestedVenueName
     venueAssignmentConfidence
+    seriesAssignmentStatus
+    seriesAssignmentConfidence
+    suggestedSeriesName
+    levels
     venueId
     venue {
       id
@@ -24992,10 +25624,18 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -25461,6 +26101,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -25535,10 +26176,18 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -25747,10 +26396,18 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -25936,10 +26593,18 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -26093,10 +26758,18 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
         sourceUrl
         tournamentId
         originalScrapedData
+        wasEdited
+        lastEditedAt
+        lastEditedBy
+        editHistory
         venueAssignmentStatus
         requiresVenueAssignment
         suggestedVenueName
         venueAssignmentConfidence
+        seriesAssignmentStatus
+        seriesAssignmentConfidence
+        suggestedSeriesName
+        levels
         venueId
         venue {
           id
@@ -26285,10 +26958,18 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -26598,10 +27279,18 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -26878,10 +27567,18 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -27173,6 +27870,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -27302,10 +28000,18 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -27526,10 +28232,18 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
       sourceUrl
       tournamentId
       originalScrapedData
+      wasEdited
+      lastEditedAt
+      lastEditedBy
+      editHistory
       venueAssignmentStatus
       requiresVenueAssignment
       suggestedVenueName
       venueAssignmentConfidence
+      seriesAssignmentStatus
+      seriesAssignmentConfidence
+      suggestedSeriesName
+      levels
       venueId
       venue {
         id
@@ -27638,10 +28352,18 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -27931,10 +28653,18 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -28015,10 +28745,18 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -28191,10 +28929,18 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -28295,10 +29041,18 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -28443,6 +29197,7 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -28517,10 +29272,18 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -28643,10 +29406,18 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
       sourceUrl
       tournamentId
       originalScrapedData
+      wasEdited
+      lastEditedAt
+      lastEditedBy
+      editHistory
       venueAssignmentStatus
       requiresVenueAssignment
       suggestedVenueName
       venueAssignmentConfidence
+      seriesAssignmentStatus
+      seriesAssignmentConfidence
+      suggestedSeriesName
+      levels
       venueId
       venue {
         id
@@ -28755,10 +29526,18 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -29048,10 +29827,18 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -29132,10 +29919,18 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -29308,10 +30103,18 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -29412,10 +30215,18 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -29560,6 +30371,7 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -29634,10 +30446,18 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -29760,10 +30580,18 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
       sourceUrl
       tournamentId
       originalScrapedData
+      wasEdited
+      lastEditedAt
+      lastEditedBy
+      editHistory
       venueAssignmentStatus
       requiresVenueAssignment
       suggestedVenueName
       venueAssignmentConfidence
+      seriesAssignmentStatus
+      seriesAssignmentConfidence
+      suggestedSeriesName
+      levels
       venueId
       venue {
         id
@@ -29872,10 +30700,18 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -30165,10 +31001,18 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -30249,10 +31093,18 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -30425,10 +31277,18 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -30529,10 +31389,18 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -30677,6 +31545,7 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -30751,10 +31620,18 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -32399,10 +33276,18 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -32679,10 +33564,18 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -33590,10 +34483,18 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -34059,6 +34960,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -34133,10 +35035,18 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -35580,10 +36490,18 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -35860,10 +36778,18 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -36771,10 +37697,18 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -37240,6 +38174,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -37314,10 +38249,18 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -38761,10 +39704,18 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -39041,10 +39992,18 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -39952,10 +40911,18 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -40421,6 +41388,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -40495,10 +41463,18 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -41084,10 +42060,18 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -41188,10 +42172,18 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -41522,10 +42514,18 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -42224,10 +43224,18 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -42328,10 +43336,18 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -42662,10 +43678,18 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -43364,10 +44388,18 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -43468,10 +44500,18 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -43802,10 +44842,18 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -44510,10 +45558,18 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -44614,10 +45670,18 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -44948,10 +46012,18 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -45143,10 +46215,18 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
       sourceUrl
       tournamentId
       originalScrapedData
+      wasEdited
+      lastEditedAt
+      lastEditedBy
+      editHistory
       venueAssignmentStatus
       requiresVenueAssignment
       suggestedVenueName
       venueAssignmentConfidence
+      seriesAssignmentStatus
+      seriesAssignmentConfidence
+      suggestedSeriesName
+      levels
       venueId
       venue {
         id
@@ -45255,10 +46335,18 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -45548,10 +46636,18 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -45632,10 +46728,18 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -45808,10 +46912,18 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -45912,10 +47024,18 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -46060,6 +47180,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -46134,10 +47255,18 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -46729,10 +47858,18 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -46833,10 +47970,18 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -47167,10 +48312,18 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -47362,10 +48515,18 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
       sourceUrl
       tournamentId
       originalScrapedData
+      wasEdited
+      lastEditedAt
+      lastEditedBy
+      editHistory
       venueAssignmentStatus
       requiresVenueAssignment
       suggestedVenueName
       venueAssignmentConfidence
+      seriesAssignmentStatus
+      seriesAssignmentConfidence
+      suggestedSeriesName
+      levels
       venueId
       venue {
         id
@@ -47474,10 +48635,18 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -47767,10 +48936,18 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -47851,10 +49028,18 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -48027,10 +49212,18 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -48131,10 +49324,18 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -48279,6 +49480,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -48353,10 +49555,18 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -48948,10 +50158,18 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -49052,10 +50270,18 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -49386,10 +50612,18 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -49581,10 +50815,18 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
       sourceUrl
       tournamentId
       originalScrapedData
+      wasEdited
+      lastEditedAt
+      lastEditedBy
+      editHistory
       venueAssignmentStatus
       requiresVenueAssignment
       suggestedVenueName
       venueAssignmentConfidence
+      seriesAssignmentStatus
+      seriesAssignmentConfidence
+      suggestedSeriesName
+      levels
       venueId
       venue {
         id
@@ -49693,10 +50935,18 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -49986,10 +51236,18 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -50070,10 +51328,18 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -50246,10 +51512,18 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -50350,10 +51624,18 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -50498,6 +51780,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -50572,10 +51855,18 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -51163,10 +52454,18 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -51267,10 +52566,18 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -51601,10 +52908,18 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -51797,10 +53112,18 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
       sourceUrl
       tournamentId
       originalScrapedData
+      wasEdited
+      lastEditedAt
+      lastEditedBy
+      editHistory
       venueAssignmentStatus
       requiresVenueAssignment
       suggestedVenueName
       venueAssignmentConfidence
+      seriesAssignmentStatus
+      seriesAssignmentConfidence
+      suggestedSeriesName
+      levels
       venueId
       venue {
         id
@@ -51909,10 +53232,18 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -52202,10 +53533,18 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -52286,10 +53625,18 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -52462,10 +53809,18 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -52566,10 +53921,18 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -52714,6 +54077,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -52788,10 +54152,18 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -53379,10 +54751,18 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -53483,10 +54863,18 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -53817,10 +55205,18 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -54013,10 +55409,18 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
       sourceUrl
       tournamentId
       originalScrapedData
+      wasEdited
+      lastEditedAt
+      lastEditedBy
+      editHistory
       venueAssignmentStatus
       requiresVenueAssignment
       suggestedVenueName
       venueAssignmentConfidence
+      seriesAssignmentStatus
+      seriesAssignmentConfidence
+      suggestedSeriesName
+      levels
       venueId
       venue {
         id
@@ -54125,10 +55529,18 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -54418,10 +55830,18 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -54502,10 +55922,18 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -54678,10 +56106,18 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -54782,10 +56218,18 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -54930,6 +56374,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -55004,10 +56449,18 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -55595,10 +57048,18 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -55699,10 +57160,18 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -56033,10 +57502,18 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -56229,10 +57706,18 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
       sourceUrl
       tournamentId
       originalScrapedData
+      wasEdited
+      lastEditedAt
+      lastEditedBy
+      editHistory
       venueAssignmentStatus
       requiresVenueAssignment
       suggestedVenueName
       venueAssignmentConfidence
+      seriesAssignmentStatus
+      seriesAssignmentConfidence
+      suggestedSeriesName
+      levels
       venueId
       venue {
         id
@@ -56341,10 +57826,18 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -56634,10 +58127,18 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -56718,10 +58219,18 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -56894,10 +58403,18 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -56998,10 +58515,18 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -57146,6 +58671,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -57220,10 +58746,18 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -57809,10 +59343,18 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -57913,10 +59455,18 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -58247,10 +59797,18 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -58595,10 +60153,18 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -59064,6 +60630,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -59138,10 +60705,18 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -59727,10 +61302,18 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -59831,10 +61414,18 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -60165,10 +61756,18 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -60513,10 +62112,18 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -60982,6 +62589,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -61056,10 +62664,18 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -61645,10 +63261,18 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -61749,10 +63373,18 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -62083,10 +63715,18 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -62431,10 +64071,18 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -62900,6 +64548,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -62974,10 +64623,18 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -63564,10 +65221,18 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -63668,10 +65333,18 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -64002,10 +65675,18 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -64693,10 +66374,18 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -64797,10 +66486,18 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -65131,10 +66828,18 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -65822,10 +67527,18 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -65926,10 +67639,18 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -66260,10 +67981,18 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -66951,10 +68680,18 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -67055,10 +68792,18 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -67389,10 +69134,18 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -68081,10 +69834,18 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -68185,10 +69946,18 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -68519,10 +70288,18 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -69211,10 +70988,18 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -69315,10 +71100,18 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -69649,10 +71442,18 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -70341,10 +72142,18 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -70445,10 +72254,18 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -70779,10 +72596,18 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -71471,10 +73296,18 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -71575,10 +73408,18 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -71909,10 +73750,18 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -72601,10 +74450,18 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -72705,10 +74562,18 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -73039,10 +74904,18 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -73728,10 +75601,18 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -73832,10 +75713,18 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -74166,10 +76055,18 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -74853,10 +76750,18 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -74957,10 +76862,18 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -75291,10 +77204,18 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -75978,10 +77899,18 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -76082,10 +78011,18 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -76416,10 +78353,18 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -77674,10 +79619,18 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -77778,10 +79731,18 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -78112,10 +80073,18 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -78875,10 +80844,18 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -78979,10 +80956,18 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -79313,10 +81298,18 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -80076,10 +82069,18 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -80180,10 +82181,18 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -80514,10 +82523,18 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -81455,10 +83472,18 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -81559,10 +83584,18 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -81893,10 +83926,18 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -82579,10 +84620,18 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -82683,10 +84732,18 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -83017,10 +85074,18 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -83703,10 +85768,18 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -83807,10 +85880,18 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -84141,10 +86222,18 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -84749,10 +86838,18 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -85218,6 +87315,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -85292,10 +87390,18 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -85541,6 +87647,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -85670,10 +87777,18 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -86035,10 +88150,18 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -86504,6 +88627,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -86578,10 +88702,18 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -86827,6 +88959,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -86956,10 +89089,18 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -87321,10 +89462,18 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -87790,6 +89939,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -87864,10 +90014,18 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -88113,6 +90271,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -88242,10 +90401,18 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -88700,6 +90867,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -88719,6 +90887,11 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
         fieldsUpdated
         foundKeys
         structureLabel
+        wasEdited
+        scrapedAt
+        fieldsExtracted
+        entityId
+        contentHash
         createdAt
         updatedAt
         _version
@@ -88926,6 +91099,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -89055,10 +91229,18 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -89387,6 +91569,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -89406,6 +91589,11 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
         fieldsUpdated
         foundKeys
         structureLabel
+        wasEdited
+        scrapedAt
+        fieldsExtracted
+        entityId
+        contentHash
         createdAt
         updatedAt
         _version
@@ -89613,6 +91801,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -89742,10 +91931,18 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -90074,6 +92271,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -90093,6 +92291,11 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
         fieldsUpdated
         foundKeys
         structureLabel
+        wasEdited
+        scrapedAt
+        fieldsExtracted
+        entityId
+        contentHash
         createdAt
         updatedAt
         _version
@@ -90300,6 +92503,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -90429,10 +92633,18 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -90758,6 +92970,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -90777,6 +92990,11 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
         fieldsUpdated
         foundKeys
         structureLabel
+        wasEdited
+        scrapedAt
+        fieldsExtracted
+        entityId
+        contentHash
         createdAt
         updatedAt
         _version
@@ -90984,6 +93202,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -91113,10 +93332,18 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -91277,6 +93504,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
     cachedContentUsedCount
     lastCacheHitAt
     contentSize
+    wasEdited
     _version
     _deleted
     _lastChangedAt
@@ -91454,6 +93682,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -91473,6 +93702,11 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
         fieldsUpdated
         foundKeys
         structureLabel
+        wasEdited
+        scrapedAt
+        fieldsExtracted
+        entityId
+        contentHash
         createdAt
         updatedAt
         _version
@@ -91680,6 +93914,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -91809,10 +94044,18 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -91973,6 +94216,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
     cachedContentUsedCount
     lastCacheHitAt
     contentSize
+    wasEdited
     _version
     _deleted
     _lastChangedAt
@@ -92150,6 +94394,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -92169,6 +94414,11 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
         fieldsUpdated
         foundKeys
         structureLabel
+        wasEdited
+        scrapedAt
+        fieldsExtracted
+        entityId
+        contentHash
         createdAt
         updatedAt
         _version
@@ -92376,6 +94626,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           cachedContentUsedCount
           lastCacheHitAt
           contentSize
+          wasEdited
           _version
           _deleted
           _lastChangedAt
@@ -92505,10 +94756,18 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           sourceUrl
           tournamentId
           originalScrapedData
+          wasEdited
+          lastEditedAt
+          lastEditedBy
+          editHistory
           venueAssignmentStatus
           requiresVenueAssignment
           suggestedVenueName
           venueAssignmentConfidence
+          seriesAssignmentStatus
+          seriesAssignmentConfidence
+          suggestedSeriesName
+          levels
           venueId
           venue {
             id
@@ -92669,6 +94928,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
     cachedContentUsedCount
     lastCacheHitAt
     contentSize
+    wasEdited
     _version
     _deleted
     _lastChangedAt
@@ -92808,6 +95068,7 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -92827,6 +95088,11 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
           fieldsUpdated
           foundKeys
           structureLabel
+          wasEdited
+          scrapedAt
+          fieldsExtracted
+          entityId
+          contentHash
           createdAt
           updatedAt
           _version
@@ -92960,6 +95226,7 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -93034,10 +95301,18 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -93206,6 +95481,7 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -93225,6 +95501,11 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
           fieldsUpdated
           foundKeys
           structureLabel
+          wasEdited
+          scrapedAt
+          fieldsExtracted
+          entityId
+          contentHash
           createdAt
           updatedAt
           _version
@@ -93358,6 +95639,7 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -93432,10 +95714,18 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -93491,6 +95781,7 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
       cachedContentUsedCount
       lastCacheHitAt
       contentSize
+      wasEdited
       _version
       _deleted
       _lastChangedAt
@@ -93510,6 +95801,11 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
     fieldsUpdated
     foundKeys
     structureLabel
+    wasEdited
+    scrapedAt
+    fieldsExtracted
+    entityId
+    contentHash
     createdAt
     updatedAt
     _version
@@ -93651,6 +95947,7 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -93670,6 +95967,11 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
           fieldsUpdated
           foundKeys
           structureLabel
+          wasEdited
+          scrapedAt
+          fieldsExtracted
+          entityId
+          contentHash
           createdAt
           updatedAt
           _version
@@ -93803,6 +96105,7 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -93877,10 +96180,18 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -94049,6 +96360,7 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -94068,6 +96380,11 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
           fieldsUpdated
           foundKeys
           structureLabel
+          wasEdited
+          scrapedAt
+          fieldsExtracted
+          entityId
+          contentHash
           createdAt
           updatedAt
           _version
@@ -94201,6 +96518,7 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -94275,10 +96593,18 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -94334,6 +96660,7 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
       cachedContentUsedCount
       lastCacheHitAt
       contentSize
+      wasEdited
       _version
       _deleted
       _lastChangedAt
@@ -94353,6 +96680,11 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
     fieldsUpdated
     foundKeys
     structureLabel
+    wasEdited
+    scrapedAt
+    fieldsExtracted
+    entityId
+    contentHash
     createdAt
     updatedAt
     _version
@@ -94494,6 +96826,7 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -94513,6 +96846,11 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
           fieldsUpdated
           foundKeys
           structureLabel
+          wasEdited
+          scrapedAt
+          fieldsExtracted
+          entityId
+          contentHash
           createdAt
           updatedAt
           _version
@@ -94646,6 +96984,7 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -94720,10 +97059,18 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -94892,6 +97239,7 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -94911,6 +97259,11 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
           fieldsUpdated
           foundKeys
           structureLabel
+          wasEdited
+          scrapedAt
+          fieldsExtracted
+          entityId
+          contentHash
           createdAt
           updatedAt
           _version
@@ -95044,6 +97397,7 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
             cachedContentUsedCount
             lastCacheHitAt
             contentSize
+            wasEdited
             _version
             _deleted
             _lastChangedAt
@@ -95118,10 +97472,18 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
             sourceUrl
             tournamentId
             originalScrapedData
+            wasEdited
+            lastEditedAt
+            lastEditedBy
+            editHistory
             venueAssignmentStatus
             requiresVenueAssignment
             suggestedVenueName
             venueAssignmentConfidence
+            seriesAssignmentStatus
+            seriesAssignmentConfidence
+            suggestedSeriesName
+            levels
             venueId
             tournamentSeriesId
             entityId
@@ -95177,6 +97539,7 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
       cachedContentUsedCount
       lastCacheHitAt
       contentSize
+      wasEdited
       _version
       _deleted
       _lastChangedAt
@@ -95196,6 +97559,11 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
     fieldsUpdated
     foundKeys
     structureLabel
+    wasEdited
+    scrapedAt
+    fieldsExtracted
+    entityId
+    contentHash
     createdAt
     updatedAt
     _version

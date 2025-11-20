@@ -1,6 +1,6 @@
 # ===================================================================
 # KINGSROOM SCHEMA
-# Version: 1.0.4
+# Version: 1.0.5
 # ===================================================================
 
 # ===================================================================
@@ -39,10 +39,18 @@ enum VenueAssignmentStatus {
   RETROACTIVE_ASSIGNED
 }
 
+enum SeriesAssignmentStatus {
+  AUTO_ASSIGNED
+  MANUALLY_ASSIGNED
+  PENDING_ASSIGNMENT
+  UNASSIGNED
+  NOT_SERIES
+}
+
 enum ScraperJobTriggerSource { SCHEDULED, MANUAL, API, CONTROL, BULK, ADMIN }
 enum ScraperJobStatus { QUEUED, RUNNING, COMPLETED, FAILED, CANCELLED, TIMEOUT }
 enum ScrapeURLStatus { ACTIVE, INACTIVE, DO_NOT_SCRAPE, ERROR, ARCHIVED }
-enum ScrapeAttemptStatus { SUCCESS, FAILED, SKIPPED_DONOTSCRAPE, SKIPPED_VENUE, BLANK, NO_CHANGES, UPDATED, SAVED }
+enum ScrapeAttemptStatus { SUCCESS, FAILED, SKIPPED_DONOTSCRAPE, SKIPPED_VENUE, BLANK, NO_CHANGES, UPDATED, SAVED, SUCCESS_EDITED, SAVED_EDITED, UPDATED_EDITED }
 enum TimeRange { LAST_HOUR, LAST_24_HOURS, LAST_7_DAYS, LAST_30_DAYS, CUSTOM }
 enum ScraperOperation { START, STOP, ENABLE, DISABLE, STATUS, RESET }
 
@@ -116,7 +124,6 @@ type Venue @model @auth(rules: [{ allow: private }]) {
   address: String
   city: String
   country: String
-  # ADD: Flag for special venues like "Unassigned"
   isSpecial: Boolean @default(value: "false")
   details: VenueDetails @hasOne
   assets: [Asset] @hasMany(indexName: "byVenue", fields: ["id"])
@@ -149,8 +156,8 @@ type TournamentSeriesTitle @model @auth(rules: [{ allow: private }]) {
 
 type TournamentSeries @model @auth(rules: [{ allow: private }]) {
   id: ID!
-  name: String!
-  year: Int!
+  name: String! @index(name: "byName", sortKeyFields: ["year"])
+  year: Int! @index(name: "byYear", sortKeyFields: ["name"])
   status: SeriesStatus!
   startDate: AWSDateTime
   endDate: AWSDateTime
@@ -161,7 +168,7 @@ type TournamentSeries @model @auth(rules: [{ allow: private }]) {
   actualPrizepool: Float
   tournamentSeriesTitleId: ID! @index(name: "byTournamentSeriesTitle", sortKeyFields: ["year"])
   title: TournamentSeriesTitle @belongsTo(fields: ["tournamentSeriesTitleId"])
-  venueId: ID @index(name: "byVenue") # CHANGED: Made optional
+  venueId: ID @index(name: "byVenue")
   venue: Venue @belongsTo(fields: ["venueId"])
   games: [Game] @hasMany(indexName: "byTournamentSeries", fields: ["id"])
 }
@@ -212,28 +219,42 @@ type Game @model @auth(rules: [{ allow: private }]) {
   isSatellite: Boolean
   gameTags: [String]
 
-  # --- Series Reference Fields (add near other series fields like isSeries, seriesName) ---
+  # --- Series Reference Fields ---
   isSeries: Boolean
   seriesName: String
   isMainEvent: Boolean
-  eventNumber: Int          # Links all flights/days for this event (e.g., Event 8)
-  dayNumber: Int            # Which day of the event (1, 2, 3...)
-  flightLetter: String      # Flight designation (A, B, C...)
-  finalDay: Boolean         # Is this the final day with prize payouts?
+  eventNumber: Int
+  dayNumber: Int
+  flightLetter: String
+  finalDay: Boolean
 
-  # --- Data Source (SIMPLE REFERENCE ONLY - NO SCRAPER FIELDS) ---
+  # --- Data Source ---
   sourceUrl: AWSURL @index(name: "bySourceUrl", queryField: "gameBySourceUrl")
   tournamentId: Int
   originalScrapedData: AWSJSON
+  
+  # --- Edit Tracking ---
+  wasEdited: Boolean @default(value: "false")
+  lastEditedAt: AWSDateTime
+  lastEditedBy: String
+  editHistory: AWSJSON
 
-  # --- NEW: Venue Assignment Tracking ---
+  # --- Venue Assignment Tracking ---
   venueAssignmentStatus: VenueAssignmentStatus @default(value: "PENDING_ASSIGNMENT")
   requiresVenueAssignment: Boolean @default(value: "false")
   suggestedVenueName: String
   venueAssignmentConfidence: Float
+  
+  # --- Series Assignment Tracking ---
+  seriesAssignmentStatus: SeriesAssignmentStatus @default(value: "NOT_SERIES")
+  seriesAssignmentConfidence: Float
+  suggestedSeriesName: String
+
+  # --- Structure Data ---
+  levels: AWSJSON
 
   # --- Relationships ---
-  venueId: ID @index(name: "byVenue", sortKeyFields: ["gameStartDateTime"]) ## <-- CHANGED: Made optional
+  venueId: ID @index(name: "byVenue", sortKeyFields: ["gameStartDateTime"])
   venue: Venue @belongsTo(fields: ["venueId"])
   tournamentSeriesId: ID @index(name: "byTournamentSeries", sortKeyFields: ["gameStartDateTime"])
   tournamentSeries: TournamentSeries @belongsTo(fields: ["tournamentSeriesId"])
@@ -293,13 +314,10 @@ type Player @model @auth(rules: [{ allow: private }]) {
   creditBalance: Int
   pointsBalance: Int
 
-  # --- ADDED RELATIONSHIP FIELDS ---
   playerSummary: PlayerSummary @hasOne(fields: ["id"])
   knownIdentities: [KnownPlayerIdentity] @hasMany(indexName: "byPlayer", fields: ["id"])
   marketingPreferences: PlayerMarketingPreferences @hasOne(fields: ["id"])
   marketingMessages: [PlayerMarketingMessage] @hasMany(indexName: "byPlayer", fields: ["id"])
-  # --- END ADDED FIELDS ---
-
   playerVenues: [PlayerVenue] @hasMany(indexName: "byVenue", fields: ["id"])
   playerEntries: [PlayerEntry] @hasMany(indexName: "byPlayer", fields: ["id"])
   playerResults: [PlayerResult] @hasMany(indexName: "byPlayer", fields: ["id"])
@@ -323,8 +341,6 @@ type PlayerSummary @model @auth(rules: [{ allow: private }]) {
   averageFinishPosition: Float
   netBalance: Float
   player: Player @belongsTo(fields: ["playerId"])
-
-  # --- FIELDS ADDED TO MATCH QUERIES ----
   sessionsPlayed: Int
   tournamentsPlayed: Int
   cashGamesPlayed: Int
@@ -344,7 +360,7 @@ type PlayerEntry @model @auth(rules: [{ allow: private }]) {
   id: ID!
   playerId: ID! @index(name: "byPlayer", sortKeyFields: ["gameStartDateTime"])
   gameId: ID! @index(name: "byGame")
-  venueId: ID @index(name: "byVenue") ## <-- CHANGED: Made optional
+  venueId: ID @index(name: "byVenue")
   status: PlayerEntryStatus!
   registrationTime: AWSDateTime!
   eliminationTime: AWSDateTime
@@ -573,18 +589,15 @@ type ScraperJob @model(queries: { list: null }) @auth(rules: [{ allow: private }
   updatedAt: AWSDateTime!
 }
 
-type ScrapeURL @model(queries: { get: "getScrapeURL", list: null }) @auth(rules: [{ allow: private }]) {  id: ID!
+type ScrapeURL @model(queries: { get: "getScrapeURL", list: null }) @auth(rules: [{ allow: private }]) {
+  id: ID!
   url: AWSURL! @index(name: "byURL", queryField: "scrapeURLByURL")
   tournamentId: Int! @index(name: "byTournamentId")
-
-  # === FIELDS MOVED FROM GAME TABLE ===
   doNotScrape: Boolean!
   sourceDataIssue: Boolean
   gameDataVerified: Boolean
   missingKeysFromScrape: [String]
   sourceSystem: String @index(name: "bySourceSystem", queryField: "scrapeURLsBySourceSystem", sortKeyFields: ["tournamentId"])
-
-  # === ORIGINAL SCRAPEURL FIELDS ===
   status: ScrapeURLStatus!
   placedIntoDatabase: Boolean!
   firstScrapedAt: AWSDateTime!
@@ -613,22 +626,19 @@ type ScrapeURL @model(queries: { get: "getScrapeURL", list: null }) @auth(rules:
   entity: Entity @belongsTo(fields: ["entityId"])
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
-
-    # === NEW CACHING FIELDS ===
-  etag: String                          # ETag from last successful scrape
-  lastModifiedHeader: String            # Last-Modified header from server
-  contentHash: String                   # SHA-256 hash of HTML content (first 8 chars)
-  s3StoragePrefix: String               # S3 folder path for this URL's HTML history
-  latestS3Key: String                   # Most recent HTML file in S3
+  etag: String
+  lastModifiedHeader: String
+  contentHash: String
+  s3StoragePrefix: String
+  latestS3Key: String
   s3StorageEnabled: Boolean @default(value: "true")
-  
-  # === ENHANCED TRACKING ===
-  lastContentChangeAt: AWSDateTime      # When content actually changed
+  lastContentChangeAt: AWSDateTime
   totalContentChanges: Int @default(value: "0")
-  lastHeaderCheckAt: AWSDateTime        # Last time we checked headers
-  cachedContentUsedCount: Int @default(value: "0")  # Times we used cached content
-  lastCacheHitAt: AWSDateTime          # When S3 cache was last used
-  contentSize: Int                     # Size in bytes for monitoring
+  lastHeaderCheckAt: AWSDateTime
+  cachedContentUsedCount: Int @default(value: "0")
+  lastCacheHitAt: AWSDateTime
+  contentSize: Int
+  wasEdited: Boolean @default(value: "false")
 }
 
 type ScrapeAttempt @model @auth(rules: [{ allow: private }]) {
@@ -654,6 +664,11 @@ type ScrapeAttempt @model @auth(rules: [{ allow: private }]) {
   fieldsUpdated: [String]
   foundKeys: [String]
   structureLabel: String
+  wasEdited: Boolean @default(value: "false")
+  scrapedAt: AWSDateTime
+  fieldsExtracted: [String]
+  entityId: ID
+  contentHash: String
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -667,37 +682,30 @@ type S3Storage @model @auth(rules: [{ allow: private }]) {
   s3Key: String! @index(name: "byS3Key")
   s3Bucket: String!
   scrapedAt: AWSDateTime!
-  contentSize: Int                    # Size in bytes
-  contentHash: String                 # Full SHA-256 hash
-  etag: String                        # ETag at time of scrape
-  lastModified: String                # Last-Modified at time of scrape
-  headers: AWSJSON                    # All response headers
+  contentSize: Int
+  contentHash: String
+  etag: String
+  lastModified: String
+  headers: AWSJSON
   dataExtracted: Boolean @default(value: "false")
   gameId: ID @index(name: "byGameId")
   isManualUpload: Boolean @default(value: "false")
-  uploadedBy: String                  # User who uploaded (for manual uploads)
-  notes: String                       # Notes for manual uploads
+  uploadedBy: String
+  notes: String
   previousVersions: [S3VersionHistory]
   gameStatus: String @index(name: "byS3GameStatus", queryField: "s3StorageByGameStatus", sortKeyFields: ["scrapedAt"])
   registrationStatus: String @index(name: "byS3RegistrationStatus", queryField: "s3StorageByRegistrationStatus", sortKeyFields: ["scrapedAt"])
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
-  
-  # === NEW PARSED DATA TRACKING ===
   isParsed: Boolean @default(value: "false")
   parsedDataHash: String
   extractedFields: [String]
   lastParsedAt: AWSDateTime
   parseCount: Int @default(value: "0")
-  
-  # === RE-SCRAPE TRACKING ===
   rescrapeCount: Int @default(value: "0")
   lastRescrapeAt: AWSDateTime
-  
-  # === DATA CHANGE TRACKING ===
   dataChangedAt: AWSDateTime
   dataChangeCount: Int @default(value: "0")
-
 }
 
 # ===================================================================
@@ -811,24 +819,23 @@ type CachingStatsResponse {
 type CacheActivityLog {
   url: AWSURL!
   timestamp: AWSDateTime!
-  action: String! # HIT, MISS, REFRESH, MANUAL
+  action: String!
   reason: String
 }
 
-# Database Metrics Types
 type DatabaseMetric {
-    timestamp: AWSDateTime!
-    functionName: String!
-    operation: String!
-    table: String!
-    success: Boolean!
-    duration: Float
-    count: Int
-    entityId: String
+  timestamp: AWSDateTime!
+  functionName: String!
+  operation: String!
+  table: String!
+  success: Boolean!
+  duration: Float
+  count: Int
+  entityId: String
 }
 
 type DatabaseMetricsResponse {
-    metrics: [DatabaseMetric!]!
+  metrics: [DatabaseMetric!]!
 }
 
 input ManualHTMLUploadInput {
@@ -852,7 +859,7 @@ type S3StorageHistoryResponse {
 
 type S3ContentResponse {
   s3Key: String!
-html: String!
+  html: String!
   metadata: AWSJSON
   size: Int
   lastModified: AWSDateTime
@@ -872,7 +879,7 @@ type CachingStats {
 type CacheActivity {
   url: AWSURL!
   timestamp: AWSDateTime!
-  action: String!  # HIT or MISS
+  action: String!
   reason: String!
 }
 
@@ -1165,7 +1172,7 @@ type ScrapedTournamentLevel {
 
 type ScrapedBreak {
   levelNumberBeforeBreak: Int!
-durationMinutes: Int
+  durationMinutes: Int
 }
 
 type ScrapedPlayerEntry {
@@ -1235,7 +1242,6 @@ type VenueMatch {
 # INPUT TYPES
 # ===================================================================
 
-# Main input for saving game data from any source
 input SaveGameInput {
   source: DataSourceInfoInput!
   game: SaveGameDataInput!
@@ -1243,57 +1249,61 @@ input SaveGameInput {
   venue: VenueReferenceInput
   series: SeriesReferenceInput
   options: SaveProcessingOptionsInput
+  auditTrail: String
 }
 
-# Data source identification
 input DataSourceInfoInput {
-  type: DataSource!                  # SCRAPE, API, MANUAL, etc.
-  sourceId: String!                  # URL, API endpoint, filename
-  entityId: ID!                      # Which entity this belongs to
-  fetchedAt: AWSDateTime!            # When was data retrieved
-  contentHash: String                # For deduplication
+  type: DataSource!
+  sourceId: String!
+  entityId: ID!
+  fetchedAt: AWSDateTime!
+  contentHash: String
+  wasEdited: Boolean
 }
 
-# Core game data for saving
 input SaveGameDataInput {
-  # Identification
-  tournamentId: Int                  # External tournament ID
-  existingGameId: ID                 # For updates to existing games
+  tournamentId: Int
+  existingGameId: ID
   name: String!
-  
-  # Classification
   gameType: GameType!
   gameVariant: GameVariant
   gameStatus: GameStatus!
-  
-  # Scheduling
   gameStartDateTime: AWSDateTime!
   gameEndDateTime: AWSDateTime
   registrationStatus: RegistrationStatus
   gameFrequency: GameFrequency
-  
-  # Financials
   buyIn: Float
   rake: Float
+  totalRake: Float
   guaranteeAmount: Float
+  guaranteeOverlay: Float
+  guaranteeSurplus: Float
   hasGuarantee: Boolean
   startingStack: Int
-  
-  # Results
   prizepool: Float
   totalEntries: Int
   totalRebuys: Int
   totalAddons: Int
-  
-  # Categorization
+  playersRemaining: Int
+  totalChipsInPlay: Float
+  averagePlayerStack: Float
+  totalDuration: String
+  revenueByBuyIns: Float
+  profitLoss: Float
   tournamentType: TournamentType
   isSeries: Boolean
   seriesName: String
+  isMainEvent: Boolean
+  eventNumber: Int
+  dayNumber: Int
+  flightLetter: String
+  finalDay: Boolean
   isSatellite: Boolean
+  isRegular: Boolean
   gameTags: [String]
+  levels: AWSJSON
 }
 
-# Player data for saving
 input SavePlayerDataInput {
   allPlayers: [SavePlayerInfoInput!]!
   totalPlayers: Int!
@@ -1303,7 +1313,6 @@ input SavePlayerDataInput {
   hasSeatingData: Boolean
 }
 
-# Individual player info
 input SavePlayerInfoInput {
   name: String!
   rank: Int
@@ -1314,55 +1323,63 @@ input SavePlayerInfoInput {
   addons: Int
 }
 
-# Venue reference for resolution
 input VenueReferenceInput {
-  venueId: ID                        # Explicit venue ID
-  venueName: String                  # For matching/creating
-  suggestedVenueId: ID               # Auto-detected venue
-  confidence: Float                  # Match confidence 0-1
+  venueId: ID
+  venueName: String
+  suggestedVenueId: ID
+  confidence: Float
 }
 
-# Series reference
 input SeriesReferenceInput {
   seriesId: ID
   seriesName: String
-  year: Int,
-  isMainEvent: Boolean,
-  dayNumber: Int,
+  suggestedSeriesId: ID
+  year: Int
+  confidence: Float
+  isMainEvent: Boolean
+  eventNumber: Int
+  dayNumber: Int
   flightLetter: String
+  finalDay: Boolean
 }
 
-# Processing options
 input SaveProcessingOptionsInput {
-  skipPlayerProcessing: Boolean      # Don't queue for PDP
-  forceUpdate: Boolean               # Update even if exists
-  validateOnly: Boolean              # Just validate, don't save
-  doNotScrape: Boolean               # Mark URL as do-not-scrape
-  priority: String                   # LOW, NORMAL, HIGH
+  skipPlayerProcessing: Boolean
+  forceUpdate: Boolean
+  validateOnly: Boolean
+  doNotScrape: Boolean
+  priority: String
 }
 
 # ===================================================================
 # RESPONSE TYPES
 # ===================================================================
 
-# Result of save operation
 type SaveGameResult {
   success: Boolean!
   gameId: ID
-  action: String!                    # CREATED, UPDATED, SKIPPED, VALIDATED, ERROR
+  action: String!
   message: String
   warnings: [String]
   playerProcessingQueued: Boolean
-  playerProcessingReason: String     # Why PDP was/wasn't queued
+  playerProcessingReason: String
   venueAssignment: SaveVenueAssignmentInfo
+  seriesAssignment: SaveSeriesAssignmentInfo
   fieldsUpdated: [String]
+  wasEdited: Boolean
 }
 
-# Venue assignment information
 type SaveVenueAssignmentInfo {
   venueId: ID
   venueName: String
   status: VenueAssignmentStatus
+  confidence: Float
+}
+
+type SaveSeriesAssignmentInfo {
+  tournamentSeriesId: ID
+  seriesName: String
+  status: SeriesAssignmentStatus
   confidence: Float
 }
 
@@ -1386,7 +1403,7 @@ type EntityScrapingStatus {
   gaps: [GapRange!]!
   gapSummary: GapSummary!
   lastUpdated: AWSDateTime!
-  cacheAge: Int  # seconds since last calculation
+  cacheAge: Int
 }
 
 type GapSummary {
@@ -1395,7 +1412,7 @@ type GapSummary {
   largestGapStart: Int
   largestGapEnd: Int
   largestGapCount: Int
-  coveragePercentage: Float!  # % of IDs that exist
+  coveragePercentage: Float!
 }
 
 type UnfinishedGamesConnection {
@@ -1420,113 +1437,43 @@ type Query {
   fetchTournamentDataRange(startId: Int!, endId: Int!): [ScrapedGameSummary!] @function(name: "webScraperFunction-${env}")
   getScraperControlState(entityId: ID): ScraperControlResponse @function(name: "autoScraper-${env}")
   fetchUpdateCandidates: [String!] @function(name: "webScraperFunction-${env}")
-
-  # NEW ENHANCED SCRAPER QUERIES
   getScraperJobsReport(status: ScraperJobStatus, limit: Int, nextToken: String): ScraperJobConnection @function(name: "scraperManagement-${env}")
   fetchScrapeURLDetails(url: AWSURL!): ScrapeURL @function(name: "scraperManagement-${env}")
   searchScrapeURLs(status: ScrapeURLStatus, limit: Int, nextToken: String): ScrapeURLConnection @function(name: "scraperManagement-${env}")
   getScraperMetrics(timeRange: TimeRange!, entityId: ID): ScraperMetrics @function(name: "scraperManagement-${env}")
   getUpdateCandidateURLs(limit: Int): [ScrapeURL!] @function(name: "scraperManagement-${env}")
-
-  # listEntitiesByDomain(domain: String!): [Entity] @function(name: "entityLookup-${env}")
   scrapeGame(url: AWSURL!, entityId: ID, venueId: ID, doNotScrape: Boolean): ScrapedGameData @function(name: "singleGameScraper-${env}")
   scrapeBulkGames(startId: Int!, endId: Int!, entityId: ID): [ScrapedGameSummary] @function(name: "bulkGamesScraper-${env}")
   listScraperJobs(entityId: ID, status: ScraperJobStatus, startTime: AWSDateTime, endTime: AWSDateTime, limit: Int, nextToken: String): ScraperJobConnection @function(name: "scraperJobQuery-${env}")
   listScrapeURLs(entityId: ID, status: ScrapeURLStatus, limit: Int, nextToken: String): ScrapeURLConnection @function(name: "scrapeURLQuery-${env}")
-
-  # --- NEW VENUE ASSIGNMENT QUERIES ---
   listGamesNeedingVenue(limit: Int, nextToken: String, entityId: ID): GamesNeedingVenueResponse @function(name: "venueAssignmentService-${env}")  
   getVenueAssignmentSummary(entityId: ID): VenueAssignmentSummary @function(name: "venueAssignmentService-${env}")
-
-  # NEW CLOUDWATCH MUTATIONS
-  # Get current user's metrics summary
-  getMyMetrics(timeRange: String): UserMetricsSummary
-    @function(name: "getUserMetrics-${env}")
-    @auth(rules: [
-      { allow: private } # Users can only see their own metrics
-    ])
-
-  # Admin-only: Get any user's metrics
-  getUserMetrics(userId: String!, timeRange: String): UserMetricsSummary
-    @function(name: "getUserMetrics-${env}")
-    @auth(rules: [
-      { allow: groups, groups: ["Admin"] }
-    ])
-
-    playerCount: Int @function(name: "getModelCount-${env}")
-    playerSummaryCount: Int @function(name: "getModelCount-${env}")
-    playerEntryCount: Int @function(name: "getModelCount-${env}")
-    playerResultCount: Int @function(name: "getModelCount-${env}")
-    playerVenueCount: Int @function(name: "getModelCount-${env}")
-    playerTransactionCount: Int @function(name: "getModelCount-${env}")
-    playerCreditsCount: Int @function(name: "getModelCount-${env}")
-    playerPointsCount: Int @function(name: "getModelCount-${env}")
-    playerTicketCount: Int @function(name: "getModelCount-${env}")
-    playerMarketingPreferencesCount: Int @function(name: "getModelCount-${env}")
-    playerMarketingMessageCount: Int @function(name: "getModelCount-${env}")
-    
-    # Game-related counts
-    gameCount: Int @function(name: "getModelCount-${env}")
-    tournamentStructureCount: Int @function(name: "getModelCount-${env}")
-    
-    getAllCounts: AllCountsResult @function(name: "getModelCount-${env}")
-
-    getS3StorageHistory(tournamentId: Int!, entityId: ID!, limit: Int): S3StorageConnection
-        @function(name: "s3ManagementFunction-${env}")  # Use your actual function name
-    
-    viewS3Content(s3Key: String!): S3ContentResponse
-        @function(name: "s3ManagementFunction-${env}")
-   
-    getCachingStats(entityId: ID!, timeRange: TimeRange): CachingStatsResponse
-        @function(name: "s3ManagementFunction-${env}")
-    
-    listStoredHTML(url: AWSURL!, limit: Int): S3StorageConnection
-        @function(name: "s3ManagementFunction-${env}")
-
-    getDatabaseMetrics(timeRange: String): DatabaseMetricsResponse
-        @function(name: "getDatabaseMetrics-${env}")
-
-    # ===================================================================
-    # GAME ID TRACKING & GAP DETECTION QUERIES
-    # ===================================================================
-    
-    # Get highest and lowest tournament IDs for an entity
-    getTournamentIdBounds(entityId: ID!): TournamentIdBounds
-        @function(name: "gameIdTracker-${env}")
-    
-    # Get comprehensive scraping status with gaps
-    getEntityScrapingStatus(
-        entityId: ID!
-        forceRefresh: Boolean
-        startId: Int
-        endId: Int
-    ): EntityScrapingStatus @function(name: "gameIdTracker-${env}")
-    
-    # Get all gaps in tournament ID sequence
-    findTournamentIdGaps(
-        entityId: ID!
-        startId: Int
-        endId: Int
-        maxGapsToReturn: Int
-    ): [GapRange!]
-       @function(name: "gameIdTracker-${env}")
-    
-    # Get unfinished games for specific entity
-    getUnfinishedGamesByEntity(
-        entityId: ID!
-        limit: Int
-        nextToken: String
-    ): UnfinishedGamesConnection
-        @function(name: "gameIdTracker-${env}")
-    
-    # Get list of tournament IDs that exist (for verification)
-    listExistingTournamentIds(
-        entityId: ID!
-        startId: Int
-        endId: Int
-        limit: Int
-    ): [Int!] 
-        @function(name: "gameIdTracker-${env}")
+  getMyMetrics(timeRange: String): UserMetricsSummary @function(name: "getUserMetrics-${env}") @auth(rules: [{ allow: private }])
+  getUserMetrics(userId: String!, timeRange: String): UserMetricsSummary @function(name: "getUserMetrics-${env}") @auth(rules: [{ allow: groups, groups: ["Admin"] }])
+  playerCount: Int @function(name: "getModelCount-${env}")
+  playerSummaryCount: Int @function(name: "getModelCount-${env}")
+  playerEntryCount: Int @function(name: "getModelCount-${env}")
+  playerResultCount: Int @function(name: "getModelCount-${env}")
+  playerVenueCount: Int @function(name: "getModelCount-${env}")
+  playerTransactionCount: Int @function(name: "getModelCount-${env}")
+  playerCreditsCount: Int @function(name: "getModelCount-${env}")
+  playerPointsCount: Int @function(name: "getModelCount-${env}")
+  playerTicketCount: Int @function(name: "getModelCount-${env}")
+  playerMarketingPreferencesCount: Int @function(name: "getModelCount-${env}")
+  playerMarketingMessageCount: Int @function(name: "getModelCount-${env}")
+  gameCount: Int @function(name: "getModelCount-${env}")
+  tournamentStructureCount: Int @function(name: "getModelCount-${env}")
+  getAllCounts: AllCountsResult @function(name: "getModelCount-${env}")
+  getS3StorageHistory(tournamentId: Int!, entityId: ID!, limit: Int): S3StorageConnection @function(name: "s3ManagementFunction-${env}")
+  viewS3Content(s3Key: String!): S3ContentResponse @function(name: "s3ManagementFunction-${env}")
+  getCachingStats(entityId: ID!, timeRange: TimeRange): CachingStatsResponse @function(name: "s3ManagementFunction-${env}")
+  listStoredHTML(url: AWSURL!, limit: Int): S3StorageConnection @function(name: "s3ManagementFunction-${env}")
+  getDatabaseMetrics(timeRange: String): DatabaseMetricsResponse @function(name: "getDatabaseMetrics-${env}")
+  getTournamentIdBounds(entityId: ID!): TournamentIdBounds @function(name: "gameIdTracker-${env}")
+  getEntityScrapingStatus(entityId: ID!, forceRefresh: Boolean, startId: Int, endId: Int): EntityScrapingStatus @function(name: "gameIdTracker-${env}")
+  findTournamentIdGaps(entityId: ID!, startId: Int, endId: Int, maxGapsToReturn: Int): [GapRange!] @function(name: "gameIdTracker-${env}")
+  getUnfinishedGamesByEntity(entityId: ID!, limit: Int, nextToken: String): UnfinishedGamesConnection @function(name: "gameIdTracker-${env}")
+  listExistingTournamentIds(entityId: ID!, startId: Int, endId: Int, limit: Int): [Int!] @function(name: "gameIdTracker-${env}")
 }
 
 type Mutation {
@@ -1534,40 +1481,18 @@ type Mutation {
   saveTournamentData(input: SaveTournamentInput!): Game @function(name: "webScraperFunction-${env}")
   controlScraperOperation(operation: ScraperOperation!, entityId: ID): ScraperControlResponse @function(name: "autoScraper-${env}")
   triggerAutoScraping(maxGames: Int): ScraperControlResponse @function(name: "autoScraper-${env}")
-
-  # NEW ENHANCED SCRAPER MUTATIONS
   startScraperJob(input: StartScraperJobInput!): ScraperJob @function(name: "scraperManagement-${env}")
   cancelScraperJob(jobId: String!): ScraperJob @function(name: "scraperManagement-${env}")
   modifyScrapeURLStatus(url: AWSURL!, status: ScrapeURLStatus, doNotScrape: Boolean): ScrapeURL @function(name: "scraperManagement-${env}")
   bulkModifyScrapeURLs(urls: [AWSURL!]!, status: ScrapeURLStatus, doNotScrape: Boolean): [ScrapeURL!] @function(name: "scraperManagement-${env}")
-
-  # --- NEW VENUE ASSIGNMENT MUTATIONS ---
   assignVenueToGame(gameId: ID!, venueId: ID!): VenueAssignmentResult @function(name: "venueAssignmentService-${env}")
   batchAssignVenues(assignments: [VenueAssignment!]!): BatchVenueAssignmentResult @function(name: "venueAssignmentService-${env}")
-
-  # NEW CLOUDWATCH MUTATIONS (FIXED - NO operations argument)
-  publishClientMetrics(metrics: [ClientMetricInput!]!): ClientMetricResponse
-    @function(name: "publishClientMetrics-${env}")
-    @auth(rules: [
-      { allow: private } # Only authenticated users
-    ])
-
-  # Upload manual HTML
+  publishClientMetrics(metrics: [ClientMetricInput!]!): ClientMetricResponse @function(name: "publishClientMetrics-${env}") @auth(rules: [{ allow: private }])
   uploadManualHTML(input: ManualHTMLUploadInput!): S3Storage
-  
-  # Re-scrape from cached HTML
-  reScrapeFromCache(input: ReScrapeFromCacheInput!): ScrapedGameData
-  @function(name: "webScraperFunction-${env}")
-  
-  # Force refresh (bypass cache)
+  reScrapeFromCache(input: ReScrapeFromCacheInput!): ScrapedGameData @function(name: "webScraperFunction-${env}")
   forceRefreshScrape(url: AWSURL!): ScrapedGameData
-  
-  # Clear cache for a URL
   clearURLCache(url: AWSURL!): Boolean
-
-  # Save game data from any source
-  saveGame(input: SaveGameInput!): SaveGameResult!
-    @function(name: "saveGameFunction-${env}")
+  saveGame(input: SaveGameInput!): SaveGameResult! @function(name: "saveGameFunction-${env}")
 }
 
 type Subscription {

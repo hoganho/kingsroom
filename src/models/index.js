@@ -195,6 +195,14 @@ const VenueAssignmentStatus = {
   "RETROACTIVE_ASSIGNED": "RETROACTIVE_ASSIGNED"
 };
 
+const SeriesAssignmentStatus = {
+  "AUTO_ASSIGNED": "AUTO_ASSIGNED",
+  "MANUALLY_ASSIGNED": "MANUALLY_ASSIGNED",
+  "PENDING_ASSIGNMENT": "PENDING_ASSIGNMENT",
+  "UNASSIGNED": "UNASSIGNED",
+  "NOT_SERIES": "NOT_SERIES"
+};
+
 const ScraperJobTriggerSource = {
   "SCHEDULED": "SCHEDULED",
   "MANUAL": "MANUAL",
@@ -229,7 +237,10 @@ const ScrapeAttemptStatus = {
   "BLANK": "BLANK",
   "NO_CHANGES": "NO_CHANGES",
   "UPDATED": "UPDATED",
-  "SAVED": "SAVED"
+  "SAVED": "SAVED",
+  "SUCCESS_EDITED": "SUCCESS_EDITED",
+  "SAVED_EDITED": "SAVED_EDITED",
+  "UPDATED_EDITED": "UPDATED_EDITED"
 };
 
 const TimeRange = {
@@ -249,7 +260,7 @@ const ScraperOperation = {
   "RESET": "RESET"
 };
 
-const { Entity, ScrapeStructure, DataSync, ScraperState, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, TournamentLevelData, CashStructure, RakeStructure, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, KnownPlayerIdentity, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, ScraperJob, ScrapeURL, ScrapeAttempt, S3Storage, ScraperControlResponse, ScraperStateData, ScraperResults, ScraperLogData, ScrapedGameStatus, S3VersionHistory, TournamentLevel, Break, ClientMetricResponse, UserMetricsSummary, S3StorageConnection, CachingStatsResponse, CacheActivityLog, DatabaseMetric, DatabaseMetricsResponse, S3StorageHistoryResponse, S3ContentResponse, CachingStats, CacheActivity, S3StorageListResponse, RefreshResponse, ReScrapeResult, EntityVenueAssignmentSummary, EntityScraperMetrics, GamesNeedingVenueResponse, VenueAssignmentSummary, VenueAssignmentResult, AffectedRecords, BatchVenueAssignmentResult, ScraperJobURLResult, ScraperMetrics, ErrorMetric, HourlyMetric, ScraperJobConnection, ScrapeURLConnection, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails, AllCountsResult, VenueMatch, SaveGameResult, SaveVenueAssignmentInfo, GapRange, EntityScrapingStatus, GapSummary, UnfinishedGamesConnection, TournamentIdBounds } = initSchema(schema);
+const { Entity, ScrapeStructure, DataSync, ScraperState, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, TournamentLevelData, CashStructure, RakeStructure, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, KnownPlayerIdentity, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, ScraperJob, ScrapeURL, ScrapeAttempt, S3Storage, ScraperControlResponse, ScraperStateData, ScraperResults, ScraperLogData, ScrapedGameStatus, S3VersionHistory, TournamentLevel, Break, ClientMetricResponse, UserMetricsSummary, S3StorageConnection, CachingStatsResponse, CacheActivityLog, DatabaseMetric, DatabaseMetricsResponse, S3StorageHistoryResponse, S3ContentResponse, CachingStats, CacheActivity, S3StorageListResponse, RefreshResponse, ReScrapeResult, EntityVenueAssignmentSummary, EntityScraperMetrics, GamesNeedingVenueResponse, VenueAssignmentSummary, VenueAssignmentResult, AffectedRecords, BatchVenueAssignmentResult, ScraperJobURLResult, ScraperMetrics, ErrorMetric, HourlyMetric, ScraperJobConnection, ScrapeURLConnection, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails, AllCountsResult, VenueMatch, SaveGameResult, SaveVenueAssignmentInfo, SaveSeriesAssignmentInfo, GapRange, EntityScrapingStatus, GapSummary, UnfinishedGamesConnection, TournamentIdBounds } = initSchema(schema);
 
 export {
   Entity,
@@ -313,6 +324,7 @@ export {
   CreditTransactionType,
   PointsTransactionType,
   VenueAssignmentStatus,
+  SeriesAssignmentStatus,
   ScraperJobTriggerSource,
   ScraperJobStatus,
   ScrapeURLStatus,
@@ -369,6 +381,7 @@ export {
   VenueMatch,
   SaveGameResult,
   SaveVenueAssignmentInfo,
+  SaveSeriesAssignmentInfo,
   GapRange,
   EntityScrapingStatus,
   GapSummary,

@@ -488,6 +488,19 @@ const handleSave = async (sourceUrl, venueId, data, existingGameId, doNotScrape 
             guaranteeOverlay: parsedData.guaranteeOverlay || null,
             totalRake: parsedData.totalRake || null
         },
+        series: parsedData.isSeries ? {
+            seriesId: parsedData.tournamentSeriesId || null,  // Manual override
+            seriesName: parsedData.seriesName || null,
+            suggestedSeriesId: parsedData.seriesMatch?.autoAssignedSeries?.id || null,  // From scraper
+            confidence: parsedData.seriesMatch?.autoAssignedSeries?.score || 0,
+            // Include structure fields
+            isMainEvent: parsedData.isMainEvent || false,
+            eventNumber: parsedData.eventNumber || null,
+            dayNumber: parsedData.dayNumber || null,
+            flightLetter: parsedData.flightLetter || null,
+            finalDay: parsedData.finalDay || false,
+            year: parsedData.seriesYear || new Date(parsedData.gameStartDateTime || new Date()).getFullYear()
+        } : null,
         players: playerData.totalPlayers > 0 ? {
             allPlayers: playerData.allPlayers,
             totalPlayers: playerData.totalPlayers,

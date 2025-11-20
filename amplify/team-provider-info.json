@@ -23,7 +23,7 @@
         },
         "webScraperFunction": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/webScraperFunction-423648573635746c434a-build.zip",
+          "s3Key": "amplify-builds/webScraperFunction-413671354d3232614b4b-build.zip",
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
           "scraperS3Bucket": "pokerpro-scraper-storage",
           "saveGameFunctionName": "saveGameFunction-dev"
@@ -71,7 +71,7 @@
         "saveGameFunction": {
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo",
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/saveGameFunction-3133714c446e51315a38-build.zip"
+          "s3Key": "amplify-builds/saveGameFunction-324c4f4c384670536f35-build.zip"
         }
       },
       "auth": {

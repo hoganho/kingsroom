@@ -656,13 +656,29 @@ const defaultStrategy = {
             ctx.add('seriesName', seriesInfo.seriesName);
             ctx.add('isRegular', !seriesInfo.isSeries);
             
-            // Add additional series fields if present
-            if (seriesInfo.seriesId) ctx.add('seriesId', seriesInfo.seriesId);
+            // ENHANCE: Add a seriesMatch object similar to venueMatch
+            if (seriesInfo.seriesId) {
+                ctx.add('seriesMatch', {
+                    autoAssignedSeries: {
+                        id: seriesInfo.seriesId,
+                        name: seriesInfo.seriesName,
+                        score: seriesInfo.confidence || 0.85  // Add confidence scoring
+                    },
+                    suggestions: seriesInfo.suggestions || [],  // Add alternative matches
+                    matchedBy: seriesInfo.matchedBy || 'database'  // 'database' or 'pattern'
+                });
+                
+                // Keep individual fields for backward compatibility
+                ctx.add('seriesId', seriesInfo.seriesId);
+                ctx.add('tournamentSeriesId', seriesInfo.seriesId);  // Add this!
+            }
+            
+            // Add series structure fields
             if (seriesInfo.dayNumber) ctx.add('dayNumber', seriesInfo.dayNumber);
             if (seriesInfo.flightLetter) ctx.add('flightLetter', seriesInfo.flightLetter);
             if (seriesInfo.isMainEvent) ctx.add('isMainEvent', seriesInfo.isMainEvent);
-            if (seriesInfo.seriesYear) ctx.add('seriesYear', seriesInfo.seriesYear);
-            if (seriesInfo.isFinalDay) ctx.add('isFinalDay', seriesInfo.isFinalDay);
+            if (seriesInfo.eventNumber) ctx.add('eventNumber', seriesInfo.eventNumber);
+            if (seriesInfo.finalDay) ctx.add('finalDay', seriesInfo.finalDay);
         }
     },
     
