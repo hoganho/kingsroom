@@ -58,6 +58,53 @@ const GameFrequency = {
   "UNKNOWN": "UNKNOWN"
 };
 
+const Quarter = {
+  "Q1": "Q1",
+  "Q2": "Q2",
+  "Q3": "Q3",
+  "Q4": "Q4"
+};
+
+const SeriesCategory = {
+  "REGULAR": "REGULAR",
+  "SPECIAL_HOLIDAY": "SPECIAL_HOLIDAY",
+  "PROMOTIONAL": "PROMOTIONAL",
+  "CHAMPIONSHIP": "CHAMPIONSHIP",
+  "SEASONAL": "SEASONAL"
+};
+
+const DayOfWeek = {
+  "MONDAY": "MONDAY",
+  "TUESDAY": "TUESDAY",
+  "WEDNESDAY": "WEDNESDAY",
+  "THURSDAY": "THURSDAY",
+  "FRIDAY": "FRIDAY",
+  "SATURDAY": "SATURDAY",
+  "SUNDAY": "SUNDAY"
+};
+
+const CostItemType = {
+  "DEALER": "DEALER",
+  "TOURNAMENT_DIRECTOR": "TOURNAMENT_DIRECTOR",
+  "PRIZE_CONTRIBUTION": "PRIZE_CONTRIBUTION",
+  "JACKPOT_CONTRIBUTION": "JACKPOT_CONTRIBUTION",
+  "PROMOTION": "PROMOTION",
+  "FLOOR_STAFF": "FLOOR_STAFF",
+  "SECURITY": "SECURITY",
+  "EQUIPMENT_RENTAL": "EQUIPMENT_RENTAL",
+  "VENUE_RENTAL": "VENUE_RENTAL",
+  "INSURANCE": "INSURANCE",
+  "OTHER": "OTHER"
+};
+
+const CostItemRateType = {
+  "STANDARD": "STANDARD",
+  "PENALTY": "PENALTY",
+  "OVERTIME": "OVERTIME",
+  "HOLIDAY": "HOLIDAY",
+  "SPECIAL": "SPECIAL"
+};
+
 const RegistrationStatus = {
   "SCHEDULED": "SCHEDULED",
   "OPEN": "OPEN",
@@ -260,7 +307,7 @@ const ScraperOperation = {
   "RESET": "RESET"
 };
 
-const { Entity, ScrapeStructure, DataSync, ScraperState, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, TournamentLevelData, CashStructure, RakeStructure, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, KnownPlayerIdentity, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, ScraperJob, ScrapeURL, ScrapeAttempt, S3Storage, ScraperControlResponse, ScraperStateData, ScraperResults, ScraperLogData, ScrapedGameStatus, S3VersionHistory, TournamentLevel, Break, ClientMetricResponse, UserMetricsSummary, S3StorageConnection, CachingStatsResponse, CacheActivityLog, DatabaseMetric, DatabaseMetricsResponse, S3StorageHistoryResponse, S3ContentResponse, CachingStats, CacheActivity, S3StorageListResponse, RefreshResponse, ReScrapeResult, EntityVenueAssignmentSummary, EntityScraperMetrics, GamesNeedingVenueResponse, VenueAssignmentSummary, VenueAssignmentResult, AffectedRecords, BatchVenueAssignmentResult, ScraperJobURLResult, ScraperMetrics, ErrorMetric, HourlyMetric, ScraperJobConnection, ScrapeURLConnection, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails, AllCountsResult, VenueMatch, SaveGameResult, SaveVenueAssignmentInfo, SaveSeriesAssignmentInfo, GapRange, EntityScrapingStatus, GapSummary, UnfinishedGamesConnection, TournamentIdBounds } = initSchema(schema);
+const { Entity, ScrapeStructure, DataSync, ScraperState, Venue, VenueDetails, TournamentSeriesTitle, TournamentSeries, Game, TournamentStructure, TournamentLevelData, CashStructure, RakeStructure, Player, PlayerSummary, PlayerEntry, PlayerResult, PlayerVenue, PlayerTransaction, PlayerCredits, PlayerPoints, KnownPlayerIdentity, TicketTemplate, PlayerTicket, MarketingMessage, PlayerMarketingMessage, PlayerMarketingPreferences, User, UserPreference, Staff, Asset, SocialAccount, SocialPost, ScraperJob, ScrapeURL, ScrapeAttempt, S3Storage, GameCostItem, GameCost, GameCostLineItem, ScraperControlResponse, ScraperStateData, ScraperResults, ScraperLogData, ScrapedGameStatus, S3VersionHistory, TournamentLevel, Break, ClientMetricResponse, UserMetricsSummary, S3StorageConnection, CachingStatsResponse, CacheActivityLog, DatabaseMetric, DatabaseMetricsResponse, S3StorageHistoryResponse, S3ContentResponse, CachingStats, CacheActivity, S3StorageListResponse, RefreshResponse, ReScrapeResult, EntityVenueAssignmentSummary, EntityScraperMetrics, GamesNeedingVenueResponse, VenueAssignmentSummary, VenueAssignmentResult, AffectedRecords, BatchVenueAssignmentResult, ScraperJobURLResult, ScraperMetrics, ErrorMetric, HourlyMetric, ScraperJobConnection, ScrapeURLConnection, ScrapedGameSummary, ScrapedGameData, ScrapedTournamentLevel, ScrapedBreak, ScrapedPlayerEntry, ScrapedPlayerSeating, ScrapedPlayerResult, ScrapedTable, ScrapedTableSeatData, ScrapedVenueMatch, ScrapedVenueMatchDetails, AllCountsResult, VenueMatch, SaveGameResult, SaveVenueAssignmentInfo, SaveSeriesAssignmentInfo, GapRange, EntityScrapingStatus, GapSummary, UnfinishedGamesConnection, TournamentIdBounds } = initSchema(schema);
 
 export {
   Entity,
@@ -300,6 +347,9 @@ export {
   ScrapeURL,
   ScrapeAttempt,
   S3Storage,
+  GameCostItem,
+  GameCost,
+  GameCostLineItem,
   DataSource,
   AssetCondition,
   VenueStatus,
@@ -307,6 +357,11 @@ export {
   GameStatus,
   GameVariant,
   GameFrequency,
+  Quarter,
+  SeriesCategory,
+  DayOfWeek,
+  CostItemType,
+  CostItemRateType,
   RegistrationStatus,
   TournamentType,
   PaymentSourceType,

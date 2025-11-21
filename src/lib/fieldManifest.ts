@@ -90,7 +90,7 @@ export const fieldManifest: Record<string, FieldDefinition> = {
   levels: { label: 'Levels', group: 'Structure & Player Data', isBaselineOptional: true },
   breaks: { label: 'Breaks', group: 'Structure & Player Data', isBaselineOptional: true },
   entries: { label: 'Entries', group: 'Structure & Player Data', isBaselineOptional: true },
-  seating: { label: 'Seating', group: 'Structure & Player Data', isProfileExpected: ["STATUS: RUNNING | REG: CLOSED"] },
+  seating: { label: 'Seating', group: 'Structure & Player Data', isProfileOptional: ["STATUS: RUNNING | REG: CLOSED"] },
   results: { 
     label: 'Results', 
     group: 'Structure & Player Data', 

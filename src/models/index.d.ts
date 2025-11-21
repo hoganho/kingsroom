@@ -58,6 +58,53 @@ export enum GameFrequency {
   UNKNOWN = "UNKNOWN"
 }
 
+export enum Quarter {
+  Q1 = "Q1",
+  Q2 = "Q2",
+  Q3 = "Q3",
+  Q4 = "Q4"
+}
+
+export enum SeriesCategory {
+  REGULAR = "REGULAR",
+  SPECIAL_HOLIDAY = "SPECIAL_HOLIDAY",
+  PROMOTIONAL = "PROMOTIONAL",
+  CHAMPIONSHIP = "CHAMPIONSHIP",
+  SEASONAL = "SEASONAL"
+}
+
+export enum DayOfWeek {
+  MONDAY = "MONDAY",
+  TUESDAY = "TUESDAY",
+  WEDNESDAY = "WEDNESDAY",
+  THURSDAY = "THURSDAY",
+  FRIDAY = "FRIDAY",
+  SATURDAY = "SATURDAY",
+  SUNDAY = "SUNDAY"
+}
+
+export enum CostItemType {
+  DEALER = "DEALER",
+  TOURNAMENT_DIRECTOR = "TOURNAMENT_DIRECTOR",
+  PRIZE_CONTRIBUTION = "PRIZE_CONTRIBUTION",
+  JACKPOT_CONTRIBUTION = "JACKPOT_CONTRIBUTION",
+  PROMOTION = "PROMOTION",
+  FLOOR_STAFF = "FLOOR_STAFF",
+  SECURITY = "SECURITY",
+  EQUIPMENT_RENTAL = "EQUIPMENT_RENTAL",
+  VENUE_RENTAL = "VENUE_RENTAL",
+  INSURANCE = "INSURANCE",
+  OTHER = "OTHER"
+}
+
+export enum CostItemRateType {
+  STANDARD = "STANDARD",
+  PENALTY = "PENALTY",
+  OVERTIME = "OVERTIME",
+  HOLIDAY = "HOLIDAY",
+  SPECIAL = "SPECIAL"
+}
+
 export enum RegistrationStatus {
   SCHEDULED = "SCHEDULED",
   OPEN = "OPEN",
@@ -1678,6 +1725,7 @@ type EagerVenue = {
   readonly address?: string | null;
   readonly city?: string | null;
   readonly country?: string | null;
+  readonly fee?: number | null;
   readonly isSpecial?: boolean | null;
   readonly details?: VenueDetails | null;
   readonly assets?: (Asset | null)[] | null;
@@ -1704,6 +1752,7 @@ type LazyVenue = {
   readonly address?: string | null;
   readonly city?: string | null;
   readonly country?: string | null;
+  readonly fee?: number | null;
   readonly isSpecial?: boolean | null;
   readonly details: AsyncItem<VenueDetails | undefined>;
   readonly assets: AsyncCollection<Asset>;
@@ -1806,6 +1855,10 @@ type EagerTournamentSeries = {
   readonly id: string;
   readonly name: string;
   readonly year: number;
+  readonly quarter?: Quarter | keyof typeof Quarter | null;
+  readonly month?: number | null;
+  readonly seriesCategory: SeriesCategory | keyof typeof SeriesCategory;
+  readonly holidayType?: string | null;
   readonly status: SeriesStatus | keyof typeof SeriesStatus;
   readonly startDate?: string | null;
   readonly endDate?: string | null;
@@ -1831,6 +1884,10 @@ type LazyTournamentSeries = {
   readonly id: string;
   readonly name: string;
   readonly year: number;
+  readonly quarter?: Quarter | keyof typeof Quarter | null;
+  readonly month?: number | null;
+  readonly seriesCategory: SeriesCategory | keyof typeof SeriesCategory;
+  readonly holidayType?: string | null;
   readonly status: SeriesStatus | keyof typeof SeriesStatus;
   readonly startDate?: string | null;
   readonly endDate?: string | null;
@@ -1868,8 +1925,10 @@ type EagerGame = {
   readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
   readonly totalDuration?: string | null;
   readonly gameFrequency?: GameFrequency | keyof typeof GameFrequency | null;
+  readonly dayOfWeek?: DayOfWeek | keyof typeof DayOfWeek | null;
   readonly buyIn?: number | null;
   readonly rake?: number | null;
+  readonly venueFee?: number | null;
   readonly startingStack?: number | null;
   readonly hasGuarantee?: boolean | null;
   readonly guaranteeAmount?: number | null;
@@ -1916,6 +1975,7 @@ type EagerGame = {
   readonly tournamentSeriesId?: string | null;
   readonly tournamentSeries?: TournamentSeries | null;
   readonly structure?: TournamentStructure | null;
+  readonly gameCost?: GameCost | null;
   readonly playerEntries?: (PlayerEntry | null)[] | null;
   readonly playerResults?: (PlayerResult | null)[] | null;
   readonly entityId?: string | null;
@@ -1939,8 +1999,10 @@ type LazyGame = {
   readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
   readonly totalDuration?: string | null;
   readonly gameFrequency?: GameFrequency | keyof typeof GameFrequency | null;
+  readonly dayOfWeek?: DayOfWeek | keyof typeof DayOfWeek | null;
   readonly buyIn?: number | null;
   readonly rake?: number | null;
+  readonly venueFee?: number | null;
   readonly startingStack?: number | null;
   readonly hasGuarantee?: boolean | null;
   readonly guaranteeAmount?: number | null;
@@ -1987,6 +2049,7 @@ type LazyGame = {
   readonly tournamentSeriesId?: string | null;
   readonly tournamentSeries: AsyncItem<TournamentSeries | undefined>;
   readonly structure: AsyncItem<TournamentStructure | undefined>;
+  readonly gameCost: AsyncItem<GameCost | undefined>;
   readonly playerEntries: AsyncCollection<PlayerEntry>;
   readonly playerResults: AsyncCollection<PlayerResult>;
   readonly entityId?: string | null;
@@ -3344,4 +3407,150 @@ export declare type S3Storage = LazyLoading extends LazyLoadingDisabled ? EagerS
 
 export declare const S3Storage: (new (init: ModelInit<S3Storage>) => S3Storage) & {
   copyOf(source: S3Storage, mutator: (draft: MutableModel<S3Storage>) => MutableModel<S3Storage> | void): S3Storage;
+}
+
+type EagerGameCostItem = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<GameCostItem, 'id'>;
+  };
+  readonly id: string;
+  readonly name: string;
+  readonly costType: CostItemType | keyof typeof CostItemType;
+  readonly rateType?: CostItemRateType | keyof typeof CostItemRateType | null;
+  readonly defaultRate?: number | null;
+  readonly isPerHour?: boolean | null;
+  readonly isActive?: boolean | null;
+  readonly description?: string | null;
+  readonly lineItems?: (GameCostLineItem | null)[] | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyGameCostItem = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<GameCostItem, 'id'>;
+  };
+  readonly id: string;
+  readonly name: string;
+  readonly costType: CostItemType | keyof typeof CostItemType;
+  readonly rateType?: CostItemRateType | keyof typeof CostItemRateType | null;
+  readonly defaultRate?: number | null;
+  readonly isPerHour?: boolean | null;
+  readonly isActive?: boolean | null;
+  readonly description?: string | null;
+  readonly lineItems: AsyncCollection<GameCostLineItem>;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type GameCostItem = LazyLoading extends LazyLoadingDisabled ? EagerGameCostItem : LazyGameCostItem
+
+export declare const GameCostItem: (new (init: ModelInit<GameCostItem>) => GameCostItem) & {
+  copyOf(source: GameCostItem, mutator: (draft: MutableModel<GameCostItem>) => MutableModel<GameCostItem> | void): GameCostItem;
+}
+
+type EagerGameCost = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<GameCost, 'id'>;
+  };
+  readonly id: string;
+  readonly gameId: string;
+  readonly game?: Game | null;
+  readonly totalDealerCost?: number | null;
+  readonly totalTournamentDirectorCost?: number | null;
+  readonly totalPrizeContribution?: number | null;
+  readonly totalJackpotContribution?: number | null;
+  readonly totalPromotionCost?: number | null;
+  readonly totalFloorStaffCost?: number | null;
+  readonly totalOtherCost?: number | null;
+  readonly totalCost: number;
+  readonly lineItems?: (GameCostLineItem | null)[] | null;
+  readonly entityId?: string | null;
+  readonly venueId?: string | null;
+  readonly gameDate?: string | null;
+  readonly notes?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyGameCost = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<GameCost, 'id'>;
+  };
+  readonly id: string;
+  readonly gameId: string;
+  readonly game: AsyncItem<Game | undefined>;
+  readonly totalDealerCost?: number | null;
+  readonly totalTournamentDirectorCost?: number | null;
+  readonly totalPrizeContribution?: number | null;
+  readonly totalJackpotContribution?: number | null;
+  readonly totalPromotionCost?: number | null;
+  readonly totalFloorStaffCost?: number | null;
+  readonly totalOtherCost?: number | null;
+  readonly totalCost: number;
+  readonly lineItems: AsyncCollection<GameCostLineItem>;
+  readonly entityId?: string | null;
+  readonly venueId?: string | null;
+  readonly gameDate?: string | null;
+  readonly notes?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type GameCost = LazyLoading extends LazyLoadingDisabled ? EagerGameCost : LazyGameCost
+
+export declare const GameCost: (new (init: ModelInit<GameCost>) => GameCost) & {
+  copyOf(source: GameCost, mutator: (draft: MutableModel<GameCost>) => MutableModel<GameCost> | void): GameCost;
+}
+
+type EagerGameCostLineItem = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<GameCostLineItem, 'id'>;
+  };
+  readonly id: string;
+  readonly gameCostId: string;
+  readonly gameCost?: GameCost | null;
+  readonly costItemId: string;
+  readonly costItem?: GameCostItem | null;
+  readonly costType: CostItemType | keyof typeof CostItemType;
+  readonly amount: number;
+  readonly quantity?: number | null;
+  readonly rate?: number | null;
+  readonly hours?: number | null;
+  readonly notes?: string | null;
+  readonly gameId?: string | null;
+  readonly entityId?: string | null;
+  readonly venueId?: string | null;
+  readonly gameDate?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyGameCostLineItem = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<GameCostLineItem, 'id'>;
+  };
+  readonly id: string;
+  readonly gameCostId: string;
+  readonly gameCost: AsyncItem<GameCost | undefined>;
+  readonly costItemId: string;
+  readonly costItem: AsyncItem<GameCostItem | undefined>;
+  readonly costType: CostItemType | keyof typeof CostItemType;
+  readonly amount: number;
+  readonly quantity?: number | null;
+  readonly rate?: number | null;
+  readonly hours?: number | null;
+  readonly notes?: string | null;
+  readonly gameId?: string | null;
+  readonly entityId?: string | null;
+  readonly venueId?: string | null;
+  readonly gameDate?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type GameCostLineItem = LazyLoading extends LazyLoadingDisabled ? EagerGameCostLineItem : LazyGameCostLineItem
+
+export declare const GameCostLineItem: (new (init: ModelInit<GameCostLineItem>) => GameCostLineItem) & {
+  copyOf(source: GameCostLineItem, mutator: (draft: MutableModel<GameCostLineItem>) => MutableModel<GameCostLineItem> | void): GameCostLineItem;
 }

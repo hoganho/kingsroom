@@ -10,9 +10,12 @@ import { SeriesTitleManager } from '../components/series/SeriesTitleManager';
 import { SeriesInstanceManager } from '../components/series/SeriesInstanceManager';
 
 import { PageWrapper, PageGrid, PageCard } from '../components/layout/PageWrapper';
+import { useEntity } from '../contexts/EntityContext';
 
 export const SeriesManagementPage = () => {
     const client = generateClient();
+    const { selectedEntities } = useEntity(); // ✅ Add entity context
+    
     const [seriesTitles, setSeriesTitles] = useState<APITypes.TournamentSeriesTitle[]>([]);
     const [seriesInstances, setSeriesInstances] = useState<APITypes.TournamentSeries[]>([]);
     const [venues, setVenues] = useState<APITypes.Venue[]>([]);
@@ -21,33 +24,71 @@ export const SeriesManagementPage = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            // ✅ 1. Define the filter to exclude soft-deleted items.
-            const filter = {
-                _deleted: {
-                    ne: true // 'ne' means "not equal to"
-                }
+            // Base filter to exclude soft-deleted items
+            const baseFilter = {
+                _deleted: { ne: true }
             };
 
-            const [titlesData, instancesData, venuesData] = await Promise.all([
-                // ✅ 2. Pass the filter to your list queries.
-                client.graphql({
-                    query: queries.listTournamentSeriesTitles,
-                    variables: { filter }
-                }),
-                client.graphql({
-                    query: queries.listTournamentSeries,
-                    variables: { filter }
-                }),
-                client.graphql({
-                    query: queries.listVenues,
-                    variables: { filter }
-                })
-            ]);
+            // ✅ Get entity IDs for filtering
+            const entityIds = selectedEntities.map(e => e.id);
+            
+            // If no entities selected, show empty state
+            if (entityIds.length === 0) {
+                setSeriesTitles([]);
+                setSeriesInstances([]);
+                setVenues([]);
+                setLoading(false);
+                return;
+            }
 
-            // The rest of the function remains the same
-            const titles = (titlesData.data.listTournamentSeriesTitles?.items || []) as APITypes.TournamentSeriesTitle[];
-            const instances = (instancesData.data.listTournamentSeries?.items || []) as APITypes.TournamentSeries[];
+            // ✅ Build entity filter for venues
+            const venueFilter = {
+                ...baseFilter,
+                or: entityIds.map(id => ({ entityId: { eq: id } }))
+            };
+
+            // Fetch venues first (filtered by entity)
+            const venuesData = await client.graphql({
+                query: queries.listVenues,
+                variables: { filter: venueFilter }
+            });
+
             const venueItems = (venuesData.data.listVenues?.items || []) as APITypes.Venue[];
+            const venueIds = venueItems.map(v => v.id);
+
+            // ✅ Build filter for series instances (by venue)
+            const seriesInstanceFilter = venueIds.length > 0 ? {
+                ...baseFilter,
+                or: venueIds.map(id => ({ venueId: { eq: id } }))
+            } : baseFilter; // If no venues, still apply base filter but will return empty
+
+            // Fetch series instances (filtered by venues from selected entities)
+            const instancesData = await client.graphql({
+                query: queries.listTournamentSeries,
+                variables: { filter: seriesInstanceFilter }
+            });
+
+            const instances = (instancesData.data.listTournamentSeries?.items || []) as APITypes.TournamentSeries[];
+            
+            // ✅ Get unique series title IDs from the filtered instances
+            const seriesTitleIds = [...new Set(instances.map(inst => inst.tournamentSeriesTitleId))];
+            
+            // Fetch only the series titles that are actually used by instances in selected entities
+            let titles: APITypes.TournamentSeriesTitle[] = [];
+            if (seriesTitleIds.length > 0) {
+                // ✅ Filter titles to only those referenced by instances
+                const titlesFilter = {
+                    ...baseFilter,
+                    or: seriesTitleIds.map(id => ({ id: { eq: id } }))
+                };
+
+                const titlesData = await client.graphql({
+                    query: queries.listTournamentSeriesTitles,
+                    variables: { filter: titlesFilter }
+                });
+
+                titles = (titlesData.data.listTournamentSeriesTitles?.items || []) as APITypes.TournamentSeriesTitle[];
+            }
 
             setSeriesTitles(titles);
             setSeriesInstances(instances);
@@ -60,9 +101,22 @@ export const SeriesManagementPage = () => {
         }
     };
 
+    // Re-fetch when selected entities change
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [selectedEntities]);
+
+    // Listen to entity change events for immediate updates (set up once)
+    useEffect(() => {
+        const handleEntityChange = () => {
+            fetchData();
+        };
+
+        window.addEventListener('selectedEntitiesChanged', handleEntityChange);
+        return () => {
+            window.removeEventListener('selectedEntitiesChanged', handleEntityChange);
+        };
+    }, []); // Empty dependency array - only set up once
 
     // Handlers for Series Titles
     const handleSaveTitle = async (input: { id?: string; title: string; _version?: number }) => {
@@ -82,7 +136,6 @@ export const SeriesManagementPage = () => {
     };
 
     const handleDeleteTitle = async (titleToDelete: APITypes.TournamentSeriesTitle) => {
-        // LOG 2: See what the parent handler receives.
         console.log('[SeriesManagementPage] handleDeleteTitle received this object:', titleToDelete);
 
         if (!titleToDelete?._version) {
@@ -92,8 +145,6 @@ export const SeriesManagementPage = () => {
         }
 
         if (window.confirm("Are you sure? This action cannot be undone.")) {
-            
-            // LOG 3: See the exact payload being sent to the backend.
             const deleteInput = {
                 id: titleToDelete.id,
                 _version: titleToDelete._version
@@ -110,7 +161,6 @@ export const SeriesManagementPage = () => {
                 fetchData();
 
             } catch (error) {
-                // LOG 4: See the full, detailed error from the backend.
                 console.error('[SeriesManagementPage] Error deleting series title:', JSON.stringify(error, null, 2));
                 alert('Failed to delete series title. The data may have been modified by someone else. See console for details.');
             }
@@ -120,25 +170,20 @@ export const SeriesManagementPage = () => {
     // Handlers for Series Instances
     const handleSaveInstance = async (formState: Partial<APITypes.TournamentSeries>) => {
         try {
-            // Check if the form state has an ID and version, which signifies an update.
             if (formState.id && formState._version) {
-                
-                // This is an UPDATE operation
                 console.log('Attempting to update series instance...');
 
-                // Construct the specific input required by the update mutation.
                 const updateInput: APITypes.UpdateTournamentSeriesInput = {
                     id: formState.id,
                     _version: formState._version,
-                    // Copy over other fields from the form
                     name: formState.name,
                     year: formState.year,
                     startDate: formState.startDate,
                     endDate: formState.endDate,
                     status: formState.status,
+                    seriesCategory: formState.seriesCategory,
                     tournamentSeriesTitleId: formState.tournamentSeriesTitleId,
                     venueId: formState.venueId,
-                    // Add any other fields from the form here
                 };
 
                 await client.graphql({ 
@@ -147,25 +192,21 @@ export const SeriesManagementPage = () => {
                 });
 
             } else {
-                // This is a CREATE operation
                 console.log('Attempting to create new series instance...');
 
-                // Construct the specific input required by the create mutation.
-                // Ensure all non-nullable fields are present.
                 const createInput: APITypes.CreateTournamentSeriesInput = {
                     name: formState.name!,
                     year: formState.year!,
                     status: formState.status!,
+                    seriesCategory: formState.seriesCategory!,
                     tournamentSeriesTitleId: formState.tournamentSeriesTitleId!,
                     venueId: formState.venueId!,
                     startDate: formState.startDate,
                     endDate: formState.endDate,
-                    // Add any other fields from the form here
                 };
 
-                // Add a safety check for required fields before sending
-                if (!createInput.name || !createInput.year || !createInput.status || !createInput.tournamentSeriesTitleId || !createInput.venueId) {
-                    alert("Cannot create series: Missing required fields (Name, Year, Status, Title, or Venue).");
+                if (!createInput.name || !createInput.year || !createInput.status || !createInput.seriesCategory || !createInput.tournamentSeriesTitleId || !createInput.venueId) {
+                    alert("Cannot create series: Missing required fields (Name, Year, Status, Category, Title, or Venue).");
                     return;
                 }
 
@@ -216,10 +257,19 @@ export const SeriesManagementPage = () => {
         );
     }
 
+    // ✅ Show message if no entities selected
+    if (selectedEntities.length === 0) {
+        return (
+            <PageWrapper title="Series Management" maxWidth="7xl">
+                <div className="p-8 text-center text-gray-500">
+                    Please select at least one entity from the sidebar to view series data.
+                </div>
+            </PageWrapper>
+        );
+    }
+
     return (
-    
         <PageWrapper title="Series Management" maxWidth="7xl">
-            {/* ✅ FIX: No extra padding div needed. PageWrapper handles it. */}
             <PageGrid columns={3} gap="lg">
                 <div className="lg:col-span-1">
                     <PageCard>
@@ -245,4 +295,3 @@ export const SeriesManagementPage = () => {
         </PageWrapper>
     );
 };
-

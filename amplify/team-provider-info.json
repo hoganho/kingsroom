@@ -46,7 +46,7 @@
         },
         "publishClientMetrics": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/publishClientMetrics-2f69314c63324865596e-build.zip"
+          "s3Key": "amplify-builds/publishClientMetrics-697832374d5172456465-build.zip"
         },
         "s3ManagementFunction": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",

@@ -16,7 +16,10 @@ export const SeriesInstanceManager: React.FC<Props> = ({ seriesInstances, series
     const [isFormOpen, setIsFormOpen] = useState(false);
 
     const openForm = (instance: APITypes.TournamentSeries | null = null) => {
-        setFormState(instance || { status: APITypes.SeriesStatus.SCHEDULED });
+        setFormState(instance || { 
+            status: APITypes.SeriesStatus.SCHEDULED,
+            seriesCategory: APITypes.SeriesCategory.REGULAR // Default to REGULAR category
+        });
         setIsFormOpen(true);
     };
 
@@ -56,6 +59,15 @@ export const SeriesInstanceManager: React.FC<Props> = ({ seriesInstances, series
                         <option value={APITypes.SeriesStatus.SCHEDULED}>Scheduled</option>
                         <option value={APITypes.SeriesStatus.LIVE}>Live</option>
                         <option value={APITypes.SeriesStatus.COMPLETED}>Completed</option>
+                    </select>
+                    
+                    <select value={formState.seriesCategory || ''} onChange={e => setFormState({...formState, seriesCategory: e.target.value as APITypes.SeriesCategory})} className="w-full p-2 border rounded" required>
+                        <option value="">Select Series Category...</option>
+                        <option value={APITypes.SeriesCategory.REGULAR}>Regular</option>
+                        <option value={APITypes.SeriesCategory.CHAMPIONSHIP}>Championship</option>
+                        <option value={APITypes.SeriesCategory.SEASONAL}>Seasonal</option>
+                        <option value={APITypes.SeriesCategory.SPECIAL_HOLIDAY}>Special Holiday</option>
+                        <option value={APITypes.SeriesCategory.PROMOTIONAL}>Promotional</option>
                     </select>
 
                     <div className="flex space-x-2">

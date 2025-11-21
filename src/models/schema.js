@@ -621,6 +621,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "fee": {
+                    "name": "fee",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "isSpecial": {
                     "name": "isSpecial",
                     "isArray": false,
@@ -1052,6 +1059,38 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "quarter": {
+                    "name": "quarter",
+                    "isArray": false,
+                    "type": {
+                        "enum": "Quarter"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "month": {
+                    "name": "month",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesCategory": {
+                    "name": "seriesCategory",
+                    "isArray": false,
+                    "type": {
+                        "enum": "SeriesCategory"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "holidayType": {
+                    "name": "holidayType",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "status": {
                     "name": "status",
                     "isArray": false,
@@ -1218,6 +1257,46 @@ export const schema = {
                 {
                     "type": "key",
                     "properties": {
+                        "name": "byQuarter",
+                        "fields": [
+                            "quarter",
+                            "year"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byMonth",
+                        "fields": [
+                            "month",
+                            "year"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "bySeriesCategory",
+                        "fields": [
+                            "seriesCategory",
+                            "year"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byHolidayType",
+                        "fields": [
+                            "holidayType",
+                            "year"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
                         "name": "byTournamentSeriesTitle",
                         "fields": [
                             "tournamentSeriesTitleId",
@@ -1335,6 +1414,15 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "dayOfWeek": {
+                    "name": "dayOfWeek",
+                    "isArray": false,
+                    "type": {
+                        "enum": "DayOfWeek"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "buyIn": {
                     "name": "buyIn",
                     "isArray": false,
@@ -1344,6 +1432,13 @@ export const schema = {
                 },
                 "rake": {
                     "name": "rake",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueFee": {
+                    "name": "venueFee",
                     "isArray": false,
                     "type": "Float",
                     "isRequired": false,
@@ -1705,6 +1800,24 @@ export const schema = {
                         ]
                     }
                 },
+                "gameCost": {
+                    "name": "gameCost",
+                    "isArray": false,
+                    "type": {
+                        "model": "GameCost"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "HAS_ONE",
+                        "associatedWith": [
+                            "id"
+                        ],
+                        "targetNames": [
+                            "id"
+                        ]
+                    }
+                },
                 "playerEntries": {
                     "name": "playerEntries",
                     "isArray": true,
@@ -1806,6 +1919,17 @@ export const schema = {
                         "queryField": "gamesByRegistrationStatus",
                         "fields": [
                             "registrationStatus",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byDayOfWeek",
+                        "queryField": "gamesByDayOfWeek",
+                        "fields": [
+                            "dayOfWeek",
                             "gameStartDateTime"
                         ]
                     }
@@ -6423,6 +6547,569 @@ export const schema = {
                     }
                 }
             ]
+        },
+        "GameCostItem": {
+            "name": "GameCostItem",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "costType": {
+                    "name": "costType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "CostItemType"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "rateType": {
+                    "name": "rateType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "CostItemRateType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "defaultRate": {
+                    "name": "defaultRate",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isPerHour": {
+                    "name": "isPerHour",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isActive": {
+                    "name": "isActive",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "description": {
+                    "name": "description",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lineItems": {
+                    "name": "lineItems",
+                    "isArray": true,
+                    "type": {
+                        "model": "GameCostLineItem"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "costItem"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "GameCostItems",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byCostType",
+                        "fields": [
+                            "costType",
+                            "name"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "GameCost": {
+            "name": "GameCost",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "game": {
+                    "name": "game",
+                    "isArray": false,
+                    "type": {
+                        "model": "Game"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "gameId"
+                        ]
+                    }
+                },
+                "totalDealerCost": {
+                    "name": "totalDealerCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalTournamentDirectorCost": {
+                    "name": "totalTournamentDirectorCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPrizeContribution": {
+                    "name": "totalPrizeContribution",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalJackpotContribution": {
+                    "name": "totalJackpotContribution",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPromotionCost": {
+                    "name": "totalPromotionCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalFloorStaffCost": {
+                    "name": "totalFloorStaffCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalOtherCost": {
+                    "name": "totalOtherCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCost": {
+                    "name": "totalCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lineItems": {
+                    "name": "lineItems",
+                    "isArray": true,
+                    "type": {
+                        "model": "GameCostLineItem"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "gameCost"
+                        ]
+                    }
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameDate": {
+                    "name": "gameDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "notes": {
+                    "name": "notes",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "GameCosts",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byGameCost",
+                        "fields": [
+                            "gameId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityCost",
+                        "fields": [
+                            "entityId",
+                            "gameDate"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byVenueCost",
+                        "fields": [
+                            "venueId",
+                            "gameDate"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byGameDateCost",
+                        "fields": [
+                            "gameDate",
+                            "totalCost"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "GameCostLineItem": {
+            "name": "GameCostLineItem",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameCostId": {
+                    "name": "gameCostId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameCost": {
+                    "name": "gameCost",
+                    "isArray": false,
+                    "type": {
+                        "model": "GameCost"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "gameCostId"
+                        ]
+                    }
+                },
+                "costItemId": {
+                    "name": "costItemId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "costItem": {
+                    "name": "costItem",
+                    "isArray": false,
+                    "type": {
+                        "model": "GameCostItem"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "costItemId"
+                        ]
+                    }
+                },
+                "costType": {
+                    "name": "costType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "CostItemType"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "amount": {
+                    "name": "amount",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "quantity": {
+                    "name": "quantity",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rate": {
+                    "name": "rate",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hours": {
+                    "name": "hours",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "notes": {
+                    "name": "notes",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameDate": {
+                    "name": "gameDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "GameCostLineItems",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byGameCost",
+                        "fields": [
+                            "gameCostId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byCostItem",
+                        "fields": [
+                            "costItemId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byCostTypeLine",
+                        "fields": [
+                            "costType",
+                            "gameDate"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byGameLineItem",
+                        "fields": [
+                            "gameId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityLineItem",
+                        "fields": [
+                            "entityId",
+                            "gameDate"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byVenueLineItem",
+                        "fields": [
+                            "venueId",
+                            "gameDate"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
         }
     },
     "enums": {
@@ -6494,6 +7181,63 @@ export const schema = {
                 "QUARTERLY",
                 "YEARLY",
                 "UNKNOWN"
+            ]
+        },
+        "Quarter": {
+            "name": "Quarter",
+            "values": [
+                "Q1",
+                "Q2",
+                "Q3",
+                "Q4"
+            ]
+        },
+        "SeriesCategory": {
+            "name": "SeriesCategory",
+            "values": [
+                "REGULAR",
+                "SPECIAL_HOLIDAY",
+                "PROMOTIONAL",
+                "CHAMPIONSHIP",
+                "SEASONAL"
+            ]
+        },
+        "DayOfWeek": {
+            "name": "DayOfWeek",
+            "values": [
+                "MONDAY",
+                "TUESDAY",
+                "WEDNESDAY",
+                "THURSDAY",
+                "FRIDAY",
+                "SATURDAY",
+                "SUNDAY"
+            ]
+        },
+        "CostItemType": {
+            "name": "CostItemType",
+            "values": [
+                "DEALER",
+                "TOURNAMENT_DIRECTOR",
+                "PRIZE_CONTRIBUTION",
+                "JACKPOT_CONTRIBUTION",
+                "PROMOTION",
+                "FLOOR_STAFF",
+                "SECURITY",
+                "EQUIPMENT_RENTAL",
+                "VENUE_RENTAL",
+                "INSURANCE",
+                "OTHER"
+            ]
+        },
+        "CostItemRateType": {
+            "name": "CostItemRateType",
+            "values": [
+                "STANDARD",
+                "PENALTY",
+                "OVERTIME",
+                "HOLIDAY",
+                "SPECIAL"
             ]
         },
         "RegistrationStatus": {
@@ -9497,5 +10241,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "5dd661d6499b3b8ac7792b1eccbcba2e"
+    "version": "9403277065b3d46143e9db23da751c20"
 };

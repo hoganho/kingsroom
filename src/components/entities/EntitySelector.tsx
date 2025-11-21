@@ -70,7 +70,8 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
   const { 
     entities, 
     currentEntity, 
-    setCurrentEntity, 
+    setCurrentEntity,
+    setSelectedEntities, // Add this to sync multi-entity selection
     loading, 
     error 
   } = useEntity();
@@ -79,7 +80,8 @@ export const EntitySelector: React.FC<EntitySelectorProps> = ({
     const newEntityId = event.target.value;
     const selected = entities.find(e => e.id === newEntityId);
     if (selected) {
-      setCurrentEntity(selected); // This updates the context for all components
+      setCurrentEntity(selected); // Updates single entity (for input/scraping)
+      setSelectedEntities([selected]); // Also update multi-entity selection (for viewing pages)
     }
   };
 
