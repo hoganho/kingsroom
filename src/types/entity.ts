@@ -8,6 +8,7 @@ export interface Entity {
   gameUrlPath: string;
   entityLogo?: string | null;
   isActive: boolean;
+  defaultVenueId?: string | null;
   createdAt?: string;
   updatedAt?: string;
   _version?: number;

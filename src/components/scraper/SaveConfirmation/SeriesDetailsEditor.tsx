@@ -1,6 +1,6 @@
 // src/components/scraper/SaveConfirmation/SeriesDetailsEditor.tsx
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { GameData } from '../../../types/game';
 import type { UseGameDataEditorReturn } from '../../../hooks/useGameDataEditor';
 import type { TournamentSeries } from '../../../types/series';
@@ -19,17 +19,26 @@ export const SeriesDetailsEditor: React.FC<SeriesDetailsEditorProps> = ({
     const { editedData, updateField, updateMultipleFields } = editor;
     const [showAdvancedInfo, setShowAdvancedInfo] = useState(false);
     
+    // 1. FIX: Use a Ref to track processed names to prevent infinite useEffect loops
+    const processedNameRef = useRef<string | null>(null);
+    
     // Auto-detect series patterns from game name
     useEffect(() => {
         if (!editedData.name || !editedData.isSeries) return;
         
+        // 1. FIX: Stop immediately if we have already processed this exact name
+        if (processedNameRef.current === editedData.name) {
+            return;
+        }
+        
         const name = editedData.name;
         const detectedValues: Partial<GameData> = {};
         
-        // Detect Main Event
-        if (/\bmain\s*event\b/i.test(name)) {
+        // 2. FIX: Disable auto-detection of Main Event so it defaults to false
+        /* if (/\bmain\s*event\b/i.test(name)) {
             detectedValues.isMainEvent = true;
-        }
+        } 
+        */
         
         // Detect Event Number (e.g., "Event 8", "Event #12")
         const eventMatch = name.match(/\bEvent\s*#?\s*(\d+)/i);
@@ -70,19 +79,26 @@ export const SeriesDetailsEditor: React.FC<SeriesDetailsEditorProps> = ({
             }
         }
         
+        // 1. FIX: Mark this name as processed BEFORE triggering updates
+        processedNameRef.current = name;
+        
         // Only update if we detected something and the field is currently empty
         const updates: Partial<GameData> = {};
+        let hasUpdates = false;
+
         for (const [key, value] of Object.entries(detectedValues)) {
             const field = key as keyof GameData;
             if (!editedData[field] && value !== undefined) {
                 updates[field] = value as any;
+                hasUpdates = true;
             }
         }
         
-        if (Object.keys(updates).length > 0) {
+        if (hasUpdates) {
             updateMultipleFields(updates);
         }
-    }, [editedData.name, editedData.isSeries]);
+    // Adding updateMultipleFields/editedData to deps is now safe because of the ref check
+    }, [editedData.name, editedData.isSeries, updateMultipleFields, editedData]);
     
     // Handle series selection
     const handleSeriesSelect = (seriesId: string) => {
@@ -112,7 +128,7 @@ export const SeriesDetailsEditor: React.FC<SeriesDetailsEditorProps> = ({
         <div className="space-y-4">
             {/* Series Selection */}
             <div className="border rounded-lg p-4">
-                <h3 className="font-semibold text-sm mb-3">🎯 Tournament Series Link</h3>
+                <h3 className="font-semibold text-sm mb-3">🔗 Tournament Series Link</h3>
                 
                 <div className="space-y-3">
                     <div>
@@ -134,7 +150,7 @@ export const SeriesDetailsEditor: React.FC<SeriesDetailsEditorProps> = ({
                     
                     {editedData.tournamentSeriesId && (
                         <div className="p-2 bg-blue-50 rounded text-xs text-blue-700">
-                            ✓ Linked to series: {series.find(s => s.id === editedData.tournamentSeriesId)?.name}
+                            ℹ Linked to series: {series.find(s => s.id === editedData.tournamentSeriesId)?.name}
                         </div>
                     )}
                 </div>
@@ -143,7 +159,7 @@ export const SeriesDetailsEditor: React.FC<SeriesDetailsEditorProps> = ({
             {/* Event Details */}
             <div className="border rounded-lg p-4">
                 <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-semibold text-sm">📊 Event Structure Details</h3>
+                    <h3 className="font-semibold text-sm">📋 Event Structure Details</h3>
                     <button
                         onClick={() => setShowAdvancedInfo(!showAdvancedInfo)}
                         className="text-xs text-blue-600 hover:text-blue-800"
@@ -227,7 +243,7 @@ export const SeriesDetailsEditor: React.FC<SeriesDetailsEditorProps> = ({
                             className="h-4 w-4"
                         />
                         <label htmlFor="finalDay" className="text-sm">
-                            💰 Final Day (payouts)
+                            🏁 Final Day (payouts)
                         </label>
                     </div>
                 </div>

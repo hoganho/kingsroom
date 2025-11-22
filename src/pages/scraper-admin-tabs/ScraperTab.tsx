@@ -64,7 +64,8 @@ interface ModalResolverValue {
   venueId?: string;
 }
 
-const client = generateClient();
+// Helper to get client lazily (after Amplify is configured)
+const getClient = () => generateClient();
 
 // --- Component Props ---
 
@@ -222,6 +223,8 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
   const { currentEntity } = useEntity();
   const [venues, setVenues] = useState<Venue[]>([]);
   const [defaultVenueId, setDefaultVenueId] = useState<string>('');
+  const [entityDefaultVenueId, setEntityDefaultVenueId] = useState<string>(''); // Entity's saved default
+  const [isSavingDefaultVenue, setIsSavingDefaultVenue] = useState(false);
 
   // --- Section Collapse State ---
   const [entitySectionOpen, setEntitySectionOpen] = useState(true);
@@ -277,6 +280,14 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
     }
   }, [currentEntity?.id]);
 
+  // Watch for changes to entity's defaultVenueId
+  useEffect(() => {
+    if (currentEntity?.defaultVenueId) {
+      setDefaultVenueId(currentEntity.defaultVenueId);
+      setEntityDefaultVenueId(currentEntity.defaultVenueId);
+    }
+  }, [currentEntity?.defaultVenueId]);
+
   useEffect(() => {
     if (urlToReparse && currentEntity?.id) {
       const urlMatch = urlToReparse.match(/[?&]id=(\d+)/);
@@ -294,17 +305,56 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
   const fetchVenues = async () => {
     if (!currentEntity?.id) return;
     try {
-      const response = await client.graphql({
+      const response = await getClient().graphql({
         query: listVenuesForDropdown,
         variables: { filter: { entityId: { eq: currentEntity.id } } }
       }) as any;
       const venueItems = (response.data?.listVenues?.items as Venue[]).filter(Boolean);
       setVenues(venueItems);
-      if (venueItems.length > 0) {
+      
+      // Use Entity's defaultVenueId if set, otherwise use first venue
+      if (currentEntity.defaultVenueId) {
+        setDefaultVenueId(currentEntity.defaultVenueId);
+        setEntityDefaultVenueId(currentEntity.defaultVenueId);
+      } else if (venueItems.length > 0) {
         setDefaultVenueId(venueItems[0].id);
+        setEntityDefaultVenueId(''); // No entity default set
       }
     } catch (error) {
       console.error('Error fetching venues:', error);
+    }
+  };
+
+  const updateEntityDefaultVenue = async () => {
+    if (!currentEntity?.id || !defaultVenueId) return;
+    
+    setIsSavingDefaultVenue(true);
+    try {
+      await getClient().graphql({
+        query: /* GraphQL */ `
+          mutation UpdateEntityDefaultVenue($input: UpdateEntityInput!) {
+            updateEntity(input: $input) {
+              id
+              defaultVenueId
+              entityName
+            }
+          }
+        `,
+        variables: {
+          input: {
+            id: currentEntity.id,
+            defaultVenueId: defaultVenueId
+          }
+        }
+      });
+      
+      setEntityDefaultVenueId(defaultVenueId);
+      console.log('Entity default venue updated successfully');
+    } catch (error) {
+      console.error('Error updating entity default venue:', error);
+      alert('Failed to save default venue to entity');
+    } finally {
+      setIsSavingDefaultVenue(false);
     }
   };
 
@@ -1129,16 +1179,55 @@ const handleManualSave = async (result: ProcessingResult) => {
               </p>
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700">Default Venue</label>
-              <select
-                value={defaultVenueId}
-                onChange={e => setDefaultVenueId(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md"
-                disabled={isProcessing}
-              >
-                {venues.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
-              </select>
-              <p className="text-xs text-gray-500 mt-1">Pre-selected venue for saves.</p>
+              <label className="text-sm font-medium text-gray-700 flex items-center justify-between">
+                <span>Default Venue for Auto-Assignment</span>
+                {entityDefaultVenueId && (
+                  <span className="text-xs text-green-600 font-normal">
+                    ✓ Saved to Entity
+                  </span>
+                )}
+              </label>
+              <div className="mt-1 flex gap-2">
+                <select
+                  value={defaultVenueId}
+                  onChange={e => setDefaultVenueId(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+                  disabled={isProcessing}
+                >
+                  {!defaultVenueId && (
+                    <option value="">No default venue set</option>
+                  )}
+                  {venues.map(v => (
+                    <option key={v.id} value={v.id}>
+                      {v.name}
+                      {v.id === entityDefaultVenueId ? ' ⭐' : ''}
+                      {v.fee ? ` ($${v.fee})` : ''}
+                    </option>
+                  ))}
+                </select>
+                {defaultVenueId !== entityDefaultVenueId && (
+                  <button
+                    type="button"
+                    onClick={updateEntityDefaultVenue}
+                    disabled={isProcessing || isSavingDefaultVenue || !defaultVenueId}
+                    className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap"
+                  >
+                    {isSavingDefaultVenue ? 'Saving...' : 'Save Default'}
+                  </button>
+                )}
+              </div>
+              <div className="mt-1 space-y-1">
+                <p className="text-xs text-gray-500">
+                  {entityDefaultVenueId 
+                    ? 'Games with low venue confidence (<0.6) will auto-assign to this venue.' 
+                    : 'Set a default venue to auto-assign games when venue matching fails.'}
+                </p>
+                {entityDefaultVenueId && defaultVenueId !== entityDefaultVenueId && (
+                  <p className="text-xs text-amber-600">
+                    ⚠ Changes not saved to entity. Click "Save Default" to update.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
           

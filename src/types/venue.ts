@@ -13,4 +13,29 @@ export interface VenueFormData {
   country?: string | null;
   aliases: string[];
   entityId: string | null;
+  fee?: number | null;  // NEW - Venue fee per game
+}
+
+/**
+ * Complete venue type matching the GraphQL schema
+ */
+export interface Venue {
+  id: string;
+  name: string;
+  venueNumber?: number | null;
+  address?: string | null;
+  city?: string | null;
+  country?: string | null;
+  aliases?: string[] | null;
+  entityId?: string | null;
+  entity?: {
+    id: string;
+    entityName: string;
+  } | null;
+  fee?: number | null;  // NEW - Venue fee per game
+  _version?: number;
+  _deleted?: boolean | null;
+  _lastChangedAt?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }

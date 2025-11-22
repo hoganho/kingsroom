@@ -45,6 +45,13 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "defaultVenueId": {
+                    "name": "defaultVenueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -624,7 +631,7 @@ export const schema = {
                 "fee": {
                     "name": "fee",
                     "isArray": false,
-                    "type": "Int",
+                    "type": "Float",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -977,6 +984,15 @@ export const schema = {
                     "attributes": [],
                     "isArrayNullable": true
                 },
+                "seriesCategory": {
+                    "name": "seriesCategory",
+                    "isArray": false,
+                    "type": {
+                        "enum": "SeriesCategory"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "seriesInstances": {
                     "name": "seriesInstances",
                     "isArray": true,
@@ -1062,9 +1078,7 @@ export const schema = {
                 "quarter": {
                     "name": "quarter",
                     "isArray": false,
-                    "type": {
-                        "enum": "Quarter"
-                    },
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -1087,7 +1101,9 @@ export const schema = {
                 "holidayType": {
                     "name": "holidayType",
                     "isArray": false,
-                    "type": "String",
+                    "type": {
+                        "enum": "HolidayType"
+                    },
                     "isRequired": false,
                     "attributes": []
                 },
@@ -1410,15 +1426,6 @@ export const schema = {
                     "isArray": false,
                     "type": {
                         "enum": "GameFrequency"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "dayOfWeek": {
-                    "name": "dayOfWeek",
-                    "isArray": false,
-                    "type": {
-                        "enum": "DayOfWeek"
                     },
                     "isRequired": false,
                     "attributes": []
@@ -1919,17 +1926,6 @@ export const schema = {
                         "queryField": "gamesByRegistrationStatus",
                         "fields": [
                             "registrationStatus",
-                            "gameStartDateTime"
-                        ]
-                    }
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byDayOfWeek",
-                        "queryField": "gamesByDayOfWeek",
-                        "fields": [
-                            "dayOfWeek",
                             "gameStartDateTime"
                         ]
                     }
@@ -7183,63 +7179,6 @@ export const schema = {
                 "UNKNOWN"
             ]
         },
-        "Quarter": {
-            "name": "Quarter",
-            "values": [
-                "Q1",
-                "Q2",
-                "Q3",
-                "Q4"
-            ]
-        },
-        "SeriesCategory": {
-            "name": "SeriesCategory",
-            "values": [
-                "REGULAR",
-                "SPECIAL_HOLIDAY",
-                "PROMOTIONAL",
-                "CHAMPIONSHIP",
-                "SEASONAL"
-            ]
-        },
-        "DayOfWeek": {
-            "name": "DayOfWeek",
-            "values": [
-                "MONDAY",
-                "TUESDAY",
-                "WEDNESDAY",
-                "THURSDAY",
-                "FRIDAY",
-                "SATURDAY",
-                "SUNDAY"
-            ]
-        },
-        "CostItemType": {
-            "name": "CostItemType",
-            "values": [
-                "DEALER",
-                "TOURNAMENT_DIRECTOR",
-                "PRIZE_CONTRIBUTION",
-                "JACKPOT_CONTRIBUTION",
-                "PROMOTION",
-                "FLOOR_STAFF",
-                "SECURITY",
-                "EQUIPMENT_RENTAL",
-                "VENUE_RENTAL",
-                "INSURANCE",
-                "OTHER"
-            ]
-        },
-        "CostItemRateType": {
-            "name": "CostItemRateType",
-            "values": [
-                "STANDARD",
-                "PENALTY",
-                "OVERTIME",
-                "HOLIDAY",
-                "SPECIAL"
-            ]
-        },
         "RegistrationStatus": {
             "name": "RegistrationStatus",
             "values": [
@@ -7401,6 +7340,29 @@ export const schema = {
                 "EXPIRED"
             ]
         },
+        "SeriesCategory": {
+            "name": "SeriesCategory",
+            "values": [
+                "REGULAR",
+                "SPECIAL",
+                "PROMOTIONAL",
+                "CHAMPIONSHIP",
+                "SEASONAL"
+            ]
+        },
+        "HolidayType": {
+            "name": "HolidayType",
+            "values": [
+                "NEW_YEAR",
+                "AUSTRALIA_DAY",
+                "EASTER",
+                "ANZAC_DAY",
+                "QUEENS_BIRTHDAY",
+                "CHRISTMAS",
+                "BOXING_DAY",
+                "OTHER"
+            ]
+        },
         "VenueAssignmentStatus": {
             "name": "VenueAssignmentStatus",
             "values": [
@@ -7419,6 +7381,32 @@ export const schema = {
                 "PENDING_ASSIGNMENT",
                 "UNASSIGNED",
                 "NOT_SERIES"
+            ]
+        },
+        "CostItemType": {
+            "name": "CostItemType",
+            "values": [
+                "DEALER",
+                "TOURNAMENT_DIRECTOR",
+                "PRIZE_CONTRIBUTION",
+                "JACKPOT_CONTRIBUTION",
+                "PROMOTION",
+                "FLOOR_STAFF",
+                "SECURITY",
+                "EQUIPMENT_RENTAL",
+                "VENUE_RENTAL",
+                "INSURANCE",
+                "OTHER"
+            ]
+        },
+        "CostItemRateType": {
+            "name": "CostItemRateType",
+            "values": [
+                "STANDARD",
+                "PENALTY",
+                "OVERTIME",
+                "HOLIDAY",
+                "SPECIAL"
             ]
         },
         "ScraperJobTriggerSource": {
@@ -10241,5 +10229,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "9403277065b3d46143e9db23da751c20"
+    "version": "37c795d6f974189d9fba93c0831f1441"
 };

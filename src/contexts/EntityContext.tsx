@@ -22,6 +22,7 @@ const listEntitiesShallow = /* GraphQL */ `
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         _version

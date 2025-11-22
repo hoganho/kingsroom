@@ -1,5 +1,5 @@
 // types/game.ts
-// Enhanced type definitions with Entity ID support
+// Enhanced type definitions with Entity ID support and Venue Fee tracking
 
 import type { DataSource, GameType, GameStatus, RegistrationStatus, TournamentType, GameVariant, GameFrequency, VenueAssignmentStatus } from '../API';
 
@@ -73,6 +73,9 @@ export type GameData = {
     gameFrequency?: GameFrequency;
     isRegular?: boolean;
     isSatellite?: boolean;
+    
+    // Venue fee (populated from venue.fee when game is created)
+    venueFee?: number | null;  // ✅ NEW - Fee charged by venue per game
     
     // Series state and metadata
     isSeries?: boolean;
@@ -199,6 +202,7 @@ export interface GameDataInput {
     totalAddons?: number;
     totalDuration?: string;
     gameTags?: string[];
+    venueFee?: number;  // ✅ NEW - Include venue fee in input
     
     // Tournament-specific fields (now directly in game input)
     tournamentType?: TournamentType;
@@ -255,4 +259,37 @@ export interface SeriesReferenceData {
   dayNumber?: number | null;      // Which day of the event (1, 2, 3...)
   flightLetter?: string | null;   // Flight designation (A, B, C...)
   finalDay?: boolean;             // Is this the final day with prize payouts?
+}
+
+// ✅ NEW: Save Game Input matching backend expectations
+export interface SaveGameInput {
+  source: {
+    type: 'SCRAPE' | 'MANUAL';
+    sourceId: string;
+    entityId: string;
+    fetchedAt: string;
+    wasEdited?: boolean;
+  };
+  game: GameDataInput;
+  venue?: {
+    venueId: string;
+    venueName?: string;
+  };
+  series?: {
+    seriesId: string;
+    seriesName: string;
+    seriesTitleId?: string;
+    year: number;
+    isMainEvent?: boolean;
+    eventNumber?: number;
+    dayNumber?: number;
+    flightLetter?: string;
+    finalDay?: boolean;
+  };
+  players?: any[];
+  options?: {
+    skipPlayerProcessing?: boolean;
+    forceUpdate?: boolean;
+    validateOnly?: boolean;
+  };
 }

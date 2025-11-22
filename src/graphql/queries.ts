@@ -246,6 +246,7 @@ export const getScraperJobsReport = /* GraphQL */ `query GetScraperJobsReport(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -405,7 +406,6 @@ export const getScraperJobsReport = /* GraphQL */ `query GetScraperJobsReport(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -592,6 +592,7 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -652,6 +653,7 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -717,6 +719,7 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -756,6 +759,7 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -821,6 +825,7 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -884,6 +889,7 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -974,6 +980,7 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -1005,7 +1012,6 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -1146,6 +1152,7 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -1201,6 +1208,7 @@ export const fetchScrapeURLDetails = /* GraphQL */ `query FetchScrapeURLDetails(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -1418,6 +1426,7 @@ export const searchScrapeURLs = /* GraphQL */ `query SearchScrapeURLs(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -1577,7 +1586,6 @@ export const searchScrapeURLs = /* GraphQL */ `query SearchScrapeURLs(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -1814,6 +1822,7 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -1874,6 +1883,7 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -1939,6 +1949,7 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -1978,6 +1989,7 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -2043,6 +2055,7 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -2106,6 +2119,7 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -2196,6 +2210,7 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -2227,7 +2242,6 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -2368,6 +2382,7 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -2423,6 +2438,7 @@ export const getUpdateCandidateURLs = /* GraphQL */ `query GetUpdateCandidateURL
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -2792,6 +2808,7 @@ export const listScraperJobs = /* GraphQL */ `query ListScraperJobs(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -2951,7 +2968,6 @@ export const listScraperJobs = /* GraphQL */ `query ListScraperJobs(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -3227,6 +3243,7 @@ export const listScrapeURLs = /* GraphQL */ `query ListScrapeURLs(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -3386,7 +3403,6 @@ export const listScrapeURLs = /* GraphQL */ `query ListScrapeURLs(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -3517,7 +3533,6 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -3641,7 +3656,6 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -3789,6 +3803,7 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -3854,6 +3869,7 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -3926,6 +3942,7 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -3953,7 +3970,6 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -4047,7 +4063,6 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -4188,6 +4203,7 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -4224,7 +4240,6 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -4365,6 +4380,7 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -4475,7 +4491,6 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -4589,7 +4604,6 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -4664,6 +4678,7 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -4823,7 +4838,6 @@ export const listGamesNeedingVenue = /* GraphQL */ `query ListGamesNeedingVenue(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -5359,7 +5373,6 @@ export const getUnfinishedGamesByEntity = /* GraphQL */ `query GetUnfinishedGame
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -5483,7 +5496,6 @@ export const getUnfinishedGamesByEntity = /* GraphQL */ `query GetUnfinishedGame
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -5631,6 +5643,7 @@ export const getUnfinishedGamesByEntity = /* GraphQL */ `query GetUnfinishedGame
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -5696,6 +5709,7 @@ export const getUnfinishedGamesByEntity = /* GraphQL */ `query GetUnfinishedGame
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -5768,6 +5782,7 @@ export const getUnfinishedGamesByEntity = /* GraphQL */ `query GetUnfinishedGame
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -5795,7 +5810,6 @@ export const getUnfinishedGamesByEntity = /* GraphQL */ `query GetUnfinishedGame
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -5889,7 +5903,6 @@ export const getUnfinishedGamesByEntity = /* GraphQL */ `query GetUnfinishedGame
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -6030,6 +6043,7 @@ export const getUnfinishedGamesByEntity = /* GraphQL */ `query GetUnfinishedGame
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -6066,7 +6080,6 @@ export const getUnfinishedGamesByEntity = /* GraphQL */ `query GetUnfinishedGame
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -6207,6 +6220,7 @@ export const getUnfinishedGamesByEntity = /* GraphQL */ `query GetUnfinishedGame
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -6317,7 +6331,6 @@ export const getUnfinishedGamesByEntity = /* GraphQL */ `query GetUnfinishedGame
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -6431,7 +6444,6 @@ export const getUnfinishedGamesByEntity = /* GraphQL */ `query GetUnfinishedGame
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -6506,6 +6518,7 @@ export const getUnfinishedGamesByEntity = /* GraphQL */ `query GetUnfinishedGame
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -6665,7 +6678,6 @@ export const getUnfinishedGamesByEntity = /* GraphQL */ `query GetUnfinishedGame
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -6793,6 +6805,7 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
     gameUrlPath
     entityLogo
     isActive
+    defaultVenueId
     createdAt
     updatedAt
     scraperStates {
@@ -6832,6 +6845,7 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -6958,6 +6972,7 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -7082,6 +7097,7 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -7219,7 +7235,6 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -7367,6 +7382,7 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -7426,7 +7442,6 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -7531,6 +7546,7 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -7568,6 +7584,7 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -7634,7 +7651,6 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -7711,7 +7727,6 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -7848,6 +7863,7 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -7963,6 +7979,7 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -7986,6 +8003,7 @@ export const getEntity = /* GraphQL */ `query GetEntity($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -8052,6 +8070,7 @@ export const listEntities = /* GraphQL */ `query ListEntities(
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -8091,6 +8110,7 @@ export const listEntities = /* GraphQL */ `query ListEntities(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -8156,6 +8176,7 @@ export const listEntities = /* GraphQL */ `query ListEntities(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -8219,6 +8240,7 @@ export const listEntities = /* GraphQL */ `query ListEntities(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -8309,6 +8331,7 @@ export const listEntities = /* GraphQL */ `query ListEntities(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -8340,7 +8363,6 @@ export const listEntities = /* GraphQL */ `query ListEntities(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -8481,6 +8503,7 @@ export const listEntities = /* GraphQL */ `query ListEntities(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -8536,6 +8559,7 @@ export const listEntities = /* GraphQL */ `query ListEntities(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -8587,6 +8611,7 @@ export const syncEntities = /* GraphQL */ `query SyncEntities(
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -8626,6 +8651,7 @@ export const syncEntities = /* GraphQL */ `query SyncEntities(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -8691,6 +8717,7 @@ export const syncEntities = /* GraphQL */ `query SyncEntities(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -8754,6 +8781,7 @@ export const syncEntities = /* GraphQL */ `query SyncEntities(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -8844,6 +8872,7 @@ export const syncEntities = /* GraphQL */ `query SyncEntities(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -8875,7 +8904,6 @@ export const syncEntities = /* GraphQL */ `query SyncEntities(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -9016,6 +9044,7 @@ export const syncEntities = /* GraphQL */ `query SyncEntities(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -9071,6 +9100,7 @@ export const syncEntities = /* GraphQL */ `query SyncEntities(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -9311,6 +9341,7 @@ export const getScraperState = /* GraphQL */ `query GetScraperState($id: ID!) {
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -9350,6 +9381,7 @@ export const getScraperState = /* GraphQL */ `query GetScraperState($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -9415,6 +9447,7 @@ export const getScraperState = /* GraphQL */ `query GetScraperState($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -9478,6 +9511,7 @@ export const getScraperState = /* GraphQL */ `query GetScraperState($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -9568,6 +9602,7 @@ export const getScraperState = /* GraphQL */ `query GetScraperState($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -9599,7 +9634,6 @@ export const getScraperState = /* GraphQL */ `query GetScraperState($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -9740,6 +9774,7 @@ export const getScraperState = /* GraphQL */ `query GetScraperState($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -9795,6 +9830,7 @@ export const getScraperState = /* GraphQL */ `query GetScraperState($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -9872,6 +9908,7 @@ export const listScraperStates = /* GraphQL */ `query ListScraperStates(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -10031,7 +10068,6 @@ export const listScraperStates = /* GraphQL */ `query ListScraperStates(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -10181,6 +10217,7 @@ export const syncScraperStates = /* GraphQL */ `query SyncScraperStates(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -10340,7 +10377,6 @@ export const syncScraperStates = /* GraphQL */ `query SyncScraperStates(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -10540,7 +10576,6 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -10688,6 +10723,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -10806,6 +10842,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -10829,6 +10866,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -10887,7 +10925,6 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -10992,6 +11029,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -11029,6 +11067,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -11095,7 +11134,6 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -11172,7 +11210,6 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -11309,6 +11346,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -11378,6 +11416,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -11450,6 +11489,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -11477,7 +11517,6 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -11745,6 +11784,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -12130,6 +12170,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -12164,6 +12205,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -12203,6 +12245,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -12268,6 +12311,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -12331,6 +12375,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -12421,6 +12466,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -12452,7 +12498,6 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -12593,6 +12638,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -12648,6 +12694,7 @@ export const getVenue = /* GraphQL */ `query GetVenue($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -12765,6 +12812,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -12823,6 +12871,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -12853,7 +12902,6 @@ export const listVenues = /* GraphQL */ `query ListVenues(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -12994,6 +13042,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -13035,6 +13084,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -13283,6 +13333,7 @@ export const listVenues = /* GraphQL */ `query ListVenues(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -13442,7 +13493,6 @@ export const listVenues = /* GraphQL */ `query ListVenues(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -13635,6 +13685,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -13693,6 +13744,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -13723,7 +13775,6 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -13864,6 +13915,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -13905,6 +13957,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -14153,6 +14206,7 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -14312,7 +14366,6 @@ export const syncVenues = /* GraphQL */ `query SyncVenues(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -14503,6 +14556,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -14561,6 +14615,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -14591,7 +14646,6 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -14732,6 +14786,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -14773,6 +14828,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -15021,6 +15077,7 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -15180,7 +15237,6 @@ export const getVenueDetails = /* GraphQL */ `query GetVenueDetails($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -15379,7 +15435,6 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -15527,6 +15582,7 @@ export const listVenueDetails = /* GraphQL */ `query ListVenueDetails(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -15685,7 +15741,6 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -15833,6 +15888,7 @@ export const syncVenueDetails = /* GraphQL */ `query SyncVenueDetails(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -15897,6 +15953,7 @@ export const getTournamentSeriesTitle = /* GraphQL */ `query GetTournamentSeries
     id
     title
     aliases
+    seriesCategory
     seriesInstances {
       items {
         id
@@ -15919,6 +15976,7 @@ export const getTournamentSeriesTitle = /* GraphQL */ `query GetTournamentSeries
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -15991,6 +16049,7 @@ export const getTournamentSeriesTitle = /* GraphQL */ `query GetTournamentSeries
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -16018,7 +16077,6 @@ export const getTournamentSeriesTitle = /* GraphQL */ `query GetTournamentSeries
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -16115,6 +16173,7 @@ export const listTournamentSeriesTitles = /* GraphQL */ `query ListTournamentSer
       id
       title
       aliases
+      seriesCategory
       seriesInstances {
         items {
           id
@@ -16137,6 +16196,7 @@ export const listTournamentSeriesTitles = /* GraphQL */ `query ListTournamentSer
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -16212,6 +16272,7 @@ export const syncTournamentSeriesTitles = /* GraphQL */ `query SyncTournamentSer
       id
       title
       aliases
+      seriesCategory
       seriesInstances {
         items {
           id
@@ -16234,6 +16295,7 @@ export const syncTournamentSeriesTitles = /* GraphQL */ `query SyncTournamentSer
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -16315,6 +16377,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
       id
       title
       aliases
+      seriesCategory
       seriesInstances {
         items {
           id
@@ -16337,6 +16400,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -16466,6 +16530,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -16524,6 +16589,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -16554,7 +16620,6 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -16695,6 +16760,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -16736,6 +16802,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -16984,6 +17051,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -17143,7 +17211,6 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -17249,7 +17316,6 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -17354,6 +17420,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -17391,6 +17458,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -17457,7 +17525,6 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -17534,7 +17601,6 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -17671,6 +17737,7 @@ export const getTournamentSeries = /* GraphQL */ `query GetTournamentSeries($id:
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -17757,6 +17824,7 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
         id
         title
         aliases
+        seriesCategory
         seriesInstances {
           items {
             id
@@ -17873,7 +17941,6 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -18021,6 +18088,7 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -18076,7 +18144,6 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -18217,6 +18284,7 @@ export const listTournamentSeries = /* GraphQL */ `query ListTournamentSeries(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -18285,6 +18353,7 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
         id
         title
         aliases
+        seriesCategory
         seriesInstances {
           items {
             id
@@ -18401,7 +18470,6 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -18549,6 +18617,7 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -18604,7 +18673,6 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -18745,6 +18813,7 @@ export const syncTournamentSeries = /* GraphQL */ `query SyncTournamentSeries(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -18792,7 +18861,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
     registrationStatus
     totalDuration
     gameFrequency
-    dayOfWeek
     buyIn
     rake
     venueFee
@@ -18916,6 +18984,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -18974,6 +19043,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -19004,7 +19074,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -19145,6 +19214,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -19186,6 +19256,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -19434,6 +19505,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -19593,7 +19665,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -19709,6 +19780,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
         id
         title
         aliases
+        seriesCategory
         seriesInstances {
           items {
             id
@@ -19825,7 +19897,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -19973,6 +20044,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -20028,7 +20100,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -20169,6 +20240,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -20222,7 +20294,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -20327,6 +20398,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -20364,6 +20436,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -20430,7 +20503,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -20507,7 +20579,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -20644,6 +20715,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -20708,7 +20780,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -20813,6 +20884,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -20850,6 +20922,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -20916,7 +20989,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -20993,7 +21065,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -21130,6 +21201,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -21410,7 +21482,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -21551,6 +21622,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -21728,7 +21800,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -21869,6 +21940,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -21903,6 +21975,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -21942,6 +22015,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -22007,6 +22081,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -22070,6 +22145,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -22160,6 +22236,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -22191,7 +22268,6 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -22332,6 +22408,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -22387,6 +22464,7 @@ export const getGame = /* GraphQL */ `query GetGame($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -22437,7 +22515,6 @@ export const listGames = /* GraphQL */ `query ListGames(
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -22561,7 +22638,6 @@ export const listGames = /* GraphQL */ `query ListGames(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -22709,6 +22785,7 @@ export const listGames = /* GraphQL */ `query ListGames(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -22774,6 +22851,7 @@ export const listGames = /* GraphQL */ `query ListGames(
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -22846,6 +22924,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -22873,7 +22952,6 @@ export const listGames = /* GraphQL */ `query ListGames(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -22967,7 +23045,6 @@ export const listGames = /* GraphQL */ `query ListGames(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -23108,6 +23185,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -23144,7 +23222,6 @@ export const listGames = /* GraphQL */ `query ListGames(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -23285,6 +23362,7 @@ export const listGames = /* GraphQL */ `query ListGames(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -23395,7 +23473,6 @@ export const listGames = /* GraphQL */ `query ListGames(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -23509,7 +23586,6 @@ export const listGames = /* GraphQL */ `query ListGames(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -23584,6 +23660,7 @@ export const listGames = /* GraphQL */ `query ListGames(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -23743,7 +23820,6 @@ export const listGames = /* GraphQL */ `query ListGames(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -23866,7 +23942,6 @@ export const syncGames = /* GraphQL */ `query SyncGames(
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -23990,7 +24065,6 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -24138,6 +24212,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -24203,6 +24278,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -24275,6 +24351,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -24302,7 +24379,6 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -24396,7 +24472,6 @@ export const syncGames = /* GraphQL */ `query SyncGames(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -24537,6 +24612,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -24573,7 +24649,6 @@ export const syncGames = /* GraphQL */ `query SyncGames(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -24714,6 +24789,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -24824,7 +24900,6 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -24938,7 +25013,6 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -25013,6 +25087,7 @@ export const syncGames = /* GraphQL */ `query SyncGames(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -25172,7 +25247,6 @@ export const syncGames = /* GraphQL */ `query SyncGames(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -25300,7 +25374,6 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -25424,7 +25497,6 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -25572,6 +25644,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -25637,6 +25710,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -25709,6 +25783,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -25736,7 +25811,6 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -25830,7 +25904,6 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -25971,6 +26044,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -26007,7 +26081,6 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -26148,6 +26221,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -26258,7 +26332,6 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -26372,7 +26445,6 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -26447,6 +26519,7 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -26606,7 +26679,6 @@ export const getTournamentStructure = /* GraphQL */ `query GetTournamentStructur
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -26749,7 +26821,6 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -26854,6 +26925,7 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -26891,6 +26963,7 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -26957,7 +27030,6 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -27034,7 +27106,6 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -27171,6 +27242,7 @@ export const listTournamentStructures = /* GraphQL */ `query ListTournamentStruc
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -27269,7 +27341,6 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -27374,6 +27445,7 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -27411,6 +27483,7 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -27477,7 +27550,6 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -27554,7 +27626,6 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -27691,6 +27762,7 @@ export const syncTournamentStructures = /* GraphQL */ `query SyncTournamentStruc
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -28391,6 +28463,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -28942,6 +29015,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -29186,6 +29260,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -29366,7 +29441,6 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -29507,6 +29581,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -29684,7 +29759,6 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -29825,6 +29899,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -30551,6 +30626,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -30609,6 +30685,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -30639,7 +30716,6 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -30780,6 +30856,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -30821,6 +30898,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -31069,6 +31147,7 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -31228,7 +31307,6 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -31822,7 +31900,6 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -31936,7 +32013,6 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -32282,7 +32358,6 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -32430,6 +32505,7 @@ export const listPlayers = /* GraphQL */ `query ListPlayers(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -32986,7 +33062,6 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -33100,7 +33175,6 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -33446,7 +33520,6 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -33594,6 +33667,7 @@ export const syncPlayers = /* GraphQL */ `query SyncPlayers(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -34147,7 +34221,6 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -34261,7 +34334,6 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -34607,7 +34679,6 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -34755,6 +34826,7 @@ export const getPlayerSummary = /* GraphQL */ `query GetPlayerSummary($id: ID!) 
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -35202,6 +35274,7 @@ export const listPlayerSummaries = /* GraphQL */ `query ListPlayerSummaries(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -35631,6 +35704,7 @@ export const syncPlayerSummaries = /* GraphQL */ `query SyncPlayerSummaries(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -36182,7 +36256,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -36296,7 +36369,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -36642,7 +36714,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -36790,6 +36861,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -36851,7 +36923,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -36975,7 +37046,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -37123,6 +37193,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -37188,6 +37259,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -37260,6 +37332,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -37287,7 +37360,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -37381,7 +37453,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -37522,6 +37593,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -37558,7 +37630,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -37699,6 +37770,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -37809,7 +37881,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -37923,7 +37994,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -37998,6 +38068,7 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -38157,7 +38228,6 @@ export const getPlayerEntry = /* GraphQL */ `query GetPlayerEntry($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -38641,6 +38711,7 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -38674,7 +38745,6 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -38779,6 +38849,7 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -38816,6 +38887,7 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -38882,7 +38954,6 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -38959,7 +39030,6 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -39096,6 +39166,7 @@ export const listPlayerEntries = /* GraphQL */ `query ListPlayerEntries(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -39539,6 +39610,7 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -39572,7 +39644,6 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -39677,6 +39748,7 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -39714,6 +39786,7 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -39780,7 +39853,6 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -39857,7 +39929,6 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -39994,6 +40065,7 @@ export const syncPlayerEntries = /* GraphQL */ `query SyncPlayerEntries(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -40549,7 +40621,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -40663,7 +40734,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -41009,7 +41079,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -41157,6 +41226,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -41219,7 +41289,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -41343,7 +41412,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -41491,6 +41559,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -41556,6 +41625,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -41628,6 +41698,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -41655,7 +41726,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -41749,7 +41819,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -41890,6 +41959,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -41926,7 +41996,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -42067,6 +42136,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -42177,7 +42247,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -42291,7 +42360,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -42366,6 +42434,7 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -42525,7 +42594,6 @@ export const getPlayerResult = /* GraphQL */ `query GetPlayerResult($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -43005,6 +43073,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -43039,7 +43108,6 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -43144,6 +43212,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -43181,6 +43250,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -43247,7 +43317,6 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -43324,7 +43393,6 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -43461,6 +43529,7 @@ export const listPlayerResults = /* GraphQL */ `query ListPlayerResults(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -43900,6 +43969,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -43934,7 +44004,6 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -44039,6 +44108,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -44076,6 +44146,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -44142,7 +44213,6 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -44219,7 +44289,6 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -44356,6 +44425,7 @@ export const syncPlayerResults = /* GraphQL */ `query SyncPlayerResults(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -44909,7 +44979,6 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -45023,7 +45092,6 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -45369,7 +45437,6 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -45517,6 +45584,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -45646,6 +45714,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -45704,6 +45773,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -45734,7 +45804,6 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -45875,6 +45944,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -45916,6 +45986,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -46164,6 +46235,7 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -46323,7 +46395,6 @@ export const getPlayerVenue = /* GraphQL */ `query GetPlayerVenue($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -46801,6 +46872,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -46902,7 +46974,6 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -47050,6 +47121,7 @@ export const listPlayerVenues = /* GraphQL */ `query ListPlayerVenues(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -47487,6 +47559,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -47588,7 +47661,6 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -47736,6 +47808,7 @@ export const syncPlayerVenues = /* GraphQL */ `query SyncPlayerVenues(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -48290,7 +48363,6 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -48404,7 +48476,6 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -48750,7 +48821,6 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -48898,6 +48968,7 @@ export const getPlayerTransaction = /* GraphQL */ `query GetPlayerTransaction($i
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -49338,6 +49409,7 @@ export const listPlayerTransactions = /* GraphQL */ `query ListPlayerTransaction
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -49756,6 +49828,7 @@ export const syncPlayerTransactions = /* GraphQL */ `query SyncPlayerTransaction
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -50290,7 +50363,6 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -50404,7 +50476,6 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -50750,7 +50821,6 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -50898,6 +50968,7 @@ export const getPlayerCredits = /* GraphQL */ `query GetPlayerCredits($id: ID!) 
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -51335,6 +51406,7 @@ export const listPlayerCredits = /* GraphQL */ `query ListPlayerCredits(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -51754,6 +51826,7 @@ export const syncPlayerCredits = /* GraphQL */ `query SyncPlayerCredits(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -52289,7 +52362,6 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -52403,7 +52475,6 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -52749,7 +52820,6 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -52897,6 +52967,7 @@ export const getPlayerPoints = /* GraphQL */ `query GetPlayerPoints($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -53334,6 +53405,7 @@ export const listPlayerPoints = /* GraphQL */ `query ListPlayerPoints(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -53753,6 +53825,7 @@ export const syncPlayerPoints = /* GraphQL */ `query SyncPlayerPoints(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -54285,7 +54358,6 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -54399,7 +54471,6 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -54745,7 +54816,6 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -54893,6 +54963,7 @@ export const getKnownPlayerIdentity = /* GraphQL */ `query GetKnownPlayerIdentit
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -55329,6 +55400,7 @@ export const listKnownPlayerIdentities = /* GraphQL */ `query ListKnownPlayerIde
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -55743,6 +55815,7 @@ export const syncKnownPlayerIdentities = /* GraphQL */ `query SyncKnownPlayerIde
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -56647,7 +56720,6 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -56761,7 +56833,6 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -57107,7 +57178,6 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -57255,6 +57325,7 @@ export const getPlayerTicket = /* GraphQL */ `query GetPlayerTicket($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -57763,6 +57834,7 @@ export const listPlayerTickets = /* GraphQL */ `query ListPlayerTickets(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -58214,6 +58286,7 @@ export const syncPlayerTickets = /* GraphQL */ `query SyncPlayerTickets(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -58999,7 +59072,6 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -59113,7 +59185,6 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -59459,7 +59530,6 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -59607,6 +59677,7 @@ export const getPlayerMarketingPreferences = /* GraphQL */ `query GetPlayerMarke
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -60042,6 +60113,7 @@ export const listPlayerMarketingPreferences = /* GraphQL */ `query ListPlayerMar
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -60455,6 +60527,7 @@ export const syncPlayerMarketingPreferences = /* GraphQL */ `query SyncPlayerMar
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -60856,6 +60929,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -60914,6 +60988,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -60944,7 +61019,6 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -61085,6 +61159,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -61126,6 +61201,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -61374,6 +61450,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -61533,7 +61610,6 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -61635,6 +61711,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -61674,6 +61751,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -61739,6 +61817,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -61802,6 +61881,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -61892,6 +61972,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -61923,7 +62004,6 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -62064,6 +62144,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -62119,6 +62200,7 @@ export const getAsset = /* GraphQL */ `query GetAsset($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -62243,7 +62325,6 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -62391,6 +62472,7 @@ export const listAssets = /* GraphQL */ `query ListAssets(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -62442,6 +62524,7 @@ export const listAssets = /* GraphQL */ `query ListAssets(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -62601,7 +62684,6 @@ export const listAssets = /* GraphQL */ `query ListAssets(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -62801,7 +62883,6 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -62949,6 +63030,7 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -63000,6 +63082,7 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -63159,7 +63242,6 @@ export const syncAssets = /* GraphQL */ `query SyncAssets(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -63509,6 +63591,7 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -63569,6 +63652,7 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -63634,6 +63718,7 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -63673,6 +63758,7 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -63738,6 +63824,7 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -63801,6 +63888,7 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -63891,6 +63979,7 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -63922,7 +64011,6 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -64063,6 +64151,7 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -64118,6 +64207,7 @@ export const getScrapeURL = /* GraphQL */ `query GetScrapeURL($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -64337,6 +64427,7 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -64496,7 +64587,6 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -64753,6 +64843,7 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -64912,7 +65003,6 @@ export const getScrapeAttempt = /* GraphQL */ `query GetScrapeAttempt($id: ID!) 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -65140,6 +65230,7 @@ export const listScrapeAttempts = /* GraphQL */ `query ListScrapeAttempts(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -65261,6 +65352,7 @@ export const listScrapeAttempts = /* GraphQL */ `query ListScrapeAttempts(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -65448,6 +65540,7 @@ export const syncScrapeAttempts = /* GraphQL */ `query SyncScrapeAttempts(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -65569,6 +65662,7 @@ export const syncScrapeAttempts = /* GraphQL */ `query SyncScrapeAttempts(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -65864,7 +65958,6 @@ export const getGameCostItem = /* GraphQL */ `query GetGameCostItem($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -66210,7 +66303,6 @@ export const getGameCost = /* GraphQL */ `query GetGameCost($id: ID!) {
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -66334,7 +66426,6 @@ export const getGameCost = /* GraphQL */ `query GetGameCost($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -66482,6 +66573,7 @@ export const getGameCost = /* GraphQL */ `query GetGameCost($id: ID!) {
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -66547,6 +66639,7 @@ export const getGameCost = /* GraphQL */ `query GetGameCost($id: ID!) {
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -66619,6 +66712,7 @@ export const getGameCost = /* GraphQL */ `query GetGameCost($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -66646,7 +66740,6 @@ export const getGameCost = /* GraphQL */ `query GetGameCost($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -66740,7 +66833,6 @@ export const getGameCost = /* GraphQL */ `query GetGameCost($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -66881,6 +66973,7 @@ export const getGameCost = /* GraphQL */ `query GetGameCost($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -66917,7 +67010,6 @@ export const getGameCost = /* GraphQL */ `query GetGameCost($id: ID!) {
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -67058,6 +67150,7 @@ export const getGameCost = /* GraphQL */ `query GetGameCost($id: ID!) {
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -67168,7 +67261,6 @@ export const getGameCost = /* GraphQL */ `query GetGameCost($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -67282,7 +67374,6 @@ export const getGameCost = /* GraphQL */ `query GetGameCost($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -67357,6 +67448,7 @@ export const getGameCost = /* GraphQL */ `query GetGameCost($id: ID!) {
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -67516,7 +67608,6 @@ export const getGameCost = /* GraphQL */ `query GetGameCost($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -67636,7 +67727,6 @@ export const getGameCost = /* GraphQL */ `query GetGameCost($id: ID!) {
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -67795,7 +67885,6 @@ export const listGameCosts = /* GraphQL */ `query ListGameCosts(
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -67900,6 +67989,7 @@ export const listGameCosts = /* GraphQL */ `query ListGameCosts(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -67937,6 +68027,7 @@ export const listGameCosts = /* GraphQL */ `query ListGameCosts(
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -68003,7 +68094,6 @@ export const listGameCosts = /* GraphQL */ `query ListGameCosts(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -68080,7 +68170,6 @@ export const listGameCosts = /* GraphQL */ `query ListGameCosts(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -68217,6 +68306,7 @@ export const listGameCosts = /* GraphQL */ `query ListGameCosts(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -68378,7 +68468,6 @@ export const syncGameCosts = /* GraphQL */ `query SyncGameCosts(
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -68483,6 +68572,7 @@ export const syncGameCosts = /* GraphQL */ `query SyncGameCosts(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -68520,6 +68610,7 @@ export const syncGameCosts = /* GraphQL */ `query SyncGameCosts(
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -68586,7 +68677,6 @@ export const syncGameCosts = /* GraphQL */ `query SyncGameCosts(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -68663,7 +68753,6 @@ export const syncGameCosts = /* GraphQL */ `query SyncGameCosts(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -68800,6 +68889,7 @@ export const syncGameCosts = /* GraphQL */ `query SyncGameCosts(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -68953,7 +69043,6 @@ export const getGameCostLineItem = /* GraphQL */ `query GetGameCostLineItem($id:
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -69058,6 +69147,7 @@ export const getGameCostLineItem = /* GraphQL */ `query GetGameCostLineItem($id:
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -69095,6 +69185,7 @@ export const getGameCostLineItem = /* GraphQL */ `query GetGameCostLineItem($id:
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -69161,7 +69252,6 @@ export const getGameCostLineItem = /* GraphQL */ `query GetGameCostLineItem($id:
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -69238,7 +69328,6 @@ export const getGameCostLineItem = /* GraphQL */ `query GetGameCostLineItem($id:
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -69375,6 +69464,7 @@ export const getGameCostLineItem = /* GraphQL */ `query GetGameCostLineItem($id:
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -69627,7 +69717,6 @@ export const listGameCostLineItems = /* GraphQL */ `query ListGameCostLineItems(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -69768,6 +69857,7 @@ export const listGameCostLineItems = /* GraphQL */ `query ListGameCostLineItems(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -69926,7 +70016,6 @@ export const syncGameCostLineItems = /* GraphQL */ `query SyncGameCostLineItems(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -70067,6 +70156,7 @@ export const syncGameCostLineItems = /* GraphQL */ `query SyncGameCostLineItems(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -70217,6 +70307,7 @@ export const entitiesByEntityName = /* GraphQL */ `query EntitiesByEntityName(
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -70256,6 +70347,7 @@ export const entitiesByEntityName = /* GraphQL */ `query EntitiesByEntityName(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -70321,6 +70413,7 @@ export const entitiesByEntityName = /* GraphQL */ `query EntitiesByEntityName(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -70384,6 +70477,7 @@ export const entitiesByEntityName = /* GraphQL */ `query EntitiesByEntityName(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -70474,6 +70568,7 @@ export const entitiesByEntityName = /* GraphQL */ `query EntitiesByEntityName(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -70505,7 +70600,6 @@ export const entitiesByEntityName = /* GraphQL */ `query EntitiesByEntityName(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -70646,6 +70740,7 @@ export const entitiesByEntityName = /* GraphQL */ `query EntitiesByEntityName(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -70701,6 +70796,7 @@ export const entitiesByEntityName = /* GraphQL */ `query EntitiesByEntityName(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -70783,6 +70879,7 @@ export const scraperStatesByEntityId = /* GraphQL */ `query ScraperStatesByEntit
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -70942,7 +71039,6 @@ export const scraperStatesByEntityId = /* GraphQL */ `query ScraperStatesByEntit
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -71138,6 +71234,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -71196,6 +71293,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -71226,7 +71324,6 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -71367,6 +71464,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -71408,6 +71506,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -71656,6 +71755,7 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -71815,7 +71915,6 @@ export const venuesByVenueNumberAndName = /* GraphQL */ `query VenuesByVenueNumb
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -72012,6 +72111,7 @@ export const venuesByEntityIdAndName = /* GraphQL */ `query VenuesByEntityIdAndN
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -72070,6 +72170,7 @@ export const venuesByEntityIdAndName = /* GraphQL */ `query VenuesByEntityIdAndN
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -72100,7 +72201,6 @@ export const venuesByEntityIdAndName = /* GraphQL */ `query VenuesByEntityIdAndN
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -72241,6 +72341,7 @@ export const venuesByEntityIdAndName = /* GraphQL */ `query VenuesByEntityIdAndN
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -72282,6 +72383,7 @@ export const venuesByEntityIdAndName = /* GraphQL */ `query VenuesByEntityIdAndN
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -72530,6 +72632,7 @@ export const venuesByEntityIdAndName = /* GraphQL */ `query VenuesByEntityIdAndN
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -72689,7 +72792,6 @@ export const venuesByEntityIdAndName = /* GraphQL */ `query VenuesByEntityIdAndN
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -72893,7 +72995,6 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -73041,6 +73142,7 @@ export const venueDetailsByVenueId = /* GraphQL */ `query VenueDetailsByVenueId(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -73137,6 +73239,7 @@ export const tournamentSeriesByNameAndYear = /* GraphQL */ `query TournamentSeri
         id
         title
         aliases
+        seriesCategory
         seriesInstances {
           items {
             id
@@ -73253,7 +73356,6 @@ export const tournamentSeriesByNameAndYear = /* GraphQL */ `query TournamentSeri
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -73401,6 +73503,7 @@ export const tournamentSeriesByNameAndYear = /* GraphQL */ `query TournamentSeri
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -73456,7 +73559,6 @@ export const tournamentSeriesByNameAndYear = /* GraphQL */ `query TournamentSeri
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -73597,6 +73699,7 @@ export const tournamentSeriesByNameAndYear = /* GraphQL */ `query TournamentSeri
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -73669,6 +73772,7 @@ export const tournamentSeriesByYearAndName = /* GraphQL */ `query TournamentSeri
         id
         title
         aliases
+        seriesCategory
         seriesInstances {
           items {
             id
@@ -73785,7 +73889,6 @@ export const tournamentSeriesByYearAndName = /* GraphQL */ `query TournamentSeri
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -73933,6 +74036,7 @@ export const tournamentSeriesByYearAndName = /* GraphQL */ `query TournamentSeri
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -73988,7 +74092,6 @@ export const tournamentSeriesByYearAndName = /* GraphQL */ `query TournamentSeri
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -74129,6 +74232,7 @@ export const tournamentSeriesByYearAndName = /* GraphQL */ `query TournamentSeri
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -74165,7 +74269,7 @@ export const tournamentSeriesByYearAndName = /* GraphQL */ `query TournamentSeri
   APITypes.TournamentSeriesByYearAndNameQuery
 >;
 export const tournamentSeriesByQuarterAndYear = /* GraphQL */ `query TournamentSeriesByQuarterAndYear(
-  $quarter: Quarter!
+  $quarter: Int!
   $year: ModelIntKeyConditionInput
   $sortDirection: ModelSortDirection
   $filter: ModelTournamentSeriesFilterInput
@@ -74201,6 +74305,7 @@ export const tournamentSeriesByQuarterAndYear = /* GraphQL */ `query TournamentS
         id
         title
         aliases
+        seriesCategory
         seriesInstances {
           items {
             id
@@ -74317,7 +74422,6 @@ export const tournamentSeriesByQuarterAndYear = /* GraphQL */ `query TournamentS
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -74465,6 +74569,7 @@ export const tournamentSeriesByQuarterAndYear = /* GraphQL */ `query TournamentS
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -74520,7 +74625,6 @@ export const tournamentSeriesByQuarterAndYear = /* GraphQL */ `query TournamentS
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -74661,6 +74765,7 @@ export const tournamentSeriesByQuarterAndYear = /* GraphQL */ `query TournamentS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -74733,6 +74838,7 @@ export const tournamentSeriesByMonthAndYear = /* GraphQL */ `query TournamentSer
         id
         title
         aliases
+        seriesCategory
         seriesInstances {
           items {
             id
@@ -74849,7 +74955,6 @@ export const tournamentSeriesByMonthAndYear = /* GraphQL */ `query TournamentSer
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -74997,6 +75102,7 @@ export const tournamentSeriesByMonthAndYear = /* GraphQL */ `query TournamentSer
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -75052,7 +75158,6 @@ export const tournamentSeriesByMonthAndYear = /* GraphQL */ `query TournamentSer
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -75193,6 +75298,7 @@ export const tournamentSeriesByMonthAndYear = /* GraphQL */ `query TournamentSer
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -75265,6 +75371,7 @@ export const tournamentSeriesBySeriesCategoryAndYear = /* GraphQL */ `query Tour
         id
         title
         aliases
+        seriesCategory
         seriesInstances {
           items {
             id
@@ -75381,7 +75488,6 @@ export const tournamentSeriesBySeriesCategoryAndYear = /* GraphQL */ `query Tour
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -75529,6 +75635,7 @@ export const tournamentSeriesBySeriesCategoryAndYear = /* GraphQL */ `query Tour
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -75584,7 +75691,6 @@ export const tournamentSeriesBySeriesCategoryAndYear = /* GraphQL */ `query Tour
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -75725,6 +75831,7 @@ export const tournamentSeriesBySeriesCategoryAndYear = /* GraphQL */ `query Tour
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -75761,7 +75868,7 @@ export const tournamentSeriesBySeriesCategoryAndYear = /* GraphQL */ `query Tour
   APITypes.TournamentSeriesBySeriesCategoryAndYearQuery
 >;
 export const tournamentSeriesByHolidayTypeAndYear = /* GraphQL */ `query TournamentSeriesByHolidayTypeAndYear(
-  $holidayType: String!
+  $holidayType: HolidayType!
   $year: ModelIntKeyConditionInput
   $sortDirection: ModelSortDirection
   $filter: ModelTournamentSeriesFilterInput
@@ -75797,6 +75904,7 @@ export const tournamentSeriesByHolidayTypeAndYear = /* GraphQL */ `query Tournam
         id
         title
         aliases
+        seriesCategory
         seriesInstances {
           items {
             id
@@ -75913,7 +76021,6 @@ export const tournamentSeriesByHolidayTypeAndYear = /* GraphQL */ `query Tournam
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -76061,6 +76168,7 @@ export const tournamentSeriesByHolidayTypeAndYear = /* GraphQL */ `query Tournam
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -76116,7 +76224,6 @@ export const tournamentSeriesByHolidayTypeAndYear = /* GraphQL */ `query Tournam
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -76257,6 +76364,7 @@ export const tournamentSeriesByHolidayTypeAndYear = /* GraphQL */ `query Tournam
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -76329,6 +76437,7 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
         id
         title
         aliases
+        seriesCategory
         seriesInstances {
           items {
             id
@@ -76445,7 +76554,6 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -76593,6 +76701,7 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -76648,7 +76757,6 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -76789,6 +76897,7 @@ export const tournamentSeriesByTournamentSeriesTitleIdAndYear = /* GraphQL */ `q
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -76859,6 +76968,7 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
         id
         title
         aliases
+        seriesCategory
         seriesInstances {
           items {
             id
@@ -76975,7 +77085,6 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -77123,6 +77232,7 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -77178,7 +77288,6 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -77319,6 +77428,7 @@ export const tournamentSeriesByVenueId = /* GraphQL */ `query TournamentSeriesBy
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -77381,7 +77491,6 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -77505,7 +77614,6 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -77653,6 +77761,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -77718,6 +77827,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -77790,6 +77900,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -77817,7 +77928,6 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -77911,7 +78021,6 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -78052,6 +78161,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -78088,7 +78198,6 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -78229,6 +78338,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -78339,7 +78449,6 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -78453,7 +78562,6 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -78528,6 +78636,7 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -78687,7 +78796,6 @@ export const gamesByStatus = /* GraphQL */ `query GamesByStatus(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -78817,7 +78925,6 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -78941,7 +79048,6 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -79089,6 +79195,7 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -79154,6 +79261,7 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -79226,6 +79334,7 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -79253,7 +79362,6 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -79347,7 +79455,6 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -79488,6 +79595,7 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -79524,7 +79632,6 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -79665,6 +79772,7 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -79775,7 +79883,6 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -79889,7 +79996,6 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -79964,6 +80070,7 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -80123,7 +80230,6 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -80226,1442 +80332,6 @@ export const gamesByRegistrationStatus = /* GraphQL */ `query GamesByRegistratio
   APITypes.GamesByRegistrationStatusQueryVariables,
   APITypes.GamesByRegistrationStatusQuery
 >;
-export const gamesByDayOfWeek = /* GraphQL */ `query GamesByDayOfWeek(
-  $dayOfWeek: DayOfWeek!
-  $gameStartDateTime: ModelStringKeyConditionInput
-  $sortDirection: ModelSortDirection
-  $filter: ModelGameFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  gamesByDayOfWeek(
-    dayOfWeek: $dayOfWeek
-    gameStartDateTime: $gameStartDateTime
-    sortDirection: $sortDirection
-    filter: $filter
-    limit: $limit
-    nextToken: $nextToken
-  ) {
-    items {
-      id
-      name
-      gameType
-      gameVariant
-      gameStatus
-      gameStartDateTime
-      gameEndDateTime
-      registrationStatus
-      totalDuration
-      gameFrequency
-      dayOfWeek
-      buyIn
-      rake
-      venueFee
-      startingStack
-      hasGuarantee
-      guaranteeAmount
-      prizepool
-      totalEntries
-      totalRebuys
-      totalAddons
-      revenueByBuyIns
-      totalRake
-      profitLoss
-      guaranteeOverlay
-      guaranteeSurplus
-      playersRemaining
-      totalChipsInPlay
-      averagePlayerStack
-      tournamentType
-      isRegular
-      isSatellite
-      gameTags
-      isSeries
-      seriesName
-      isMainEvent
-      eventNumber
-      dayNumber
-      flightLetter
-      finalDay
-      sourceUrl
-      tournamentId
-      originalScrapedData
-      wasEdited
-      lastEditedAt
-      lastEditedBy
-      editHistory
-      venueAssignmentStatus
-      requiresVenueAssignment
-      suggestedVenueName
-      venueAssignmentConfidence
-      seriesAssignmentStatus
-      seriesAssignmentConfidence
-      suggestedSeriesName
-      levels
-      venueId
-      venue {
-        id
-        venueNumber
-        name
-        aliases
-        address
-        city
-        country
-        fee
-        isSpecial
-        details {
-          id
-          startDate
-          status
-          lastCustomerSuccessVisit
-          totalGamesHeld
-          averagePlayersPerGame
-          gameNights
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            fee
-            isSpecial
-            entityId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        assets {
-          items {
-            id
-            name
-            type
-            condition
-            acquiredDate
-            lastCheckedDate
-            venueId
-            entityId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            registrationStatus
-            totalDuration
-            gameFrequency
-            dayOfWeek
-            buyIn
-            rake
-            venueFee
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            prizepool
-            totalEntries
-            totalRebuys
-            totalAddons
-            revenueByBuyIns
-            totalRake
-            profitLoss
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentType
-            isRegular
-            isSatellite
-            gameTags
-            isSeries
-            seriesName
-            isMainEvent
-            eventNumber
-            dayNumber
-            flightLetter
-            finalDay
-            sourceUrl
-            tournamentId
-            originalScrapedData
-            wasEdited
-            lastEditedAt
-            lastEditedBy
-            editHistory
-            venueAssignmentStatus
-            requiresVenueAssignment
-            suggestedVenueName
-            venueAssignmentConfidence
-            seriesAssignmentStatus
-            seriesAssignmentConfidence
-            suggestedSeriesName
-            levels
-            venueId
-            tournamentSeriesId
-            entityId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            gameStructureId
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        series {
-          items {
-            id
-            name
-            year
-            quarter
-            month
-            seriesCategory
-            holidayType
-            status
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        playerMemberships {
-          items {
-            id
-            totalGamesPlayed
-            averageBuyIn
-            firstPlayedDate
-            lastPlayedDate
-            targetingClassification
-            playerId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        registeredPlayers {
-          items {
-            id
-            primaryEntityId
-            firstName
-            lastName
-            phone
-            email
-            status
-            category
-            targetingClassification
-            registrationDate
-            firstGamePlayed
-            lastPlayedDate
-            creditBalance
-            pointsBalance
-            venueAssignmentStatus
-            registrationVenueId
-            updatedAt
-            createdAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        entityId
-        entity {
-          id
-          entityName
-          gameUrlDomain
-          gameUrlPath
-          entityLogo
-          isActive
-          createdAt
-          updatedAt
-          scraperStates {
-            nextToken
-            startedAt
-            __typename
-          }
-          scraperJobs {
-            nextToken
-            __typename
-          }
-          scrapeURLs {
-            nextToken
-            __typename
-          }
-          venues {
-            nextToken
-            startedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          assets {
-            nextToken
-            startedAt
-            __typename
-          }
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        venueDetailsId
-        __typename
-      }
-      tournamentSeriesId
-      tournamentSeries {
-        id
-        name
-        year
-        quarter
-        month
-        seriesCategory
-        holidayType
-        status
-        startDate
-        endDate
-        events
-        numberOfEvents
-        guaranteedPrizepool
-        estimatedPrizepool
-        actualPrizepool
-        tournamentSeriesTitleId
-        title {
-          id
-          title
-          aliases
-          seriesInstances {
-            nextToken
-            startedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        venueId
-        venue {
-          id
-          venueNumber
-          name
-          aliases
-          address
-          city
-          country
-          fee
-          isSpecial
-          details {
-            id
-            startDate
-            status
-            lastCustomerSuccessVisit
-            totalGamesHeld
-            averagePlayersPerGame
-            gameNights
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          assets {
-            nextToken
-            startedAt
-            __typename
-          }
-          games {
-            nextToken
-            startedAt
-            __typename
-          }
-          series {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerMemberships {
-            nextToken
-            startedAt
-            __typename
-          }
-          registeredPlayers {
-            nextToken
-            startedAt
-            __typename
-          }
-          entityId
-          entity {
-            id
-            entityName
-            gameUrlDomain
-            gameUrlPath
-            entityLogo
-            isActive
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          venueDetailsId
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            registrationStatus
-            totalDuration
-            gameFrequency
-            dayOfWeek
-            buyIn
-            rake
-            venueFee
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            prizepool
-            totalEntries
-            totalRebuys
-            totalAddons
-            revenueByBuyIns
-            totalRake
-            profitLoss
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentType
-            isRegular
-            isSatellite
-            gameTags
-            isSeries
-            seriesName
-            isMainEvent
-            eventNumber
-            dayNumber
-            flightLetter
-            finalDay
-            sourceUrl
-            tournamentId
-            originalScrapedData
-            wasEdited
-            lastEditedAt
-            lastEditedBy
-            editHistory
-            venueAssignmentStatus
-            requiresVenueAssignment
-            suggestedVenueName
-            venueAssignmentConfidence
-            seriesAssignmentStatus
-            seriesAssignmentConfidence
-            suggestedSeriesName
-            levels
-            venueId
-            tournamentSeriesId
-            entityId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            gameStructureId
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      structure {
-        id
-        levels {
-          levelNumber
-          durationMinutes
-          smallBlind
-          bigBlind
-          ante
-          __typename
-        }
-        breaks {
-          levelNumberBeforeBreak
-          durationMinutes
-          __typename
-        }
-        gameId
-        game {
-          id
-          name
-          gameType
-          gameVariant
-          gameStatus
-          gameStartDateTime
-          gameEndDateTime
-          registrationStatus
-          totalDuration
-          gameFrequency
-          dayOfWeek
-          buyIn
-          rake
-          venueFee
-          startingStack
-          hasGuarantee
-          guaranteeAmount
-          prizepool
-          totalEntries
-          totalRebuys
-          totalAddons
-          revenueByBuyIns
-          totalRake
-          profitLoss
-          guaranteeOverlay
-          guaranteeSurplus
-          playersRemaining
-          totalChipsInPlay
-          averagePlayerStack
-          tournamentType
-          isRegular
-          isSatellite
-          gameTags
-          isSeries
-          seriesName
-          isMainEvent
-          eventNumber
-          dayNumber
-          flightLetter
-          finalDay
-          sourceUrl
-          tournamentId
-          originalScrapedData
-          wasEdited
-          lastEditedAt
-          lastEditedBy
-          editHistory
-          venueAssignmentStatus
-          requiresVenueAssignment
-          suggestedVenueName
-          venueAssignmentConfidence
-          seriesAssignmentStatus
-          seriesAssignmentConfidence
-          suggestedSeriesName
-          levels
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            fee
-            isSpecial
-            entityId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            name
-            year
-            quarter
-            month
-            seriesCategory
-            holidayType
-            status
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          structure {
-            id
-            gameId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          gameCost {
-            id
-            gameId
-            totalDealerCost
-            totalTournamentDirectorCost
-            totalPrizeContribution
-            totalJackpotContribution
-            totalPromotionCost
-            totalFloorStaffCost
-            totalOtherCost
-            totalCost
-            entityId
-            venueId
-            gameDate
-            notes
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          playerEntries {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
-            __typename
-          }
-          entityId
-          entity {
-            id
-            entityName
-            gameUrlDomain
-            gameUrlPath
-            entityLogo
-            isActive
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          gameStructureId
-          __typename
-        }
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      gameCost {
-        id
-        gameId
-        game {
-          id
-          name
-          gameType
-          gameVariant
-          gameStatus
-          gameStartDateTime
-          gameEndDateTime
-          registrationStatus
-          totalDuration
-          gameFrequency
-          dayOfWeek
-          buyIn
-          rake
-          venueFee
-          startingStack
-          hasGuarantee
-          guaranteeAmount
-          prizepool
-          totalEntries
-          totalRebuys
-          totalAddons
-          revenueByBuyIns
-          totalRake
-          profitLoss
-          guaranteeOverlay
-          guaranteeSurplus
-          playersRemaining
-          totalChipsInPlay
-          averagePlayerStack
-          tournamentType
-          isRegular
-          isSatellite
-          gameTags
-          isSeries
-          seriesName
-          isMainEvent
-          eventNumber
-          dayNumber
-          flightLetter
-          finalDay
-          sourceUrl
-          tournamentId
-          originalScrapedData
-          wasEdited
-          lastEditedAt
-          lastEditedBy
-          editHistory
-          venueAssignmentStatus
-          requiresVenueAssignment
-          suggestedVenueName
-          venueAssignmentConfidence
-          seriesAssignmentStatus
-          seriesAssignmentConfidence
-          suggestedSeriesName
-          levels
-          venueId
-          venue {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            fee
-            isSpecial
-            entityId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          tournamentSeriesId
-          tournamentSeries {
-            id
-            name
-            year
-            quarter
-            month
-            seriesCategory
-            holidayType
-            status
-            startDate
-            endDate
-            events
-            numberOfEvents
-            guaranteedPrizepool
-            estimatedPrizepool
-            actualPrizepool
-            tournamentSeriesTitleId
-            venueId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          structure {
-            id
-            gameId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          gameCost {
-            id
-            gameId
-            totalDealerCost
-            totalTournamentDirectorCost
-            totalPrizeContribution
-            totalJackpotContribution
-            totalPromotionCost
-            totalFloorStaffCost
-            totalOtherCost
-            totalCost
-            entityId
-            venueId
-            gameDate
-            notes
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          playerEntries {
-            nextToken
-            startedAt
-            __typename
-          }
-          playerResults {
-            nextToken
-            startedAt
-            __typename
-          }
-          entityId
-          entity {
-            id
-            entityName
-            gameUrlDomain
-            gameUrlPath
-            entityLogo
-            isActive
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          gameStructureId
-          __typename
-        }
-        totalDealerCost
-        totalTournamentDirectorCost
-        totalPrizeContribution
-        totalJackpotContribution
-        totalPromotionCost
-        totalFloorStaffCost
-        totalOtherCost
-        totalCost
-        lineItems {
-          items {
-            id
-            gameCostId
-            costItemId
-            costType
-            amount
-            quantity
-            rate
-            hours
-            notes
-            gameId
-            entityId
-            venueId
-            gameDate
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        entityId
-        venueId
-        gameDate
-        notes
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      playerEntries {
-        items {
-          id
-          playerId
-          gameId
-          venueId
-          status
-          registrationTime
-          eliminationTime
-          gameStartDateTime
-          lastKnownStackSize
-          tableNumber
-          seatNumber
-          numberOfReEntries
-          isMultiDayTournament
-          player {
-            id
-            primaryEntityId
-            firstName
-            lastName
-            phone
-            email
-            status
-            category
-            targetingClassification
-            registrationDate
-            firstGamePlayed
-            lastPlayedDate
-            creditBalance
-            pointsBalance
-            venueAssignmentStatus
-            registrationVenueId
-            updatedAt
-            createdAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          game {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            registrationStatus
-            totalDuration
-            gameFrequency
-            dayOfWeek
-            buyIn
-            rake
-            venueFee
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            prizepool
-            totalEntries
-            totalRebuys
-            totalAddons
-            revenueByBuyIns
-            totalRake
-            profitLoss
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentType
-            isRegular
-            isSatellite
-            gameTags
-            isSeries
-            seriesName
-            isMainEvent
-            eventNumber
-            dayNumber
-            flightLetter
-            finalDay
-            sourceUrl
-            tournamentId
-            originalScrapedData
-            wasEdited
-            lastEditedAt
-            lastEditedBy
-            editHistory
-            venueAssignmentStatus
-            requiresVenueAssignment
-            suggestedVenueName
-            venueAssignmentConfidence
-            seriesAssignmentStatus
-            seriesAssignmentConfidence
-            suggestedSeriesName
-            levels
-            venueId
-            tournamentSeriesId
-            entityId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            gameStructureId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      playerResults {
-        items {
-          id
-          finishingPlace
-          isMultiDayQualification
-          prizeWon
-          amountWon
-          totalRunners
-          pointsEarned
-          gameStartDateTime
-          playerId
-          player {
-            id
-            primaryEntityId
-            firstName
-            lastName
-            phone
-            email
-            status
-            category
-            targetingClassification
-            registrationDate
-            firstGamePlayed
-            lastPlayedDate
-            creditBalance
-            pointsBalance
-            venueAssignmentStatus
-            registrationVenueId
-            updatedAt
-            createdAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          gameId
-          game {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            registrationStatus
-            totalDuration
-            gameFrequency
-            dayOfWeek
-            buyIn
-            rake
-            venueFee
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            prizepool
-            totalEntries
-            totalRebuys
-            totalAddons
-            revenueByBuyIns
-            totalRake
-            profitLoss
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentType
-            isRegular
-            isSatellite
-            gameTags
-            isSeries
-            seriesName
-            isMainEvent
-            eventNumber
-            dayNumber
-            flightLetter
-            finalDay
-            sourceUrl
-            tournamentId
-            originalScrapedData
-            wasEdited
-            lastEditedAt
-            lastEditedBy
-            editHistory
-            venueAssignmentStatus
-            requiresVenueAssignment
-            suggestedVenueName
-            venueAssignmentConfidence
-            seriesAssignmentStatus
-            seriesAssignmentConfidence
-            suggestedSeriesName
-            levels
-            venueId
-            tournamentSeriesId
-            entityId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            gameStructureId
-            __typename
-          }
-          createdAt
-          updatedAt
-          _version
-          _deleted
-          _lastChangedAt
-          __typename
-        }
-        nextToken
-        startedAt
-        __typename
-      }
-      entityId
-      entity {
-        id
-        entityName
-        gameUrlDomain
-        gameUrlPath
-        entityLogo
-        isActive
-        createdAt
-        updatedAt
-        scraperStates {
-          items {
-            id
-            isRunning
-            lastScannedId
-            lastRunStartTime
-            lastRunEndTime
-            consecutiveBlankCount
-            totalScraped
-            totalErrors
-            enabled
-            highestStoredId
-            lowestStoredId
-            knownGapRanges
-            lastGapScanAt
-            totalGamesInDatabase
-            entityId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        scraperJobs {
-          items {
-            id
-            jobId
-            triggerSource
-            triggeredBy
-            startTime
-            endTime
-            durationSeconds
-            maxGames
-            targetURLs
-            isFullScan
-            startId
-            endId
-            status
-            totalURLsProcessed
-            newGamesScraped
-            gamesUpdated
-            gamesSkipped
-            errors
-            blanks
-            averageScrapingTime
-            successRate
-            errorMessages
-            failedURLs
-            entityId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          __typename
-        }
-        scrapeURLs {
-          items {
-            id
-            url
-            tournamentId
-            doNotScrape
-            sourceDataIssue
-            gameDataVerified
-            missingKeysFromScrape
-            sourceSystem
-            status
-            placedIntoDatabase
-            firstScrapedAt
-            lastScrapedAt
-            lastSuccessfulScrapeAt
-            timesScraped
-            timesSuccessful
-            timesFailed
-            consecutiveFailures
-            lastScrapeStatus
-            lastScrapeMessage
-            lastScrapeJobId
-            gameId
-            gameName
-            gameStatus
-            venueId
-            venueName
-            lastDataHash
-            hasDataChanges
-            lastFoundKeys
-            lastStructureLabel
-            averageScrapingTime
-            lastScrapingTime
-            entityId
-            createdAt
-            updatedAt
-            etag
-            lastModifiedHeader
-            contentHash
-            s3StoragePrefix
-            latestS3Key
-            s3StorageEnabled
-            lastContentChangeAt
-            totalContentChanges
-            lastHeaderCheckAt
-            cachedContentUsedCount
-            lastCacheHitAt
-            contentSize
-            wasEdited
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          __typename
-        }
-        venues {
-          items {
-            id
-            venueNumber
-            name
-            aliases
-            address
-            city
-            country
-            fee
-            isSpecial
-            entityId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            venueDetailsId
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        games {
-          items {
-            id
-            name
-            gameType
-            gameVariant
-            gameStatus
-            gameStartDateTime
-            gameEndDateTime
-            registrationStatus
-            totalDuration
-            gameFrequency
-            dayOfWeek
-            buyIn
-            rake
-            venueFee
-            startingStack
-            hasGuarantee
-            guaranteeAmount
-            prizepool
-            totalEntries
-            totalRebuys
-            totalAddons
-            revenueByBuyIns
-            totalRake
-            profitLoss
-            guaranteeOverlay
-            guaranteeSurplus
-            playersRemaining
-            totalChipsInPlay
-            averagePlayerStack
-            tournamentType
-            isRegular
-            isSatellite
-            gameTags
-            isSeries
-            seriesName
-            isMainEvent
-            eventNumber
-            dayNumber
-            flightLetter
-            finalDay
-            sourceUrl
-            tournamentId
-            originalScrapedData
-            wasEdited
-            lastEditedAt
-            lastEditedBy
-            editHistory
-            venueAssignmentStatus
-            requiresVenueAssignment
-            suggestedVenueName
-            venueAssignmentConfidence
-            seriesAssignmentStatus
-            seriesAssignmentConfidence
-            suggestedSeriesName
-            levels
-            venueId
-            tournamentSeriesId
-            entityId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            gameStructureId
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        assets {
-          items {
-            id
-            name
-            type
-            condition
-            acquiredDate
-            lastCheckedDate
-            venueId
-            entityId
-            createdAt
-            updatedAt
-            _version
-            _deleted
-            _lastChangedAt
-            __typename
-          }
-          nextToken
-          startedAt
-          __typename
-        }
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      gameStructureId
-      __typename
-    }
-    nextToken
-    startedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.GamesByDayOfWeekQueryVariables,
-  APITypes.GamesByDayOfWeekQuery
->;
 export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
   $sourceUrl: AWSURL!
   $sortDirection: ModelSortDirection
@@ -81687,7 +80357,6 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -81811,7 +80480,6 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -81959,6 +80627,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -82024,6 +80693,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -82096,6 +80766,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -82123,7 +80794,6 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -82217,7 +80887,6 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -82358,6 +81027,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -82394,7 +81064,6 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -82535,6 +81204,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -82645,7 +81315,6 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -82759,7 +81428,6 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -82834,6 +81502,7 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -82993,7 +81662,6 @@ export const gameBySourceUrl = /* GraphQL */ `query GameBySourceUrl(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -83123,7 +81791,6 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -83247,7 +81914,6 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -83395,6 +82061,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -83460,6 +82127,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -83532,6 +82200,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -83559,7 +82228,6 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -83653,7 +82321,6 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -83794,6 +82461,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -83830,7 +82498,6 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -83971,6 +82638,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -84081,7 +82749,6 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -84195,7 +82862,6 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -84270,6 +82936,7 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -84429,7 +83096,6 @@ export const gamesByVenueIdAndGameStartDateTime = /* GraphQL */ `query GamesByVe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -84559,7 +83225,6 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -84683,7 +83348,6 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -84831,6 +83495,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -84896,6 +83561,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -84968,6 +83634,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -84995,7 +83662,6 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -85089,7 +83755,6 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -85230,6 +83895,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -85266,7 +83932,6 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -85407,6 +84072,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -85517,7 +84183,6 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -85631,7 +84296,6 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -85706,6 +84370,7 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -85865,7 +84530,6 @@ export const gamesByTournamentSeriesIdAndGameStartDateTime = /* GraphQL */ `quer
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -85995,7 +84659,6 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -86119,7 +84782,6 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -86267,6 +84929,7 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -86332,6 +84995,7 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -86404,6 +85068,7 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -86431,7 +85096,6 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -86525,7 +85189,6 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -86666,6 +85329,7 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -86702,7 +85366,6 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -86843,6 +85506,7 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -86953,7 +85617,6 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -87067,7 +85730,6 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -87142,6 +85804,7 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -87301,7 +85964,6 @@ export const gamesByEntityIdAndGameStartDateTime = /* GraphQL */ `query GamesByE
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -87431,7 +86093,6 @@ export const gamesByEntityAndTournamentId = /* GraphQL */ `query GamesByEntityAn
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -87555,7 +86216,6 @@ export const gamesByEntityAndTournamentId = /* GraphQL */ `query GamesByEntityAn
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -87703,6 +86363,7 @@ export const gamesByEntityAndTournamentId = /* GraphQL */ `query GamesByEntityAn
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -87768,6 +86429,7 @@ export const gamesByEntityAndTournamentId = /* GraphQL */ `query GamesByEntityAn
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -87840,6 +86502,7 @@ export const gamesByEntityAndTournamentId = /* GraphQL */ `query GamesByEntityAn
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -87867,7 +86530,6 @@ export const gamesByEntityAndTournamentId = /* GraphQL */ `query GamesByEntityAn
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -87961,7 +86623,6 @@ export const gamesByEntityAndTournamentId = /* GraphQL */ `query GamesByEntityAn
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -88102,6 +86763,7 @@ export const gamesByEntityAndTournamentId = /* GraphQL */ `query GamesByEntityAn
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -88138,7 +86800,6 @@ export const gamesByEntityAndTournamentId = /* GraphQL */ `query GamesByEntityAn
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -88279,6 +86940,7 @@ export const gamesByEntityAndTournamentId = /* GraphQL */ `query GamesByEntityAn
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -88389,7 +87051,6 @@ export const gamesByEntityAndTournamentId = /* GraphQL */ `query GamesByEntityAn
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -88503,7 +87164,6 @@ export const gamesByEntityAndTournamentId = /* GraphQL */ `query GamesByEntityAn
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -88578,6 +87238,7 @@ export const gamesByEntityAndTournamentId = /* GraphQL */ `query GamesByEntityAn
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -88737,7 +87398,6 @@ export const gamesByEntityAndTournamentId = /* GraphQL */ `query GamesByEntityAn
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -88881,7 +87541,6 @@ export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStruc
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -88986,6 +87645,7 @@ export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStruc
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -89023,6 +87683,7 @@ export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStruc
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -89089,7 +87750,6 @@ export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStruc
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -89166,7 +87826,6 @@ export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStruc
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -89303,6 +87962,7 @@ export const tournamentStructuresByGameId = /* GraphQL */ `query TournamentStruc
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -89973,7 +88633,6 @@ export const playersByPrimaryEntityId = /* GraphQL */ `query PlayersByPrimaryEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -90087,7 +88746,6 @@ export const playersByPrimaryEntityId = /* GraphQL */ `query PlayersByPrimaryEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -90433,7 +89091,6 @@ export const playersByPrimaryEntityId = /* GraphQL */ `query PlayersByPrimaryEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -90581,6 +89238,7 @@ export const playersByPrimaryEntityId = /* GraphQL */ `query PlayersByPrimaryEnt
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -91139,7 +89797,6 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -91253,7 +89910,6 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -91599,7 +90255,6 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -91747,6 +90402,7 @@ export const playerByPhone = /* GraphQL */ `query PlayerByPhone(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -92305,7 +90961,6 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -92419,7 +91074,6 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -92765,7 +91419,6 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -92913,6 +91566,7 @@ export const playerByEmail = /* GraphQL */ `query PlayerByEmail(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -93471,7 +92125,6 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -93585,7 +92238,6 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -93931,7 +92583,6 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -94079,6 +92730,7 @@ export const playersByRegistrationVenueId = /* GraphQL */ `query PlayersByRegist
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -94518,6 +93170,7 @@ export const playerSummariesByPlayerId = /* GraphQL */ `query PlayerSummariesByP
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -94957,6 +93610,7 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -94990,7 +93644,6 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -95095,6 +93748,7 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -95132,6 +93786,7 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -95198,7 +93853,6 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -95275,7 +93929,6 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -95412,6 +94065,7 @@ export const playerEntriesByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -95857,6 +94511,7 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -95890,7 +94545,6 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -95995,6 +94649,7 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -96032,6 +94687,7 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -96098,7 +94754,6 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -96175,7 +94830,6 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -96312,6 +94966,7 @@ export const playerEntriesByGameId = /* GraphQL */ `query PlayerEntriesByGameId(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -96757,6 +95412,7 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -96790,7 +95446,6 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -96895,6 +95550,7 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -96932,6 +95588,7 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -96998,7 +95655,6 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -97075,7 +95731,6 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -97212,6 +95867,7 @@ export const playerEntriesByVenueId = /* GraphQL */ `query PlayerEntriesByVenueI
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -97655,6 +96311,7 @@ export const playerResultsByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -97689,7 +96346,6 @@ export const playerResultsByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -97794,6 +96450,7 @@ export const playerResultsByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -97831,6 +96488,7 @@ export const playerResultsByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -97897,7 +96555,6 @@ export const playerResultsByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -97974,7 +96631,6 @@ export const playerResultsByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -98111,6 +96767,7 @@ export const playerResultsByPlayerIdAndGameStartDateTime = /* GraphQL */ `query 
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -98552,6 +97209,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -98586,7 +97244,6 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -98691,6 +97348,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -98728,6 +97386,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -98794,7 +97453,6 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -98871,7 +97529,6 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -99008,6 +97665,7 @@ export const playerResultsByGameId = /* GraphQL */ `query PlayerResultsByGameId(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -99449,6 +98107,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -99550,7 +98209,6 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -99698,6 +98356,7 @@ export const playerVenuesByPlayerIdAndVenueId = /* GraphQL */ `query PlayerVenue
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -100139,6 +98798,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -100240,7 +98900,6 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -100388,6 +99047,7 @@ export const playerVenuesByVenueIdAndPlayerId = /* GraphQL */ `query PlayerVenue
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -100830,6 +99490,7 @@ export const playerTransactionsByPlayerIdAndTransactionDate = /* GraphQL */ `que
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -101250,6 +99911,7 @@ export const playerTransactionsByGameId = /* GraphQL */ `query PlayerTransaction
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -101672,6 +100334,7 @@ export const playerCreditsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pl
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -102093,6 +100756,7 @@ export const playerCreditsByRelatedGameId = /* GraphQL */ `query PlayerCreditsBy
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -102516,6 +101180,7 @@ export const playerPointsByPlayerIdAndTransactionDate = /* GraphQL */ `query Pla
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -102937,6 +101602,7 @@ export const playerPointsByRelatedGameId = /* GraphQL */ `query PlayerPointsByRe
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -103355,6 +102021,7 @@ export const knownPlayerIdentitiesByPlayerId = /* GraphQL */ `query KnownPlayerI
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -103772,6 +102439,7 @@ export const playerTicketsByPlayerId = /* GraphQL */ `query PlayerTicketsByPlaye
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -104225,6 +102893,7 @@ export const playerTicketsByTicketTemplateId = /* GraphQL */ `query PlayerTicket
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -104750,6 +103419,7 @@ export const playerMarketingPreferencesByPlayerId = /* GraphQL */ `query PlayerM
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -104960,7 +103630,6 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -105108,6 +103777,7 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -105159,6 +103829,7 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -105318,7 +103989,6 @@ export const assetsByVenueId = /* GraphQL */ `query AssetsByVenueId(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -105522,7 +104192,6 @@ export const assetsByEntityIdAndType = /* GraphQL */ `query AssetsByEntityIdAndT
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -105670,6 +104339,7 @@ export const assetsByEntityIdAndType = /* GraphQL */ `query AssetsByEntityIdAndT
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -105721,6 +104391,7 @@ export const assetsByEntityIdAndType = /* GraphQL */ `query AssetsByEntityIdAndT
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -105880,7 +104551,6 @@ export const assetsByEntityIdAndType = /* GraphQL */ `query AssetsByEntityIdAndT
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -106198,6 +104868,7 @@ export const scraperJobsByJobId = /* GraphQL */ `query ScraperJobsByJobId(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -106357,7 +105028,6 @@ export const scraperJobsByJobId = /* GraphQL */ `query ScraperJobsByJobId(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -106638,6 +105308,7 @@ export const scraperJobsByStatusAndStartTime = /* GraphQL */ `query ScraperJobsB
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -106797,7 +105468,6 @@ export const scraperJobsByStatusAndStartTime = /* GraphQL */ `query ScraperJobsB
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -107078,6 +105748,7 @@ export const scraperJobsByEntityIdAndStartTime = /* GraphQL */ `query ScraperJob
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -107237,7 +105908,6 @@ export const scraperJobsByEntityIdAndStartTime = /* GraphQL */ `query ScraperJob
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -107515,6 +106185,7 @@ export const scrapeURLByURL = /* GraphQL */ `query ScrapeURLByURL(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -107674,7 +106345,6 @@ export const scrapeURLByURL = /* GraphQL */ `query ScrapeURLByURL(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -107965,6 +106635,7 @@ export const scrapeURLSByTournamentId = /* GraphQL */ `query ScrapeURLSByTournam
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -108124,7 +106795,6 @@ export const scrapeURLSByTournamentId = /* GraphQL */ `query ScrapeURLSByTournam
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -108417,6 +107087,7 @@ export const scrapeURLsBySourceSystem = /* GraphQL */ `query ScrapeURLsBySourceS
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -108576,7 +107247,6 @@ export const scrapeURLsBySourceSystem = /* GraphQL */ `query ScrapeURLsBySourceS
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -108867,6 +107537,7 @@ export const scrapeURLSByGameId = /* GraphQL */ `query ScrapeURLSByGameId(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -109026,7 +107697,6 @@ export const scrapeURLSByGameId = /* GraphQL */ `query ScrapeURLSByGameId(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -109317,6 +107987,7 @@ export const scrapeURLSByEntityId = /* GraphQL */ `query ScrapeURLSByEntityId(
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -109476,7 +108147,6 @@ export const scrapeURLSByEntityId = /* GraphQL */ `query ScrapeURLSByEntityId(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -109691,6 +108361,7 @@ export const scrapeAttemptsByScraperJobIdAndAttemptTime = /* GraphQL */ `query S
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -109812,6 +108483,7 @@ export const scrapeAttemptsByScraperJobIdAndAttemptTime = /* GraphQL */ `query S
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -110003,6 +108675,7 @@ export const scrapeAttemptsByScrapeURLIdAndAttemptTime = /* GraphQL */ `query Sc
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -110124,6 +108797,7 @@ export const scrapeAttemptsByScrapeURLIdAndAttemptTime = /* GraphQL */ `query Sc
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -110903,7 +109577,6 @@ export const gameCostsByGameId = /* GraphQL */ `query GameCostsByGameId(
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -111008,6 +109681,7 @@ export const gameCostsByGameId = /* GraphQL */ `query GameCostsByGameId(
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -111045,6 +109719,7 @@ export const gameCostsByGameId = /* GraphQL */ `query GameCostsByGameId(
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -111111,7 +109786,6 @@ export const gameCostsByGameId = /* GraphQL */ `query GameCostsByGameId(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -111188,7 +109862,6 @@ export const gameCostsByGameId = /* GraphQL */ `query GameCostsByGameId(
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -111325,6 +109998,7 @@ export const gameCostsByGameId = /* GraphQL */ `query GameCostsByGameId(
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -111490,7 +110164,6 @@ export const gameCostsByEntityIdAndGameDate = /* GraphQL */ `query GameCostsByEn
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -111595,6 +110268,7 @@ export const gameCostsByEntityIdAndGameDate = /* GraphQL */ `query GameCostsByEn
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -111632,6 +110306,7 @@ export const gameCostsByEntityIdAndGameDate = /* GraphQL */ `query GameCostsByEn
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -111698,7 +110373,6 @@ export const gameCostsByEntityIdAndGameDate = /* GraphQL */ `query GameCostsByEn
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -111775,7 +110449,6 @@ export const gameCostsByEntityIdAndGameDate = /* GraphQL */ `query GameCostsByEn
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -111912,6 +110585,7 @@ export const gameCostsByEntityIdAndGameDate = /* GraphQL */ `query GameCostsByEn
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -112077,7 +110751,6 @@ export const gameCostsByVenueIdAndGameDate = /* GraphQL */ `query GameCostsByVen
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -112182,6 +110855,7 @@ export const gameCostsByVenueIdAndGameDate = /* GraphQL */ `query GameCostsByVen
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -112219,6 +110893,7 @@ export const gameCostsByVenueIdAndGameDate = /* GraphQL */ `query GameCostsByVen
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -112285,7 +110960,6 @@ export const gameCostsByVenueIdAndGameDate = /* GraphQL */ `query GameCostsByVen
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -112362,7 +111036,6 @@ export const gameCostsByVenueIdAndGameDate = /* GraphQL */ `query GameCostsByVen
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -112499,6 +111172,7 @@ export const gameCostsByVenueIdAndGameDate = /* GraphQL */ `query GameCostsByVen
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -112664,7 +111338,6 @@ export const gameCostsByGameDateAndTotalCost = /* GraphQL */ `query GameCostsByG
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -112769,6 +111442,7 @@ export const gameCostsByGameDateAndTotalCost = /* GraphQL */ `query GameCostsByG
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -112806,6 +111480,7 @@ export const gameCostsByGameDateAndTotalCost = /* GraphQL */ `query GameCostsByG
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -112872,7 +111547,6 @@ export const gameCostsByGameDateAndTotalCost = /* GraphQL */ `query GameCostsByG
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -112949,7 +111623,6 @@ export const gameCostsByGameDateAndTotalCost = /* GraphQL */ `query GameCostsByG
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -113086,6 +111759,7 @@ export const gameCostsByGameDateAndTotalCost = /* GraphQL */ `query GameCostsByG
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -113252,7 +111926,6 @@ export const gameCostLineItemsByGameCostId = /* GraphQL */ `query GameCostLineIt
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -113393,6 +112066,7 @@ export const gameCostLineItemsByGameCostId = /* GraphQL */ `query GameCostLineIt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -113553,7 +112227,6 @@ export const gameCostLineItemsByCostItemId = /* GraphQL */ `query GameCostLineIt
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -113694,6 +112367,7 @@ export const gameCostLineItemsByCostItemId = /* GraphQL */ `query GameCostLineIt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -113856,7 +112530,6 @@ export const gameCostLineItemsByCostTypeAndGameDate = /* GraphQL */ `query GameC
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -113997,6 +112670,7 @@ export const gameCostLineItemsByCostTypeAndGameDate = /* GraphQL */ `query GameC
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -114157,7 +112831,6 @@ export const gameCostLineItemsByGameId = /* GraphQL */ `query GameCostLineItemsB
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -114298,6 +112971,7 @@ export const gameCostLineItemsByGameId = /* GraphQL */ `query GameCostLineItemsB
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -114460,7 +113134,6 @@ export const gameCostLineItemsByEntityIdAndGameDate = /* GraphQL */ `query GameC
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -114601,6 +113274,7 @@ export const gameCostLineItemsByEntityIdAndGameDate = /* GraphQL */ `query GameC
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -114763,7 +113437,6 @@ export const gameCostLineItemsByVenueIdAndGameDate = /* GraphQL */ `query GameCo
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -114904,6 +113577,7 @@ export const gameCostLineItemsByVenueIdAndGameDate = /* GraphQL */ `query GameCo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version

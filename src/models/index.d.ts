@@ -58,53 +58,6 @@ export enum GameFrequency {
   UNKNOWN = "UNKNOWN"
 }
 
-export enum Quarter {
-  Q1 = "Q1",
-  Q2 = "Q2",
-  Q3 = "Q3",
-  Q4 = "Q4"
-}
-
-export enum SeriesCategory {
-  REGULAR = "REGULAR",
-  SPECIAL_HOLIDAY = "SPECIAL_HOLIDAY",
-  PROMOTIONAL = "PROMOTIONAL",
-  CHAMPIONSHIP = "CHAMPIONSHIP",
-  SEASONAL = "SEASONAL"
-}
-
-export enum DayOfWeek {
-  MONDAY = "MONDAY",
-  TUESDAY = "TUESDAY",
-  WEDNESDAY = "WEDNESDAY",
-  THURSDAY = "THURSDAY",
-  FRIDAY = "FRIDAY",
-  SATURDAY = "SATURDAY",
-  SUNDAY = "SUNDAY"
-}
-
-export enum CostItemType {
-  DEALER = "DEALER",
-  TOURNAMENT_DIRECTOR = "TOURNAMENT_DIRECTOR",
-  PRIZE_CONTRIBUTION = "PRIZE_CONTRIBUTION",
-  JACKPOT_CONTRIBUTION = "JACKPOT_CONTRIBUTION",
-  PROMOTION = "PROMOTION",
-  FLOOR_STAFF = "FLOOR_STAFF",
-  SECURITY = "SECURITY",
-  EQUIPMENT_RENTAL = "EQUIPMENT_RENTAL",
-  VENUE_RENTAL = "VENUE_RENTAL",
-  INSURANCE = "INSURANCE",
-  OTHER = "OTHER"
-}
-
-export enum CostItemRateType {
-  STANDARD = "STANDARD",
-  PENALTY = "PENALTY",
-  OVERTIME = "OVERTIME",
-  HOLIDAY = "HOLIDAY",
-  SPECIAL = "SPECIAL"
-}
-
 export enum RegistrationStatus {
   SCHEDULED = "SCHEDULED",
   OPEN = "OPEN",
@@ -234,6 +187,25 @@ export enum PointsTransactionType {
   EXPIRED = "EXPIRED"
 }
 
+export enum SeriesCategory {
+  REGULAR = "REGULAR",
+  SPECIAL = "SPECIAL",
+  PROMOTIONAL = "PROMOTIONAL",
+  CHAMPIONSHIP = "CHAMPIONSHIP",
+  SEASONAL = "SEASONAL"
+}
+
+export enum HolidayType {
+  NEW_YEAR = "NEW_YEAR",
+  AUSTRALIA_DAY = "AUSTRALIA_DAY",
+  EASTER = "EASTER",
+  ANZAC_DAY = "ANZAC_DAY",
+  QUEENS_BIRTHDAY = "QUEENS_BIRTHDAY",
+  CHRISTMAS = "CHRISTMAS",
+  BOXING_DAY = "BOXING_DAY",
+  OTHER = "OTHER"
+}
+
 export enum VenueAssignmentStatus {
   AUTO_ASSIGNED = "AUTO_ASSIGNED",
   MANUALLY_ASSIGNED = "MANUALLY_ASSIGNED",
@@ -248,6 +220,28 @@ export enum SeriesAssignmentStatus {
   PENDING_ASSIGNMENT = "PENDING_ASSIGNMENT",
   UNASSIGNED = "UNASSIGNED",
   NOT_SERIES = "NOT_SERIES"
+}
+
+export enum CostItemType {
+  DEALER = "DEALER",
+  TOURNAMENT_DIRECTOR = "TOURNAMENT_DIRECTOR",
+  PRIZE_CONTRIBUTION = "PRIZE_CONTRIBUTION",
+  JACKPOT_CONTRIBUTION = "JACKPOT_CONTRIBUTION",
+  PROMOTION = "PROMOTION",
+  FLOOR_STAFF = "FLOOR_STAFF",
+  SECURITY = "SECURITY",
+  EQUIPMENT_RENTAL = "EQUIPMENT_RENTAL",
+  VENUE_RENTAL = "VENUE_RENTAL",
+  INSURANCE = "INSURANCE",
+  OTHER = "OTHER"
+}
+
+export enum CostItemRateType {
+  STANDARD = "STANDARD",
+  PENALTY = "PENALTY",
+  OVERTIME = "OVERTIME",
+  HOLIDAY = "HOLIDAY",
+  SPECIAL = "SPECIAL"
 }
 
 export enum ScraperJobTriggerSource {
@@ -1543,6 +1537,7 @@ type EagerEntity = {
   readonly gameUrlPath: string;
   readonly entityLogo?: string | null;
   readonly isActive: boolean;
+  readonly defaultVenueId?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly scraperStates?: (ScraperState | null)[] | null;
@@ -1563,6 +1558,7 @@ type LazyEntity = {
   readonly gameUrlPath: string;
   readonly entityLogo?: string | null;
   readonly isActive: boolean;
+  readonly defaultVenueId?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly scraperStates: AsyncCollection<ScraperState>;
@@ -1823,6 +1819,7 @@ type EagerTournamentSeriesTitle = {
   readonly id: string;
   readonly title: string;
   readonly aliases?: (string | null)[] | null;
+  readonly seriesCategory?: SeriesCategory | keyof typeof SeriesCategory | null;
   readonly seriesInstances?: (TournamentSeries | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
@@ -1836,6 +1833,7 @@ type LazyTournamentSeriesTitle = {
   readonly id: string;
   readonly title: string;
   readonly aliases?: (string | null)[] | null;
+  readonly seriesCategory?: SeriesCategory | keyof typeof SeriesCategory | null;
   readonly seriesInstances: AsyncCollection<TournamentSeries>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
@@ -1855,10 +1853,10 @@ type EagerTournamentSeries = {
   readonly id: string;
   readonly name: string;
   readonly year: number;
-  readonly quarter?: Quarter | keyof typeof Quarter | null;
+  readonly quarter?: number | null;
   readonly month?: number | null;
   readonly seriesCategory: SeriesCategory | keyof typeof SeriesCategory;
-  readonly holidayType?: string | null;
+  readonly holidayType?: HolidayType | keyof typeof HolidayType | null;
   readonly status: SeriesStatus | keyof typeof SeriesStatus;
   readonly startDate?: string | null;
   readonly endDate?: string | null;
@@ -1884,10 +1882,10 @@ type LazyTournamentSeries = {
   readonly id: string;
   readonly name: string;
   readonly year: number;
-  readonly quarter?: Quarter | keyof typeof Quarter | null;
+  readonly quarter?: number | null;
   readonly month?: number | null;
   readonly seriesCategory: SeriesCategory | keyof typeof SeriesCategory;
-  readonly holidayType?: string | null;
+  readonly holidayType?: HolidayType | keyof typeof HolidayType | null;
   readonly status: SeriesStatus | keyof typeof SeriesStatus;
   readonly startDate?: string | null;
   readonly endDate?: string | null;
@@ -1925,7 +1923,6 @@ type EagerGame = {
   readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
   readonly totalDuration?: string | null;
   readonly gameFrequency?: GameFrequency | keyof typeof GameFrequency | null;
-  readonly dayOfWeek?: DayOfWeek | keyof typeof DayOfWeek | null;
   readonly buyIn?: number | null;
   readonly rake?: number | null;
   readonly venueFee?: number | null;
@@ -1999,7 +1996,6 @@ type LazyGame = {
   readonly registrationStatus?: RegistrationStatus | keyof typeof RegistrationStatus | null;
   readonly totalDuration?: string | null;
   readonly gameFrequency?: GameFrequency | keyof typeof GameFrequency | null;
-  readonly dayOfWeek?: DayOfWeek | keyof typeof DayOfWeek | null;
   readonly buyIn?: number | null;
   readonly rake?: number | null;
   readonly venueFee?: number | null;

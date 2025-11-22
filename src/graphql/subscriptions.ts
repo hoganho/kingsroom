@@ -95,6 +95,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -155,6 +156,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -220,6 +222,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -259,6 +262,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -324,6 +328,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -387,6 +392,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -477,6 +483,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -508,7 +515,6 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -649,6 +655,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -704,6 +711,7 @@ export const onScraperJobUpdate = /* GraphQL */ `subscription OnScraperJobUpdate
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -825,6 +833,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -885,6 +894,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -950,6 +960,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -989,6 +1000,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -1054,6 +1066,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -1117,6 +1130,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -1207,6 +1221,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -1238,7 +1253,6 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -1379,6 +1393,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -1434,6 +1449,7 @@ export const onScrapeURLStatusChange = /* GraphQL */ `subscription OnScrapeURLSt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -1490,6 +1506,7 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
     gameUrlPath
     entityLogo
     isActive
+    defaultVenueId
     createdAt
     updatedAt
     scraperStates {
@@ -1529,6 +1546,7 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -1655,6 +1673,7 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -1779,6 +1798,7 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -1916,7 +1936,6 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -2064,6 +2083,7 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -2123,7 +2143,6 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -2228,6 +2247,7 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -2265,6 +2285,7 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -2331,7 +2352,6 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -2408,7 +2428,6 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -2545,6 +2564,7 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -2660,6 +2680,7 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -2683,6 +2704,7 @@ export const onCreateEntity = /* GraphQL */ `subscription OnCreateEntity($filter
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -2747,6 +2769,7 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
     gameUrlPath
     entityLogo
     isActive
+    defaultVenueId
     createdAt
     updatedAt
     scraperStates {
@@ -2786,6 +2809,7 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -2912,6 +2936,7 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -3036,6 +3061,7 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -3173,7 +3199,6 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -3321,6 +3346,7 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -3380,7 +3406,6 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -3485,6 +3510,7 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -3522,6 +3548,7 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -3588,7 +3615,6 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -3665,7 +3691,6 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -3802,6 +3827,7 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -3917,6 +3943,7 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -3940,6 +3967,7 @@ export const onUpdateEntity = /* GraphQL */ `subscription OnUpdateEntity($filter
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -4004,6 +4032,7 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
     gameUrlPath
     entityLogo
     isActive
+    defaultVenueId
     createdAt
     updatedAt
     scraperStates {
@@ -4043,6 +4072,7 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -4169,6 +4199,7 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -4293,6 +4324,7 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -4430,7 +4462,6 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -4578,6 +4609,7 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -4637,7 +4669,6 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -4742,6 +4773,7 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -4779,6 +4811,7 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -4845,7 +4878,6 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -4922,7 +4954,6 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -5059,6 +5090,7 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -5174,6 +5206,7 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -5197,6 +5230,7 @@ export const onDeleteEntity = /* GraphQL */ `subscription OnDeleteEntity($filter
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -5421,6 +5455,7 @@ export const onCreateScraperState = /* GraphQL */ `subscription OnCreateScraperS
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -5460,6 +5495,7 @@ export const onCreateScraperState = /* GraphQL */ `subscription OnCreateScraperS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -5525,6 +5561,7 @@ export const onCreateScraperState = /* GraphQL */ `subscription OnCreateScraperS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -5588,6 +5625,7 @@ export const onCreateScraperState = /* GraphQL */ `subscription OnCreateScraperS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -5678,6 +5716,7 @@ export const onCreateScraperState = /* GraphQL */ `subscription OnCreateScraperS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -5709,7 +5748,6 @@ export const onCreateScraperState = /* GraphQL */ `subscription OnCreateScraperS
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -5850,6 +5888,7 @@ export const onCreateScraperState = /* GraphQL */ `subscription OnCreateScraperS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -5905,6 +5944,7 @@ export const onCreateScraperState = /* GraphQL */ `subscription OnCreateScraperS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -5979,6 +6019,7 @@ export const onUpdateScraperState = /* GraphQL */ `subscription OnUpdateScraperS
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -6018,6 +6059,7 @@ export const onUpdateScraperState = /* GraphQL */ `subscription OnUpdateScraperS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -6083,6 +6125,7 @@ export const onUpdateScraperState = /* GraphQL */ `subscription OnUpdateScraperS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -6146,6 +6189,7 @@ export const onUpdateScraperState = /* GraphQL */ `subscription OnUpdateScraperS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -6236,6 +6280,7 @@ export const onUpdateScraperState = /* GraphQL */ `subscription OnUpdateScraperS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -6267,7 +6312,6 @@ export const onUpdateScraperState = /* GraphQL */ `subscription OnUpdateScraperS
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -6408,6 +6452,7 @@ export const onUpdateScraperState = /* GraphQL */ `subscription OnUpdateScraperS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -6463,6 +6508,7 @@ export const onUpdateScraperState = /* GraphQL */ `subscription OnUpdateScraperS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -6537,6 +6583,7 @@ export const onDeleteScraperState = /* GraphQL */ `subscription OnDeleteScraperS
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -6576,6 +6623,7 @@ export const onDeleteScraperState = /* GraphQL */ `subscription OnDeleteScraperS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -6641,6 +6689,7 @@ export const onDeleteScraperState = /* GraphQL */ `subscription OnDeleteScraperS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -6704,6 +6753,7 @@ export const onDeleteScraperState = /* GraphQL */ `subscription OnDeleteScraperS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -6794,6 +6844,7 @@ export const onDeleteScraperState = /* GraphQL */ `subscription OnDeleteScraperS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -6825,7 +6876,6 @@ export const onDeleteScraperState = /* GraphQL */ `subscription OnDeleteScraperS
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -6966,6 +7016,7 @@ export const onDeleteScraperState = /* GraphQL */ `subscription OnDeleteScraperS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -7021,6 +7072,7 @@ export const onDeleteScraperState = /* GraphQL */ `subscription OnDeleteScraperS
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -7154,7 +7206,6 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -7302,6 +7353,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -7420,6 +7472,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -7443,6 +7496,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -7501,7 +7555,6 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -7606,6 +7659,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -7643,6 +7697,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -7709,7 +7764,6 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -7786,7 +7840,6 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -7923,6 +7976,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -7992,6 +8046,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -8064,6 +8119,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -8091,7 +8147,6 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -8359,6 +8414,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -8744,6 +8800,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -8778,6 +8835,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -8817,6 +8875,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -8882,6 +8941,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -8945,6 +9005,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -9035,6 +9096,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -9066,7 +9128,6 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -9207,6 +9268,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -9262,6 +9324,7 @@ export const onCreateVenue = /* GraphQL */ `subscription OnCreateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -9396,7 +9459,6 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -9544,6 +9606,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -9662,6 +9725,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -9685,6 +9749,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -9743,7 +9808,6 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -9848,6 +9912,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -9885,6 +9950,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -9951,7 +10017,6 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -10028,7 +10093,6 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -10165,6 +10229,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -10234,6 +10299,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -10306,6 +10372,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -10333,7 +10400,6 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -10601,6 +10667,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -10986,6 +11053,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -11020,6 +11088,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -11059,6 +11128,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -11124,6 +11194,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -11187,6 +11258,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -11277,6 +11349,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -11308,7 +11381,6 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -11449,6 +11521,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -11504,6 +11577,7 @@ export const onUpdateVenue = /* GraphQL */ `subscription OnUpdateVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -11638,7 +11712,6 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -11786,6 +11859,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -11904,6 +11978,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -11927,6 +12002,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -11985,7 +12061,6 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -12090,6 +12165,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -12127,6 +12203,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -12193,7 +12270,6 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -12270,7 +12346,6 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -12407,6 +12482,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -12476,6 +12552,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -12548,6 +12625,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -12575,7 +12653,6 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -12843,6 +12920,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -13228,6 +13306,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -13262,6 +13341,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -13301,6 +13381,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -13366,6 +13447,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -13429,6 +13511,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -13519,6 +13602,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -13550,7 +13634,6 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -13691,6 +13774,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -13746,6 +13830,7 @@ export const onDeleteVenue = /* GraphQL */ `subscription OnDeleteVenue($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -13872,6 +13957,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -13930,6 +14016,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -13960,7 +14047,6 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -14101,6 +14187,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -14142,6 +14229,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -14390,6 +14478,7 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -14549,7 +14638,6 @@ export const onCreateVenueDetails = /* GraphQL */ `subscription OnCreateVenueDet
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -14745,6 +14833,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -14803,6 +14892,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -14833,7 +14923,6 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -14974,6 +15063,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -15015,6 +15105,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -15263,6 +15354,7 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -15422,7 +15514,6 @@ export const onUpdateVenueDetails = /* GraphQL */ `subscription OnUpdateVenueDet
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -15618,6 +15709,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -15676,6 +15768,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -15706,7 +15799,6 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -15847,6 +15939,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -15888,6 +15981,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -16136,6 +16230,7 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -16295,7 +16390,6 @@ export const onDeleteVenueDetails = /* GraphQL */ `subscription OnDeleteVenueDet
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -16408,6 +16502,7 @@ export const onCreateTournamentSeriesTitle = /* GraphQL */ `subscription OnCreat
     id
     title
     aliases
+    seriesCategory
     seriesInstances {
       items {
         id
@@ -16430,6 +16525,7 @@ export const onCreateTournamentSeriesTitle = /* GraphQL */ `subscription OnCreat
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -16502,6 +16598,7 @@ export const onCreateTournamentSeriesTitle = /* GraphQL */ `subscription OnCreat
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -16529,7 +16626,6 @@ export const onCreateTournamentSeriesTitle = /* GraphQL */ `subscription OnCreat
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -16619,6 +16715,7 @@ export const onUpdateTournamentSeriesTitle = /* GraphQL */ `subscription OnUpdat
     id
     title
     aliases
+    seriesCategory
     seriesInstances {
       items {
         id
@@ -16641,6 +16738,7 @@ export const onUpdateTournamentSeriesTitle = /* GraphQL */ `subscription OnUpdat
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -16713,6 +16811,7 @@ export const onUpdateTournamentSeriesTitle = /* GraphQL */ `subscription OnUpdat
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -16740,7 +16839,6 @@ export const onUpdateTournamentSeriesTitle = /* GraphQL */ `subscription OnUpdat
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -16830,6 +16928,7 @@ export const onDeleteTournamentSeriesTitle = /* GraphQL */ `subscription OnDelet
     id
     title
     aliases
+    seriesCategory
     seriesInstances {
       items {
         id
@@ -16852,6 +16951,7 @@ export const onDeleteTournamentSeriesTitle = /* GraphQL */ `subscription OnDelet
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -16924,6 +17024,7 @@ export const onDeleteTournamentSeriesTitle = /* GraphQL */ `subscription OnDelet
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -16951,7 +17052,6 @@ export const onDeleteTournamentSeriesTitle = /* GraphQL */ `subscription OnDelet
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -17058,6 +17158,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
       id
       title
       aliases
+      seriesCategory
       seriesInstances {
         items {
           id
@@ -17080,6 +17181,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -17209,6 +17311,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -17267,6 +17370,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -17297,7 +17401,6 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -17438,6 +17541,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -17479,6 +17583,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -17727,6 +17832,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -17886,7 +17992,6 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -17992,7 +18097,6 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -18097,6 +18201,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -18134,6 +18239,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -18200,7 +18306,6 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -18277,7 +18382,6 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -18414,6 +18518,7 @@ export const onCreateTournamentSeries = /* GraphQL */ `subscription OnCreateTour
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -18497,6 +18602,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
       id
       title
       aliases
+      seriesCategory
       seriesInstances {
         items {
           id
@@ -18519,6 +18625,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -18648,6 +18755,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -18706,6 +18814,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -18736,7 +18845,6 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -18877,6 +18985,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -18918,6 +19027,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -19166,6 +19276,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -19325,7 +19436,6 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -19431,7 +19541,6 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -19536,6 +19645,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -19573,6 +19683,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -19639,7 +19750,6 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -19716,7 +19826,6 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -19853,6 +19962,7 @@ export const onUpdateTournamentSeries = /* GraphQL */ `subscription OnUpdateTour
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -19936,6 +20046,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
       id
       title
       aliases
+      seriesCategory
       seriesInstances {
         items {
           id
@@ -19958,6 +20069,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -20087,6 +20199,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -20145,6 +20258,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -20175,7 +20289,6 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -20316,6 +20429,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -20357,6 +20471,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -20605,6 +20720,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -20764,7 +20880,6 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -20870,7 +20985,6 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -20975,6 +21089,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -21012,6 +21127,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -21078,7 +21194,6 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -21155,7 +21270,6 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -21292,6 +21406,7 @@ export const onDeleteTournamentSeries = /* GraphQL */ `subscription OnDeleteTour
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -21363,7 +21478,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
     registrationStatus
     totalDuration
     gameFrequency
-    dayOfWeek
     buyIn
     rake
     venueFee
@@ -21487,6 +21601,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -21545,6 +21660,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -21575,7 +21691,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -21716,6 +21831,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -21757,6 +21873,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -22005,6 +22122,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -22164,7 +22282,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -22280,6 +22397,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
         id
         title
         aliases
+        seriesCategory
         seriesInstances {
           items {
             id
@@ -22396,7 +22514,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -22544,6 +22661,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -22599,7 +22717,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -22740,6 +22857,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -22793,7 +22911,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -22898,6 +23015,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -22935,6 +23053,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -23001,7 +23120,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -23078,7 +23196,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -23215,6 +23332,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -23279,7 +23397,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -23384,6 +23501,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -23421,6 +23539,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -23487,7 +23606,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -23564,7 +23682,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -23701,6 +23818,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -23981,7 +24099,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -24122,6 +24239,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -24299,7 +24417,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -24440,6 +24557,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -24474,6 +24592,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -24513,6 +24632,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -24578,6 +24698,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -24641,6 +24762,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -24731,6 +24853,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -24762,7 +24885,6 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -24903,6 +25025,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -24958,6 +25081,7 @@ export const onCreateGame = /* GraphQL */ `subscription OnCreateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -25006,7 +25130,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
     registrationStatus
     totalDuration
     gameFrequency
-    dayOfWeek
     buyIn
     rake
     venueFee
@@ -25130,6 +25253,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -25188,6 +25312,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -25218,7 +25343,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -25359,6 +25483,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -25400,6 +25525,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -25648,6 +25774,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -25807,7 +25934,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -25923,6 +26049,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
         id
         title
         aliases
+        seriesCategory
         seriesInstances {
           items {
             id
@@ -26039,7 +26166,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -26187,6 +26313,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -26242,7 +26369,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -26383,6 +26509,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -26436,7 +26563,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -26541,6 +26667,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -26578,6 +26705,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -26644,7 +26772,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -26721,7 +26848,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -26858,6 +26984,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -26922,7 +27049,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -27027,6 +27153,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -27064,6 +27191,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -27130,7 +27258,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -27207,7 +27334,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -27344,6 +27470,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -27624,7 +27751,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -27765,6 +27891,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -27942,7 +28069,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -28083,6 +28209,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -28117,6 +28244,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -28156,6 +28284,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -28221,6 +28350,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -28284,6 +28414,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -28374,6 +28505,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -28405,7 +28537,6 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -28546,6 +28677,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -28601,6 +28733,7 @@ export const onUpdateGame = /* GraphQL */ `subscription OnUpdateGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -28649,7 +28782,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
     registrationStatus
     totalDuration
     gameFrequency
-    dayOfWeek
     buyIn
     rake
     venueFee
@@ -28773,6 +28905,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -28831,6 +28964,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -28861,7 +28995,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -29002,6 +29135,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -29043,6 +29177,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -29291,6 +29426,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -29450,7 +29586,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -29566,6 +29701,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
         id
         title
         aliases
+        seriesCategory
         seriesInstances {
           items {
             id
@@ -29682,7 +29818,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -29830,6 +29965,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -29885,7 +30021,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -30026,6 +30161,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -30079,7 +30215,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -30184,6 +30319,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -30221,6 +30357,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -30287,7 +30424,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -30364,7 +30500,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -30501,6 +30636,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -30565,7 +30701,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -30670,6 +30805,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -30707,6 +30843,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -30773,7 +30910,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -30850,7 +30986,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -30987,6 +31122,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -31267,7 +31403,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -31408,6 +31543,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -31585,7 +31721,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -31726,6 +31861,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -31760,6 +31896,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -31799,6 +31936,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -31864,6 +32002,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -31927,6 +32066,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -32017,6 +32157,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -32048,7 +32189,6 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -32189,6 +32329,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -32244,6 +32385,7 @@ export const onDeleteGame = /* GraphQL */ `subscription OnDeleteGame($filter: Mo
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -32310,7 +32452,6 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -32434,7 +32575,6 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -32582,6 +32722,7 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -32647,6 +32788,7 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -32719,6 +32861,7 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -32746,7 +32889,6 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -32840,7 +32982,6 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -32981,6 +33122,7 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -33017,7 +33159,6 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -33158,6 +33299,7 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -33268,7 +33410,6 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -33382,7 +33523,6 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -33457,6 +33597,7 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -33616,7 +33757,6 @@ export const onCreateTournamentStructure = /* GraphQL */ `subscription OnCreateT
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -33752,7 +33892,6 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -33876,7 +34015,6 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -34024,6 +34162,7 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -34089,6 +34228,7 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -34161,6 +34301,7 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -34188,7 +34329,6 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -34282,7 +34422,6 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -34423,6 +34562,7 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -34459,7 +34599,6 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -34600,6 +34739,7 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -34710,7 +34850,6 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -34824,7 +34963,6 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -34899,6 +35037,7 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -35058,7 +35197,6 @@ export const onUpdateTournamentStructure = /* GraphQL */ `subscription OnUpdateT
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -35194,7 +35332,6 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -35318,7 +35455,6 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -35466,6 +35602,7 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -35531,6 +35668,7 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -35603,6 +35741,7 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -35630,7 +35769,6 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -35724,7 +35862,6 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -35865,6 +36002,7 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -35901,7 +36039,6 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -36042,6 +36179,7 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -36152,7 +36290,6 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -36266,7 +36403,6 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -36341,6 +36477,7 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -36500,7 +36637,6 @@ export const onDeleteTournamentStructure = /* GraphQL */ `subscription OnDeleteT
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -37189,6 +37325,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -37740,6 +37877,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -37984,6 +38122,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -38164,7 +38303,6 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -38305,6 +38443,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -38482,7 +38621,6 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -38623,6 +38761,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -39349,6 +39488,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -39407,6 +39547,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -39437,7 +39578,6 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -39578,6 +39718,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -39619,6 +39760,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -39867,6 +40009,7 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -40026,7 +40169,6 @@ export const onCreatePlayer = /* GraphQL */ `subscription OnCreatePlayer($filter
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -40514,6 +40656,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -41065,6 +41208,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -41309,6 +41453,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -41489,7 +41634,6 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -41630,6 +41774,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -41807,7 +41952,6 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -41948,6 +42092,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -42674,6 +42819,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -42732,6 +42878,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -42762,7 +42909,6 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -42903,6 +43049,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -42944,6 +43091,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -43192,6 +43340,7 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -43351,7 +43500,6 @@ export const onUpdatePlayer = /* GraphQL */ `subscription OnUpdatePlayer($filter
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -43839,6 +43987,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -44390,6 +44539,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -44634,6 +44784,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -44814,7 +44965,6 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -44955,6 +45105,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -45132,7 +45283,6 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -45273,6 +45423,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -45999,6 +46150,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -46057,6 +46209,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -46087,7 +46240,6 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -46228,6 +46380,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -46269,6 +46422,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -46517,6 +46671,7 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -46676,7 +46831,6 @@ export const onDeletePlayer = /* GraphQL */ `subscription OnDeletePlayer($filter
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -47278,7 +47432,6 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -47392,7 +47545,6 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -47738,7 +47890,6 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -47886,6 +48037,7 @@ export const onCreatePlayerSummary = /* GraphQL */ `subscription OnCreatePlayerS
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -48457,7 +48609,6 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -48571,7 +48722,6 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -48917,7 +49067,6 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -49065,6 +49214,7 @@ export const onUpdatePlayerSummary = /* GraphQL */ `subscription OnUpdatePlayerS
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -49636,7 +49786,6 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -49750,7 +49899,6 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -50096,7 +50244,6 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -50244,6 +50391,7 @@ export const onDeletePlayerSummary = /* GraphQL */ `subscription OnDeletePlayerS
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -50821,7 +50969,6 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -50935,7 +51082,6 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -51281,7 +51427,6 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -51429,6 +51574,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -51490,7 +51636,6 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -51614,7 +51759,6 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -51762,6 +51906,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -51827,6 +51972,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -51899,6 +52045,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -51926,7 +52073,6 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -52020,7 +52166,6 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -52161,6 +52306,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -52197,7 +52343,6 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -52338,6 +52483,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -52448,7 +52594,6 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -52562,7 +52707,6 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -52637,6 +52781,7 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -52796,7 +52941,6 @@ export const onCreatePlayerEntry = /* GraphQL */ `subscription OnCreatePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -53404,7 +53548,6 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -53518,7 +53661,6 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -53864,7 +54006,6 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -54012,6 +54153,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -54073,7 +54215,6 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -54197,7 +54338,6 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -54345,6 +54485,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -54410,6 +54551,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -54482,6 +54624,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -54509,7 +54652,6 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -54603,7 +54745,6 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -54744,6 +54885,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -54780,7 +54922,6 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -54921,6 +55062,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -55031,7 +55173,6 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -55145,7 +55286,6 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -55220,6 +55360,7 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -55379,7 +55520,6 @@ export const onUpdatePlayerEntry = /* GraphQL */ `subscription OnUpdatePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -55987,7 +56127,6 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -56101,7 +56240,6 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -56447,7 +56585,6 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -56595,6 +56732,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -56656,7 +56794,6 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -56780,7 +56917,6 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -56928,6 +57064,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -56993,6 +57130,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -57065,6 +57203,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -57092,7 +57231,6 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -57186,7 +57324,6 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -57327,6 +57464,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -57363,7 +57501,6 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -57504,6 +57641,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -57614,7 +57752,6 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -57728,7 +57865,6 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -57803,6 +57939,7 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -57962,7 +58099,6 @@ export const onDeletePlayerEntry = /* GraphQL */ `subscription OnDeletePlayerEnt
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -58566,7 +58702,6 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -58680,7 +58815,6 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -59026,7 +59160,6 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -59174,6 +59307,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -59236,7 +59370,6 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -59360,7 +59493,6 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -59508,6 +59640,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -59573,6 +59706,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -59645,6 +59779,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -59672,7 +59807,6 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -59766,7 +59900,6 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -59907,6 +60040,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -59943,7 +60077,6 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -60084,6 +60217,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -60194,7 +60328,6 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -60308,7 +60441,6 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -60383,6 +60515,7 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -60542,7 +60675,6 @@ export const onCreatePlayerResult = /* GraphQL */ `subscription OnCreatePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -61146,7 +61278,6 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -61260,7 +61391,6 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -61606,7 +61736,6 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -61754,6 +61883,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -61816,7 +61946,6 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -61940,7 +62069,6 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -62088,6 +62216,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -62153,6 +62282,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -62225,6 +62355,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -62252,7 +62383,6 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -62346,7 +62476,6 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -62487,6 +62616,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -62523,7 +62653,6 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -62664,6 +62793,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -62774,7 +62904,6 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -62888,7 +63017,6 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -62963,6 +63091,7 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -63122,7 +63251,6 @@ export const onUpdatePlayerResult = /* GraphQL */ `subscription OnUpdatePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -63726,7 +63854,6 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -63840,7 +63967,6 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -64186,7 +64312,6 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -64334,6 +64459,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -64396,7 +64522,6 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -64520,7 +64645,6 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -64668,6 +64792,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -64733,6 +64858,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -64805,6 +64931,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -64832,7 +64959,6 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -64926,7 +65052,6 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -65067,6 +65192,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -65103,7 +65229,6 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -65244,6 +65369,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -65354,7 +65480,6 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -65468,7 +65593,6 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -65543,6 +65667,7 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -65702,7 +65827,6 @@ export const onDeletePlayerResult = /* GraphQL */ `subscription OnDeletePlayerRe
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -66304,7 +66428,6 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -66418,7 +66541,6 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -66764,7 +66886,6 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -66912,6 +67033,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -67041,6 +67163,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -67099,6 +67222,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -67129,7 +67253,6 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -67270,6 +67393,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -67311,6 +67435,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -67559,6 +67684,7 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -67718,7 +67844,6 @@ export const onCreatePlayerVenue = /* GraphQL */ `subscription OnCreatePlayerVen
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -68320,7 +68445,6 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -68434,7 +68558,6 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -68780,7 +68903,6 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -68928,6 +69050,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -69057,6 +69180,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -69115,6 +69239,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -69145,7 +69270,6 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -69286,6 +69410,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -69327,6 +69452,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -69575,6 +69701,7 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -69734,7 +69861,6 @@ export const onUpdatePlayerVenue = /* GraphQL */ `subscription OnUpdatePlayerVen
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -70336,7 +70462,6 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -70450,7 +70575,6 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -70796,7 +70920,6 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -70944,6 +71067,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -71073,6 +71197,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -71131,6 +71256,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -71161,7 +71287,6 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -71302,6 +71427,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -71343,6 +71469,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -71591,6 +71718,7 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -71750,7 +71878,6 @@ export const onDeletePlayerVenue = /* GraphQL */ `subscription OnDeletePlayerVen
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -72353,7 +72480,6 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -72467,7 +72593,6 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -72813,7 +72938,6 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -72961,6 +73085,7 @@ export const onCreatePlayerTransaction = /* GraphQL */ `subscription OnCreatePla
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -73521,7 +73646,6 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -73635,7 +73759,6 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -73981,7 +74104,6 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -74129,6 +74251,7 @@ export const onUpdatePlayerTransaction = /* GraphQL */ `subscription OnUpdatePla
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -74689,7 +74812,6 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -74803,7 +74925,6 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -75149,7 +75270,6 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -75297,6 +75417,7 @@ export const onDeletePlayerTransaction = /* GraphQL */ `subscription OnDeletePla
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -75857,7 +75978,6 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -75971,7 +76091,6 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -76317,7 +76436,6 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -76465,6 +76583,7 @@ export const onCreatePlayerCredits = /* GraphQL */ `subscription OnCreatePlayerC
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -77026,7 +77145,6 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -77140,7 +77258,6 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -77486,7 +77603,6 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -77634,6 +77750,7 @@ export const onUpdatePlayerCredits = /* GraphQL */ `subscription OnUpdatePlayerC
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -78195,7 +78312,6 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -78309,7 +78425,6 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -78655,7 +78770,6 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -78803,6 +78917,7 @@ export const onDeletePlayerCredits = /* GraphQL */ `subscription OnDeletePlayerC
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -79364,7 +79479,6 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -79478,7 +79592,6 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -79824,7 +79937,6 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -79972,6 +80084,7 @@ export const onCreatePlayerPoints = /* GraphQL */ `subscription OnCreatePlayerPo
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -80533,7 +80646,6 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -80647,7 +80759,6 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -80993,7 +81104,6 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -81141,6 +81251,7 @@ export const onUpdatePlayerPoints = /* GraphQL */ `subscription OnUpdatePlayerPo
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -81702,7 +81813,6 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -81816,7 +81926,6 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -82162,7 +82271,6 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -82310,6 +82418,7 @@ export const onDeletePlayerPoints = /* GraphQL */ `subscription OnDeletePlayerPo
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -82868,7 +82977,6 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -82982,7 +83090,6 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -83328,7 +83435,6 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -83476,6 +83582,7 @@ export const onCreateKnownPlayerIdentity = /* GraphQL */ `subscription OnCreateK
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -84032,7 +84139,6 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -84146,7 +84252,6 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -84492,7 +84597,6 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -84640,6 +84744,7 @@ export const onUpdateKnownPlayerIdentity = /* GraphQL */ `subscription OnUpdateK
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -85196,7 +85301,6 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -85310,7 +85414,6 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -85656,7 +85759,6 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -85804,6 +85906,7 @@ export const onDeleteKnownPlayerIdentity = /* GraphQL */ `subscription OnDeleteK
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -86934,7 +87037,6 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -87048,7 +87150,6 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -87394,7 +87495,6 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -87542,6 +87642,7 @@ export const onCreatePlayerTicket = /* GraphQL */ `subscription OnCreatePlayerTi
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -88174,7 +88275,6 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -88288,7 +88388,6 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -88634,7 +88733,6 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -88782,6 +88880,7 @@ export const onUpdatePlayerTicket = /* GraphQL */ `subscription OnUpdatePlayerTi
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -89414,7 +89513,6 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -89528,7 +89626,6 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -89874,7 +89971,6 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -90022,6 +90118,7 @@ export const onDeletePlayerTicket = /* GraphQL */ `subscription OnDeletePlayerTi
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -90832,7 +90929,6 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -90946,7 +91042,6 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -91292,7 +91387,6 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -91440,6 +91534,7 @@ export const onCreatePlayerMarketingPreferences = /* GraphQL */ `subscription On
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -91995,7 +92090,6 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -92109,7 +92203,6 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -92455,7 +92548,6 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -92603,6 +92695,7 @@ export const onUpdatePlayerMarketingPreferences = /* GraphQL */ `subscription On
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -93158,7 +93251,6 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -93272,7 +93364,6 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -93618,7 +93709,6 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -93766,6 +93856,7 @@ export const onDeletePlayerMarketingPreferences = /* GraphQL */ `subscription On
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -94155,6 +94246,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -94213,6 +94305,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -94243,7 +94336,6 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -94384,6 +94476,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -94425,6 +94518,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -94673,6 +94767,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -94832,7 +94927,6 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -94934,6 +95028,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -94973,6 +95068,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -95038,6 +95134,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -95101,6 +95198,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -95191,6 +95289,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -95222,7 +95321,6 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -95363,6 +95461,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -95418,6 +95517,7 @@ export const onCreateAsset = /* GraphQL */ `subscription OnCreateAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -95540,6 +95640,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -95598,6 +95699,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -95628,7 +95730,6 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -95769,6 +95870,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -95810,6 +95912,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -96058,6 +96161,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -96217,7 +96321,6 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -96319,6 +96422,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -96358,6 +96462,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -96423,6 +96528,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -96486,6 +96592,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -96576,6 +96683,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -96607,7 +96715,6 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -96748,6 +96855,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -96803,6 +96911,7 @@ export const onUpdateAsset = /* GraphQL */ `subscription OnUpdateAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -96925,6 +97034,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -96983,6 +97093,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -97013,7 +97124,6 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -97154,6 +97264,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -97195,6 +97306,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -97443,6 +97555,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -97602,7 +97715,6 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -97704,6 +97816,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -97743,6 +97856,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -97808,6 +97922,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -97871,6 +97986,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -97961,6 +98077,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -97992,7 +98109,6 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -98133,6 +98249,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -98188,6 +98305,7 @@ export const onDeleteAsset = /* GraphQL */ `subscription OnDeleteAsset($filter: 
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -98438,6 +98556,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -98498,6 +98617,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -98563,6 +98683,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -98602,6 +98723,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -98667,6 +98789,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -98730,6 +98853,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -98820,6 +98944,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -98851,7 +98976,6 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -98992,6 +99116,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -99047,6 +99172,7 @@ export const onCreateScraperJob = /* GraphQL */ `subscription OnCreateScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -99171,6 +99297,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -99231,6 +99358,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -99296,6 +99424,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -99335,6 +99464,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -99400,6 +99530,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -99463,6 +99594,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -99553,6 +99685,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -99584,7 +99717,6 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -99725,6 +99857,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -99780,6 +99913,7 @@ export const onUpdateScraperJob = /* GraphQL */ `subscription OnUpdateScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -99904,6 +100038,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -99964,6 +100099,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -100029,6 +100165,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -100068,6 +100205,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -100133,6 +100271,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -100196,6 +100335,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -100286,6 +100426,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -100317,7 +100458,6 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -100458,6 +100598,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -100513,6 +100654,7 @@ export const onDeleteScraperJob = /* GraphQL */ `subscription OnDeleteScraperJob
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -100634,6 +100776,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -100694,6 +100837,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -100759,6 +100903,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -100798,6 +100943,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -100863,6 +101009,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -100926,6 +101073,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -101016,6 +101164,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -101047,7 +101196,6 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -101188,6 +101336,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -101243,6 +101392,7 @@ export const onCreateScrapeURL = /* GraphQL */ `subscription OnCreateScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -101377,6 +101527,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -101437,6 +101588,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -101502,6 +101654,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -101541,6 +101694,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -101606,6 +101760,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -101669,6 +101824,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -101759,6 +101915,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -101790,7 +101947,6 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -101931,6 +102087,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -101986,6 +102143,7 @@ export const onUpdateScrapeURL = /* GraphQL */ `subscription OnUpdateScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -102120,6 +102278,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -102180,6 +102339,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -102245,6 +102405,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
       gameUrlPath
       entityLogo
       isActive
+      defaultVenueId
       createdAt
       updatedAt
       scraperStates {
@@ -102284,6 +102445,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -102349,6 +102511,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -102412,6 +102575,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -102502,6 +102666,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -102533,7 +102698,6 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -102674,6 +102838,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -102729,6 +102894,7 @@ export const onDeleteScrapeURL = /* GraphQL */ `subscription OnDeleteScrapeURL($
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -102950,6 +103116,7 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -103109,7 +103276,6 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -103366,6 +103532,7 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -103525,7 +103692,6 @@ export const onCreateScrapeAttempt = /* GraphQL */ `subscription OnCreateScrapeA
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -103835,6 +104001,7 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -103994,7 +104161,6 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -104251,6 +104417,7 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -104410,7 +104577,6 @@ export const onUpdateScrapeAttempt = /* GraphQL */ `subscription OnUpdateScrapeA
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -104720,6 +104886,7 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -104879,7 +105046,6 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -105136,6 +105302,7 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -105295,7 +105462,6 @@ export const onDeleteScrapeAttempt = /* GraphQL */ `subscription OnDeleteScrapeA
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -105615,7 +105781,6 @@ export const onCreateGameCostItem = /* GraphQL */ `subscription OnCreateGameCost
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -105780,7 +105945,6 @@ export const onUpdateGameCostItem = /* GraphQL */ `subscription OnUpdateGameCost
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -105945,7 +106109,6 @@ export const onDeleteGameCostItem = /* GraphQL */ `subscription OnDeleteGameCost
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -106095,7 +106258,6 @@ export const onCreateGameCost = /* GraphQL */ `subscription OnCreateGameCost($fi
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -106219,7 +106381,6 @@ export const onCreateGameCost = /* GraphQL */ `subscription OnCreateGameCost($fi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -106367,6 +106528,7 @@ export const onCreateGameCost = /* GraphQL */ `subscription OnCreateGameCost($fi
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -106432,6 +106594,7 @@ export const onCreateGameCost = /* GraphQL */ `subscription OnCreateGameCost($fi
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -106504,6 +106667,7 @@ export const onCreateGameCost = /* GraphQL */ `subscription OnCreateGameCost($fi
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -106531,7 +106695,6 @@ export const onCreateGameCost = /* GraphQL */ `subscription OnCreateGameCost($fi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -106625,7 +106788,6 @@ export const onCreateGameCost = /* GraphQL */ `subscription OnCreateGameCost($fi
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -106766,6 +106928,7 @@ export const onCreateGameCost = /* GraphQL */ `subscription OnCreateGameCost($fi
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -106802,7 +106965,6 @@ export const onCreateGameCost = /* GraphQL */ `subscription OnCreateGameCost($fi
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -106943,6 +107105,7 @@ export const onCreateGameCost = /* GraphQL */ `subscription OnCreateGameCost($fi
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -107053,7 +107216,6 @@ export const onCreateGameCost = /* GraphQL */ `subscription OnCreateGameCost($fi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -107167,7 +107329,6 @@ export const onCreateGameCost = /* GraphQL */ `subscription OnCreateGameCost($fi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -107242,6 +107403,7 @@ export const onCreateGameCost = /* GraphQL */ `subscription OnCreateGameCost($fi
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -107401,7 +107563,6 @@ export const onCreateGameCost = /* GraphQL */ `subscription OnCreateGameCost($fi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -107521,7 +107682,6 @@ export const onCreateGameCost = /* GraphQL */ `subscription OnCreateGameCost($fi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -107675,7 +107835,6 @@ export const onUpdateGameCost = /* GraphQL */ `subscription OnUpdateGameCost($fi
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -107799,7 +107958,6 @@ export const onUpdateGameCost = /* GraphQL */ `subscription OnUpdateGameCost($fi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -107947,6 +108105,7 @@ export const onUpdateGameCost = /* GraphQL */ `subscription OnUpdateGameCost($fi
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -108012,6 +108171,7 @@ export const onUpdateGameCost = /* GraphQL */ `subscription OnUpdateGameCost($fi
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -108084,6 +108244,7 @@ export const onUpdateGameCost = /* GraphQL */ `subscription OnUpdateGameCost($fi
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -108111,7 +108272,6 @@ export const onUpdateGameCost = /* GraphQL */ `subscription OnUpdateGameCost($fi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -108205,7 +108365,6 @@ export const onUpdateGameCost = /* GraphQL */ `subscription OnUpdateGameCost($fi
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -108346,6 +108505,7 @@ export const onUpdateGameCost = /* GraphQL */ `subscription OnUpdateGameCost($fi
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -108382,7 +108542,6 @@ export const onUpdateGameCost = /* GraphQL */ `subscription OnUpdateGameCost($fi
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -108523,6 +108682,7 @@ export const onUpdateGameCost = /* GraphQL */ `subscription OnUpdateGameCost($fi
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -108633,7 +108793,6 @@ export const onUpdateGameCost = /* GraphQL */ `subscription OnUpdateGameCost($fi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -108747,7 +108906,6 @@ export const onUpdateGameCost = /* GraphQL */ `subscription OnUpdateGameCost($fi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -108822,6 +108980,7 @@ export const onUpdateGameCost = /* GraphQL */ `subscription OnUpdateGameCost($fi
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -108981,7 +109140,6 @@ export const onUpdateGameCost = /* GraphQL */ `subscription OnUpdateGameCost($fi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -109101,7 +109259,6 @@ export const onUpdateGameCost = /* GraphQL */ `subscription OnUpdateGameCost($fi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -109255,7 +109412,6 @@ export const onDeleteGameCost = /* GraphQL */ `subscription OnDeleteGameCost($fi
       registrationStatus
       totalDuration
       gameFrequency
-      dayOfWeek
       buyIn
       rake
       venueFee
@@ -109379,7 +109535,6 @@ export const onDeleteGameCost = /* GraphQL */ `subscription OnDeleteGameCost($fi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -109527,6 +109682,7 @@ export const onDeleteGameCost = /* GraphQL */ `subscription OnDeleteGameCost($fi
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -109592,6 +109748,7 @@ export const onDeleteGameCost = /* GraphQL */ `subscription OnDeleteGameCost($fi
           id
           title
           aliases
+          seriesCategory
           seriesInstances {
             nextToken
             startedAt
@@ -109664,6 +109821,7 @@ export const onDeleteGameCost = /* GraphQL */ `subscription OnDeleteGameCost($fi
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -109691,7 +109849,6 @@ export const onDeleteGameCost = /* GraphQL */ `subscription OnDeleteGameCost($fi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -109785,7 +109942,6 @@ export const onDeleteGameCost = /* GraphQL */ `subscription OnDeleteGameCost($fi
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -109926,6 +110082,7 @@ export const onDeleteGameCost = /* GraphQL */ `subscription OnDeleteGameCost($fi
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -109962,7 +110119,6 @@ export const onDeleteGameCost = /* GraphQL */ `subscription OnDeleteGameCost($fi
           registrationStatus
           totalDuration
           gameFrequency
-          dayOfWeek
           buyIn
           rake
           venueFee
@@ -110103,6 +110259,7 @@ export const onDeleteGameCost = /* GraphQL */ `subscription OnDeleteGameCost($fi
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -110213,7 +110370,6 @@ export const onDeleteGameCost = /* GraphQL */ `subscription OnDeleteGameCost($fi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -110327,7 +110483,6 @@ export const onDeleteGameCost = /* GraphQL */ `subscription OnDeleteGameCost($fi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -110402,6 +110557,7 @@ export const onDeleteGameCost = /* GraphQL */ `subscription OnDeleteGameCost($fi
         gameUrlPath
         entityLogo
         isActive
+        defaultVenueId
         createdAt
         updatedAt
         scraperStates {
@@ -110561,7 +110717,6 @@ export const onDeleteGameCost = /* GraphQL */ `subscription OnDeleteGameCost($fi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -110681,7 +110836,6 @@ export const onDeleteGameCost = /* GraphQL */ `subscription OnDeleteGameCost($fi
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -110840,7 +110994,6 @@ export const onCreateGameCostLineItem = /* GraphQL */ `subscription OnCreateGame
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -110945,6 +111098,7 @@ export const onCreateGameCostLineItem = /* GraphQL */ `subscription OnCreateGame
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -110982,6 +111136,7 @@ export const onCreateGameCostLineItem = /* GraphQL */ `subscription OnCreateGame
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -111048,7 +111203,6 @@ export const onCreateGameCostLineItem = /* GraphQL */ `subscription OnCreateGame
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -111125,7 +111279,6 @@ export const onCreateGameCostLineItem = /* GraphQL */ `subscription OnCreateGame
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -111262,6 +111415,7 @@ export const onCreateGameCostLineItem = /* GraphQL */ `subscription OnCreateGame
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -111511,7 +111665,6 @@ export const onUpdateGameCostLineItem = /* GraphQL */ `subscription OnUpdateGame
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -111616,6 +111769,7 @@ export const onUpdateGameCostLineItem = /* GraphQL */ `subscription OnUpdateGame
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -111653,6 +111807,7 @@ export const onUpdateGameCostLineItem = /* GraphQL */ `subscription OnUpdateGame
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -111719,7 +111874,6 @@ export const onUpdateGameCostLineItem = /* GraphQL */ `subscription OnUpdateGame
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -111796,7 +111950,6 @@ export const onUpdateGameCostLineItem = /* GraphQL */ `subscription OnUpdateGame
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -111933,6 +112086,7 @@ export const onUpdateGameCostLineItem = /* GraphQL */ `subscription OnUpdateGame
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {
@@ -112182,7 +112336,6 @@ export const onDeleteGameCostLineItem = /* GraphQL */ `subscription OnDeleteGame
         registrationStatus
         totalDuration
         gameFrequency
-        dayOfWeek
         buyIn
         rake
         venueFee
@@ -112287,6 +112440,7 @@ export const onDeleteGameCostLineItem = /* GraphQL */ `subscription OnDeleteGame
             gameUrlPath
             entityLogo
             isActive
+            defaultVenueId
             createdAt
             updatedAt
             _version
@@ -112324,6 +112478,7 @@ export const onDeleteGameCostLineItem = /* GraphQL */ `subscription OnDeleteGame
             id
             title
             aliases
+            seriesCategory
             createdAt
             updatedAt
             _version
@@ -112390,7 +112545,6 @@ export const onDeleteGameCostLineItem = /* GraphQL */ `subscription OnDeleteGame
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -112467,7 +112621,6 @@ export const onDeleteGameCostLineItem = /* GraphQL */ `subscription OnDeleteGame
             registrationStatus
             totalDuration
             gameFrequency
-            dayOfWeek
             buyIn
             rake
             venueFee
@@ -112604,6 +112757,7 @@ export const onDeleteGameCostLineItem = /* GraphQL */ `subscription OnDeleteGame
           gameUrlPath
           entityLogo
           isActive
+          defaultVenueId
           createdAt
           updatedAt
           scraperStates {

@@ -29,70 +29,57 @@ export const SeriesManagementPage = () => {
                 _deleted: { ne: true }
             };
 
-            // ✅ Get entity IDs for filtering
+            // ✅ ALWAYS fetch ALL series titles (they're global templates)
+            const titlesData = await client.graphql({
+                query: queries.listTournamentSeriesTitles,
+                variables: { filter: baseFilter }
+            });
+            const titles = (titlesData.data.listTournamentSeriesTitles?.items || []) as APITypes.TournamentSeriesTitle[];
+            setSeriesTitles(titles);
+
+            // Get entity IDs for filtering venues and instances
             const entityIds = selectedEntities.map(e => e.id);
             
-            // If no entities selected, show empty state
+            // If no entities selected, only show titles
             if (entityIds.length === 0) {
-                setSeriesTitles([]);
                 setSeriesInstances([]);
                 setVenues([]);
                 setLoading(false);
                 return;
             }
 
-            // ✅ Build entity filter for venues
+            // Build entity filter for venues
             const venueFilter = {
                 ...baseFilter,
                 or: entityIds.map(id => ({ entityId: { eq: id } }))
             };
 
-            // Fetch venues first (filtered by entity)
+            // Fetch venues (filtered by entity)
             const venuesData = await client.graphql({
                 query: queries.listVenues,
                 variables: { filter: venueFilter }
             });
-
             const venueItems = (venuesData.data.listVenues?.items || []) as APITypes.Venue[];
             const venueIds = venueItems.map(v => v.id);
+            setVenues(venueItems);
 
-            // ✅ Build filter for series instances (by venue)
-            const seriesInstanceFilter = venueIds.length > 0 ? {
-                ...baseFilter,
-                or: venueIds.map(id => ({ venueId: { eq: id } }))
-            } : baseFilter; // If no venues, still apply base filter but will return empty
-
-            // Fetch series instances (filtered by venues from selected entities)
-            const instancesData = await client.graphql({
-                query: queries.listTournamentSeries,
-                variables: { filter: seriesInstanceFilter }
-            });
-
-            const instances = (instancesData.data.listTournamentSeries?.items || []) as APITypes.TournamentSeries[];
-            
-            // ✅ Get unique series title IDs from the filtered instances
-            const seriesTitleIds = [...new Set(instances.map(inst => inst.tournamentSeriesTitleId))];
-            
-            // Fetch only the series titles that are actually used by instances in selected entities
-            let titles: APITypes.TournamentSeriesTitle[] = [];
-            if (seriesTitleIds.length > 0) {
-                // ✅ Filter titles to only those referenced by instances
-                const titlesFilter = {
+            // Build filter for series instances (by venue)
+            if (venueIds.length > 0) {
+                const seriesInstanceFilter = {
                     ...baseFilter,
-                    or: seriesTitleIds.map(id => ({ id: { eq: id } }))
+                    or: venueIds.map(id => ({ venueId: { eq: id } }))
                 };
 
-                const titlesData = await client.graphql({
-                    query: queries.listTournamentSeriesTitles,
-                    variables: { filter: titlesFilter }
+                // Fetch series instances (filtered by venues from selected entities)
+                const instancesData = await client.graphql({
+                    query: queries.listTournamentSeries,
+                    variables: { filter: seriesInstanceFilter }
                 });
-
-                titles = (titlesData.data.listTournamentSeriesTitles?.items || []) as APITypes.TournamentSeriesTitle[];
+                const instances = (instancesData.data.listTournamentSeries?.items || []) as APITypes.TournamentSeries[];
+                setSeriesInstances(instances);
+            } else {
+                setSeriesInstances([]);
             }
-
-            setSeriesTitles(titles);
-            setSeriesInstances(instances);
-            setVenues(venueItems);
 
         } catch (error) {
             console.error("Error fetching series data:", error);
@@ -119,12 +106,12 @@ export const SeriesManagementPage = () => {
     }, []); // Empty dependency array - only set up once
 
     // Handlers for Series Titles
-    const handleSaveTitle = async (input: { id?: string; title: string; _version?: number }) => {
+    const handleSaveTitle = async (input: { id?: string; title: string; seriesCategory?: APITypes.SeriesCategory | null; _version?: number }) => {
         const mutation = input.id ? mutations.updateTournamentSeriesTitle : mutations.createTournamentSeriesTitle;
         
         const payload = input.id 
-            ? { id: input.id, title: input.title, _version: input._version } 
-            : { title: input.title };
+            ? { id: input.id, title: input.title, seriesCategory: input.seriesCategory, _version: input._version } 
+            : { title: input.title, seriesCategory: input.seriesCategory };
         
         try {
             await client.graphql({ query: mutation, variables: { input: payload } });
@@ -171,17 +158,18 @@ export const SeriesManagementPage = () => {
     const handleSaveInstance = async (formState: Partial<APITypes.TournamentSeries>) => {
         try {
             if (formState.id && formState._version) {
-                console.log('Attempting to update series instance...');
-
                 const updateInput: APITypes.UpdateTournamentSeriesInput = {
                     id: formState.id,
                     _version: formState._version,
                     name: formState.name,
                     year: formState.year,
+                    quarter: formState.quarter,
+                    month: formState.month,
                     startDate: formState.startDate,
                     endDate: formState.endDate,
                     status: formState.status,
                     seriesCategory: formState.seriesCategory,
+                    holidayType: formState.holidayType,
                     tournamentSeriesTitleId: formState.tournamentSeriesTitleId,
                     venueId: formState.venueId,
                 };
@@ -190,25 +178,20 @@ export const SeriesManagementPage = () => {
                     query: mutations.updateTournamentSeries, 
                     variables: { input: updateInput } 
                 });
-
             } else {
-                console.log('Attempting to create new series instance...');
-
                 const createInput: APITypes.CreateTournamentSeriesInput = {
                     name: formState.name!,
                     year: formState.year!,
+                    quarter: formState.quarter,
+                    month: formState.month,
                     status: formState.status!,
                     seriesCategory: formState.seriesCategory!,
+                    holidayType: formState.holidayType,
                     tournamentSeriesTitleId: formState.tournamentSeriesTitleId!,
                     venueId: formState.venueId!,
                     startDate: formState.startDate,
                     endDate: formState.endDate,
                 };
-
-                if (!createInput.name || !createInput.year || !createInput.status || !createInput.seriesCategory || !createInput.tournamentSeriesTitleId || !createInput.venueId) {
-                    alert("Cannot create series: Missing required fields (Name, Year, Status, Category, Title, or Venue).");
-                    return;
-                }
 
                 await client.graphql({ 
                     query: mutations.createTournamentSeries, 
@@ -216,9 +199,7 @@ export const SeriesManagementPage = () => {
                 });
             }
             
-            console.log('Save operation successful. Refreshing data...');
             fetchData();
-
         } catch (error) {
             console.error('Error saving series instance:', error);
             alert('Failed to save series instance. See console for details.');

@@ -14,11 +14,6 @@ enum GameType { TOURNAMENT, CASH_GAME }
 enum GameStatus { INITIATING, SCHEDULED, REGISTERING, RUNNING, CANCELLED, FINISHED, NOT_IN_USE, NOT_PUBLISHED, CLOCK_STOPPED, UNKNOWN }
 enum GameVariant { NLHE, PLO, PLOM, PLO5, PLO6 }
 enum GameFrequency { DAILY, WEEKLY, FORTNIGHTLY, MONTHLY, QUARTERLY, YEARLY, UNKNOWN }
-enum Quarter { Q1, Q2, Q3, Q4 }
-enum SeriesCategory { REGULAR, SPECIAL_HOLIDAY, PROMOTIONAL, CHAMPIONSHIP, SEASONAL }
-enum DayOfWeek { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY }
-enum CostItemType { DEALER, TOURNAMENT_DIRECTOR, PRIZE_CONTRIBUTION, JACKPOT_CONTRIBUTION, PROMOTION, FLOOR_STAFF, SECURITY, EQUIPMENT_RENTAL, VENUE_RENTAL, INSURANCE, OTHER }
-enum CostItemRateType { STANDARD, PENALTY, OVERTIME, HOLIDAY, SPECIAL }
 enum RegistrationStatus { SCHEDULED, OPEN, FINAL, CLOSED, N_A }
 enum TournamentType { FREEZEOUT, REBUY, SATELLITE, DEEPSTACK }
 enum PaymentSourceType { CASH, SQUARE, CREDIT_CARD, INTERNAL_CREDIT, UNKNOWN }
@@ -35,6 +30,17 @@ enum TicketStatus { ACTIVE, EXPIRED, USED }
 enum PlayerEntryStatus { REGISTERED, VOIDED, PLAYING, ELIMINATED, COMPLETED }
 enum CreditTransactionType { AWARD_PROMOTION, AWARD_REFUND, AWARD_MANUAL, REDEEM_GAME_BUY_IN, EXPIRED }
 enum PointsTransactionType { EARN_FROM_PLAY, EARN_FROM_PROMOTION, REDEEM_FOR_BUY_IN, REDEEM_FOR_MERCH, ADJUSTMENT_MANUAL, EXPIRED }
+enum SeriesCategory { REGULAR, SPECIAL, PROMOTIONAL, CHAMPIONSHIP, SEASONAL }
+enum HolidayType {
+  NEW_YEAR
+  AUSTRALIA_DAY
+  EASTER
+  ANZAC_DAY
+  QUEENS_BIRTHDAY
+  CHRISTMAS
+  BOXING_DAY
+  OTHER
+}
 
 enum VenueAssignmentStatus {
   AUTO_ASSIGNED
@@ -50,6 +56,28 @@ enum SeriesAssignmentStatus {
   PENDING_ASSIGNMENT
   UNASSIGNED
   NOT_SERIES
+}
+
+enum CostItemType { 
+  DEALER, 
+  TOURNAMENT_DIRECTOR, 
+  PRIZE_CONTRIBUTION, 
+  JACKPOT_CONTRIBUTION, 
+  PROMOTION, 
+  FLOOR_STAFF, 
+  SECURITY, 
+  EQUIPMENT_RENTAL, 
+  VENUE_RENTAL, 
+  INSURANCE, 
+  OTHER 
+}
+
+enum CostItemRateType { 
+  STANDARD, 
+  PENALTY, 
+  OVERTIME, 
+  HOLIDAY, 
+  SPECIAL 
 }
 
 enum ScraperJobTriggerSource { SCHEDULED, MANUAL, API, CONTROL, BULK, ADMIN }
@@ -70,6 +98,7 @@ type Entity @model @auth(rules: [{ allow: private }]) {
   gameUrlPath: String!
   entityLogo: AWSURL
   isActive: Boolean! @default(value: "true")
+  defaultVenueId: ID
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
   
@@ -129,7 +158,7 @@ type Venue @model @auth(rules: [{ allow: private }]) {
   address: String
   city: String
   country: String
-  fee: Int
+  fee: Float  # NEW FIELD
   isSpecial: Boolean @default(value: "false")
   details: VenueDetails @hasOne
   assets: [Asset] @hasMany(indexName: "byVenue", fields: ["id"])
@@ -157,6 +186,7 @@ type TournamentSeriesTitle @model @auth(rules: [{ allow: private }]) {
   id: ID!
   title: String!
   aliases: [String]
+  seriesCategory: SeriesCategory  # NEW FIELD
   seriesInstances: [TournamentSeries] @hasMany(indexName: "byTournamentSeriesTitle", fields: ["id"])
 }
 
@@ -164,10 +194,10 @@ type TournamentSeries @model @auth(rules: [{ allow: private }]) {
   id: ID!
   name: String! @index(name: "byName", sortKeyFields: ["year"])
   year: Int! @index(name: "byYear", sortKeyFields: ["name"])
-  quarter: Quarter @index(name: "byQuarter", sortKeyFields: ["year"])
+  quarter: Int @index(name: "byQuarter", sortKeyFields: ["year"])
   month: Int @index(name: "byMonth", sortKeyFields: ["year"])
   seriesCategory: SeriesCategory! @default(value: "REGULAR") @index(name: "bySeriesCategory", sortKeyFields: ["year"])
-  holidayType: String @index(name: "byHolidayType", sortKeyFields: ["year"])
+  holidayType: HolidayType @index(name: "byHolidayType", sortKeyFields: ["year"])
   status: SeriesStatus!
   startDate: AWSDateTime
   endDate: AWSDateTime
@@ -197,7 +227,6 @@ type Game @model @auth(rules: [{ allow: private }]) {
   registrationStatus: RegistrationStatus @index(name: "byRegistrationStatus", queryField: "gamesByRegistrationStatus", sortKeyFields: ["gameStartDateTime"])
   totalDuration: String
   gameFrequency: GameFrequency
-  dayOfWeek: DayOfWeek @index(name: "byDayOfWeek", queryField: "gamesByDayOfWeek", sortKeyFields: ["gameStartDateTime"])
 
   # --- Financials & Buy-in ---
   buyIn: Float
@@ -721,6 +750,10 @@ type S3Storage @model @auth(rules: [{ allow: private }]) {
   dataChangeCount: Int @default(value: "0")
 }
 
+# ===================================================================
+# Game Costs
+# ===================================================================
+
 type GameCostItem @model @auth(rules: [{ allow: private }]) {
   id: ID!
   name: String!
@@ -738,9 +771,9 @@ type GameCostItem @model @auth(rules: [{ allow: private }]) {
 type GameCost @model @auth(rules: [{ allow: private }]) {
   id: ID!
   gameId: ID! @index(name: "byGameCost")
-  game: Game @belongsTo(fields: ["gameId"])
+  game: Game @belongsTo(fields: ["gameId"]) 
   
-  # Structured cost fields for common categories
+  # Structured cost fields
   totalDealerCost: Float @default(value: "0")
   totalTournamentDirectorCost: Float @default(value: "0")
   totalPrizeContribution: Float @default(value: "0")
@@ -755,13 +788,12 @@ type GameCost @model @auth(rules: [{ allow: private }]) {
   # Detailed line items
   lineItems: [GameCostLineItem] @hasMany(indexName: "byGameCost", fields: ["id"])
   
-  # Denormalized fields for efficient querying
+  # Denormalized fields
   entityId: ID @index(name: "byEntityCost", sortKeyFields: ["gameDate"])
   venueId: ID @index(name: "byVenueCost", sortKeyFields: ["gameDate"])
   gameDate: AWSDateTime @index(name: "byGameDateCost", sortKeyFields: ["totalCost"])
   
   notes: String
-  
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -783,7 +815,7 @@ type GameCostLineItem @model @auth(rules: [{ allow: private }]) {
   
   notes: String
   
-  # Denormalized fields for efficient querying across entities/venues
+  # Denormalized fields
   gameId: ID @index(name: "byGameLineItem")
   entityId: ID @index(name: "byEntityLineItem", sortKeyFields: ["gameDate"])
   venueId: ID @index(name: "byVenueLineItem", sortKeyFields: ["gameDate"])

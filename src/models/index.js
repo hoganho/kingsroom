@@ -58,53 +58,6 @@ const GameFrequency = {
   "UNKNOWN": "UNKNOWN"
 };
 
-const Quarter = {
-  "Q1": "Q1",
-  "Q2": "Q2",
-  "Q3": "Q3",
-  "Q4": "Q4"
-};
-
-const SeriesCategory = {
-  "REGULAR": "REGULAR",
-  "SPECIAL_HOLIDAY": "SPECIAL_HOLIDAY",
-  "PROMOTIONAL": "PROMOTIONAL",
-  "CHAMPIONSHIP": "CHAMPIONSHIP",
-  "SEASONAL": "SEASONAL"
-};
-
-const DayOfWeek = {
-  "MONDAY": "MONDAY",
-  "TUESDAY": "TUESDAY",
-  "WEDNESDAY": "WEDNESDAY",
-  "THURSDAY": "THURSDAY",
-  "FRIDAY": "FRIDAY",
-  "SATURDAY": "SATURDAY",
-  "SUNDAY": "SUNDAY"
-};
-
-const CostItemType = {
-  "DEALER": "DEALER",
-  "TOURNAMENT_DIRECTOR": "TOURNAMENT_DIRECTOR",
-  "PRIZE_CONTRIBUTION": "PRIZE_CONTRIBUTION",
-  "JACKPOT_CONTRIBUTION": "JACKPOT_CONTRIBUTION",
-  "PROMOTION": "PROMOTION",
-  "FLOOR_STAFF": "FLOOR_STAFF",
-  "SECURITY": "SECURITY",
-  "EQUIPMENT_RENTAL": "EQUIPMENT_RENTAL",
-  "VENUE_RENTAL": "VENUE_RENTAL",
-  "INSURANCE": "INSURANCE",
-  "OTHER": "OTHER"
-};
-
-const CostItemRateType = {
-  "STANDARD": "STANDARD",
-  "PENALTY": "PENALTY",
-  "OVERTIME": "OVERTIME",
-  "HOLIDAY": "HOLIDAY",
-  "SPECIAL": "SPECIAL"
-};
-
 const RegistrationStatus = {
   "SCHEDULED": "SCHEDULED",
   "OPEN": "OPEN",
@@ -234,6 +187,25 @@ const PointsTransactionType = {
   "EXPIRED": "EXPIRED"
 };
 
+const SeriesCategory = {
+  "REGULAR": "REGULAR",
+  "SPECIAL": "SPECIAL",
+  "PROMOTIONAL": "PROMOTIONAL",
+  "CHAMPIONSHIP": "CHAMPIONSHIP",
+  "SEASONAL": "SEASONAL"
+};
+
+const HolidayType = {
+  "NEW_YEAR": "NEW_YEAR",
+  "AUSTRALIA_DAY": "AUSTRALIA_DAY",
+  "EASTER": "EASTER",
+  "ANZAC_DAY": "ANZAC_DAY",
+  "QUEENS_BIRTHDAY": "QUEENS_BIRTHDAY",
+  "CHRISTMAS": "CHRISTMAS",
+  "BOXING_DAY": "BOXING_DAY",
+  "OTHER": "OTHER"
+};
+
 const VenueAssignmentStatus = {
   "AUTO_ASSIGNED": "AUTO_ASSIGNED",
   "MANUALLY_ASSIGNED": "MANUALLY_ASSIGNED",
@@ -248,6 +220,28 @@ const SeriesAssignmentStatus = {
   "PENDING_ASSIGNMENT": "PENDING_ASSIGNMENT",
   "UNASSIGNED": "UNASSIGNED",
   "NOT_SERIES": "NOT_SERIES"
+};
+
+const CostItemType = {
+  "DEALER": "DEALER",
+  "TOURNAMENT_DIRECTOR": "TOURNAMENT_DIRECTOR",
+  "PRIZE_CONTRIBUTION": "PRIZE_CONTRIBUTION",
+  "JACKPOT_CONTRIBUTION": "JACKPOT_CONTRIBUTION",
+  "PROMOTION": "PROMOTION",
+  "FLOOR_STAFF": "FLOOR_STAFF",
+  "SECURITY": "SECURITY",
+  "EQUIPMENT_RENTAL": "EQUIPMENT_RENTAL",
+  "VENUE_RENTAL": "VENUE_RENTAL",
+  "INSURANCE": "INSURANCE",
+  "OTHER": "OTHER"
+};
+
+const CostItemRateType = {
+  "STANDARD": "STANDARD",
+  "PENALTY": "PENALTY",
+  "OVERTIME": "OVERTIME",
+  "HOLIDAY": "HOLIDAY",
+  "SPECIAL": "SPECIAL"
 };
 
 const ScraperJobTriggerSource = {
@@ -357,11 +351,6 @@ export {
   GameStatus,
   GameVariant,
   GameFrequency,
-  Quarter,
-  SeriesCategory,
-  DayOfWeek,
-  CostItemType,
-  CostItemRateType,
   RegistrationStatus,
   TournamentType,
   PaymentSourceType,
@@ -378,8 +367,12 @@ export {
   PlayerEntryStatus,
   CreditTransactionType,
   PointsTransactionType,
+  SeriesCategory,
+  HolidayType,
   VenueAssignmentStatus,
   SeriesAssignmentStatus,
+  CostItemType,
+  CostItemRateType,
   ScraperJobTriggerSource,
   ScraperJobStatus,
   ScrapeURLStatus,

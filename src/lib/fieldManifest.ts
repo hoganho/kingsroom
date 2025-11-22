@@ -25,6 +25,11 @@ export const fieldManifest: Record<string, FieldDefinition> = {
   structureLabel: { label: 'Structure Label', group: 'Core Game Details', isBaselineExpected: true },
   gameVariant: { label: 'Game Variant', group: 'Core Game Details', isBaselineExpected: true },
   
+  // Entity & Venue Details
+  entityId: { label: 'Entity ID', group: 'Entity & Venue Details', isBaselineExpected: true },
+  venueId: { label: 'Venue ID', group: 'Entity & Venue Details', isBaselineExpected: true },
+  venueFee: { label: 'Venue Fee', group: 'Entity & Venue Details', isBaselineOptional: true },  // ✅ NEW
+  
   // Derived and Manual Details
   seriesName: { label: 'Series Name', group: 'Derived and Manual Details', isBaselineOptional: true },
   venueName: { label: 'Venue Name', group: 'Derived and Manual Details', isBaselineOptional: true },
@@ -48,13 +53,14 @@ export const fieldManifest: Record<string, FieldDefinition> = {
 
   // Tournament Setup
   tournamentType: { label: 'Tournament Type', group: 'Tournament Setup', isBaselineOptional: true },
+  tournamentId: { label: 'Tournament ID', group: 'Tournament Setup', isBaselineExpected: true },
   buyIn: { label: 'Buy-In', group: 'Tournament Setup', isBaselineExpected: true },
   rake: { label: 'Rake', group: 'Tournament Setup', isBaselineOptional: true },
   startingStack: { label: 'Starting Stack', group: 'Tournament Setup', isBaselineExpected: true },
   hasGuarantee: { label: 'Has Guarantee', group: 'Tournament Setup', isBaselineExpected: true },
   guaranteeAmount: { label: 'Guarantee Amt', group: 'Tournament Setup', isBaselineOptional: true },
 
-    // --- Series Reference Fields (ADD THIS SECTION) ---
+  // Series Reference Fields
   tournamentSeriesId: { 
     label: 'Tournament Series', 
     group: 'Series Reference', 
@@ -104,5 +110,11 @@ export const fieldManifest: Record<string, FieldDefinition> = {
   totalChipsInPlay: { label: 'Total Chips In Play', group: 'Live Tournament Data', isProfileExpected: ["STATUS: RUNNING | REG: CLOSED"] },
   averagePlayerStack: { label: 'Average Stack', group: 'Live Tournament Data', isProfileExpected: ["STATUS: RUNNING | REG: CLOSED"] },
 
-//  rawHtml: { label: 'Raw HTML', group: 'Structure & Player Data', isBaselineOptional: true },
+  // Game Type Classification
+  gameType: { label: 'Game Type', group: 'Core Game Details', isBaselineOptional: true },
+
+  // Additional metadata
+  doNotScrape: { label: 'Do Not Scrape', group: 'System Fields', isBaselineOptional: true },
+  foundKeys: { label: 'Found Keys', group: 'System Fields', isBaselineOptional: true },
+  s3Key: { label: 'S3 Key', group: 'System Fields', isBaselineOptional: true },
 };

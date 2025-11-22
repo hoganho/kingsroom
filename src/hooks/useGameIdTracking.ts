@@ -7,7 +7,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/api';
 
-const client = generateClient();
+// Helper to get client lazily (after Amplify is configured)
+const getClient = () => generateClient();
 
 // ===================================================================
 // TYPES
@@ -196,7 +197,7 @@ export const useGameIdTracking = (entityId?: string) => {
     setError(null);
 
     try {
-      const response = await client.graphql({
+      const response = await getClient().graphql({
         query: GET_TOURNAMENT_ID_BOUNDS,
         variables: { entityId: id }
       }) as { data: { getTournamentIdBounds: TournamentIdBounds } };
@@ -240,7 +241,7 @@ export const useGameIdTracking = (entityId?: string) => {
         endId: options?.endId
       });
 
-      const response = await client.graphql({
+      const response = await getClient().graphql({
         query: GET_ENTITY_SCRAPING_STATUS,
         variables: {
           entityId: id,
@@ -291,7 +292,7 @@ export const useGameIdTracking = (entityId?: string) => {
     setError(null);
 
     try {
-      const response = await client.graphql({
+      const response = await getClient().graphql({
         query: FIND_TOURNAMENT_ID_GAPS,
         variables: {
           entityId: id,
@@ -332,7 +333,7 @@ export const useGameIdTracking = (entityId?: string) => {
     setError(null);
 
     try {
-      const response = await client.graphql({
+      const response = await getClient().graphql({
         query: GET_UNFINISHED_GAMES,
         variables: {
           entityId: id,
@@ -373,7 +374,7 @@ export const useGameIdTracking = (entityId?: string) => {
     setError(null);
 
     try {
-      const response = await client.graphql({
+      const response = await getClient().graphql({
         query: LIST_EXISTING_TOURNAMENT_IDS,
         variables: {
           entityId: id,
@@ -504,7 +505,7 @@ export const getEntityScrapingStatusDirect = async (
   }
 ): Promise<EntityScrapingStatus> => {
   try {
-    const response = await client.graphql({
+    const response = await getClient().graphql({
       query: GET_ENTITY_SCRAPING_STATUS,
       variables: {
         entityId,
@@ -533,7 +534,7 @@ export const findTournamentIdGapsDirect = async (
   }
 ): Promise<GapRange[]> => {
   try {
-    const response = await client.graphql({
+    const response = await getClient().graphql({
       query: FIND_TOURNAMENT_ID_GAPS,
       variables: {
         entityId,
