@@ -9413,6 +9413,20 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "skipped": {
+                    "name": "skipped",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "skipReason": {
+                    "name": "skipReason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "tournamentId": {
                     "name": "tournamentId",
                     "isArray": false,
@@ -10229,5 +10243,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "37c795d6f974189d9fba93c0831f1441"
+    "version": "ee0905e49b2ee5dea2e2c7a114ce8bde"
 };

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { 
     Save, 
     Eye, 
-    ExternalLink, 
     RefreshCw,
     XCircle,
     AlertCircle,
@@ -14,9 +13,10 @@ import {
     ChevronDown,
     Database,
     HardDrive,
-    Zap,
     CheckCircle,
     Loader2,
+    Ban,
+    Globe,
 } from 'lucide-react';
 import type { GameState } from '../../types/game';
 import type { Venue } from '../../API';
@@ -86,6 +86,28 @@ const getProcessingStatusStyles = (status: ProcessingStatus): string => {
     }
 };
 
+// Data source badge configuration
+const DATA_SOURCE_CONFIG = {
+    's3': {
+        label: 'S3 Query',
+        icon: HardDrive,
+        className: 'bg-purple-100 text-purple-700 border-purple-200',
+        tooltip: 'Data retrieved from S3 cache storage'
+    },
+    'web': {
+        label: 'Web Scrape',
+        icon: Globe,
+        className: 'bg-cyan-100 text-cyan-700 border-cyan-200',
+        tooltip: 'Data fetched via web scraping'
+    },
+    'none': {
+        label: 'Not Retrieved',
+        icon: Ban,
+        className: 'bg-gray-100 text-gray-600 border-gray-300',
+        tooltip: 'Data not retrieved - marked as Do Not Scrape'
+    }
+};
+
 interface GameListItemProps {
     game: GameState;
     venues?: Venue[];
@@ -101,7 +123,7 @@ interface GameListItemProps {
     showActions?: boolean;
     onClick?: () => void;
     enableCreateVenue?: boolean;
-    dataSource?: 'live' | 's3' | 'skipped';
+    dataSource?: 's3' | 'web' | 'none' | 'live' | 'skipped'; // 'live' and 'skipped' for backward compatibility
     // NEW: Compact mode props
     compact?: boolean;
     processingStatus?: ProcessingStatus;
@@ -178,125 +200,176 @@ export const GameListItem: React.FC<GameListItemProps> = ({
                 } else {
                     const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
                     const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-                    setCountdown(`${minutes}m ${seconds.toString().padStart(2, '0')}s`);
+                    setCountdown(`${minutes}:${seconds.toString().padStart(2, '0')}`);
                 }
             };
-            
+
             calculateCountdown();
             interval = setInterval(calculateCountdown, 1000);
-        } else {
-            setCountdown('');
         }
-        
+
         return () => {
             if (interval) clearInterval(interval);
         };
     }, [game.autoRefresh, game.lastFetched, game.data?.doNotScrape]);
 
-    const hasError = !!game.errorMessage;
     const data = game.data;
-    const isClickable = !!onClick && !hasError && data?.gameStatus !== 'FINISHED';
-    const isSaveDisabled = !selectedVenueId || game.jobStatus === 'SAVING' || !data;
-    const isInDatabase = !!(game.existingGameId || game.saveResult);
+    const hasError = !!game.errorMessage;
     const hasDoNotScrape = !!data?.doNotScrape;
 
-    // Get status icon for compact mode
-    const getStatusIcon = () => {
-        if (!processingStatus) return null;
-        switch (processingStatus) {
-            case 'success':
-                return <CheckCircle className="h-4 w-4 text-green-600" />;
-            case 'error':
-                return <XCircle className="h-4 w-4 text-red-600" />;
-            case 'skipped':
-                return <AlertCircle className="h-4 w-4 text-yellow-600" />;
-            case 'scraping':
-            case 'saving':
-                return <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />;
-            case 'review':
-                return <Eye className="h-4 w-4 text-purple-600" />;
-            default:
-                return <Clock className="h-4 w-4 text-gray-400" />;
-        }
-    };
-
-    // Determine color class based on mode
-    const colorClass = compact && processingStatus
-        ? getProcessingStatusStyles(processingStatus)
-        : needsVenueSelection 
-            ? 'bg-yellow-50 border-yellow-300 hover:bg-yellow-100' 
-            : getListItemColorClass(data?.gameStatus, data?.registrationStatus);
-
-    // Database Status Component
+    // Database status component
     const DatabaseStatus = () => {
-        if (isInDatabase) {
+        if (game.saveResult) {
             return (
-                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold ${hasDoNotScrape ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-green-100 text-green-800 border border-green-300'}`}>
-                    <Database className="h-3.5 w-3.5" />
-                    <span>IN DATABASE</span>
-                </div>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-green-100 text-green-800 border border-green-200">
+                    <Database className="h-3 w-3" />
+                    Saved
+                </span>
+            );
+        }
+        if (game.existingGameId) {
+            return (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-blue-100 text-blue-800 border border-blue-200">
+                    <Database className="h-3 w-3" />
+                    Exists
+                </span>
             );
         }
         return null;
     };
 
-    // ===================================================================
-    // COMPACT MODE RENDER
-    // ===================================================================
-    if (compact) {
+    // Render data source badge
+    const DataSourceBadge = ({ showLabel = true }: { showLabel?: boolean }) => {
+        if (!dataSource) return null;
+        
+        // Normalize old values to new values for backward compatibility
+        let normalizedSource: 's3' | 'web' | 'none' = dataSource as 's3' | 'web' | 'none';
+        if (dataSource === 'live' as any) normalizedSource = 'web';
+        if (dataSource === 'skipped' as any) normalizedSource = 'none';
+        
+        const config = DATA_SOURCE_CONFIG[normalizedSource];
+        if (!config) {
+            console.warn(`Invalid dataSource value: ${dataSource}`);
+            return null;
+        }
+        
+        const Icon = config.icon;
+        
         return (
-            <div className={`border rounded-md transition-all ${colorClass}`}>
-                {/* Compact Header Row */}
-                <div 
-                    className="flex items-center justify-between p-2 cursor-pointer"
-                    onClick={() => data && setIsExpanded(!isExpanded)}
-                >
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                        {getStatusIcon()}
-                        <code className="text-xs font-mono bg-white bg-opacity-60 px-1.5 py-0.5 rounded">
-                            {tournamentId || getDisplayId(game.id)}
-                        </code>
+            <span 
+                className={`inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium rounded border ${config.className}`}
+                title={config.tooltip}
+            >
+                <Icon className="h-3 w-3" />
+                {showLabel && <span>{config.label}</span>}
+            </span>
+        );
+    };
+
+    // --- Compact Mode Rendering ---
+    if (compact) {
+        const statusIcon = processingStatus === 'success' ? CheckCircle :
+                          processingStatus === 'error' ? XCircle :
+                          processingStatus === 'scraping' || processingStatus === 'saving' ? Loader2 :
+                          processingStatus === 'review' ? Eye :
+                          processingStatus === 'skipped' ? AlertCircle :
+                          Clock;
+
+        const StatusIcon = statusIcon;
+        const isAnimating = processingStatus === 'scraping' || processingStatus === 'saving';
+
+        return (
+            <div
+                className={`
+                    border rounded-lg overflow-hidden transition-colors
+                    ${getProcessingStatusStyles(processingStatus || 'pending')}
+                    ${onClick ? 'cursor-pointer' : ''}
+                `}
+                onClick={onClick}
+            >
+                {/* Compact Header */}
+                <div className="flex items-center justify-between p-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <StatusIcon className={`h-5 w-5 flex-shrink-0 ${
+                            processingStatus === 'success' ? 'text-green-600' :
+                            processingStatus === 'error' ? 'text-red-600' :
+                            processingStatus === 'scraping' || processingStatus === 'saving' ? 'text-blue-600' :
+                            processingStatus === 'review' ? 'text-purple-600' :
+                            processingStatus === 'skipped' ? 'text-yellow-600' :
+                            'text-gray-400'
+                        } ${isAnimating ? 'animate-spin' : ''}`} />
                         
-                        {/* Tournament name if available */}
-                        {data?.name ? (
-                            <span className="text-sm text-gray-900 truncate font-medium">
-                                {data.name}
-                            </span>
-                        ) : (
-                            <span className="text-sm text-gray-600 truncate">
-                                {processingMessage || game.errorMessage || 'Loading...'}
-                            </span>
-                        )}
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-sm font-medium text-gray-900">
+                                    {tournamentId || getDisplayId(game.id)}
+                                </span>
+                                {processingStatus && (
+                                    <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${
+                                        processingStatus === 'success' ? 'bg-green-100 text-green-700' :
+                                        processingStatus === 'error' ? 'bg-red-100 text-red-700' :
+                                        processingStatus === 'scraping' || processingStatus === 'saving' ? 'bg-blue-100 text-blue-700' :
+                                        processingStatus === 'review' ? 'bg-purple-100 text-purple-700' :
+                                        processingStatus === 'skipped' ? 'bg-yellow-100 text-yellow-700' :
+                                        'bg-gray-100 text-gray-600'
+                                    }`}>
+                                        {processingStatus === 'review' ? 'Review' :
+                                         processingStatus === 'scraping' ? 'Retrieving' :
+                                         processingStatus === 'saving' ? 'Saving' :
+                                         processingStatus === 'success' ? 'Success' :
+                                         processingStatus === 'error' ? 'Error' :
+                                         processingStatus === 'skipped' ? 'Skipped' :
+                                         'Pending'}
+                                    </span>
+                                )}
+                            </div>
+                            
+                            {/* Two-step process display */}
+                            {processingStatus === 'success' && (
+                                <div className="text-xs text-gray-600 mt-1 space-y-0.5">
+                                    {/* Step 1: Retrieved */}
+                                    {dataSource && (
+                                        <div className="flex items-center gap-1">
+                                            <span className="font-medium text-gray-700">Retrieved:</span>
+                                            <span>
+                                                {dataSource === 's3' ? 'S3 Query' :
+                                                 dataSource === 'web' ? 'Web Scrape' :
+                                                 'None'}
+                                            </span>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Step 2: Parsed Status */}
+                                    <div className="flex items-center gap-1">
+                                        <span className="font-medium text-gray-700">Parsed:</span>
+                                        <span>
+                                            {data?.gameStatus === 'NOT_PUBLISHED' || data?.gameStatus === 'NOT_IN_USE' 
+                                                ? `${data.gameStatus} (not saved)` 
+                                                : 'Ready to save'}
+                                        </span>
+                                    </div>
+                                    
+                                    {/* Tournament name */}
+                                    {data?.name && (
+                                        <div className="text-gray-700 truncate">
+                                            {data.name}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            
+                            {/* Show processing message for non-success states */}
+                            {processingStatus !== 'success' && processingMessage && (
+                                <p className="text-xs text-gray-600 truncate mt-0.5">
+                                    {processingMessage}
+                                </p>
+                            )}
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-                        {/* Data source indicator */}
-                        {dataSource && (
-                            <span className={`hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium rounded ${
-                                dataSource === 's3' 
-                                    ? 'bg-purple-100 text-purple-700 border border-purple-200' 
-                                    : dataSource === 'skipped'
-                                    ? 'bg-yellow-100 text-yellow-700 border border-yellow-200'
-                                    : 'bg-cyan-100 text-cyan-700 border border-cyan-200'
-                            }`}>
-                                {dataSource === 's3' ? (
-                                    <>
-                                        <HardDrive className="h-3 w-3" />
-                                        S3
-                                    </>
-                                ) : dataSource === 'skipped' ? (
-                                    <>
-                                        <AlertCircle className="h-3 w-3" />
-                                        Skipped
-                                    </>
-                                ) : (
-                                    <>
-                                        <Zap className="h-3 w-3" />
-                                        Live
-                                    </>
-                                )}
-                            </span>
-                        )}
+                        {/* Data source indicator - ALWAYS show label */}
+                        <DataSourceBadge showLabel={true} />
 
                         {/* Quick stats when we have data */}
                         {data && (
@@ -304,87 +377,75 @@ export const GameListItem: React.FC<GameListItemProps> = ({
                                 {data.gameStatus && (
                                     <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${
                                         data.gameStatus === 'RUNNING' ? 'bg-green-100 text-green-700' :
-                                        data.gameStatus === 'FINISHED' ? 'bg-gray-100 text-gray-600' :
-                                        'bg-blue-100 text-blue-700'
+                                        data.gameStatus === 'SCHEDULED' ? 'bg-blue-100 text-blue-700' :
+                                        data.gameStatus === 'FINISHED' ? 'bg-gray-100 text-gray-700' :
+                                        'bg-gray-100 text-gray-600'
                                     }`}>
                                         {data.gameStatus}
                                     </span>
                                 )}
-                                {data.buyIn && (
-                                    <span className="flex items-center">
+                                {data.buyIn !== undefined && (
+                                    <span className="flex items-center gap-0.5">
                                         <DollarSign className="h-3 w-3" />
                                         {data.buyIn}
-                                    </span>
-                                )}
-                                {data.totalEntries !== undefined && (
-                                    <span className="flex items-center">
-                                        <Users className="h-3 w-3 mr-0.5" />
-                                        {data.totalEntries}
                                     </span>
                                 )}
                             </div>
                         )}
 
-                        {/* Database status indicator */}
-                        {isInDatabase && (
-                            <Database className="h-3.5 w-3.5 text-green-600" />
-                        )}
+                        {/* Database status */}
+                        <DatabaseStatus />
 
-                        {/* View details button */}
-                        {data && onViewDetails && (
-                            <button 
-                                onClick={(e) => { e.stopPropagation(); onViewDetails(); }}
-                                className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                        {/* Action buttons */}
+                        {showActions && onViewDetails && data && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onViewDetails();
+                                }}
+                                className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                title="View details"
                             >
-                                View
+                                <Eye className="h-4 w-4" />
                             </button>
                         )}
-                        
-                        {data && (
-                            <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+
+                        {/* Save button - show when NOT currently saving and game hasn't been saved yet */}
+                        {/* Allow showing for NOT_PUBLISHED (special placeholder save) or non-doNotScrape games */}
+                        {showActions && onSave && processingStatus !== 'saving' && data && (!hasDoNotScrape || data?.gameStatus === 'NOT_PUBLISHED') && !game.saveResult && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onSave();
+                                }}
+                                disabled={!selectedVenueId && !enableCreateVenue}
+                                className="p-1.5 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                title={data?.gameStatus === 'NOT_PUBLISHED' ? 'Save as placeholder' : 'Save to database'}
+                            >
+                                <Save className="h-4 w-4" />
+                            </button>
                         )}
+
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsExpanded(!isExpanded);
+                            }}
+                            className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                            <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                        </button>
                     </div>
                 </div>
 
-                {/* Expanded Details for Compact Mode */}
-                {isExpanded && data && (
-                    <div className="border-t border-gray-200 p-3 bg-white bg-opacity-50 space-y-3">
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                            {data.gameStartDateTime && (
-                                <div>
-                                    <span className="text-gray-500">Start:</span>
-                                    <p className="font-medium">
-                                        {new Date(data.gameStartDateTime).toLocaleDateString()}{' '}
-                                        {new Date(data.gameStartDateTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                                    </p>
-                                </div>
-                            )}
-                            {data.buyIn && (
-                                <div>
-                                    <span className="text-gray-500">Buy-in:</span>
-                                    <p className="font-medium">${data.buyIn}</p>
-                                </div>
-                            )}
-                            {data.totalEntries !== undefined && (
-                                <div>
-                                    <span className="text-gray-500">Entries:</span>
-                                    <p className="font-medium">{data.totalEntries}</p>
-                                </div>
-                            )}
-                            {data.prizepool && (
-                                <div>
-                                    <span className="text-gray-500">Prize Pool:</span>
-                                    <p className="font-medium">${data.prizepool}</p>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Venue Selector - for saving scraped results */}
-                        {showVenueSelector && !isInDatabase && (
-                            <div className="space-y-2">
+                {/* Expandable Details */}
+                {isExpanded && (
+                    <div className="border-t border-gray-200 p-3 bg-white bg-opacity-50 space-y-2">
+                        {/* Venue Selector */}
+                        {showVenueSelector && (
+                            <div className="space-y-1">
                                 <label className="block text-xs font-medium text-gray-700">
-                                    Select Venue to Save
+                                    Venue
                                 </label>
                                 {venuesLoading ? (
                                     <div className="text-xs text-gray-500">Loading venues...</div>
@@ -397,58 +458,45 @@ export const GameListItem: React.FC<GameListItemProps> = ({
                                             }
                                         }}
                                         onClick={(e) => e.stopPropagation()}
-                                        className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        disabled={game.jobStatus === 'SAVING'}
+                                        className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        disabled={venues.length === 0 && !enableCreateVenue}
                                     >
-                                        <option value="">Select Venue...</option>
+                                        <option value="">
+                                            {venues.length === 0 && !enableCreateVenue ? 'No venues available' : 'Select Venue...'}
+                                        </option>
                                         {venues.map(venue => (
                                             <option key={venue.id} value={venue.id}>
                                                 {formatVenueOption(venue)}
                                             </option>
                                         ))}
+                                        {enableCreateVenue && (
+                                            <>
+                                                <option disabled>──────────</option>
+                                                <option value="create_new" className="font-semibold">
+                                                    ➕ Create new venue...
+                                                </option>
+                                            </>
+                                        )}
                                     </select>
                                 )}
                             </div>
                         )}
 
-                        {/* Action Buttons */}
-                        <div className="flex items-center gap-2">
-                            {/* Save Button - available if we have data and venue selected */}
-                            {showActions && onSave && !isInDatabase && (
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); onSave(); }}
-                                    disabled={isSaveDisabled}
-                                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
-                                >
-                                    <Save className="h-3 w-3" />
-                                    Review & Save
-                                </button>
-                            )}
-
-                            {/* Source Link */}
-                            {sourceUrl && (
-                                <a 
-                                    href={sourceUrl} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="inline-flex items-center text-xs text-blue-600 hover:underline"
-                                >
-                                    <ExternalLink className="h-3 w-3 mr-1" />
-                                    View source
-                                </a>
-                            )}
-                        </div>
-
-                        {/* Database Status */}
-                        {isInDatabase && (
-                            <div className="flex items-center gap-1 text-xs text-green-700">
-                                <Database className="h-3 w-3" />
-                                <span>Saved: {game.existingGameId || game.saveResult?.id}</span>
+                        {/* Source URL */}
+                        {sourceUrl && (
+                            <div className="text-xs text-gray-500 break-all">
+                                <span className="font-medium">URL:</span> {sourceUrl}
                             </div>
                         )}
 
-                        {/* Error message */}
+                        {/* Data source info */}
+                        {dataSource && (
+                            <div className="flex items-center gap-2">
+                                <DataSourceBadge />
+                            </div>
+                        )}
+
+                        {/* Error or additional info */}
                         {hasError && (
                             <p className="text-xs text-red-600">
                                 Error: {game.errorMessage}
@@ -460,130 +508,125 @@ export const GameListItem: React.FC<GameListItemProps> = ({
         );
     }
 
-    // ===================================================================
-    // STANDARD MODE RENDER (Original)
-    // ===================================================================
+    // --- Standard Mode Rendering ---
     return (
         <div
-            className={`border rounded-lg overflow-hidden transition-all duration-200 ${colorClass} ${isClickable ? 'cursor-pointer' : ''}`}
-            onClick={isClickable ? onClick : undefined}
+            className={`
+                border rounded-lg overflow-hidden transition-colors
+                ${hasError ? 'border-red-300' : ''}
+                ${getListItemColorClass(data?.gameStatus, data?.registrationStatus)}
+                ${onClick ? 'cursor-pointer' : ''}
+            `}
+            onClick={onClick}
         >
-            {/* Header section */}
-            <div className="p-3 sm:p-4">
-                {/* Top row with expand/collapse and status badges */}
-                <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2 flex-wrap">
-                        {/* Expand/Collapse toggle */}
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setIsExpanded(!isExpanded);
-                            }}
-                            className="p-1 hover:bg-black hover:bg-opacity-5 rounded transition-colors"
-                        >
-                            <ChevronDown 
-                                className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
-                            />
-                        </button>
-
-                        {/* Tournament ID */}
-                        <span className="text-xs font-mono bg-gray-200 px-2 py-1 rounded">
-                            {getDisplayId(game.id)}
-                        </span>
-
-                        {/* Job status badge */}
-                        {game.jobStatus && (
-                            <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded border ${getJobStatusColor(game.jobStatus)}`}>
-                                {game.jobStatus === 'FETCHING' || game.jobStatus === 'SCRAPING' || game.jobStatus === 'PARSING' ? (
-                                    <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
-                                ) : null}
-                                {game.jobStatus}
+            {/* Header */}
+            <div className="flex items-center justify-between p-3 sm:p-4">
+                <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                    {/* Status Indicator */}
+                    <div className={`h-2 w-2 rounded-full flex-shrink-0 ${
+                        hasError ? 'bg-red-500' :
+                        hasDoNotScrape ? 'bg-amber-500' :
+                        data?.gameStatus === 'RUNNING' ? 'bg-green-500 animate-pulse' :
+                        data?.gameStatus === 'SCHEDULED' ? 'bg-blue-500' :
+                        data?.gameStatus === 'FINISHED' ? 'bg-gray-400' :
+                        'bg-gray-300'
+                    }`} />
+                    
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm sm:text-base font-medium text-gray-900">
+                                ID: {getDisplayId(game.id)}
                             </span>
-                        )}
+                            
+                            {game.jobStatus && (
+                                <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded border ${getJobStatusColor(game.jobStatus)}`}>
+                                    {game.jobStatus}
+                                </span>
+                            )}
 
-                        {/* Data source indicator */}
-                        {dataSource && (
-                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded ${
-                                dataSource === 's3' 
-                                    ? 'bg-purple-100 text-purple-700 border border-purple-200' 
-                                    : 'bg-cyan-100 text-cyan-700 border border-cyan-200'
-                            }`}>
-                                {dataSource === 's3' ? (
-                                    <>
-                                        <HardDrive className="h-3 w-3" />
-                                        S3
-                                    </>
-                                ) : (
-                                    <>
-                                        <Zap className="h-3 w-3" />
-                                        Live
-                                    </>
-                                )}
-                            </span>
-                        )}
+                            {/* Data source indicator */}
+                            <DataSourceBadge />
 
-                        {/* Database status */}
-                        <DatabaseStatus />
-                    </div>
-
-                    {/* Action buttons */}
-                    {showActions && (
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                            {onViewDetails && data && (
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onViewDetails();
-                                    }}
-                                    className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-full transition-colors"
-                                    title="View details"
-                                >
-                                    <Eye className="h-4 w-4" />
-                                </button>
-                            )}
-                            {onRefresh && (
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onRefresh();
-                                    }}
-                                    className="p-1.5 text-gray-600 hover:bg-gray-200 rounded-full transition-colors"
-                                    title="Refresh"
-                                    disabled={game.jobStatus === 'FETCHING' || game.jobStatus === 'SCRAPING'}
-                                >
-                                    <RefreshCw className={`h-4 w-4 ${game.jobStatus === 'FETCHING' || game.jobStatus === 'SCRAPING' ? 'animate-spin' : ''}`} />
-                                </button>
-                            )}
-                            {onSave && !isInDatabase && (
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onSave();
-                                    }}
-                                    className="p-1.5 text-green-600 hover:bg-green-100 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    title="Save to database"
-                                    disabled={isSaveDisabled}
-                                >
-                                    <Save className="h-4 w-4" />
-                                </button>
-                            )}
-                            {onRemove && (
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onRemove();
-                                    }}
-                                    className="p-1.5 text-red-600 hover:bg-red-100 rounded-full transition-colors"
-                                    title="Remove"
-                                >
-                                    <XCircle className="h-4 w-4" />
-                                </button>
-                            )}
+                            {/* Database status */}
+                            <DatabaseStatus />
                         </div>
-                    )}
+
+                        {/* Action buttons */}
+                        {showActions && (
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {onViewDetails && data && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onViewDetails();
+                                        }}
+                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
+                                    >
+                                        <Eye className="h-3 w-3" />
+                                        <span className="hidden sm:inline">View</span>
+                                    </button>
+                                )}
+                                
+                                {/* Save button - allow for NOT_PUBLISHED (placeholder save) or non-doNotScrape games */}
+                                {onSave && data && (!hasDoNotScrape || data?.gameStatus === 'NOT_PUBLISHED') && !game.saveResult && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onSave();
+                                        }}
+                                        disabled={game.jobStatus === 'SAVING' || (!selectedVenueId && !game.existingGameId && !enableCreateVenue)}
+                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-green-700 bg-green-50 rounded hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        title={data?.gameStatus === 'NOT_PUBLISHED' ? 'Save as placeholder' : 'Save to database'}
+                                    >
+                                        <Save className="h-3 w-3" />
+                                        <span className="hidden sm:inline">Save</span>
+                                    </button>
+                                )}
+                                
+                                {onRefresh && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onRefresh();
+                                        }}
+                                        disabled={game.jobStatus === 'FETCHING' || game.jobStatus === 'SCRAPING'}
+                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-purple-700 bg-purple-50 rounded hover:bg-purple-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <RefreshCw className={`h-3 w-3 ${game.jobStatus === 'FETCHING' || game.jobStatus === 'SCRAPING' ? 'animate-spin' : ''}`} />
+                                        <span className="hidden sm:inline">Refresh</span>
+                                    </button>
+                                )}
+                                
+                                {onRemove && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onRemove();
+                                        }}
+                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-700 bg-red-50 rounded hover:bg-red-100 transition-colors"
+                                    >
+                                        <XCircle className="h-3 w-3" />
+                                        <span className="hidden sm:inline">Remove</span>
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                {/* Tournament name and status */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIsExpanded(!isExpanded);
+                    }}
+                    className="ml-2 p-1 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+                >
+                    <ChevronDown className={`h-5 w-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                </button>
+            </div>
+
+            {/* Tournament Info */}
+            <div className="px-3 sm:px-4 pb-3">
                 <div className="mb-2">
                     <h3 className="text-sm sm:text-base font-semibold text-gray-900 break-words">
                         {data?.name || 'Loading tournament data...'}

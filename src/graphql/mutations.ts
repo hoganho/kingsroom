@@ -12,8 +12,14 @@ export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData(
   $url: AWSURL
   $s3Key: String
   $forceRefresh: Boolean
+  $scraperApiKey: String
 ) {
-  fetchTournamentData(url: $url, s3Key: $s3Key, forceRefresh: $forceRefresh) {
+  fetchTournamentData(
+    url: $url
+    s3Key: $s3Key
+    forceRefresh: $forceRefresh
+    scraperApiKey: $scraperApiKey
+  ) {
     name
     gameStartDateTime
     gameEndDateTime
@@ -110,6 +116,8 @@ export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData(
     }
     existingGameId
     doNotScrape
+    skipped
+    skipReason
     tournamentId
     entityId
     sourceUrl
@@ -7080,6 +7088,8 @@ export const reScrapeFromCache = /* GraphQL */ `mutation ReScrapeFromCache($inpu
     }
     existingGameId
     doNotScrape
+    skipped
+    skipReason
     tournamentId
     entityId
     sourceUrl
@@ -7194,6 +7204,8 @@ export const forceRefreshScrape = /* GraphQL */ `mutation ForceRefreshScrape($ur
     }
     existingGameId
     doNotScrape
+    skipped
+    skipReason
     tournamentId
     entityId
     sourceUrl

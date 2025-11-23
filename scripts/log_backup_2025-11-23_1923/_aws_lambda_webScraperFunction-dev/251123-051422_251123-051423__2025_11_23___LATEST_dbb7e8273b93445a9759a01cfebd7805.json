@@ -1,0 +1,47 @@
+[
+  {
+    "timestamp": 1763874862716,
+    "message": "INIT_START Runtime Version: nodejs:22.v65\tRuntime Version ARN: arn:aws:lambda:ap-southeast-2::runtime:32854065d48ca9c5e6b3046b96919e02f1be0a9623e600f07b963bb7f531b7d5\n",
+    "ingestionTime": 1763874871113
+  },
+  {
+    "timestamp": 1763874863696,
+    "message": "START RequestId: d66e329f-ad6d-4ff2-9062-c5e9a909a8e8 Version: $LATEST\n",
+    "ingestionTime": 1763874871113
+  },
+  {
+    "timestamp": 1763874863698,
+    "message": "2025-11-23T05:14:23.698Z\td66e329f-ad6d-4ff2-9062-c5e9a909a8e8\tINFO\t[HANDLER] Incoming event: {\n  \"typeName\": \"Mutation\",\n  \"fieldName\": \"fetchTournamentData\",\n  \"arguments\": {\n    \"url\": \"https://kingsroom.com.au/tournament/?id=2\",\n    \"s3Key\": null,\n    \"forceRefresh\": false\n  },\n  \"identity\": {\n    \"claims\": {\n      \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n      \"cognito:groups\": [\n        \"Admin\"\n      ],\n      \"iss\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n      \"client_id\": \"4sth21dgrh3rjjnsl63ka32k4q\",\n      \"origin_jti\": \"dcbe6569-c63a-45dd-957a-0d6aa9728f08\",\n      \"event_id\": \"b8a9cf13-bdbf-464e-8e3c-e5e5d59243f1\",\n      \"token_use\": \"access\",\n      \"scope\": \"aws.cognito.signin.user.admin\",\n      \"auth_time\": 1763666135,\n      \"exp\": 1763878428,\n      \"iat\": 1763874828,\n      \"jti\": \"25744274-453c-4e8d-9587-94a1a0e6c147\",\n      \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n    },\n    \"defaultAuthStrategy\": \"ALLOW\",\n    \"groups\": [\n      \"Admin\"\n    ],\n    \"issuer\": \"https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_j2kAd4kpO\",\n    \"sourceIp\": [\n      \"217.217.121.88\"\n    ],\n    \"sub\": \"29de14b8-20b1-70d8-752d-823eaa69b476\",\n    \"username\": \"29de14b8-20b1-70d8-752d-823eaa69b476\"\n  },\n  \"source\": null,\n  \"request\": {\n    \"headers\": {\n      \"x-forwarded-for\": \"217.217.121.88,130.176.212.138\",\n      \"sec-ch-ua-mobile\": \"?0\",\n      \"cloudfront-viewer-country\": \"AU\",\n      \"cloudfront-is-tablet-viewer\": \"false\",\n      \"x-amzn-requestid\": \"f43e5a95-dc56-4a6b-a00e-34f0963b4a2d\",\n      \"via\": \"2.0 ece2a231e09716eb97b51099bf5928fe.cloudfront.net (CloudFront)\",\n      \"cloudfront-forwarded-proto\": \"https\",\n      \"origin\": \"http://localhost:5173\",\n      \"content-length\": \"1985\",\n      \"x-forwarded-proto\": \"https\",\n      \"accept-language\": \"en-GB,en;q=0.8\",\n      \"host\": \"moi5t5e25vbajg2funkwklyhqq.appsync-api.ap-southeast-2.amazonaws.com\",\n      \"sec-gpc\": \"1\",\n      \"user-agent\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36\",\n      \"cloudfront-is-mobile-viewer\": \"false\",\n      \"accept\": \"*/*\",\n      \"priority\": \"u=1, i\",\n      \"cloudfront-viewer-asn\": \"0\",\n      \"cloudfront-is-smarttv-viewer\": \"false\",\n      \"x-amzn-appsync-is-vpce-request\": \"false\",\n      \"accept-encoding\": \"gzip, deflate, br, zstd\",\n      \"x-amzn-account-id\": \"495599763953\",\n      \"referer\": \"http://localhost:5173/\",\n      \"x-amzn-remote-ip\": \"217.217.121.88\",\n      \"content-type\": \"application/json; charset=UTF-8\",\n      \"sec-fetch-mode\": \"cors\",\n      \"x-amzn-trace-id\": \"Root=1-6922982e-23e609943d66134c35e42044\",\n      \"x-amz-cf-id\": \"3UKVP7k6-2_cFA2_BQpn33WRT-pg78IqhzRBY5q_syABks0ynfTCkA==\",\n      \"authorization\": \"eyJraWQiOiI0ZjE0SDRUWituNW01dUN4UzV6Tkh0VlBVN0x6TU9PS3VnZ1ppandhWlwvVT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYiLCJjb2duaXRvOmdyb3VwcyI6WyJBZG1pbiJdLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfajJrQWQ0a3BPIiwiY2xpZW50X2lkIjoiNHN0aDIxZGdyaDNyampuc2w2M2thMzJrNHEiLCJvcmlnaW5fanRpIjoiZGNiZTY1NjktYzYzYS00NWRkLTk1N2EtMGQ2YWE5NzI4ZjA4IiwiZXZlbnRfaWQiOiJiOGE5Y2YxMy1iZGJmLTQ2NGUtOGUzYy1lNWU1ZDU5MjQzZjEiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzYzNjY2MTM1LCJleHAiOjE3NjM4Nzg0MjgsImlhdCI6MTc2Mzg3NDgyOCwianRpIjoiMjU3NDQyNzQtNDUzYy00ZThkLTk1ODctOTRhMWEwZTZjMTQ3IiwidXNlcm5hbWUiOiIyOWRlMTRiOC0yMGIxLTcwZDgtNzUyZC04MjNlYWE2OWI0NzYifQ.IK5m1DPC7RtV6IvPgVujCFpH5m-ivrlMD50QbRV2APepd8fGfLDHBo61OO8Ih3yaoWQNq8kp7Co5ZOb6SBMDHZarXVZqEefa_cGQ3Yn0nv9s5z9kRZSa2zfwQ2UnkKDxb_GMYwptjZ5y8fCCDimWNBEzdZtPF-Qu3vjKruV_-4mQDZCVg-KLCEqqGSTcDTpEUIIH6eTG4u73S43LKRVDIPBH8YNAvGXgw-IEluxNVTEwNrgyIbCMrOLLF6aErKWzIKUY7vMStj1kwZUppCc5TrkFd1xQ2w0Yey4wQUdFNgsjbVQOcYMCLFRKitrjiM3uZOASu2h_a2nHKOU3CdpDpg\",\n      \"sec-fetch-dest\": \"empty\",\n      \"x-amz-user-agent\": \"aws-amplify/6.15.7 api/1 framework/1\",\n      \"sec-ch-ua-platform\": \"\\\"macOS\\\"\",\n      \"cloudfront-is-desktop-viewer\": \"true\",\n      \"sec-fetch-site\": \"cross-site\",\n      \"sec-ch-ua\": \"\\\"Chromium\\\";v=\\\"142\\\", \\\"Brave\\\";v=\\\"142\\\", \\\"Not_A Brand\\\";v=\\\"99\\\"\",\n      \"x-forwarded-port\": \"443\"\n    },\n    \"domainName\": null\n  },\n  \"prev\": {\n    \"result\": {}\n  }\n}\n",
+    "ingestionTime": 1763874871113
+  },
+  {
+    "timestamp": 1763874863824,
+    "message": "2025-11-23T05:14:23.824Z\td66e329f-ad6d-4ff2-9062-c5e9a909a8e8\tINFO\t[HANDLER] Op: fetchTournamentData. Job: N/A, Entity: 42101695-1332-48e3-963b-3c6ad4e909a0\n",
+    "ingestionTime": 1763874871113
+  },
+  {
+    "timestamp": 1763874863834,
+    "message": "2025-11-23T05:14:23.834Z\td66e329f-ad6d-4ff2-9062-c5e9a909a8e8\tINFO\t[FETCH] Skipping https://kingsroom.com.au/tournament/?id=2 - marked as doNotScrape\n",
+    "ingestionTime": 1763874871113
+  },
+  {
+    "timestamp": 1763874863834,
+    "message": "2025-11-23T05:14:23.834Z\td66e329f-ad6d-4ff2-9062-c5e9a909a8e8\tINFO\t[HANDLER] Flushing monitoring metrics...\n",
+    "ingestionTime": 1763874871113
+  },
+  {
+    "timestamp": 1763874863860,
+    "message": "2025-11-23T05:14:23.860Z\td66e329f-ad6d-4ff2-9062-c5e9a909a8e8\tINFO\t[HANDLER] Monitoring flush complete.\n",
+    "ingestionTime": 1763874871113
+  },
+  {
+    "timestamp": 1763874863862,
+    "message": "END RequestId: d66e329f-ad6d-4ff2-9062-c5e9a909a8e8\n",
+    "ingestionTime": 1763874871113
+  },
+  {
+    "timestamp": 1763874863862,
+    "message": "REPORT RequestId: d66e329f-ad6d-4ff2-9062-c5e9a909a8e8\tDuration: 166.06 ms\tBilled Duration: 1142 ms\tMemory Size: 1024 MB\tMax Memory Used: 134 MB\tInit Duration: 975.74 ms\t\n",
+    "ingestionTime": 1763874871113
+  }
+]

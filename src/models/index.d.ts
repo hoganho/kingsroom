@@ -1087,6 +1087,8 @@ type EagerScrapedGameData = {
   readonly venueMatch?: ScrapedVenueMatch | null;
   readonly existingGameId?: string | null;
   readonly doNotScrape?: boolean | null;
+  readonly skipped?: boolean | null;
+  readonly skipReason?: string | null;
   readonly tournamentId: number;
   readonly entityId?: string | null;
   readonly sourceUrl?: string | null;
@@ -1144,6 +1146,8 @@ type LazyScrapedGameData = {
   readonly venueMatch?: ScrapedVenueMatch | null;
   readonly existingGameId?: string | null;
   readonly doNotScrape?: boolean | null;
+  readonly skipped?: boolean | null;
+  readonly skipReason?: string | null;
   readonly tournamentId: number;
   readonly entityId?: string | null;
   readonly sourceUrl?: string | null;

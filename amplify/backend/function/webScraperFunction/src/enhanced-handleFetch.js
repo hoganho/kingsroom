@@ -202,7 +202,7 @@ const getExistingS3StorageRecord = async (scrapeURLId, url, ddbDocClient) => {
  * Enhanced wrapper for simplified usage - includes monitoring
  * This is the main entry point that other Lambda functions call
  */
-const enhancedHandleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRefresh = false, monitoredDdbClient = null) => {
+const enhancedHandleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRefresh = false, monitoredDdbClient = null, scraperApiKey = null) => {
     // Use provided client or create new one
     const ddbDocClient = monitoredDdbClient || DynamoDBDocumentClient.from(new DynamoDBClient({}));
     
@@ -210,6 +210,7 @@ const enhancedHandleFetch = async (url, scrapeURLRecord, entityId, tournamentId,
     console.log(`[enhancedHandleFetch] Force refresh: ${forceRefresh}`);
     console.log(`[enhancedHandleFetch] Entity ID: ${entityId}`);
     console.log(`[enhancedHandleFetch] Has S3 key: ${!!scrapeURLRecord?.latestS3Key}`);
+    console.log(`[enhancedHandleFetch] Has custom API key: ${!!scraperApiKey}`);  // ✅ NEW: Log API key presence
     
     try {
         const result = await handleFetch(
@@ -218,7 +219,8 @@ const enhancedHandleFetch = async (url, scrapeURLRecord, entityId, tournamentId,
             entityId,
             tournamentId,
             forceRefresh,
-            ddbDocClient
+            ddbDocClient,
+            scraperApiKey  // ✅ NEW: Pass the API key
         );
         
         if (result.success) {
@@ -241,14 +243,15 @@ const enhancedHandleFetch = async (url, scrapeURLRecord, entityId, tournamentId,
 /**
  * Simplified fetch for when we don't have database access
  */
-const simplifiedFetch = async (url, entityId, tournamentId) => {
+const simplifiedFetch = async (url, entityId, tournamentId, scraperApiKey = null) => {
     const startTime = Date.now();
     
     console.log(`[SimplifiedFetch] Fetching ${url} for entity ${entityId}, tournament ${tournamentId}`);
     
     try {
         // Fetch from live site using ScraperAPI
-        const liveResult = await fetchFromLiveSiteWithRetries(url, MAX_RETRIES);
+        // ✅ NEW: Pass the API key
+        const liveResult = await fetchFromLiveSiteWithRetries(url, MAX_RETRIES, scraperApiKey);
         
         if (!liveResult.success) {
             throw new Error(`Live fetch failed: ${liveResult.error}`);
@@ -307,7 +310,7 @@ const simplifiedFetch = async (url, entityId, tournamentId) => {
 /**
  * Main fetch handler with caching strategy
  */
-const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRefresh = false, ddbDocClient = null) => {
+const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRefresh = false, ddbDocClient = null, scraperApiKey = null) => {
     const startTime = Date.now();
     const scrapeURLTable = getTableName('ScrapeURL');
     
@@ -510,7 +513,8 @@ const handleFetch = async (url, scrapeURLRecord, entityId, tournamentId, forceRe
         });
         fetchStats.liveScraped = true;
         
-        const liveResult = await fetchFromLiveSiteWithRetries(url, MAX_RETRIES);
+        // ✅ NEW: Pass the API key to fetchFromLiveSiteWithRetries
+        const liveResult = await fetchFromLiveSiteWithRetries(url, MAX_RETRIES, scraperApiKey);
         
         if (!liveResult.success) {
             log('error', 'Live fetch failed after retries', { 
@@ -977,13 +981,15 @@ const checkHTTPHeaders = async (url, scrapeURLRecord) => {
 
 /**
  * Fetch HTML from live website with retry logic
+ * ✅ UPDATED: Now accepts scraperApiKey parameter
  */
-const fetchFromLiveSiteWithRetries = async (url, maxRetries = 3) => {
+const fetchFromLiveSiteWithRetries = async (url, maxRetries = 3, scraperApiKey = null) => {
     let lastError = null;
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-            const result = await fetchFromLiveSite(url);
+            // ✅ NEW: Pass the API key to fetchFromLiveSite
+            const result = await fetchFromLiveSite(url, scraperApiKey);
             if (result.success) {
                 return result;
             }
@@ -1008,16 +1014,25 @@ const fetchFromLiveSiteWithRetries = async (url, maxRetries = 3) => {
 
 /**
  * Fetch HTML from live website using ScraperAPI
+ * ✅ UPDATED: Now accepts scraperApiKey parameter with fallback logic
  */
-const fetchFromLiveSite = async (url) => {
-    if (!SCRAPERAPI_KEY) {
-        console.error('SCRAPERAPI_KEY environment variable is not set!');
+const fetchFromLiveSite = async (url, scraperApiKey = null) => {
+    // ✅ NEW: Use provided API key or fall back to environment/constant
+    const apiKey = scraperApiKey || process.env.SCRAPERAPI_KEY || SCRAPERAPI_KEY;
+    
+    if (!apiKey) {
+        console.error('ScraperAPI key not provided and environment variable is not set!');
         return { success: false, error: 'ScraperAPI key is not configured.' };
     }
 
+    console.log(`[fetchFromLiveSite] Using API key:`, {
+        source: scraperApiKey ? 'parameter' : (process.env.SCRAPERAPI_KEY ? 'environment' : 'constant'),
+        keyPreview: apiKey ? `${apiKey.substring(0, 8)}...` : 'none'
+    });
+
     // Construct the ScraperAPI URL with country_code=au for local appearance
     const encodedUrl = encodeURIComponent(url);
-    const scraperApiUrl = `http://api.scraperapi.com?api_key=${SCRAPERAPI_KEY}&url=${encodedUrl}&country_code=au`;
+    const scraperApiUrl = `http://api.scraperapi.com?api_key=${apiKey}&url=${encodedUrl}&country_code=au`;
 
     try {
         const response = await axios.get(scraperApiUrl, {

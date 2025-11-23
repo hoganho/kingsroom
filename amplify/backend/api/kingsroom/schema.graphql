@@ -1268,6 +1268,8 @@ type ScrapedGameData {
   venueMatch: ScrapedVenueMatch
   existingGameId: String
   doNotScrape: Boolean
+  skipped: Boolean
+  skipReason: String
   tournamentId: Int!
   entityId: ID
   sourceUrl: AWSURL
@@ -1595,7 +1597,7 @@ type Query {
 }
 
 type Mutation {
-  fetchTournamentData(url: AWSURL, s3Key: String, forceRefresh: Boolean): ScrapedGameData @function(name: "webScraperFunction-${env}")
+  fetchTournamentData(url: AWSURL, s3Key: String, forceRefresh: Boolean, scraperApiKey: String): ScrapedGameData @function(name: "webScraperFunction-${env}")
   saveTournamentData(input: SaveTournamentInput!): Game @function(name: "webScraperFunction-${env}")
   controlScraperOperation(operation: ScraperOperation!, entityId: ID): ScraperControlResponse @function(name: "autoScraper-${env}")
   triggerAutoScraping(maxGames: Int): ScraperControlResponse @function(name: "autoScraper-${env}")

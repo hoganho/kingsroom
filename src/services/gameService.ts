@@ -1,5 +1,5 @@
 // services/gameService.ts
-// Complete service with all original functions plus enhanced save support
+// UPDATED: Added scraperApiKey parameter support
 
 import { generateClient } from 'aws-amplify/api';
 import type { GraphQLResult } from '@aws-amplify/api';
@@ -257,18 +257,27 @@ const getEntityIdFromUrl = async (_url: string): Promise<string | null> => {
 
 /**
  * Fetch game data from backend (single game)
+ * ✅ UPDATED: Added scraperApiKey parameter
  */
 export const fetchGameDataFromBackend = async (
     url: string,
-    forceRefresh: boolean = false
+    forceRefresh: boolean = false,
+    scraperApiKey?: string
 ): Promise<ScrapedGameData> => {
     const client = generateClient();
-    console.log(`[GameService] Fetching tournament data for ${url}...`);
+    console.log(`[GameService] Fetching tournament data for ${url}...`, {
+        forceRefresh,
+        hasApiKey: !!scraperApiKey
+    });
     
     try {
         const response = await client.graphql({
             query: fetchTournamentData,
-            variables: { url, forceRefresh }
+            variables: { 
+                url, 
+                forceRefresh,
+                scraperApiKey: scraperApiKey || '62c905a307da2591dc89f94d193caacf'
+            }
         }) as GraphQLResult<any>;
         
         if (response.errors) {

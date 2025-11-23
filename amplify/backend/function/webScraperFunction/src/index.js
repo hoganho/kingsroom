@@ -726,6 +726,14 @@ exports.handler = async (event) => {
                     const forceRefresh = args.forceRefresh || false;
                     const overrideDoNotScrape = args.overrideDoNotScrape || false;
                     
+                    // NEW: Extract scraperApiKey from arguments
+                    const scraperApiKey = args.scraperApiKey || process.env.SCRAPERAPI_KEY || "62c905a307da2591dc89f94d193caacf";
+                    console.log('[HANDLER] ScraperAPI Key:', {
+                        hasCustomKey: !!args.scraperApiKey,
+                        keyLength: scraperApiKey?.length,
+                        keyPreview: scraperApiKey?.substring(0, 8) + '...'
+                    });
+                    
                     // Handle S3 cache scenario
                     if (s3KeyParam) {
                         console.log(`[FETCH] 🔒 S3 CACHE MODE - Using cached HTML`);
@@ -874,13 +882,15 @@ exports.handler = async (event) => {
                         getAllSeriesTitles()
                     ]);
                     
+                    // NEW: Pass scraperApiKey to enhancedHandleFetch
                     const fetchResult = await enhancedHandleFetch(
                         fetchUrl, 
                         scrapeURLRecord, 
                         entityId, 
                         tournamentId, 
                         forceRefresh, 
-                        monitoredDdbDocClient
+                        monitoredDdbDocClient,
+                        scraperApiKey  // ADDED: Pass as 7th parameter
                     );
                     
                     if (!fetchResult.success) {

@@ -2595,6 +2595,8 @@ export const scrapeGame = /* GraphQL */ `query ScrapeGame(
     }
     existingGameId
     doNotScrape
+    skipped
+    skipReason
     tournamentId
     entityId
     sourceUrl

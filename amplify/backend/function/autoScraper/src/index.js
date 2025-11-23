@@ -124,8 +124,8 @@ async function callGraphQL(query, variables, entityId = null) {
 
 // --- NEW: GraphQL Mutations (from schema.graphql) ---
 const FETCH_TOURNAMENT_DATA = /* GraphQL */ `
-    mutation FetchTournamentData($url: AWSURL, $forceRefresh: Boolean, $entityId: ID) {
-        fetchTournamentData(url: $url, forceRefresh: $forceRefresh, entityId: $entityId) {
+    mutation FetchTournamentData($url: AWSURL, $forceRefresh: Boolean, $entityId: ID, $scraperApiKey: String) {
+        fetchTournamentData(url: $url, forceRefresh: $forceRefresh, entityId: $entityId, scraperApiKey: $scraperApiKey) {
             name
             gameStatus
             tournamentId

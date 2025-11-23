@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import {
   Play, StopCircle, Settings, Eye, ChevronDown, ChevronRight,
-  RefreshCw, Pause, CheckCircle
+  RefreshCw, Pause, CheckCircle, Key
 } from 'lucide-react';
 
 // --- Real Imports ---
@@ -244,6 +244,10 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
     skipInProgress: false,
     overrideExisting: false,
   });
+
+  // ✅ NEW: ScraperAPI Key Configuration
+  const [scraperApiKey, setScraperApiKey] = useState<string>('62c905a307da2591dc89f94d193caacf');
+  const [showApiKey, setShowApiKey] = useState<boolean>(false);
 
   // Processing State
   const [isProcessing, setIsProcessing] = useState(false);
@@ -488,19 +492,30 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
     const url = `${currentEntity?.gameUrlDomain}${currentEntity?.gameUrlPath}${tournamentId}`;
 
     setProcessingResults(prev => prev.map(r =>
-      r.id === tournamentId ? { ...r, status: 'scraping', message: 'Scraping...' } : r
+      r.id === tournamentId ? { ...r, status: 'scraping', message: 'Scraping...', parsedData: r.parsedData } : r
     ));
 
     try {
-      const parsedData = await fetchGameDataFromBackend(url);
+      // ✅ UPDATED: Pass API key to fetchGameDataFromBackend
+      const parsedData = await fetchGameDataFromBackend(
+        url,
+        !options.useS3,  // forceRefresh = !useS3
+        scraperApiKey    // Pass the API key
+      );
 
-      // Debug logging to trace doNotScrape detection
+      // ✅ ENHANCED DEBUG: Log the raw response from backend to verify source field
       console.log('[ScraperTab] Received data for tournament', tournamentId, {
         name: parsedData.name,
         doNotScrape: parsedData.doNotScrape,
         gameStatus: parsedData.gameStatus,
         skipped: (parsedData as any).skipped,
-        skipReason: (parsedData as any).skipReason
+        skipReason: (parsedData as any).skipReason,
+        // ✅ NEW: Check for source field from backend
+        source: (parsedData as any).source,
+        s3Key: parsedData.s3Key,
+        // ✅ NEW: Check if source field exists at all
+        hasSourceField: 'source' in parsedData,
+        allKeys: Object.keys(parsedData).sort()
       });
 
       // Check for doNotScrape skip - show options modal unless ignoreDoNotScrape is set
@@ -605,10 +620,11 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
         ));
 
         // Refetch with the chosen option
+        // ✅ UPDATED: Pass API key to fetchGameDataFromBackend
         const refetchedData = await fetchGameDataFromBackend(
-          modalResult.action === 'S3' && modalResult.s3Key 
-            ? url // TODO: Update fetchGameDataFromBackend to support s3Key parameter
-            : url
+          url,
+          modalResult.action === 'LIVE',  // forceRefresh if LIVE selected
+          scraperApiKey                    // Pass the API key
         );
         
         // Replace parsedData with refetched data
@@ -694,7 +710,7 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
             ...r,
             status: 'success',
             message: 'Scraped (ready to save)',
-            parsedData,
+            parsedData: r.parsedData,
             selectedVenueId: defaultVenueId
           } : r
         ));
@@ -870,7 +886,7 @@ const handleManualSave = async (result: ProcessingResult) => {
     // Instead of saving directly, show the modal
     setIsPaused(true);
     setProcessingResults(prev => prev.map(r =>
-        r.id === result.id ? { ...r, status: 'review', message: 'Opening for review...' } : r
+        r.id === result.id ? { ...r, status: 'review', message: 'Opening for review...', parsedData: r.parsedData } : r
     ));
     
     const modalResult = await showSaveConfirmationModal(
@@ -1054,6 +1070,44 @@ const handleManualSave = async (result: ProcessingResult) => {
     </label>
   );
 
+  // ✅ NEW: API Key Configuration UI Component
+  const renderApiKeyConfig = () => (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Key className="h-4 w-4 text-gray-500" />
+        <label className="text-sm font-medium text-gray-700">
+          ScraperAPI Key
+        </label>
+      </div>
+      
+      <div className="flex gap-2">
+        <div className="flex-1 relative">
+          <input
+            type={showApiKey ? "text" : "password"}
+            value={scraperApiKey}
+            onChange={(e) => setScraperApiKey(e.target.value)}
+            disabled={isProcessing}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+            placeholder="Enter ScraperAPI key"
+          />
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowApiKey(!showApiKey)}
+          className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+          disabled={isProcessing}
+        >
+          {showApiKey ? 'Hide' : 'Show'}
+        </button>
+      </div>
+      
+      <p className="text-xs text-gray-500">
+        This key is used to fetch tournament pages through ScraperAPI.
+        {!scraperApiKey && <span className="text-amber-600 ml-1">⚠ No key configured - fetches may fail</span>}
+      </p>
+    </div>
+  );
+
   // --- Entity Warning ---
   if (!currentEntity) {
     return (
@@ -1229,6 +1283,11 @@ const handleManualSave = async (result: ProcessingResult) => {
                 )}
               </div>
             </div>
+            
+            {/* ✅ NEW: API Key Configuration */}
+            <div className="rounded-lg bg-gray-50 p-4 border">
+              {renderApiKeyConfig()}
+            </div>
           </div>
           
           {/* Column 2: Options */}
@@ -1256,7 +1315,7 @@ const handleManualSave = async (result: ProcessingResult) => {
           <button
             type="button"
             onClick={isProcessing ? handleStopProcessing : handleStartProcessing}
-            disabled={!currentEntity || (isProcessing && isPaused)}
+            disabled={!currentEntity || (isProcessing && isPaused) || !scraperApiKey}
             className={`w-full flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white ${
               isProcessing
                 ? 'bg-red-600 hover:bg-red-700'
@@ -1273,6 +1332,11 @@ const handleManualSave = async (result: ProcessingResult) => {
               <><Play className="h-5 w-5 mr-2" /> Start Processing</>
             )}
           </button>
+          {!scraperApiKey && !isProcessing && (
+            <p className="text-xs text-red-600 mt-2 text-center">
+              ⚠ ScraperAPI key required to start processing
+            </p>
+          )}
         </div>
       </CollapsibleSection>
 
@@ -1302,14 +1366,48 @@ const handleManualSave = async (result: ProcessingResult) => {
                 processingMessage={result.message}
                 tournamentId={result.id}
                 sourceUrl={result.url}
-                dataSource={
-                  ((result.parsedData as any)?.skipped || 
-                   (result.parsedData?.doNotScrape && result.parsedData?.name?.includes('Skipped')) ||
-                   result.parsedData?.name === 'Skipped - Do Not Scrape') ? 'skipped' :
-                  result.parsedData?.s3Key ? 's3' : 
-                  (result.parsedData as any)?.source === 'S3_CACHE' ? 's3' :
-                  'live'
-                }
+                dataSource={(() => {
+                  // ✅ ENHANCED: Better logging and source determination
+                  const source = (result.parsedData as any)?.source;
+                  const s3Key = result.parsedData?.s3Key;
+                  const skipped = (result.parsedData as any)?.skipped;
+                  
+                  // Debug log to help trace the issue
+                  console.log(`[ScraperTab] Tournament ${result.id} source info:`, {
+                    backendSource: source,
+                    hasS3Key: !!s3Key,
+                    s3KeyPreview: s3Key ? s3Key.substring(0, 60) + '...' : null,
+                    skipped,
+                    status: result.status,
+                    hasDataField: 'source' in (result.parsedData || {})
+                  });
+                  
+                  // Priority 1: ONLY show 'none' if we actually skipped fetching (early exit from Lambda)
+                  if (skipped) {
+                    console.log(`[ScraperTab] → Tournament ${result.id}: Using 'none' (skipped)`);
+                    return 'none';
+                  }
+                  
+                  // Priority 2: Show actual data source based on 'source' field from Lambda (PRIMARY SOURCE)
+                  if (source === 'S3_CACHE' || source === 'HTTP_304_CACHE') {
+                    console.log(`[ScraperTab] → Tournament ${result.id}: Using 's3' (source=${source})`);
+                    return 's3';
+                  }
+                  if (source === 'LIVE') {
+                    console.log(`[ScraperTab] → Tournament ${result.id}: Using 'web' (source=LIVE)`);
+                    return 'web';
+                  }
+                  
+                  // Priority 3: Fallback - Check s3Key if source field not set (backward compatibility)
+                  if (s3Key) {
+                    console.log(`[ScraperTab] → Tournament ${result.id}: Using 's3' (s3Key fallback, no source field)`);
+                    return 's3';
+                  }
+                  
+                  // Default fallback
+                  console.log(`[ScraperTab] → Tournament ${result.id}: Using 'web' (default fallback)`);
+                  return 'web';
+                })() as 's3' | 'web' | 'none'}
               />
             ))}
           </div>
