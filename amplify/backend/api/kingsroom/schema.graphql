@@ -80,6 +80,14 @@ enum CostItemRateType {
   SPECIAL 
 }
 
+enum EntryType {
+  INITIAL
+  REENTRY
+  DIRECT_BUYIN
+  QUALIFIED_CONTINUATION
+  AGGREGATE_LISTING
+}
+
 enum ScraperJobTriggerSource { SCHEDULED, MANUAL, API, CONTROL, BULK, ADMIN }
 enum ScraperJobStatus { QUEUED, RUNNING, COMPLETED, FAILED, CANCELLED, TIMEOUT }
 enum ScrapeURLStatus { ACTIVE, INACTIVE, DO_NOT_SCRAPE, ERROR, ARCHIVED }
@@ -269,6 +277,25 @@ type Game @model @auth(rules: [{ allow: private }]) {
   flightLetter: String
   finalDay: Boolean
 
+  # --- Multi-Day Consolidation Fields ---
+  parentGameId: ID @index(name: "byParentGame", sortKeyFields: ["gameStartDateTime"])
+  parentGame: Game @belongsTo(fields: ["parentGameId"])
+  childGames: [Game] @hasMany(indexName: "byParentGame", fields: ["id"])
+
+  # REPLACEMENT FOR BOOLEAN FLAGS
+  # Values: "PARENT", "CHILD", "STANDARD"
+  # This allows you to filter: consolidationType eq "PARENT" to find all consolidated games
+  consolidationType: String @default(value: "STANDARD") @index(name: "byConsolidationType", sortKeyFields: ["gameStartDateTime"])
+  
+  # The "Glue" Key
+  consolidationKey: String @index(name: "byConsolidationKey", queryField: "gamesByConsolidationKey")
+
+  # Data Confidence (These are not keys, so Boolean is fine here)
+  isPartialData: Boolean @default(value: "false")
+  missingFlightCount: Int
+  expectedTotalEntries: Int
+  actualCalculatedEntries: Int
+
   # --- Data Source ---
   sourceUrl: AWSURL @index(name: "bySourceUrl", queryField: "gameBySourceUrl")
   tournamentId: Int
@@ -414,6 +441,13 @@ type PlayerEntry @model @auth(rules: [{ allow: private }]) {
   isMultiDayTournament: Boolean
   player: Player @belongsTo(fields: ["playerId"])
   game: Game @belongsTo(fields: ["gameId"])
+  
+  # Deduplication Logic
+  entryType: EntryType @default(value: "INITIAL")
+  qualifyingGameId: ID # Points to the specific flight they qualified from (if applicable)
+
+  # Values: "CONSOLIDATED" (Rolled up on parent), "ORIGINAL" (Actual flight data)
+  recordType: String @default(value: "ORIGINAL") @index(name: "byRecordType", sortKeyFields: ["gameStartDateTime"])
 }
 
 type PlayerResult @model @auth(rules: [{ allow: private }]) {
@@ -429,6 +463,10 @@ type PlayerResult @model @auth(rules: [{ allow: private }]) {
   player: Player @belongsTo(fields: ["playerId"])
   gameId: ID! @index(name: "byGame")
   game: Game @belongsTo(fields: ["gameId"])
+
+  # REPLACEMENT FOR BOOLEAN FLAG
+  # Values: "CONSOLIDATED", "ORIGINAL"
+  recordType: String @default(value: "ORIGINAL") @index(name: "byRecordTypeResult", sortKeyFields: ["gameStartDateTime"])
 }
 
 type PlayerVenue @model @auth(rules: [{ allow: private }]) {

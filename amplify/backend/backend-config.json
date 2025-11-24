@@ -259,6 +259,20 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "tournamentConsolidator": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput"
+          ],
+          "category": "api",
+          "resourceName": "kingsroom"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "venueAssignmentService": {
       "build": true,
       "dependsOn": [
@@ -496,6 +510,22 @@
         {
           "category": "function",
           "resourceName": "scraperManagement"
+        }
+      ]
+    },
+    "AMPLIFY_function_tournamentConsolidator_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "tournamentConsolidator"
+        }
+      ]
+    },
+    "AMPLIFY_function_tournamentConsolidator_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "tournamentConsolidator"
         }
       ]
     },

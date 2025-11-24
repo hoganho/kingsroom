@@ -1636,6 +1636,86 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "parentGameId": {
+                    "name": "parentGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "parentGame": {
+                    "name": "parentGame",
+                    "isArray": false,
+                    "type": {
+                        "model": "Game"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "parentGameId"
+                        ]
+                    }
+                },
+                "childGames": {
+                    "name": "childGames",
+                    "isArray": true,
+                    "type": {
+                        "model": "Game"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "parentGame"
+                        ]
+                    }
+                },
+                "consolidationType": {
+                    "name": "consolidationType",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "consolidationKey": {
+                    "name": "consolidationKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isPartialData": {
+                    "name": "isPartialData",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "missingFlightCount": {
+                    "name": "missingFlightCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "expectedTotalEntries": {
+                    "name": "expectedTotalEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "actualCalculatedEntries": {
+                    "name": "actualCalculatedEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "sourceUrl": {
                     "name": "sourceUrl",
                     "isArray": false,
@@ -1927,6 +2007,36 @@ export const schema = {
                         "fields": [
                             "registrationStatus",
                             "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byParentGame",
+                        "fields": [
+                            "parentGameId",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byConsolidationType",
+                        "fields": [
+                            "consolidationType",
+                            "gameStartDateTime"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byConsolidationKey",
+                        "queryField": "gamesByConsolidationKey",
+                        "fields": [
+                            "consolidationKey"
                         ]
                     }
                 },
@@ -3083,6 +3193,29 @@ export const schema = {
                         ]
                     }
                 },
+                "entryType": {
+                    "name": "entryType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "EntryType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "qualifyingGameId": {
+                    "name": "qualifyingGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "recordType": {
+                    "name": "recordType",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -3132,6 +3265,16 @@ export const schema = {
                         "name": "byVenue",
                         "fields": [
                             "venueId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byRecordType",
+                        "fields": [
+                            "recordType",
+                            "gameStartDateTime"
                         ]
                     }
                 },
@@ -3256,6 +3399,13 @@ export const schema = {
                         ]
                     }
                 },
+                "recordType": {
+                    "name": "recordType",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -3296,6 +3446,16 @@ export const schema = {
                         "name": "byGame",
                         "fields": [
                             "gameId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byRecordTypeResult",
+                        "fields": [
+                            "recordType",
+                            "gameStartDateTime"
                         ]
                     }
                 },
@@ -7409,6 +7569,16 @@ export const schema = {
                 "SPECIAL"
             ]
         },
+        "EntryType": {
+            "name": "EntryType",
+            "values": [
+                "INITIAL",
+                "REENTRY",
+                "DIRECT_BUYIN",
+                "QUALIFIED_CONTINUATION",
+                "AGGREGATE_LISTING"
+            ]
+        },
         "ScraperJobTriggerSource": {
             "name": "ScraperJobTriggerSource",
             "values": [
@@ -10243,5 +10413,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "ee0905e49b2ee5dea2e2c7a114ce8bde"
+    "version": "997649db0bdcbd0b999394b5528721d6"
 };

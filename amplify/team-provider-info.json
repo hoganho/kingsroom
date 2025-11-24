@@ -72,6 +72,10 @@
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
           "s3Key": "amplify-builds/saveGameFunction-58546253595234585373-build.zip",
           "playerProcessorQueueUrl": "https://sqs.ap-southeast-2.amazonaws.com/495599763953/GameProcessingQueue.fifo"
+        },
+        "tournamentConsolidator": {
+          "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
+          "s3Key": "amplify-builds/tournamentConsolidator-6577593972394d6a4576-build.zip"
         }
       },
       "auth": {

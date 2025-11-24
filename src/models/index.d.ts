@@ -244,6 +244,14 @@ export enum CostItemRateType {
   SPECIAL = "SPECIAL"
 }
 
+export enum EntryType {
+  INITIAL = "INITIAL",
+  REENTRY = "REENTRY",
+  DIRECT_BUYIN = "DIRECT_BUYIN",
+  QUALIFIED_CONTINUATION = "QUALIFIED_CONTINUATION",
+  AGGREGATE_LISTING = "AGGREGATE_LISTING"
+}
+
 export enum ScraperJobTriggerSource {
   SCHEDULED = "SCHEDULED",
   MANUAL = "MANUAL",
@@ -1956,6 +1964,15 @@ type EagerGame = {
   readonly dayNumber?: number | null;
   readonly flightLetter?: string | null;
   readonly finalDay?: boolean | null;
+  readonly parentGameId?: string | null;
+  readonly parentGame?: Game | null;
+  readonly childGames?: (Game | null)[] | null;
+  readonly consolidationType?: string | null;
+  readonly consolidationKey?: string | null;
+  readonly isPartialData?: boolean | null;
+  readonly missingFlightCount?: number | null;
+  readonly expectedTotalEntries?: number | null;
+  readonly actualCalculatedEntries?: number | null;
   readonly sourceUrl?: string | null;
   readonly tournamentId?: number | null;
   readonly originalScrapedData?: string | null;
@@ -2029,6 +2046,15 @@ type LazyGame = {
   readonly dayNumber?: number | null;
   readonly flightLetter?: string | null;
   readonly finalDay?: boolean | null;
+  readonly parentGameId?: string | null;
+  readonly parentGame: AsyncItem<Game | undefined>;
+  readonly childGames: AsyncCollection<Game>;
+  readonly consolidationType?: string | null;
+  readonly consolidationKey?: string | null;
+  readonly isPartialData?: boolean | null;
+  readonly missingFlightCount?: number | null;
+  readonly expectedTotalEntries?: number | null;
+  readonly actualCalculatedEntries?: number | null;
   readonly sourceUrl?: string | null;
   readonly tournamentId?: number | null;
   readonly originalScrapedData?: string | null;
@@ -2361,6 +2387,9 @@ type EagerPlayerEntry = {
   readonly isMultiDayTournament?: boolean | null;
   readonly player?: Player | null;
   readonly game?: Game | null;
+  readonly entryType?: EntryType | keyof typeof EntryType | null;
+  readonly qualifyingGameId?: string | null;
+  readonly recordType?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -2385,6 +2414,9 @@ type LazyPlayerEntry = {
   readonly isMultiDayTournament?: boolean | null;
   readonly player: AsyncItem<Player | undefined>;
   readonly game: AsyncItem<Game | undefined>;
+  readonly entryType?: EntryType | keyof typeof EntryType | null;
+  readonly qualifyingGameId?: string | null;
+  readonly recordType?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -2412,6 +2444,7 @@ type EagerPlayerResult = {
   readonly player?: Player | null;
   readonly gameId: string;
   readonly game?: Game | null;
+  readonly recordType?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -2433,6 +2466,7 @@ type LazyPlayerResult = {
   readonly player: AsyncItem<Player | undefined>;
   readonly gameId: string;
   readonly game: AsyncItem<Game | undefined>;
+  readonly recordType?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }

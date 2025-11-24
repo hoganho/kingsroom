@@ -244,6 +244,14 @@ const CostItemRateType = {
   "SPECIAL": "SPECIAL"
 };
 
+const EntryType = {
+  "INITIAL": "INITIAL",
+  "REENTRY": "REENTRY",
+  "DIRECT_BUYIN": "DIRECT_BUYIN",
+  "QUALIFIED_CONTINUATION": "QUALIFIED_CONTINUATION",
+  "AGGREGATE_LISTING": "AGGREGATE_LISTING"
+};
+
 const ScraperJobTriggerSource = {
   "SCHEDULED": "SCHEDULED",
   "MANUAL": "MANUAL",
@@ -373,6 +381,7 @@ export {
   SeriesAssignmentStatus,
   CostItemType,
   CostItemRateType,
+  EntryType,
   ScraperJobTriggerSource,
   ScraperJobStatus,
   ScrapeURLStatus,
