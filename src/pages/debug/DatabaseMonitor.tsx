@@ -1,7 +1,7 @@
 // src/pages/debug/DatabaseMonitor.tsx
-// Unified Database Monitor - Shows operations from both Frontend and Lambda functions
+// IMPROVED VERSION - Shows only the most recent batch of database operations
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { getMonitoring } from '../../utils/enhanced-monitoring';
 import { 
@@ -15,7 +15,10 @@ import {
     Clock,
     CheckCircle,
     XCircle,
-    AlertCircle
+    AlertCircle,
+    ChevronLeft,
+    ChevronRight,
+    Layers
 } from 'lucide-react';
 
 interface LambdaOperation {
@@ -28,17 +31,28 @@ interface LambdaOperation {
     entityId?: string;
 }
 
+interface OperationBatch {
+    operations: any[];
+    startTime: Date;
+    endTime: Date;
+    count: number;
+}
+
 export const DatabaseMonitorPage: React.FC = () => {
     const [clientOperations, setClientOperations] = useState<any[]>([]);
     const [lambdaOperations, setLambdaOperations] = useState<LambdaOperation[]>([]);
     const [filter, setFilter] = useState<'ALL' | 'CLIENT' | 'LAMBDA'>('ALL');
     const [selectedTable, setSelectedTable] = useState<string>('');
     const [isLoading, setIsLoading] = useState(false);
-    const [cloudWatchMetrics, setCloudWatchMetrics] = useState<any[]>([]);
     const [stats, setStats] = useState({
         client: { total: 0, inserts: 0, updates: 0, deletes: 0, queries: 0 },
         lambda: { total: 0, inserts: 0, updates: 0, deletes: 0, queries: 0 }
     });
+    
+    // Batch-related state
+    const [batchTimeWindow, setBatchTimeWindow] = useState(5000); // 5 seconds default
+    const [currentBatchIndex, setCurrentBatchIndex] = useState(0);
+    const [showAllBatches, setShowAllBatches] = useState(false);
     
     const client = generateClient();
     const monitoring = getMonitoring();
@@ -47,7 +61,6 @@ export const DatabaseMonitorPage: React.FC = () => {
     const fetchCloudWatchMetrics = async () => {
         setIsLoading(true);
         try {
-            // This calls your 'getDatabaseMetrics' Lambda function
             const query = /* GraphQL */ `
                 query GetDatabaseMetrics($timeRange: String) {
                     getDatabaseMetrics(timeRange: $timeRange) {
@@ -64,16 +77,13 @@ export const DatabaseMonitorPage: React.FC = () => {
                 }
             `;
             
-            // Execute the GraphQL query
             const result = await client.graphql({
                 query: query,
                 variables: { timeRange: 'LAST_24_HOURS' }
             }) as any;
             
-            // Set the Lambda operations state with the fetched data
             if (result.data?.getDatabaseMetrics?.metrics) {
                 setLambdaOperations(result.data.getDatabaseMetrics.metrics);
-                setCloudWatchMetrics(result.data.getDatabaseMetrics.metrics);
             }
             
         } catch (error) {
@@ -88,6 +98,8 @@ export const DatabaseMonitorPage: React.FC = () => {
         const unsubscribe = monitoring.subscribe((operation) => {
             setClientOperations(prev => [operation, ...prev].slice(0, 100));
             updateStats('client', operation);
+            // Reset to show most recent batch when new operations arrive
+            setCurrentBatchIndex(0);
         });
 
         // Initial load of local client operations
@@ -104,10 +116,9 @@ export const DatabaseMonitorPage: React.FC = () => {
             unsubscribe();
             clearInterval(interval);
         };
-    }, []); // Note: Empty dependency array is correct here
+    }, []);
 
-    // This effect runs when lambdaOperations state is updated
-    // It updates the statistics block for "LAMBDA"
+    // Update Lambda statistics when operations change
     useEffect(() => {
         if (lambdaOperations.length === 0) return;
 
@@ -130,7 +141,6 @@ export const DatabaseMonitorPage: React.FC = () => {
     const updateStats = (source: 'client' | 'lambda', operation: any) => {
         setStats(prev => {
             const newStats = { ...prev };
-            // Only update client stats in real-time from the subscription
             if (source === 'client') {
                 newStats[source].total++;
                 
@@ -150,8 +160,8 @@ export const DatabaseMonitorPage: React.FC = () => {
         ...lambdaOperations.map(op => op.table)
     ])).filter(Boolean);
 
-    // Filter operations based on selected filters
-    const getFilteredOperations = () => {
+    // Combine all operations
+    const getAllOperations = useCallback(() => {
         let allOps = [];
         
         if (filter === 'ALL' || filter === 'CLIENT') {
@@ -166,32 +176,97 @@ export const DatabaseMonitorPage: React.FC = () => {
             allOps = allOps.filter(op => op.table === selectedTable);
         }
         
-        // Sort by timestamp
+        // Sort by timestamp (newest first)
         return allOps.sort((a, b) => 
             new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
-    };
+    }, [filter, selectedTable, clientOperations, lambdaOperations]);
+
+    // Group operations into batches based on time proximity
+    const getOperationBatches = useCallback((operations: any[]): OperationBatch[] => {
+        if (operations.length === 0) return [];
+        
+        const batches: OperationBatch[] = [];
+        let currentBatch: any[] = [operations[0]];
+        
+        for (let i = 1; i < operations.length; i++) {
+            const prevTime = new Date(operations[i - 1].timestamp).getTime();
+            const currTime = new Date(operations[i].timestamp).getTime();
+            const timeDiff = prevTime - currTime; // Note: operations are sorted newest first
+            
+            // If the time gap is larger than the batch window, start a new batch
+            if (timeDiff > batchTimeWindow) {
+                // Save the current batch
+                batches.push({
+                    operations: currentBatch,
+                    startTime: new Date(currentBatch[currentBatch.length - 1].timestamp),
+                    endTime: new Date(currentBatch[0].timestamp),
+                    count: currentBatch.length
+                });
+                // Start a new batch
+                currentBatch = [operations[i]];
+            } else {
+                currentBatch.push(operations[i]);
+            }
+        }
+        
+        // Don't forget the last batch
+        if (currentBatch.length > 0) {
+            batches.push({
+                operations: currentBatch,
+                startTime: new Date(currentBatch[currentBatch.length - 1].timestamp),
+                endTime: new Date(currentBatch[0].timestamp),
+                count: currentBatch.length
+            });
+        }
+        
+        return batches;
+    }, [batchTimeWindow]);
+
+    // Get filtered operations with batch logic
+    const { filteredOperations, batches, currentBatch } = useMemo(() => {
+        const all = getAllOperations();
+        const operationBatches = getOperationBatches(all);
+        
+        const currentBatchOps = showAllBatches 
+            ? all 
+            : operationBatches[currentBatchIndex]?.operations || [];
+        
+        const currentBatchInfo = operationBatches[currentBatchIndex] || null;
+        
+        return {
+            filteredOperations: currentBatchOps,
+            batches: operationBatches,
+            currentBatch: currentBatchInfo
+        };
+    }, [getAllOperations, getOperationBatches, currentBatchIndex, showAllBatches]);
 
     const exportData = () => {
-        const data = {
-            timestamp: new Date().toISOString(),
+        const dataStr = JSON.stringify({
+            clientOperations,
+            lambdaOperations,
             stats,
-            operations: {
-                client: clientOperations,
-                lambda: lambdaOperations
-            },
-            cloudWatchMetrics
-        };
+            timestamp: new Date().toISOString()
+        }, null, 2);
         
-        const blob = new Blob([JSON.stringify(data, null, 2)], { 
-            type: 'application/json' 
-        });
+        const blob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = `database-monitor-${Date.now()}.json`;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    };
+
+    const getOperationColor = (operation: string) => {
+        const opLower = operation?.toLowerCase() || '';
+        if (opLower.includes('insert') || opLower === 'insert') return 'bg-green-100 text-green-800';
+        if (opLower.includes('update') || opLower === 'update') return 'bg-yellow-100 text-yellow-800';
+        if (opLower.includes('delete') || opLower === 'delete') return 'bg-red-100 text-red-800';
+        if (opLower.includes('query') || opLower === 'query') return 'bg-blue-100 text-blue-800';
+        return 'bg-gray-100 text-gray-800';
     };
 
     const getSourceIcon = (source: string) => {
@@ -200,126 +275,181 @@ export const DatabaseMonitorPage: React.FC = () => {
             : <Monitor className="w-4 h-4 text-blue-500" />;
     };
 
-    const getOperationColor = (operation: string) => {
-        const op = operation?.toLowerCase();
-        if (op?.includes('insert')) return 'text-green-600 bg-green-50';
-        if (op?.includes('update')) return 'text-blue-600 bg-blue-50';
-        if (op?.includes('delete')) return 'text-red-600 bg-red-50';
-        if (op?.includes('query')) return 'text-gray-600 bg-gray-50';
-        if (op?.includes('error')) return 'text-red-600 bg-red-50';
-        return 'text-gray-600 bg-gray-50';
+    const formatBatchTimeRange = (batch: OperationBatch | null) => {
+        if (!batch) return '';
+        const duration = batch.endTime.getTime() - batch.startTime.getTime();
+        return `${batch.startTime.toLocaleTimeString()} - ${batch.endTime.toLocaleTimeString()} (${(duration / 1000).toFixed(1)}s)`;
     };
 
-    const filteredOperations = getFilteredOperations();
-
     return (
-        <div className="space-y-6">
+        <div className="p-6 space-y-6">
             {/* Header */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex justify-between items-center mb-4">
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                            <Database className="w-6 h-6" />
-                            Unified Database Monitor
-                        </h1>
-                        <p className="text-sm text-gray-500 mt-1">
-                            Real-time monitoring of all database operations from Frontend and Lambda functions
-                        </p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Database Monitor</h1>
+                    <p className="text-gray-600 mt-1">Real-time database operations from client and Lambda functions</p>
+                </div>
+                <div className="flex gap-2">
+                    <button
+                        onClick={fetchCloudWatchMetrics}
+                        disabled={isLoading}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                    >
+                        <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                        Refresh
+                    </button>
+                    <button
+                        onClick={exportData}
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                    >
+                        <Download className="w-4 h-4" />
+                        Export
+                    </button>
+                </div>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* Client Operations */}
+                <div className="bg-blue-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                        <Monitor className="w-5 h-5 text-blue-600" />
+                        <span className="text-xs font-medium text-blue-600">CLIENT</span>
                     </div>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={fetchCloudWatchMetrics}
-                            disabled={isLoading}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
-                        >
-                            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                            Refresh
-                        </button>
-                        <button
-                            onClick={exportData}
-                            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center gap-2"
-                        >
-                            <Download className="w-4 h-4" />
-                            Export
-                        </button>
+                    <div className="text-2xl font-bold text-gray-900">{stats.client.total}</div>
+                    <div className="text-xs text-gray-600 mt-2 space-y-1">
+                        <div>Inserts: {stats.client.inserts}</div>
+                        <div>Updates: {stats.client.updates}</div>
+                        <div>Deletes: {stats.client.deletes}</div>
                     </div>
                 </div>
 
-                {/* Statistics Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {/* Client Stats */}
-                    <div className="bg-blue-50 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                            <Monitor className="w-5 h-5 text-blue-600" />
-                            <span className="text-xs font-medium text-blue-600">CLIENT</span>
-                        </div>
-                        <div className="text-2xl font-bold text-gray-900">{stats.client.total}</div>
-                        <div className="text-xs text-gray-600 space-y-1 mt-2">
-                            <div className="flex justify-between">
-                                <span>Inserts:</span>
-                                <span className="font-medium">{stats.client.inserts}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>Updates:</span>
-                                <span className="font-medium">{stats.client.updates}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>Deletes:</span>
-                                <span className="font-medium">{stats.client.deletes}</span>
-                            </div>
-                        </div>
+                {/* Lambda Operations */}
+                <div className="bg-purple-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                        <Server className="w-5 h-5 text-purple-600" />
+                        <span className="text-xs font-medium text-purple-600">LAMBDA</span>
                     </div>
-
-                    {/* Lambda Stats */}
-                    <div className="bg-purple-50 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                            <Server className="w-5 h-5 text-purple-600" />
-                            <span className="text-xs font-medium text-purple-600">LAMBDA</span>
-                        </div>
-                        <div className="text-2xl font-bold text-gray-900">{stats.lambda.total}</div>
-                        <div className="text-xs text-gray-600 space-y-1 mt-2">
-                            <div className="flex justify-between">
-                                <span>Inserts:</span>
-                                <span className="font-medium">{stats.lambda.inserts}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>Updates:</span>
-                                <span className="font-medium">{stats.lambda.updates}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>Deletes:</span>
-                                <span className="font-medium">{stats.lambda.deletes}</span>
-                            </div>
-                        </div>
+                    <div className="text-2xl font-bold text-gray-900">{stats.lambda.total}</div>
+                    <div className="text-xs text-gray-600 mt-2 space-y-1">
+                        <div>Inserts: {stats.lambda.inserts}</div>
+                        <div>Updates: {stats.lambda.updates}</div>
+                        <div>Deletes: {stats.lambda.deletes}</div>
                     </div>
+                </div>
 
-                    {/* Total Operations */}
-                    <div className="bg-gray-50 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                            <Activity className="w-5 h-5 text-gray-600" />
-                            <span className="text-xs font-medium text-gray-600">TOTAL OPS</span>
-                        </div>
-                        <div className="text-2xl font-bold text-gray-900">
-                            {stats.client.total + stats.lambda.total}
-                        </div>
-                        <div className="text-xs text-gray-600 mt-2">
-                            Last 24 hours
-                        </div>
+                {/* Total Operations */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                        <Activity className="w-5 h-5 text-gray-600" />
+                        <span className="text-xs font-medium text-gray-600">TOTAL</span>
                     </div>
+                    <div className="text-2xl font-bold text-gray-900">
+                        {stats.client.total + stats.lambda.total}
+                    </div>
+                    <div className="text-xs text-gray-600 mt-2">
+                        Last 24 hours
+                    </div>
+                </div>
 
-                    {/* Tables Affected */}
-                    <div className="bg-green-50 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                            <Database className="w-5 h-5 text-green-600" />
-                            <span className="text-xs font-medium text-green-600">TABLES</span>
-                        </div>
-                        <div className="text-2xl font-bold text-gray-900">{allTables.length}</div>
-                        <div className="text-xs text-gray-600 mt-2">
-                            Tables accessed
-                        </div>
+                {/* Tables Affected */}
+                <div className="bg-green-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                        <Database className="w-5 h-5 text-green-600" />
+                        <span className="text-xs font-medium text-green-600">TABLES</span>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">{allTables.length}</div>
+                    <div className="text-xs text-gray-600 mt-2">
+                        Tables accessed
                     </div>
                 </div>
             </div>
+
+            {/* Batch Controls */}
+            {batches.length > 0 && (
+                <div className="bg-white rounded-lg shadow-sm p-4">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                            <Layers className="w-4 h-4 text-gray-500" />
+                            <span className="text-sm font-medium text-gray-700">Batch View</span>
+                        </div>
+                        <button
+                            onClick={() => setShowAllBatches(!showAllBatches)}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                                showAllBatches
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                        >
+                            {showAllBatches ? 'Show All Operations' : 'Show Latest Batch Only'}
+                        </button>
+                    </div>
+                    
+                    {!showAllBatches && (
+                        <div className="space-y-3">
+                            {/* Batch Navigation */}
+                            {batches.length > 1 && (
+                                <div className="flex items-center justify-between">
+                                    <button
+                                        onClick={() => setCurrentBatchIndex(prev => Math.max(0, prev - 1))}
+                                        disabled={currentBatchIndex === 0}
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                    >
+                                        <ChevronLeft className="w-4 h-4" />
+                                        Previous Batch
+                                    </button>
+                                    <span className="text-sm text-gray-600">
+                                        Batch {currentBatchIndex + 1} of {batches.length}
+                                    </span>
+                                    <button
+                                        onClick={() => setCurrentBatchIndex(prev => Math.min(batches.length - 1, prev + 1))}
+                                        disabled={currentBatchIndex === batches.length - 1}
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                    >
+                                        Next Batch
+                                        <ChevronRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            )}
+                            
+                            {/* Current Batch Info */}
+                            {currentBatch && (
+                                <div className="bg-blue-50 rounded-lg p-3">
+                                    <div className="flex items-center gap-2 text-sm text-gray-700 mb-2">
+                                        <Clock className="w-4 h-4" />
+                                        <span className="font-medium">{formatBatchTimeRange(currentBatch)}</span>
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                        {currentBatch.count} operations in this batch
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    
+                    {/* Batch Time Window Selector */}
+                    <div className="flex items-center gap-2 mt-3">
+                        <span className="text-sm text-gray-600">Batch time window:</span>
+                        <select
+                            value={batchTimeWindow}
+                            onChange={(e) => {
+                                setBatchTimeWindow(Number(e.target.value));
+                                setCurrentBatchIndex(0);
+                            }}
+                            className="px-3 py-1.5 rounded-lg border border-gray-300 text-sm"
+                        >
+                            <option value="2000">2 seconds</option>
+                            <option value="3000">3 seconds</option>
+                            <option value="5000">5 seconds</option>
+                            <option value="10000">10 seconds</option>
+                            <option value="30000">30 seconds</option>
+                        </select>
+                        <span className="text-xs text-gray-500 ml-2">
+                            Operations within this window are grouped together
+                        </span>
+                    </div>
+                </div>
+            )}
 
             {/* Filters */}
             <div className="bg-white rounded-lg shadow-sm p-4">
@@ -360,6 +490,7 @@ export const DatabaseMonitorPage: React.FC = () => {
 
                     <div className="ml-auto text-sm text-gray-500">
                         Showing {filteredOperations.length} operations
+                        {!showAllBatches && batches.length > 0 && ` in batch ${currentBatchIndex + 1}`}
                     </div>
                 </div>
             </div>
@@ -368,16 +499,28 @@ export const DatabaseMonitorPage: React.FC = () => {
             <div className="bg-white rounded-lg shadow-sm">
                 <div className="border-b border-gray-200 px-6 py-3">
                     <h2 className="text-lg font-semibold text-gray-900">
-                        Real-time Operations
+                        {showAllBatches ? 'All Operations' : `Batch ${currentBatchIndex + 1} Operations`}
                     </h2>
+                    {batches.length > 1 && (
+                        <p className="text-sm text-gray-600 mt-1">
+                            {batches.length} total batches identified
+                        </p>
+                    )}
                 </div>
                 
                 <div className="divide-y divide-gray-200 max-h-[600px] overflow-y-auto">
                     {filteredOperations.length === 0 ? (
                         <div className="p-8 text-center text-gray-500">
                             <Database className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                            <p>No operations recorded yet</p>
-                            <p className="text-sm mt-1">Database operations will appear here in real-time</p>
+                            <p>No operations in this batch</p>
+                            <p className="text-sm mt-1">
+                                {showAllBatches 
+                                    ? 'Database operations will appear here in real-time'
+                                    : batches.length > 0
+                                        ? 'Try navigating to a different batch'
+                                        : 'Database operations will appear here in real-time'
+                                }
+                            </p>
                         </div>
                     ) : (
                         filteredOperations.map((op, index) => (

@@ -285,7 +285,22 @@ export const fetchGameDataFromBackend = async (
         }
         
         const data = response.data.fetchTournamentData;
-        console.log('[GameService] Tournament data fetched:', data?.name || 'Unknown');
+
+        // 👇👇👇 ADD THIS DEBUG BLOCK 👇👇👇
+        console.group(`[DEBUG] Fetch Result for ID: ${data?.tournamentId}`);
+        console.log('1. Raw "source" field:', data?.source);
+        console.log('2. Raw "s3Key" field:', data?.s3Key);
+        console.log('3. All received keys:', Object.keys(data || {}));
+        
+        // Check if the fields are totally missing (undefined) or just empty strings
+        if (data?.source === undefined) {
+            console.error('❌ CRITICAL: "source" field is MISSING from GraphQL response. Check your query definition!');
+        } else {
+            console.log('✅ "source" field exists:', data.source);
+        }
+        console.groupEnd();
+        // 👆👆👆 END DEBUG BLOCK 👆👆👆
+        
         return data;
     } catch (error) {
         console.error('[GameService] Error fetching tournament data:', error);

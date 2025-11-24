@@ -245,7 +245,7 @@ export const ScrapeTab: React.FC<ScrapeTabProps> = ({ urlToReparse, onReparseCom
     overrideExisting: false,
   });
 
-  // ✅ NEW: ScraperAPI Key Configuration
+  // API Key Configuration
   const [scraperApiKey, setScraperApiKey] = useState<string>('62c905a307da2591dc89f94d193caacf');
   const [showApiKey, setShowApiKey] = useState<boolean>(false);
 
@@ -491,46 +491,24 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
     const tournamentId = queue[i];
     const url = `${currentEntity?.gameUrlDomain}${currentEntity?.gameUrlPath}${tournamentId}`;
 
+    // Update status to scraping
     setProcessingResults(prev => prev.map(r =>
       r.id === tournamentId ? { ...r, status: 'scraping', message: 'Scraping...', parsedData: r.parsedData } : r
     ));
 
     try {
-      // ✅ UPDATED: Pass API key to fetchGameDataFromBackend
+      // Pass API key to fetchGameDataFromBackend
       const parsedData = await fetchGameDataFromBackend(
         url,
         !options.useS3,  // forceRefresh = !useS3
         scraperApiKey    // Pass the API key
       );
 
-      // ✅ ENHANCED DEBUG: Log the raw response from backend to verify source field
-      console.log('[ScraperTab] Received data for tournament', tournamentId, {
-        name: parsedData.name,
-        doNotScrape: parsedData.doNotScrape,
-        gameStatus: parsedData.gameStatus,
-        skipped: (parsedData as any).skipped,
-        skipReason: (parsedData as any).skipReason,
-        // ✅ NEW: Check for source field from backend
-        source: (parsedData as any).source,
-        s3Key: parsedData.s3Key,
-        // ✅ NEW: Check if source field exists at all
-        hasSourceField: 'source' in parsedData,
-        allKeys: Object.keys(parsedData).sort()
-      });
-
       // Check for doNotScrape skip - show options modal unless ignoreDoNotScrape is set
-      // Multiple ways to detect a skipped tournament:
-      // 1. Backend explicitly returns skipped: true and skipReason
-      // 2. Backend returns doNotScrape: true with the skip name pattern
-      // 3. Name matches the skip pattern
       const isSkippedDoNotScrape = 
         ((parsedData as any).skipped && (parsedData as any).skipReason === 'DO_NOT_SCRAPE') ||
         (parsedData.doNotScrape && parsedData.name?.includes('Skipped')) ||
         (parsedData.name === 'Skipped - Do Not Scrape');
-      
-      console.log('[ScraperTab] isSkippedDoNotScrape:', isSkippedDoNotScrape, 
-        'ignoreDoNotScrape:', options.ignoreDoNotScrape,
-        'willShowModal:', isSkippedDoNotScrape && !options.ignoreDoNotScrape);
       
       if (isSkippedDoNotScrape && !options.ignoreDoNotScrape) {
         setIsPaused(true);
@@ -539,12 +517,11 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
             ...r,
             status: 'review',
             message: 'Tournament marked as Do Not Scrape - awaiting decision...',
-            parsedData
+            parsedData // Pass current data
           } : r
         ));
 
         // Show ScrapeOptionsModal and wait for user decision
-        // UPDATED: Now includes 'SAVE_PLACEHOLDER' option
         const modalResult = await new Promise<{ action: 'S3' | 'LIVE' | 'SKIP' | 'SAVE_PLACEHOLDER', s3Key?: string }>((resolve) => {
           setScrapeOptionsModal({
             isOpen: true,
@@ -558,7 +535,7 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
         setScrapeOptionsModal(null);
         setIsPaused(false);
 
-        // Handle SAVE_PLACEHOLDER action - save NOT_PUBLISHED game with placeholder data
+        // Handle SAVE_PLACEHOLDER action
         if (modalResult.action === 'SAVE_PLACEHOLDER') {
         try {
             setProcessingResults(prev => prev.map(r =>
@@ -586,7 +563,6 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
             } : r
             ));
 
-            // Refresh scraping status to reflect the new save
             await getScrapingStatus({ entityId: currentEntity?.id, forceRefresh: true });
 
         } catch (error: any) {
@@ -616,11 +592,10 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
 
         // User chose to fetch from S3 or Live - refetch with override
         setProcessingResults(prev => prev.map(r =>
-          r.id === tournamentId ? { ...r, status: 'scraping', message: `Fetching from ${modalResult.action}...` } : r
+          r.id === tournamentId ? { ...r, status: 'scraping', message: `Fetching from ${modalResult.action}...`, parsedData } : r
         ));
 
         // Refetch with the chosen option
-        // ✅ UPDATED: Pass API key to fetchGameDataFromBackend
         const refetchedData = await fetchGameDataFromBackend(
           url,
           modalResult.action === 'LIVE',  // forceRefresh if LIVE selected
@@ -646,13 +621,12 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
 
       // ============================================================
       // Handle NOT_PUBLISHED games in bulk/auto mode (skipManualReviews)
-      // This auto-saves without showing the modal
       // ============================================================
       if (parsedData.gameStatus === 'NOT_PUBLISHED' && options.skipManualReviews) {
         if (scrapeFlow === 'scrape_save') {
           try {
             setProcessingResults(prev => prev.map(r =>
-              r.id === tournamentId ? { ...r, status: 'saving', message: 'Saving NOT_PUBLISHED placeholder...' } : r
+              r.id === tournamentId ? { ...r, status: 'saving', message: 'Saving NOT_PUBLISHED placeholder...', parsedData } : r
             ));
             
             const sourceUrl = `${currentEntity?.gameUrlDomain}${currentEntity?.gameUrlPath}${tournamentId}`;
@@ -670,12 +644,11 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
                 ...r,
                 status: 'success',
                 message: 'Saved (NOT_PUBLISHED placeholder)',
-                parsedData,
+                parsedData, // Use latest parsedData
                 savedGameId: saveResult.gameId || undefined
               } : r
             ));
 
-            // Refresh scraping status to reflect the new save
             await getScrapingStatus({ entityId: currentEntity?.id, forceRefresh: true });
 
           } catch (error: any) {
@@ -684,7 +657,7 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
                 ...r,
                 status: 'error',
                 message: `Failed to save NOT_PUBLISHED: ${error.message}`,
-                parsedData
+                parsedData // Use latest parsedData
               } : r
             ));
           }
@@ -695,7 +668,7 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
               ...r,
               status: 'skipped',
               message: 'Skipped (NOT_PUBLISHED)',
-              parsedData
+              parsedData // Use latest parsedData
             } : r
           ));
         }
@@ -710,7 +683,7 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
             ...r,
             status: 'success',
             message: 'Scraped (ready to save)',
-            parsedData: r.parsedData,
+            parsedData: parsedData, // ✅ USE FRESH DATA
             selectedVenueId: defaultVenueId
           } : r
         ));
@@ -719,7 +692,7 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
 
       // Save flow
       setProcessingResults(prev => prev.map(r =>
-        r.id === tournamentId ? { ...r, status: 'saving', message: 'Determining venue...' } : r
+        r.id === tournamentId ? { ...r, status: 'saving', message: 'Determining venue...', parsedData } : r
       ));
 
       let venueIdToUse = '';
@@ -736,7 +709,7 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
       } else {
         setIsPaused(true);
         setProcessingResults(prev => prev.map(r =>
-          r.id === tournamentId ? { ...r, status: 'review', message: 'Awaiting review...' } : r
+          r.id === tournamentId ? { ...r, status: 'review', message: 'Awaiting review...', parsedData: parsedData } : r
         ));
 
         const suggestedVenueId = autoVenueId || defaultVenueId || '';
@@ -746,7 +719,7 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
 
         if (modalResult.action === 'cancel' || signal.aborted) {
           setProcessingResults(prev => prev.map(r =>
-            r.id === tournamentId ? { ...r, status: 'skipped', message: 'User cancelled' } : r
+            r.id === tournamentId ? { ...r, status: 'skipped', message: 'User cancelled', parsedData: parsedData } : r
           ));
           continue;
         }
@@ -756,7 +729,7 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
 
       if (!venueIdToUse) {
         setProcessingResults(prev => prev.map(r =>
-          r.id === tournamentId ? { ...r, status: 'error', message: 'No venue selected' } : r
+          r.id === tournamentId ? { ...r, status: 'error', message: 'No venue selected', parsedData: parsedData } : r
         ));
         continue;
       }
@@ -767,14 +740,14 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
             ...r,
             status: 'skipped',
             message: 'Game already exists (override disabled)',
-            parsedData
+            parsedData: parsedData
           } : r
         ));
         continue;
       }
 
       setProcessingResults(prev => prev.map(r =>
-        r.id === tournamentId ? { ...r, status: 'saving', message: 'Saving to Game...' } : r
+        r.id === tournamentId ? { ...r, status: 'saving', message: 'Saving to Game...', parsedData: parsedData } : r
       ));
 
       // Use edited data from modal if available
@@ -802,7 +775,7 @@ const processQueue = async (queue: number[], signal: AbortSignal) => {
           ...r,
           status: 'success',
           message: 'Successfully saved',
-          parsedData,
+          parsedData: parsedData, // ✅ USE FRESH DATA
           savedGameId: saveResult.gameId || undefined
         } : r
       ));
@@ -1367,46 +1340,27 @@ const handleManualSave = async (result: ProcessingResult) => {
                 tournamentId={result.id}
                 sourceUrl={result.url}
                 dataSource={(() => {
-                  // ✅ ENHANCED: Better logging and source determination
+                  // ✅ UPDATED LOGIC: Suppress confusing "web" fallback during loading
+                  if (result.status === 'pending' || result.status === 'scraping') {
+                    return 'web'; // Default visual (or 'none') - no log needed
+                  }
+
                   const source = (result.parsedData as any)?.source;
                   const s3Key = result.parsedData?.s3Key;
                   const skipped = (result.parsedData as any)?.skipped;
                   
-                  // Debug log to help trace the issue
+                  // Detailed logging only for meaningful states
                   console.log(`[ScraperTab] Tournament ${result.id} source info:`, {
                     backendSource: source,
                     hasS3Key: !!s3Key,
-                    s3KeyPreview: s3Key ? s3Key.substring(0, 60) + '...' : null,
-                    skipped,
-                    status: result.status,
-                    hasDataField: 'source' in (result.parsedData || {})
+                    status: result.status
                   });
                   
-                  // Priority 1: ONLY show 'none' if we actually skipped fetching (early exit from Lambda)
-                  if (skipped) {
-                    console.log(`[ScraperTab] → Tournament ${result.id}: Using 'none' (skipped)`);
-                    return 'none';
-                  }
+                  if (skipped) return 'none';
+                  if (source === 'S3_CACHE' || source === 'HTTP_304_CACHE' || s3Key) return 's3';
+                  if (source === 'LIVE') return 'web';
                   
-                  // Priority 2: Show actual data source based on 'source' field from Lambda (PRIMARY SOURCE)
-                  if (source === 'S3_CACHE' || source === 'HTTP_304_CACHE') {
-                    console.log(`[ScraperTab] → Tournament ${result.id}: Using 's3' (source=${source})`);
-                    return 's3';
-                  }
-                  if (source === 'LIVE') {
-                    console.log(`[ScraperTab] → Tournament ${result.id}: Using 'web' (source=LIVE)`);
-                    return 'web';
-                  }
-                  
-                  // Priority 3: Fallback - Check s3Key if source field not set (backward compatibility)
-                  if (s3Key) {
-                    console.log(`[ScraperTab] → Tournament ${result.id}: Using 's3' (s3Key fallback, no source field)`);
-                    return 's3';
-                  }
-                  
-                  // Default fallback
-                  console.log(`[ScraperTab] → Tournament ${result.id}: Using 'web' (default fallback)`);
-                  return 'web';
+                  return 'web'; // Fallback
                 })() as 's3' | 'web' | 'none'}
               />
             ))}
@@ -1434,9 +1388,9 @@ const handleManualSave = async (result: ProcessingResult) => {
             (currentEntity ? `${currentEntity.gameUrlDomain}${currentEntity.gameUrlPath}${gameForReview.game.tournamentId}` : 
             `Tournament ID: ${gameForReview.game.tournamentId}`)
             }
-            entityId={currentEntity?.id}                    // ADD THIS
-            autoMode={idSelectionMode === 'auto'}           // ADD THIS
-            skipConfirmation={options.skipManualReviews}    // ADD THIS
+            entityId={currentEntity?.id}
+            autoMode={idSelectionMode === 'auto'}
+            skipConfirmation={options.skipManualReviews}
         />
         )}
 

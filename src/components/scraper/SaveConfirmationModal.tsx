@@ -1,6 +1,4 @@
-// src/components/scraper/SaveConfirmationModal.tsx (Enhanced Version with Venue Fee and Series Category Support)
-
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import type { GameData, EntityConfig } from '../../types/game';
 import type { TournamentSeries, TournamentSeriesTitle } from '../../types/series';
@@ -9,7 +7,10 @@ import { useGameDataEditor } from '../../hooks/useGameDataEditor';
 import { QuickDataEditor } from './SaveConfirmation/QuickDataEditor';
 import { SeriesDetailsEditor } from './SaveConfirmation/SeriesDetailsEditor';
 
-// GraphQL Queries
+// ===================================================================
+// GRAPHQL OPERATIONS
+// ===================================================================
+
 const getVenueName = /* GraphQL */ `
     query GetVenueName($id: ID!) {
         getVenue(id: $id) {
@@ -141,7 +142,10 @@ const createSeriesMutation = /* GraphQL */ `
     }
 `;
 
-// Type for game data that can be passed to this modal
+// ===================================================================
+// TYPES & INTERFACES
+// ===================================================================
+
 type ModalGameData = ScrapedGameData | GameData | {
     name?: string | null;
     gameStatus?: string | null;
@@ -176,7 +180,10 @@ interface VenueOption {
     fee?: number | null;
 }
 
-// Utility Functions for Series Enhancement
+// ===================================================================
+// UTILITY FUNCTIONS
+// ===================================================================
+
 const detectSeriesCategory = (seriesName: string): SeriesCategory => {
     const name = seriesName.toLowerCase();
     
@@ -198,6 +205,7 @@ const detectSeriesCategory = (seriesName: string): SeriesCategory => {
 };
 
 const detectHolidayType = (date: string, name: string): HolidayType | null => {
+    if (!date) return null;
     const gameDate = new Date(date);
     const month = gameDate.getMonth() + 1;
     const day = gameDate.getDate();
@@ -254,9 +262,13 @@ const tabs: ModalTab[] = [
     { id: 'diff', label: 'Changes', icon: '📝' }
 ];
 
-/**
- * Enhanced SaveConfirmationModal with inline editing, venue fee support, and series category enhancement
- */
+// ===================================================================
+// COMPONENT
+// ===================================================================
+
+// [FIX 1] Client initialized OUTSIDE the component to prevent infinite re-renders
+const client = generateClient();
+
 export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({ 
     isOpen, 
     onClose, 
@@ -268,7 +280,6 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
     autoMode = false,
     skipConfirmation = false
 }) => {
-    const client = generateClient();
     
     // Core state
     const [venueName, setVenueName] = useState<string>('');
@@ -362,7 +373,8 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         };
         
         loadVenueName();
-    }, [venueId, client]);
+        // [FIX 2] Removed 'client' from dependency array to prevent infinite loop
+    }, [venueId]);
     
     // Load entities
     useEffect(() => {
@@ -381,7 +393,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         };
         
         loadEntities();
-    }, [client]);
+    }, []); // Empty dependency array is fine as client is stable now
     
     // Load venues when entity changes
     useEffect(() => {
@@ -406,10 +418,10 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
             }
         };
         
-        if (selectedEntityId) {
+        if (selectedEntityId || entities.length > 0) {
             loadVenues();
         }
-    }, [selectedEntityId, client]);
+    }, [selectedEntityId, entities.length]);
     
     // Load series and titles
     useEffect(() => {
@@ -438,7 +450,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         };
         
         loadSeriesData();
-    }, [client]);
+    }, []);
     
     // Auto-save in auto mode
     useEffect(() => {
