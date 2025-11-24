@@ -6,6 +6,9 @@ import type { ScrapedGameData, SeriesStatus, SeriesCategory, HolidayType } from 
 import { useGameDataEditor } from '../../hooks/useGameDataEditor';
 import { QuickDataEditor } from './SaveConfirmation/QuickDataEditor';
 import { SeriesDetailsEditor } from './SaveConfirmation/SeriesDetailsEditor';
+// ✅ NEW: Import consolidation preview components
+import { ConsolidationPreview } from './SaveConfirmation/ConsolidationPreview';
+import { useConsolidationPreview } from '../../hooks/useConsolidationPreview';
 
 // ===================================================================
 // GRAPHQL OPERATIONS
@@ -211,33 +214,20 @@ const detectHolidayType = (date: string, name: string): HolidayType | null => {
     const day = gameDate.getDate();
     const nameLower = name.toLowerCase();
     
-    // Christmas period (Dec 20-31)
     if (month === 12 && day >= 20) return 'CHRISTMAS' as HolidayType;
-    
-    // Boxing Day period (Dec 26 - Jan 2)
     if ((month === 12 && day >= 26) || (month === 1 && day <= 2)) {
         return 'BOXING_DAY' as HolidayType;
     }
-    
-    // New Year period (Dec 31 - Jan 7)
     if ((month === 12 && day === 31) || (month === 1 && day <= 7)) {
         return 'NEW_YEAR' as HolidayType;
     }
-    
-    // Australia Day (around Jan 26)
     if (month === 1 && day >= 24 && day <= 28) {
         return 'AUSTRALIA_DAY' as HolidayType;
     }
-    
-    // Easter (would need more complex logic)
     if (nameLower.includes('easter')) return 'EASTER' as HolidayType;
-    
-    // ANZAC Day (April 25)
     if (month === 4 && day >= 23 && day <= 27) {
         return 'ANZAC_DAY' as HolidayType;
     }
-    
-    // Queen's Birthday (June - second Monday)
     if (month === 6 && nameLower.includes('queen')) {
         return 'QUEENS_BIRTHDAY' as HolidayType;
     }
@@ -254,20 +244,34 @@ const getMonthFromDate = (date: string): number => {
     return new Date(date).getMonth() + 1;
 };
 
+// ✅ UPDATED: Added 'grouping' tab for consolidation preview
 const tabs: ModalTab[] = [
     { id: 'quick', label: 'Quick Edit', icon: '⚡' },
     { id: 'relationships', label: 'Entity/Venue/Series', icon: '🔗' },
+    { id: 'grouping', label: 'Grouping', icon: '📦' },  // NEW TAB
     { id: 'advanced', label: 'Advanced', icon: '⚙️' },
     { id: 'validation', label: 'Validation', icon: '✓' },
     { id: 'diff', label: 'Changes', icon: '📝' }
 ];
 
 // ===================================================================
-// COMPONENT
+// LAZY CLIENT INITIALIZATION
 // ===================================================================
 
-// [FIX 1] Client initialized OUTSIDE the component to prevent infinite re-renders
-const client = generateClient();
+// Lazy initialization pattern to avoid calling generateClient() before Amplify.configure()
+// Using 'any' to avoid TypeScript excessive stack depth error with Amplify's complex generics
+let clientInstance: any = null;
+
+const getClient = () => {
+    if (!clientInstance) {
+        clientInstance = generateClient();
+    }
+    return clientInstance;
+};
+
+// ===================================================================
+// COMPONENT
+// ===================================================================
 
 export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({ 
     isOpen, 
@@ -317,6 +321,15 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
     const [newSeriesStatus, setNewSeriesStatus] = useState<string>('SCHEDULED');
     const [newSeriesTitleName, setNewSeriesTitleName] = useState('');
     
+    // ✅ NEW: Consolidation tracking state
+    const [consolidationInfo, setConsolidationInfo] = useState<{
+        willConsolidate: boolean;
+        parentName: string | null;
+    }>({
+        willConsolidate: false,
+        parentName: null
+    });
+    
     // Convert game data to GameData type
     const initialData = useMemo(() => {
         const data = gameData as any;
@@ -343,6 +356,22 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         getChangedFields
     } = editor;
     
+    // ✅ NEW: Use consolidation preview hook for header badge
+    const { 
+        preview: consolidationPreview, 
+        isLoading: consolidationLoading,
+        willConsolidate 
+    } = useConsolidationPreview(editedData, {
+        debounceMs: 300,
+        includeSiblingDetails: false,
+        onPreviewComplete: (result) => {
+            setConsolidationInfo({
+                willConsolidate: result.willConsolidate,
+                parentName: result.consolidation?.parentName || null
+            });
+        }
+    });
+    
     // Generate a venue number for new venues
     const generateVenueNumber = useCallback(() => {
         return Math.floor(Math.random() * 900000) + 100000;
@@ -355,7 +384,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
             
             setLoadingVenue(true);
             try {
-                const result = await client.graphql({
+                const result = await getClient().graphql({
                     query: getVenueName,
                     variables: { id: venueId }
                 }) as { data: { getVenue: { id: string; name: string; fee: number | null } | null } };
@@ -373,14 +402,13 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         };
         
         loadVenueName();
-        // [FIX 2] Removed 'client' from dependency array to prevent infinite loop
     }, [venueId]);
     
     // Load entities
     useEffect(() => {
         const loadEntities = async () => {
             try {
-                const result = await client.graphql({
+                const result = await getClient().graphql({
                     query: listEntitiesForDropdown,
                     variables: { limit: 100 }
                 }) as { data: { listEntities: { items: any[] } } };
@@ -393,7 +421,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         };
         
         loadEntities();
-    }, []); // Empty dependency array is fine as client is stable now
+    }, []);
     
     // Load venues when entity changes
     useEffect(() => {
@@ -403,7 +431,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                     entityId: { eq: selectedEntityId }
                 } : undefined;
                 
-                const result = await client.graphql({
+                const result = await getClient().graphql({
                     query: listVenuesForDropdown,
                     variables: { 
                         filter,
@@ -427,8 +455,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
     useEffect(() => {
         const loadSeriesData = async () => {
             try {
-                // Load series
-                const seriesResult = await client.graphql({
+                const seriesResult = await getClient().graphql({
                     query: listSeriesForDropdown,
                     variables: { limit: 100 }
                 }) as { data: { listTournamentSeries: { items: any[] } } };
@@ -436,8 +463,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                 const seriesItems = seriesResult.data.listTournamentSeries?.items || [];
                 setSeries(seriesItems.filter((item: any) => item && !item._deleted));
                 
-                // Load series titles
-                const titlesResult = await client.graphql({
+                const titlesResult = await getClient().graphql({
                     query: listSeriesTitlesForDropdown,
                     variables: { limit: 100 }
                 }) as { data: { listTournamentSeriesTitles: { items: any[] } } };
@@ -459,6 +485,30 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         }
     }, [autoMode, skipConfirmation, isOpen]);
     
+    // ✅ NEW: Auto-apply detected pattern suggestions
+    const handleApplyDetectedPattern = useCallback(() => {
+        if (!consolidationPreview?.detectedPattern) return;
+        
+        const { parsedDayNumber, parsedFlightLetter, isFinalDay } = 
+            consolidationPreview.detectedPattern;
+        
+        const updates: Partial<GameData> = {};
+        
+        if (parsedDayNumber && !editedData.dayNumber) {
+            updates.dayNumber = parsedDayNumber;
+        }
+        if (parsedFlightLetter && !editedData.flightLetter) {
+            updates.flightLetter = parsedFlightLetter;
+        }
+        if (isFinalDay && !editedData.finalDay) {
+            updates.finalDay = true;
+        }
+        
+        if (Object.keys(updates).length > 0) {
+            updateMultipleFields(updates);
+        }
+    }, [consolidationPreview, editedData, updateMultipleFields]);
+    
     // Creation handlers
     const handleCreateEntity = async () => {
         try {
@@ -477,18 +527,15 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                 isActive: true
             };
             
-            const result = await client.graphql({
+            const result = await getClient().graphql({
                 query: createEntityMutation,
                 variables: { input }
             }) as { data: { createEntity: EntityConfig } };
             
             const newEntity = result.data.createEntity;
             if (newEntity) {
-                // Add to entities list
                 setEntities(prev => [...prev, newEntity as EntityConfig]);
-                // Select the new entity
                 setSelectedEntityId(newEntity.id);
-                // Reset form
                 setNewEntityName('');
                 setNewEntityDomain('');
                 setShowCreateCard(false);
@@ -517,21 +564,18 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                 fee: newVenueFee
             };
             
-            const result = await client.graphql({
+            const result = await getClient().graphql({
                 query: createVenueMutation,
                 variables: { input }
             }) as { data: { createVenue: VenueOption } };
             
             const newVenue = result.data.createVenue;
             if (newVenue) {
-                // Add to venues list
                 setVenues(prev => [...prev, newVenue as VenueOption]);
-                // Select the new venue
                 setSelectedVenueId(newVenue.id);
                 updateField('venueId', newVenue.id);
                 setVenueName(newVenue.name);
                 setVenueFee(newVenue.fee || null);
-                // Reset form
                 setNewVenueName('');
                 setNewVenueFee(null);
                 setShowCreateCard(false);
@@ -553,7 +597,6 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                 return;
             }
             
-            // Auto-detect category
             const detectedCategory = detectSeriesCategory(newSeriesTitleName);
             
             const input = {
@@ -562,18 +605,15 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                 seriesCategory: detectedCategory
             };
             
-            const result = await client.graphql({
+            const result = await getClient().graphql({
                 query: createSeriesTitleMutation,
                 variables: { input }
             }) as { data: { createTournamentSeriesTitle: TournamentSeriesTitle } };
             
             const newTitle = result.data.createTournamentSeriesTitle;
             if (newTitle) {
-                // Add to titles list
                 setSeriesTitles(prev => [...prev, newTitle as TournamentSeriesTitle]);
-                // Select the new title
                 setSelectedSeriesTitleId(newTitle.id);
-                // Reset form
                 setNewSeriesTitleName('');
                 setShowCreateCard(false);
             }
@@ -594,14 +634,9 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                 return;
             }
             
-            // Get game date for calculations
             const gameDate = editedData.gameStartDateTime || new Date().toISOString();
-            
-            // Find selected title for category
             const selectedTitle = seriesTitles.find(t => t.id === selectedSeriesTitleId);
             const category = selectedTitle?.seriesCategory || 'REGULAR' as SeriesCategory;
-            
-            // Calculate holiday type if SPECIAL category
             const holidayType = category === 'SPECIAL'
                 ? detectHolidayType(gameDate, newSeriesName)
                 : null;
@@ -620,20 +655,17 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                 endDate: null
             };
             
-            const result = await client.graphql({
+            const result = await getClient().graphql({
                 query: createSeriesMutation,
                 variables: { input }
             }) as { data: { createTournamentSeries: TournamentSeries } };
             
             const newSeries = result.data.createTournamentSeries;
             if (newSeries) {
-                // Add to series list
                 setSeries(prev => [...prev, newSeries as TournamentSeries]);
-                // Select the new series
                 setSelectedSeriesId(newSeries.id);
                 updateField('tournamentSeriesId', newSeries.id);
                 updateField('seriesName', newSeries.name);
-                // Reset form
                 setNewSeriesName('');
                 setNewSeriesYear(new Date().getFullYear());
                 setNewSeriesStatus('SCHEDULED');
@@ -649,7 +681,6 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
     const handleConfirm = async () => {
         setIsSaving(true);
         try {
-            // Include all edited data with series fields
             const saveData = {
                 ...editedData,
                 tournamentSeriesId: selectedSeriesId || editedData.tournamentSeriesId,
@@ -672,13 +703,11 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
     const handleQuickFix = () => {
         const fixes: Partial<GameData> = {};
         
-        // Apply critical fixes
         if (!editedData.name) fixes.name = 'Tournament ' + new Date().getTime();
         if (!editedData.gameStatus) fixes.gameStatus = 'SCHEDULED' as any;
         if (!editedData.registrationStatus) fixes.registrationStatus = 'OPEN' as any;
         if (!editedData.tournamentId) fixes.tournamentId = Math.floor(Math.random() * 1000000);
         
-        // Apply logical fixes
         if (editedData.guaranteeAmount && editedData.guaranteeAmount > 0) {
             fixes.hasGuarantee = true;
         }
@@ -698,12 +727,29 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
             case 'quick':
                 return (
                     <div className="p-4">
-                        {/* Venue fee display */}
                         {venueFee && (
                             <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded">
                                 <div className="text-sm">
                                     <span className="font-medium">Venue Fee:</span>
                                     <span className="ml-2 text-blue-700">${venueFee.toFixed(2)}</span>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* ✅ NEW: Show compact consolidation preview in quick tab */}
+                        {willConsolidate && consolidationInfo.parentName && (
+                            <div className="mb-3 p-2 bg-purple-50 border border-purple-200 rounded">
+                                <div className="text-sm flex items-center gap-2">
+                                    <span>📦</span>
+                                    <span>
+                                        Will group under: <strong>{consolidationInfo.parentName}</strong>
+                                    </span>
+                                    <button
+                                        onClick={() => setActiveTab('grouping')}
+                                        className="text-xs text-purple-600 hover:text-purple-700 underline ml-auto"
+                                    >
+                                        View Details
+                                    </button>
                                 </div>
                             </div>
                         )}
@@ -807,12 +853,11 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                             <select
                                 value={selectedVenueId}
                                 onChange={(e) => {
-                                    const venueId = e.target.value;
-                                    setSelectedVenueId(venueId);
-                                    updateField('venueId', venueId);
+                                    const venueIdVal = e.target.value;
+                                    setSelectedVenueId(venueIdVal);
+                                    updateField('venueId', venueIdVal);
                                     
-                                    // Update venue name and fee
-                                    const selectedVenue = venues.find(v => v.id === venueId);
+                                    const selectedVenue = venues.find(v => v.id === venueIdVal);
                                     if (selectedVenue) {
                                         setVenueName(selectedVenue.name);
                                         setVenueFee(selectedVenue.fee || null);
@@ -876,7 +921,6 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                                 </div>
                             )}
                             
-                            {/* Display selected venue fee */}
                             {venueFee && (
                                 <div className="mt-2 text-xs text-gray-600">
                                     Selected venue has a fee of ${venueFee.toFixed(2)}
@@ -931,56 +975,51 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                             </div>
                             
                             {/* Series Instance Selection */}
-                            <div>
+                            <div className="mb-3">
                                 <label className="text-xs font-medium text-gray-700">Series Instance</label>
                                 <select
                                     value={selectedSeriesId}
                                     onChange={(e) => {
-                                        const seriesId = e.target.value;
-                                        setSelectedSeriesId(seriesId);
-                                        updateField('tournamentSeriesId', seriesId || null);
+                                        const seriesIdVal = e.target.value;
+                                        setSelectedSeriesId(seriesIdVal);
+                                        updateField('tournamentSeriesId', seriesIdVal);
                                         
-                                        // Update series name
-                                        const selectedSeries = series.find(s => s.id === seriesId);
-                                        if (selectedSeries) {
-                                            updateField('seriesName', selectedSeries.name);
+                                        const selectedSeriesItem = series.find(s => s.id === seriesIdVal);
+                                        if (selectedSeriesItem) {
+                                            updateField('seriesName', selectedSeriesItem.name);
+                                            updateField('isSeries', true);
                                         }
                                     }}
                                     className="w-full px-2 py-1.5 text-sm border rounded mt-1"
                                 >
-                                    <option value="">-- No Series --</option>
+                                    <option value="">-- Select Series --</option>
                                     {filteredSeries.map(s => (
                                         <option key={s.id} value={s.id}>
                                             {s.name} ({s.year}) - {s.status}
-                                            {s.seriesCategory && ` [${s.seriesCategory}]`}
-                                            {s.seriesCategory === 'SPECIAL' && s.holidayType && ` - ${s.holidayType.replace(/_/g, ' ')}`}
                                         </option>
                                     ))}
                                 </select>
                             </div>
                             
-                            {/* Display selected series info */}
-                            {selectedSeriesId && (() => {
+                            {/* Show selected series info */}
+                            {(() => {
                                 const selectedSeries = series.find(s => s.id === selectedSeriesId);
                                 return selectedSeries ? (
-                                    <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="font-medium">Category:</span>
+                                    <div className="p-2 bg-green-50 border border-green-200 rounded text-xs mt-2">
+                                        <div className="font-medium text-green-800 mb-1">Selected Series:</div>
+                                        <div><span className="font-medium">Name:</span> {selectedSeries.name}</div>
+                                        <div><span className="font-medium">Year:</span> {selectedSeries.year}</div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium">Category:</span> 
                                             <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
-                                                {selectedSeries.seriesCategory || 'REGULAR'}
+                                                {selectedSeries.seriesCategory}
                                             </span>
-                                            {selectedSeries.seriesCategory === 'SPECIAL' && selectedSeries.holidayType && (
+                                            {selectedSeries.holidayType && (
                                                 <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded">
                                                     {selectedSeries.holidayType.replace(/_/g, ' ')}
                                                 </span>
                                             )}
                                         </div>
-                                        {selectedSeries.quarter && (
-                                            <div><span className="font-medium">Quarter:</span> Q{selectedSeries.quarter}</div>
-                                        )}
-                                        {selectedSeries.month && (
-                                            <div><span className="font-medium">Month:</span> {selectedSeries.month}</div>
-                                        )}
                                     </div>
                                 ) : null;
                             })()}
@@ -1019,7 +1058,6 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                                             <option value="CANCELLED">Cancelled</option>
                                         </select>
                                     </div>
-                                    {/* Show detected category */}
                                     {newSeriesName && (
                                         <div className="text-xs text-gray-600 mb-2">
                                             Detected category: <span className="font-medium">
@@ -1059,6 +1097,136 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                         )}
                     </div>
                 );
+            
+            // ✅ NEW: Grouping/Consolidation Tab
+            case 'grouping':
+                return (
+                    <div className="p-4 space-y-4">
+                        <div className="text-sm text-gray-600 mb-4">
+                            <p>
+                                This preview shows how your tournament will be grouped with
+                                related flights when saved. Multi-day tournaments are
+                                automatically consolidated under a parent record.
+                            </p>
+                        </div>
+                        
+                        {/* Main Consolidation Preview Component */}
+                        <ConsolidationPreview
+                            gameData={editedData}
+                            showSiblingDetails={true}
+                            onConsolidationChange={(willConsolidateVal, parentName) => {
+                                setConsolidationInfo({ 
+                                    willConsolidate: willConsolidateVal, 
+                                    parentName 
+                                });
+                            }}
+                        />
+                        
+                        {/* Auto-apply detected patterns button */}
+                        {consolidationPreview?.detectedPattern?.isMultiDay && 
+                         consolidationPreview.detectedPattern.detectionSource === 'namePattern' && (
+                            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="text-sm font-medium text-blue-900">
+                                            💡 Auto-detected Pattern
+                                        </div>
+                                        <div className="text-xs text-blue-700 mt-1">
+                                            We detected day/flight info from the name. 
+                                            Apply it to the fields for better accuracy?
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={handleApplyDetectedPattern}
+                                        className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                                    >
+                                        Apply
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Tips Section */}
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                            <h4 className="text-sm font-medium text-gray-700 mb-2">
+                                💡 Tips for Better Grouping
+                            </h4>
+                            <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
+                                <li>
+                                    Set <strong>Tournament Series</strong> and <strong>Event Number</strong> for 
+                                    most reliable grouping
+                                </li>
+                                <li>
+                                    Set <strong>Day Number</strong> (1, 2, 3) and <strong>Flight Letter</strong> (A, B, C) 
+                                    to identify specific flights
+                                </li>
+                                <li>
+                                    Mark the final day with the <strong>Final Day</strong> checkbox to ensure 
+                                    results are synced correctly
+                                </li>
+                                <li>
+                                    Games with the same buy-in at the same venue with similar names will be 
+                                    grouped automatically
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        {/* Quick Series Fields Editor */}
+                        {willConsolidate && (
+                            <div className="border rounded-lg p-4">
+                                <h4 className="text-sm font-medium text-gray-700 mb-3">
+                                    📋 Quick Series Fields
+                                </h4>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-700">Event Number</label>
+                                        <input
+                                            type="number"
+                                            value={editedData.eventNumber || ''}
+                                            onChange={(e) => updateField('eventNumber', e.target.value ? parseInt(e.target.value) : null)}
+                                            placeholder="e.g., 8"
+                                            className="w-full px-2 py-1 text-sm border rounded mt-1"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-700">Day Number</label>
+                                        <input
+                                            type="number"
+                                            value={editedData.dayNumber || ''}
+                                            onChange={(e) => updateField('dayNumber', e.target.value ? parseInt(e.target.value) : null)}
+                                            placeholder="e.g., 1"
+                                            className="w-full px-2 py-1 text-sm border rounded mt-1"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-700">Flight Letter</label>
+                                        <select
+                                            value={editedData.flightLetter || ''}
+                                            onChange={(e) => updateField('flightLetter', e.target.value || null)}
+                                            className="w-full px-2 py-1 text-sm border rounded mt-1"
+                                        >
+                                            <option value="">-- None --</option>
+                                            {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].map(letter => (
+                                                <option key={letter} value={letter}>{letter}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="flex items-end gap-2">
+                                        <label className="flex items-center gap-2 text-sm">
+                                            <input
+                                                type="checkbox"
+                                                checked={editedData.finalDay || false}
+                                                onChange={(e) => updateField('finalDay', e.target.checked)}
+                                                className="h-4 w-4"
+                                            />
+                                            Final Day
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
                 
             case 'advanced':
                 return (
@@ -1073,7 +1241,6 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
             case 'validation':
                 return (
                     <div className="p-4 space-y-4">
-                        {/* Validation Status */}
                         <div className={`border rounded-lg p-4 ${validationStatus.isValid ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'}`}>
                             <h3 className="font-semibold text-sm mb-3">
                                 {validationStatus.isValid ? '✓ Validation Passed' : '⚠ Validation Issues'}
@@ -1106,9 +1273,9 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                             )}
                             
                             {validationStatus.warnings.length > 0 && (
-                                <div>
+                                <div className="mb-3">
                                     <div className="text-sm font-medium text-yellow-700 mb-1">Warnings:</div>
-                                    <ul className="list-disc list-inside text-xs text-yellow-700">
+                                    <ul className="text-sm text-yellow-700 list-disc list-inside">
                                         {validationStatus.warnings.map((warning, idx) => (
                                             <li key={idx}>{warning}</li>
                                         ))}
@@ -1126,7 +1293,6 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                             )}
                         </div>
                         
-                        {/* Field Stats */}
                         <div className="bg-gray-50 border rounded-lg p-4">
                             <h3 className="font-semibold text-sm mb-3">Field Statistics</h3>
                             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -1221,6 +1387,7 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
+                        {/* Validation badge */}
                         {validationStatus.isValid ? (
                             <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
                                 ✓ Valid
@@ -1230,9 +1397,28 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                                 ⚠ {validationStatus.criticalMissing.length} Issues
                             </span>
                         )}
+                        
+                        {/* Changes badge */}
                         {hasChanges && (
                             <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
                                 {getChangedFields().length} Changes
+                            </span>
+                        )}
+                        
+                        {/* ✅ NEW: Consolidation badge */}
+                        {consolidationLoading ? (
+                            <span className="px-2 py-1 bg-gray-100 text-gray-500 rounded text-xs font-medium">
+                                <span className="animate-pulse">Checking...</span>
+                            </span>
+                        ) : willConsolidate && consolidationInfo.parentName && (
+                            <span 
+                                className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium cursor-pointer hover:bg-purple-200"
+                                onClick={() => setActiveTab('grouping')}
+                                title="Click to view grouping details"
+                            >
+                                📦 Groups: {consolidationInfo.parentName.length > 20 
+                                    ? consolidationInfo.parentName.substring(0, 20) + '...' 
+                                    : consolidationInfo.parentName}
                             </span>
                         )}
                     </div>
@@ -1253,6 +1439,10 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
                             <span className="mr-1">{tab.icon}</span>
                             <span className="hidden sm:inline">{tab.label}</span>
                             <span className="sm:hidden">{tab.label.split('/')[0]}</span>
+                            {/* ✅ NEW: Indicator dot on grouping tab when consolidation active */}
+                            {tab.id === 'grouping' && willConsolidate && (
+                                <span className="ml-1 w-2 h-2 bg-purple-500 rounded-full inline-block" />
+                            )}
                         </button>
                     ))}
                 </div>

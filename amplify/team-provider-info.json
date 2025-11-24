@@ -75,7 +75,7 @@
         },
         "tournamentConsolidator": {
           "deploymentBucketName": "amplify-kingsroom-dev-338eb-deployment",
-          "s3Key": "amplify-builds/tournamentConsolidator-6577593972394d6a4576-build.zip"
+          "s3Key": "amplify-builds/tournamentConsolidator-6c44322b54662b544e76-build.zip"
         }
       },
       "auth": {

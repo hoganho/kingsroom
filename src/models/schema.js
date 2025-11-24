@@ -197,384 +197,6 @@ export const schema = {
                 }
             ]
         },
-        "ScrapeStructure": {
-            "name": "ScrapeStructure",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "fields": {
-                    "name": "fields",
-                    "isArray": true,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": false
-                },
-                "structureLabel": {
-                    "name": "structureLabel",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "occurrenceCount": {
-                    "name": "occurrenceCount",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "firstSeenAt": {
-                    "name": "firstSeenAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "lastSeenAt": {
-                    "name": "lastSeenAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "exampleUrl": {
-                    "name": "exampleUrl",
-                    "isArray": false,
-                    "type": "AWSURL",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "ScrapeStructures",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        "DataSync": {
-            "name": "DataSync",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "syncedAt": {
-                    "name": "syncedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "method": {
-                    "name": "method",
-                    "isArray": false,
-                    "type": {
-                        "enum": "DataSource"
-                    },
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "sourceUrl": {
-                    "name": "sourceUrl",
-                    "isArray": false,
-                    "type": "AWSURL",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "title": {
-                    "name": "title",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "content": {
-                    "name": "content",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "DataSyncs",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        "ScraperState": {
-            "name": "ScraperState",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "isRunning": {
-                    "name": "isRunning",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "lastScannedId": {
-                    "name": "lastScannedId",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "lastRunStartTime": {
-                    "name": "lastRunStartTime",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "lastRunEndTime": {
-                    "name": "lastRunEndTime",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "consecutiveBlankCount": {
-                    "name": "consecutiveBlankCount",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalScraped": {
-                    "name": "totalScraped",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalErrors": {
-                    "name": "totalErrors",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "enabled": {
-                    "name": "enabled",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "currentLog": {
-                    "name": "currentLog",
-                    "isArray": true,
-                    "type": {
-                        "nonModel": "ScraperLogData"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
-                },
-                "highestStoredId": {
-                    "name": "highestStoredId",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "lowestStoredId": {
-                    "name": "lowestStoredId",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "knownGapRanges": {
-                    "name": "knownGapRanges",
-                    "isArray": false,
-                    "type": "AWSJSON",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "lastGapScanAt": {
-                    "name": "lastGapScanAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalGamesInDatabase": {
-                    "name": "totalGamesInDatabase",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "lastGamesProcessed": {
-                    "name": "lastGamesProcessed",
-                    "isArray": true,
-                    "type": {
-                        "nonModel": "ScrapedGameStatus"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
-                },
-                "entityId": {
-                    "name": "entityId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "entity": {
-                    "name": "entity",
-                    "isArray": false,
-                    "type": {
-                        "model": "Entity"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "association": {
-                        "connectionType": "BELONGS_TO",
-                        "targetNames": [
-                            "entityId"
-                        ]
-                    }
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "ScraperStates",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byEntityScraperState",
-                        "fields": [
-                            "entityId"
-                        ]
-                    }
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
         "Venue": {
             "name": "Venue",
             "fields": {
@@ -2461,6 +2083,569 @@ export const schema = {
                 }
             ]
         },
+        "GameCost": {
+            "name": "GameCost",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "game": {
+                    "name": "game",
+                    "isArray": false,
+                    "type": {
+                        "model": "Game"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "gameId"
+                        ]
+                    }
+                },
+                "totalDealerCost": {
+                    "name": "totalDealerCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalTournamentDirectorCost": {
+                    "name": "totalTournamentDirectorCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPrizeContribution": {
+                    "name": "totalPrizeContribution",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalJackpotContribution": {
+                    "name": "totalJackpotContribution",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPromotionCost": {
+                    "name": "totalPromotionCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalFloorStaffCost": {
+                    "name": "totalFloorStaffCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalOtherCost": {
+                    "name": "totalOtherCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCost": {
+                    "name": "totalCost",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lineItems": {
+                    "name": "lineItems",
+                    "isArray": true,
+                    "type": {
+                        "model": "GameCostLineItem"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "gameCost"
+                        ]
+                    }
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameDate": {
+                    "name": "gameDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "notes": {
+                    "name": "notes",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "GameCosts",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byGameCost",
+                        "fields": [
+                            "gameId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityCost",
+                        "fields": [
+                            "entityId",
+                            "gameDate"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byVenueCost",
+                        "fields": [
+                            "venueId",
+                            "gameDate"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byGameDateCost",
+                        "fields": [
+                            "gameDate",
+                            "totalCost"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "GameCostLineItem": {
+            "name": "GameCostLineItem",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameCostId": {
+                    "name": "gameCostId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameCost": {
+                    "name": "gameCost",
+                    "isArray": false,
+                    "type": {
+                        "model": "GameCost"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "gameCostId"
+                        ]
+                    }
+                },
+                "costItemId": {
+                    "name": "costItemId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "costItem": {
+                    "name": "costItem",
+                    "isArray": false,
+                    "type": {
+                        "model": "GameCostItem"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "costItemId"
+                        ]
+                    }
+                },
+                "costType": {
+                    "name": "costType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "CostItemType"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "amount": {
+                    "name": "amount",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "quantity": {
+                    "name": "quantity",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rate": {
+                    "name": "rate",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hours": {
+                    "name": "hours",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "notes": {
+                    "name": "notes",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameDate": {
+                    "name": "gameDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "GameCostLineItems",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byGameCost",
+                        "fields": [
+                            "gameCostId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byCostItem",
+                        "fields": [
+                            "costItemId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byCostTypeLine",
+                        "fields": [
+                            "costType",
+                            "gameDate"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byGameLineItem",
+                        "fields": [
+                            "gameId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityLineItem",
+                        "fields": [
+                            "entityId",
+                            "gameDate"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byVenueLineItem",
+                        "fields": [
+                            "venueId",
+                            "gameDate"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "GameCostItem": {
+            "name": "GameCostItem",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "costType": {
+                    "name": "costType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "CostItemType"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "rateType": {
+                    "name": "rateType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "CostItemRateType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "defaultRate": {
+                    "name": "defaultRate",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isPerHour": {
+                    "name": "isPerHour",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isActive": {
+                    "name": "isActive",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "description": {
+                    "name": "description",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lineItems": {
+                    "name": "lineItems",
+                    "isArray": true,
+                    "type": {
+                        "model": "GameCostLineItem"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "costItem"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "GameCostItems",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byCostType",
+                        "fields": [
+                            "costType",
+                            "name"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
         "Player": {
             "name": "Player",
             "fields": {
@@ -4182,1172 +4367,6 @@ export const schema = {
                 }
             ]
         },
-        "TicketTemplate": {
-            "name": "TicketTemplate",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "name": {
-                    "name": "name",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "description": {
-                    "name": "description",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "value": {
-                    "name": "value",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "validityDays": {
-                    "name": "validityDays",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "originGameId": {
-                    "name": "originGameId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "targetGameId": {
-                    "name": "targetGameId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "playerTickets": {
-                    "name": "playerTickets",
-                    "isArray": true,
-                    "type": {
-                        "model": "PlayerTicket"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true,
-                    "association": {
-                        "connectionType": "HAS_MANY",
-                        "associatedWith": [
-                            "ticketTemplate"
-                        ]
-                    }
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "TicketTemplates",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        "PlayerTicket": {
-            "name": "PlayerTicket",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "assignedAt": {
-                    "name": "assignedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "expiryDate": {
-                    "name": "expiryDate",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "status": {
-                    "name": "status",
-                    "isArray": false,
-                    "type": {
-                        "enum": "TicketStatus"
-                    },
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "usedInGameId": {
-                    "name": "usedInGameId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "playerId": {
-                    "name": "playerId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "player": {
-                    "name": "player",
-                    "isArray": false,
-                    "type": {
-                        "model": "Player"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "association": {
-                        "connectionType": "BELONGS_TO",
-                        "targetNames": [
-                            "playerId"
-                        ]
-                    }
-                },
-                "ticketTemplateId": {
-                    "name": "ticketTemplateId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "ticketTemplate": {
-                    "name": "ticketTemplate",
-                    "isArray": false,
-                    "type": {
-                        "model": "TicketTemplate"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "association": {
-                        "connectionType": "BELONGS_TO",
-                        "targetNames": [
-                            "ticketTemplateId"
-                        ]
-                    }
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "PlayerTickets",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byPlayer",
-                        "fields": [
-                            "playerId"
-                        ]
-                    }
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byTicketTemplate",
-                        "fields": [
-                            "ticketTemplateId"
-                        ]
-                    }
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        "MarketingMessage": {
-            "name": "MarketingMessage",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "name": {
-                    "name": "name",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "subject": {
-                    "name": "subject",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "emailBody": {
-                    "name": "emailBody",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "smsBody": {
-                    "name": "smsBody",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "sentMessages": {
-                    "name": "sentMessages",
-                    "isArray": true,
-                    "type": {
-                        "model": "PlayerMarketingMessage"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true,
-                    "association": {
-                        "connectionType": "HAS_MANY",
-                        "associatedWith": [
-                            "marketingMessageId"
-                        ]
-                    }
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "MarketingMessages",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        "PlayerMarketingMessage": {
-            "name": "PlayerMarketingMessage",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "status": {
-                    "name": "status",
-                    "isArray": false,
-                    "type": {
-                        "enum": "MessageStatus"
-                    },
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "sentAt": {
-                    "name": "sentAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "playerId": {
-                    "name": "playerId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "marketingMessageId": {
-                    "name": "marketingMessageId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "PlayerMarketingMessages",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byPlayer",
-                        "fields": [
-                            "playerId",
-                            "sentAt"
-                        ]
-                    }
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byMarketingMessage",
-                        "fields": [
-                            "marketingMessageId"
-                        ]
-                    }
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        "PlayerMarketingPreferences": {
-            "name": "PlayerMarketingPreferences",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "optOutSms": {
-                    "name": "optOutSms",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "optOutEmail": {
-                    "name": "optOutEmail",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "playerId": {
-                    "name": "playerId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "player": {
-                    "name": "player",
-                    "isArray": false,
-                    "type": {
-                        "model": "Player"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "association": {
-                        "connectionType": "BELONGS_TO",
-                        "targetNames": [
-                            "playerId"
-                        ]
-                    }
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "PlayerMarketingPreferences",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byPlayer",
-                        "fields": [
-                            "playerId"
-                        ]
-                    }
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        "User": {
-            "name": "User",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "username": {
-                    "name": "username",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "email": {
-                    "name": "email",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "role": {
-                    "name": "role",
-                    "isArray": false,
-                    "type": {
-                        "enum": "UserRole"
-                    },
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "preferences": {
-                    "name": "preferences",
-                    "isArray": true,
-                    "type": {
-                        "model": "UserPreference"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true,
-                    "association": {
-                        "connectionType": "HAS_MANY",
-                        "associatedWith": [
-                            "userId"
-                        ]
-                    }
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "Users",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "provider": "userPools",
-                                "ownerField": "id",
-                                "allow": "owner",
-                                "operations": [
-                                    "read",
-                                    "update"
-                                ],
-                                "identityClaim": "cognito:username"
-                            },
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "read"
-                                ]
-                            },
-                            {
-                                "groupClaim": "cognito:groups",
-                                "provider": "userPools",
-                                "allow": "groups",
-                                "groups": [
-                                    "SUPER_ADMIN"
-                                ],
-                                "operations": [
-                                    "create",
-                                    "read",
-                                    "update",
-                                    "delete"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        "UserPreference": {
-            "name": "UserPreference",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "page": {
-                    "name": "page",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "widget": {
-                    "name": "widget",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "preference": {
-                    "name": "preference",
-                    "isArray": false,
-                    "type": "AWSJSON",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "userId": {
-                    "name": "userId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "UserPreferences",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byUser",
-                        "fields": [
-                            "userId"
-                        ]
-                    }
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "provider": "userPools",
-                                "ownerField": "userId",
-                                "allow": "owner",
-                                "identityClaim": "cognito:username",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        "Staff": {
-            "name": "Staff",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "firstName": {
-                    "name": "firstName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "lastName": {
-                    "name": "lastName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "role": {
-                    "name": "role",
-                    "isArray": false,
-                    "type": {
-                        "enum": "StaffRole"
-                    },
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "assignedVenueId": {
-                    "name": "assignedVenueId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "Staff",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byVenue",
-                        "fields": [
-                            "assignedVenueId"
-                        ]
-                    }
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        "Asset": {
-            "name": "Asset",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "name": {
-                    "name": "name",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "type": {
-                    "name": "type",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "condition": {
-                    "name": "condition",
-                    "isArray": false,
-                    "type": {
-                        "enum": "AssetCondition"
-                    },
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "acquiredDate": {
-                    "name": "acquiredDate",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "lastCheckedDate": {
-                    "name": "lastCheckedDate",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "venueId": {
-                    "name": "venueId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "venue": {
-                    "name": "venue",
-                    "isArray": false,
-                    "type": {
-                        "model": "Venue"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "association": {
-                        "connectionType": "BELONGS_TO",
-                        "targetNames": [
-                            "venueId"
-                        ]
-                    }
-                },
-                "entityId": {
-                    "name": "entityId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "entity": {
-                    "name": "entity",
-                    "isArray": false,
-                    "type": {
-                        "model": "Entity"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "association": {
-                        "connectionType": "BELONGS_TO",
-                        "targetNames": [
-                            "entityId"
-                        ]
-                    }
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "Assets",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byVenue",
-                        "fields": [
-                            "venueId"
-                        ]
-                    }
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byEntityAsset",
-                        "fields": [
-                            "entityId",
-                            "type"
-                        ]
-                    }
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        "SocialAccount": {
-            "name": "SocialAccount",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "platform": {
-                    "name": "platform",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "accountName": {
-                    "name": "accountName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "apiKey": {
-                    "name": "apiKey",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "apiSecret": {
-                    "name": "apiSecret",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "SocialAccounts",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        "SocialPost": {
-            "name": "SocialPost",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "content": {
-                    "name": "content",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "imageUrl": {
-                    "name": "imageUrl",
-                    "isArray": false,
-                    "type": "AWSURL",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "postedAt": {
-                    "name": "postedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "socialAccountId": {
-                    "name": "socialAccountId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "SocialPosts",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "bySocialAccount",
-                        "fields": [
-                            "socialAccountId",
-                            "postedAt"
-                        ]
-                    }
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
         "ScraperJob": {
             "name": "ScraperJob",
             "fields": {
@@ -6367,6 +5386,384 @@ export const schema = {
                 }
             ]
         },
+        "ScraperState": {
+            "name": "ScraperState",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "isRunning": {
+                    "name": "isRunning",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastScannedId": {
+                    "name": "lastScannedId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastRunStartTime": {
+                    "name": "lastRunStartTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastRunEndTime": {
+                    "name": "lastRunEndTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "consecutiveBlankCount": {
+                    "name": "consecutiveBlankCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalScraped": {
+                    "name": "totalScraped",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalErrors": {
+                    "name": "totalErrors",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "enabled": {
+                    "name": "enabled",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "currentLog": {
+                    "name": "currentLog",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "ScraperLogData"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "highestStoredId": {
+                    "name": "highestStoredId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lowestStoredId": {
+                    "name": "lowestStoredId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "knownGapRanges": {
+                    "name": "knownGapRanges",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastGapScanAt": {
+                    "name": "lastGapScanAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalGamesInDatabase": {
+                    "name": "totalGamesInDatabase",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastGamesProcessed": {
+                    "name": "lastGamesProcessed",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "ScrapedGameStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entity": {
+                    "name": "entity",
+                    "isArray": false,
+                    "type": {
+                        "model": "Entity"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "entityId"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "ScraperStates",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityScraperState",
+                        "fields": [
+                            "entityId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "ScrapeStructure": {
+            "name": "ScrapeStructure",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "fields": {
+                    "name": "fields",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "structureLabel": {
+                    "name": "structureLabel",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "occurrenceCount": {
+                    "name": "occurrenceCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "firstSeenAt": {
+                    "name": "firstSeenAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastSeenAt": {
+                    "name": "lastSeenAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "exampleUrl": {
+                    "name": "exampleUrl",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "ScrapeStructures",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "DataSync": {
+            "name": "DataSync",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "syncedAt": {
+                    "name": "syncedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "method": {
+                    "name": "method",
+                    "isArray": false,
+                    "type": {
+                        "enum": "DataSource"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "sourceUrl": {
+                    "name": "sourceUrl",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "title": {
+                    "name": "title",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "content": {
+                    "name": "content",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "DataSyncs",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
         "S3Storage": {
             "name": "S3Storage",
             "fields": {
@@ -6704,8 +6101,304 @@ export const schema = {
                 }
             ]
         },
-        "GameCostItem": {
-            "name": "GameCostItem",
+        "User": {
+            "name": "User",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "username": {
+                    "name": "username",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "email": {
+                    "name": "email",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "role": {
+                    "name": "role",
+                    "isArray": false,
+                    "type": {
+                        "enum": "UserRole"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "preferences": {
+                    "name": "preferences",
+                    "isArray": true,
+                    "type": {
+                        "model": "UserPreference"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "userId"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "Users",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "provider": "userPools",
+                                "ownerField": "id",
+                                "allow": "owner",
+                                "operations": [
+                                    "read",
+                                    "update"
+                                ],
+                                "identityClaim": "cognito:username"
+                            },
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "read"
+                                ]
+                            },
+                            {
+                                "groupClaim": "cognito:groups",
+                                "provider": "userPools",
+                                "allow": "groups",
+                                "groups": [
+                                    "SUPER_ADMIN"
+                                ],
+                                "operations": [
+                                    "create",
+                                    "read",
+                                    "update",
+                                    "delete"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "UserPreference": {
+            "name": "UserPreference",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "page": {
+                    "name": "page",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "widget": {
+                    "name": "widget",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "preference": {
+                    "name": "preference",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "userId": {
+                    "name": "userId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "UserPreferences",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byUser",
+                        "fields": [
+                            "userId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "provider": "userPools",
+                                "ownerField": "userId",
+                                "allow": "owner",
+                                "identityClaim": "cognito:username",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "Staff": {
+            "name": "Staff",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "firstName": {
+                    "name": "firstName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastName": {
+                    "name": "lastName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "role": {
+                    "name": "role",
+                    "isArray": false,
+                    "type": {
+                        "enum": "StaffRole"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "assignedVenueId": {
+                    "name": "assignedVenueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "Staff",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byVenue",
+                        "fields": [
+                            "assignedVenueId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "Asset": {
+            "name": "Asset",
             "fields": {
                 "id": {
                     "name": "id",
@@ -6721,43 +6414,156 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "costType": {
-                    "name": "costType",
+                "type": {
+                    "name": "type",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "condition": {
+                    "name": "condition",
                     "isArray": false,
                     "type": {
-                        "enum": "CostItemType"
+                        "enum": "AssetCondition"
                     },
                     "isRequired": true,
                     "attributes": []
                 },
-                "rateType": {
-                    "name": "rateType",
+                "acquiredDate": {
+                    "name": "acquiredDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastCheckedDate": {
+                    "name": "lastCheckedDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venue": {
+                    "name": "venue",
                     "isArray": false,
                     "type": {
-                        "enum": "CostItemRateType"
+                        "model": "Venue"
                     },
                     "isRequired": false,
-                    "attributes": []
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "venueId"
+                        ]
+                    }
                 },
-                "defaultRate": {
-                    "name": "defaultRate",
+                "entityId": {
+                    "name": "entityId",
                     "isArray": false,
-                    "type": "Float",
+                    "type": "ID",
                     "isRequired": false,
                     "attributes": []
                 },
-                "isPerHour": {
-                    "name": "isPerHour",
+                "entity": {
+                    "name": "entity",
                     "isArray": false,
-                    "type": "Boolean",
+                    "type": {
+                        "model": "Entity"
+                    },
                     "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "entityId"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "Assets",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byVenue",
+                        "fields": [
+                            "venueId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byEntityAsset",
+                        "fields": [
+                            "entityId",
+                            "type"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "TicketTemplate": {
+            "name": "TicketTemplate",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
                     "attributes": []
                 },
-                "isActive": {
-                    "name": "isActive",
+                "name": {
+                    "name": "name",
                     "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
+                    "type": "String",
+                    "isRequired": true,
                     "attributes": []
                 },
                 "description": {
@@ -6767,11 +6573,39 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "lineItems": {
-                    "name": "lineItems",
+                "value": {
+                    "name": "value",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "validityDays": {
+                    "name": "validityDays",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "originGameId": {
+                    "name": "originGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "targetGameId": {
+                    "name": "targetGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerTickets": {
+                    "name": "playerTickets",
                     "isArray": true,
                     "type": {
-                        "model": "GameCostLineItem"
+                        "model": "PlayerTicket"
                     },
                     "isRequired": false,
                     "attributes": [],
@@ -6779,7 +6613,7 @@ export const schema = {
                     "association": {
                         "connectionType": "HAS_MANY",
                         "associatedWith": [
-                            "costItem"
+                            "ticketTemplate"
                         ]
                     }
                 },
@@ -6787,19 +6621,147 @@ export const schema = {
                     "name": "createdAt",
                     "isArray": false,
                     "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
                 },
                 "updatedAt": {
                     "name": "updatedAt",
                     "isArray": false,
                     "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
                 }
             },
             "syncable": true,
-            "pluralName": "GameCostItems",
+            "pluralName": "TicketTemplates",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "PlayerTicket": {
+            "name": "PlayerTicket",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "assignedAt": {
+                    "name": "assignedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "expiryDate": {
+                    "name": "expiryDate",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": {
+                        "enum": "TicketStatus"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "usedInGameId": {
+                    "name": "usedInGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerId": {
+                    "name": "playerId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "player": {
+                    "name": "player",
+                    "isArray": false,
+                    "type": {
+                        "model": "Player"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "playerId"
+                        ]
+                    }
+                },
+                "ticketTemplateId": {
+                    "name": "ticketTemplateId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "ticketTemplate": {
+                    "name": "ticketTemplate",
+                    "isArray": false,
+                    "type": {
+                        "model": "TicketTemplate"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "ticketTemplateId"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "PlayerTickets",
             "attributes": [
                 {
                     "type": "model",
@@ -6808,10 +6770,18 @@ export const schema = {
                 {
                     "type": "key",
                     "properties": {
-                        "name": "byCostType",
+                        "name": "byPlayer",
                         "fields": [
-                            "costType",
-                            "name"
+                            "playerId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byTicketTemplate",
+                        "fields": [
+                            "ticketTemplateId"
                         ]
                     }
                 },
@@ -6833,8 +6803,8 @@ export const schema = {
                 }
             ]
         },
-        "GameCost": {
-            "name": "GameCost",
+        "MarketingMessage": {
+            "name": "MarketingMessage",
             "fields": {
                 "id": {
                     "name": "id",
@@ -6843,89 +6813,39 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "gameId": {
-                    "name": "gameId",
+                "name": {
+                    "name": "name",
                     "isArray": false,
-                    "type": "ID",
+                    "type": "String",
                     "isRequired": true,
                     "attributes": []
                 },
-                "game": {
-                    "name": "game",
+                "subject": {
+                    "name": "subject",
                     "isArray": false,
-                    "type": {
-                        "model": "Game"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "association": {
-                        "connectionType": "BELONGS_TO",
-                        "targetNames": [
-                            "gameId"
-                        ]
-                    }
-                },
-                "totalDealerCost": {
-                    "name": "totalDealerCost",
-                    "isArray": false,
-                    "type": "Float",
+                    "type": "String",
                     "isRequired": false,
                     "attributes": []
                 },
-                "totalTournamentDirectorCost": {
-                    "name": "totalTournamentDirectorCost",
+                "emailBody": {
+                    "name": "emailBody",
                     "isArray": false,
-                    "type": "Float",
+                    "type": "String",
                     "isRequired": false,
                     "attributes": []
                 },
-                "totalPrizeContribution": {
-                    "name": "totalPrizeContribution",
+                "smsBody": {
+                    "name": "smsBody",
                     "isArray": false,
-                    "type": "Float",
+                    "type": "String",
                     "isRequired": false,
                     "attributes": []
                 },
-                "totalJackpotContribution": {
-                    "name": "totalJackpotContribution",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalPromotionCost": {
-                    "name": "totalPromotionCost",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalFloorStaffCost": {
-                    "name": "totalFloorStaffCost",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalOtherCost": {
-                    "name": "totalOtherCost",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalCost": {
-                    "name": "totalCost",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "lineItems": {
-                    "name": "lineItems",
+                "sentMessages": {
+                    "name": "sentMessages",
                     "isArray": true,
                     "type": {
-                        "model": "GameCostLineItem"
+                        "model": "PlayerMarketingMessage"
                     },
                     "isRequired": false,
                     "attributes": [],
@@ -6933,55 +6853,111 @@ export const schema = {
                     "association": {
                         "connectionType": "HAS_MANY",
                         "associatedWith": [
-                            "gameCost"
+                            "marketingMessageId"
                         ]
                     }
                 },
-                "entityId": {
-                    "name": "entityId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "venueId": {
-                    "name": "venueId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gameDate": {
-                    "name": "gameDate",
+                "createdAt": {
+                    "name": "createdAt",
                     "isArray": false,
                     "type": "AWSDateTime",
                     "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "MarketingMessages",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "PlayerMarketingMessage": {
+            "name": "PlayerMarketingMessage",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
                     "attributes": []
                 },
-                "notes": {
-                    "name": "notes",
+                "status": {
+                    "name": "status",
                     "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
+                    "type": {
+                        "enum": "MessageStatus"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "sentAt": {
+                    "name": "sentAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "playerId": {
+                    "name": "playerId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "marketingMessageId": {
+                    "name": "marketingMessageId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
                     "attributes": []
                 },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
                     "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
                 },
                 "updatedAt": {
                     "name": "updatedAt",
                     "isArray": false,
                     "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
                 }
             },
             "syncable": true,
-            "pluralName": "GameCosts",
+            "pluralName": "PlayerMarketingMessages",
             "attributes": [
                 {
                     "type": "model",
@@ -6990,39 +6966,19 @@ export const schema = {
                 {
                     "type": "key",
                     "properties": {
-                        "name": "byGameCost",
+                        "name": "byPlayer",
                         "fields": [
-                            "gameId"
+                            "playerId",
+                            "sentAt"
                         ]
                     }
                 },
                 {
                     "type": "key",
                     "properties": {
-                        "name": "byEntityCost",
+                        "name": "byMarketingMessage",
                         "fields": [
-                            "entityId",
-                            "gameDate"
-                        ]
-                    }
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byVenueCost",
-                        "fields": [
-                            "venueId",
-                            "gameDate"
-                        ]
-                    }
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byGameDateCost",
-                        "fields": [
-                            "gameDate",
-                            "totalCost"
+                            "marketingMessageId"
                         ]
                     }
                 },
@@ -7044,8 +7000,8 @@ export const schema = {
                 }
             ]
         },
-        "GameCostLineItem": {
-            "name": "GameCostLineItem",
+        "PlayerMarketingPreferences": {
+            "name": "PlayerMarketingPreferences",
             "fields": {
                 "id": {
                     "name": "id",
@@ -7054,139 +7010,61 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "gameCostId": {
-                    "name": "gameCostId",
+                "optOutSms": {
+                    "name": "optOutSms",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "optOutEmail": {
+                    "name": "optOutEmail",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerId": {
+                    "name": "playerId",
                     "isArray": false,
                     "type": "ID",
                     "isRequired": true,
                     "attributes": []
                 },
-                "gameCost": {
-                    "name": "gameCost",
+                "player": {
+                    "name": "player",
                     "isArray": false,
                     "type": {
-                        "model": "GameCost"
+                        "model": "Player"
                     },
                     "isRequired": false,
                     "attributes": [],
                     "association": {
                         "connectionType": "BELONGS_TO",
                         "targetNames": [
-                            "gameCostId"
+                            "playerId"
                         ]
                     }
-                },
-                "costItemId": {
-                    "name": "costItemId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "costItem": {
-                    "name": "costItem",
-                    "isArray": false,
-                    "type": {
-                        "model": "GameCostItem"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "association": {
-                        "connectionType": "BELONGS_TO",
-                        "targetNames": [
-                            "costItemId"
-                        ]
-                    }
-                },
-                "costType": {
-                    "name": "costType",
-                    "isArray": false,
-                    "type": {
-                        "enum": "CostItemType"
-                    },
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "amount": {
-                    "name": "amount",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "quantity": {
-                    "name": "quantity",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "rate": {
-                    "name": "rate",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "hours": {
-                    "name": "hours",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "notes": {
-                    "name": "notes",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gameId": {
-                    "name": "gameId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "entityId": {
-                    "name": "entityId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "venueId": {
-                    "name": "venueId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gameDate": {
-                    "name": "gameDate",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": []
                 },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
                     "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
                 },
                 "updatedAt": {
                     "name": "updatedAt",
                     "isArray": false,
                     "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
                 }
             },
             "syncable": true,
-            "pluralName": "GameCostLineItems",
+            "pluralName": "PlayerMarketingPreferences",
             "attributes": [
                 {
                     "type": "model",
@@ -7195,57 +7073,179 @@ export const schema = {
                 {
                     "type": "key",
                     "properties": {
-                        "name": "byGameCost",
+                        "name": "byPlayer",
                         "fields": [
-                            "gameCostId"
+                            "playerId"
                         ]
                     }
                 },
                 {
-                    "type": "key",
+                    "type": "auth",
                     "properties": {
-                        "name": "byCostItem",
-                        "fields": [
-                            "costItemId"
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
                         ]
                     }
+                }
+            ]
+        },
+        "SocialAccount": {
+            "name": "SocialAccount",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "platform": {
+                    "name": "platform",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "accountName": {
+                    "name": "accountName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "apiKey": {
+                    "name": "apiKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "apiSecret": {
+                    "name": "apiSecret",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "SocialAccounts",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "private",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "SocialPost": {
+            "name": "SocialPost",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "content": {
+                    "name": "content",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "imageUrl": {
+                    "name": "imageUrl",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "postedAt": {
+                    "name": "postedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "socialAccountId": {
+                    "name": "socialAccountId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "SocialPosts",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
                 },
                 {
                     "type": "key",
                     "properties": {
-                        "name": "byCostTypeLine",
+                        "name": "bySocialAccount",
                         "fields": [
-                            "costType",
-                            "gameDate"
-                        ]
-                    }
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byGameLineItem",
-                        "fields": [
-                            "gameId"
-                        ]
-                    }
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byEntityLineItem",
-                        "fields": [
-                            "entityId",
-                            "gameDate"
-                        ]
-                    }
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byVenueLineItem",
-                        "fields": [
-                            "venueId",
-                            "gameDate"
+                            "socialAccountId",
+                            "postedAt"
                         ]
                     }
                 },
@@ -7650,6 +7650,297 @@ export const schema = {
         }
     },
     "nonModels": {
+        "ConsolidationPreviewResult": {
+            "name": "ConsolidationPreviewResult",
+            "fields": {
+                "willConsolidate": {
+                    "name": "willConsolidate",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "reason": {
+                    "name": "reason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "consolidation": {
+                    "name": "consolidation",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "ConsolidationDetails"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "warnings": {
+                    "name": "warnings",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "detectedPattern": {
+                    "name": "detectedPattern",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "DetectedMultiDayPattern"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ConsolidationDetails": {
+            "name": "ConsolidationDetails",
+            "fields": {
+                "consolidationKey": {
+                    "name": "consolidationKey",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "keyStrategy": {
+                    "name": "keyStrategy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "parentExists": {
+                    "name": "parentExists",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "parentGameId": {
+                    "name": "parentGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "parentName": {
+                    "name": "parentName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "siblingCount": {
+                    "name": "siblingCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "siblings": {
+                    "name": "siblings",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "ConsolidationSibling"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "projectedTotals": {
+                    "name": "projectedTotals",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "ProjectedConsolidationTotals"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ConsolidationSibling": {
+            "name": "ConsolidationSibling",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dayNumber": {
+                    "name": "dayNumber",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "flightLetter": {
+                    "name": "flightLetter",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameStatus": {
+                    "name": "gameStatus",
+                    "isArray": false,
+                    "type": {
+                        "enum": "GameStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameStartDateTime": {
+                    "name": "gameStartDateTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalEntries": {
+                    "name": "totalEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "finalDay": {
+                    "name": "finalDay",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ProjectedConsolidationTotals": {
+            "name": "ProjectedConsolidationTotals",
+            "fields": {
+                "totalEntries": {
+                    "name": "totalEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalRebuys": {
+                    "name": "totalRebuys",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalAddons": {
+                    "name": "totalAddons",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepool": {
+                    "name": "prizepool",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "earliestStart": {
+                    "name": "earliestStart",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "latestEnd": {
+                    "name": "latestEnd",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "projectedStatus": {
+                    "name": "projectedStatus",
+                    "isArray": false,
+                    "type": {
+                        "enum": "GameStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isPartialData": {
+                    "name": "isPartialData",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "missingFlightCount": {
+                    "name": "missingFlightCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "DetectedMultiDayPattern": {
+            "name": "DetectedMultiDayPattern",
+            "fields": {
+                "isMultiDay": {
+                    "name": "isMultiDay",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "detectionSource": {
+                    "name": "detectionSource",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "parsedDayNumber": {
+                    "name": "parsedDayNumber",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "parsedFlightLetter": {
+                    "name": "parsedFlightLetter",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isFinalDay": {
+                    "name": "isFinalDay",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "derivedParentName": {
+                    "name": "derivedParentName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
         "ScraperControlResponse": {
             "name": "ScraperControlResponse",
             "fields": {
@@ -7874,1074 +8165,6 @@ export const schema = {
                 }
             }
         },
-        "S3VersionHistory": {
-            "name": "S3VersionHistory",
-            "fields": {
-                "s3Key": {
-                    "name": "s3Key",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "scrapedAt": {
-                    "name": "scrapedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "contentHash": {
-                    "name": "contentHash",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "uploadedBy": {
-                    "name": "uploadedBy",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "contentSize": {
-                    "name": "contentSize",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "TournamentLevel": {
-            "name": "TournamentLevel",
-            "fields": {
-                "levelNumber": {
-                    "name": "levelNumber",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "durationMinutes": {
-                    "name": "durationMinutes",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "smallBlind": {
-                    "name": "smallBlind",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "bigBlind": {
-                    "name": "bigBlind",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "ante": {
-                    "name": "ante",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "Break": {
-            "name": "Break",
-            "fields": {
-                "levelNumberBeforeBreak": {
-                    "name": "levelNumberBeforeBreak",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "durationMinutes": {
-                    "name": "durationMinutes",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "ClientMetricResponse": {
-            "name": "ClientMetricResponse",
-            "fields": {
-                "success": {
-                    "name": "success",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "message": {
-                    "name": "message",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "userId": {
-                    "name": "userId",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "UserMetricsSummary": {
-            "name": "UserMetricsSummary",
-            "fields": {
-                "userId": {
-                    "name": "userId",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "userName": {
-                    "name": "userName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalActions": {
-                    "name": "totalActions",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalPageViews": {
-                    "name": "totalPageViews",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalErrors": {
-                    "name": "totalErrors",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "lastActive": {
-                    "name": "lastActive",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "mostUsedFeature": {
-                    "name": "mostUsedFeature",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "S3StorageConnection": {
-            "name": "S3StorageConnection",
-            "fields": {
-                "items": {
-                    "name": "items",
-                    "isArray": true,
-                    "type": {
-                        "model": "S3Storage"
-                    },
-                    "isRequired": true,
-                    "attributes": [],
-                    "isArrayNullable": false
-                },
-                "nextToken": {
-                    "name": "nextToken",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "CachingStatsResponse": {
-            "name": "CachingStatsResponse",
-            "fields": {
-                "totalURLs": {
-                    "name": "totalURLs",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "urlsWithETags": {
-                    "name": "urlsWithETags",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "urlsWithLastModified": {
-                    "name": "urlsWithLastModified",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalCacheHits": {
-                    "name": "totalCacheHits",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalCacheMisses": {
-                    "name": "totalCacheMisses",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "averageCacheHitRate": {
-                    "name": "averageCacheHitRate",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "storageUsedMB": {
-                    "name": "storageUsedMB",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "recentCacheActivity": {
-                    "name": "recentCacheActivity",
-                    "isArray": true,
-                    "type": {
-                        "nonModel": "CacheActivityLog"
-                    },
-                    "isRequired": true,
-                    "attributes": [],
-                    "isArrayNullable": true
-                }
-            }
-        },
-        "CacheActivityLog": {
-            "name": "CacheActivityLog",
-            "fields": {
-                "url": {
-                    "name": "url",
-                    "isArray": false,
-                    "type": "AWSURL",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "timestamp": {
-                    "name": "timestamp",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "action": {
-                    "name": "action",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "reason": {
-                    "name": "reason",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "DatabaseMetric": {
-            "name": "DatabaseMetric",
-            "fields": {
-                "timestamp": {
-                    "name": "timestamp",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "functionName": {
-                    "name": "functionName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "operation": {
-                    "name": "operation",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "table": {
-                    "name": "table",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "success": {
-                    "name": "success",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "duration": {
-                    "name": "duration",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "count": {
-                    "name": "count",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "entityId": {
-                    "name": "entityId",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "DatabaseMetricsResponse": {
-            "name": "DatabaseMetricsResponse",
-            "fields": {
-                "metrics": {
-                    "name": "metrics",
-                    "isArray": true,
-                    "type": {
-                        "nonModel": "DatabaseMetric"
-                    },
-                    "isRequired": true,
-                    "attributes": [],
-                    "isArrayNullable": false
-                }
-            }
-        },
-        "S3StorageHistoryResponse": {
-            "name": "S3StorageHistoryResponse",
-            "fields": {
-                "items": {
-                    "name": "items",
-                    "isArray": true,
-                    "type": {
-                        "model": "S3Storage"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
-                },
-                "nextToken": {
-                    "name": "nextToken",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "S3ContentResponse": {
-            "name": "S3ContentResponse",
-            "fields": {
-                "s3Key": {
-                    "name": "s3Key",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "html": {
-                    "name": "html",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "metadata": {
-                    "name": "metadata",
-                    "isArray": false,
-                    "type": "AWSJSON",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "size": {
-                    "name": "size",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "lastModified": {
-                    "name": "lastModified",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "CachingStats": {
-            "name": "CachingStats",
-            "fields": {
-                "totalURLs": {
-                    "name": "totalURLs",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "urlsWithETags": {
-                    "name": "urlsWithETags",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "urlsWithLastModified": {
-                    "name": "urlsWithLastModified",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalCacheHits": {
-                    "name": "totalCacheHits",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalCacheMisses": {
-                    "name": "totalCacheMisses",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "averageCacheHitRate": {
-                    "name": "averageCacheHitRate",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "storageUsedMB": {
-                    "name": "storageUsedMB",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "recentCacheActivity": {
-                    "name": "recentCacheActivity",
-                    "isArray": true,
-                    "type": {
-                        "nonModel": "CacheActivity"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
-                }
-            }
-        },
-        "CacheActivity": {
-            "name": "CacheActivity",
-            "fields": {
-                "url": {
-                    "name": "url",
-                    "isArray": false,
-                    "type": "AWSURL",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "timestamp": {
-                    "name": "timestamp",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "action": {
-                    "name": "action",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "reason": {
-                    "name": "reason",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                }
-            }
-        },
-        "S3StorageListResponse": {
-            "name": "S3StorageListResponse",
-            "fields": {
-                "items": {
-                    "name": "items",
-                    "isArray": true,
-                    "type": {
-                        "model": "S3Storage"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
-                },
-                "nextToken": {
-                    "name": "nextToken",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "RefreshResponse": {
-            "name": "RefreshResponse",
-            "fields": {
-                "message": {
-                    "name": "message",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "status": {
-                    "name": "status",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                }
-            }
-        },
-        "ReScrapeResult": {
-            "name": "ReScrapeResult",
-            "fields": {
-                "name": {
-                    "name": "name",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gameStartDateTime": {
-                    "name": "gameStartDateTime",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gameEndDateTime": {
-                    "name": "gameEndDateTime",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gameStatus": {
-                    "name": "gameStatus",
-                    "isArray": false,
-                    "type": {
-                        "enum": "GameStatus"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "registrationStatus": {
-                    "name": "registrationStatus",
-                    "isArray": false,
-                    "type": {
-                        "enum": "RegistrationStatus"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gameType": {
-                    "name": "gameType",
-                    "isArray": false,
-                    "type": {
-                        "enum": "GameType"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gameVariant": {
-                    "name": "gameVariant",
-                    "isArray": false,
-                    "type": {
-                        "enum": "GameVariant"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "tournamentType": {
-                    "name": "tournamentType",
-                    "isArray": false,
-                    "type": {
-                        "enum": "TournamentType"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "prizepool": {
-                    "name": "prizepool",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "buyIn": {
-                    "name": "buyIn",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "rake": {
-                    "name": "rake",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "startingStack": {
-                    "name": "startingStack",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "hasGuarantee": {
-                    "name": "hasGuarantee",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "guaranteeAmount": {
-                    "name": "guaranteeAmount",
-                    "isArray": false,
-                    "type": "Float",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalEntries": {
-                    "name": "totalEntries",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalRebuys": {
-                    "name": "totalRebuys",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalAddons": {
-                    "name": "totalAddons",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalDuration": {
-                    "name": "totalDuration",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "playersRemaining": {
-                    "name": "playersRemaining",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "seriesName": {
-                    "name": "seriesName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gameTags": {
-                    "name": "gameTags",
-                    "isArray": true,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
-                },
-                "venueMatch": {
-                    "name": "venueMatch",
-                    "isArray": false,
-                    "type": {
-                        "nonModel": "VenueMatch"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "existingGameId": {
-                    "name": "existingGameId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "doNotScrape": {
-                    "name": "doNotScrape",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "sourceUrl": {
-                    "name": "sourceUrl",
-                    "isArray": false,
-                    "type": "AWSURL",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "tournamentId": {
-                    "name": "tournamentId",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "entityId": {
-                    "name": "entityId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "s3Key": {
-                    "name": "s3Key",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "reScrapedAt": {
-                    "name": "reScrapedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "EntityVenueAssignmentSummary": {
-            "name": "EntityVenueAssignmentSummary",
-            "fields": {
-                "entityId": {
-                    "name": "entityId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "entityName": {
-                    "name": "entityName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalGames": {
-                    "name": "totalGames",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gamesWithVenue": {
-                    "name": "gamesWithVenue",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gamesNeedingVenue": {
-                    "name": "gamesNeedingVenue",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "EntityScraperMetrics": {
-            "name": "EntityScraperMetrics",
-            "fields": {
-                "entityId": {
-                    "name": "entityId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "entityName": {
-                    "name": "entityName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalJobs": {
-                    "name": "totalJobs",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "successfulJobs": {
-                    "name": "successfulJobs",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "failedJobs": {
-                    "name": "failedJobs",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "totalURLsScraped": {
-                    "name": "totalURLsScraped",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                }
-            }
-        },
-        "GamesNeedingVenueResponse": {
-            "name": "GamesNeedingVenueResponse",
-            "fields": {
-                "items": {
-                    "name": "items",
-                    "isArray": true,
-                    "type": {
-                        "model": "Game"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
-                },
-                "nextToken": {
-                    "name": "nextToken",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalCount": {
-                    "name": "totalCount",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "VenueAssignmentSummary": {
-            "name": "VenueAssignmentSummary",
-            "fields": {
-                "totalGames": {
-                    "name": "totalGames",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gamesWithVenue": {
-                    "name": "gamesWithVenue",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "gamesNeedingVenue": {
-                    "name": "gamesNeedingVenue",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "pendingAssignments": {
-                    "name": "pendingAssignments",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "byEntity": {
-                    "name": "byEntity",
-                    "isArray": true,
-                    "type": {
-                        "nonModel": "EntityVenueAssignmentSummary"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
-                }
-            }
-        },
-        "VenueAssignmentResult": {
-            "name": "VenueAssignmentResult",
-            "fields": {
-                "success": {
-                    "name": "success",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "gameId": {
-                    "name": "gameId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "venueId": {
-                    "name": "venueId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "affectedRecords": {
-                    "name": "affectedRecords",
-                    "isArray": false,
-                    "type": {
-                        "nonModel": "AffectedRecords"
-                    },
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "error": {
-                    "name": "error",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "AffectedRecords": {
-            "name": "AffectedRecords",
-            "fields": {
-                "gameUpdated": {
-                    "name": "gameUpdated",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "playerEntriesUpdated": {
-                    "name": "playerEntriesUpdated",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "playerVenueRecordsCreated": {
-                    "name": "playerVenueRecordsCreated",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "playersWithRegistrationUpdated": {
-                    "name": "playersWithRegistrationUpdated",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "playerSummariesUpdated": {
-                    "name": "playerSummariesUpdated",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
-        "BatchVenueAssignmentResult": {
-            "name": "BatchVenueAssignmentResult",
-            "fields": {
-                "successful": {
-                    "name": "successful",
-                    "isArray": true,
-                    "type": {
-                        "nonModel": "VenueAssignmentResult"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
-                },
-                "failed": {
-                    "name": "failed",
-                    "isArray": true,
-                    "type": {
-                        "nonModel": "VenueAssignmentResult"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true
-                },
-                "totalProcessed": {
-                    "name": "totalProcessed",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                }
-            }
-        },
         "ScraperJobURLResult": {
             "name": "ScraperJobURLResult",
             "fields": {
@@ -9128,46 +8351,49 @@ export const schema = {
                 }
             }
         },
-        "ScraperJobConnection": {
-            "name": "ScraperJobConnection",
+        "EntityScraperMetrics": {
+            "name": "EntityScraperMetrics",
             "fields": {
-                "items": {
-                    "name": "items",
-                    "isArray": true,
-                    "type": {
-                        "model": "ScraperJob"
-                    },
-                    "isRequired": true,
-                    "attributes": [],
-                    "isArrayNullable": true
-                },
-                "nextToken": {
-                    "name": "nextToken",
+                "entityId": {
+                    "name": "entityId",
                     "isArray": false,
-                    "type": "String",
+                    "type": "ID",
                     "isRequired": false,
                     "attributes": []
-                }
-            }
-        },
-        "ScrapeURLConnection": {
-            "name": "ScrapeURLConnection",
-            "fields": {
-                "items": {
-                    "name": "items",
-                    "isArray": true,
-                    "type": {
-                        "model": "ScrapeURL"
-                    },
-                    "isRequired": true,
-                    "attributes": [],
-                    "isArrayNullable": true
                 },
-                "nextToken": {
-                    "name": "nextToken",
+                "entityName": {
+                    "name": "entityName",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": false,
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalJobs": {
+                    "name": "totalJobs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "successfulJobs": {
+                    "name": "successfulJobs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "failedJobs": {
+                    "name": "failedJobs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalURLsScraped": {
+                    "name": "totalURLsScraped",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
                     "attributes": []
                 }
             }
@@ -9911,6 +9137,880 @@ export const schema = {
                 }
             }
         },
+        "VenueMatch": {
+            "name": "VenueMatch",
+            "fields": {
+                "autoAssignedVenue": {
+                    "name": "autoAssignedVenue",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "ScrapedVenueMatchDetails"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "suggestions": {
+                    "name": "suggestions",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "ScrapedVenueMatchDetails"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                }
+            }
+        },
+        "ReScrapeResult": {
+            "name": "ReScrapeResult",
+            "fields": {
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameStartDateTime": {
+                    "name": "gameStartDateTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameEndDateTime": {
+                    "name": "gameEndDateTime",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameStatus": {
+                    "name": "gameStatus",
+                    "isArray": false,
+                    "type": {
+                        "enum": "GameStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "registrationStatus": {
+                    "name": "registrationStatus",
+                    "isArray": false,
+                    "type": {
+                        "enum": "RegistrationStatus"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameType": {
+                    "name": "gameType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "GameType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameVariant": {
+                    "name": "gameVariant",
+                    "isArray": false,
+                    "type": {
+                        "enum": "GameVariant"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tournamentType": {
+                    "name": "tournamentType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "TournamentType"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prizepool": {
+                    "name": "prizepool",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "buyIn": {
+                    "name": "buyIn",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "rake": {
+                    "name": "rake",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "startingStack": {
+                    "name": "startingStack",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "hasGuarantee": {
+                    "name": "hasGuarantee",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "guaranteeAmount": {
+                    "name": "guaranteeAmount",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalEntries": {
+                    "name": "totalEntries",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalRebuys": {
+                    "name": "totalRebuys",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalAddons": {
+                    "name": "totalAddons",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalDuration": {
+                    "name": "totalDuration",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playersRemaining": {
+                    "name": "playersRemaining",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesName": {
+                    "name": "seriesName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gameTags": {
+                    "name": "gameTags",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "venueMatch": {
+                    "name": "venueMatch",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "VenueMatch"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "existingGameId": {
+                    "name": "existingGameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "doNotScrape": {
+                    "name": "doNotScrape",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "sourceUrl": {
+                    "name": "sourceUrl",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "tournamentId": {
+                    "name": "tournamentId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "s3Key": {
+                    "name": "s3Key",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "reScrapedAt": {
+                    "name": "reScrapedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "GapRange": {
+            "name": "GapRange",
+            "fields": {
+                "start": {
+                    "name": "start",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "end": {
+                    "name": "end",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "count": {
+                    "name": "count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "EntityScrapingStatus": {
+            "name": "EntityScrapingStatus",
+            "fields": {
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "entityName": {
+                    "name": "entityName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lowestTournamentId": {
+                    "name": "lowestTournamentId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "highestTournamentId": {
+                    "name": "highestTournamentId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalGamesStored": {
+                    "name": "totalGamesStored",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "unfinishedGameCount": {
+                    "name": "unfinishedGameCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gaps": {
+                    "name": "gaps",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "GapRange"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "gapSummary": {
+                    "name": "gapSummary",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "GapSummary"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastUpdated": {
+                    "name": "lastUpdated",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "cacheAge": {
+                    "name": "cacheAge",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "GapSummary": {
+            "name": "GapSummary",
+            "fields": {
+                "totalGaps": {
+                    "name": "totalGaps",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalMissingIds": {
+                    "name": "totalMissingIds",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "largestGapStart": {
+                    "name": "largestGapStart",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "largestGapEnd": {
+                    "name": "largestGapEnd",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "largestGapCount": {
+                    "name": "largestGapCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "coveragePercentage": {
+                    "name": "coveragePercentage",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "TournamentIdBounds": {
+            "name": "TournamentIdBounds",
+            "fields": {
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lowestId": {
+                    "name": "lowestId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "highestId": {
+                    "name": "highestId",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCount": {
+                    "name": "totalCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "lastUpdated": {
+                    "name": "lastUpdated",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            }
+        },
+        "S3VersionHistory": {
+            "name": "S3VersionHistory",
+            "fields": {
+                "s3Key": {
+                    "name": "s3Key",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "scrapedAt": {
+                    "name": "scrapedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "contentHash": {
+                    "name": "contentHash",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "uploadedBy": {
+                    "name": "uploadedBy",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "contentSize": {
+                    "name": "contentSize",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "CachingStatsResponse": {
+            "name": "CachingStatsResponse",
+            "fields": {
+                "totalURLs": {
+                    "name": "totalURLs",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "urlsWithETags": {
+                    "name": "urlsWithETags",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "urlsWithLastModified": {
+                    "name": "urlsWithLastModified",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalCacheHits": {
+                    "name": "totalCacheHits",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalCacheMisses": {
+                    "name": "totalCacheMisses",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "averageCacheHitRate": {
+                    "name": "averageCacheHitRate",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "storageUsedMB": {
+                    "name": "storageUsedMB",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "recentCacheActivity": {
+                    "name": "recentCacheActivity",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "CacheActivityLog"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                }
+            }
+        },
+        "CacheActivityLog": {
+            "name": "CacheActivityLog",
+            "fields": {
+                "url": {
+                    "name": "url",
+                    "isArray": false,
+                    "type": "AWSURL",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "timestamp": {
+                    "name": "timestamp",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "action": {
+                    "name": "action",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "reason": {
+                    "name": "reason",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "S3ContentResponse": {
+            "name": "S3ContentResponse",
+            "fields": {
+                "s3Key": {
+                    "name": "s3Key",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "html": {
+                    "name": "html",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "metadata": {
+                    "name": "metadata",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "size": {
+                    "name": "size",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastModified": {
+                    "name": "lastModified",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "S3StorageHistoryResponse": {
+            "name": "S3StorageHistoryResponse",
+            "fields": {
+                "items": {
+                    "name": "items",
+                    "isArray": true,
+                    "type": {
+                        "model": "S3Storage"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "nextToken": {
+                    "name": "nextToken",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "S3StorageListResponse": {
+            "name": "S3StorageListResponse",
+            "fields": {
+                "items": {
+                    "name": "items",
+                    "isArray": true,
+                    "type": {
+                        "model": "S3Storage"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "nextToken": {
+                    "name": "nextToken",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "TournamentLevel": {
+            "name": "TournamentLevel",
+            "fields": {
+                "levelNumber": {
+                    "name": "levelNumber",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "durationMinutes": {
+                    "name": "durationMinutes",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "smallBlind": {
+                    "name": "smallBlind",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "bigBlind": {
+                    "name": "bigBlind",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "ante": {
+                    "name": "ante",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "Break": {
+            "name": "Break",
+            "fields": {
+                "levelNumberBeforeBreak": {
+                    "name": "levelNumberBeforeBreak",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "durationMinutes": {
+                    "name": "durationMinutes",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ClientMetricResponse": {
+            "name": "ClientMetricResponse",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "userId": {
+                    "name": "userId",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "UserMetricsSummary": {
+            "name": "UserMetricsSummary",
+            "fields": {
+                "userId": {
+                    "name": "userId",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "userName": {
+                    "name": "userName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalActions": {
+                    "name": "totalActions",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalPageViews": {
+                    "name": "totalPageViews",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalErrors": {
+                    "name": "totalErrors",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "lastActive": {
+                    "name": "lastActive",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "mostUsedFeature": {
+                    "name": "mostUsedFeature",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "DatabaseMetric": {
+            "name": "DatabaseMetric",
+            "fields": {
+                "timestamp": {
+                    "name": "timestamp",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "functionName": {
+                    "name": "functionName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "operation": {
+                    "name": "operation",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "table": {
+                    "name": "table",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "duration": {
+                    "name": "duration",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "count": {
+                    "name": "count",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "entityId": {
+                    "name": "entityId",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "DatabaseMetricsResponse": {
+            "name": "DatabaseMetricsResponse",
+            "fields": {
+                "metrics": {
+                    "name": "metrics",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "DatabaseMetric"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                }
+            }
+        },
         "AllCountsResult": {
             "name": "AllCountsResult",
             "fields": {
@@ -10007,27 +10107,248 @@ export const schema = {
                 }
             }
         },
-        "VenueMatch": {
-            "name": "VenueMatch",
+        "EntityVenueAssignmentSummary": {
+            "name": "EntityVenueAssignmentSummary",
             "fields": {
-                "autoAssignedVenue": {
-                    "name": "autoAssignedVenue",
+                "entityId": {
+                    "name": "entityId",
                     "isArray": false,
-                    "type": {
-                        "nonModel": "ScrapedVenueMatchDetails"
-                    },
+                    "type": "ID",
                     "isRequired": false,
                     "attributes": []
                 },
-                "suggestions": {
-                    "name": "suggestions",
+                "entityName": {
+                    "name": "entityName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "totalGames": {
+                    "name": "totalGames",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gamesWithVenue": {
+                    "name": "gamesWithVenue",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gamesNeedingVenue": {
+                    "name": "gamesNeedingVenue",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "VenueAssignmentSummary": {
+            "name": "VenueAssignmentSummary",
+            "fields": {
+                "totalGames": {
+                    "name": "totalGames",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gamesWithVenue": {
+                    "name": "gamesWithVenue",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gamesNeedingVenue": {
+                    "name": "gamesNeedingVenue",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "pendingAssignments": {
+                    "name": "pendingAssignments",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "byEntity": {
+                    "name": "byEntity",
                     "isArray": true,
                     "type": {
-                        "nonModel": "ScrapedVenueMatchDetails"
+                        "nonModel": "EntityVenueAssignmentSummary"
                     },
                     "isRequired": false,
                     "attributes": [],
                     "isArrayNullable": true
+                }
+            }
+        },
+        "VenueAssignmentResult": {
+            "name": "VenueAssignmentResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "gameId": {
+                    "name": "gameId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "venueId": {
+                    "name": "venueId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "affectedRecords": {
+                    "name": "affectedRecords",
+                    "isArray": false,
+                    "type": {
+                        "nonModel": "AffectedRecords"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "AffectedRecords": {
+            "name": "AffectedRecords",
+            "fields": {
+                "gameUpdated": {
+                    "name": "gameUpdated",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerEntriesUpdated": {
+                    "name": "playerEntriesUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerVenueRecordsCreated": {
+                    "name": "playerVenueRecordsCreated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playersWithRegistrationUpdated": {
+                    "name": "playersWithRegistrationUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "playerSummariesUpdated": {
+                    "name": "playerSummariesUpdated",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "BatchVenueAssignmentResult": {
+            "name": "BatchVenueAssignmentResult",
+            "fields": {
+                "successful": {
+                    "name": "successful",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "VenueAssignmentResult"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "failed": {
+                    "name": "failed",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "VenueAssignmentResult"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "totalProcessed": {
+                    "name": "totalProcessed",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "GamesNeedingVenueResponse": {
+            "name": "GamesNeedingVenueResponse",
+            "fields": {
+                "items": {
+                    "name": "items",
+                    "isArray": true,
+                    "type": {
+                        "model": "Game"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "nextToken": {
+                    "name": "nextToken",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "totalCount": {
+                    "name": "totalCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "RefreshResponse": {
+            "name": "RefreshResponse",
+            "fields": {
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
                 }
             }
         },
@@ -10189,155 +10510,68 @@ export const schema = {
                 }
             }
         },
-        "GapRange": {
-            "name": "GapRange",
+        "S3StorageConnection": {
+            "name": "S3StorageConnection",
             "fields": {
-                "start": {
-                    "name": "start",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "end": {
-                    "name": "end",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "count": {
-                    "name": "count",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                }
-            }
-        },
-        "EntityScrapingStatus": {
-            "name": "EntityScrapingStatus",
-            "fields": {
-                "entityId": {
-                    "name": "entityId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "entityName": {
-                    "name": "entityName",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "lowestTournamentId": {
-                    "name": "lowestTournamentId",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "highestTournamentId": {
-                    "name": "highestTournamentId",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalGamesStored": {
-                    "name": "totalGamesStored",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "unfinishedGameCount": {
-                    "name": "unfinishedGameCount",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "gaps": {
-                    "name": "gaps",
+                "items": {
+                    "name": "items",
                     "isArray": true,
                     "type": {
-                        "nonModel": "GapRange"
+                        "model": "S3Storage"
                     },
                     "isRequired": true,
                     "attributes": [],
                     "isArrayNullable": false
                 },
-                "gapSummary": {
-                    "name": "gapSummary",
+                "nextToken": {
+                    "name": "nextToken",
                     "isArray": false,
-                    "type": {
-                        "nonModel": "GapSummary"
-                    },
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "lastUpdated": {
-                    "name": "lastUpdated",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "cacheAge": {
-                    "name": "cacheAge",
-                    "isArray": false,
-                    "type": "Int",
+                    "type": "String",
                     "isRequired": false,
                     "attributes": []
                 }
             }
         },
-        "GapSummary": {
-            "name": "GapSummary",
+        "ScraperJobConnection": {
+            "name": "ScraperJobConnection",
             "fields": {
-                "totalGaps": {
-                    "name": "totalGaps",
-                    "isArray": false,
-                    "type": "Int",
+                "items": {
+                    "name": "items",
+                    "isArray": true,
+                    "type": {
+                        "model": "ScraperJob"
+                    },
                     "isRequired": true,
-                    "attributes": []
+                    "attributes": [],
+                    "isArrayNullable": true
                 },
-                "totalMissingIds": {
-                    "name": "totalMissingIds",
+                "nextToken": {
+                    "name": "nextToken",
                     "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "largestGapStart": {
-                    "name": "largestGapStart",
-                    "isArray": false,
-                    "type": "Int",
+                    "type": "String",
                     "isRequired": false,
                     "attributes": []
-                },
-                "largestGapEnd": {
-                    "name": "largestGapEnd",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "largestGapCount": {
-                    "name": "largestGapCount",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "coveragePercentage": {
-                    "name": "coveragePercentage",
-                    "isArray": false,
-                    "type": "Float",
+                }
+            }
+        },
+        "ScrapeURLConnection": {
+            "name": "ScrapeURLConnection",
+            "fields": {
+                "items": {
+                    "name": "items",
+                    "isArray": true,
+                    "type": {
+                        "model": "ScrapeURL"
+                    },
                     "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "nextToken": {
+                    "name": "nextToken",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
                     "attributes": []
                 }
             }
@@ -10370,48 +10604,8 @@ export const schema = {
                     "attributes": []
                 }
             }
-        },
-        "TournamentIdBounds": {
-            "name": "TournamentIdBounds",
-            "fields": {
-                "entityId": {
-                    "name": "entityId",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "lowestId": {
-                    "name": "lowestId",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "highestId": {
-                    "name": "highestId",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "totalCount": {
-                    "name": "totalCount",
-                    "isArray": false,
-                    "type": "Int",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "lastUpdated": {
-                    "name": "lastUpdated",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": true,
-                    "attributes": []
-                }
-            }
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "997649db0bdcbd0b999394b5528721d6"
+    "version": "7b9a75de34b0067462bfcd20b0ec2968"
 };
