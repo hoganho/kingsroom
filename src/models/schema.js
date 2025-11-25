@@ -8680,6 +8680,62 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "tournamentSeriesId": {
+                    "name": "tournamentSeriesId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesTitleId": {
+                    "name": "seriesTitleId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isMainEvent": {
+                    "name": "isMainEvent",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "eventNumber": {
+                    "name": "eventNumber",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dayNumber": {
+                    "name": "dayNumber",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "flightLetter": {
+                    "name": "flightLetter",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "finalDay": {
+                    "name": "finalDay",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "seriesYear": {
+                    "name": "seriesYear",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "gameFrequency": {
                     "name": "gameFrequency",
                     "isArray": false,
@@ -10607,5 +10663,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "7b9a75de34b0067462bfcd20b0ec2968"
+    "version": "d85b21e9f87d0f6378a2dde97027b149"
 };

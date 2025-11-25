@@ -2766,6 +2766,14 @@ export const scrapeGame = /* GraphQL */ `query ScrapeGame(
     isRegular
     isSeries
     isSatellite
+    tournamentSeriesId
+    seriesTitleId
+    isMainEvent
+    eventNumber
+    dayNumber
+    flightLetter
+    finalDay
+    seriesYear
     gameFrequency
     gameTags
     levels {

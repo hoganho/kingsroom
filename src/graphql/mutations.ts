@@ -50,6 +50,14 @@ export const fetchTournamentData = /* GraphQL */ `mutation FetchTournamentData(
     isRegular
     isSeries
     isSatellite
+    tournamentSeriesId
+    seriesTitleId
+    isMainEvent
+    eventNumber
+    dayNumber
+    flightLetter
+    finalDay
+    seriesYear
     gameFrequency
     gameTags
     levels {
@@ -11947,6 +11955,14 @@ export const reScrapeFromCache = /* GraphQL */ `mutation ReScrapeFromCache($inpu
     isRegular
     isSeries
     isSatellite
+    tournamentSeriesId
+    seriesTitleId
+    isMainEvent
+    eventNumber
+    dayNumber
+    flightLetter
+    finalDay
+    seriesYear
     gameFrequency
     gameTags
     levels {
@@ -12063,6 +12079,14 @@ export const forceRefreshScrape = /* GraphQL */ `mutation ForceRefreshScrape($ur
     isRegular
     isSeries
     isSatellite
+    tournamentSeriesId
+    seriesTitleId
+    isMainEvent
+    eventNumber
+    dayNumber
+    flightLetter
+    finalDay
+    seriesYear
     gameFrequency
     gameTags
     levels {

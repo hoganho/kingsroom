@@ -1047,6 +1047,17 @@ type ScrapedGameData {
   isRegular: Boolean
   isSeries: Boolean
   isSatellite: Boolean
+  
+  # Series structure fields for multi-day/flight tournaments
+  tournamentSeriesId: ID
+  seriesTitleId: ID
+  isMainEvent: Boolean
+  eventNumber: Int
+  dayNumber: Int
+  flightLetter: String
+  finalDay: Boolean
+  seriesYear: Int
+  
   gameFrequency: GameFrequency
   gameTags: [String]
   levels: [ScrapedTournamentLevel!]
