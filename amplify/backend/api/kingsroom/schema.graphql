@@ -48,7 +48,7 @@ enum ScraperOperation { START, STOP, ENABLE, DISABLE, STATUS, RESET }
 # 2. CORE DOMAIN (Entities, Venues, Series)
 # ===================================================================
 
-type Entity @model @auth(rules: [{ allow: private }]) {
+type Entity @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   entityName: String! @index(name: "byEntityName")
   gameUrlDomain: String!
@@ -68,7 +68,7 @@ type Entity @model @auth(rules: [{ allow: private }]) {
   assets: [Asset] @hasMany(indexName: "byEntityAsset", fields: ["id"])
 }
 
-type Venue @model @auth(rules: [{ allow: private }]) {
+type Venue @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   venueNumber: Int! @index(name: "byVenueNumber", sortKeyFields: ["name"])
   name: String!
@@ -91,7 +91,7 @@ type Venue @model @auth(rules: [{ allow: private }]) {
   entity: Entity @belongsTo(fields: ["entityId"])
 }
 
-type VenueDetails @model @auth(rules: [{ allow: private }]) {
+type VenueDetails @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   startDate: AWSDateTime!
   status: VenueStatus!
@@ -103,7 +103,7 @@ type VenueDetails @model @auth(rules: [{ allow: private }]) {
   venue: Venue @belongsTo(fields: ["venueId"])
 }
 
-type TournamentSeriesTitle @model @auth(rules: [{ allow: private }]) {
+type TournamentSeriesTitle @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   title: String!
   aliases: [String]
@@ -111,7 +111,7 @@ type TournamentSeriesTitle @model @auth(rules: [{ allow: private }]) {
   seriesInstances: [TournamentSeries] @hasMany(indexName: "byTournamentSeriesTitle", fields: ["id"])
 }
 
-type TournamentSeries @model @auth(rules: [{ allow: private }]) {
+type TournamentSeries @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   name: String! @index(name: "byName", sortKeyFields: ["year"])
   year: Int! @index(name: "byYear", sortKeyFields: ["name"])
@@ -140,7 +140,7 @@ type TournamentSeries @model @auth(rules: [{ allow: private }]) {
 # 3. GAME DOMAIN & CONSOLIDATION
 # ===================================================================
 
-type Game @model @auth(rules: [{ allow: private }]) {
+type Game @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   # --- Core Identification ---
   id: ID!
   name: String!
@@ -253,7 +253,7 @@ type Game @model @auth(rules: [{ allow: private }]) {
   updatedAt: AWSDateTime!
 }
 
-type TournamentStructure @model @auth(rules: [{ allow: private }]) {
+type TournamentStructure @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   levels: [TournamentLevel!]
   breaks: [Break!]
@@ -261,13 +261,13 @@ type TournamentStructure @model @auth(rules: [{ allow: private }]) {
   game: Game @belongsTo(fields: ["gameId"])
 }
 
-type TournamentLevelData @model @auth(rules: [{ allow: private }]) {
+type TournamentLevelData @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   levels: [TournamentLevel!]
   gameId: ID! @index(name: "byGame")
 }
 
-type CashStructure @model @auth(rules: [{ allow: private }]) {
+type CashStructure @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   stakes: String!
   minBuyIn: Float
@@ -275,14 +275,14 @@ type CashStructure @model @auth(rules: [{ allow: private }]) {
   gameId: ID! @index(name: "byGame")
 }
 
-type RakeStructure @model @auth(rules: [{ allow: private }]) {
+type RakeStructure @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   rakePercentage: Float
   rakeCap: Float
   gameId: ID! @index(name: "byGame")
 }
 
-type GameCost @model @auth(rules: [{ allow: private }]) {
+type GameCost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   gameId: ID! @index(name: "byGameCost")
   game: Game @belongsTo(fields: ["gameId"]) 
@@ -312,7 +312,7 @@ type GameCost @model @auth(rules: [{ allow: private }]) {
   updatedAt: AWSDateTime!
 }
 
-type GameCostLineItem @model @auth(rules: [{ allow: private }]) {
+type GameCostLineItem @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   gameCostId: ID! @index(name: "byGameCost")
   gameCost: GameCost @belongsTo(fields: ["gameCostId"])
@@ -337,7 +337,7 @@ type GameCostLineItem @model @auth(rules: [{ allow: private }]) {
   updatedAt: AWSDateTime!
 }
 
-type GameCostItem @model @auth(rules: [{ allow: private }]) {
+type GameCostItem @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   name: String!
   costType: CostItemType! @index(name: "byCostType", sortKeyFields: ["name"])
@@ -442,7 +442,7 @@ type DetectedMultiDayPattern {
 # 4. PLAYER DOMAIN
 # ===================================================================
 
-type Player @model @auth(rules: [{ allow: private }]) {
+type Player @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   primaryEntityId: ID @index(name: "byPrimaryEntity")
   firstName: String!
@@ -477,7 +477,7 @@ type Player @model @auth(rules: [{ allow: private }]) {
   updatedAt: AWSDateTime!
 }
 
-type PlayerSummary @model @auth(rules: [{ allow: private }]) {
+type PlayerSummary @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   playerId: ID! @index(name: "byPlayer")
   gamesPlayedLast30Days: Int
@@ -501,7 +501,7 @@ type PlayerSummary @model @auth(rules: [{ allow: private }]) {
   lastPlayed: AWSDateTime!
 }
 
-type PlayerEntry @model @auth(rules: [{ allow: private }]) {
+type PlayerEntry @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   playerId: ID! @index(name: "byPlayer", sortKeyFields: ["gameStartDateTime"])
   gameId: ID! @index(name: "byGame")
@@ -526,7 +526,7 @@ type PlayerEntry @model @auth(rules: [{ allow: private }]) {
   recordType: String @default(value: "ORIGINAL") @index(name: "byRecordType", sortKeyFields: ["gameStartDateTime"])
 }
 
-type PlayerResult @model @auth(rules: [{ allow: private }]) {
+type PlayerResult @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   finishingPlace: Int
   isMultiDayQualification: Boolean
@@ -544,7 +544,7 @@ type PlayerResult @model @auth(rules: [{ allow: private }]) {
   recordType: String @default(value: "ORIGINAL") @index(name: "byRecordTypeResult", sortKeyFields: ["gameStartDateTime"])
 }
 
-type PlayerVenue @model @auth(rules: [{ allow: private }]) {
+type PlayerVenue @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   totalGamesPlayed: Int
   averageBuyIn: Float
@@ -557,7 +557,7 @@ type PlayerVenue @model @auth(rules: [{ allow: private }]) {
   venue: Venue @belongsTo(fields: ["venueId"])
 }
 
-type PlayerTransaction @model @auth(rules: [{ allow: private }]) {
+type PlayerTransaction @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   type: TransactionType!
   amount: Float!
@@ -570,7 +570,7 @@ type PlayerTransaction @model @auth(rules: [{ allow: private }]) {
   gameId: ID @index(name: "byGame")
 }
 
-type PlayerCredits @model @auth(rules: [{ allow: private }]) {
+type PlayerCredits @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   type: CreditTransactionType!
   changeAmount: Float!
@@ -584,7 +584,7 @@ type PlayerCredits @model @auth(rules: [{ allow: private }]) {
   relatedTransactionId: ID
 }
 
-type PlayerPoints @model @auth(rules: [{ allow: private }]) {
+type PlayerPoints @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   type: PointsTransactionType!
   changeAmount: Float!
@@ -598,7 +598,7 @@ type PlayerPoints @model @auth(rules: [{ allow: private }]) {
   relatedTransactionId: ID
 }
 
-type KnownPlayerIdentity @model @auth(rules: [{ allow: private }]) {
+type KnownPlayerIdentity @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   sourceSystem: String!
   identityValue: String!
@@ -697,7 +697,7 @@ type ScrapeURL @model(queries: { get: "getScrapeURL", list: null }) @auth(rules:
   wasEdited: Boolean @default(value: "false")
 }
 
-type ScrapeAttempt @model @auth(rules: [{ allow: private }]) {
+type ScrapeAttempt @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   url: AWSURL!
   tournamentId: Int!
@@ -729,7 +729,7 @@ type ScrapeAttempt @model @auth(rules: [{ allow: private }]) {
   updatedAt: AWSDateTime!
 }
 
-type ScraperState @model @auth(rules: [{ allow: private }]) {
+type ScraperState @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   isRunning: Boolean!
   lastScannedId: Int!
@@ -750,7 +750,7 @@ type ScraperState @model @auth(rules: [{ allow: private }]) {
   entity: Entity @belongsTo(fields: ["entityId"])
 }
 
-type ScrapeStructure @model @auth(rules: [{ allow: private }]) {
+type ScrapeStructure @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   fields: [String]!
   structureLabel: String!
@@ -760,7 +760,7 @@ type ScrapeStructure @model @auth(rules: [{ allow: private }]) {
   exampleUrl: AWSURL
 }
 
-type DataSync @model @auth(rules: [{ allow: private }]) {
+type DataSync @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   syncedAt: AWSDateTime!
   method: DataSource!
@@ -769,7 +769,7 @@ type DataSync @model @auth(rules: [{ allow: private }]) {
   content: String
 }
 
-type S3Storage @model @auth(rules: [{ allow: private }]) {
+type S3Storage @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   scrapeURLId: ID @index(name: "byScrapeURL", sortKeyFields: ["scrapedAt"])
   url: AWSURL! @index(name: "byURL", sortKeyFields: ["scrapedAt"])
@@ -810,7 +810,7 @@ type S3Storage @model @auth(rules: [{ allow: private }]) {
 # 6. SYSTEM, ADMIN & ASSETS
 # ===================================================================
 
-type User @model @auth(rules: [
+type User @model(subscriptions: null) @auth(rules: [
   { allow: owner, ownerField: "id", operations: [read, update] },
   { allow: private, operations: [create, read] },
   { allow: groups, groups: ["SUPER_ADMIN"], operations: [create, read, update, delete] }
@@ -822,7 +822,7 @@ type User @model @auth(rules: [
   preferences: [UserPreference] @hasMany(indexName: "byUser", fields: ["id"])
 }
 
-type UserPreference @model @auth(rules: [{ allow: owner, ownerField: "userId" }]) {
+type UserPreference @model(subscriptions: null) @auth(rules: [{ allow: owner, ownerField: "userId" }]) {
   id: ID!
   page: String!
   widget: String!
@@ -830,7 +830,7 @@ type UserPreference @model @auth(rules: [{ allow: owner, ownerField: "userId" }]
   userId: ID! @index(name: "byUser")
 }
 
-type Staff @model @auth(rules: [{ allow: private }]) {
+type Staff @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   firstName: String!
   lastName: String
@@ -838,7 +838,7 @@ type Staff @model @auth(rules: [{ allow: private }]) {
   assignedVenueId: ID @index(name: "byVenue")
 }
 
-type Asset @model @auth(rules: [{ allow: private }]) {
+type Asset @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   name: String!
   type: String!
@@ -851,7 +851,7 @@ type Asset @model @auth(rules: [{ allow: private }]) {
   entity: Entity @belongsTo(fields: ["entityId"])
 }
 
-type TicketTemplate @model @auth(rules: [{ allow: private }]) {
+type TicketTemplate @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   name: String!
   description: String
@@ -862,7 +862,7 @@ type TicketTemplate @model @auth(rules: [{ allow: private }]) {
   playerTickets: [PlayerTicket] @hasMany(indexName: "byTicketTemplate", fields: ["id"])
 }
 
-type PlayerTicket @model @auth(rules: [{ allow: private }]) {
+type PlayerTicket @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   assignedAt: AWSDateTime!
   expiryDate: AWSDateTime!
@@ -874,7 +874,7 @@ type PlayerTicket @model @auth(rules: [{ allow: private }]) {
   ticketTemplate: TicketTemplate @belongsTo(fields: ["ticketTemplateId"])
 }
 
-type MarketingMessage @model @auth(rules: [{ allow: private }]) {
+type MarketingMessage @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   name: String!
   subject: String
@@ -883,7 +883,7 @@ type MarketingMessage @model @auth(rules: [{ allow: private }]) {
   sentMessages: [PlayerMarketingMessage] @hasMany(indexName: "byMarketingMessage", fields: ["id"])
 }
 
-type PlayerMarketingMessage @model @auth(rules: [{ allow: private }]) {
+type PlayerMarketingMessage @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   status: MessageStatus!
   sentAt: AWSDateTime!
@@ -891,7 +891,7 @@ type PlayerMarketingMessage @model @auth(rules: [{ allow: private }]) {
   marketingMessageId: ID! @index(name: "byMarketingMessage")
 }
 
-type PlayerMarketingPreferences @model @auth(rules: [{ allow: private }]) {
+type PlayerMarketingPreferences @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   optOutSms: Boolean
   optOutEmail: Boolean
@@ -899,7 +899,7 @@ type PlayerMarketingPreferences @model @auth(rules: [{ allow: private }]) {
   player: Player @belongsTo(fields: ["playerId"])
 }
 
-type SocialAccount @model @auth(rules: [{ allow: private }]) {
+type SocialAccount @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   platform: String!
   accountName: String!
@@ -907,7 +907,7 @@ type SocialAccount @model @auth(rules: [{ allow: private }]) {
   apiSecret: String
 }
 
-type SocialPost @model @auth(rules: [{ allow: private }]) {
+type SocialPost @model(subscriptions: null) @auth(rules: [{ allow: private }]) {
   id: ID!
   content: String!
   imageUrl: AWSURL
