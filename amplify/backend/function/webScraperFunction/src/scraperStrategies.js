@@ -134,6 +134,21 @@ const extractSeriesDetails = (tournamentName) => {
         }
     }
     
+    // Extract event number (e.g., "Event 8", "Event #8", "Event #12")
+    const eventPatterns = [
+        /\bEvent\s*#?\s*(\d+)/i,           // "Event 8", "Event #8", "Event  8"
+        /\bEv(?:ent)?\.?\s*#?\s*(\d+)/i,   // "Ev 8", "Ev. #8"
+        /\b#(\d+)\s*[-:]/i                  // "#8 -" or "#8:" at start of name
+    ];
+    
+    for (const pattern of eventPatterns) {
+        const match = tournamentName.match(pattern);
+        if (match) {
+            details.eventNumber = parseInt(match[1]);
+            break;
+        }
+    }
+    
     // Handle "Final Day" or "Final Table"
     if (/\bFinal\s*(Day|Table)?\b/i.test(tournamentName)) {
         details.dayNumber = details.dayNumber || 99;  // Use 99 to indicate final
